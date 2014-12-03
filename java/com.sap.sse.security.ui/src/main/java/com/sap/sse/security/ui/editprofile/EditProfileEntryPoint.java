@@ -25,6 +25,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
+import com.sap.sse.security.ui.client.UserManagementService;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
@@ -32,8 +34,6 @@ import com.sap.sse.security.ui.client.component.EditEmailDialogWithDefaultCallba
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementService;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class EditProfileEntryPoint implements EntryPoint {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
@@ -68,6 +68,9 @@ public class EditProfileEntryPoint implements EntryPoint {
         rolesPanel.add(new Label(stringMessages.roles()));
         final Label rolesLabel = new Label();
         rolesPanel.add(rolesLabel);
+        rolesPanel.add(new Label(stringMessages.permissions()));
+        final Label permissionsLabel = new Label();
+        rolesPanel.add(permissionsLabel);
         fp.add(rolesPanel);
         final Label emailLabel = new Label(stringMessages.email());
         fp.add(emailLabel);
@@ -116,6 +119,7 @@ public class EditProfileEntryPoint implements EntryPoint {
                         nameText.setText(user.getName());
                         emailText.setText(user.getEmail());
                         rolesLabel.setText(user.getRoles().toString());
+                        permissionsLabel.setText(user.getPermissions().toString());
                     }
                 }
             });

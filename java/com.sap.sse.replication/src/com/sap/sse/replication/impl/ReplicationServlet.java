@@ -1,6 +1,8 @@
 package com.sap.sse.replication.impl;
 
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -21,6 +23,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.rabbitmq.client.Channel;
 import com.sap.sse.gateway.AbstractHttpServlet;
+import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.impl.CountingOutputStream;
@@ -51,7 +54,9 @@ public class ReplicationServlet extends AbstractHttpServlet {
      */
     private static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
 
-    public static final String REPLICA_IDS_AS_STRINGS_COMMA_SEPARATED = "replicaIdsAsStringsCommaSeparated";
+    public static final String REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED = "replicaIdsAsStringsCommaSeparated";
+
+    public static final String REPLICABLE_ID_AS_STRING = "replicaIdAsString";
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
@@ -87,7 +92,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
-            String[] replicableIdsAsStrings = req.getParameter(REPLICA_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
+            String[] replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
             Channel channel = getReplicationService().createMasterChannel();
             RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
                     /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
@@ -120,6 +125,41 @@ public class ReplicationServlet extends AbstractHttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
                     + Arrays.toString(Action.values()));
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        logger.info("Received request to apply and replicate an operation from a replica");
+        InputStream is = req.getInputStream();
+        DataInputStream dis = new DataInputStream(is);
+        String replicableIdAsString = dis.readUTF();
+        try {
+            Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
+            if (replicable != null) {
+                applyOperationToReplicable(replicable, is);
+            } else {
+                logger.warning("Received operation for replicable "+replicableIdAsString+
+                        ", but a replicable with that ID couldn't be found. Ignoring the operation.");
+            }
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.SEVERE,
+                    "Exception occurred while trying to receive and apply operation initiated on replica", e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exception " + e
+                    + " occurred while trying to receive and apply operation initiated on replica");
+        }
+    }
+
+    /**
+     * Applies <code>operation</code> to the replicable identified by <code>replicableIdAsString</code>. If such a
+     * replicable cannot be found on this server instance, a warning is logged and the operation is ignored.
+     */
+    private <S, R> void applyOperationToReplicable(Replicable<S, ?> replicable, InputStream is)
+            throws ClassNotFoundException, IOException {
+        ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
+        OperationWithResult<S, ?> operation = replicable.readOperation(is);
+        Thread.currentThread().setContextClassLoader(oldContextClassLoader);
+        replicable.apply(operation);
     }
 
     private void deregisterClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp) throws IOException {

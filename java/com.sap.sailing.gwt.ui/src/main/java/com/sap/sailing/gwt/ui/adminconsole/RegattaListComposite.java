@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -169,6 +170,30 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
 
+        TextColumn<RegattaDTO> startEndDateColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                return DateAndTimeFormatterUtil.formatDateRange(regatta.startDate, regatta.endDate);
+            }
+        };
+        startEndDateColumn.setSortable(true);
+        columnSortHandler.setComparator(startEndDateColumn, new Comparator<RegattaDTO>() {
+            @Override
+            public int compare(RegattaDTO r1, RegattaDTO r2) {
+                int result;
+                if(r1.startDate != null && r2.startDate != null) {
+                    result = r2.startDate.compareTo(r1.startDate);
+                } else if(r1.startDate == null && r2.startDate != null) {
+                    result = 1;
+                } else if(r1.startDate != null && r2.startDate == null) {
+                    result = -1;
+                } else {
+                    result = 0;
+                }
+                return result;
+            }
+        });
+
         TextColumn<RegattaDTO> regattaBoatClassColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -200,6 +225,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
+        table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(regattaActionColumn, stringMessages.actions());
         table.setSelectionModel(regattaSelectionCheckboxColumn.getSelectionModel(), regattaSelectionCheckboxColumn.getSelectionManager());
@@ -257,7 +283,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
         
-        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaUuid,
+        sailingService.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate, editedRegatta.defaultCourseAreaUuid,
                 editedRegatta.configuration, editedRegatta.useStartTimeInference, new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {
                             @Override

@@ -7,8 +7,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
 
 public class ObjectInputStreamResolvingAgainstDomainFactoryImpl extends ObjectInputStreamResolvingAgainstCache<DomainFactory> {
-    ObjectInputStreamResolvingAgainstDomainFactoryImpl(InputStream in, DomainFactory domainFactory)
-            throws IOException {
+    ObjectInputStreamResolvingAgainstDomainFactoryImpl(InputStream in, DomainFactory domainFactory) throws IOException {
         super(in, domainFactory);
     }
 }

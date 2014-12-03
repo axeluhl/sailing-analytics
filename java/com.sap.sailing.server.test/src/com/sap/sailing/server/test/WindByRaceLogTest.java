@@ -88,7 +88,8 @@ public class WindByRaceLogTest {
         raceColumn = service.apply(leaderboardColumnOperation);
         
         final String baseRegattaName = "Test Event";
-        AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseRegattaName, boatClassName), boatClassName, UUID.randomUUID());
+        AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseRegattaName, boatClassName), boatClassName, 
+                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID());
         Regatta regatta = service.apply(addRegattaOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());

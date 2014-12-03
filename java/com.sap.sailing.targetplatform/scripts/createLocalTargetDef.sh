@@ -6,4 +6,4 @@ remote_repo="http://p2.sapsailing.com/p2/sailing/"
 local_repo="file://`readlink -f ../../com.sap.sailing.targetplatform.base/target/repository/ | sed -e 's/\/cygdrive\/\(.\)/\/\1:/'`"
 
 # replace remote p2-repo URL with local repo URL
-sed -e "/^<repository location=\"/ s@$remote_repo@$local_repo@" $base-remote.target > $base-local.target
+sed -e "/^<repository location=\"/ s@$remote_repo@$local_repo@" -e 's/target name="Race Analysis Target"/target name="Race Analysis Local Target"/' $base-remote.target > $base-local.target

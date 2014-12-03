@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sse.common.TimePoint;
 
 public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<Regatta>{
     private static final long serialVersionUID = 8755035775682718882L;
@@ -15,10 +16,14 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     private final UUID newDefaultCourseAreaId;
     private final RegattaConfiguration newConfiguration;
     private final boolean useStartTimeInference;
+    private final TimePoint startDate;
+    private final TimePoint endDate;
     
-    public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, UUID newDefaultCourseAreaId,
+    public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate, UUID newDefaultCourseAreaId,
             RegattaConfiguration newConfiguration, boolean useStartTimeInference) {
         this.regattaIdentifier = regattaIdentifier;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.newDefaultCourseAreaId = newDefaultCourseAreaId;
         this.newConfiguration = newConfiguration;
         this.useStartTimeInference = useStartTimeInference;
@@ -26,7 +31,7 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.updateRegatta(regattaIdentifier, newDefaultCourseAreaId, newConfiguration, null, useStartTimeInference);
+        Regatta regatta = toState.updateRegatta(regattaIdentifier, startDate, endDate, newDefaultCourseAreaId, newConfiguration, null, useStartTimeInference);
         return regatta;
     }
 

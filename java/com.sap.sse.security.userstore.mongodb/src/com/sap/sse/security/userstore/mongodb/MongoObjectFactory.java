@@ -2,6 +2,7 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.util.Map;
 
+import com.mongodb.DB;
 import com.sap.sse.security.User;
 
 public interface MongoObjectFactory {
@@ -15,4 +16,6 @@ public interface MongoObjectFactory {
     public void storeSettingTypes(Map<String, Class<?>> settingTypes);
 
     public void storePreferences(String username, Map<String, String> userMap);
+
+    public DB getDatabase();
 }

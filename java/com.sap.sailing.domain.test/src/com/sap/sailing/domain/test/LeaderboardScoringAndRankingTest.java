@@ -812,7 +812,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     @Test
     public void testAdditionalScoreInformationLeadsToChangedScoreForOneColumn() throws NoWindException {
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
-        Regatta dummyRegatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE , "Dummy", new BoatClassImpl("Extreme40", false), trackedRegattaRegistry, new HighPointFirstGets10Or8AndLastBreaksTie(), "578876345345", new CourseAreaImpl("Humba", UUID.randomUUID()));
+        Regatta dummyRegatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE , "Dummy", new BoatClassImpl("Extreme40", false), 
+                /*startDate*/ null, /*endDate*/ null, trackedRegattaRegistry, new HighPointFirstGets10Or8AndLastBreaksTie(), "578876345345", new CourseAreaImpl("Humba", UUID.randomUUID()));
         trackedRegattaRegistry.getOrCreateTrackedRegatta(dummyRegatta);
         Competitor[] competitors = createCompetitors(10).toArray(new Competitor[0]);
         TimePoint now = MillisecondsTimePoint.now();
@@ -1320,7 +1321,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             series.add(medalSeries);
         }
 
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, series, /* persistent */ false, scoringScheme, "123", null);
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
+                /*startDate*/ null, /*endDate*/ null, series, /* persistent */ false, scoringScheme, "123", null);
         return regatta;
     }
     
@@ -1385,7 +1387,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             series.add(finalSeries);
         }
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("Extreme40", /* typicallyStartsUpwind */ false);
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
                 series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN), "123", /* course area */null);
         List<Competitor> competitors = createCompetitors(12);
         final int firstYellowCompetitorIndex = 3;
