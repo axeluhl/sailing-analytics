@@ -14,6 +14,7 @@ import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Division;
 import com.sap.sailing.xrr.schema.Person;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.TRResult;
 import com.sap.sailing.xrr.schema.Team;
 
 
@@ -35,7 +36,7 @@ public class ParserImpl implements Parser {
 
     @Override
     public RegattaResults parse() throws JAXBException {
-        JAXBContext jc = JAXBContext.newInstance("com.sap.sailing.xrr.schema", ParserImpl.class.getClassLoader());
+        JAXBContext jc = JAXBContext.newInstance(TRResult.class.getPackage().getName(), ParserImpl.class.getClassLoader());
         Unmarshaller um = jc.createUnmarshaller();
         @SuppressWarnings("unchecked")
         RegattaResults regattaResults = ((JAXBElement<RegattaResults>) um.unmarshal(inputStream)).getValue();

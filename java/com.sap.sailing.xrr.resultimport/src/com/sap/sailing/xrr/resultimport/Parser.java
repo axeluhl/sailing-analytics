@@ -1,6 +1,5 @@
 package com.sap.sailing.xrr.resultimport;
 
-
 import javax.xml.bind.JAXBException;
 
 import com.sap.sailing.xrr.schema.Boat;
@@ -8,9 +7,6 @@ import com.sap.sailing.xrr.schema.Division;
 import com.sap.sailing.xrr.schema.Person;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.schema.Team;
-
-
-
 
 public interface Parser {
     RegattaResults parse() throws JAXBException;
