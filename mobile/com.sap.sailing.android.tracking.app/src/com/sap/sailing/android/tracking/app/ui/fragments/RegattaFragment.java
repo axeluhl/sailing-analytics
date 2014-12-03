@@ -51,7 +51,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 				.findViewById(R.id.start_tracking);
 		startTrackingButton.setOnClickListener(this);
 
-		ImageButton changePhotoButton = (ImageButton) view
+		Button changePhotoButton = (Button) view
 				.findViewById(R.id.change_photo_button);
 		changePhotoButton.setOnClickListener(this);
 
