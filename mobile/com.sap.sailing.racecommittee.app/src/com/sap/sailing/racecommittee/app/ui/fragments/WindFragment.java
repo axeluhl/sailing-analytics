@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -23,6 +24,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -181,6 +183,8 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
             }
         });
 
+        setNumberPickerTextColor(np_windSpeed, Color.BLACK);
+        
         // map suche
         et_location.setOnEditorActionListener(this);
 
@@ -587,6 +591,36 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         return nums;
     }
 
+    public static boolean setNumberPickerTextColor(NumberPicker numberPicker, int color)
+    {
+        final int count = numberPicker.getChildCount();
+        for(int i = 0; i < count; i++){
+            View child = numberPicker.getChildAt(i);
+            if(child instanceof EditText){
+                try{
+                    Field selectorWheelPaintField = numberPicker.getClass()
+                        .getDeclaredField("mSelectorWheelPaint");
+                    selectorWheelPaintField.setAccessible(true);
+                    ((Paint)selectorWheelPaintField.get(numberPicker)).setColor(color);
+                    ((EditText)child).setTextColor(color);
+                    numberPicker.invalidate();
+                    return true;
+                }
+                catch(NoSuchFieldException e){
+                    //ExLog.w("setNumberPickerTextColor",this.getClass().getCanonicalName(), e);
+                }
+                catch(IllegalAccessException e){
+                	//ExLog.w("setNumberPickerTextColor",this.getClass().getCanonicalName(), e);
+                }
+                catch(IllegalArgumentException e){
+                	//ExLog.w("setNumberPickerTextColor",this.getClass().getCanonicalName(), e);
+                }
+            }
+        }
+        return false;
+    }
+    
+    
     protected void saveEntriesInPreferences(Wind wind) {
         // Wind.getBearing() returns a value that assumes that the wind flows in
         // that direction

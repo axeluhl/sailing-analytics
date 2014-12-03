@@ -24,5 +24,5 @@
         <item name="android:background">@color/colorAccent</item>
         <item name="android:clickable">true</item>
     </style>
-
+    
 </resources>
