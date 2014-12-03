@@ -126,6 +126,9 @@ public interface PolarDataService {
      * @return array with datacount for all angles in the given area, else null
      */
     Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
+
+    SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
+            LegType legType, Tack tack, boolean useLinReg) throws NotEnoughDataHasBeenAddedException;
     
 
 }

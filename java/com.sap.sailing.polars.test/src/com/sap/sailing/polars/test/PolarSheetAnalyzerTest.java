@@ -30,25 +30,25 @@ public class PolarSheetAnalyzerTest {
         BoatClass boatClass = mock(BoatClass.class);
         
         SpeedWithBearingWithConfidence<Void> result = analyzer.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass,
-                new KnotSpeedImpl(14));
+                new KnotSpeedImpl(14), true);
         assertThat(result.getObject().getKnots(), closeTo(8.5, 0.1));
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(50, 0.1));
         assertThat(result.getConfidence(), closeTo(0.7, 0.1));
         
         SpeedWithBearingWithConfidence<Void> result2 = analyzer.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass,
-                new KnotSpeedImpl(14));
+                new KnotSpeedImpl(14), true);
         assertThat(result2.getObject().getKnots(), closeTo(14.2, 0.1));
         assertThat(result2.getObject().getBearing().getDegrees(), closeTo(142.8, 0.1));
         assertThat(result2.getConfidence(), closeTo(0.6, 0.1));
         
         SpeedWithBearingWithConfidence<Void> result3 = analyzer.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass,
-                new KnotSpeedImpl(14));
+                new KnotSpeedImpl(14), true);
         assertThat(result3.getObject().getKnots(), closeTo(8.6, 0.1));
         assertThat(result3.getObject().getBearing().getDegrees(), closeTo(-49.5, 0.1));
         assertThat(result3.getConfidence(), closeTo(0.7, 0.1));
         
         SpeedWithBearingWithConfidence<Void> result4 = analyzer.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass,
-                new KnotSpeedImpl(14));
+                new KnotSpeedImpl(14), true);
         assertThat(result4.getObject().getKnots(), closeTo(13.5, 0.1));
         assertThat(result4.getObject().getBearing().getDegrees(), closeTo(-143.6, 0.1));
         assertThat(result4.getConfidence(), closeTo(0.25, 0.1));

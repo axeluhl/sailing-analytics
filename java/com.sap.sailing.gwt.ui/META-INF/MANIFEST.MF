@@ -46,6 +46,7 @@ Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.polars,
  com.sap.sailing.polars.factory,
+ com.sap.sailing.polars.regression,
  javax.jms;version="1.1.0",
  javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",

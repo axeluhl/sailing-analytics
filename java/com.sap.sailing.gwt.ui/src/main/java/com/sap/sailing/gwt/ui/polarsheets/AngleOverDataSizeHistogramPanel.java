@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -29,9 +32,13 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
     
     private final Chart chart;
     private final StringMessages stringMessages;
+    
+    private final Map<String, Set<Series>> seriesForId;
 
     public AngleOverDataSizeHistogramPanel(StringMessages stringMessages) {
         super(Unit.PX);
+        
+        this.seriesForId = new HashMap<>();
         this.stringMessages = stringMessages;
         setSize("100%", "100%");
         
@@ -51,13 +58,20 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
         return histogramChart;
     }
 
-    public void addData(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle) {
+    public void addData(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle, String seriesId, String actualSeriesName) {
         chart.setTitle("");
         Series series = chart.createSeries();
         
         Point[] points = toPoints(histogramDataPerAngle);
         series.setPoints(points);
+        series.setName(actualSeriesName);
         chart.addSeries(series);
+        
+        if (!seriesForId.containsKey(seriesId)) {
+            seriesForId.put(seriesId, new HashSet<Series>());
+        }
+        Set<Series> seriesSet = seriesForId.get(seriesId);
+        seriesSet.add(series);
     }
 
     private Point[] toPoints(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle) {
@@ -96,6 +110,18 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
     public void onResize() {
         chart.setSizeToMatchContainer();
         super.onResize();
+    }
+
+    public void removeSeries(String seriesId) {
+        for (Series series : seriesForId.get(seriesId)) {
+            chart.removeSeries(series);
+        }
+        seriesForId.remove(seriesId);
+    }
+    
+    public void removeAllSeries() {
+        chart.removeAllSeries();
+        seriesForId.clear();
     }
     
     
