@@ -34,6 +34,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
+import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -79,11 +81,13 @@ public class WindFragment extends LoggableFragment implements
 	private final static String TAG = WindFragment.class.getName();
 	private final static int FIVE_SEC = 5000;
 	private final static int EVERY_POSITION_CHANGE = 0;
+	private final static int MAX_KTS = 50;
 
 	private CompassView compassView;
 	private EditText windBearingEditText;
 	private EditText windSpeedEditText;
-	private SeekBar windSpeedSeekBar;
+//	private SeekBar windSpeedSeekBar;
+	private NumberPicker np_windSpeed;
 	private Button sendButton;
 	private Button btn_position_set;
 	private Button btn_set_manual_position;
@@ -119,8 +123,10 @@ public class WindFragment extends LoggableFragment implements
 				.findViewById(R.id.editTextWindDirection);
 		windSpeedEditText = (EditText) windFragmentView
 				.findViewById(R.id.editTextWindSpeed);
-		windSpeedSeekBar = (SeekBar) windFragmentView
-				.findViewById(R.id.seekbar_wind_speed);
+//		windSpeedSeekBar = (SeekBar) windFragmentView
+//				.findViewById(R.id.seekbar_wind_speed);
+		np_windSpeed = (NumberPicker) windFragmentView
+				.findViewById(R.id.np_windSpeed);
 		sendButton = (Button) windFragmentView.findViewById(R.id.btn_wind_send);
 		txt_waitingForGPS = (TextView) windFragmentView
 				.findViewById(R.id.txt_waitingForGPS);
@@ -163,27 +169,27 @@ public class WindFragment extends LoggableFragment implements
 
 		locationClient = new LocationClient(getActivity(), this, this);
 
-		windSpeedSeekBar
-				.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-					public void onProgressChanged(SeekBar seekBar,
-							int progress, boolean fromUser) {
-						float speed = round(progress / 10.0f, 1);
-						int displayedValue = Integer.getInteger(
-								windSpeedEditText.getText().toString(), 0)
-								.intValue();
-						int progressValue = Float.valueOf(speed).intValue();
-						if (displayedValue != progressValue) {
-							windSpeedEditText.setText(speedFormat.format(speed));
-						}
-					}
-
-					public void onStartTrackingTouch(SeekBar seekBar) {
-					}
-
-					public void onStopTrackingTouch(SeekBar seekBar) {
-					}
-				});
+//		windSpeedSeekBar
+//				.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+//
+//					public void onProgressChanged(SeekBar seekBar,
+//							int progress, boolean fromUser) {
+//						float speed = round(progress / 10.0f, 1);
+//						int displayedValue = Integer.getInteger(
+//								windSpeedEditText.getText().toString(), 0)
+//								.intValue();
+//						int progressValue = Float.valueOf(speed).intValue();
+//						if (displayedValue != progressValue) {
+//							windSpeedEditText.setText(speedFormat.format(speed));
+//						}
+//					}
+//
+//					public void onStartTrackingTouch(SeekBar seekBar) {
+//					}
+//
+//					public void onStopTrackingTouch(SeekBar seekBar) {
+//					}
+//				});
 
 		// buttons
 		sendButton.setOnClickListener(this);
@@ -192,6 +198,22 @@ public class WindFragment extends LoggableFragment implements
 		btn_position_set.setEnabled(false);
 		btn_position_set.setOnClickListener(this);
 
+		// windspeed picker
+		String nums[] = generateNumbers();
+		np_windSpeed.setMaxValue(nums.length - 1);
+		np_windSpeed.setMinValue(0);
+		np_windSpeed.setWrapSelectorWheel(false);
+		np_windSpeed.setDisplayedValues(nums);
+		np_windSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);		
+		
+		np_windSpeed.setOnValueChangedListener(new OnValueChangeListener() {
+			@Override
+			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+				String text = (float)newVal / 2f  +"";
+				windSpeedEditText.setText(text);
+			}
+		});
+		
 		et_location
 				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
@@ -220,19 +242,19 @@ public class WindFragment extends LoggableFragment implements
 						}
 					}
 				});
-		windSpeedEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-			@Override
-			public void onFocusChange(View v, boolean hasFocus) {
-				if (!hasFocus) {
-					String windSpeedText = windSpeedEditText.getText()
-							.toString();
-					if (windSpeedText.length() > 0) {
-						windSpeedSeekBar.setProgress(Double.valueOf(
-								windSpeedText).intValue() * 10);
-					}
-				}
-			}
-		});
+//		windSpeedEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+//			@Override
+//			public void onFocusChange(View v, boolean hasFocus) {
+//				if (!hasFocus) {
+//					String windSpeedText = windSpeedEditText.getText()
+//							.toString();
+//					if (windSpeedText.length() > 0) {
+//						np_windSpeed.setValue(Double.valueOf(
+//								windSpeedText).intValue() * 2);
+//					}
+//				}
+//			}
+//		});
 		speedFormat = new DecimalFormat("#0.0", new DecimalFormatSymbols(
 				Locale.US));
 		bearingFormat = new DecimalFormat("###", new DecimalFormatSymbols(
@@ -241,15 +263,17 @@ public class WindFragment extends LoggableFragment implements
 		AppPreferences preferences = AppPreferences.on(getActivity()
 				.getApplicationContext());
 		double enteredWindSpeed = preferences.getWindSpeed();
-		windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed)
-				.intValue() * 10);
+//		windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed)
+//				.intValue() * 10);
 		windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
+		
 		double enteredWindBearingFrom = preferences
 				.getWindBearingFromDirection();
 		compassView.setDirection((float) enteredWindBearingFrom);
 		windBearingEditText.setText(bearingFormat
 				.format(enteredWindBearingFrom));
-
+		np_windSpeed.setValue(((int) (Double.valueOf(
+				enteredWindSpeed) * 2)));
 		LatLng enteredWindLocation = preferences.getWindPosition();
 		if (enteredWindLocation.latitude != 0
 				&& enteredWindLocation.longitude != 0) {
@@ -601,6 +625,23 @@ public class WindFragment extends LoggableFragment implements
 		BigDecimal decimal = new BigDecimal(unrounded);
 		BigDecimal round = decimal.setScale(precision, BigDecimal.ROUND_UP);
 		return round.floatValue();
+	}
+	
+	private static String[] generateNumbers(){
+		String nums[] = new String[MAX_KTS*2 + 1];
+		
+		for ( int i = 0; i < MAX_KTS*2 + 1; i=i+2){
+			if ( i == 0 ){
+				nums[i] = i + "";
+			} else {
+				nums[i] = i/2 + "";
+			}
+			
+			if ( i < MAX_KTS*2 )
+				nums[i+1] = i/2 + ",5";
+		}
+		
+		return nums;
 	}
 
 	protected void saveEntriesInPreferences(Wind wind) {

@@ -5,7 +5,8 @@
     android:background="@color/white"
     android:descendantFocusability="beforeDescendants"
     android:focusableInTouchMode="true"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:theme="@android:style/Theme.Holo" >
 
    <LinearLayout android:id="@+id/ll_topContainer"
         android:layout_width="fill_parent"
@@ -73,15 +74,14 @@
 	            android:hint="@string/in_knots"
 	            android:inputType="numberDecimal"
 	            android:minWidth="200dp"
-	            android:textSize="24sp" />
-	
-	        <SeekBar
-	            android:id="@+id/seekbar_wind_speed"
-	            android:layout_width="match_parent"
+	            android:textSize="24sp"
+	            android:visibility="gone" />
+
+	        <NumberPicker
+	            android:id="@+id/np_windSpeed"
+	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:max="500"
-	            android:padding="10dp"
-	            android:progress="100" />
+	            android:theme="@android:style/Theme.Holo" />
 	
 	    </LinearLayout>
 	    
