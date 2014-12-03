@@ -61,7 +61,7 @@
                 android:layout_alignParentRight="true"
                 android:paddingRight="10dp"
                 android:text="@string/zero"
-                android:textColor="@color/sap_green" />
+                />
 
             <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                 android:id="@+id/tracking_status_label"
