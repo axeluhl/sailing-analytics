@@ -57,6 +57,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -115,7 +116,6 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private Marker windMarker;
     private Circle windCircle;
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View windFragmentView = inflater.inflate(R.layout.wind_view, container, false);
@@ -133,22 +133,13 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         rl_gpsOverlay = (RelativeLayout) windFragmentView.findViewById(R.id.rl_gpsOverlay);
         et_location = (EditText) windFragmentView.findViewById(R.id.et_location);
 
-        FragmentManager fragmentManager;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            fragmentManager = getChildFragmentManager();
-        } else {
-            fragmentManager = getActivity().getFragmentManager();
-        }
-        MapFragment mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.windMap);
-        windMap = mapFragment.getMap();
-        windMap.getUiSettings().setAllGesturesEnabled(false);
-
         btn_set_manual_position = (Button) windFragmentView.findViewById(R.id.btn_set_manual_position);
         btn_position_set = (Button) windFragmentView.findViewById(R.id.btn_position_set);
 
         return windFragmentView;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -208,8 +199,18 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
             centerMap(enteredWindLocation);
         }
 
+        FragmentManager fragmentManager;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            fragmentManager = getChildFragmentManager();
+        } else {
+            fragmentManager = getActivity().getFragmentManager();
+        }
+        MapFragment mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.windMap);
+        windMap = mapFragment.getMap();
         windMap.setOnMapClickListener(this);
         windMap.setOnMarkerDragListener(this);
+        UiSettings uiSettings = windMap.getUiSettings();
+        uiSettings.setAllGesturesEnabled(false);
 
         double markerLat = -1;
         if (savedInstanceState != null) {
