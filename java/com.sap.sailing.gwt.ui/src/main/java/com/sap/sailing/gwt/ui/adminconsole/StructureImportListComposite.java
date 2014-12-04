@@ -23,7 +23,7 @@ public class StructureImportListComposite extends RegattaListComposite implement
     public StructureImportListComposite(final SailingServiceAsync sailingService,
             final RegattaSelectionProvider regattaSelectionProvider, RegattaRefresher regattaRefresher,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
-        super(sailingService,regattaSelectionProvider,regattaRefresher,errorReporter,stringMessages);
+        super(sailingService, regattaSelectionProvider, regattaRefresher, errorReporter, stringMessages);
     }
 
     // create Regatta Table in StructureImportManagementPanel
@@ -67,6 +67,7 @@ public class StructureImportListComposite extends RegattaListComposite implement
         columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
         table.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
+        table.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
 
         return table;
     }

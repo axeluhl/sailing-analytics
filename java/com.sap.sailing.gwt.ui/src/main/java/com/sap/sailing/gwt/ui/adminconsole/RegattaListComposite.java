@@ -129,9 +129,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 RegattaListComposite.this.regattaSelectionProvider.setSelection(selectedRaceIdentifiers);
             }
         });
-
         panel.add(regattaTable);
-
         initWidget(mainPanel);
     }
 

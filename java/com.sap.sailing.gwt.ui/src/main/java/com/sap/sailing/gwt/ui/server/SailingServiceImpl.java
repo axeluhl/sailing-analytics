@@ -4424,6 +4424,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return getService().getDataImportLock().getProgress(id);
     }
 
+    @Override
     public Integer getStructureImportOperationProgress() {
 //        int parsedDocuments = 0;
 //        if (structureImporter != null) {
