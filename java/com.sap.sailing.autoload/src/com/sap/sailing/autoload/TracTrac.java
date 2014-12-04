@@ -81,8 +81,9 @@ public class TracTrac {
                         }
                         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(getService()
                                 .getMongoObjectFactory(), getService().getDomainObjectFactory());
-                        RegattaLogStore regattaLogStore = MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
-                                getService().getMongoObjectFactory(), getService().getDomainObjectFactory());
+                        RegattaLogStore regattaLogStore = null;
+                                //TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
+                                //getService().getMongoObjectFactory(), getService().getDomainObjectFactory());
                         getTracTracAdapter().addTracTracRace(
                                 (TrackerManager) getService(),
                                 regattaForRaceRecord,

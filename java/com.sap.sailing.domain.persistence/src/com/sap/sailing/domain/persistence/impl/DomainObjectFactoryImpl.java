@@ -472,8 +472,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private RegattaLogStore getRegattaLogStore() {
-        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
-                new MongoObjectFactoryImpl(database, serviceFinderFactory), this);
+        return null;
+            //TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
+//                new MongoObjectFactoryImpl(database, serviceFinderFactory), this);
     }
 
     private FlexibleLeaderboard loadFlexibleLeaderboard(DBObject dbLeaderboard,

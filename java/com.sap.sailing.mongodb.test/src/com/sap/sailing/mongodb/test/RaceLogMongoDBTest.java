@@ -115,7 +115,8 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
     }
 
     protected RegattaLogStore getRegattaLogStore() {
-        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
+        return null;
+        //TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
     }
 
 }

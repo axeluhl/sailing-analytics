@@ -1046,7 +1046,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private RegattaLogStore getRegattaLogStore() {
-        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
+        return null;
+        //TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
     }
 
     @Override
@@ -2110,10 +2111,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return scheduler;
     }
 
-    /**
-     * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
-     * service object. It is then replicated to all replicas.
-     */
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
         return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);

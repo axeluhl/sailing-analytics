@@ -2626,8 +2626,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private RegattaLogStore getRegattaLogStore() {
-        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
-                mongoObjectFactory, domainObjectFactory);
+        return null;
+//        TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
+//                mongoObjectFactory, domainObjectFactory);
     }
 
     @Override
