@@ -160,6 +160,22 @@ public class DatabaseHelper {
 		return result;
 	}
 
+	public void insertGPSFix(double lat, double lon, double speed,
+			double bearing, String provider, long timestamp, long eventRowId) {
+		ContentResolver cr = mContext.getContentResolver();
+		ContentValues cv = new ContentValues();
+		
+		cv.put(SensorGps.GPS_LATITUDE, lat);
+		cv.put(SensorGps.GPS_LONGITUDE, lon);
+		cv.put(SensorGps.GPS_PROVIDER, provider);
+		cv.put(SensorGps.GPS_SPEED, speed);
+		cv.put(SensorGps.GPS_TIME, timestamp);
+		cv.put(SensorGps.GPS_BEARING, bearing);
+		cv.put(SensorGps.GPS_EVENT_FK, eventRowId);
+
+		cr.insert(SensorGps.CONTENT_URI, cv);
+	}
+
 
 	/**
 	 * for testing.
