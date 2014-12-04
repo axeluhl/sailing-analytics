@@ -9,44 +9,44 @@
 
         }
 
-		.slick-track {
+		.slider .slick-track {
 			
 		}
 
-        .slider > ul > li > button:before {
+        .slider ul li > button:before {
             font-size: 15px;
         }
 		
-		.slick-slide {
+		.slider .slick-slide {
            	margin: 0px;
 			background-color: #fcfcfc;
 		}
 
 		
-		.slick-prev {
+		.slider .slick-prev {
 			left: 20px;
 			z-index:1;
 			height: 60px;
 			width: 60px;
 
 		}
-		.slick-prev:before {
+		.slider .slick-prev:before {
 			color: #000000;
 			font-size: 60px;
 			left: -60px;
+			top: 10px;
 		} 
-		.slick-next {
+		.slider .slick-next {
 			right: 20px;
 			z-index:1;
 			height: 60px;
 			width: 60px;
 		} 
-		.slick-next:before {
+		.slider .slick-next:before {
 			color: #000000;
 			font-size: 60px;
 			left: -60px;
 		} 
-
 
     </ui:style>
 
