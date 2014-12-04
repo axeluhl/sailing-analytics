@@ -13,7 +13,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
-import com.sap.sailing.android.tracking.app.services.GpsFix;
+import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 /**
  * Testing helper methods

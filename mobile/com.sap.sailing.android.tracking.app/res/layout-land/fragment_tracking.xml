@@ -134,7 +134,7 @@
                 android:paddingLeft="10dp"
                 android:text="@string/tracking_time" />
 
-            <com.sap.sailing.android.tracking.app.views.AutoResizeTextView
+            <com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView
                 android:id="@+id/tracking_time_label"
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
@@ -163,7 +163,7 @@
                     android:paddingRight="9dp"
                     android:text="" />
 
-                <com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView
+                <com.sap.sailing.android.tracking.app.customviews.SignalQualityIndicatorView
                     android:id="@+id/gps_quality_indicator"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

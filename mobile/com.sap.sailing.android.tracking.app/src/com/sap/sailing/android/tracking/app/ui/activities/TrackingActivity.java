@@ -1,25 +1,16 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.BaseColumns;
 import android.support.v7.widget.Toolbar;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardsEventsJoined;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
@@ -29,6 +20,8 @@ import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConn
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivityListener;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.TransmittingBinder;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
 	
@@ -61,27 +54,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
         
         if (getSupportActionBar() != null) {
-        	
-        	String leaderboardName = "";
-        	String eventName = "";
-        	ContentResolver cr = getContentResolver();
-        	String projectionStr = "events._id,leaderboards.leaderboard_name,events.event_name";
-        	String[] projection = projectionStr.split(",");
-        	Cursor cursor = cr.query(LeaderboardsEventsJoined.CONTENT_URI, projection, "events.event_id = \"" + eventId + "\"", null, null);
-        	if (cursor.moveToFirst())
-        	{
-        		eventName = cursor.getString(cursor.getColumnIndex("event_name"));
-        		leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
-        	}
-        	
-        	cursor.close();
-        	
+        	EventInfo eventInfo = DatabaseHelper.getInstance(this).getEventInfo(eventId);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
-            getSupportActionBar().setTitle(leaderboardName);
-            getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventName);
+            getSupportActionBar().setTitle(eventInfo.leaderboardName);
+            getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.eventName);
         }
         
         TrackingFragment fragment;
