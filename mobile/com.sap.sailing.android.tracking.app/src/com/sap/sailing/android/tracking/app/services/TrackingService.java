@@ -5,16 +5,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import android.annotation.TargetApi;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.BaseColumns;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -26,8 +22,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 
@@ -175,17 +169,10 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 
 		reportGPSQuality(location.getAccuracy());
 
-		ContentResolver cr = getContentResolver();
-		ContentValues cv = new ContentValues();
-		cv.put(SensorGps.GPS_LATITUDE, location.getLatitude());
-		cv.put(SensorGps.GPS_LONGITUDE, location.getLongitude());
-		cv.put(SensorGps.GPS_PROVIDER, location.getProvider());
-		cv.put(SensorGps.GPS_SPEED, location.getSpeed());
-		cv.put(SensorGps.GPS_TIME, location.getTime());
-		cv.put(SensorGps.GPS_BEARING, location.getBearing());
-		cv.put(SensorGps.GPS_EVENT_FK, eventRowId);
-
-		cr.insert(SensorGps.CONTENT_URI, cv);
+		DatabaseHelper.getInstance(this).insertGPSFix(location.getLatitude(),
+				location.getLongitude(), location.getSpeed(),
+				location.getBearing(), location.getProvider(),
+				location.getTime(), eventRowId);
 
 		ensureTransmittingServiceIsRunning();
 	}
