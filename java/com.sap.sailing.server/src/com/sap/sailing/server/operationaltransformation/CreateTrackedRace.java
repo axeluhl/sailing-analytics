@@ -43,7 +43,6 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
      * {@link EmptyGPSFixStore}.
      */
     private transient final GPSFixStore gpsFixStore;
-    
 
     /**
      * @param windStore

@@ -279,8 +279,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNowCheckBox");
         simulateWithStartTimeNowCheckBox.setWordWrap(false);
         simulateWithStartTimeNowCheckBox.setValue(Boolean.FALSE);
-        final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox("Use internal algorithm instead of TracTrac mark passings");
-        //TODO StringMessages!!
+        final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
         ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
         
