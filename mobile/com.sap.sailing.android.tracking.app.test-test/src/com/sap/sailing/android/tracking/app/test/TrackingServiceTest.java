@@ -3,28 +3,20 @@ package com.sap.sailing.android.tracking.app.test;
 import java.util.ArrayList;
 import java.util.Date;
 
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.location.Location;
-import android.net.Uri;
 import android.os.IBinder;
-import android.provider.CalendarContract.Events;
 import android.test.ServiceTestCase;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.services.GpsFix;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 
 public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 
 	static final String TAG = TrackingServiceTest.class.getName();
+	final String eventId = "test123";
+	long eventRowId;
 //	static final String GPS_MOCK_PROVIDER_NAME = "TestProvider";
 	
 	public TrackingServiceTest() {
@@ -34,7 +26,9 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 	@Override
     protected void setUp() throws Exception {
         super.setUp();
-        deleteAllGpsFixesFromDB();
+        DatabaseTestHelper.deleteAllGpsFixesFromDB(getContext());
+        DatabaseTestHelper.deleteAllEventsFromDB(getContext());
+        eventRowId = DatabaseTestHelper.createNewEventInDBAndReturnItsId(getContext(), "test123", eventId);
 //        createGpsTestProvider();
     }
 	
@@ -44,7 +38,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 //		removeGpsTestProvider();
 	}
 	
-	private void startService(int eventId)
+	private void startService()
 	{
 		Intent startIntent = new Intent();
         startIntent.setClass(getContext(), TrackingService.class);
@@ -57,7 +51,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
      * Test basic startup/shutdown of Service
      */
     public void testStartable() {
-    	startService(123);
+    	startService();
         TrackingService service = getService();
         assertNotNull(service);
     }
@@ -77,20 +71,20 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
      * @throws InterruptedException 
      */
 	public void testGPSFixesStoredToDatabase() throws InterruptedException {
-		startService(789);
+		startService();
 		
 //		LocationManager locationManager = (LocationManager) this.getContext()
 //				.getSystemService(Context.LOCATION_SERVICE);
 		
 		long timestamp = new Date().getTime();
-		long nanos = System.nanoTime();
+//		long nanos = System.nanoTime();
 		
         Location location = new Location("Test");
         location.setLatitude(20.0);
         location.setLongitude(30.0);
         location.setAccuracy(0);
         location.setTime(timestamp);
-        location.setElapsedRealtimeNanos(nanos);
+//        location.setElapsedRealtimeNanos(nanos);
         location.setSpeed(12.5f);
         location.setBearing(123);
         
@@ -98,7 +92,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
         
 //      locationManager.setTestProviderLocation(GPS_MOCK_PROVIDER_NAME, location);
         
-        ArrayList<GpsFix> fixes = getAllGpsFixesFromDB();
+        ArrayList<GpsFix> fixes = DatabaseTestHelper.getAllGpsFixesFromDB(getContext());
         assertEquals(1, fixes.size());
         
         GpsFix fix = fixes.get(0);
@@ -109,7 +103,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
         assertEquals(123.0, fix.course);
         assertEquals(12.5, fix.speed);
         assertEquals(0, fix.synced);
-        assertEquals(String.valueOf(789), fix.eventId);
+        assertEquals(String.valueOf(eventRowId), fix.eventId);
 
         shutdownService();
     }
@@ -141,49 +135,5 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 //		}
 //	}
 	
-	private void deleteAllGpsFixesFromDB()
-	{
-		ContentResolver cr = getContext().getContentResolver();
-		cr.delete(SensorGps.CONTENT_URI, null, null);
-		assertEquals(0, getAllGpsFixesFromDB().size());
-		ExLog.i(getContext(), TAG, "deleteAllGpsFixesFromDB");
-	}
 	
-	private ArrayList<GpsFix> getAllGpsFixesFromDB() 
-	{
-		ArrayList<GpsFix> result = new ArrayList<GpsFix>();
-		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
-		// differs from trackingService projectionClause, taking event_id from sensor_gps.event_id,
-		// because event does not exist.
-		String projectionClauseStr = "sensor_gps.event_id as _eid,sensor_gps.gps_time,sensor_gps.gps_latitude,"
-				+ "sensor_gps.gps_longitude,sensor_gps.gps_speed,sensor_gps.gps_bearing,sensor_gps.gps_synced,"
-				+ "events.event_server,sensor_gps._id as _gid";
-		ContentResolver cr = getContext().getContentResolver();
-		Cursor cursor = cr.query(EventGpsFixesJoined.CONTENT_URI, projectionClauseStr.split(","), selectionClause, null, null);
-		while (cursor.moveToNext()) {
-			GpsFix gpsFix = new GpsFix();
-			
-			for (int i = 0; i < cursor.getColumnCount(); i++)
-			{
-				System.out.println(cursor.getColumnName(i) + " -~> " + cursor.getString(i));
-			}
-			
-			gpsFix.id = cursor.getInt(cursor.getColumnIndex("_gid"));
-			gpsFix.timestamp = cursor.getLong(cursor.getColumnIndex(SensorGps.GPS_TIME));
-			gpsFix.latitude  = cursor.getDouble(cursor.getColumnIndex(SensorGps.GPS_LATITUDE));
-			gpsFix.longitude  = cursor.getDouble(cursor.getColumnIndex(SensorGps.GPS_LONGITUDE));
-			gpsFix.speed  = cursor.getDouble(cursor.getColumnIndex(SensorGps.GPS_SPEED));
-			gpsFix.course  = cursor.getDouble(cursor.getColumnIndex(SensorGps.GPS_BEARING));
-			gpsFix.synced = cursor.getInt(cursor.getColumnIndex(SensorGps.GPS_SYNCED));
-			gpsFix.host = cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER));
-			gpsFix.eventId = cursor.getString(cursor.getColumnIndex("_eid"));
-			
-			result.add(gpsFix);
-		}
-		
-		cursor.close();
-		
-		ExLog.i(getContext(), TAG, "getAllGpsFixesFromDB: " + result);
-		return result;
-	}
 }

@@ -1,19 +1,23 @@
 package com.sap.sailing.android.tracking.app.test;
 
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.net.Uri;
+import java.util.Date;
+
+import org.mockito.Mockito;
+
+import android.content.Intent;
 import android.test.ServiceTestCase;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TransmittingService;
+import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
 public class TransmittingServiceTest extends ServiceTestCase<TransmittingService> {
 	
 	static final String TAG = TransmittingServiceTest.class.getName();
+	final String eventId = "test123";
+	
+	private VolleyHelper volleyHelperSpy;
 	
 	public TransmittingServiceTest() {
 		super(TransmittingService.class);
@@ -21,8 +25,16 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 	
 	@Override
     protected void setUp() throws Exception {
-        super.setUp();
-        deleteAllEventsFromDB();
+        super.setUp();        
+        System.setProperty( "dexmaker.dexcache", getContext().getCacheDir().getPath() );
+        DatabaseTestHelper.deleteAllEventsFromDB(getContext());
+        DatabaseTestHelper.deleteAllGpsFixesFromDB(getContext());
+        
+        if (volleyHelperSpy == null)
+        {
+        	VolleyHelper volleyHelper = VolleyHelper.getInstance(getContext());
+        	volleyHelperSpy = Mockito.spy(volleyHelper);
+        }
     }
 	
 	@Override
@@ -30,34 +42,31 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		super.tearDown();
 	}
 	
+	private void startService()
+	{
+		Intent startIntent = new Intent();
+        startIntent.setClass(getContext(), TrackingService.class);
+        startIntent.setAction(getContext().getString(R.string.transmitting_service_start));
+        startService(startIntent);
+	}
+	
 	public void testTest()
 	{
 		assertNotNull("TEST");
 	}
 	
-	private long createNewEventInDBAndReturnItsId(String eventName)
-	{
-		ContentResolver cr = getContext().getContentResolver();
-		ContentValues cv = new ContentValues();
-		cv.put(Event.EVENT_NAME, eventName);
-		Uri uri = cr.insert(Event.CONTENT_URI, cv);
-		return ContentUris.parseId(uri);
+	public void testTransmittingServiceTransmitsGpsFix() throws InterruptedException {
+		long eventRowId = DatabaseTestHelper.createNewEventInDBAndReturnItsId(getContext(), "TEST", eventId);
+		long timestamp = (new Date()).getTime();
+		DatabaseTestHelper.createNewGpsFixInDatabase(getContext(), eventRowId, 12.0, 13.0, 14.0, timestamp);
+		
+		startService();
+		
+		Thread.sleep(5000);
+		
+		shutdownService();
 	}
 	
-	private void deleteAllEventsFromDB()
-	{
-		ContentResolver cr = getContext().getContentResolver();
-		cr.delete(Event.CONTENT_URI, null, null);
-		assertEquals(0, getNumberOfEventsFromDB());
-		ExLog.i(getContext(), TAG, "deleteAllEventsFromDB");
-	}
-	
-	private int getNumberOfEventsFromDB()
-	{
-		ContentResolver cr = getContext().getContentResolver();
-		Cursor cursor = cr.query(Event.CONTENT_URI, null, null, null, null);
-		int result = cursor.getCount();
-		cursor.close();
-		return result;
-	}
+
+
 }
