@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -465,6 +466,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public void setUseStartTimeInference(boolean useStartTimeInference) {
                         // TODO Auto-generated method stub
                         
+                    }
+
+                    @Override
+                    public RegattaLog getRegattaLog() {
+                        // TODO Auto-generated method stub
+                        return null;
                     }
 
                     @Override

@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -75,6 +76,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
+    
+    private RegattaLog regattaLog;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -522,4 +525,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return useStartTimeInference;
     }
 
+    public RegattaLog getRegattaLog() {
+        return regattaLog;
+    }
 }
