@@ -50,7 +50,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     protected final MultiSelectionModel<RegattaDTO> regattaSelectionModel;
     protected final CellTable<RegattaDTO> regattaTable;
-    protected ListDataProvider<RegattaDTO> regattaListDataProvider;
+    protected final ListDataProvider<RegattaDTO> regattaListDataProvider;
     private List<RegattaDTO> allRegattas;
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
