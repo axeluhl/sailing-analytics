@@ -1,10 +1,11 @@
 package com.sap.sailing.domain.abstractlog.race;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 
-public interface RaceLogEventData {
+public interface RaceLogEventData extends Serializable {
 
     /**
      * Gets the event's pass identifier.

@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
@@ -81,7 +82,7 @@ public class TracTrac {
                         }
                         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(getService()
                                 .getMongoObjectFactory(), getService().getDomainObjectFactory());
-                        RegattaLogStore regattaLogStore = null;
+                        RegattaLogStore regattaLogStore = EmptyRegattaLogStore.INSTANCE;
                                 //TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
                                 //getService().getMongoObjectFactory(), getService().getDomainObjectFactory());
                         getTracTracAdapter().addTracTracRace(

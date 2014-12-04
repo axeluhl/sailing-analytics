@@ -7,6 +7,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventData;
 import com.sap.sailing.domain.base.Competitor;
 
 public class RaceLogEventDataImpl implements RaceLogEventData {
+    private static final long serialVersionUID = 61677173867866892L;
     private final List<Competitor> involvedBoats;
     private final int passId;
     

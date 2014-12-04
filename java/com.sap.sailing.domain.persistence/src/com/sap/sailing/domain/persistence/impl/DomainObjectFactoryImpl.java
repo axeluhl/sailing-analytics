@@ -146,6 +146,7 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -472,7 +473,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private RegattaLogStore getRegattaLogStore() {
-        return null;
+        return EmptyRegattaLogStore.INSTANCE;
             //TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
 //                new MongoObjectFactoryImpl(database, serviceFinderFactory), this);
     }
