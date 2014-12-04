@@ -14,13 +14,13 @@
             android:layout_height="match_parent"
             android:padding="10dp">
              
-            <com.sap.sailing.android.tracking.app.views.AutoResizeTextView
+            <com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"/>
 
-            <com.sap.sailing.android.tracking.app.views.AutoResizeTextView
+            <com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView
                 android:id="@+id/toolbar_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

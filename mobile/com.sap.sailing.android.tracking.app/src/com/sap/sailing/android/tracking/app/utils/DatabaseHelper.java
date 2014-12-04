@@ -15,8 +15,10 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardsEventsJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
-import com.sap.sailing.android.tracking.app.services.GpsFix;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 public class DatabaseHelper {
 
@@ -174,6 +176,23 @@ public class DatabaseHelper {
 		cv.put(SensorGps.GPS_EVENT_FK, eventRowId);
 
 		cr.insert(SensorGps.CONTENT_URI, cv);
+	}
+	
+	public EventInfo getEventInfo(String eventId) {
+		EventInfo result = new EventInfo();
+		
+    	ContentResolver cr = mContext.getContentResolver();
+    	String projectionStr = "events._id,leaderboards.leaderboard_name,events.event_name";
+    	String[] projection = projectionStr.split(",");
+    	Cursor cursor = cr.query(LeaderboardsEventsJoined.CONTENT_URI, projection, "events.event_id = \"" + eventId + "\"", null, null);
+    	if (cursor.moveToFirst())
+    	{
+    		result.eventName = cursor.getString(cursor.getColumnIndex("event_name"));
+    		result.leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
+    	}
+    	
+    	cursor.close();
+		return result;
 	}
 
 

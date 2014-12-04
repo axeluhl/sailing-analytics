@@ -1,4 +1,4 @@
-package com.sap.sailing.android.tracking.app.services;
+package com.sap.sailing.android.tracking.app.valueobjects;
 
 public class GpsFix
 {

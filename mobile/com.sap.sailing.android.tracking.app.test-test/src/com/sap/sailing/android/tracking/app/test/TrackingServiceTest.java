@@ -9,8 +9,8 @@ import android.os.IBinder;
 import android.test.ServiceTestCase;
 
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.services.GpsFix;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
+import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 

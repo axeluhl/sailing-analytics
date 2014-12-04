@@ -37,6 +37,7 @@ import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.SqlDebugHelper;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 /**
  * Service that handles sending of GPS-fixes (fixes) to the Sailing-API.

@@ -1,6 +1,6 @@
 // http://stackoverflow.com/questions/5033012/auto-scale-textview-text-to-fit-within-bounds
 // http://stackoverflow.com/questions/5033012/auto-scale-textview-text-to-fit-within-bounds/21851157#21851157
-package com.sap.sailing.android.tracking.app.views;
+package com.sap.sailing.android.tracking.app.customviews;
 
 /**
  *               DO WHAT YOU WANT TO PUBLIC LICENSE

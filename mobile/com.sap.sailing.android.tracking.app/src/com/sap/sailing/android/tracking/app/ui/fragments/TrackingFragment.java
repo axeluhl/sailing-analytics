@@ -24,13 +24,13 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView;
+import com.sap.sailing.android.tracking.app.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.views.AutoResizeTextView;
-import com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView;
 
 public class TrackingFragment extends BaseFragment implements OnClickListener {
 

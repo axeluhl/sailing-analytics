@@ -1,4 +1,4 @@
-package com.sap.sailing.android.tracking.app.views;
+package com.sap.sailing.android.tracking.app.customviews;
 
 import android.content.Context;
 import android.content.res.TypedArray;
