@@ -1,11 +1,16 @@
 package com.sap.sailing.android.tracking.app.utils;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
+import org.json.JSONObject;
 
 import android.app.Application;
 import android.content.Context;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response.ErrorListener;
+import com.android.volley.Response.Listener;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
 public class VolleyHelper extends Application {
 
@@ -35,6 +40,12 @@ public class VolleyHelper extends Application {
         
         return mRequestQueue;
     }
+
+	public <T> void enqueueRequest(String urlStr, JSONObject requestJsonObject,
+			Listener<JSONObject> listener, ErrorListener errorListener) {
+		addRequest(new JsonObjectRequest(urlStr, requestJsonObject, listener,
+				errorListener));
+	}
     
     public <T> void addRequest(Request<T> request) {
         addRequest(request, TAG);
@@ -49,5 +60,14 @@ public class VolleyHelper extends Application {
         if (mRequestQueue != null) {
             mRequestQueue.cancelAll((tag == null) ? TAG : tag);
         }
+    }
+    
+    /**
+     * for testing.
+     * @param instance
+     */
+    public static void injectInstance(VolleyHelper instance)
+    {
+    	mInstance = instance;
     }
 }

@@ -33,6 +33,8 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsF
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.SqlDebugHelper;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 
@@ -261,7 +263,7 @@ public class TransmittingService extends Service {
 		}
 		
 		sendFixesToAPI(null);
-		reportUnsentGPSFixesCount(getNumberOfUnsentGPSFixes());
+		reportUnsentGPSFixesCount(DatabaseHelper.getInstance(getBaseContext()).getNumberOfUnsentGPSFixes());
 	}
 	
 	private boolean getTrackingServiceIsCurrentlyTracking()
@@ -270,9 +272,9 @@ public class TransmittingService extends Service {
 	}
 	
 	private void sendFixesToAPI(List<String> failedHosts) {
-		// first, lets fetch all unsent fixes
-		List<GpsFix> fixes = getUnsentFixes(failedHosts);
 		
+		// first, lets fetch all unsent fixes
+		List<GpsFix> fixes = DatabaseHelper.getInstance(getBaseContext()).getUnsentFixes(failedHosts, UPDATE_BATCH_SIZE);
 		// store ids so we can delete the rows later
 		ArrayList<String> ids = new ArrayList<String>();
 		
@@ -337,11 +339,14 @@ public class TransmittingService extends Service {
 			if (host != null)
 			{
 				sendingAttempted = true;
-				VolleyHelper.getInstance(this).addRequest(
-						new JsonObjectRequest(host
-								+ prefs.getServerGpsFixesPostPath(), requestObject,
-								new FixSubmitListener(ids.toArray(idsArr)),
-								new FixSubmitErrorListener(host, getTrackingServiceIsCurrentlyTracking(), failedHosts)));	
+				
+				VolleyHelper.getInstance(this).enqueueRequest(
+						host + prefs.getServerGpsFixesPostPath(),
+						requestObject,
+						new FixSubmitListener(ids.toArray(idsArr)),
+						new FixSubmitErrorListener(host,
+								getTrackingServiceIsCurrentlyTracking(),
+								failedHosts));
 			}
 			else
 			{
@@ -369,46 +374,6 @@ public class TransmittingService extends Service {
 	 * and needs to find out the id of that event first.
 	 * @return
 	 */
-	private int getNumberOfUnsentGPSFixes()
-	{
-		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
-		String sortAndLimitClause = SensorGps.GPS_TIME + " DESC LIMIT 1";
-	
-		int eventId = -1;
-
-		Cursor cur = getContentResolver().query(
-				EventGpsFixesJoined.CONTENT_URI,
-				new String[] { "events._id as _eid" }, 
-				selectionClause, 
-				null,
-				sortAndLimitClause);
-		
-		while (cur.moveToNext()) {
-			eventId = cur.getInt(0);
-		}
-		
-		cur.close();
-	
-		if (eventId == -1)
-		{
-			if (BuildConfig.DEBUG)
-			{
-				ExLog.i(this, TAG, "no event id, reporting 0 gps-fixes.");
-			}
-			return 0;
-		}
-		
-		String selectionClause2 = "events._id = " + eventId;
-		Cursor countCursor = getContentResolver().query(
-				EventGpsFixesJoined.CONTENT_URI,
-				new String[] { "count(*) AS count" }, selectionClause2, null, null);
-
-		countCursor.moveToFirst();
-		int count = countCursor.getInt(0);
-		countCursor.close();
-
-		return count;
-	}
 	
 	private float getBatteryPercentage()
 	{
@@ -424,19 +389,12 @@ public class TransmittingService extends Service {
 			ExLog.i(this, TAG, "Battery: " + (batteryPct * 100) + "%");
 		}
 		
-		
 		return batteryPct;
 	}
 	
 	private void deleteSynced(String[] fixIdStrings)
 	{
-		for (String idStr: fixIdStrings)
-		{
-			ContentValues updateValues = new ContentValues();
-			updateValues.put(SensorGps.GPS_SYNCED, 1);
-			Uri uri = ContentUris.withAppendedId(SensorGps.CONTENT_URI, Long.parseLong(idStr));
-			getContentResolver().delete(uri, null, null);
-		}
+		DatabaseHelper.getInstance(getBaseContext()).deleteGpsFixes(fixIdStrings);
 	}
 	
 	/**
@@ -495,60 +453,7 @@ public class TransmittingService extends Service {
 //		}
 //	}
 	
-	private List<GpsFix> getUnsentFixes(List<String> failedHosts)
-	{
-		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
-		String projectionClauseStr = "events._id as _eid,sensor_gps.gps_time,sensor_gps.gps_latitude,"
-				+ "sensor_gps.gps_longitude,sensor_gps.gps_speed,sensor_gps.gps_bearing,sensor_gps.gps_synced,"
-				+ "events.event_server,sensor_gps._id as _gid";
-		String[] projectionClause = projectionClauseStr.split(",");
-		String sortAndLimitClause = SensorGps.GPS_TIME + " DESC LIMIT " + UPDATE_BATCH_SIZE;
-		
-		if (failedHosts != null)
-		{
-			if (failedHosts.size() > 0)
-			{
-				StringBuffer buf = new StringBuffer();
-				buf.append("( ");
-
-				for (String failedHost : failedHosts) {
-					buf.append("\"" + failedHost + "\",");
-				}
-				
-				// remove the last comma
-				buf.setLength(buf.length() - 1);
-				buf.append(" )");
-				
-				selectionClause += " AND " + Event.EVENT_SERVER + " NOT IN " + buf.toString();
-			}
-		}
-		
-		ArrayList<GpsFix> list = new ArrayList<GpsFix>();
-		Cursor cur = getContentResolver().query(EventGpsFixesJoined.CONTENT_URI, projectionClause, selectionClause, null, sortAndLimitClause);
-		while (cur.moveToNext()) {
-			GpsFix gpsFix = new GpsFix();
-			
-			gpsFix.id = cur.getInt(cur.getColumnIndex("_gid"));
-			gpsFix.timestamp = cur.getLong(cur.getColumnIndex(SensorGps.GPS_TIME));
-			gpsFix.latitude  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_LATITUDE));
-			gpsFix.longitude  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_LONGITUDE));
-			gpsFix.speed  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_SPEED));
-			gpsFix.course  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_BEARING));
-			gpsFix.synced = cur.getInt(cur.getColumnIndex(SensorGps.GPS_SYNCED));
-			gpsFix.host = cur.getString(cur.getColumnIndex(Event.EVENT_SERVER));
-			gpsFix.eventId = cur.getString(cur.getColumnIndex("_eid"));
-			
-			list.add(gpsFix);
-			
-			if (list.size() >= UPDATE_BATCH_SIZE)
-			{
-				break;
-			}
-        }
-		
-		cur.close();
-		return list;
-	}
+	
 	
 	private class FixSubmitListener implements Listener<JSONObject> {
 
@@ -638,7 +543,6 @@ public class TransmittingService extends Service {
 		apiConnectivityListener = null;
 	}
 	
-    
 	public class TransmittingBinder extends Binder {
 		public TransmittingService getService() {
 			return TransmittingService.this;
