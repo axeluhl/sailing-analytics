@@ -152,7 +152,7 @@ public class SignalQualityIndicatorView extends View {
 	
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-	   int minw = getPaddingLeft() + getPaddingRight() + 40;
+	   int minw = getPaddingLeft() + getPaddingRight() + 20;
 	   int w = resolveSizeAndState(minw, widthMeasureSpec, 1);
 	   int minh = 50;
 	   setMeasuredDimension(w, minh);
