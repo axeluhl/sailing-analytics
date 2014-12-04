@@ -104,6 +104,7 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		assertEquals(14, jsonFix.getLong("speedMperS"));
 		assertEquals(101.5, jsonFix.getDouble("bearingDeg"));
 		
+		assertEquals("http://127.0.0.1/api/v1/gps_fixes", urlCaptor.getValue());
 		shutdownService();
 	}
 
