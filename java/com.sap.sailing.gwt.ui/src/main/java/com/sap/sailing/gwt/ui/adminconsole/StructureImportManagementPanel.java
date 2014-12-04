@@ -34,6 +34,8 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class StructureImportManagementPanel extends FlowPanel {
@@ -43,7 +45,7 @@ public class StructureImportManagementPanel extends FlowPanel {
     private final RegattaRefresher regattaRefresher;
     private final EventManagementPanel eventManagementPanel;
     private final StructureImportListComposite regattaListComposite;
-    private Panel progressPanel;
+    private final BusyIndicator busyIndicator;
     private TextBox jsonURLTextBox;
     private TextBox eventIDTextBox;
 
@@ -56,6 +58,7 @@ public class StructureImportManagementPanel extends FlowPanel {
     public StructureImportManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, RegattaRefresher regattaRefresher, EventManagementPanel eventManagementPanel) {
         this.eventManagementPanel = eventManagementPanel;
+        this.busyIndicator = new SimpleBusyIndicator();
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -67,7 +70,8 @@ public class StructureImportManagementPanel extends FlowPanel {
     }
 
     private void createUI() {
-        progressPanel = new FlowPanel();
+        final Panel progressPanel = new FlowPanel();
+        progressPanel.add(busyIndicator);
         Grid URLgrid = new Grid(2, 2);
         Label eventIDLabel = new Label(stringMessages.event() + ":");
         Label jsonURLLabel = new Label(stringMessages.jsonUrl() + ":");
@@ -224,14 +228,17 @@ public class StructureImportManagementPanel extends FlowPanel {
         }
 
         else {
+            busyIndicator.setBusy(true);
             sailingService.getRegattas(valueToValidate, new AsyncCallback<Iterable<RegattaDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
+                    busyIndicator.setBusy(false);
                     errorReporter.reportError("Error trying to load regattas");
                 }
 
                 @Override
                 public void onSuccess(Iterable<RegattaDTO> regattas) {
+                    busyIndicator.setBusy(false);
                     editSeriesPanel.clear();
                     fillRegattas(regattas);
                     importDetailsButton.setEnabled(true);

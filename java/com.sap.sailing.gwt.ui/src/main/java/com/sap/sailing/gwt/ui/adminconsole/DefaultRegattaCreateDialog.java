@@ -34,6 +34,7 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
         sailingEventsListBox.setSelectedIndex(1);
         sailingEventsListBox.setEnabled(false);
         setCourseAreaSelection();
+        setSeriesEditor();
     }
 
     protected void setSeriesEditor() {
