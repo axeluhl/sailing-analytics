@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -30,7 +31,7 @@ public interface DomainFactory {
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
-    Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, String raceID, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry);
+    Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String raceID, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
@@ -58,9 +59,10 @@ public interface DomainFactory {
 
     RaceType getRaceTypeFromRaceID(String raceID);
 
-    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
-            String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore);
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
+            String raceName, String raceDescription, BoatClass boatClass, StartList startList,
+            long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore);
 
     ControlPoint getOrCreateControlPoint(Iterable<String> devices);
 

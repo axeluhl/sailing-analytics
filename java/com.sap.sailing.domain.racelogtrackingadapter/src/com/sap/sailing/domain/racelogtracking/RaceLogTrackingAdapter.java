@@ -4,9 +4,9 @@ import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Fleet;
@@ -32,7 +32,7 @@ public interface RaceLogTrackingAdapter {
      * <ul>
      * <li>Is the racelog denoted for tracking? If not, throw exception.</li>
      * <li>Is a {@link RaceLogRaceTracker} already listening for this racelog? If not, add one.</li>
-     * <li>Is a {@link StartTrackingEvent} present in the racelog? If not, add one</li>
+     * <li>Is a {@link RaceLogStartTrackingEvent} present in the racelog? If not, add one</li>
      * </ul>
      */
     void startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
@@ -46,7 +46,7 @@ public interface RaceLogTrackingAdapter {
     boolean isRaceLogRaceTrackerAttached(RacingEventService service, RaceLog raceLog);
 
     /**
-     * Denotes the {@link RaceLog} for racelog-tracking, by inserting a {@link DenoteForTrackingEvent}.
+     * Denotes the {@link RaceLog} for racelog-tracking, by inserting a {@link RaceLogDenoteForTrackingEvent}.
      * 
      * @throws NotDenotableForRaceLogTrackingException
      *             Fails, if no {@link RaceLog}, or a non-empty {@link RaceLog}, or one with attached
@@ -57,7 +57,7 @@ public interface RaceLogTrackingAdapter {
             Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException;
     
     /**
-     * Revoke the {@link DenoteForTrackingEvent}, and if it exists the {@link StartTrackingEvent}.
+     * Revoke the {@link RaceLogDenoteForTrackingEvent}, and if it exists the {@link RaceLogStartTrackingEvent}.
      * This does not affect existing an {@link RaceLogRaceTracker}
      * or {@link TrackedRace} for this {@code RaceLog}.
      */
@@ -80,7 +80,7 @@ public interface RaceLogTrackingAdapter {
      * Duplicate the course and competitor registrations in the newest {@link RaceLogCourseDesignChangedEvent}
      * in {@code from} race log to the {@code to} race logs.
      * The {@link Mark}s and {@link ControlPoint}s are duplicated and not reused. This also inserts the necessary
-     * {@link DefineMarkEvent}s into the {@code to} race logs.
+     * {@link RaceLogDefineMarkEvent}s into the {@code to} race logs.
      */
     void copyCourseAndCompetitors(RaceLog from, Set<RaceLog> to, SharedDomainFactory baseDomainFactory,
             RacingEventService service);

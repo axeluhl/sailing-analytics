@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -22,6 +23,8 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogOnLeaderboardIdentifier;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -44,13 +47,20 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private String name;
     private transient RaceLogStore raceLogStore;
     private CourseArea courseArea;
+    
+    /**
+     * @see RegattaLog for the reason why the leaderboard manages a {@code RegattaLog}
+     */
+    private final RegattaLog regattaLog;
 
     public FlexibleLeaderboardImpl(String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
             ScoringScheme scoringScheme, CourseArea courseArea) {
-        this(EmptyRaceLogStore.INSTANCE, name, resultDiscardingRule, scoringScheme, courseArea);
+        this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
+                name, resultDiscardingRule, scoringScheme, courseArea);
     }
 
-    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
+    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
             ScoringScheme scoringScheme, CourseArea courseArea) {
         super(resultDiscardingRule);
         this.scoringScheme = scoringScheme;
@@ -61,6 +71,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.races = new ArrayList<FlexibleRaceColumn>();
         this.raceLogStore = raceLogStore;
         this.courseArea = courseArea;
+        this.regattaLog = regattaLogStore.getRegattaLog(name, /*ignoreCache*/ true);
     }
 
     /**
@@ -242,4 +253,8 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.courseArea = newCourseArea;
     }
 
+    @Override
+    public RegattaLog getRegattaLog() {
+        return regattaLog;
+    }
 }

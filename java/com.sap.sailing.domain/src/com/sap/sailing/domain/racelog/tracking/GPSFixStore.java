@@ -1,15 +1,15 @@
 package com.sap.sailing.domain.racelog.tracking;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.shared.events.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;

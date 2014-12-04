@@ -49,6 +49,7 @@ import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
@@ -98,7 +99,8 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, /* displayName */ null, false, leaderboards);
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup,
-                new HighPointExtremeSailingSeriesOverall(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
+                new HighPointExtremeSailingSeriesOverall(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]),
+                EmptyRegattaLogStore.INSTANCE);
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
 
@@ -205,7 +207,8 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, /* displayName */ null, false, leaderboards);
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup,
-                new HighPointExtremeSailingSeriesOverall(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
+                new HighPointExtremeSailingSeriesOverall(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]),
+                EmptyRegattaLogStore.INSTANCE);
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
         overallLeaderboard.setSuppressed(wolfgang, true);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
@@ -261,7 +264,8 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, /* displayName */ null, false, leaderboards);
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup,
-                new HighPointExtremeSailingSeriesOverall(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
+                new HighPointExtremeSailingSeriesOverall(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]),
+                EmptyRegattaLogStore.INSTANCE);
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
         overallLeaderboard.setSuppressed(wolfgang, true);
         overallLeaderboard.setSuppressed(hasso, true);

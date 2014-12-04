@@ -22,6 +22,7 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterFactoryImpl;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
@@ -115,10 +116,10 @@ public class SailingServiceImplMock extends SailingServiceImpl {
 
                     @Override
                     public RaceHandle addSwissTimingRace(TrackerManager trackerManager,
-                            RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname,
-                            int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
-                            throws InterruptedException, UnknownHostException, IOException, ParseException,
-                            Exception {
+                            RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
+                            BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore,
+                            RegattaLogStore regattaLogStore, long timeoutInMilliseconds) throws InterruptedException,
+                            UnknownHostException, IOException, ParseException, Exception {
                         // TODO Auto-generated method stub
                         return null;
                     }

@@ -18,6 +18,7 @@ import org.junit.rules.Timeout;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -46,7 +47,9 @@ public class UnicodeCharactersInCompetitorNamesTest {
     }
     
     @Test
-    public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, InterruptedException, CreateModelException, SubscriberInitializationException {
+    public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException,
+            URISyntaxException, IOException, InterruptedException, CreateModelException,
+            SubscriberInitializationException {
         TracTracRaceTracker fourtyninerYellow_2 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -59,10 +62,11 @@ public class UnicodeCharactersInCompetitorNamesTest {
                         tractracTunnel ? new URI("tcp://" + tractracTunnelHost + ":"
                                 + TracTracConnectionConstants.PORT_TUNNEL_STORED)
                                 : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
-                                        + TracTracConnectionConstants.PORT_STORED),
-                        new URI("http://tracms.traclive.dk/update_course"),
+                                        + TracTracConnectionConstants.PORT_STORED), new URI(
+                                "http://tracms.traclive.dk/update_course"),
                         /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l,
-                        /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, "tracTest", "tracTest", "", "",
+                        /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
+                        EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, "tracTest", "tracTest", "", "",
                         new DummyTrackedRegattaRegistry());
 
         Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRace().getCompetitors();

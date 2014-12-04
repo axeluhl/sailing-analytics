@@ -170,10 +170,7 @@ public interface Regatta extends Named, WithID {
     void setUseStartTimeInference(boolean useStartTimeInference);
 
     /**
-     * Gets the {@link RegattaLog} associated with this {@link Regatta}.
-     * 
-     * @param configuration
+     * @return The RegattaLog associated with this regatta.
      */
     RegattaLog getRegattaLog();
-
 }

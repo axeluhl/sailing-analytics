@@ -11,6 +11,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -38,8 +39,9 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
     private final LeaderboardGroup leaderboardGroup;
 
     public LeaderboardGroupMetaLeaderboard(LeaderboardGroup leaderboardGroup, ScoringScheme scoringScheme,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(leaderboardGroup.getName()+" "+LeaderboardNameConstants.OVERALL, scoringScheme, resultDiscardingRule);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, RegattaLogStore regattaLogStore) {
+        super(leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL, scoringScheme, resultDiscardingRule,
+                regattaLogStore);
         this.leaderboardGroup = leaderboardGroup;
         leaderboardGroup.addLeaderboardGroupListener(this);
         registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
