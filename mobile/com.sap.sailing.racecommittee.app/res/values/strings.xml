@@ -3,6 +3,8 @@
 
     <string-array name="empty_array" tools:ignore="UnusedResources" />
 
+    <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
+    <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
     <string name="service_info">SAP Race Committee Service</string>
@@ -114,16 +116,24 @@
     <string name="results_capturing_view_list_empty">No photos yet</string>
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Results for race %s are attached.</string>
+    
+    <!-- WIND FRAGMENT -->
     <string name="wind_direction_degrees">Wind direction from (degrees)</string>
-    <string name="wind_speed_knots">Wind speed (knots)</string>
-    <string name="enter_wind_direction">1. Enter the wind direction</string>
-    <string name="enter_wind_speed">2. Enter the wind speed</string>
+    <string name="enter_wind_direction">Direction (from)</string>
+    <string name="enter_wind_speed">Speed (kts)</string>
+    <string name="enter_wind_gps">Wind Measuring Position</string>
     <string name="check_all_data">3. Check all data</string>
     <string name="in_degrees">in degrees</string>
     <string name="in_knots">in knots</string>
     <string name="wind_speed_direction_not_a_valid_number">The wind speed or direction is not a valid number. Please correct the value.</string>
     <string name="wind_location_or_fields_not_valid">The entered location, wind speed or direction is empty. Please correct the values.</string>
     <string name="waiting_for_gps">Waiting for GPS Signal&#8230;</string>
+    <string name="manual_entry">Manual Position Entry</string>
+    <string name="found_gps_position">GPS Based Position</string>
+    <string name="set_position_manually">Add Position Manually</string>
+    <string name="searchPosition">Location search &#8230;</string>
+    <string name="no_location_found">Could not find a location based on your query.</string>
+    <string name="store_position">Use this position</string>
     <string name="store_wind">Store wind</string>
 
     <!-- SETTINGS -->
