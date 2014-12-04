@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.shared.mainmedia;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
@@ -57,9 +58,23 @@ public class MainMedia extends Composite {
     }
 
     public void setRecentEvents(List<EventBaseDTO> recentEvents) {
-        List<String> photoGalleryUrls = new ArrayList<String>();
+        class Holder {
+            public Holder(String url, int height, int width) {
+                this.url = url;
+                this.height = height;
+                this.width = width;
+            }
+
+            String url;
+            int height;
+            int width;
+        }
+        List<Holder> photoGalleryUrls = new LinkedList<>();
         for (EventBaseDTO event : recentEvents) {
-            photoGalleryUrls.addAll(event.getSailingLovesPhotographyImages());
+            for (String url : event.getSailingLovesPhotographyImages()) {
+                ImageSize size = event.getImageSize(url);
+                photoGalleryUrls.add(new Holder(url, size.getHeight(), size.getWidth()));
+            }
             if (!event.getVideoURLs().isEmpty() && videoCounter < MAX_VIDEO_COUNT) {
                 addVideoToVideoPanel(event);
             }
@@ -72,8 +87,9 @@ public class MainMedia extends Composite {
             Collections.swap(photoGalleryUrls, i, random.nextInt(gallerySize));
         }
 
-        for (String url : photoGalleryUrls) {
-            imageCarousel.addImage(url);
+        for (Holder holder : photoGalleryUrls) {
+
+            imageCarousel.addImage(holder.url, holder.height, holder.width);
         }
         imageCarousel.init();
     }

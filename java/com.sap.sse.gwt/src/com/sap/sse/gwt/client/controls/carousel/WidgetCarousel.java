@@ -5,7 +5,6 @@ import java.util.LinkedList;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.ButtonElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
@@ -56,12 +55,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class WidgetCarousel extends Composite {
 
     private static SlickSliderUiBinder ourUiBinder = GWT.create(SlickSliderUiBinder.class);
-
-    @UiField
-    ButtonElement slickPrev;
-
-    @UiField
-    ButtonElement slickNext;
 
     @UiField
     HTMLPanel sliderMainUi;
@@ -115,7 +108,7 @@ public class WidgetCarousel extends Composite {
             @Override
             public void execute() {
                 try {
-                    setupSlider(reference, slickPrev, slickNext);
+                    setupSlider(reference);
                 } catch (Exception e) {
                     GWT.log("Catched Exception on slider init", e);
                 }
@@ -148,7 +141,7 @@ public class WidgetCarousel extends Composite {
      *
      * @param uniqueId
      */
-    native void setupSlider(WidgetCarousel sliderReference, ButtonElement prevArrowEl, ButtonElement nextArrowEl) /*-{
+    native void setupSlider(WidgetCarousel sliderReference) /*-{
 
 	$wnd
 		.$(document)
@@ -165,8 +158,6 @@ public class WidgetCarousel extends Composite {
 						swipeToSlide : false,
 						arrows : true,
 						responsive : false,
-						prevArrow : prevArrowEl,
-						nextArrow : nextArrowEl,
 						onAfterChange : function() {
 						    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
 						},
@@ -289,7 +280,7 @@ public class WidgetCarousel extends Composite {
             @Override
             public void execute() {
                 try {
-                    setupSlider(reference, slickPrev, slickNext);
+                    setupSlider(reference);
                     for (int i = 0; i < getElement().getChildCount(); i++) {
                         Element child = (Element) getElement().getChild(i);
                         String className = child.getClassName();

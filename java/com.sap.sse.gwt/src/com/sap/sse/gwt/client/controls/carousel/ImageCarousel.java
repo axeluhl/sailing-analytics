@@ -2,19 +2,15 @@ package com.sap.sse.gwt.client.controls.carousel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.ButtonElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safecss.shared.SafeStyles;
-import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -60,16 +56,10 @@ public class ImageCarousel extends Widget {
     private static SlickSliderUiBinder ourUiBinder = GWT.create(SlickSliderUiBinder.class);
     private static MyTemplate myTemplate = GWT.create(MyTemplate.class);
 
-    @UiField
-    ButtonElement slickPrev;
-
-    @UiField
-    ButtonElement slickNext;
-
     /**
      * slick slider property: dots
      */
-    private boolean showDots = false;
+    private boolean showDots = true;
     /**
      * slick slider property: centerMode
      */
@@ -81,7 +71,7 @@ public class ImageCarousel extends Widget {
     /**
      * slick slider property: infiniteScrolling
      */
-    private boolean infiniteScrolling = false;
+    private boolean infiniteScrolling = true;
     /**
      * Image margin (effectively sets spacing between images)
      */
@@ -94,7 +84,7 @@ public class ImageCarousel extends Widget {
     /**
      * The height of the images
      */
-    private int imagesHeight = 400;
+    private int imagesHeight = 300;
 
     private final String uniqueId;
 
@@ -114,41 +104,25 @@ public class ImageCarousel extends Widget {
      *
      * @param uniqueId
      */
-    native void setupSlider(ImageCarousel sliderReference, ButtonElement prevArrowEl, ButtonElement nextArrowEl) /*-{
-
-	$wnd
-		.$(document)
-		.ready(
-			function() {
-			    $wnd
-				    .$(
-					    '.'
-						    + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
-				    .slick(
-					    {
-						dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::showDots),
-						infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::infiniteScrolling),
-						centerMode : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::centerMode),
-						variableWidth : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::variableWidth),
-						lazyLoad : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::lazyload),
-						swipeToSlide : false,
-						arrows : true,
-						responsive : true,
-						slidesToShow : 3,
-						prevArrow : prevArrowEl,
-						nextArrow : nextArrowEl
-					    });
-			});
-
-    }-*/;
-
-    native void addImage(ImageCarousel sliderReference, final DivElement el) /*-{
+    native void setupSlider(ImageCarousel sliderReference) /*-{
 
 	$wnd
 		.$(
 			'.'
 				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
-		.slickAdd(el);
+		.slick(
+			{
+			    dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::showDots),
+			    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::infiniteScrolling),
+			    centerMode : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::centerMode),
+			    variableWidth : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::variableWidth),
+			    lazyLoad : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::lazyload),
+			    swipeToSlide : false,
+			    arrows : true,
+			    responsive : true,
+			    slidesToShow : 2
+
+			});
 
     }-*/;
 
@@ -157,17 +131,16 @@ public class ImageCarousel extends Widget {
      *
      * @param url
      */
-    public void addImage(String url) {
+    public void addImage(String url, int height, int width) {
 
         DivElement imageHolder = Document.get().createDivElement();
+        ImageElement imageElement = Document.get().createImageElement();
+        imageElement.setAttribute("data-lazy", UriUtils.fromString(url).asString());
 
-        SafeStylesBuilder ssb = new SafeStylesBuilder();
+        imageHolder.getStyle().setHeight(imagesHeight, Unit.PX);
+        imageHolder.getStyle().setWidth(Math.round(width * (imagesHeight / (double) height)), Unit.PX);
+        imageHolder.appendChild(imageElement);
 
-        ssb.height(imagesHeight, Unit.PX);
-        ssb.appendTrustedString("width:auto;");
-        ssb.margin(contentMarginInPixels, Style.Unit.PX);
-
-        imageHolder.setInnerSafeHtml(myTemplate.imageDiv(UriUtils.fromString(url).asString(), ssb.toSafeStyles()));
         getElement().appendChild(imageHolder);
 
     }
@@ -260,7 +233,7 @@ public class ImageCarousel extends Widget {
      * Template used to create image element
      */
     interface MyTemplate extends SafeHtmlTemplates {
-        @Template("<div><img style='{1}' data-lazy='{0}'/></div>")
+        @Template("<img style='{1}' data-lazy='{0}'/>")
         SafeHtml imageDiv(String uri, SafeStyles imageStyles);
     }
 
@@ -269,18 +242,13 @@ public class ImageCarousel extends Widget {
      */
     public void init() {
         final ImageCarousel reference = this;
+
         Scheduler.get().scheduleDeferred(new Command() {
+
             @Override
             public void execute() {
                 try {
-                    setupSlider(reference, slickPrev, slickNext);
-                    for (int i = 0; i < getElement().getChildCount(); i++) {
-                        Element child = (Element) getElement().getChild(i);
-                        String className = child.getClassName();
-                        if (className != null && className.contains("slick-list")) {
-                            child.getStyle().setHeight(imagesHeight, Unit.PX);
-                        }
-                    }
+                    setupSlider(reference);
                 } catch (Exception e) {
                     GWT.log("Catched Exception on slider init", e);
                 }
