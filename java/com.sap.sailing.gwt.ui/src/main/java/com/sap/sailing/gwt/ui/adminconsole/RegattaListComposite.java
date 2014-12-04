@@ -135,7 +135,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         initWidget(mainPanel);
     }
 
-    protected CellTable<RegattaDTO> createRegattaTable() {
+    private CellTable<RegattaDTO> createRegattaTable() {
         CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
