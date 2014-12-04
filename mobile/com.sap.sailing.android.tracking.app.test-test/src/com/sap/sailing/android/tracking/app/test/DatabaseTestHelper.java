@@ -94,6 +94,7 @@ public class DatabaseTestHelper {
 		cv.put(SensorGps.GPS_ACCURACY, accuracy);
 		cv.put(SensorGps.GPS_TIME, timestamp);
 		cv.put(SensorGps.GPS_EVENT_FK, eventId);
+		cv.put(SensorGps.GPS_SYNCED, 0);
 		cr.insert(SensorGps.CONTENT_URI, cv);
 	}
 	
@@ -103,10 +104,8 @@ public class DatabaseTestHelper {
 		ContentValues cv = new ContentValues();
 		cv.put(Event.EVENT_NAME, eventName);
 		cv.put(Event.EVENT_ID, eventId);
+		cv.put(Event.EVENT_SERVER, "127.0.0.1");
 		Uri uri = cr.insert(Event.CONTENT_URI, cv);
 		return ContentUris.parseId(uri);
 	}
-	
-
-
 }

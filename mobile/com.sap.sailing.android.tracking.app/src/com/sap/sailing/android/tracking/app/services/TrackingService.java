@@ -29,6 +29,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 
 public class TrackingService extends Service implements ConnectionCallbacks,
 		OnConnectionFailedListener, LocationListener {
@@ -87,7 +88,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 								.getExtras()
 								.getString(getString(R.string.tracking_service_event_id_parameter));
 						
-						eventRowId = getRowIdForEventId(eventId);
+						eventRowId = DatabaseHelper.getInstance(this).getRowIdForEventId(eventId);
 						
 						if (BuildConfig.DEBUG) {
 							ExLog.i(this, TAG, "Starting Tracking Service with eventId: "+ eventId);
@@ -102,18 +103,6 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 			}
 		}
 		return Service.START_STICKY;
-	}
-	
-	private long getRowIdForEventId(String eventId)
-	{
-		int result = 0;
-		
-		ContentResolver cr = getContentResolver();
-		Cursor cursor = cr.query(Event.CONTENT_URI, null, "event_id = \"" + eventId + "\"", null, null);
-		cursor.moveToFirst();
-		result = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-		cursor.close();
-		return result;
 	}
 
 	public void startTracking() {
