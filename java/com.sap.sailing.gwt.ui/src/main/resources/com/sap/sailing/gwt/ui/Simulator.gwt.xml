@@ -59,8 +59,6 @@
 	<set-property name="gwt.logging.logLevel" value="INFO" />
 	<set-property name="gwt.logging.simpleRemoteHandler"
 		value="ENABLED" />
-	<set-property name="gwt.logging.consoleHandler" value="DISABLED" />
-	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
 	<!-- Add compiler.stackMode to get a readable stacktrace from JavaScript 
 		It generates a set of files in WEB-INF/deploy; those files need to be placed 
 		on the server -->
