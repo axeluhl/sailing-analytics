@@ -27,15 +27,13 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected StringMessages stringMessages;
     protected RegattaDTO regatta;
     
-    protected ListBox scoringSchemeListBox;
-    protected ListBox courseAreaListBox;
-    protected ListBox sailingEventsListBox;
-    protected CheckBox useStartTimeInferenceCheckBox;
-    protected ListEditorComposite<SeriesDTO> seriesEditor;
+    protected final ListBox scoringSchemeListBox;
+    protected final ListBox courseAreaListBox;
+    protected final ListBox sailingEventsListBox;
+    protected final CheckBox useStartTimeInferenceCheckBox;
+    private final ListEditorComposite<SeriesDTO> seriesEditor;
 
-    protected List<EventDTO> existingEvents;
-
-    protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel);
+    protected final List<EventDTO> existingEvents;
 
     public AbstractRegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, List<EventDTO> existingEvents, String title,
             String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
@@ -60,7 +58,16 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         courseAreaListBox = createListBox(false);
         courseAreaListBox.ensureDebugId("CourseAreaListBox");
         courseAreaListBox.setEnabled(false);
+        this.seriesEditor = createSeriesEditor();
         setupEventAndCourseAreaListBoxes(stringMessages);
+    }
+
+    protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel);
+
+    protected abstract ListEditorComposite<SeriesDTO> createSeriesEditor();
+    
+    protected ListEditorComposite<SeriesDTO> getSeriesEditor() {
+        return seriesEditor;
     }
 
     @Override
@@ -114,8 +121,6 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         return false;
     }
     
-    protected abstract void setSeriesEditor();
-
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
         sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
         for (EventDTO event : existingEvents) {
@@ -194,7 +199,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         regatta.scoringScheme = getSelectedScoringSchemeType();
         regatta.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
         setCourseAreaInRegatta(regatta);
-        regatta.series = seriesEditor.getValue();
+        regatta.series = getSeriesEditor().getValue();
         return regatta;
     }
 

@@ -7,6 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
@@ -34,21 +35,21 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
         sailingEventsListBox.setSelectedIndex(1);
         sailingEventsListBox.setEnabled(false);
         setCourseAreaSelection();
-        setSeriesEditor();
+        createSeriesEditor();
     }
 
-    protected void setSeriesEditor() {
+    protected ListEditorComposite<SeriesDTO> createSeriesEditor() {
         List<SeriesDTO> series = new ArrayList<SeriesDTO>();
         for (RegattaDTO regattaDTO : defaultRegattas) {
             series.addAll(regattaDTO.series);
         }
-        seriesEditor = new SeriesWithFleetsDefaultListEditor(series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */ false);
+        return new SeriesWithFleetsDefaultListEditor(series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */ false);
     }
 
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
-        tabPanel.add(seriesEditor, stringMessages.series());
+        tabPanel.add(getSeriesEditor(), stringMessages.series());
         tabPanel.selectTab(0);
         panel.add(tabPanel);
     }

@@ -18,6 +18,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFleetsDialog {
 
@@ -72,8 +74,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     }
 
     @Override
-    protected void setSeriesEditor() {
-        seriesEditor = new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */ false);
+    protected ListEditorComposite<SeriesDTO> createSeriesEditor() {
+        return new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */ false);
     }
 
     @Override
@@ -96,7 +98,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
-        tabPanel.add(seriesEditor, stringMessages.series());
+        tabPanel.add(getSeriesEditor(), stringMessages.series());
         tabPanel.selectTab(0);
         panel.add(tabPanel);
     }
@@ -109,7 +111,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         } else {
             regatta.configuration = null;
         }
-        regatta.series = seriesEditor.getValue();
+        regatta.series = getSeriesEditor().getValue();
         return regatta;
     }
 
