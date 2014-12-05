@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.SetReducer;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
@@ -380,7 +382,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
 
-        Iterable<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(raceLog).analyze();
+        //check both the racelog and regattalog for registered competitors
+        Set<Competitor> competitors = new MultiLogAnalyzer<>(RegisteredCompetitorsAnalyzer.Factory.INSTANCE,
+                new SetReducer<Competitor>(), params.getLogHierarchy()).analyze();
+
         Serializable raceId = denoteEvent.getRaceId();
         final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
 

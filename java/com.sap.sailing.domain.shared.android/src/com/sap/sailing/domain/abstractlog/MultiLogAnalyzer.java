@@ -2,7 +2,10 @@ package com.sap.sailing.domain.abstractlog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Apply one kind of analyzer to multiple logs, and combine (reduce) their output into one result value.
@@ -20,6 +23,28 @@ public class MultiLogAnalyzer<InterimResultT, FinalResultT>
     public interface ResultReducer<InterimResultT, FinalResultT> {
         FinalResultT getInitialFinalResultValue();
         FinalResultT reduce(InterimResultT interimResult, FinalResultT reducedFinalResult);
+    }
+    
+    public static abstract class CollectionReducer<T, C extends Collection<T>> implements ResultReducer<Collection<T>, C> {
+        @Override
+        public C reduce(Collection<T> interimResult, C reducedFinalResult) {
+            reducedFinalResult.addAll(interimResult);
+            return reducedFinalResult;
+        }
+    }
+    
+    public static class SetReducer<T> extends CollectionReducer<T, Set<T>> {
+        @Override
+        public Set<T> getInitialFinalResultValue() {
+            return new HashSet<T>();
+        }
+    }
+    
+    public static class ListReducer<T> extends CollectionReducer<T, List<T>> {
+        @Override
+        public List<T> getInitialFinalResultValue() {
+            return new ArrayList<T>();
+        }
     }
 
     public MultiLogAnalyzer(AnalyzerFactory< InterimResultT> analyzerFactory,
