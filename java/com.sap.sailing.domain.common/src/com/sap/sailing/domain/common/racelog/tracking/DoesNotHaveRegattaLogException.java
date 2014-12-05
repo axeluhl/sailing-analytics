@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.leaderboard;
+package com.sap.sailing.domain.common.racelog.tracking;
 
 import java.io.Serializable;
 
