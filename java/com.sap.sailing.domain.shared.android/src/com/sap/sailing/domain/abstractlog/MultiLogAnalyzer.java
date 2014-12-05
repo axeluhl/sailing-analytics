@@ -60,9 +60,10 @@ public class MultiLogAnalyzer<InterimResultT, FinalResultT>
         @Override
         public Map<K, C> reduce(Map<K, C> interimResult, Map<K, C> reducedFinalResult) {
             for (Entry<K, C> e : interimResult.entrySet()) {
-                C existing = reducedFinalResult.putIfAbsent(e.getKey(), e.getValue());
-                if (existing != null) {
-                    existing.addAll(e.getValue());
+                if (reducedFinalResult.containsKey(e.getKey())) {
+                    reducedFinalResult.get(e.getKey()).addAll(e.getValue());
+                } else {
+                    reducedFinalResult.put(e.getKey(), e.getValue());
                 }
             }
             return reducedFinalResult;
