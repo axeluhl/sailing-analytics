@@ -3,8 +3,11 @@ package com.sap.sailing.domain.abstractlog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -45,6 +48,26 @@ public class MultiLogAnalyzer<InterimResultT, FinalResultT>
         public List<T> getInitialFinalResultValue() {
             return new ArrayList<T>();
         }
+    }
+    
+    public static class MapWithValueCollectionReducer<K, V, C extends Collection<V>>
+        implements ResultReducer<Map<K, C>, Map<K, C>> {
+        @Override
+        public Map<K, C> getInitialFinalResultValue() {
+            return new HashMap<K, C>();
+        }
+
+        @Override
+        public Map<K, C> reduce(Map<K, C> interimResult, Map<K, C> reducedFinalResult) {
+            for (Entry<K, C> e : interimResult.entrySet()) {
+                C existing = reducedFinalResult.putIfAbsent(e.getKey(), e.getValue());
+                if (existing != null) {
+                    existing.addAll(e.getValue());
+                }
+            }
+            return reducedFinalResult;
+        }
+
     }
 
     public MultiLogAnalyzer(AnalyzerFactory< InterimResultT> analyzerFactory,

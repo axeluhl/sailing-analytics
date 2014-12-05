@@ -1045,4 +1045,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public void attachRegattaLog(RegattaLog regattaLog) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

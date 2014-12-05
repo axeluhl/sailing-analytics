@@ -215,7 +215,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
     }
 
     @Override
-    public void removeListener(VisitorT listener) {
+    public void removeListener(Object listener) {
         synchronized (listeners) {
             listeners.remove(listener);
         }

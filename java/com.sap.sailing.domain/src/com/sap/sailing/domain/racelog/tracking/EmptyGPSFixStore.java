@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelog.tracking;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimeRange;
@@ -19,12 +19,12 @@ public enum EmptyGPSFixStore implements GPSFixStore {
 
     @Override
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-            RaceLog raceLog, Competitor competitor) {
+            AbstractLog<?, ?> log, Competitor competitor) {
     }
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
-            RaceLog raceLog, Mark mark) {
+            AbstractLog<?, ?> log, Mark mark) {
     }
 
     @Override

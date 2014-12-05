@@ -849,4 +849,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Position getCenterOfCourse(TimePoint at) {
         return null;
     }
+
+    @Override
+    public void attachRegattaLog(RegattaLog regattaLog) {
+        // TODO Auto-generated method stub
+        
+    }
 }

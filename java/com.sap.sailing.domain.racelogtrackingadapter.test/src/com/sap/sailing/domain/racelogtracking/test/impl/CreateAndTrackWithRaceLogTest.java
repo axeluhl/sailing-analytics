@@ -20,6 +20,9 @@ import org.junit.rules.ExpectedException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -32,7 +35,9 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -70,11 +75,12 @@ public class CreateAndTrackWithRaceLogTest {
         gpsFixStore = service.getGPSFixStore();
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         author = service.getServerAuthor();
-        Series series = new SeriesImpl("series", false, Collections.singletonList(fleet), Collections.emptySet(), service);
+        Series series = new SeriesImpl("series", false, Collections.singletonList(fleet), Collections.emptySet(),
+                service);
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
-                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), Collections.<Series>singletonList(series),
-                false, new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */ true);
-        series.addRaceColumn(columnName, /* trackedRegattaRegistry */ null);
+        /* startDate */null, /* endDate */null, UUID.randomUUID(), Collections.<Series> singletonList(series), false,
+                new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */true);
+        series.addRaceColumn(columnName, /* trackedRegattaRegistry */null);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactoryImpl.INSTANCE.getAdapter(DomainFactory.INSTANCE);
     }
@@ -88,11 +94,17 @@ public class CreateAndTrackWithRaceLogTest {
         return new MillisecondsTimePoint(time++);
     }
 
+    private TimePoint t(long millis) {
+        return new MillisecondsTimePoint(millis);
+    }
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
+
     @Test
-    public void cantAddBeforeDenoting() throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
-        RaceColumn column = leaderboard.getRaceColumnByName(columnName);		
+    public void cantAddBeforeDenoting() throws MalformedURLException, FileNotFoundException, URISyntaxException,
+            Exception {
+        RaceColumn column = leaderboard.getRaceColumnByName(columnName);
         exception.expect(NotDenotedForRaceLogTrackingException.class);
         adapter.startTracking(service, leaderboard, column, fleet);
     }
@@ -103,52 +115,115 @@ public class CreateAndTrackWithRaceLogTest {
         track.unlockAfterRead();
     }
 
+    private void addFixes0(DeviceIdentifier dev1) throws TransformationException,
+            NoCorrespondingServiceRegisteredException {
+        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(5), new KnotSpeedWithBearingImpl(
+                10, new DegreeBearingImpl(5))));
+        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(15), new KnotSpeedWithBearingImpl(
+                10, new DegreeBearingImpl(5))));
+    }
+
+    private void addFixes1(TrackedRace race, Competitor comp1, DeviceIdentifier dev1) throws TransformationException,
+            NoCorrespondingServiceRegisteredException {
+        // one fix should have been loaded from store
+        testSize(race.getTrack(comp1), 1);
+
+        // further fix arrives in race
+        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(7), new KnotSpeedWithBearingImpl(
+                10, new DegreeBearingImpl(5))));
+        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(14), new KnotSpeedWithBearingImpl(
+                10, new DegreeBearingImpl(5)))); // outside mapping range
+        testSize(race.getTrack(comp1), 2);
+    }
+
+    private void addFixes2(TrackedRace race, Competitor comp1, DeviceIdentifier dev1) throws TransformationException,
+            NoCorrespondingServiceRegisteredException {
+        // add another mapping on the fly, other old fixes should be loaded
+        testSize(race.getTrack(comp1), 4);
+
+        // add another fix in new mapping range
+        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(18), new KnotSpeedWithBearingImpl(
+                10, new DegreeBearingImpl(5))));
+        testSize(race.getTrack(comp1), 5);
+    }
+
+    private void addFixes3(TrackedRace race, Competitor comp1, DeviceIdentifier dev1) throws TransformationException,
+            NoCorrespondingServiceRegisteredException {
+        // stop tracking, then no more fixes arrive at race
+        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(8), new KnotSpeedWithBearingImpl(
+                10, new DegreeBearingImpl(5))));
+        testSize(race.getTrack(comp1), 5);
+    }
+
     @Test
-    public void canDenote_Add_Track() throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
+    public void canDenote_Add_Track() throws MalformedURLException, FileNotFoundException, URISyntaxException,
+            Exception {
 
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
         RaceLog raceLog = column.getRaceLog(fleet);
 
-        //can denote racelog for tracking
+        // can denote racelog for tracking
         assertTrue(raceLog.isEmpty());
         adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
         assertFalse(raceLog.isEmpty());
 
-        //add a mapping and one fix in, one out of mapping
+        // add a mapping and one fix in, one out of mapping
         Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null);
         DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
-        raceLog.add(factory.createDeviceCompetitorMappingEvent(t(), author, dev1, comp1, 0, new MillisecondsTimePoint(0), new MillisecondsTimePoint(10)));
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(5), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(15), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
-
+        raceLog.add(factory.createDeviceCompetitorMappingEvent(t(), author, dev1, comp1, 0, t(0), t(10)));
+        addFixes0(dev1);
         raceLog.add(factory.createRegisterCompetitorEvent(t(), author, 0, comp1));
 
-        //start tracking
+        // start tracking
         adapter.startTracking(service, leaderboard, column, fleet);
 
-        //now there is a trackedrace
+        // now there is a trackedrace
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
 
-        //one fix should have been loaded from store
-        testSize(race.getTrack(comp1), 1);
+        addFixes1(race, comp1, dev1);
+        raceLog.add(factory.createDeviceCompetitorMappingEvent(t(), author, dev1, comp1, 0, t(11), t(20)));
 
-        //further fix arrives in race
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(7), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(14), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5)))); //outside mapping range
-        testSize(race.getTrack(comp1), 2);
+        // add another mapping on the fly, other old fixes should be loaded
+        addFixes2(race, comp1, dev1);
 
-        //add another mapping on the fly, other old fixes should be loaded
-        raceLog.add(factory.createDeviceCompetitorMappingEvent(t(), author, dev1, comp1, 0, new MillisecondsTimePoint(11), new MillisecondsTimePoint(20)));
-        testSize(race.getTrack(comp1), 4);
-
-        //add another fix in new mapping range
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(18), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
-        testSize(race.getTrack(comp1), 5);
-
-        //stop tracking, then no more fixes arrive at race
+        // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop();
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(8), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
-        testSize(race.getTrack(comp1), 5);
+        addFixes3(race, comp1, dev1);
+    }
+
+    @Test
+    public void useEventsInRegattaLog() throws NotDenotedForRaceLogTrackingException, Exception {
+        RaceColumn column = leaderboard.getRaceColumnByName(columnName);
+        RegattaLog regattaLog = leaderboard.getRegattaLog();
+        RaceLog raceLog = column.getRaceLog(fleet);
+
+        adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
+
+        // add a mapping and one fix in, one out of mapping
+        Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null);
+        DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), author, t(), UUID.randomUUID(), comp1, dev1,
+                t(0), t(10)));
+        addFixes0(dev1);
+        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(t(), author, t(), UUID.randomUUID(), comp1));
+
+        // start tracking
+        adapter.startTracking(service, leaderboard, column, fleet);
+
+        // now there is a trackedrace
+        TrackedRace race = column.getTrackedRace(fleet);
+        assertNotNull(race);
+
+        addFixes1(race, comp1, dev1);
+
+        // add another mapping on the fly, other old fixes should be loaded
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), author, t(), UUID.randomUUID(), comp1, dev1,
+                t(11), t(20)));
+        addFixes2(race, comp1, dev1);
+
+        // stop tracking, then no more fixes arrive at race
+        service.getRaceTrackerById(raceLog.getId()).stop();
+        addFixes3(race, comp1, dev1);
     }
 }

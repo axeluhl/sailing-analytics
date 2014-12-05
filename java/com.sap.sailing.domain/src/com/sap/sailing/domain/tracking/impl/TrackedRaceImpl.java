@@ -31,8 +31,10 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -45,6 +47,7 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -96,12 +99,13 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -2631,34 +2635,27 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
     }
-
-    /**
-     * This can trigger fixes to be loaded, if there are {@link DeviceMapping}s in the {@code RaceLog}.
-     * If multiple race logs are attached, the threads that are spawned to load fixes will do so one
-     * after another, as they acquire a write lock on the {@link #loadingFromGPSFixStoreLock}.
-     */
-    @Override
-    public void attachRaceLog(final RaceLog raceLog) {
-        if (raceLog != null) {
-            // Use the new race log, that possibly contains device mappings, to load GPSFix tracks from the DB
+    
+    private void loadFixesForLog(final AbstractLog<?, ?> log) {
+        if (log != null) {
+            // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
-            new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", race log "
-                    + raceLog.getId()) {
+            new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", log "
+                    + log.getId()) {
                 @Override
                 public void run() {
                     LockUtil.lockForRead(getSerializationLock());
                     LockUtil.lockForWrite(getLoadingFromGPSFixStoreLock());
                     synchronized (TrackedRaceImpl.this) {
-                        TrackedRaceImpl.this.attachedRaceLogs.put(raceLog.getId(), raceLog);
                         loadingFromGPSFixStore = true; // indicates that the serialization lock is now safely held
                         TrackedRaceImpl.this.notifyAll();
                     }
                     try {
-                        logger.info("Started loading competitor tracks for " + getRace().getName() + " for race log " + raceLog.getId());
+                        logger.info("Started loading competitor tracks for " + getRace().getName() + " for log " + log.getId());
                         for (Competitor competitor : race.getCompetitors()) {
                             try {
                                 gpsFixStore.loadCompetitorTrack(
-                                        (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog,
+                                        (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), log,
                                         competitor);
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.log(Level.WARNING, "Could not load track for " + competitor);
@@ -2668,7 +2665,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         logger.info("Started loading mark tracks for " + getRace().getName());
                         for (Mark mark : getMarks()) {
                             try {
-                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog,
+                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), log,
                                         mark);
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.log(Level.WARNING, "Could not load track for " + mark);
@@ -2687,8 +2684,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
             }.start();
         } else {
-            logger.severe("Got a request to attach race log for an empty race log!");
+            logger.severe("Got a request to attach log for an empty log!");
         }
+    }
+
+    /**
+     * This can trigger fixes to be loaded, if there are {@link DeviceMapping}s in the {@code RaceLog}.
+     * If multiple race logs are attached, the threads that are spawned to load fixes will do so one
+     * after another, as they acquire a write lock on the {@link #loadingFromGPSFixStoreLock}.
+     */
+    @Override
+    public void attachRaceLog(final RaceLog raceLog) {
+        attachedRaceLogs.put(raceLog.getId(), raceLog);
+        loadFixesForLog(raceLog);
+    }
+    
+    @Override
+    public void attachRegattaLog(RegattaLog regattaLog) {
+        loadFixesForLog(regattaLog);
     }
 
     @Override

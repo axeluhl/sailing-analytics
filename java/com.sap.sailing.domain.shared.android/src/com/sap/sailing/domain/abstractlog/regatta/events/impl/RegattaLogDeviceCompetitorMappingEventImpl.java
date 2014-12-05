@@ -13,7 +13,7 @@ import com.sap.sse.common.TimePoint;
 public class RegattaLogDeviceCompetitorMappingEventImpl extends AbstractDeviceMappingEventImpl<RegattaLogEventVisitor, Competitor>
 implements RegattaLogDeviceCompetitorMappingEvent {
     public RegattaLogDeviceCompetitorMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable pId, int pPassId, Competitor mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
+            Serializable pId, Competitor mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
         super(createdAt, author, logicalTimePoint, pId, mappedTo, device, from, to);
     }
 

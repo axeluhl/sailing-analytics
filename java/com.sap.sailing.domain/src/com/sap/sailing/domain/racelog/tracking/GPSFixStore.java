@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelog.tracking;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
@@ -19,13 +19,13 @@ public interface GPSFixStore {
     /**
      * Load all fixes that correspond to the {@link DeviceCompetitorMappingEvent}s found in the {@code raceLog}.
      */
-    void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog,
+    void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log,
             Competitor competitor) throws TransformationException;
 
     /**
      * Load all fixes that correspond to the {@link DeviceMarkMappingEvent}s found in the {@code raceLog}.
      */
-    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark) throws TransformationException,
+    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark) throws TransformationException,
     NoCorrespondingServiceRegisteredException;
 
     /**
