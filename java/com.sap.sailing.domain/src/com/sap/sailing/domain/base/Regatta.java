@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.leaderboard.HasRegattaLog;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -18,7 +18,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Regatta extends Named, WithID {
+public interface Regatta extends Named, WithID, HasRegattaLog {
     ScoringScheme getScoringScheme();
 
     /**
@@ -168,9 +168,4 @@ public interface Regatta extends Named, WithID {
      * Updates the flag deciding whether to use start time inference. See {@link #useStartTimeInference()}.
      */
     void setUseStartTimeInference(boolean useStartTimeInference);
-
-    /**
-     * @return The RegattaLog associated with this regatta.
-     */
-    RegattaLog getRegattaLog();
 }

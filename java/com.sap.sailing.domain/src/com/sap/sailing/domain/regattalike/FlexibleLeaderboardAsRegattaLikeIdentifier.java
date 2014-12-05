@@ -20,4 +20,28 @@ public class FlexibleLeaderboardAsRegattaLikeIdentifier implements RegattaLikeId
         resolver.resolveOnFlexibleLeaderboardIdentifier(this);
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((leaderboardName == null) ? 0 : leaderboardName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FlexibleLeaderboardAsRegattaLikeIdentifier other = (FlexibleLeaderboardAsRegattaLikeIdentifier) obj;
+        if (leaderboardName == null) {
+            if (other.leaderboardName != null)
+                return false;
+        } else if (!leaderboardName.equals(other.leaderboardName))
+            return false;
+        return true;
+    }
 }

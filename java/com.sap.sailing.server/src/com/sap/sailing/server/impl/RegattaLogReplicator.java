@@ -1,29 +1,29 @@
 package com.sap.sailing.server.impl;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RegattaLikeListener;
 import com.sap.sailing.domain.base.RegattaListener;
-import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.regattalike.FlexibleLeaderboardAsRegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifierResolver;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnRegatta;
 
 /**
- * Being a {@link RegattaListener}, this replicator must be added to all {@link Regatta}s managing a {@link RegattaLog}
- * so as to be notified about changes to the regatta log. This largely happens by callbacks to the
- * {@link #regattaLogEventAdded(RaceColumn, RaceLogIdentifier, RaceLogEvent)} method. This object will then use the
- * {@link Replicator} passed to this object's constructor and send a {@link RecordRegattaLogEventOnLeaderboard} or a
- * {@link RecordRegattaLogEventOnRegatta} operation to all replicas.
+ * Being a {@link RegattaListener}, this replicator must be added to all {@link RegattaLikeIdentifier regatta-like}
+ * objects (these manage a {@link RegattaLog}) so as to be notified about changes to the regatta log. This largely
+ * happens by callbacks to the {@link #regattaLogEventAdded} method. This object will then use the {@link Replicator}
+ * passed to this object's constructor and send a {@link RecordRegattaLogEventOnRegatta} or a
+ * {@link RecordRegattaLogEventOnFlexibleLeaderboard} operation to all replicas.
  * 
  * This class is a modified version of {@link RaceLogReplicator}
  * 
  */
-public class RegattaLogReplicator implements RegattaListener {
-
+public class RegattaLogReplicator implements RegattaLikeListener {
     private final Replicator service;
 
     public RegattaLogReplicator(Replicator service) {
@@ -31,16 +31,22 @@ public class RegattaLogReplicator implements RegattaListener {
     }
 
     @Override
-    public void regattaLogEventAdded(final Regatta regatta, final RegattaLogEvent event) {
-        RacingEventServiceOperation<?> operation = new RecordRegattaLogEventOnRegatta(regatta.getName(), event);
-        service.replicate(operation);
-    }
+    public void regattaLogEventAdded(RegattaLikeIdentifier regattaLikeIdentifier, final RegattaLogEvent event) {
+        regattaLikeIdentifier.resolve(new RegattaLikeIdentifierResolver() {
+            @Override
+            public void resolveOnRegattaIdentifier(RegattaAsRegattaLikeIdentifier regattaLikeParent) {
+                RacingEventServiceOperation<?> operation = new RecordRegattaLogEventOnRegatta(regattaLikeParent
+                        .getName(), event);
+                service.replicate(operation);
+            }
 
-    @Override
-    public void raceAdded(Regatta regatta, RaceDefinition race) {
-    }
-
-    @Override
-    public void raceRemoved(Regatta regatta, RaceDefinition race) {
+            @Override
+            public void resolveOnFlexibleLeaderboardIdentifier(
+                    FlexibleLeaderboardAsRegattaLikeIdentifier regattaLikeParent) {
+                RacingEventServiceOperation<?> operation = new RecordRegattaLogEventOnFlexibleLeaderboard(
+                        regattaLikeParent.getName(), event);
+                service.replicate(operation);
+            }
+        });
     }
 }
