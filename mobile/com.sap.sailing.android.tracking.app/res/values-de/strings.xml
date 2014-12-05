@@ -75,5 +75,6 @@
 	<string name="no_qr_code_popup_message">Bitte kontaktieren Sie die Rennleitung, falls Sie keinen QR-Code erhalten haben.</string>
 	<string name="tracking_colon">Tracke:</string>
 	<string name="tracking_gps_accuracy">GPS Genauigkeit</string>
+	<string name="regatta_in_progress">Die Regatta findet gerade statt.</string>
 
 </resources>
