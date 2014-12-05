@@ -30,6 +30,7 @@
             <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
+            <string>OpenSans</string>
         </mutableArray>
         <mutableArray key="OpenSans-Semibold.ttf">
             <string>OpenSans-Semibold</string>
@@ -793,16 +794,20 @@
                                                         <action selector="batterySavingChanged:" destination="H1Q-9y-gn2" eventType="valueChanged" id="6fN-hp-Ux5"/>
                                                     </connections>
                                                 </switch>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Battery Saving" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="eRQ-p8-ydN">
-                                                    <rect key="frame" x="15" y="11" width="113" height="21"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Battery Saving" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="eRQ-p8-ydN">
+                                                    <rect key="frame" x="15" y="10" width="114" height="24"/>
+                                                    <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstAttribute="centerY" secondItem="WvA-dL-zOH" secondAttribute="centerY" id="NQx-Tf-6C8"/>
-                                                <constraint firstAttribute="trailing" secondItem="WvA-dL-zOH" secondAttribute="trailing" constant="15" id="dTo-Dk-nrE"/>
+                                                <constraint firstItem="eRQ-p8-ydN" firstAttribute="top" secondItem="wMb-jA-3a7" secondAttribute="top" constant="10" id="3w0-LK-bQk"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="WvA-dL-zOH" secondAttribute="trailing" constant="7" id="EzM-6e-FNX"/>
+                                                <constraint firstAttribute="bottom" secondItem="eRQ-p8-ydN" secondAttribute="bottom" constant="9" id="Kfh-jv-Hua"/>
+                                                <constraint firstItem="eRQ-p8-ydN" firstAttribute="top" secondItem="wMb-jA-3a7" secondAttribute="topMargin" constant="2" id="TlF-pm-omn"/>
+                                                <constraint firstItem="WvA-dL-zOH" firstAttribute="centerY" secondItem="wMb-jA-3a7" secondAttribute="centerY" id="bFY-e3-y1j"/>
+                                                <constraint firstItem="eRQ-p8-ydN" firstAttribute="leading" secondItem="wMb-jA-3a7" secondAttribute="leadingMargin" constant="7" id="vyu-kd-bsD"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
