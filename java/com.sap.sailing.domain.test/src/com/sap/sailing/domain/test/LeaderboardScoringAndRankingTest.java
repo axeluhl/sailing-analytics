@@ -917,8 +917,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboardHighPoint10LastBreaksTie }));
         LeaderboardGroupMetaLeaderboard leaderboardHighPointESSOverall = new LeaderboardGroupMetaLeaderboard(
                 leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
-                new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
-                EmptyRegattaLogStore.INSTANCE);
+                new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]));
         assertEquals(16, leaderboardHighPointESSOverall.getCompetitorsFromBestToWorst(later).size());
         assertEquals(new Double(10), leaderboardHighPointESSOverall.getTotalPoints(competitors[0], later));
         assertEquals(new Double(9), leaderboardHighPointESSOverall.getTotalPoints(competitors[1], later));
@@ -975,7 +974,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", /* displayName */ null, false, Arrays.asList(leaderboard1,
                 leaderboard2, leaderboard3));
         leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
-                new ThresholdBasedResultDiscardingRuleImpl(new int[0]), EmptyRegattaLogStore.INSTANCE));
+                new ThresholdBasedResultDiscardingRuleImpl(new int[0])));
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[1], true);
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[2], true);
         List<Competitor> rankedCompetitors = leaderboardGroup.getOverallLeaderboard().getCompetitorsFromBestToWorst(later);
@@ -1096,7 +1095,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group ESS Overall", "Leaderboard Group", /* displayName */ null,
                 false, Arrays.asList(leaderboard1, leaderboard2));
         leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
-                new ThresholdBasedResultDiscardingRuleImpl(new int[0]), EmptyRegattaLogStore.INSTANCE));
+                new ThresholdBasedResultDiscardingRuleImpl(new int[0])));
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[c.length-1], true);
         // ranking must match the regatta ranks - as for 11 competitors the ranking is random
         // in the faulty implementation we test with many iterations to make sure that

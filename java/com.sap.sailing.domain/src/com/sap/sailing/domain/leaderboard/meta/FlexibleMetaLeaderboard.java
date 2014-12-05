@@ -7,7 +7,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
@@ -19,8 +18,8 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
     private final NamedReentrantReadWriteLock leaderboardsLock;
 
     public FlexibleMetaLeaderboard(String name, ScoringScheme scoringScheme,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, RegattaLogStore regattaLogStore) {
-        super(name, scoringScheme, resultDiscardingRule, regattaLogStore);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(name, scoringScheme, resultDiscardingRule);
         leaderboards = new ArrayList<Leaderboard>();
         leaderboardsLock = new NamedReentrantReadWriteLock("leaderboards collection of "+FlexibleMetaLeaderboard.class.getSimpleName()+" "+getName(),
                 /* fair */ false);

@@ -359,7 +359,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             String regattaName = (String) dbLeaderboard.get(FieldNames.REGATTA_NAME.name());
             if (groupForMetaLeaderboard != null) {
                 result = new LeaderboardGroupMetaLeaderboard(groupForMetaLeaderboard,
-                        loadScoringScheme(dbLeaderboard), resultDiscardingRule, getRegattaLogStore());
+                        loadScoringScheme(dbLeaderboard), resultDiscardingRule);
                 groupForMetaLeaderboard.setOverallLeaderboard(result);
             } else if (regattaName == null) {
                 result = loadFlexibleLeaderboard(dbLeaderboard, resultDiscardingRule);

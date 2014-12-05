@@ -44,7 +44,6 @@ import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
-import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -132,7 +131,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("LeaderboardGroup", "Test Leaderboard Group", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboard }));
         final LeaderboardGroupMetaLeaderboard overallLeaderboard =
                 new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPoint(),
-                        new ThresholdBasedResultDiscardingRuleImpl(new int[0]), EmptyRegattaLogStore.INSTANCE);
+                        new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
         final double FACTOR = 2.0;
         overallLeaderboard.getRaceColumnByName("Test Leaderboard").setFactor(FACTOR);

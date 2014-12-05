@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.leaderboard.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -463,8 +464,8 @@ public interface SailingService extends RemoteService {
      * Get the competitors registered in this leaderboard. Does not automatically include the competitors
      * {@link #getCompetitorRegistrations(String, String, String) registered for the racelog}.
      */
-    Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName);
-    
+    Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName) throws DoesNotHaveRegattaLogException;
+
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO);
     
     Collection<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
@@ -539,7 +540,8 @@ public interface SailingService extends RemoteService {
      */
     RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
 
-    void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitors);
+    void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitors)
+            throws DoesNotHaveRegattaLogException;
     
     /**
      * A leaderboard may be situated under multiple events (connected via a leaderboardgroup).

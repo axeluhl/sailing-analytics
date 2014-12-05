@@ -198,7 +198,9 @@ import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFact
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.leaderboard.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
+import com.sap.sailing.domain.leaderboard.HasRegattaLog;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -4694,8 +4696,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return getRaceLog(triple.getA(), triple.getB(), triple.getC());
     }
     
-    private RegattaLog getRegattaLog(String leaderboardName) {
-        return getService().getLeaderboardByName(leaderboardName).getRegattaLog();
+    private RegattaLog getRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
+        Leaderboard l = getService().getLeaderboardByName(leaderboardName);
+        if (! (l instanceof HasRegattaLog)) {
+            throw new DoesNotHaveRegattaLogException();
+        }
+        return ((HasRegattaLog) l).getRegattaLog();
     }
     
     private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
@@ -4712,7 +4718,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName) {
+    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName)
+            throws DoesNotHaveRegattaLogException {
         return convertToCompetitorDTOs(
                 new RegisteredCompetitorsAnalyzer<>(
                         getRegattaLog(leaderboardName)).analyze());
@@ -4735,7 +4742,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitorDTOs) {
+    public void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitorDTOs)
+            throws DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLog(leaderboardName);
         Set<Competitor> competitors = new HashSet<Competitor>();
         for (CompetitorDTO dto : competitorDTOs) {

@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface FlexibleLeaderboard extends Leaderboard, Renamable {
+public interface FlexibleLeaderboard extends Leaderboard, Renamable, HasRegattaLog {
     /**
      * Moves the column with the name <code>name</code> up. 
      * @param name The name of the column to move.
