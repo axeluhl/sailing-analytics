@@ -70,13 +70,11 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         regattaConfigurationCheckbox.setValue(regatta.configuration != null);
         regattaConfigurationButton.setEnabled(regatta.configuration != null);
     }
-    
 
-	@Override
-	protected void setSeriesEditor() {
-		seriesEditor = new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */
-                false);
-	}
+    @Override
+    protected void setSeriesEditor() {
+        seriesEditor = new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */ false);
+    }
 
     @Override
     public void show() {
@@ -106,7 +104,6 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     @Override
     protected RegattaDTO getResult() {
         RegattaDTO regatta = super.getResult();
-
         if (regattaConfigurationCheckbox.getValue()) {
             regatta.configuration = currentRegattaConfiguration;
         } else {

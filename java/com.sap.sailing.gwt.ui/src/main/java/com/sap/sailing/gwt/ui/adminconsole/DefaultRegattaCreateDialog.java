@@ -42,8 +42,7 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
         for (RegattaDTO regattaDTO : defaultRegattas) {
             series.addAll(regattaDTO.series);
         }
-        seriesEditor = new SeriesWithFleetsDefaultListEditor(series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */
-        false);
+        seriesEditor = new SeriesWithFleetsDefaultListEditor(series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */ false);
     }
 
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {

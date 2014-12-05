@@ -110,13 +110,11 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             List<EventDTO> existingEvents, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(new RegattaDTO(), existingEvents, stringMessages.addRegatta(), stringMessages.ok(), stringMessages,
                 new RegattaParameterValidator(stringMessages, existingRegattas), callback);
-        setSeriesEditor();
     }
 
     @Override
     protected void setSeriesEditor() {
-        this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO> emptyList(), stringMessages,
-                resources.removeIcon(), /* enableFleetRemoval */true);
+        this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO> emptyList(), stringMessages, resources.removeIcon(), /* enableFleetRemoval */true);
     }
 
     @Override
