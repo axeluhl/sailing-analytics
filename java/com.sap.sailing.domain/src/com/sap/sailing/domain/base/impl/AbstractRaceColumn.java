@@ -26,7 +26,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     private Map<Fleet, RaceLog> raceLogs;
     
-    private RaceLogStore raceLogStore;
+    private transient RaceLogStore raceLogStore;
     private RegattaLikeIdentifier regattaLikeParent;
 
     public AbstractRaceColumn() {
