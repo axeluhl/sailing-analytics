@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
 
-import java.lang.reflect.InvocationTargetException;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -132,6 +130,7 @@ public class MainScheduleFragment extends RaceFragment implements OnClickListene
             break;
         }
         if (mCurrent != null) {
+            mCurrent.setArguments(getRecentArguments());
             openFragment();
         }
     }

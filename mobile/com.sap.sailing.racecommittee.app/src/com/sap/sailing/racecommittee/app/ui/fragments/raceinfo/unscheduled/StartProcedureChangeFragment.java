@@ -59,6 +59,7 @@ public class StartProcedureChangeFragment extends RaceFragment {
                             try {
                                 RaceFragment fragment = (RaceFragment) Class.forName(mAdapter.getItem(i).getClassName()).newInstance();
                                 RacingActivity activity = (RacingActivity) getActivity();
+                                fragment.setArguments(getArguments());
                                 activity.replaceFragment(fragment);
                             } catch (java.lang.InstantiationException ex) {
                                 ExLog.ex(getActivity(), TAG, ex);

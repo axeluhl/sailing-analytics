@@ -1,10 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import java.io.Serializable;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -23,6 +26,66 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return arguments;
     }
 
+    protected ManagedRace managedRace;
+
+    protected AppPreferences preferences;
+    public String fill2(int value) {
+        String erg = String.valueOf(value);
+
+        if (erg.length() < 2) {
+            erg = "0" + erg;
+        }
+        return erg;
+    }
+
+    public String getDuration(Date date1, Date date2) {
+        TimeUnit timeUnit = TimeUnit.SECONDS;
+
+        long diffInMilli = date2.getTime() - date1.getTime();
+        long s = timeUnit.convert(diffInMilli, TimeUnit.MILLISECONDS);
+
+        long days = s / (24 * 60 * 60);
+        long rest = s - (days * 24 * 60 * 60);
+        long hrs = rest / (60 * 60);
+        long rest1 = rest - (hrs * 60 * 60);
+        long min = rest1 / 60;
+        long sec = s % 60;
+
+        String dates = "";
+        if (days < 0 || hrs < 0 || min < 0 || sec < 0) {
+            dates += "-";
+            if (days < 0) {
+                days *= -1;
+            }
+            if (hrs < 0) {
+                hrs *= -1;
+            }
+            if (min < 0) {
+                min *= -1;
+            }
+            if (sec < 0) {
+                sec *= -1;
+            }
+        }
+        if (days != 0) {
+            dates = days + ":";
+        }
+
+        dates += fill2((int) hrs) + ":";
+        dates += fill2((int) min) + ":";
+        dates += fill2((int) sec);
+
+        return dates;
+    }
+
+    public ManagedRace getRace() {
+        return managedRace;
+    }
+
+    public RaceState getRaceState() {
+        return getRace().getState();
+    }
+
     /**
      * Creates a bundle that contains the race id as parameter for the next fragment
      * 
@@ -34,13 +97,9 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return args;
     }
 
-    protected ManagedRace managedRace;
-    protected AppPreferences preferences;
-
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        preferences = AppPreferences.on(activity);
+    public void notifyTick() {
+        // see subclasses.
     }
 
     @Override
@@ -54,7 +113,15 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
                 throw new IllegalStateException(
                         String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
             }
+        } else {
+            ExLog.i(getActivity(), TAG, "no arguments!?");
         }
+    }
+    
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        preferences = AppPreferences.on(activity);
     }
 
     @Override
@@ -68,18 +135,5 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     public void onStop() {
         super.onStop();
         TickSingleton.INSTANCE.unregisterListener(this);
-    }
-
-    public ManagedRace getRace() {
-        return managedRace;
-    }
-
-    public RaceState getRaceState() {
-        return getRace().getState();
-    }
-
-    @Override
-    public void notifyTick() {
-        // see subclasses.
     }
 }

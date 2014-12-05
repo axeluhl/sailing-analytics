@@ -28,7 +28,9 @@ public class GateStartFragment extends RaceFragment{
                 public void onClick(View v) {
                     RacingActivity activity = (RacingActivity) getActivity();
                     if (activity != null) {
-                        activity.replaceFragment(new StartProcedureChangeFragment());
+                        RaceFragment fragment = new StartProcedureChangeFragment();
+                        fragment.setArguments(getArguments());
+                        activity.replaceFragment(fragment);
                     }
                 }
             });
@@ -36,5 +38,4 @@ public class GateStartFragment extends RaceFragment{
         
         return view;
     }
-    
 }
