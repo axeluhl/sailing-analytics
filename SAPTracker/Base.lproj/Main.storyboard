@@ -228,18 +228,28 @@
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="scan_white" translatesAutoresizingMaskIntoConstraints="NO" id="doL-JD-57p">
+                                <rect key="frame" x="193" y="161" width="214" height="214"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="214" id="Ojn-gu-Sqx"/>
+                                    <constraint firstAttribute="width" constant="214" id="pCS-Rr-8Zx"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="ttp-CB-QaR" firstAttribute="top" secondItem="pUL-en-Wee" secondAttribute="top" id="0Oz-0F-erF"/>
                             <constraint firstAttribute="trailing" secondItem="ttp-CB-QaR" secondAttribute="trailing" id="GFG-je-7LA"/>
                             <constraint firstItem="ttp-CB-QaR" firstAttribute="bottom" secondItem="1Le-Y7-h2R" secondAttribute="top" id="Iss-zA-ra0"/>
+                            <constraint firstAttribute="centerX" secondItem="doL-JD-57p" secondAttribute="centerX" id="Pkg-Fp-fUh"/>
+                            <constraint firstAttribute="centerY" secondItem="doL-JD-57p" secondAttribute="centerY" id="SLx-U1-2m9"/>
                             <constraint firstItem="ttp-CB-QaR" firstAttribute="leading" secondItem="pUL-en-Wee" secondAttribute="leading" id="tda-yG-hJZ"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Scan QR Code" id="LQ4-39-f6l"/>
                     <connections>
                         <outlet property="previewView" destination="ttp-CB-QaR" id="D7j-aT-pIK"/>
+                        <outlet property="targetImageView" destination="doL-JD-57p" id="55W-0c-5YO"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xZl-Qp-1x0" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -909,6 +919,7 @@
         <image name="DE.png" width="64" height="64"/>
         <image name="edit" width="22" height="22"/>
         <image name="home_bg" width="434" height="289"/>
+        <image name="scan_white" width="214" height="214"/>
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>

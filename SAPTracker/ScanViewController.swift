@@ -12,7 +12,8 @@ import AVFoundation
 class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, QRCodeManagerDelegate {
     
     @IBOutlet weak var previewView: UIView!
-    
+    @IBOutlet weak var targetImageView: UIImageView!
+   
     var activityIndicatorView: UIActivityIndicatorView!
     private var session: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
@@ -57,12 +58,15 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
         previewView.layer.addSublayer(previewLayer)
         
         session.startRunning()
+        
+        targetImageView.image = UIImage(named: "scan_white")
     }
     
     /* AVCaptureMetadataOutputObjectsDelegate. Parse scanned QR code */
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [AnyObject]!, fromConnection connection: AVCaptureConnection!)
     {
         if metadataObjects.count > 0 {
+            targetImageView.image = UIImage(named: "scan_green")
             session.stopRunning()
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as AVMetadataMachineReadableCodeObject
             qrCodeManager!.parseUrl(metadataObject.stringValue)
@@ -88,6 +92,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     
     func qrCodeCancel() {
         self.session.startRunning()
+        targetImageView.image = UIImage(named: "scan_white")
     }
     
 }
