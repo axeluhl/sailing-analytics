@@ -256,7 +256,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     }
     
     private void refresh() {
-        sailingService.getDeviceMappingsFromRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<List<DeviceMappingDTO>>() {
+        sailingService.getDeviceMappingsFromLogHierarchy(leaderboardName, raceColumnName, fleetName, new AsyncCallback<List<DeviceMappingDTO>>() {
             @Override
             public void onSuccess(List<DeviceMappingDTO> result) {
                 mappings = result;

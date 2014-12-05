@@ -228,12 +228,12 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     }
 
     private Map<Competitor, List<DeviceMapping<Competitor>>> getNewCompetitorMappings() {
-        return new MultiLogAnalyzer<>(new DeviceCompetitorMappingFinder.Factory<>(),
+        return new MultiLogAnalyzer<>(new DeviceCompetitorMappingFinder.Factory(),
                 new MapWithValueCollectionReducer<>(), params.getLogHierarchy()).analyze();
     }
 
     private Map<Mark, List<DeviceMapping<Mark>>> getNewMarkMappings() {
-        return new MultiLogAnalyzer<>(new DeviceMarkMappingFinder.Factory<>(), new MapWithValueCollectionReducer<>(),
+        return new MultiLogAnalyzer<>(new DeviceMarkMappingFinder.Factory(), new MapWithValueCollectionReducer<>(),
                 params.getLogHierarchy()).analyze();
     }
 

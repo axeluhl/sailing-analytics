@@ -54,6 +54,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -4943,22 +4945,51 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 deviceId), from, to, item, originalRaceLogEventUUIDs);
     }
     
-    @Override
-    public List<DeviceMappingDTO> getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName,
-            String fleetName) throws TransformationException {
+    private List<AbstractLog<?, ?>> getLogHierarchy(String leaderboardName, String raceColumnName,
+            String fleetName) {
+        List<AbstractLog<?, ?>> result = new ArrayList<>();
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        result.add(raceLog);
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard instanceof HasRegattaLog) {
+            result.add(((HasRegattaLog) leaderboard).getRegattaLog());
+        }
+        return result;
+    }
+    
+    private List<DeviceMappingDTO> getDeviceMappingsFromLogs(List<AbstractLog<?, ?>> logs)
+            throws TransformationException {
         List<DeviceMappingDTO> result = new ArrayList<DeviceMappingDTO>();
-        for (List<? extends DeviceMapping<Competitor>> list : new DeviceCompetitorMappingFinder<>(raceLog).analyze().values()) {
+        for (List<? extends DeviceMapping<Competitor>> list : new MultiLogAnalyzer<>(
+                new DeviceCompetitorMappingFinder.Factory(),
+                new MultiLogAnalyzer.MapWithValueCollectionReducer<Competitor, DeviceMapping<Competitor>, List<DeviceMapping<Competitor>>>(),
+                logs).analyze().values()) {
             for (DeviceMapping<Competitor> mapping : list) {
                 result.add(convertToDeviceMappingDTO(mapping));
             }
         }
-        for (List<? extends DeviceMapping<Mark>> list : new DeviceMarkMappingFinder<>(raceLog).analyze().values()) {
+        for (List<? extends DeviceMapping<Mark>> list : new MultiLogAnalyzer<>(
+                new DeviceMarkMappingFinder.Factory(),
+                new MultiLogAnalyzer.MapWithValueCollectionReducer<Mark, DeviceMapping<Mark>, List<DeviceMapping<Mark>>>(),
+                logs).analyze().values()) {
             for (DeviceMapping<Mark> mapping : list) {
                 result.add(convertToDeviceMappingDTO(mapping));
             }
         }
         return result;
+    }
+    
+    @Override
+    public List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
+            String fleetName) throws TransformationException {
+        return getDeviceMappingsFromLogs(getLogHierarchy(leaderboardName, raceColumnName, fleetName));
+    }
+    
+    @Override
+    public List<DeviceMappingDTO> getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName,
+            String fleetName) throws TransformationException {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        return getDeviceMappingsFromLogs(Collections.<AbstractLog<?, ?>>singletonList(raceLog));
     }
     
     @Override

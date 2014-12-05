@@ -549,4 +549,7 @@ public interface SailingService extends RemoteService {
      * leaderboard is coupled to.
      */
     Collection<EventDTO> getEventsForLeaderboard(String leaderboardName);
+
+    List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
+            String fleetName) throws TransformationException;
 }

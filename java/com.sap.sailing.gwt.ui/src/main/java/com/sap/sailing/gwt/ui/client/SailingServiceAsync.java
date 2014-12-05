@@ -599,6 +599,12 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
 
+    /**
+     * Do not only use the racelog, but also other logs (e.g. RegattaLogs) in the hierarchy of the race.
+     */
+    void getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<DeviceMappingDTO>> callback);
+
     void getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<List<DeviceMappingDTO>> callback);
 

@@ -15,7 +15,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 public class DeviceMarkMappingFinder<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT>
         extends DeviceMappingFinder<LogT, EventT, VisitorT, Mark> {
     
-    public static class Factory<T> implements AnalyzerFactory<Map<Mark, List<DeviceMapping<Mark>>>> {
+    public static class Factory implements AnalyzerFactory<Map<Mark, List<DeviceMapping<Mark>>>> {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         @Override
         public LogAnalyzer<Map<Mark, List<DeviceMapping<Mark>>>> createAnalyzer(AbstractLog<?, ?> log) {
