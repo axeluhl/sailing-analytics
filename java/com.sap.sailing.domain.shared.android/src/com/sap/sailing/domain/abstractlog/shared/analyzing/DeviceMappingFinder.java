@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.LogAnalyzer;
+import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.AnalyzerFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.shared.events.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
@@ -37,6 +39,15 @@ import com.sap.sse.common.WithID;
  */
 public class DeviceMappingFinder<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>,
 VisitorT, ItemT extends WithID> extends BaseLogAnalyzer<LogT, EventT, VisitorT, Map<ItemT, List<DeviceMapping<ItemT>>>> {
+    
+    public static class Factory<ItemT extends WithID> implements AnalyzerFactory<Map<ItemT, List<DeviceMapping<ItemT>>>> {
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        @Override
+        public LogAnalyzer<Map<ItemT, List<DeviceMapping<ItemT>>>> createAnalyzer(AbstractLog<?, ?> log) {
+            return new DeviceMappingFinder(log);
+        }
+    }
+    
     private static Logger logger = Logger.getLogger(DeviceMappingFinder.class.getName());
     
     public DeviceMappingFinder(LogT log) {
