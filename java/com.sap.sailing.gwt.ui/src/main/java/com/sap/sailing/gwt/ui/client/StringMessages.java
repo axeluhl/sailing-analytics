@@ -175,7 +175,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String jibe();
     String penaltyCircle();
     String markPassing();
-    String markPassings();
     String mark();
     String otherManeuver();
     String douglasPeuckerPoints();
@@ -1112,4 +1111,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String serverReplies();
     String errorCommunicatingWithServer();
     String userManagement();
+    String useInternalAlgorithm();
 }
