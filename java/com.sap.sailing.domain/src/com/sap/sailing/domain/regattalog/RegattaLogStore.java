@@ -3,7 +3,6 @@ package com.sap.sailing.domain.regattalog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
-import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sse.common.Named;
 
 
