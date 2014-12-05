@@ -46,7 +46,7 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         // start tracking timer
         let timer = NSTimer(timeInterval: 0.1, target: self, selector: "timer:", userInfo: nil, repeats: true)
         NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)
-        dateFormatter.dateFormat = "HH:mm:ss.S"
+        dateFormatter.dateFormat = "HH:mm:ss"
         dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
     }
 

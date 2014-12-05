@@ -11,8 +11,16 @@
             <string>OpenSans-Bold</string>
             <string>OpenSans-Bold</string>
             <string>OpenSans-Bold</string>
+            <string>OpenSans-Bold</string>
+            <string>OpenSans-Bold</string>
         </mutableArray>
         <mutableArray key="OpenSans-Regular.ttf">
+            <string>OpenSans</string>
+            <string>OpenSans</string>
+            <string>OpenSans</string>
+            <string>OpenSans</string>
+            <string>OpenSans</string>
+            <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
@@ -547,62 +555,53 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ULl-vy-5gb">
-                                <rect key="frame" x="16" y="486" width="568" height="30"/>
-                                <state key="normal" title="Stop Tracking">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="stopTrackingButtonTapped:" destination="QJL-mi-hJE" eventType="touchUpInside" id="n7g-nN-HpJ"/>
-                                </connections>
-                            </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Quality" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="xj9-FF-3W6">
-                                <rect key="frame" x="16" y="8" width="94" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <rect key="frame" x="16" y="8" width="93" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="9Mo-uS-sYi">
-                                <rect key="frame" x="16" y="37" width="50" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <rect key="frame" x="16" y="40" width="50" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="NT1-c8-AwF">
-                                <rect key="frame" x="16" y="66" width="45" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <rect key="frame" x="16" y="72" width="46" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tracking Time" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="IeZ-JM-OWw">
-                                <rect key="frame" x="16" y="95" width="107" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <rect key="frame" x="16" y="104" width="110" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tracking Running" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="EWa-HT-PQE">
-                                <rect key="frame" x="451" y="37" width="133" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <rect key="frame" x="448" y="40" width="136" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.25098039215686274" green="0.50196078431372548" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Online" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Ur0-mb-7N4">
-                                <rect key="frame" x="535" y="66" width="49" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <rect key="frame" x="531" y="72" width="53" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.25098040700000002" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00:00.00" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="mUm-EE-6Is">
-                                <rect key="frame" x="17" y="124" width="561" height="64"/>
+                                <rect key="frame" x="16" y="136" width="568" height="64"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="64" id="a9S-3h-eFG"/>
+                                    <constraint firstAttribute="height" constant="64" id="26U-pI-mWl"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="48"/>
+                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="48"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CY5-XK-zgr">
-                                <rect key="frame" x="476" y="13" width="21" height="11"/>
+                                <rect key="frame" x="476" y="15" width="21" height="11"/>
                                 <color key="backgroundColor" red="0.54117647058823526" green="0.70980392156862748" blue="0.30588235294117649" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="11" id="EOH-yW-4us"/>
@@ -610,7 +609,7 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7J8-0s-XmP">
-                                <rect key="frame" x="505" y="13" width="21" height="11"/>
+                                <rect key="frame" x="505" y="15" width="21" height="11"/>
                                 <color key="backgroundColor" red="0.54117647058823526" green="0.70980392156862748" blue="0.30588235294117649" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="11" id="m1T-Dw-j2g"/>
@@ -618,7 +617,7 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zse-sv-43R">
-                                <rect key="frame" x="534" y="13" width="21" height="11"/>
+                                <rect key="frame" x="534" y="15" width="21" height="11"/>
                                 <color key="backgroundColor" red="0.54117647058823526" green="0.70980392156862748" blue="0.30588235294117649" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="11" id="aNO-v5-KhF"/>
@@ -626,41 +625,64 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fPT-R9-l89">
-                                <rect key="frame" x="563" y="13" width="21" height="11"/>
+                                <rect key="frame" x="563" y="15" width="21" height="11"/>
                                 <color key="backgroundColor" red="0.54117647058823526" green="0.70980392156862748" blue="0.30588235294117649" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="21" id="6u5-Ib-BM2"/>
                                     <constraint firstAttribute="height" constant="11" id="j55-Rw-BLM"/>
                                 </constraints>
                             </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ULl-vy-5gb">
+                                <rect key="frame" x="16" y="441" width="568" height="75"/>
+                                <color key="backgroundColor" red="0.87843137250000003" green="0.20000000000000001" blue="0.090196078430000007" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="75" id="Pjg-oD-Zlw">
+                                        <variation key="heightClass=compact" constant="50"/>
+                                    </constraint>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="15"/>
+                                <state key="normal" title="Stop Tracking">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="2"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="stopTrackingButtonTapped:" destination="QJL-mi-hJE" eventType="touchUpInside" id="n7g-nN-HpJ"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="mUm-EE-6Is" firstAttribute="leading" secondItem="IeZ-JM-OWw" secondAttribute="leading" id="0Ay-l0-bI3"/>
                             <constraint firstItem="9Mo-uS-sYi" firstAttribute="leading" secondItem="NT1-c8-AwF" secondAttribute="leading" id="2aT-I1-sda"/>
+                            <constraint firstItem="ULl-vy-5gb" firstAttribute="leading" secondItem="mUm-EE-6Is" secondAttribute="leading" id="3V2-Wg-ReX"/>
                             <constraint firstItem="NT1-c8-AwF" firstAttribute="top" secondItem="9Mo-uS-sYi" secondAttribute="bottom" constant="8" symbolic="YES" id="4cn-03-b6o"/>
                             <constraint firstItem="CY5-XK-zgr" firstAttribute="centerY" secondItem="zse-sv-43R" secondAttribute="centerY" id="7C4-Gz-bHx"/>
+                            <constraint firstAttribute="bottom" secondItem="ULl-vy-5gb" secondAttribute="bottom" constant="20" symbolic="YES" id="83p-EZ-yff"/>
                             <constraint firstItem="IeZ-JM-OWw" firstAttribute="leading" secondItem="NT1-c8-AwF" secondAttribute="leading" id="Ado-mt-IeU"/>
                             <constraint firstItem="CY5-XK-zgr" firstAttribute="centerY" secondItem="xj9-FF-3W6" secondAttribute="centerY" id="Ahu-UI-Ee3"/>
                             <constraint firstItem="9Mo-uS-sYi" firstAttribute="leading" secondItem="xj9-FF-3W6" secondAttribute="leading" id="COM-YR-mcH"/>
                             <constraint firstAttribute="trailing" secondItem="EWa-HT-PQE" secondAttribute="trailing" constant="16" id="GkI-sc-5QQ"/>
                             <constraint firstItem="CY5-XK-zgr" firstAttribute="centerY" secondItem="fPT-R9-l89" secondAttribute="centerY" id="LEE-nf-7IS"/>
                             <constraint firstItem="zse-sv-43R" firstAttribute="leading" secondItem="7J8-0s-XmP" secondAttribute="trailing" constant="8" id="MAh-oZ-gKw"/>
-                            <constraint firstAttribute="bottom" secondItem="ULl-vy-5gb" secondAttribute="bottom" constant="20" symbolic="YES" id="Mhf-jg-Rj5"/>
-                            <constraint firstItem="ULl-vy-5gb" firstAttribute="leading" secondItem="mP6-V4-QPK" secondAttribute="leadingMargin" id="NiZ-NG-J07"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="mUm-EE-6Is" secondAttribute="trailing" constant="6" id="Npm-PJ-MOZ"/>
+                            <constraint firstItem="ULl-vy-5gb" firstAttribute="leading" secondItem="mP6-V4-QPK" secondAttribute="leadingMargin" id="Q2v-Hl-3tz"/>
                             <constraint firstItem="CY5-XK-zgr" firstAttribute="centerY" secondItem="7J8-0s-XmP" secondAttribute="centerY" id="Qbs-ys-ZHv"/>
-                            <constraint firstItem="mUm-EE-6Is" firstAttribute="top" secondItem="IeZ-JM-OWw" secondAttribute="bottom" constant="8" symbolic="YES" id="Sgq-Pj-oN8"/>
+                            <constraint firstItem="mUm-EE-6Is" firstAttribute="top" secondItem="IeZ-JM-OWw" secondAttribute="bottom" constant="8" symbolic="YES" id="WbM-Xa-hwn"/>
                             <constraint firstItem="xj9-FF-3W6" firstAttribute="top" secondItem="lhj-Lt-OY9" secondAttribute="bottom" constant="8" symbolic="YES" id="ajP-Io-QD1"/>
                             <constraint firstAttribute="trailing" secondItem="fPT-R9-l89" secondAttribute="trailing" constant="16" id="cjT-Sn-zVS"/>
                             <constraint firstItem="7J8-0s-XmP" firstAttribute="leading" secondItem="CY5-XK-zgr" secondAttribute="trailing" constant="8" id="dlD-cp-UyD"/>
-                            <constraint firstItem="mUm-EE-6Is" firstAttribute="leading" secondItem="mP6-V4-QPK" secondAttribute="leadingMargin" constant="1" id="gh4-8W-Mre"/>
                             <constraint firstItem="EWa-HT-PQE" firstAttribute="baseline" secondItem="9Mo-uS-sYi" secondAttribute="baseline" id="oik-aU-Yj9"/>
                             <constraint firstItem="9Mo-uS-sYi" firstAttribute="top" secondItem="xj9-FF-3W6" secondAttribute="bottom" constant="8" symbolic="YES" id="qKt-ha-VrH"/>
-                            <constraint firstAttribute="centerX" secondItem="ULl-vy-5gb" secondAttribute="centerX" id="rCl-vT-o7g"/>
+                            <constraint firstItem="mUm-EE-6Is" firstAttribute="trailing" secondItem="Ur0-mb-7N4" secondAttribute="trailing" id="r2B-FD-EvT"/>
                             <constraint firstItem="Ur0-mb-7N4" firstAttribute="baseline" secondItem="NT1-c8-AwF" secondAttribute="baseline" id="rpW-GQ-ZYE"/>
-                            <constraint firstItem="ULl-vy-5gb" firstAttribute="leading" secondItem="IeZ-JM-OWw" secondAttribute="leading" id="syD-YV-Vct"/>
                             <constraint firstItem="IeZ-JM-OWw" firstAttribute="top" secondItem="NT1-c8-AwF" secondAttribute="bottom" constant="8" symbolic="YES" id="tyg-Qq-0IJ"/>
                             <constraint firstAttribute="trailing" secondItem="Ur0-mb-7N4" secondAttribute="trailing" constant="16" id="x5p-zX-lmW"/>
+                            <constraint firstItem="ULl-vy-5gb" firstAttribute="trailing" secondItem="mUm-EE-6Is" secondAttribute="trailing" id="yLw-OR-Kb5"/>
                             <constraint firstItem="fPT-R9-l89" firstAttribute="leading" secondItem="zse-sv-43R" secondAttribute="trailing" constant="8" id="zdH-b3-ndc"/>
                         </constraints>
                     </view>
@@ -879,7 +901,7 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Xxn-jp-xEB"/>
-        <segue reference="QMa-LQ-D8c"/>
+        <segue reference="tzB-PL-31j"/>
+        <segue reference="Irs-ey-Uhs"/>
     </inferredMetricsTieBreakers>
 </document>
