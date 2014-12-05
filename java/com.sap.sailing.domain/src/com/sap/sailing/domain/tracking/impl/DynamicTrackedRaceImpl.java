@@ -86,6 +86,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 		this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
+        if(markPassingCalculator!=null){
+        	logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
+        }
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
             for (WindSource windSourceToExclude : getWindSourcesToExclude()) {
