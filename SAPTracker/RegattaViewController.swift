@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreLocation
+import Darwin
 
 class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate {
     
@@ -25,13 +26,23 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var flagImageView: UIImageView!
     @IBOutlet weak var sailLabel: UILabel!
+    @IBOutlet weak var regattaStartLabel: UILabel!
+    @IBOutlet weak var daysHeight: NSLayoutConstraint!
+    @IBOutlet weak var daysLabel: UILabel!
+    @IBOutlet weak var hoursHeight: NSLayoutConstraint!
+    @IBOutlet weak var hoursLabel: UILabel!
+    @IBOutlet weak var minutesHeight: NSLayoutConstraint!
+    @IBOutlet weak var minutesLabel: UILabel!
     @IBOutlet weak var lastSyncLabel: UILabel!
-    @IBOutlet weak var finishedLabel: UILabel!
     @IBOutlet weak var startTrackingButton: UIButton!
-    
+    @IBOutlet weak var announcementsLabel: PaddedLabel!
+
     var dateFormatter: NSDateFormatter
     
     var isFinished: Bool = false
+    let secondsInDay: Double = 60 * 60 * 24
+    let secondsInHour: Double = 60 * 60
+    var loop: NSTimer?
     
     /* Setup date formatter for last sync. */
     required init(coder aDecoder: NSCoder) {
@@ -64,8 +75,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         nameLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.displayName
         flagImageView.image = UIImage(named: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.countryCode)
         sailLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.sailId
-        showLastSync()
-        
+        checkRegattaStatus()
+
         // get image sources
         super.viewDidLoad()
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
@@ -80,37 +91,69 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         // point to events API server
         APIManager.sharedManager.initManager(DataManager.sharedManager.selectedEvent!.serverUrl)
         
-        checkRegattaIsFinished()
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        showLastSync()
+        checkRegattaStatus()
     }
 
-    private func showLastSync() {
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        loop?.invalidate()
+    }
+
+    // MARK: - 
+    func checkRegattaStatus() {
+        let now = NSDate()
+        
+        isFinished = false
+        
+        // reset views
+        lastSyncLabel.hidden = true
         if DataManager.sharedManager.selectedEvent!.lastSyncDate != nil {
             lastSyncLabel.text = "Last sync: " + dateFormatter.stringFromDate(DataManager.sharedManager.selectedEvent!.lastSyncDate!)
         } else {
             lastSyncLabel.text = nil
         }
-    }
-    
-    private func checkRegattaIsFinished() {
-        let now = NSDate()
+        startTrackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
+        announcementsLabel.text = "Please listen for announcements"
+      
+        // finished
         if now.timeIntervalSinceDate(DataManager.sharedManager.selectedEvent!.endDate) > 0 {
             isFinished = true
-            lastSyncLabel.hidden = true
-            finishedLabel.hidden = false
+            regattaStartLabel.text = "Thank you for participating!"
+            daysHeight.constant = 0
+            hoursHeight.constant = 0
+            minutesHeight.constant = 0
             startTrackingButton.setTitle("Close", forState: UIControlState.Normal)
-        } else {
-            isFinished = false
+            startTrackingButton.backgroundColor = UIColor(hex: 0xEFAD00)
+            announcementsLabel.text = " "
+        }
+        // before race
+        else if now.timeIntervalSinceDate(DataManager.sharedManager.selectedEvent!.startDate) < 0 { regattaStartLabel.text = "Regatta will start in"
             lastSyncLabel.hidden = false
-            finishedLabel.hidden = true
-            startTrackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
+            let delta = floor(now.timeIntervalSinceDate(DataManager.sharedManager.selectedEvent!.startDate)) * -1
+            let days = floor(delta / secondsInDay)
+            let hours = floor((delta - days * secondsInDay) / secondsInHour)
+            let minutes = floor((delta - days * secondsInDay - hours * secondsInHour) / 60.0)
+            daysLabel.text = String(format: "%.0f", arguments: [days])
+            hoursLabel.text = String(format: "%.0f", arguments: [hours])
+            minutesLabel.text = String(format: "%.0f", arguments: [minutes])
+            loop?.invalidate()
+            loop = NSTimer(timeInterval: 60, target: self, selector: "checkRegattaStatus", userInfo: nil, repeats: false)
+            NSRunLoop.currentRunLoop().addTimer(loop!, forMode:NSRunLoopCommonModes)
+        }
+        // during race
+        else {
+            regattaStartLabel.text = "Regatta in progress"
+            daysHeight.constant = 0
+            hoursHeight.constant = 0
+            minutesHeight.constant = 0
+            lastSyncLabel.hidden = false
         }
     }
-    
+
     // MARK: - Menu
     
     @IBAction func showMenuActionSheet(sender: AnyObject) {

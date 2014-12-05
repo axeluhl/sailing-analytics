@@ -94,7 +94,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
         let event = fetchedResultsController!.objectAtIndexPath(indexPath) as Event
-        cell.textLabel.text = event.leaderBoard?.name
+        cell.textLabel?.text = event.leaderBoard?.name
     }
     
     // MARK: - NSFetchedResultsControllerDelegate
