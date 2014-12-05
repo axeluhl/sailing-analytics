@@ -32,11 +32,9 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogOnRegattaIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -164,10 +162,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     private void setRaceLogInformationOnRaceColumn(RaceColumn raceColumn) {
-        raceColumn.setRaceLogInformation(
-                new RaceLogInformationImpl(
-                    raceLogStore,
-                    new RaceLogOnRegattaIdentifier(this, raceColumn.getName())));
+        raceColumn.setRaceLogInformation(raceLogStore, new RegattaAsRegattaLikeIdentifier(this));
     }
 
     @Override
@@ -213,8 +208,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             linkToRegattaAndConnectRaceLogsAndAddListeners(series);
             if (series.getRaceColumns() != null) {
                 for (RaceColumnInSeries column : series.getRaceColumns()) {
-                    column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore,
-                            new RaceLogOnRegattaIdentifier(this, column.getName())));
+                    column.setRaceLogInformation(raceLogStore, new RegattaAsRegattaLikeIdentifier(this));
                 }
             } else {
                 logger.warning("Race Columns were null during deserialization. This should not happen.");

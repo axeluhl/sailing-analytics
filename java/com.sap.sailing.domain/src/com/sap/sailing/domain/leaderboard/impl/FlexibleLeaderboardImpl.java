@@ -18,11 +18,9 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogOnLeaderboardIdentifier;
+import com.sap.sailing.domain.regattalike.FlexibleLeaderboardAsRegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -84,8 +82,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         ois.defaultReadObject();
         raceLogStore = EmptyRaceLogStore.INSTANCE;
         for (RaceColumn column : getRaceColumns()) {
-            column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore, new RaceLogOnLeaderboardIdentifier(
-                    this, column.getName())));
+            column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
         }
     }
 
@@ -126,10 +123,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             column = createRaceColumn(name, medalRace);
             column.addRaceColumnListener(this);
             races.add(column);
-            column.setRaceLogInformation(
-                    new RaceLogInformationImpl(
-                            raceLogStore,
-                            new RaceLogOnLeaderboardIdentifier(this, column.getName())));
+            column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
             getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
         }
         return column;
