@@ -24,8 +24,6 @@ public class MainMedia extends Composite {
 
     private static final int MAX_VIDEO_COUNT = 3;
 
-    private static final MainMediaResources.LocalCss STYLES = MainMediaResources.INSTANCE.css();
-
     @UiField
     HTMLPanel videosPanel;
     @UiField
@@ -91,7 +89,7 @@ public class MainMedia extends Composite {
 
             imageCarousel.addImage(holder.url, holder.height, holder.width);
         }
-        imageCarousel.init();
+
     }
 
     private void addVideoToVideoPanel(EventBaseDTO event) {
