@@ -143,11 +143,15 @@ public class EditMarkPassingsPanel extends FlexTable implements
 							public String asString() {
 								// TODO this is really unclean (Problem: no
 								// calendar)
-								// Oh and time zones could be problem
 								String string = "";
 								if (date != null) {
 									string = date.toString();
 									string = string.substring(10, 20);
+									if(currentCompetitorEdits.containsKey(object.getA())){
+										string = string + " (f)";
+									}
+								} else if (!(object.getA()<zeroBasedIndexOfFirstSuppressedWaypoint)){
+									string = "(s)";
 								}
 								return string;
 							}
