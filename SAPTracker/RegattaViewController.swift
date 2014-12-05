@@ -270,4 +270,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         }
     }
     
+    func navigationController(navigationController: UINavigationController, willShowViewController viewController: UIViewController, animated: Bool) {
+        UIApplication.sharedApplication().statusBarStyle = UIStatusBarStyle.LightContent
+    }
 }

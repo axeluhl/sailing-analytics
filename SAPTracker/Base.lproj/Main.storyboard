@@ -462,6 +462,9 @@
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                             </view>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="edit" translatesAutoresizingMaskIntoConstraints="NO" id="OJh-OU-o9e">
+                                <rect key="frame" x="570" y="84" width="22" height="22"/>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -487,6 +490,8 @@
                             <constraint firstItem="tvc-eS-Us6" firstAttribute="leading" secondItem="5is-0I-Kv3" secondAttribute="trailing" constant="8" id="WJd-lR-8UH"/>
                             <constraint firstItem="5is-0I-Kv3" firstAttribute="top" secondItem="ft9-jD-C5m" secondAttribute="bottom" constant="8" symbolic="YES" id="YvG-vU-Ja4"/>
                             <constraint firstItem="D89-pe-zpv" firstAttribute="top" secondItem="qVe-AE-cJY" secondAttribute="top" id="cOW-rk-hiy"/>
+                            <constraint firstItem="OJh-OU-o9e" firstAttribute="trailing" secondItem="ft9-jD-C5m" secondAttribute="trailing" constant="8" id="dSG-Rj-d1W"/>
+                            <constraint firstItem="2UK-je-59c" firstAttribute="top" secondItem="OJh-OU-o9e" secondAttribute="bottom" constant="8" id="h6j-PG-eFG"/>
                             <constraint firstItem="D89-pe-zpv" firstAttribute="top" secondItem="wYi-P2-UTF" secondAttribute="bottom" id="hJ8-EA-YDu"/>
                             <constraint firstItem="D89-pe-zpv" firstAttribute="leading" secondItem="2UK-je-59c" secondAttribute="leading" id="imR-gR-eWj"/>
                             <constraint firstItem="tvc-eS-Us6" firstAttribute="top" secondItem="ft9-jD-C5m" secondAttribute="bottom" constant="8" symbolic="YES" id="j0t-tm-Tq0"/>
@@ -494,6 +499,11 @@
                             <constraint firstItem="5is-0I-Kv3" firstAttribute="leading" secondItem="pjH-rV-MGI" secondAttribute="trailing" constant="8" id="sOk-Cy-Vto"/>
                             <constraint firstItem="qVe-AE-cJY" firstAttribute="bottom" secondItem="D89-pe-zpv" secondAttribute="bottom" id="sc3-C9-bZf"/>
                         </constraints>
+                        <variation key="heightClass=compact">
+                            <mask key="subviews">
+                                <exclude reference="OJh-OU-o9e"/>
+                            </mask>
+                        </variation>
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Regatta" id="BjQ-Fx-PEX">
@@ -897,6 +907,7 @@
     </scenes>
     <resources>
         <image name="DE.png" width="64" height="64"/>
+        <image name="edit" width="22" height="22"/>
         <image name="home_bg" width="434" height="289"/>
         <image name="settings" width="22" height="22"/>
     </resources>
