@@ -13,41 +13,32 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
-public class SeriesWithFleetsDefaultCreateDialog extends
-		SeriesWithFleetsCreateDialog {
+public class SeriesWithFleetsDefaultCreateDialog extends SeriesWithFleetsCreateDialog {
+    public SeriesWithFleetsDefaultCreateDialog(SeriesDTO defaultSeries, StringMessages stringMessages,
+            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<SeriesDTO> callback) {
+        super(Collections.<SeriesDTO> emptyList(), stringMessages, callback);
+        nameEntryField.setText(defaultSeries.getName());// Otherwise an errorMessage will pop up
+        isMedalSeriesCheckbox.setValue(defaultSeries.isFirstColumnIsNonDiscardableCarryForward());
+        startsWithZeroScoreCheckbox.setValue(defaultSeries.isStartsWithZeroScore());
+        hasSplitFleetContiguousScoringCheckbox.setValue(defaultSeries.hasSplitFleetContiguousScoring());
+        firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(defaultSeries.isFirstColumnIsNonDiscardableCarryForward());
+        useSeriesResultDiscardingThresholdsCheckbox.setValue(defaultSeries.definesSeriesDiscardThresholds());
+        discardThresholdBoxes.setDiscardThresholds(defaultSeries.getDiscardThresholds());
+        fleetListComposite.setValue(defaultSeries.getFleets());
+    }
 
-	public SeriesWithFleetsDefaultCreateDialog(
-			SeriesDTO defaultSeries,
-			StringMessages stringMessages,
-			com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<SeriesDTO> callback) {
-		super(Collections.<SeriesDTO> emptyList(), stringMessages, callback);
-		nameEntryField.setText(defaultSeries.getName());// Otherwise an errorMessage will pop up
-		isMedalSeriesCheckbox.setValue(defaultSeries
-				.isFirstColumnIsNonDiscardableCarryForward());
-		startsWithZeroScoreCheckbox.setValue(defaultSeries
-				.isStartsWithZeroScore());
-		hasSplitFleetContiguousScoringCheckbox.setValue(defaultSeries
-				.hasSplitFleetContiguousScoring());
-		firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(defaultSeries
-				.isFirstColumnIsNonDiscardableCarryForward());
-		useSeriesResultDiscardingThresholdsCheckbox.setValue(defaultSeries
-				.definesSeriesDiscardThresholds());
-		discardThresholdBoxes.setDiscardThresholds(defaultSeries
-				.getDiscardThresholds());
-		fleetListComposite.setValue(defaultSeries.getFleets());
-	}
+    @Override
+    protected Widget getAdditionalWidget() {
+        VerticalPanel panel = (VerticalPanel) super.getAdditionalWidget();
+        Grid formGrid = (Grid) panel.getWidget(0);
+        formGrid.removeRow(0);
+        formGrid.removeRow(0);
+        return panel;
+    }
 
-	@Override
-	protected Widget getAdditionalWidget() {
-		VerticalPanel panel = (VerticalPanel) super.getAdditionalWidget();
-		Grid formGrid = (Grid) panel.getWidget(0);
-		formGrid.removeRow(0);
-		formGrid.removeRow(0);
-		return panel;
-	}
-	
-	protected void initializeFleetListComposite(StringMessages stringMessages) {
-		fleetListComposite = new FleetListEditableEditorComposite(Arrays.asList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
+    protected void initializeFleetListComposite(StringMessages stringMessages) {
+        fleetListComposite = new FleetListEditableEditorComposite(Arrays.asList(new FleetDTO(
+                LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
         fleetListComposite.ensureDebugId("FleetListEditableEditorComposite");
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<Iterable<FleetDTO>>() {
             @Override
@@ -56,5 +47,4 @@ public class SeriesWithFleetsDefaultCreateDialog extends
             }
         });
     }
-
 }

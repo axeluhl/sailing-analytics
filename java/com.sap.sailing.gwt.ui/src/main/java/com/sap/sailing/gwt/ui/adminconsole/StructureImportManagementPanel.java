@@ -306,7 +306,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         Grid grid = new Grid(structure.size(), 2);
         int i = 0;
         for (final Set<String> struct : structure.keySet()) {
-            Button editBtn = new Button("Edit Series");
+            Button editBtn = new Button("Edit Series"); // TODO i18n
             editBtn.addClickHandler(new ClickHandler() {
 
                 @Override
