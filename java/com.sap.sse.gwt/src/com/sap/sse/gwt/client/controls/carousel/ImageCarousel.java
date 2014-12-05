@@ -6,9 +6,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.safecss.shared.SafeStyles;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.Command;
@@ -41,20 +38,18 @@ import com.google.gwt.user.client.ui.Widget;
  *      slider.addImage("http://demotivators.despair.com/demotivational/destinyrockdemotivator.jpg");
  *      slider.addImage("http://demotivators.despair.com/demotivational/aspirationdemotivator.jpg");
  *
+ *      - Start the carousel
+ *
+ *      slider.init();
  * 
  *      The widget depends on css and js resources, as well as jquery 1.7+.
  *
- *      To use the CDN resources, include:
- * 
- *      <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.3.15/slick.css"/> <script
- *      type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.3.15/slick.min.js"></script>
  *
  *      Created by pgtaboada on 10.11.14.
  */
 public class ImageCarousel extends Widget {
 
     private static SlickSliderUiBinder ourUiBinder = GWT.create(SlickSliderUiBinder.class);
-    private static MyTemplate myTemplate = GWT.create(MyTemplate.class);
 
     /**
      * slick slider property: dots
@@ -96,7 +91,7 @@ public class ImageCarousel extends Widget {
 
         uniqueId = "slider_" + Document.get().createUniqueId();
         getElement().addClassName(uniqueId);
-
+        init();
     }
 
     /**
@@ -230,17 +225,9 @@ public class ImageCarousel extends Widget {
     }
 
     /**
-     * Template used to create image element
-     */
-    interface MyTemplate extends SafeHtmlTemplates {
-        @Template("<img style='{1}' data-lazy='{0}'/>")
-        SafeHtml imageDiv(String uri, SafeStyles imageStyles);
-    }
-
-    /**
      * Apply slick js to constructed dom tree.
      */
-    public void init() {
+    private void init() {
         final ImageCarousel reference = this;
 
         Scheduler.get().scheduleDeferred(new Command() {
