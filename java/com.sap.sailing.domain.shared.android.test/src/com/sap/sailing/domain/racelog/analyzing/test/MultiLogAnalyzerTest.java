@@ -96,12 +96,12 @@ public class MultiLogAnalyzerTest {
         DeviceIdentifier d1 = createDevice();
         DeviceIdentifier d2 = createDevice();
         
-        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), author, now(), uuid(), 0, c1, d1, t(0), t(10)));
-        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), author, now(), uuid(), 0, c1, d2, t(30), t(40)));
-        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), author, now(), uuid(), c2, d2, t(10), t(20)));
+        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), author, now(), 0, 0, c1, d1, t(0), t(10)));
+        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), author, now(), 1, 0, c1, d2, t(30), t(40)));
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), author, now(), 2, c2, d2, t(10), t(20)));
         
         // and one for same item (competitor) in other log
-        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), author, now(), uuid(), c1, d1, t(10),
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), author, now(), 3, c1, d1, t(10),
                 t(20)));
 
         Map<WithID, List<DeviceMapping<WithID>>> result = new MultiLogAnalyzer<>(
@@ -110,6 +110,6 @@ public class MultiLogAnalyzerTest {
 
         assertThat("mappings for two competitors", result.size(), equalTo(2));
         assertThat("three mappings for competitor 1 ", result.get(c1).size(), equalTo(3));
-        assertThat("one mappng for competitor 2", result.get(c2).size(), equalTo(1));
+        assertThat("one mapping for competitor 2", result.get(c2).size(), equalTo(1));
     }
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.abstractlog.impl;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Timed;
@@ -24,15 +25,15 @@ public class LogEventComparator implements Comparator<Timed>, Serializable {
 
     @Override
     public int compare(Timed o1, Timed o2) {
-        if (o1 instanceof RaceLogEvent && o2 instanceof RaceLogEvent) {
-            return compareEvents((RaceLogEvent) o1, (RaceLogEvent) o2);
+        if (o1 instanceof AbstractLogEvent && o2 instanceof AbstractLogEvent) {
+            return compareEvents((AbstractLogEvent<?>) o1, (AbstractLogEvent<?>) o2);
         }
 
         // fallback to timed comparison
         return timedComparator.compare(o1, o2);
     }
     
-    protected int compareEvents(RaceLogEvent e1, RaceLogEvent e2) {
+    protected int compareEvents(AbstractLogEvent<?> e1, AbstractLogEvent<?> e2) {
         //compare author priorities
         int result = e1.getAuthor().compareTo(e2.getAuthor());
         if (result != 0) return result;
