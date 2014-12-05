@@ -207,7 +207,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         final LinkedList<String> acceptedImages = new LinkedList<String>();
         for (String candidateImageUrl : imageURLs) {
             ImageSize imageSize = getImageSize(candidateImageUrl);
-            if (imageSize.getHeight() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS
+            if (imageSize != null && imageSize.getHeight() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS
                     && !candidateImageUrl.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
                 acceptedImages.add(candidateImageUrl);
             } else {
@@ -246,13 +246,19 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
             }
 
             ImageHolder(String url, ImageSize imageSize) {
-                assert url != null : "url must not be null";
-                assert imageSize != null : "imageSize must not be null";
-                this.url = url;
-                this.height = imageSize.getHeight();
-                this.width = imageSize.getWidth();
-                this.size = height * width;
-                this.ratio = height / (double) width;
+                if (url == null || imageSize == null) {
+                    this.url = "";
+                    this.height = -1;
+                    this.width = -1;
+                    this.size = -1;
+                    this.ratio = -1;
+                } else {
+                    this.url = url;
+                    this.height = imageSize.getHeight();
+                    this.width = imageSize.getWidth();
+                    this.size = height * width;
+                    this.ratio = height / (double) width;
+                }
             }
 
             boolean isBetterWorstcaseThan(ImageHolder otherImageHolder) {
