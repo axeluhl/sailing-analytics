@@ -21,12 +21,11 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
 
     public SeriesWithFleetsListEditor(Iterable<SeriesDTO> initialValues, StringMessages stringMessages,
             ImageResource removeImage, boolean enableFleetRemoval) {
-        super(initialValues, createExpandedUi(stringMessages, removeImage, enableFleetRemoval));
+        this(initialValues, new ExpandedUi(stringMessages, removeImage, enableFleetRemoval));
     }
 
-    private static ListEditorUiStrategy<SeriesDTO> createExpandedUi(StringMessages stringMessages,
-            ImageResource removeImage, boolean enableFleetRemoval) {
-        return new ExpandedUi(stringMessages, removeImage, enableFleetRemoval);
+    protected SeriesWithFleetsListEditor(Iterable<SeriesDTO> initialValues, ListEditorUiStrategy<SeriesDTO> activeUi) {
+        super(initialValues, activeUi);
     }
 
     protected static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {

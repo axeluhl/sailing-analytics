@@ -104,10 +104,10 @@ public class StructureImportManagementPanel extends FlowPanel {
                     if (!selectedRegattas.isEmpty()) {
                         createRegattas(selectedRegattas, getSelectedEvent());
                     } else {
-                        errorReporter.reportError("Please select at least one regatta");
+                        errorReporter.reportError("Please select at least one regatta"); // TODO i18n
                     }
                 } else {
-                    errorReporter.reportError("Please select an event");
+                    errorReporter.reportError("Please select an event"); // TODO i18n
                 }
             }
         });

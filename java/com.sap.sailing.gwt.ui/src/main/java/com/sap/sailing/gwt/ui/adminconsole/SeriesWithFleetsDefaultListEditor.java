@@ -16,17 +16,15 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
-import com.sap.sse.gwt.client.controls.listedit.ListEditorUiStrategy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class SeriesWithFleetsDefaultListEditor extends
-		SeriesWithFleetsListEditor {
+public class SeriesWithFleetsDefaultListEditor extends SeriesWithFleetsListEditor {
 	private final static Map<String, Map<String, List<SeriesDTO>>> seriesStructure = new HashMap<String, Map<String, List<SeriesDTO>>>();
 
 	public SeriesWithFleetsDefaultListEditor(List<SeriesDTO> series,
 			StringMessages stringMessages, ImageResource removeImage,
 			boolean enableFleetRemoval) {
-		super(new ArrayList<SeriesDTO>(), stringMessages, removeImage, enableFleetRemoval);
+		super(new ArrayList<SeriesDTO>(), new ExpandedUiDefault(stringMessages, removeImage, enableFleetRemoval));
 
 		seriesStructure.clear();
 		analyzeSeriesStructure(series);
@@ -61,13 +59,6 @@ public class SeriesWithFleetsDefaultListEditor extends
 		}
 	}
 
-	protected ListEditorUiStrategy<SeriesDTO> createExpandedUi(
-			StringMessages stringMessages, ImageResource removeImage,
-			boolean enableFleetRemoval) {
-		return new ExpandedUiDefault(stringMessages, removeImage,
-				enableFleetRemoval);
-	}
-
 	private static class ExpandedUiDefault extends ExpandedUi {
 
 		public ExpandedUiDefault(StringMessages stringMessages,
@@ -79,7 +70,7 @@ public class SeriesWithFleetsDefaultListEditor extends
 			return new HorizontalPanel();
 		}
 		private Widget listSeriesWithFleets(final SeriesDTO seriesDTO){
-			final Button addSeriesButton = new Button("Edit Series");
+			final Button addSeriesButton = new Button("Edit Series"); // TODO rename to editSeriesButton; i18n
 			addSeriesButton.ensureDebugId("SetDefaultSeriesButton");
 			addSeriesButton.addClickHandler(new ClickHandler() {
 				@Override
