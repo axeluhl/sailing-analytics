@@ -88,10 +88,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         jsonURLTextBox = new TextBox();
         jsonURLTextBox.ensureDebugId("JsonURLTextBox");
         jsonURLTextBox.setVisibleLength(100);
-        jsonURLTextBox
-                .getElement()
-                .setPropertyString(
-                        "placeholder",
+        jsonURLTextBox.getElement().setPropertyString("placeholder",
                         "http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json");
         listRegattasButton = new Button(this.stringMessages.listRegattas());
         importDetailsButton = new Button(this.stringMessages.importRegatta());
@@ -104,10 +101,10 @@ public class StructureImportManagementPanel extends FlowPanel {
                     if (!selectedRegattas.isEmpty()) {
                         createRegattas(selectedRegattas, getSelectedEvent());
                     } else {
-                        errorReporter.reportError("Please select at least one regatta"); // TODO i18n
+                        errorReporter.reportError(stringMessages.pleaseSelectAtLeastOneRegatta());
                     }
                 } else {
-                    errorReporter.reportError("Please select an event"); // TODO i18n
+                    errorReporter.reportError(stringMessages.pleaseSelectAnEvent());
                 }
             }
         });
@@ -160,7 +157,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to get events");
+                errorReporter.reportError(stringMessages.errorTryingToGetEvents(caught.getMessage()));
             }
 
             @Override
@@ -306,7 +303,7 @@ public class StructureImportManagementPanel extends FlowPanel {
         Grid grid = new Grid(structure.size(), 2);
         int i = 0;
         for (final Set<String> struct : structure.keySet()) {
-            Button editBtn = new Button("Edit Series"); // TODO i18n
+            Button editBtn = new Button(stringMessages.editSeries());
             editBtn.addClickHandler(new ClickHandler() {
 
                 @Override

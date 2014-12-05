@@ -21,15 +21,15 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
     private final Iterable<RegattaDTO> defaultRegattas;
 
     public DefaultRegattaCreateDialog(List<EventDTO> existingEvents, Iterable<RegattaDTO> selectedRegattas,
-            SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringConstants,
+            SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<EventAndRegattaDTO> callback) {
-        super(new RegattaDTO(), existingEvents, "Create default settings for all regattas...", stringConstants.ok(),
-                stringConstants, null /* RegattaParameterValidator */, callback);
+        super(new RegattaDTO(), existingEvents, stringMessages.createDefaultSettingsForAllRegattas(), stringMessages.ok(),
+                stringMessages, null /* RegattaParameterValidator */, callback);
         this.defaultRegattas = selectedRegattas;
         if (existingEvents != null && !existingEvents.isEmpty()) {
             sailingEventsListBox.addItem((existingEvents.get(0)).getName());
         } else {
-            sailingEventsListBox.addItem("No overall event selected...");
+            sailingEventsListBox.addItem(stringMessages.noOverallEventSelected());
         }
         sailingEventsListBox.setSelectedIndex(1);
         sailingEventsListBox.setEnabled(false);

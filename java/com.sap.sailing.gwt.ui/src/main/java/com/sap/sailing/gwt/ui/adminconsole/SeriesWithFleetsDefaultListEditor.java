@@ -66,7 +66,7 @@ public class SeriesWithFleetsDefaultListEditor extends SeriesWithFleetsListEdito
         }
 
         private Widget listSeriesWithFleets(final SeriesDTO seriesDTO) {
-            final Button editSeriesButton = new Button("Edit Series"); // TODO i18n
+            final Button editSeriesButton = new Button(getStringMessages().editSeries());
             editSeriesButton.ensureDebugId("SetDefaultSeriesButton");
             editSeriesButton.addClickHandler(new ClickHandler() {
                 @Override
