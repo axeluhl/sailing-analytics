@@ -1,32 +1,28 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
-import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
 /**
- * Shared between GWT and Android. Used for creating and deciphering the URL
- * encoded by the QRCode, which gives the tracking app all necessary information
- * for creating the device mapping.
- * This includes the leaderboard name, race-column name and fleet name to identify
- * which RaceLog to add the {@code DeviceMappingEvent} to. Also, either a competitor
- * or mark ID is added, to which the device should be mapped. Timestamps for the
- * beginning and the end of the mapping are also included.
+ * Shared between GWT and Android. Used for creating and deciphering the URL encoded by the QRCode, which gives the
+ * tracking app all necessary information for creating the device mapping of either the race or leaderboard/regatta.
  * <p>
- * The URL points to the apk-file of the app deployed to the {@code www} directory
- * of the server, with additional {@code GET}-parameters:
- * <ul>
- * <li>{@link RaceLogServletConstants#PARAMS_LEADERBOARD_NAME}</li>
- * <li>{@link RaceLogServletConstants#PARAMS_RACE_COLUMN_NAME}</li>
- * <li>{@link RaceLogServletConstants#PARAMS_RACE_FLEET_NAME}</li>
- * <li>either {@link #COMPETITOR_ID_AS_STRING} or {@link #MARK_ID_AS_STRING}</li>
- * <li>{@link #FROM_MILLIS}</li>
- * <li>{@link #TO_MILLIS}</li>
- * </ul>
+ * The field that server for mapping a device for an individual race are deprecated (see {@link DeviceMappingOnRaceQRCodeWidget}).
+ * <p>
+ * The structure of the URL is documented in the <a href="http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft">Wiki</a>.
+ * {@code http://<host>/tracking/checkin?event_id=<e>&leaderboard_name=<l>&competitor_id=<c>}
  * 
  * @author Fredrik Teschke
  */
 public interface DeviceMappingConstants {
-   static final String COMPETITOR_ID_AS_STRING = "competitor";
-   static final String MARK_ID_AS_STRING = "mark";
-   static final String FROM_MILLIS = "from";
-   static final String TO_MILLIS = "to";
+    static final String URL_BASE = "/tracking/checkin";
+    static final String EVENT_ID = "event_id";
+    static final String LEADERBOARD_NAME = "leaderboard_name";
+    static final String COMPETITOR_ID_AS_STRING = "competitor_id";
+    static final String MARK_ID_AS_STRING = "mark_id";
+    
+    @Deprecated
+    static final String FROM_MILLIS = "from";
+    @Deprecated
+    static final String TO_MILLIS = "to";
+    @Deprecated
+    static final String APK_PATH = "/apps/com.sap.sailing.android.tracking.app.apk";
 }

@@ -89,8 +89,12 @@ public class LaunchActivity extends BaseActivity {
             String fleet = uri.getQueryParameter(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME);
             String competitorIdAsString = uri.getQueryParameter(DeviceMappingConstants.COMPETITOR_ID_AS_STRING);
             String markIdAsString = uri.getQueryParameter(DeviceMappingConstants.MARK_ID_AS_STRING);
+            
+            @SuppressWarnings("deprecation")
             Long fromMillis = Long.parseLong(uri.getQueryParameter(DeviceMappingConstants.FROM_MILLIS));
+            @SuppressWarnings("deprecation")
             Long toMillis = Long.parseLong(uri.getQueryParameter(DeviceMappingConstants.TO_MILLIS));
+            
             RaceLogEvent event = null;
 
             DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(

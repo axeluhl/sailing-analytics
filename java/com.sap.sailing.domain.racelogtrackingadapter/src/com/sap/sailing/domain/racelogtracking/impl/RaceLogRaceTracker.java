@@ -380,7 +380,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
 
-        Iterable<Competitor> competitors = new RegisteredCompetitorsAnalyzer(raceLog).analyze();
+        Iterable<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(raceLog).analyze();
         Serializable raceId = denoteEvent.getRaceId();
         final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
 

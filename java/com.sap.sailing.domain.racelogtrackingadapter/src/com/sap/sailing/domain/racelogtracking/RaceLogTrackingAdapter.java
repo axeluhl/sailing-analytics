@@ -7,6 +7,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Fleet;
@@ -90,4 +91,10 @@ public interface RaceLogTrackingAdapter {
      * and unregister all already registered competitors not in {@code competitors}.
      */
     void registerCompetitors(RacingEventService service, RaceLog raceLog, Set<Competitor> competitors);
+    
+    /**
+     * If not yet registered, register the competitors in {@code competitors},
+     * and unregister all already registered competitors not in {@code competitors}.
+     */
+    void registerCompetitors(RacingEventService service, RegattaLog regattaLog, Set<Competitor> competitors);
 }

@@ -453,7 +453,17 @@ public interface SailingService extends RemoteService {
     
     void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
     
+    /**
+     * Get the competitors registered in this racelog. Does not automatically include the competitors
+     * {@link #getCompetitorRegistrations(String) registered for the leaderboard}.
+     */
     Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName);
+
+    /**
+     * Get the competitors registered in this leaderboard. Does not automatically include the competitors
+     * {@link #getCompetitorRegistrations(String, String, String) registered for the racelog}.
+     */
+    Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName);
     
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO);
     
@@ -528,4 +538,13 @@ public interface SailingService extends RemoteService {
      * @return The RaceDTO of the modified race or <code>null</code>, if the given newStartTimeReceived was null.
      */
     RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
+
+    void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitors);
+    
+    /**
+     * A leaderboard may be situated under multiple events (connected via a leaderboardgroup).
+     * This method traverses all events and leaderboardgroup to build the collection of events this
+     * leaderboard is coupled to.
+     */
+    Collection<EventDTO> getEventsForLeaderboard(String leaderboardName);
 }

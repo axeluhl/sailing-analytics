@@ -14,7 +14,7 @@ implements RegattaLogRegisterCompetitorEvent {
     private static final long serialVersionUID = -5114645637316367845L;
     
     public RegattaLogRegisterCompetitorEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, int passId, Competitor competitor) {
+            TimePoint logicalTimePoint, Serializable id, Competitor competitor) {
         super(createdAt, author, logicalTimePoint, id, competitor);
     }
 

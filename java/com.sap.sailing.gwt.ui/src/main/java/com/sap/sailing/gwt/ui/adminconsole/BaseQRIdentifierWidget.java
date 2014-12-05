@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.adminconsole.DeviceMappingQRCodeWidget.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.QRCodeComposite;
 
@@ -67,13 +68,14 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
         return baseWidget;
     }
 
-    protected abstract String generateEncodedQRCodeContent();
+    protected abstract String generateEncodedQRCodeContent() throws QRCodeURLCreationException;
     
     public void generateQRCode() {
-        String encoded = generateEncodedQRCodeContent();
-        if (encoded != null) {
+        try {
+            qrCodeComposite.generateQRCode(generateEncodedQRCodeContent());
             error.setText("");
-            qrCodeComposite.generateQRCode(encoded);
+        } catch (QRCodeURLCreationException e) {
+            setError(e.getMessage());
         }
     }
     
