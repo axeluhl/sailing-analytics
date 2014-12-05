@@ -31,8 +31,6 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.OpenEndedDeviceMappingFinder;
@@ -382,7 +380,11 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         
         //TODO: use device type and pushDeviceId
 
-        Competitor mappedTo = domainFactory.getExistingCompetitorById(competitorId);
+        Competitor mappedTo = domainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
+        if (mappedTo == null) {
+            return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
         TimePoint from = new MillisecondsTimePoint(fromMillis);
 
@@ -440,6 +442,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
         logger.fine("JSON requestObject is: " + requestObject.toString());
         Long toMillis = (Long) requestObject.get("toMillis");
+        String competitorId = (String) requestObject.get("competitorId");
         String deviceUuid = (String) requestObject.get("deviceUuid");
         TimePoint closingTimePoint = new MillisecondsTimePoint(toMillis);
         
@@ -447,8 +450,15 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
+
+        Competitor mappedTo = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
+        if (mappedTo == null) {
+            return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
         
-        OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(hasRegattaLog.getRegattaLog(), deviceUuid);
+        OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(hasRegattaLog.getRegattaLog(),
+                mappedTo, deviceUuid);
         Serializable deviceMappingEventId = finder.analyze();
 
         if (deviceMappingEventId == null) {

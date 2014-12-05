@@ -7,6 +7,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
+import com.sap.sse.common.WithID;
 
 
 /**
@@ -16,10 +17,12 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
  */
 public class OpenEndedDeviceMappingFinder extends BaseLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor, Serializable> {
 
-    private Serializable deviceUuid;
+    private final WithID mappedTo;
+    private final Serializable deviceUuid;
     
-    public OpenEndedDeviceMappingFinder(RegattaLog log, Serializable deviceUuid) {
+    public OpenEndedDeviceMappingFinder(RegattaLog log, WithID mappedTo, Serializable deviceUuid) {
         super(log);
+        this.mappedTo = mappedTo;
         this.deviceUuid = deviceUuid;
     }
 
@@ -28,7 +31,8 @@ public class OpenEndedDeviceMappingFinder extends BaseLogAnalyzer<RegattaLog, Re
         for (RegattaLogEvent regattaLogEvent : log.getUnrevokedEvents()) {
             if (regattaLogEvent instanceof RegattaLogDeviceCompetitorMappingEvent) {
                 RegattaLogDeviceCompetitorMappingEvent deviceMappingEvent = (RegattaLogDeviceCompetitorMappingEvent) regattaLogEvent;
-                if (deviceMappingEvent.getDevice().getStringRepresentation().equals(deviceUuid)) {
+                if (deviceMappingEvent.getMappedTo().equals(mappedTo) &&
+                        deviceMappingEvent.getDevice().getStringRepresentation().equals(deviceUuid)) {
                     return deviceMappingEvent.getId();
                 }
             }
