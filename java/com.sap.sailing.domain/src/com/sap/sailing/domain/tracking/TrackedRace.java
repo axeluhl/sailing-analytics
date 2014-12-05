@@ -569,6 +569,11 @@ public interface TrackedRace extends Serializable {
      * @param fromRaceLog Make sure that the fixes defined by the mappings in this racelog were loaded.
      */
     void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException;
+
+    /**
+     * @see #waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog)
+     */
+    void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 

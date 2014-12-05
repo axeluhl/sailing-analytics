@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -244,6 +245,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     protected transient ConcurrentHashMap<Serializable, RaceLog> attachedRaceLogs;
 
+    protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
+
     /**
      * The time delay to the current point in time in milliseconds.
      */
@@ -298,6 +301,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
+        attachedRegattaLogs = new ConcurrentHashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
         this.loadingFromWindStoreLock = new NamedReentrantReadWriteLock("Loading from wind store lock for tracked race "
@@ -519,6 +523,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException {
         while (!attachedRaceLogs.containsKey(fromRaceLog.getId()) || loadingFromGPSFixStore) {
+            wait();
+        }
+    }
+
+    @Override
+    public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+        while (!attachedRegattaLogs.containsKey(fromRegattaLog.getId()) || loadingFromGPSFixStore) {
             wait();
         }
     }
@@ -2636,7 +2647,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
     
-    private void loadFixesForLog(final AbstractLog<?, ?> log) {
+    private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(
+            final LogT log, ConcurrentHashMap<Serializable, LogT> addLogToMap) {
         if (log != null) {
             // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
@@ -2648,6 +2660,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     LockUtil.lockForWrite(getLoadingFromGPSFixStoreLock());
                     synchronized (TrackedRaceImpl.this) {
                         loadingFromGPSFixStore = true; // indicates that the serialization lock is now safely held
+                        addLogToMap.put(log.getId(), log);
                         TrackedRaceImpl.this.notifyAll();
                     }
                     try {
@@ -2695,13 +2708,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     @Override
     public void attachRaceLog(final RaceLog raceLog) {
-        attachedRaceLogs.put(raceLog.getId(), raceLog);
-        loadFixesForLog(raceLog);
+        loadFixesForLog(raceLog, attachedRaceLogs);
     }
     
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
-        loadFixesForLog(regattaLog);
+        loadFixesForLog(regattaLog, attachedRegattaLogs);
     }
 
     @Override

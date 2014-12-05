@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
@@ -852,6 +853,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
         // TODO Auto-generated method stub
         
     }

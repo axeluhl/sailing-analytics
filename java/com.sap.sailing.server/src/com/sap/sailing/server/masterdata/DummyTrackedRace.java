@@ -624,4 +624,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         
     }
 
+    @Override
+    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

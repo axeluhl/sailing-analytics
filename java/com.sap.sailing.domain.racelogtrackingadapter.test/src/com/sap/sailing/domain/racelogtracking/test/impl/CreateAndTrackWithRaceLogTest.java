@@ -181,6 +181,7 @@ public class CreateAndTrackWithRaceLogTest {
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
 
+        race.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
         addFixes1(race, comp1, dev1);
         raceLog.add(factory.createDeviceCompetitorMappingEvent(t(), author, dev1, comp1, 0, t(11), t(20)));
 
@@ -215,6 +216,7 @@ public class CreateAndTrackWithRaceLogTest {
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
 
+        race.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
         addFixes1(race, comp1, dev1);
 
         // add another mapping on the fly, other old fixes should be loaded
