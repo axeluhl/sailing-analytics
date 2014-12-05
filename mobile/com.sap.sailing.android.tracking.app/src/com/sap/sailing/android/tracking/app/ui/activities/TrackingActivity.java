@@ -19,6 +19,7 @@ import com.sap.sailing.android.tracking.app.services.TransmittingService;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivityListener;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.TransmittingBinder;
+import com.sap.sailing.android.tracking.app.ui.fragments.HudFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
@@ -43,7 +44,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         Intent intent = getIntent();
         eventId = intent.getExtras().getString(getString(R.string.tracking_activity_event_id_parameter)); 
         		
-        setContentView(R.layout.fragment_container);
+        setContentView(R.layout.fragment_hud_container);
         
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -63,20 +64,31 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.eventName);
         }
         
-        TrackingFragment fragment;
+        TrackingFragment mainFragment;
         if (savedInstanceState != null)
         {
-        	fragment = (TrackingFragment)getSupportFragmentManager().getFragment(savedInstanceState, SIS_FRAGMENT);
+        	mainFragment = (TrackingFragment)getSupportFragmentManager().getFragment(savedInstanceState, SIS_FRAGMENT);
         }
         else
         {
-        	fragment = new TrackingFragment();
+        	mainFragment = new TrackingFragment();
         }
         
-        replaceFragment(R.id.content_frame, fragment);
+        HudFragment hudFragment = new HudFragment();
+        
+        replaceFragment(R.id.content_frame, mainFragment);
+        replaceFragment(R.id.hud_content_frame, hudFragment);
+        
         startTrackingService(eventId);
     }
     
+//    @Override
+//    public void onWindowFocusChanged(boolean hasFocus) {
+//    	super.onWindowFocusChanged(hasFocus);
+//    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
+//    	hudFragment.layoutOverlay();
+//    }
+//    
     @Override
     protected void onSaveInstanceState(Bundle outState) {
     	super.onSaveInstanceState(outState);
