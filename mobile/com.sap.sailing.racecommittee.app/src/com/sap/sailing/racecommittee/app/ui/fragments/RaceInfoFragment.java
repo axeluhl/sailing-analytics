@@ -127,7 +127,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.commit();
     }
-
+    
     private void showRaceResetConfirmationDialog() {
         prepareResetRaceView();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -191,7 +191,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                     String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
         }
     }
-    
     
     public void onWindEntered(Wind windFix){
         getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/colorGreyDark"
+    android:padding="@dimen/listview_row_padding" >
+
+    <TextView
+        android:id="@+id/start_procedure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Text" />
+
+    <ImageView
+        android:id="@+id/checked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_check_black_18dp"
+        android:visibility="visible" />
+
+</RelativeLayout>

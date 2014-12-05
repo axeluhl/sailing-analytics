@@ -159,7 +159,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if ((windFragment != null && !windFragment.isFragmentUIActive()) || windFragment == null) {
             windFragment = new WindFragment();
             getFragmentManager().beginTransaction()
-                    //.setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                    // .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                     .replace(R.id.racing_view_right_container, windFragment)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null).commit();
         }
@@ -182,20 +182,20 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void onBackPressed() {
         Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_right_container);
         if (!(fragment instanceof RaceInfoFragment || fragment instanceof WelcomeFragment)) {
-	        if (getFragmentManager().getBackStackEntryCount() > 0) {
-	            getFragmentManager().popBackStackImmediate();
-	            getFragmentManager().beginTransaction().commit();
-	
-	            // fix for filled out RaceInfoFragment
-	            if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
-	                ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
-	                getFragmentManager().popBackStackImmediate();
-	                onRaceItemClicked(selectedRace);
-	            }
-	        } 
+            if (getFragmentManager().getBackStackEntryCount() > 0) {
+                getFragmentManager().popBackStackImmediate();
+                getFragmentManager().beginTransaction().commit();
+
+                // fix for filled out RaceInfoFragment
+                if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
+                    ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
+                    getFragmentManager().popBackStackImmediate();
+                    onRaceItemClicked(selectedRace);
+                }
+            }
         } else {
-        	logoutSession();
-	    }
+            logoutSession();
+        }
     }
 
     @Override
@@ -292,7 +292,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
         getFragmentManager().beginTransaction()
-                //.setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                // .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                 .replace(R.id.racing_view_right_container, infoFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null).commit();
     }
@@ -376,5 +376,16 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         title += " (" + author.getName() + ")";
 
         getSupportActionBar().setTitle(title);
+    }
+
+    public void replaceFragment(RaceFragment fragment) {
+        replaceFragment(fragment, R.id.sub_fragment);
+    }
+
+    public void replaceFragment(RaceFragment fragment, int viewId) {
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(viewId, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }

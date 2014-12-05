@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.adapters.unscheduled;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,14 +29,6 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
         mContext = context;
         mInflater = (LayoutInflater) (mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE));
         mStartMode = startMode;
-    }
-
-    private void drawCheck(Boolean isChecked) {
-        Drawable checkImage = null;
-        if (isChecked) {
-            checkImage = mContext.getResources().getDrawable(R.drawable.ic_check_black_18dp);
-        }
-        mChecked.setImageDrawable(checkImage);
     }
 
     @Override
@@ -138,7 +129,10 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
         mChecked = ViewHolder.get(convertView, R.id.checked);
         if (mChecked != null) {
             mChecked.setTag(position);
-            drawCheck(mStartMode.isChecked());
+            mChecked.setVisibility(View.INVISIBLE);
+            if (mStartMode.isChecked()) {
+                mChecked.setVisibility(View.VISIBLE);
+            }
         }
 
         return convertView;
@@ -148,18 +142,17 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
     public void onClick(View view) {
         for (StartMode startMode : mStartMode) {
             startMode.setChecked(false);
-            notifyDataSetChanged();
         }
         mChecked = ViewHolder.get(view, R.id.checked);
         if (mChecked != null) {
             Integer position = (Integer) mChecked.getTag();
             if (position != null) {
-                StartMode startMode = mStartMode.get(position);
+                StartMode startMode = getItem(position);
                 if (startMode != null) {
                     startMode.setChecked(true);
-                    notifyDataSetChanged();
                 }
             }
         }
+        notifyDataSetChanged();
     }
 }

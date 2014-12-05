@@ -3,10 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorGreyDark"
-    android:paddingEnd="20dp"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
-    android:paddingStart="20dp" >
+    android:padding="@dimen/listview_row_padding" >
 
     <ImageView
         android:id="@+id/flag"

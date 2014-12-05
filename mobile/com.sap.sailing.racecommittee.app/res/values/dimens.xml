@@ -3,5 +3,8 @@
 
     <dimen name="navigation_drawer_width">500dp</dimen>
 	<dimen name="navigation_drawer_right_box">150dp</dimen>
+	
+	<dimen name="listview_side_padding">100dp</dimen>
+	<dimen name="listview_row_padding">20dp</dimen>
     
 </resources>
