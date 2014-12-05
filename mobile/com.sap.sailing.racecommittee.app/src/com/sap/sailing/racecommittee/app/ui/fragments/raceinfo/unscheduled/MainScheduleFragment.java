@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
 
+import java.lang.reflect.InvocationTargetException;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,12 +10,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.NextFragmentListener;
 
 public class MainScheduleFragment extends RaceFragment implements OnClickListener, NextFragmentListener {
 
+    private static final String TAG = MainScheduleFragment.class.getName();
+    
     private Button mCourse;
     private RaceFragment mCurrent;
     private TextView mHeaderText;
@@ -42,7 +48,18 @@ public class MainScheduleFragment extends RaceFragment implements OnClickListene
         String race = managedRace.getRaceName();
         mHeaderText.setText(serie + " - " + fleet + " - " + race);
 
-        openTabFragment();
+        if (savedInstanceState != null) {
+            try {
+                mCurrent = (RaceFragment) Class.forName(savedInstanceState.getString("fragment")).getConstructor(NextFragmentListener.class).newInstance(this);
+            } catch (Exception e) {
+                ExLog.ex(getActivity(), TAG, e);
+            }
+        }
+        if (mCurrent == null) {
+            openTabFragment();
+        } else {
+            openFragment();
+        }
     }
 
     @Override
@@ -62,6 +79,15 @@ public class MainScheduleFragment extends RaceFragment implements OnClickListene
         }
 
         openTabFragment();
+    }
+    
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+        if (mCurrent != null) {
+            outState.putString("fragment", mCurrent.getClass().getName());
+        }
     }
 
     @Override
@@ -87,7 +113,8 @@ public class MainScheduleFragment extends RaceFragment implements OnClickListene
     }
 
     private void openFragment() {
-        getFragmentManager().beginTransaction().replace(R.id.sub_fragment, mCurrent).commit();
+        RacingActivity activity = (RacingActivity) getActivity();
+        activity.replaceFragment(mCurrent);
     }
 
     private void openTabFragment() {

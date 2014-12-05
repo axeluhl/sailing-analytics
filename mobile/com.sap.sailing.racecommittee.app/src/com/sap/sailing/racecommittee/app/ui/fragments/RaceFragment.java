@@ -15,7 +15,7 @@ import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 
-    // private static final String TAG = RaceFragment.class.getName();
+    private static final String TAG = RaceFragment.class.getName();
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
@@ -82,5 +82,4 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     public void notifyTick() {
         // see subclasses.
     }
-
 }

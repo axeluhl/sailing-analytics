@@ -26,7 +26,6 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -114,6 +113,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private RaceInfoFragment infoFragment;
     private Wind mWind;
     private NavigationDrawerFragment navDrawerFragment;
+    private RaceFragment raceFragment;
     private ManagedRace selectedRace;
     private Button windButton;
 
@@ -256,18 +256,26 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             if (mWind != null) {
                 onWindEntered(mWind);
             }
+            Bundle args = savedInstanceState.getBundle("childBundle");
+            if (args != null) {
+                infoFragment = new RaceInfoFragment();
+                infoFragment.setArguments(args);
+            }
         }
 
         Serializable eventId = getEventIdFromItent();
         if (eventId == null) {
             throw new IllegalStateException("There was no event id transmitted...");
         }
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.racing_view_right_container,
-                        new WelcomeFragment(dataManager.getDataStore(), courseAreaId, eventId, preferences.getAuthor()))
-                .commit();
 
+        if (infoFragment == null) {
+            getFragmentManager()
+                    .beginTransaction()
+                    .replace(
+                            R.id.racing_view_right_container,
+                            new WelcomeFragment(dataManager.getDataStore(), courseAreaId, eventId, preferences
+                                    .getAuthor())).commit();
+        }
     }
 
     @Override
@@ -307,6 +315,9 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         super.onSaveInstanceState(outState);
 
         outState.putSerializable("wind", mWind);
+        if (infoFragment != null) {
+            outState.putBundle("childBundle", infoFragment.getArguments());
+        }
     }
 
     @Override
@@ -357,6 +368,19 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
+    public void replaceFragment(RaceFragment fragment) {
+        replaceFragment(fragment, R.id.sub_fragment);
+    }
+
+    public void replaceFragment(RaceFragment fragment, int viewId) {
+        raceFragment = fragment;
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(viewId, raceFragment);
+        // transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
     @Override
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
         super.setSupportProgressBarIndeterminateVisibility(visible);
@@ -368,24 +392,5 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 mProgressSpinner.setVisibility(View.GONE);
             }
         }
-    }
-
-    private void setupActionBar(CourseArea courseArea) {
-        RaceLogEventAuthor author = preferences.getAuthor();
-        String title = String.format(getString(R.string.racingview_header), courseArea.getName());
-        title += " (" + author.getName() + ")";
-
-        getSupportActionBar().setTitle(title);
-    }
-
-    public void replaceFragment(RaceFragment fragment) {
-        replaceFragment(fragment, R.id.sub_fragment);
-    }
-
-    public void replaceFragment(RaceFragment fragment, int viewId) {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(viewId, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
     }
 }
