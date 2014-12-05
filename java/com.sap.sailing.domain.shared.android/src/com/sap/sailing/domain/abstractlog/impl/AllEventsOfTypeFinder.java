@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 
 /**
@@ -13,7 +13,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
  *
  */
 public class AllEventsOfTypeFinder<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>,
-VisitorT> extends AbstractLogAnalyzer<LogT, EventT, VisitorT, List<EventT>> {
+VisitorT> extends BaseLogAnalyzer<LogT, EventT, VisitorT, List<EventT>> {
     private final Class<?> ofType;
     private final boolean onlyUnrevoked;
 

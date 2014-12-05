@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
@@ -18,7 +18,7 @@ import com.sap.sailing.domain.base.Competitor;
  *
  */
 public class RegisteredCompetitorsAnalyzer<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT>
-        extends AbstractLogAnalyzer<LogT, EventT, VisitorT, Set<Competitor>> {
+        extends BaseLogAnalyzer<LogT, EventT, VisitorT, Set<Competitor>> {
 
     public RegisteredCompetitorsAnalyzer(LogT log) {
         super(log);

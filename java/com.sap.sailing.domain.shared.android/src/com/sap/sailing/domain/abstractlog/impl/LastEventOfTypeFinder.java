@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.abstractlog.impl;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 
 /**
@@ -10,7 +10,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
  *
  */
 public class LastEventOfTypeFinder<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>,
-VisitorT> extends AbstractLogAnalyzer<LogT, EventT, VisitorT, EventT> {
+VisitorT> extends BaseLogAnalyzer<LogT, EventT, VisitorT, EventT> {
     private final Class<?> ofType;
     private final boolean onlyUnrevoked;
 

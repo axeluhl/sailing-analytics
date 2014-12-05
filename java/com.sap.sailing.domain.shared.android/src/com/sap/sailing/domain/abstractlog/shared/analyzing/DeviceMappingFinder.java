@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.shared.events.CloseOpenEndedDeviceMappingEvent;
@@ -36,7 +36,7 @@ import com.sap.sse.common.WithID;
  * according {@code CloseOpenEndedDeviceMappingEvent} exists.
  */
 public class DeviceMappingFinder<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>,
-VisitorT, ItemT extends WithID> extends AbstractLogAnalyzer<LogT, EventT, VisitorT, Map<ItemT, List<DeviceMapping<ItemT>>>> {
+VisitorT, ItemT extends WithID> extends BaseLogAnalyzer<LogT, EventT, VisitorT, Map<ItemT, List<DeviceMapping<ItemT>>>> {
     private static Logger logger = Logger.getLogger(DeviceMappingFinder.class.getName());
     
     public DeviceMappingFinder(LogT log) {

@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
@@ -12,6 +15,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.leaderboard.HasRegattaLog;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -99,5 +103,14 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
     
     public DomainFactory getDomainFactory() {
         return domainFactory;
+    }
+    
+    public List<AbstractLog<?, ?>> getLogHierarchy() {
+        List<AbstractLog<?, ?>> result = new ArrayList<>();
+        result.add(getRaceLog());
+        if (leaderboard instanceof HasRegattaLog) {
+            result.add(((HasRegattaLog) leaderboard).getRegattaLog());
+        }
+        return result;
     }
 }

@@ -1,18 +1,17 @@
 package com.sap.sailing.domain.abstractlog;
 
-
 /**
  * Analyzer to perform a query over a given AbstractLog. Each subclass defines its <code>ResultType</code>.
  * 
- * @param <ResultType>
+ * @param <ResultT>
  *            type of analysis result.
  */
-public abstract class AbstractLogAnalyzer<LogT extends AbstractLog<EventT, VisitorT>,
-EventT extends AbstractLogEvent<VisitorT>, VisitorT, ResultType> {
+public abstract class BaseLogAnalyzer<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT, ResultT>
+        implements LogAnalyzer<ResultT> {
 
     protected LogT log;
 
-    public AbstractLogAnalyzer(LogT log) {
+    public BaseLogAnalyzer(LogT log) {
         this.log = log;
     }
 
@@ -20,7 +19,8 @@ EventT extends AbstractLogEvent<VisitorT>, VisitorT, ResultType> {
         return log;
     }
 
-    public ResultType analyze() {
+    @Override
+    public ResultT analyze() {
         log.lockForRead();
         try {
             return performAnalysis();
@@ -29,7 +29,7 @@ EventT extends AbstractLogEvent<VisitorT>, VisitorT, ResultType> {
         }
     }
 
-    protected abstract ResultType performAnalysis();
+    protected abstract ResultT performAnalysis();
 
     protected Iterable<EventT> getAllEvents() {
         return log.getRawFixes();

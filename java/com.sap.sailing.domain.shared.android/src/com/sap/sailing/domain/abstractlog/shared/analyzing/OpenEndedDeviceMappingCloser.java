@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.shared.events.CloseOpenEndedDeviceMappingEvent;
@@ -22,7 +22,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public abstract class OpenEndedDeviceMappingCloser<LogT extends AbstractLog<EventT, VisitorT>,
 EventT extends AbstractLogEvent<VisitorT>,VisitorT, CloseEventT extends CloseOpenEndedDeviceMappingEvent<VisitorT>>
-extends AbstractLogAnalyzer<LogT, EventT, VisitorT, List<CloseEventT>> {
+extends BaseLogAnalyzer<LogT, EventT, VisitorT, List<CloseEventT>> {
     private final DeviceMapping<?> mapping;
     protected final AbstractLogEventAuthor author;
     protected final TimePoint closingTimePoint;

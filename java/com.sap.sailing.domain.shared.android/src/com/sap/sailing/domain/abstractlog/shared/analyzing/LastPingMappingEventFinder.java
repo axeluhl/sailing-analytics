@@ -1,14 +1,14 @@
 package com.sap.sailing.domain.abstractlog.shared.analyzing;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sse.common.WithID;
 
 public class LastPingMappingEventFinder <LogT extends AbstractLog<EventT, VisitorT>,
 EventT extends AbstractLogEvent<VisitorT>, VisitorT, ItemT extends WithID>
-extends AbstractLogAnalyzer<LogT, EventT, VisitorT, DeviceMappingEvent<VisitorT, ItemT>> {
+extends BaseLogAnalyzer<LogT, EventT, VisitorT, DeviceMappingEvent<VisitorT, ItemT>> {
     private final WithID item;
     
     public LastPingMappingEventFinder(LogT log, WithID forItem) {
