@@ -76,5 +76,7 @@
 	<string name="tracking_colon">Tracke:</string>
 	<string name="tracking_gps_accuracy">GPS Genauigkeit</string>
 	<string name="regatta_in_progress">Die Regatta findet gerade statt.</string>
+	<string name="hud_heading_prefix">HDG: </string>
+	<string name="hud_speed_over_ground_prefix">SPD: </string>
 
 </resources>
