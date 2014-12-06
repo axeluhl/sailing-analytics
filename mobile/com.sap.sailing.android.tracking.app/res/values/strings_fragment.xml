@@ -36,4 +36,6 @@
 	<string name="tracking_status_tracking">Tracking running</string>
 	<string name="tracking_status_not_tracking">Tracking stopped</string>
 	<string name="tracking_status_no_gps_signal">No GPS Signal!</string>
+	<string name="hud_heading_prefix">HDG: </string>
+	<string name="hud_speed_over_ground_prefix">SPD: </string>
 </resources>

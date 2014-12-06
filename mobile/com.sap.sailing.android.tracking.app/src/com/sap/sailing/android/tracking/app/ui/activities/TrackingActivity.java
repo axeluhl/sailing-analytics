@@ -87,6 +87,9 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     	super.onWindowFocusChanged(hasFocus);
     	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
     	hudFragment.layoutOverlay();
+    	
+    	hudFragment.setSpeedOverGround(0);
+    	hudFragment.setHeading(0);
     }
     
     @Override

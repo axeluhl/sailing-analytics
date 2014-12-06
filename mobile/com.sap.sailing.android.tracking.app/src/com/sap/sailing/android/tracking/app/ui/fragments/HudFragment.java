@@ -8,8 +8,8 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.LinearInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.sap.sailing.android.tracking.app.R;
 
@@ -31,6 +31,18 @@ public class HudFragment extends BaseFragment {
 		layout.setOnTouchListener(new OverlayOnTouchListener());
 		
 		return view;
+	}
+	
+	public void setHeading(float heading)
+	{
+		TextView headingLabel = (TextView)getActivity().findViewById(R.id.hud_hdg_label);
+		headingLabel.setText(getString(R.string.hud_heading_prefix) + String.valueOf(heading) + "°");
+	}
+	
+	public void setSpeedOverGround(float speed)
+	{
+		TextView speedLabel = (TextView)getActivity().findViewById(R.id.hud_speed_label);
+		speedLabel.setText(getString(R.string.hud_speed_over_ground_prefix) + String.valueOf(speed) + "kn");
 	}
 	
 	/**
@@ -69,12 +81,12 @@ public class HudFragment extends BaseFragment {
 			case MotionEvent.ACTION_UP:
 				int treshold = Math.round((maxTranslateY - minTranslateY) / 2);
 				if (lastTranslation < treshold) {
-					view.animate().translationY(minTranslateY).setDuration(500)
+					view.animate().translationY(minTranslateY).setDuration(100)
 							.setInterpolator(new LinearInterpolator()).start();
 
 					lastTranslation = (int) minTranslateY;
 				} else {
-					view.animate().translationY(maxTranslateY).setDuration(100)
+					view.animate().translationY(maxTranslateY).setDuration(500)
 							.setInterpolator(new BounceInterpolator()).start();
 
 					lastTranslation = (int) maxTranslateY;
