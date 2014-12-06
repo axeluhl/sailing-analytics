@@ -32,7 +32,6 @@ public class MainMedia extends Composite {
     @UiField
     ImageCarousel imageCarousel;
 
-    // private Swiper swiper;
     private int videoCounter;
 
     interface MainMediaUiBinder extends UiBinder<Widget, MainMedia> {
