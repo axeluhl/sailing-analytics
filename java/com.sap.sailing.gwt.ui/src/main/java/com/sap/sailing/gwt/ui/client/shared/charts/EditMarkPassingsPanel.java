@@ -147,10 +147,12 @@ public class EditMarkPassingsPanel extends FlexTable implements
 								if (date != null) {
 									string = date.toString();
 									string = string.substring(10, 20);
-									if(currentCompetitorEdits.containsKey(object.getA())){
+									if (currentCompetitorEdits
+											.containsKey(object.getA())) {
 										string = string + " (f)";
 									}
-								} else if (!(object.getA()<zeroBasedIndexOfFirstSuppressedWaypoint)){
+								} else if (zeroBasedIndexOfFirstSuppressedWaypoint != null
+										&& !(object.getA() < zeroBasedIndexOfFirstSuppressedWaypoint)) {
 									string = "(s)";
 								}
 								return string;
