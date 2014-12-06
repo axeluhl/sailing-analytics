@@ -49,7 +49,7 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
     }
 
     private static StageTeaserUiBinder uiBinder = GWT.create(StageTeaserUiBinder.class);
-    private EventBaseDTO event;
+    private final EventBaseDTO event;
 
     @Override
     public void doInitializeLazyComponents() {
