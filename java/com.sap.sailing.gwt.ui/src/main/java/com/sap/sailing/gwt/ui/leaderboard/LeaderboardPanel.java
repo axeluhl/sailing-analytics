@@ -85,7 +85,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
@@ -167,8 +166,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private final TotalRankColumn totalRankColumn;
     
     private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
-
-    //private final EditMarkPassingsPanel markPassingsPanel;
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -1714,13 +1711,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionCheckboxColumn.getSelectionManager());
         setShowAddedScores(settings.isShowAddedScores());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
-        // the mark passings panel needs to be created before createToolbarPanel and before loadCompleteLeaderboard(...), but added after the information panel
-        /*if (preSelectedRace != null) {
-            markPassingsPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, preSelectedRace,
-                    stringMessages, competitorSelectionProvider, errorReporter, timer);
-        } else {
-            markPassingsPanel = null;
-        }*/
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(getLeaderboardDisplayDate());
         }
@@ -1747,10 +1737,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             });
             this.competitorFilterPanel = competitorSearchTextBox;
         }
-        /*if (markPassingsPanel != null) {
-            contentPanel.add(markPassingsPanel);
-            contentPanel.add(markPassingsPanel.getEditButton());
-        }*/
         SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
         leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
         filterControlPanel = new HorizontalPanel();
@@ -1816,9 +1802,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         refreshAndSettingsPanel.add(refreshPanel);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        /*if (markPassingsPanel != null) {
-            contentPanel.add(markPassingsPanel.getEditButton());
-        }*/
         return toolbarPanel;
     }
 
@@ -2202,9 +2185,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
             raceColumnSelection.autoUpdateRaceColumnSelectionForUpdatedLeaderboard(getLeaderboard(), leaderboard);
             setLeaderboard(leaderboard);
-            /*if (markPassingsPanel != null) {
-                markPassingsPanel.setLeaderboard(leaderboard);
-            }*/
             adjustColumnLayout(leaderboard);
             updateRaceColumnDTOsToRaceColumns(leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {

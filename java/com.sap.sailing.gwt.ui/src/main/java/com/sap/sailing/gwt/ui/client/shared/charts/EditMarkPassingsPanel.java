@@ -43,10 +43,13 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public class EditMarkPassingsPanel extends FlexTable implements
 		Component<Void>, RaceSelectionChangeListener,
-		CompetitorSelectionChangeListener {
+		CompetitorSelectionChangeListener, UserStatusEventHandler {
 
 	private static class AnchorCell extends AbstractCell<SafeHtml> {
 		@Override
@@ -83,13 +86,18 @@ public class EditMarkPassingsPanel extends FlexTable implements
 			final RegattaAndRaceIdentifier raceIdentifier,
 			StringMessages stringMessages,
 			final CompetitorSelectionProvider competitorSelectionModel,
-			final ErrorReporter errorReporter, final Timer timer) {
+			final ErrorReporter errorReporter, final Timer timer,
+			UserService userService) {
 		this.sailingService = sailingService;
 		this.raceIdentifier = raceIdentifier;
 		this.asyncExecutor = asyncActionsExecutor;
 		this.errorReporter = errorReporter;
 		this.competitorSelectionModel = competitorSelectionModel;
 		competitorSelectionModel.addCompetitorSelectionChangeListener(this);
+		userService.addUserStatusEventHandler(this);
+		Iterable<String> roles = userService.getCurrentUser().getRoles();
+		setVisible(Util.contains(roles, "admin")
+				|| Util.contains(roles, "eventmanager"));
 
 		// Waypoint list
 		currentWaypoints = new ArrayList<>();
@@ -285,7 +293,6 @@ public class EditMarkPassingsPanel extends FlexTable implements
 		setWidget(2, 1, removeFixedMarkPassingsButton);
 		setWidget(3, 0, suppressPassingsButton);
 		setWidget(3, 1, removeSuppressedPassingButton);
-		setVisible(false);
 	}
 
 	@Override
@@ -445,7 +452,6 @@ public class EditMarkPassingsPanel extends FlexTable implements
 
 	@Override
 	public SettingsDialogComponent<Void> getSettingsDialogComponent() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -468,5 +474,12 @@ public class EditMarkPassingsPanel extends FlexTable implements
 	public String getDependentCssClassName() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void onUserStatusChange(UserDTO user) {
+		Iterable<String> roles = user.getRoles();
+		setVisible(Util.contains(roles, "admin")
+				|| Util.contains(roles, "eventmanager"));
 	}
 }
