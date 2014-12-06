@@ -17,4 +17,16 @@ public abstract class BaseFragment extends Fragment {
         prefs = new AppPreferences(getActivity());
         return super.onCreateView(inflater, container, savedInstanceState);
     }
+    
+	protected float dpToPx(float dp)
+	{
+		float density = getActivity().getResources().getDisplayMetrics().density;
+		return dp * density;
+	}
+
+	protected float pxToDp(float px)
+	{
+		float density = getActivity().getResources().getDisplayMetrics().density;
+		return px / density;
+	}
 }
