@@ -24,16 +24,6 @@
             android:textColor="@color/black"
             android:textStyle="bold" />
 
-         <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
-            android:id="@+id/hud_course_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="BER: ???°"
-            android:gravity="center"
-            android:textColor="@color/black"
-            android:textStyle="bold" />
-         
         <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
             android:id="@+id/hud_speed_label"
             android:layout_width="match_parent"

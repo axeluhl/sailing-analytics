@@ -82,13 +82,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         startTrackingService(eventId);
     }
     
-//    @Override
-//    public void onWindowFocusChanged(boolean hasFocus) {
-//    	super.onWindowFocusChanged(hasFocus);
-//    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
-//    	hudFragment.layoutOverlay();
-//    }
-//    
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+    	super.onWindowFocusChanged(hasFocus);
+    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
+    	hudFragment.layoutOverlay();
+    }
+    
     @Override
     protected void onSaveInstanceState(Bundle outState) {
     	super.onSaveInstanceState(outState);
