@@ -13,7 +13,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -48,21 +47,22 @@ public class StartActivity extends AbstractActivity {
 
     protected void fillStartPageEvents(final StartView view, List<EventBaseDTO> events) {
         List<Pair<StageEventType, EventBaseDTO>> featuredEvents = new ArrayList<Pair<StageEventType, EventBaseDTO>>();
-        List<EventBaseDTO> recentEventsOfSameYear = new ArrayList<EventBaseDTO>();
+        List<EventBaseDTO> recentEventsOfLast12Month = new ArrayList<EventBaseDTO>();
         List<EventBaseDTO> upcomingSoonEvents = new ArrayList<EventBaseDTO>();
         List<EventBaseDTO> popularEvents = new ArrayList<EventBaseDTO>();
         Date now = new Date();
-        int currentYear = DateUtil.getYear(now);
         final int MAX_STAGE_EVENTS = 5;
-        final long FOUR_WEEK_IN_MS = 4L * (1000 * 60 * 60 * 24 * 7);
+        final long ONE_DAY_IN_MS = (1000 * 60 * 60 * 24);
+        final long FOUR_WEEK_IN_MS = 4L * 7 * ONE_DAY_IN_MS;
+        final long ONE_YEAR_IN_MS = 365 * ONE_DAY_IN_MS;
         for (EventBaseDTO event : events) {
             if (event.startDate != null && event.endDate != null) {
                 if (now.after(event.startDate) && now.before(event.endDate)) {
                     featuredEvents.add(new Pair<StageEventType, EventBaseDTO>(StageEventType.RUNNING, event));
                 } else if (event.startDate.after(now) && event.startDate.getTime() - now.getTime() < FOUR_WEEK_IN_MS) {
                     upcomingSoonEvents.add(event);
-                } else if (event.endDate.before(now) && DateUtil.getYear(event.endDate) == currentYear) {
-                    recentEventsOfSameYear.add(event);
+                } else if (event.endDate.before(now) && event.endDate.getTime() > now.getTime() - ONE_YEAR_IN_MS) {
+                    recentEventsOfLast12Month.add(event);
                 }
             }
         }
@@ -74,11 +74,11 @@ public class StartActivity extends AbstractActivity {
         }
         // fallback for the case we did not find any events
         if (featuredEvents.size() < MAX_STAGE_EVENTS) {
-            fillingUpEventsList(MAX_STAGE_EVENTS, featuredEvents, StageEventType.POPULAR, recentEventsOfSameYear);
+            fillingUpEventsList(MAX_STAGE_EVENTS, featuredEvents, StageEventType.POPULAR, recentEventsOfLast12Month);
         }
         Collections.sort(featuredEvents, new FeaturedEventsComparator());
         view.setFeaturedEvents(featuredEvents);
-        view.setRecentEvents(recentEventsOfSameYear);
+        view.setRecentEvents(recentEventsOfLast12Month);
         // See bug 2232: the stage image sizes are scaled incorrectly. https://github.com/ubilabs/sap-sailing-analytics/issues/421 and
         // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2232 have the details. A quick fix may be to send a resize event
         // after everything has been rendered.
