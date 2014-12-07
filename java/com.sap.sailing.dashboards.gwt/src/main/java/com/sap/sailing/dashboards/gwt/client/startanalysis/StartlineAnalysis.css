@@ -129,7 +129,7 @@
 	background-color: white;
 	line-height: 20pt;
 	vertical-align: middle;
-	font-size: 11pt;
+	font-size: 10pt;
 	font-family: "Arial";
 	text-align: center;
 }
@@ -152,16 +152,16 @@
 
 .startanalysis_card_line_data_wind {
 	top: 0pt;
-	left: 160pt;
-	width: 85pt;
+	left: 150pt;
+	width: 80pt;
 	text-align: left;
 	padding-left: 7pt;
 }
 
 .startanalysis_card_line_data_geo {
 	top: 0pt;
-	left: 245pt;
-	width: 105pt;
+	left: 235pt;
+	width: 90pt;
 	text-align: left;
 }
 

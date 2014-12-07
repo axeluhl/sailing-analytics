@@ -122,7 +122,7 @@
 					<!-- GWT version detected from dependencyManagement -->
 					<execution>
 						<configuration>
-							<extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
+							<extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx4096m</extraJvmArgs>
 							<!-- <userAgents>chrome</userAgents> -->
 							<modules>
 								<module>com.sap.sailing.dashboards.gwt.RibDashboard</module>
