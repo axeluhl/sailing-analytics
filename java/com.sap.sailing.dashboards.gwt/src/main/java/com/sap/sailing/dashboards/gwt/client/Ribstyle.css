@@ -48,7 +48,7 @@
 .collumn {
 	position: absolute;
 	top: 5pt;
-	bottom: 0pt;
+	bottom: 15pt;
 	margin: 5pt;
 }
 
@@ -173,6 +173,19 @@
 .hint {
 	height: 100%;
 	line-height: 25pt;
+	margin-top: 0pt;
+	vertical-align: middle;
+	font-size: 12pt;
+	font-family: "Arial";
+	width: 100%;
+	text-align: center;
+}
+
+.windcharthint{
+	position: absolute;
+	bottom: 0pt;
+	height: 15pt;
+	line-height: 15pt;
 	margin-top: 0pt;
 	vertical-align: middle;
 	font-size: 12pt;

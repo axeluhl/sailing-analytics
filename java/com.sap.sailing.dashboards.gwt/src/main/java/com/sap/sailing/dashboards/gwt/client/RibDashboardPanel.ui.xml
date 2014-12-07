@@ -22,6 +22,7 @@
 					<g:HTMLPanel ui:field="rightwindbotcontainer"
 						styleName="{style.collumn} {style.right}">
 					</g:HTMLPanel>
+					<g:HTMLPanel styleName="{style.windcharthint}">Tab on chart to change interval.</g:HTMLPanel>
 				</mgwtpanel:Panel>
 				<mgwtpanel:Panel styleName="{style.page}">
 					<g:HTMLPanel styleName="{style.collumn} {style.startanalysiscollumn}">

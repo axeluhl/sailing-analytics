@@ -9,8 +9,6 @@
 	<g:FlowPanel styleName="{style.flowPanelContainer}">
 		<highcharts:Chart ui:field="verticalWindChart"
 			styleName="{style.verticalWindChart}"></highcharts:Chart>
-		<g:HTMLPanel ui:field="verticalWindChartClickHint"
-			styleName="{style.verticalWindChartClickHint}">Tab chart for change to <span ui:field="clickHintMinutesSpan" class="{style.clickHintMinutesSpan}">15</span> minutes intervall</g:HTMLPanel>
 	<g:FocusPanel ui:field="verticalWindChartClickArea" styleName="{style.verticalWindChartClickArea}"></g:FocusPanel>
 	</g:FlowPanel>
 

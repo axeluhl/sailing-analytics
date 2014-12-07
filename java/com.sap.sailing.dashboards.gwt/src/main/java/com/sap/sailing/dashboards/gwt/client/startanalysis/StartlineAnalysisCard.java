@@ -109,9 +109,9 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
             this.startanalysis_card_wind_data_speed
                     .setInnerHTML(NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.windSpeedInKnots) + " kts");
             this.startanalysis_card_line_data
-            .setInnerHTML("Startline Advantage");
-            this.startanalysis_card_line_data_wind.setInnerHTML("Wind: "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageAtPinEnd) + " m");
-            this.startanalysis_card_line_data_geo.setInnerHTML("Geometry: "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageByGeometry) + " m");
+            .setInnerHTML("Startline Advantage:");
+            this.startanalysis_card_line_data_wind.setInnerHTML("<b>Wind:</b> "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageAtPinEnd) + " m");
+            this.startanalysis_card_line_data_geo.setInnerHTML("<b>Geometry:</b> "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageByGeometry) + " m");
         }
     }
 

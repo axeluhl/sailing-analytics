@@ -26,7 +26,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.BarPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -35,7 +34,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardEntryPoint;
@@ -88,12 +86,6 @@ public class VerticalWindChart extends Composite implements HasWidgets {
 
     @UiField(provided = true)
     Chart verticalWindChart;
-
-    @UiField
-    HTMLPanel verticalWindChartClickHint;
-
-    @UiField
-    SpanElement clickHintMinutesSpan;
 
     public VerticalWindChart() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -295,7 +287,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
             chartIntervallinMinutes = SMALL_DISPLAY_INTERVALL_IN_MINUTES;
         }
         adaptVerticalWindChartExtemes();
-        notifyVerticalWindChartClickListeners(SMALL_DISPLAY_INTERVALL_IN_MINUTES);
+        notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
     }
 
     @Override
