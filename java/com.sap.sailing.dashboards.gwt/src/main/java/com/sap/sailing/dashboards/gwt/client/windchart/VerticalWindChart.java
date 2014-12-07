@@ -1,6 +1,8 @@
 package com.sap.sailing.dashboards.gwt.client.windchart;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +39,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardEntryPoint;
-import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
 
 /**
  * The class represents a wind chart that is displayed vertically. Because it is meant to be used to display wind fixes,
@@ -53,6 +54,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
     private Series verticalWindChartSeries;
     private String positiveSeriesColorAsHex;
     private String negativeSeriesColorAsHex;
+    private List<VerticalWindChartClickListener> verticalWindChartClickListeners;
 
     /**
      * The field is used to cache the current selected display interval. It is either
@@ -109,6 +111,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         setYAxisOptions();
         positiveSeriesColorAsHex = positiveFillColor;
         negativeSeriesColorAsHex = negativeFillColor;
+        verticalWindChartClickListeners = new ArrayList<VerticalWindChartClickListener>();
     }
 
     private void setChartOptions() {
@@ -265,6 +268,20 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         }
         return firstPointOfVerticalWindChartSeries;
     }
+    
+    public void addVerticalWindChartClickListener(VerticalWindChartClickListener verticalWindChartClickListener) {
+        verticalWindChartClickListeners.add(verticalWindChartClickListener);
+    }
+    
+    public void removeVerticalWindChartClickListener(VerticalWindChartClickListener verticalWindChartClickListener) {
+        verticalWindChartClickListeners.remove(verticalWindChartClickListener);
+    }
+    
+    public void notifyVerticalWindChartClickListeners(int intervalInMillis) {
+        for (VerticalWindChartClickListener verticalWindChartClickListener : verticalWindChartClickListeners) {
+            verticalWindChartClickListener.clickedWindChartWithNewIntervalChangeInMillis(intervalInMillis);
+        }
+    }
 
     /**
      * The method handles a click on the vertical wind charts focus panel. It changes the display interval of the x-axis
@@ -278,7 +295,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
             chartIntervallinMinutes = SMALL_DISPLAY_INTERVALL_IN_MINUTES;
         }
         adaptVerticalWindChartExtemes();
-        clickHintMinutesSpan.setInnerHTML("" + chartIntervallinMinutes);
+        notifyVerticalWindChartClickListeners(SMALL_DISPLAY_INTERVALL_IN_MINUTES);
     }
 
     @Override

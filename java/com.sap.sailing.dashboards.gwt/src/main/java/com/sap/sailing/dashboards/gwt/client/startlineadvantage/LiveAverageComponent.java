@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.dashboards.gwt.client.windchart.VerticalWindChartClickListener;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 
 /**
@@ -25,7 +26,7 @@ import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
  * @author Alexander Ries (D062114)
  *
  */
-public class LiveAverageComponent extends Composite implements HasWidgets {
+public class LiveAverageComponent extends Composite implements HasWidgets, VerticalWindChartClickListener {
 
     private static LiveAverageComponentUiBinder uiBinder = GWT.create(LiveAverageComponentUiBinder.class);
 
@@ -94,8 +95,8 @@ public class LiveAverageComponent extends Composite implements HasWidgets {
             this.liveUnit.getStyle().setPosition(Position.ABSOLUTE);
             this.averageUnit.getStyle().setPosition(Position.ABSOLUTE);
         }
-        this.liveLabel.setInnerText("live");
-        this.averageLabel.setInnerText("average");
+        this.liveLabel.setInnerHTML("live");
+        this.averageLabel.setInnerHTML("average<br>(15 minutes)");
     }
 
     public void updateValues(String liveValue, String averageValue) {
@@ -122,5 +123,14 @@ public class LiveAverageComponent extends Composite implements HasWidgets {
     @Override
     public boolean remove(Widget w) {
         return false;
+    }
+
+    @Override
+    public void clickedWindChartWithNewIntervalChangeInMillis(int windChartIntervallInMillis) {
+        if(windChartIntervallInMillis > 15){
+            this.averageLabel.setInnerHTML("average<br>(1 hour)");
+        }else{
+            this.averageLabel.setInnerHTML("average<br>(15 minutes)");
+        }
     }
 }

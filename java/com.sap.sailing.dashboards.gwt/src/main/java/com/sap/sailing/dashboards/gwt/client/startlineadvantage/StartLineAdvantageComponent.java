@@ -50,8 +50,8 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
                         .changeStartLineAdvatageComponentsStateToOtherState(StartLineAdvantageComponent.this);
             }
         });
-        this.liveLabel.setInnerText("live");
-        this.averageLabel.setInnerText("average");
+        this.liveLabel.setInnerHTML("live");
+        this.averageLabel.setInnerHTML("average<br>(1 hour)");
         RibDashboardDataRetriever.getInstance().addDataObserver(this);
     }
 

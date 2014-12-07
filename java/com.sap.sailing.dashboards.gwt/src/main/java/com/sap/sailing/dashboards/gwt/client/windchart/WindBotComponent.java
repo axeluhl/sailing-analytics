@@ -103,7 +103,8 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
 
     public WindBotComponent(String windBotId) {
         this.windBotId = windBotId;
-        if (Window.Location.getParameter(IN_SIMULATION_MODE).toString().equals("true")) {
+        String inSimulationModeParameter = Window.Location.getParameter(IN_SIMULATION_MODE);
+        if (inSimulationModeParameter != null && inSimulationModeParameter.equals("true")) {
             inSimulationMode = true;
             this.speedSinWave = new SinWave(50, 8);
             this.directionSinWave = new SinWave(100, 8);
@@ -114,6 +115,8 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
         movingAverageDirection = new MovingAverage(500);
         initWidget(uiBinder.createAndBindUi(this));
         windBotNamePanel.getElement().setInnerText("Wind Bot " + windBotId);
+        trueWindSpeedVerticalWindChart.addVerticalWindChartClickListener(trueWindSpeedLiveAverageComponent);
+        trueWindDirectionVerticalWindChart.addVerticalWindChartClickListener(trueWindDirectionLiveAverageComponent);
     }
 
     public WindTrackInfoDTO getWindTrackInfoDTOFromAndWindBotID(WindInfoForRaceDTO windInfoForRaceDTO, String id) {
