@@ -1,12 +1,15 @@
 package com.sap.sailing.dashboards.gwt.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotification;
 import com.sap.sailing.dashboards.gwt.client.device.Location;
 import com.sap.sailing.dashboards.gwt.client.popups.RacingNotYetStartedPopup;
 import com.sap.sailing.dashboards.gwt.client.popups.RacingNotYetStartedPopupListener;
@@ -15,6 +18,10 @@ import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.Competit
 import com.sap.sailing.dashboards.gwt.client.startanalysis.NewStartAnalysisListener;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sse.gwt.client.player.TimeListener;
 
 /**
  * Class calls method {@link #requestLiveRaceInfoFromRibDashboadService()) to retrieve new
@@ -24,36 +31,38 @@ import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
  * @author Alexander Ries
  * 
  */
-public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListener, CompetitorSelectionPopupListener{
+public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListener, CompetitorSelectionPopupListener,
+        TimeListener, RaceSelectionProvider {
 
     private int numberOfChachedStartAnalysisDTOs;
     private String leaderboardGroupName;
-    private Timer dataRetrieverTimer;
     private ArrayList<RibDashboardDataRetrieverListener> dataRetrieverListener;
     private ArrayList<NewStartAnalysisListener> newStartAnalysisListeners;
+    private ArrayList<RaceSelectionChangeListener> raceSelectionChangeListener;
 
     private final RibDashboardServiceAsync ribDashboardService;
-    private final Object MUTEX = new Object();
+
+    private final Object MUTEX;
 
     private static RibDashboardDataRetriever INSTANCE = null;
 
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardName";
-    private static final int REQUEST_INTERVAL = 5000;
-    
+
     private String selectedTeamName;
-    
+
     private CompetitorSelectionPopup competitorSelectionPopup;
     private RacingNotYetStartedPopup popupRacingNotYetStarted;
+    private BottomNotification bottomNotification;
 
     public RibDashboardDataRetriever() {
-        dataRetrieverListener = new ArrayList<RibDashboardDataRetrieverListener>();
-        newStartAnalysisListeners = new ArrayList<NewStartAnalysisListener>();
+        initNonFinalMemberVariablesWithNoArgumentConstructor();
+        initRacingNotYetStartedPopup();
+        MUTEX = new Object();
         ribDashboardService = GWT.create(RibDashboardService.class);
         this.leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
         numberOfChachedStartAnalysisDTOs = 0;
-        popupRacingNotYetStarted = new RacingNotYetStartedPopup();
-        popupRacingNotYetStarted.addListener(this);
-        startRequestingData();
+        competitorSelectionPopup = new CompetitorSelectionPopup();
+        initBottomNotification();
     }
 
     public static RibDashboardDataRetriever getInstance() {
@@ -65,36 +74,33 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
         return INSTANCE;
     }
 
-    public void startRequestingData() {
-        if (dataRetrieverTimer == null) {
-
-            dataRetrieverTimer = new Timer() {
-                @Override
-                public void run() {
-                    requestLiveRaceInfoFromRibDashboadService();
-                }
-            };
-            dataRetrieverTimer.scheduleRepeating(REQUEST_INTERVAL);
-            dataRetrieverTimer.run();
-        }
+    private void initRacingNotYetStartedPopup() {
+        popupRacingNotYetStarted = new RacingNotYetStartedPopup();
+        popupRacingNotYetStarted.addListener(this);
     }
 
-    private void stopRequestingData() {
-        if (dataRetrieverTimer.isRunning()) {
-            dataRetrieverTimer.cancel();
-            dataRetrieverTimer = null;
-        }
+    private void initBottomNotification() {
+        bottomNotification = new BottomNotification();
+        RootPanel.get().add(bottomNotification);
     }
 
-    private void requestLiveRaceInfoFromRibDashboadService() {
-    	System.out.println("Request with team "+selectedTeamName);
+    private void initNonFinalMemberVariablesWithNoArgumentConstructor() {
+        dataRetrieverListener = new ArrayList<RibDashboardDataRetrieverListener>();
+        newStartAnalysisListeners = new ArrayList<NewStartAnalysisListener>();
+        raceSelectionChangeListener = new ArrayList<RaceSelectionChangeListener>();
+    }
+
+    private void loadLiveRaceInfoFromRibDashboadService() {
         ribDashboardService.getLiveRaceInfo(leaderboardGroupName, selectedTeamName,
                 new AsyncCallback<RibDashboardRaceInfoDTO>() {
                     @Override
                     public void onSuccess(RibDashboardRaceInfoDTO result) {
                         switch (result.responseMessage) {
                         case OK:
-                            popupRacingNotYetStarted.hide(true);
+                            popupRacingNotYetStarted.hide(/* remove blur effect */true);
+                            List<RegattaAndRaceIdentifier> singletonList = Collections
+                                    .singletonList(result.idOfLastTrackedRace);
+                            setSelection(singletonList);
                             if (result.startAnalysisDTOList != null) {
                                 int numberOfReceivedStartAnalysisDTOs = result.startAnalysisDTOList.size();
                                 if (numberOfChachedStartAnalysisDTOs != numberOfReceivedStartAnalysisDTOs) {
@@ -103,21 +109,25 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
                                 }
                             }
                             notifyDataObservers(result);
+                            competitorSelectionPopup.hide();
                             break;
                         case NO_COMPETITOR_SELECTED:
                             popupRacingNotYetStarted.hide(true);
                             if (result.competitorNamesFromLastTrackedRace != null
-                                    && result.competitorNamesFromLastTrackedRace.size() > 0) {
-                                competitorSelectionPopup = new CompetitorSelectionPopup(
-                                        result.competitorNamesFromLastTrackedRace);
+                                    && result.competitorNamesFromLastTrackedRace.size() > 0 && !competitorSelectionPopup.isShown()) {
+                                competitorSelectionPopup.setCompetitorList(result.competitorNamesFromLastTrackedRace);
                                 competitorSelectionPopup.addListener(RibDashboardDataRetriever.this);
                                 competitorSelectionPopup.show();
-                                stopRequestingData();
                             }
                             break;
                         case NO_RACE_LIVE:
-                            popupRacingNotYetStarted.showWithMessageAndImageAndButtonText("Racing not yet started", RibDashboardImageResources.INSTANCE.beach(), "Retry");
-                            stopRequestingData();
+                            if (numberOfChachedStartAnalysisDTOs == 0) {
+                                popupRacingNotYetStarted.showWithMessageAndImageAndButtonText("Racing not yet started",
+                                        RibDashboardImageResources.INSTANCE.beach(), "Retry");
+                            } else {
+                                bottomNotification.show("Race finished!", "#418bcb", "#FFFFFF", false);
+                                setSelection(null);
+                            }
                             break;
                         default:
                             break;
@@ -178,13 +188,57 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
 
     @Override
     public void popupButtonClicked() {
-        startRequestingData();
     }
 
     @Override
     public void didClickedOKWithCompetitorName(String competitorName) {
-    	System.out.println("Did clicked with competitor "+competitorName);
+        System.out.println("Did clicked with competitor " + competitorName);
         this.selectedTeamName = competitorName;
-        startRequestingData();
+    }
+
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        loadLiveRaceInfoFromRibDashboadService();
+    }
+
+    @Override
+    public void addRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
+        synchronized (MUTEX) {
+            if (listener != null) {
+                raceSelectionChangeListener.add(listener);
+            }
+        }
+    }
+
+    @Override
+    public void removeRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
+        synchronized (MUTEX) {
+            raceSelectionChangeListener.remove(listener);
+        }
+    }
+
+    @Override
+    public void setSelection(List<RegattaAndRaceIdentifier> newSelection,
+            RaceSelectionChangeListener... listenersNotToNotify) {
+        synchronized (MUTEX) {
+            for (RaceSelectionChangeListener currentRaceSelectionChangeListener : raceSelectionChangeListener) {
+                currentRaceSelectionChangeListener.onRaceSelectionChange(newSelection);
+            }
+        }
+    }
+
+    @Override
+    public List<RegattaAndRaceIdentifier> getAllRaces() {
+        return null;
+    }
+
+    @Override
+    public void setAllRaces(List<RegattaAndRaceIdentifier> newAllRaces,
+            RaceSelectionChangeListener... listenersNotToNotify) {
+    }
+
+    @Override
+    public List<RegattaAndRaceIdentifier> getSelectedRaces() {
+        return null;
     }
 }

@@ -212,7 +212,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets,
 
     @Override
     public void addNewStartAnalysisCard(List<StartAnalysisDTO> startAnalysisDTOs) {
-        this.bottomNotification.show("New Start Analysis available.");
+        this.bottomNotification.show("New Start Analysis available.", "#F0AB00", "#000000", true);
         for (int i = numberOfStartAnalysisCards; i <= startAnalysisDTOs.size() - 1; i++) {
             addStartAnalysisCard(startAnalysisDTOs.get(i));
             starts.add(startAnalysisDTOs.get(i));

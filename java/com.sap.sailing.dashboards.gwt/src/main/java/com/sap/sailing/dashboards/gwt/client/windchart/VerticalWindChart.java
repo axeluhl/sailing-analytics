@@ -37,7 +37,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardEntryPoint;
-import com.sap.sailing.gwt.ui.client.shared.charts.ChartPointRecalculator;
+import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
 
 /**
  * The class represents a wind chart that is displayed vertically. Because it is meant to be used to display wind fixes,
@@ -51,6 +51,8 @@ import com.sap.sailing.gwt.ui.client.shared.charts.ChartPointRecalculator;
 public class VerticalWindChart extends Composite implements HasWidgets {
 
     private Series verticalWindChartSeries;
+    private String positiveSeriesColorAsHex;
+    private String negativeSeriesColorAsHex;
 
     /**
      * The field is used to cache the current selected display interval. It is either
@@ -105,7 +107,8 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         setChartOptions();
         setXAxisOptions();
         setYAxisOptions();
-        initAndConfigureVerticalWindChartSeriesWithColors(positiveFillColor, negativeFillColor);
+        positiveSeriesColorAsHex = positiveFillColor;
+        negativeSeriesColorAsHex = negativeFillColor;
     }
 
     private void setChartOptions() {
@@ -152,14 +155,14 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                                 }));
     }
 
-    private void initAndConfigureVerticalWindChartSeriesWithColors(String positiveFillColor, String negativeFillColor) {
+    private void initVerticalWindChartSeries() {
         verticalWindChartSeries = verticalWindChart.createSeries();
         AreaPlotOptions areaPlotOptions = new AreaPlotOptions();
         verticalWindChart.addSeries(verticalWindChartSeries.setName(null).setPlotOptions(
                 areaPlotOptions.setDashStyle(DashStyle.SOLID).setLineWidth(0.1)
                         .setMarker(new Marker().setEnabled(false)).setShadow(false).setHoverStateEnabled(false)
-                        .setLineColor("#FFFFFF").setFillColor(positiveFillColor)
-                        .setOption("negativeFillColor", negativeFillColor)));
+                        .setLineColor("#FFFFFF").setFillColor(positiveSeriesColorAsHex)
+                        .setOption("negativeFillColor", negativeSeriesColorAsHex)));
     }
 
     /**
@@ -171,21 +174,18 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * {@link #setXAxisExtremesForSeriesPointRangeIsSmallerThanChartDisplayIntervall()} and
      * {@link #setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall()}.
      * */
-    public void addPointToSeriesWithAverage(Point point, double average, boolean pointContainsWindDirectionValue) {
-        if (pointContainsWindDirectionValue == true) {
-            adaptWindDirectionPointToStayCloseToLastPoint(point);
+    public void addPointsToSeriesWithAverage(Point[] points, double average) {
+        if (verticalWindChartSeries == null) {
+            initVerticalWindChartSeries();
+            verticalWindChartSeries.setPoints(points, true);
+        } else {
+            for (Point point : points) {
+                verticalWindChartSeries.addPoint(point, true, false, false);
+            }
         }
-        verticalWindChartSeries.addPoint(point, true, false, true);
         verticalWindChartSeries.updateThreshold("" + average);
         adaptVerticalWindChartExtemes();
         verticalWindChart.setSizeToMatchContainer();
-    }
-
-    private void adaptWindDirectionPointToStayCloseToLastPoint(Point newPoint) {
-        Point lastPointOfVerticalWindChartSeries = getLastPointOfVerticalWindChartSeries();
-        if (lastPointOfVerticalWindChartSeries != null) {
-            newPoint = ChartPointRecalculator.stayClosestToPreviousPoint(lastPointOfVerticalWindChartSeries, newPoint);
-        }
     }
 
     /**
@@ -246,10 +246,12 @@ public class VerticalWindChart extends Composite implements HasWidgets {
 
     private Point getLastPointOfVerticalWindChartSeries() {
         Point lastPointOfVerticalWindChartSeries = null;
-        Point[] seriesPoints = verticalWindChartSeries.getPoints();
-        int seriesPointsLenght = seriesPoints.length;
-        if (seriesPointsLenght > 0) {
-            lastPointOfVerticalWindChartSeries = seriesPoints[seriesPointsLenght - 1];
+        if (verticalWindChartSeries != null) {
+            Point[] seriesPoints = verticalWindChartSeries.getPoints();
+            int seriesPointsLenght = seriesPoints.length;
+            if (seriesPointsLenght > 0) {
+                lastPointOfVerticalWindChartSeries = seriesPoints[seriesPointsLenght - 1];
+            }
         }
         return lastPointOfVerticalWindChartSeries;
     }

@@ -16,10 +16,12 @@ public class CompetitorTable extends AbsolutePanel {
     private CellTable<String> table;
     private CompetitorTableRowSelectionListener competitorTableRowSelectionListener;
 
-    public CompetitorTable(List<String> competitorNames, CompetitorTableRowSelectionListener competitorTableRowSelectionListener) {
-
-        initTable(competitorNames);
+    public CompetitorTable(CompetitorTableRowSelectionListener competitorTableRowSelectionListener) {
         this.competitorTableRowSelectionListener = competitorTableRowSelectionListener;
+    }
+    
+    public void setTableContent(List<String> competitorNames){
+        initTable(competitorNames);
     }
 
     private void initTable(List<String> competitorNames) {

@@ -59,7 +59,8 @@ Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-ajaxloader.jar,
  WEB-INF/lib/gwt-bootstrap-2.3.2.0.jar
 TrackLifecycle: true
-Export-Package: com.sap.sailing.gwt.ui.client,
+Export-Package: com.sap.sailing.gwt.ui.actions,
+ com.sap.sailing.gwt.ui.client,
  com.sap.sailing.gwt.ui.client.shared.charts,
  com.sap.sailing.gwt.ui.client.shared.racemap,
  com.sap.sailing.gwt.ui.server,

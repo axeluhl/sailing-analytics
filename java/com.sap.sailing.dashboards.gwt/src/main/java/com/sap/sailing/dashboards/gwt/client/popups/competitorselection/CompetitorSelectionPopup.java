@@ -45,6 +45,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
     Button button;
 
     private String currentCompetitorSelected;
+    private boolean isVisible;
 
     private List<CompetitorSelectionPopupListener> competitorSelectionPopupListener;
 
@@ -53,15 +54,15 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
     interface CompetitorSelectionPopupUiBinder extends UiBinder<Widget, CompetitorSelectionPopup> {
     }
 
-    public CompetitorSelectionPopup(List<String> competitorList) {
+    public CompetitorSelectionPopup() {
         competitorSelectionPopupListener = new ArrayList<CompetitorSelectionPopupListener>();
-        competitortable = new CompetitorTable(competitorList, this);
+        competitortable = new CompetitorTable(this);
+        isVisible = false;
         initWidget(uiBinder.createAndBindUi(this));
-        initPopUp();
     }
-
-    private void initPopUp() {
-        show();
+    
+    public void setCompetitorList(List<String> competitorList){
+        competitortable.setTableContent(competitorList);
     }
 
     public void show() {
@@ -70,6 +71,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         this.getElement().addClassName(style.popupshow());
         this.getElement().removeClassName(style.popuphide());
         RootLayoutPanel.get().addStyleName(style.blurred());
+        isVisible = true;
     }
 
     public void hide() {
@@ -77,6 +79,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         this.getElement().removeClassName(style.popupshow());
         RootLayoutPanel.get().addStyleName(style.not_blurred());
         RootPanel.get().remove(this);
+        isVisible = false;
     }
     
     public void addListener(CompetitorSelectionPopupListener o) {
@@ -93,6 +96,10 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         for (CompetitorSelectionPopupListener newStartAnalysisListener : competitorSelectionPopupListener) {
             newStartAnalysisListener.didClickedOKWithCompetitorName(competitorName);
         }
+    }
+    
+    public boolean isShown(){
+        return isVisible;
     }
 
     @UiHandler("button")

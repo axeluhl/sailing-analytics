@@ -17,7 +17,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardService;
-import com.sap.sailing.dashboards.gwt.server.utils.MovingAverage;
+import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
 import com.sap.sailing.dashboards.gwt.shared.ResponseMessage;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
@@ -216,7 +216,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements
 	private void fillLiveRaceInfoDTOWithRaceData(
 			RibDashboardRaceInfoDTO lRInfo, TimePoint now) {
 		if (runningRace != null) {
-			lRInfo.nameOfLastTrackedRace = runningRace.getRace().getName();
+			lRInfo.idOfLastTrackedRace = runningRace.getRaceIdentifier();
 			try {
 				List<Competitor> competitors = runningRace
 						.getCompetitorsFromBestToWorst(now);

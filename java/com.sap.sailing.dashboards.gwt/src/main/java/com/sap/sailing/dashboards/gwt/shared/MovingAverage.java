@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.sap.sailing.dashboards.gwt.server.utils;
+package com.sap.sailing.dashboards.gwt.shared;
 
 
 /**

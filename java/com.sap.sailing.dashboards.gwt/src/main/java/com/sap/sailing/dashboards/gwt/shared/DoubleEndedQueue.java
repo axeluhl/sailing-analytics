@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.server.utils;
+package com.sap.sailing.dashboards.gwt.shared;
 
 import java.util.ArrayList;
 import java.util.List;

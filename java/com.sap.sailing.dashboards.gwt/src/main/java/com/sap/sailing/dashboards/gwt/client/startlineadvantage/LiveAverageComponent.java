@@ -99,6 +99,7 @@ public class LiveAverageComponent extends Composite implements HasWidgets {
     }
 
     public void updateValues(String liveValue, String averageValue) {
+        System.out.println("UPDATE VALUES");
         this.liveNumber.setInnerText(liveValue);
         this.averageNumber.setInnerText(averageValue);
     }

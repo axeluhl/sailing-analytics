@@ -9,9 +9,8 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FocusPanel;
 
 /**
- * This class is a notification that pops up from the bottom of the screen.
- * In the dashboard it is used to tell the user that there happened something important
- * in the app. I.e if there is a new start analysis available.
+ * This class is a notification that pops up from the bottom of the screen. In the dashboard it is used to tell the user
+ * that there happened something important in the app. I.e if there is a new start analysis available.
  * 
  * @author Alexander Ries
  * 
@@ -43,19 +42,22 @@ public class BottomNotification extends FocusPanel {
     public void initClickHander() {
 
     }
-    
-    public void show(String message) {
+
+    public void show(String message, String backgroundColorAsHex, String textcolorAsHex, boolean dismissAfter20Seconds) {
         shown = true;
         this.removeStyleName("bottomnotificationhidden");
         this.addStyleName("bottomnotificationshow");
         this.getElement().setInnerHTML(message);
-
-        Timer timer = new Timer() {
-            public void run() {
-              hide();
-            }
-          };
-          timer.schedule(20000);
+        this.getElement().getStyle().setBackgroundColor(backgroundColorAsHex);
+        this.getElement().getStyle().setColor(textcolorAsHex);
+        if (dismissAfter20Seconds) {
+            Timer timer = new Timer() {
+                public void run() {
+                    hide();
+                }
+            };
+            timer.schedule(20000);
+        }
     }
 
     public void hide() {
@@ -67,17 +69,17 @@ public class BottomNotification extends FocusPanel {
         this.addStyleName("bottomnotificationhidden");
         this.getElement().setInnerHTML("");
     }
-    
-    public void addBottomNotificationClickListener(BottomNotificationClickListener bottomNotificationClickListener){
+
+    public void addBottomNotificationClickListener(BottomNotificationClickListener bottomNotificationClickListener) {
         bottomNotificationClickListeners.add(bottomNotificationClickListener);
     }
-    
-    public void removeBottomNotificationClickListener(BottomNotificationClickListener bottomNotificationClickListener){
+
+    public void removeBottomNotificationClickListener(BottomNotificationClickListener bottomNotificationClickListener) {
         bottomNotificationClickListeners.remove(bottomNotificationClickListener);
     }
-    
-    private void nofitifyBottomNotificationClickListenersAboutClick(){
-        for(BottomNotificationClickListener bncl: bottomNotificationClickListeners){
+
+    private void nofitifyBottomNotificationClickListenersAboutClick() {
+        for (BottomNotificationClickListener bncl : bottomNotificationClickListeners) {
             bncl.bottomNotificationClicked();
         }
     }
