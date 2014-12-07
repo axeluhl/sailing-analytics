@@ -8,7 +8,7 @@
 	<ui:style type='com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent.WindBotComponentStyle'
 		src='WindBotComponentStyle.css'></ui:style>
 
-	<g:HTMLPanel>
+	<g:HTMLPanel styleName="windBotComponent">
 		<g:HTMLPanel ui:field="windBotNamePanel" styleName="{style.windBotNamePanel}">Wind Bot</g:HTMLPanel>
 		<g:HTMLPanel
 			styleName="{style.wind_bot_component_live_average_container} {style.wind_bot_component_left}">

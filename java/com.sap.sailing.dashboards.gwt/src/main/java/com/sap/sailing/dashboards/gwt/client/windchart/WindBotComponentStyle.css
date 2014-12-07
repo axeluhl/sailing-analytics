@@ -1,5 +1,12 @@
 @CHARSET "UTF-8";
 
+.windBotComponent{
+	position: absolute;
+	height: 100%;
+	width:  100%;
+	z-index: 5;
+}
+
 .windBotNamePanel {
 	height: 45pt;
 	line-height: 45pt;

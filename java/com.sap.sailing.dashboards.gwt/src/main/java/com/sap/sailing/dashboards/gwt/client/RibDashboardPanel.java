@@ -60,6 +60,12 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     @UiField
     public DivElement hint;
+    
+    @UiField
+    public DivElement windloadinghintleft;
+    
+    @UiField
+    public DivElement windloadinghintright;
 
     @UiField
     public HTMLPanel bottombar;
@@ -106,12 +112,18 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
                 WindBotComponent leftwindBotComponent = new WindBotComponent(windBotID);
                 leftwindbotcontainer.add(leftwindBotComponent);
                 windBotComponents.add(leftwindBotComponent);
+                windloadinghintleft.getStyle().setOpacity(0.0);
             } else if (windBotAddedCounterTOConsiderForPanels == 1) {
                 WindBotComponent rightwindBotComponent = new WindBotComponent(windBotID);
                 rightwindbotcontainer.add(rightwindBotComponent);
                 windBotComponents.add(rightwindBotComponent);
+                windloadinghintright.getStyle().setOpacity(0.0);
             }
             windBotAddedCounterTOConsiderForPanels++;
+            if(windloadinghintleft.getStyle().getOpacity() != "0.0" || windloadinghintright.getStyle().getOpacity() != "0.0"){
+                windloadinghintleft.setInnerHTML("Wind bot out of service");
+                windloadinghintright.setInnerHTML("Wind bot out of service");
+            }
         }
         addWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
     }
