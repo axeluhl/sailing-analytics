@@ -23,6 +23,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     private final ExecutorService executor;
     private final UnfinishedInstructionsCounter unfinishedInstructionsCounter;
     
+    private boolean isFinished = false;
     private boolean gotAborted = false;
 
     public AbstractPartitioningParallelProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
@@ -34,28 +35,30 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
 
     @Override
     public void processElement(InputType element) {
-        for (WorkingType partialElement : partitionElement(element)) {
-            final Callable<ResultType> instruction = createInstruction(partialElement);
-            if (isInstructionValid(instruction)) {
-                Runnable instructionWrapper = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ResultType result = instruction.call();
-                            if (isResultValid(result)) {
-                                forwardResultToReceivers(result);
+        if (!isFinished && !gotAborted) {
+            for (WorkingType partialElement : partitionElement(element)) {
+                final Callable<ResultType> instruction = createInstruction(partialElement);
+                if (isInstructionValid(instruction)) {
+                    Runnable instructionWrapper = new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                ResultType result = instruction.call();
+                                if (isResultValid(result)) {
+                                    forwardResultToReceivers(result);
+                                }
+                            } catch (Exception e) {
+                                if (!gotAborted || !(e instanceof InterruptedException)) {
+                                    onFailure(e);
+                                }
+                            } finally {
+                                AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.decrement();
                             }
-                        } catch (Exception e) {
-                            if (!gotAborted || !(e instanceof InterruptedException)) {
-                                onFailure(e);
-                            }
-                        } finally {
-                            AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.decrement();
                         }
-                    }
-                };
-                unfinishedInstructionsCounter.increment();
-                executor.execute(instructionWrapper);
+                    };
+                    unfinishedInstructionsCounter.increment();
+                    executor.execute(instructionWrapper);
+                }
             }
         }
     }
@@ -99,7 +102,10 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     @Override
     public void finish() throws InterruptedException {
         sleepUntilAllInstructionsFinished();
-        tellResultReceiversToFinish();
+        if (!gotAborted) {
+            isFinished = true;
+            tellResultReceiversToFinish();
+        }
     }
 
     protected void sleepUntilAllInstructionsFinished() throws InterruptedException {

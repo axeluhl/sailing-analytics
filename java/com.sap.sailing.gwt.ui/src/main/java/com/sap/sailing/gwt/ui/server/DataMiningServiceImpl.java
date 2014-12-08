@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -9,13 +10,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.datamining.factories.SailingDataMiningFactory;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.QueryDefinition;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
@@ -31,12 +32,11 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private static final long serialVersionUID = -7951930891674894528L;
 
     private final BundleContext context;
-
-    private final SailingDataMiningFactory sailingDataMiningFactory;
-    private final FunctionDTOFactory functionDTOFactory;
-
+    
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+
+    private final FunctionDTOFactory functionDTOFactory;
     
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
@@ -44,10 +44,6 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         
-        sailingDataMiningFactory = new SailingDataMiningFactory(getDataMiningServer().getExecutorService(),
-                                                                getDataMiningServer().getStringMessages(),
-                                                                getDataMiningServer().getFunctionProvider(),
-                                                                getDataMiningServer().getDataRetrieverChainDefinitionProvider());
         functionDTOFactory = new FunctionDTOFactory();
     }
 
@@ -139,16 +135,29 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition, int retrieverLevel, Collection<FunctionDTO> dimensions, String localeInfoName) throws Exception {
-        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dataRetrieverChainDefinition, retrieverLevel, dimensions, localeInfoName);
+    public QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
+            int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName) throws Exception {
+        DataRetrieverChainDefinition<RacingEventService> retrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
+        Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
+        Query<Set<Object>> dimensionValuesQuery = getDataMiningServer().createDimensionValuesQuery(getRacingEventService(), retrieverChainDefinition, retrieverLevel, dimensions, locale);
         QueryResult<Set<Object>> result = dimensionValuesQuery.run();
         return result;
     }
 
+    private Collection<Function<?>> functionDTOsAsFunctions(Iterable<FunctionDTO> functionDTOs) {
+        List<Function<?>> functions = new ArrayList<>();
+        DataMiningServer dataMiningServer = getDataMiningServer();
+        for (FunctionDTO functionDTO : functionDTOs) {
+            functions.add(dataMiningServer.getFunctionForDTO(functionDTO));
+        }
+        return functions;
+    }
+
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDTO queryDefinition) throws Exception {
-        @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
-        Query<ResultType> query = (Query<ResultType>) sailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition);
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDTO queryDefinitionDTO) throws Exception {
+        QueryDefinition<RacingEventService, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
+        Query<ResultType> query = getDataMiningServer().createQuery(getRacingEventService(), queryDefinition);
         QueryResult<ResultType> result = query.run();
         return result;
     }

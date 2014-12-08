@@ -35,6 +35,16 @@ public class ModifiableQueryDefinition<DataSourceType, ResultType> implements Qu
         this.statisticToCalculate = statisticToCalculate;
         this.aggregatorType = aggregatorType;
     }
+    
+    @Override
+    public Class<DataSourceType> getDataSourceType() {
+        return retrieverChain.getDataSourceType();
+    }
+    
+    @Override
+    public Class<ResultType> getResultType() {
+        return statisticToCalculate.getReturnType();
+    }
 
     @Override
     public Locale getLocale() {

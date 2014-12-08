@@ -9,6 +9,9 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 
 public interface QueryDefinition<DataSourceType, ResultType> {
+
+    public Class<DataSourceType> getDataSourceType();
+    public Class<ResultType> getResultType();
     
     public Locale getLocale();
     

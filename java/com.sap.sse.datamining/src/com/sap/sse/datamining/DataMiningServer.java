@@ -1,5 +1,7 @@
 package com.sap.sse.datamining;
 
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
@@ -43,6 +45,12 @@ public interface DataMiningServer {
 
     public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(UUID id);
     
-    public QueryDefinition<?, ?> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO);
+    public <DataSourceType, ResultType> QueryDefinition<DataSourceType, ResultType> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO);
+
+    public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
+            DataRetrieverChainDefinition<DataSource> dataRetrieverChainDefinition, int retrieverLevel,
+            Iterable<Function<?>> dimensions, Locale locale);
+
+    public <DataSource, DataType, ResultType> Query<ResultType> createQuery(DataSource dataSource, QueryDefinition<DataSource, ResultType> queryDefinition);
     
 }
