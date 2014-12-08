@@ -28,11 +28,11 @@ public class NamedArrayAdapter<T extends Named> extends ArrayAdapter<T> {
         if (convertView == null) {
 
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.welter_one_row_no_image, /* view group */null);
+            view = inflater.inflate(R.layout.login_list_item, /* view group */null);
         }
 
         T item = getItem(position);
-        TextView title = (TextView) view.findViewById(R.id.Welter_Cell_OneRowNoImage_txtTitle);
+        TextView title = (TextView) view.findViewById(R.id.txt_list_item);
         title.setText(item.getName());
         title.setAlpha(isEnabled(position) ? 1.0f : 0.2f);
 

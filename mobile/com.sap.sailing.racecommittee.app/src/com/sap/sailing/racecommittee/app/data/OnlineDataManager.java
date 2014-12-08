@@ -43,10 +43,12 @@ import com.sap.sailing.racecommittee.app.data.parsers.DeviceConfigurationParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
+import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
@@ -250,4 +252,11 @@ public class OnlineDataManager extends DataManager {
             }
         }, getContext());
     }
+
+	@Override
+	public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
+			PositionListFragment positionListFragment) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

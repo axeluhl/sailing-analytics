@@ -35,8 +35,9 @@
     <string name="flag_ap">AP Flagge</string>
     <string name="flag_november">November</string>
     <string name="flag_jury">Jury</string>
-    <string name="label_login_events">Event auswählen:</string>
-    <string name="label_login_course_area">Bahn auswählen:</string>
+    <string name="label_login_events">Event auswählen</string>
+    <string name="label_login_course_area">Bahn auswählen</string>
+    <string name="label_login_position">Position auswählen</string>
     <string name="login_type_viewer">Im Demo-Modus anmelden</string>
     <string name="racelist_unscheduled">Noch nicht geplant</string>
     <string name="racelist_scheduled">Geplant für %s</string>

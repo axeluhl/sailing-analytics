@@ -4,7 +4,13 @@ import java.util.Collection;
 
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -14,6 +20,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 
 public class EventListFragment extends NamedListFragment<EventBase> {
 
+	
     @Override
     protected ItemSelectedListener<EventBase> attachListener(Activity activity) {
         if (activity instanceof EventSelectedListenerHost) {
@@ -34,5 +41,4 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     protected LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createLoaderCallbacks(ReadonlyDataManager manager) {
         return manager.createEventsLoader(this);
     }
-
 }

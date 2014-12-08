@@ -15,7 +15,9 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
+import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 
 /**
  * <p>
@@ -66,6 +68,19 @@ public interface ReadonlyDataManager {
     public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
             Serializable parentEventId, LoadClient<Collection<CourseArea>> callback);
 
+    
+    /**
+     * Creates a new {@link LoaderCallbacks} object for loading racing referee positions.
+     * 
+     * @param callback
+     *            {@link LoadClient} implementing your data handling code.
+     * @return {@link LoaderCallbacks} to be used in
+     *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
+     *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
+     */
+    public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
+			PositionListFragment positionListFragment);
+    
     /**
      * Creates a new {@link LoaderCallbacks} object for loading {@link ManagedRace}s of a specific {@link CourseArea}.
      * 

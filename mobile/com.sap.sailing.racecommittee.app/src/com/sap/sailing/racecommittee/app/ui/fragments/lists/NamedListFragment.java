@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -36,7 +37,10 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     
     private ItemSelectedListener<T> listener;
     private NamedArrayAdapter<T> listAdapter;
+    private TextView txt_header;
 
+
+    
     protected ArrayList<T> namedList;
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
@@ -47,15 +51,18 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         return new NamedArrayAdapter<T>(context, items);
     }
 
+    
     /*@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.list_fragment, container, false);
     }*/
     
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
-        parent.addView(v, 0);
+        parent.addView(v, 1);
+        txt_header = (TextView) parent.findViewById(R.id.txt_listHeader);
         return parent;
     }
 
@@ -98,12 +105,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         listener.itemSelected(this, item);
     }
 
-    private void addHeader() {
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        ViewGroup header = (ViewGroup) inflater.inflate(R.layout.selection_list_header_view, getListView(), false);
-        getListView().addHeaderView(header, null, false);
-        TextView textText = ((TextView) header.findViewById(R.id.textHeader));
-        textText.setText(getHeaderText());
+    protected void addHeader() {
+    	txt_header.setText(getHeaderText());
+    	txt_header.setVisibility(View.VISIBLE);
     }
 
     @Override

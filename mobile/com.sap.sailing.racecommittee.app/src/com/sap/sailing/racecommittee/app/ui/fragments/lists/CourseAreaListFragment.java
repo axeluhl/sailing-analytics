@@ -8,6 +8,8 @@ import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -55,5 +57,4 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(ReadonlyDataManager manager) {
         return manager.createCourseAreasLoader(parentEventId, this);
     }
-
 }

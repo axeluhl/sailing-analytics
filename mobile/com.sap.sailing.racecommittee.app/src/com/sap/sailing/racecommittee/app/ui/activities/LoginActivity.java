@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.util.UUID;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -20,15 +21,18 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
@@ -36,14 +40,18 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
+import com.sap.sse.common.Named;
 
-public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
+public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost,
         DialogListenerHost {
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
+    private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
     private final static String TAG = LoginActivity.class.getName();
 
@@ -114,7 +122,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         }
     };
-
+    public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
+        return courseAreaSelectionListener;
+    }
+    
+    public ItemSelectedListener<EventBase> getEventSelectionListener() {
+        return eventSelectionListener;
+    }
+    
     private LoginDialog mLoginDialog;
     private ProgressBar mProgressSpinner;
     private CourseArea mSelectedCourseArea;
@@ -141,6 +156,15 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         transaction.commitAllowingStateLoss();
         ExLog.i(this, "LoginActivity", "CourseFragment created.");
     }
+    
+    private void addAreaPositionListFragment() {
+        Fragment fragment = new PositionListFragment();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
+        transaction.replace(R.id.login_view_bottom_container, fragment, AreaPositionListFragmentTag);
+        transaction.commitAllowingStateLoss();
+        ExLog.i(this, "LoginActivity", "PositionFragment created.");
+    }
 
     private void addEventListFragment() {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -149,13 +173,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         transaction.commit();
     }
 
-    public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
-        return courseAreaSelectionListener;
-    }
-
-    public ItemSelectedListener<EventBase> getEventSelectionListener() {
-        return eventSelectionListener;
-    }
 
     @Override
     public DialogResultListener getListener() {
@@ -193,7 +210,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                             "Course area reference was not set - cannot start racing activity.");
                     return;
                 }
-
+                
+                
+                
                 Intent message = new Intent(LoginActivity.this, RacingActivity.class);
                 message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseArea.getId());
                 message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
@@ -251,6 +270,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void selectCourseArea(CourseArea courseArea) {
         mSelectedCourseArea = courseArea;
+        showAreaPositionListFragment();
         mLoginDialog.show(getFragmentManager(), "LoginDialog");
     }
 
@@ -270,4 +290,23 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private void showCourseAreaListFragment(Serializable eventId) {
         addCourseAreaListFragment(eventId);
     }
+    
+    private void showAreaPositionListFragment() {
+        addAreaPositionListFragment();
+    }
+
+    
+//    public interface AreaPosition extends Named, WithID, IsManagedBySharedDomainFactory {
+//        UUID getId();
+//    }
+
+
+	@Override
+	public void onPositionSelected() {
+		Intent message = new Intent(LoginActivity.this, RacingActivity.class);
+        message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseArea.getId());
+        message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
+        fadeActivity(message);
+	}
+
 }
