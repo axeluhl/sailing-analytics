@@ -6,6 +6,6 @@ public interface ClusterGroupRepository {
 
     public void add(ClusterGroup<?> clusterGroup);
 
-    public <T> Collection<ClusterGroup<T>> getClusterGroupsFor(Class<T> type);
+    public <DataType> Collection<ClusterGroup<DataType>> getClusterGroupsFor(Class<DataType> type);
 
 }

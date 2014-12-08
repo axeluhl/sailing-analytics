@@ -25,12 +25,14 @@ public class Activator implements BundleActivator, DataMiningBundleService {
 
     private final DataMiningStringMessages sailingDataMiningStringMessages;
     private final SailingDataRetrieverChainDefinitions dataRetrieverChainDefinitions;
+    private final SailingClusterGroups clusterGroups;
     
     private ServiceReference<DataMiningBundleService> dataMiningBundleServiceReference;
     
     public Activator() {
         dataRetrieverChainDefinitions = new SailingDataRetrieverChainDefinitions();
         sailingDataMiningStringMessages = new DataMiningStringMessagesImpl(STRING_MESSAGES_BASE_NAME, Activator.class.getClassLoader());
+        clusterGroups = new SailingClusterGroups();
     }
 
     @Override
@@ -68,6 +70,10 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     @Override
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions();
+    }
+    
+    public SailingClusterGroups getClusterGroups() {
+        return clusterGroups;
     }
     
     public static Activator getDefault() {

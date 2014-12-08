@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.shared.impl;
+package com.sap.sse.datamining.shared.impl.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,7 +10,6 @@ import java.util.Map;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
 public class QueryDefinitionDTOImpl implements QueryDefinitionDTO {
     private static final long serialVersionUID = -6438771277564908352L;

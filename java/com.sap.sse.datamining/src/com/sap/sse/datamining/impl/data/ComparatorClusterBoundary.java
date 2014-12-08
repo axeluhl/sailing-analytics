@@ -46,4 +46,38 @@ public class ComparatorClusterBoundary<ElementType> implements ClusterBoundary<E
         return (Class<ElementType>) boundaryValue.getClass();
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((boundaryValue == null) ? 0 : boundaryValue.hashCode());
+        result = prime * result + ((comparator == null) ? 0 : comparator.hashCode());
+        result = prime * result + ((strategy == null) ? 0 : strategy.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ComparatorClusterBoundary<?> other = (ComparatorClusterBoundary<?>) obj;
+        if (boundaryValue == null) {
+            if (other.boundaryValue != null)
+                return false;
+        } else if (!boundaryValue.equals(other.boundaryValue))
+            return false;
+        if (comparator == null) {
+            if (other.comparator != null)
+                return false;
+        } else if (!comparator.equals(other.comparator))
+            return false;
+        if (strategy != other.strategy)
+            return false;
+        return true;
+    }
+
 }

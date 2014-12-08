@@ -22,7 +22,7 @@ import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
 
 public class SailingDataRetrieverChainDefinitions {
 
-    private static Collection<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions;
+    private final Collection<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions;
     
     public SailingDataRetrieverChainDefinitions() {
         dataRetrieverChainDefinitions = new ArrayList<>();
