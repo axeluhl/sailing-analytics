@@ -146,7 +146,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		ExLog.i(this, TAG, "LocationClient was disconnected");
 	}
 
-	public void reportGPSQuality(float gpsAccurracy) {
+	public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed) {
 		GPSQuality quality = GPSQuality.noSignal;
 
 		if (gpsQualityListener != null) {
@@ -158,8 +158,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 				quality = GPSQuality.great;
 			}
 
-			gpsQualityListener.gpsQualityAndAccurracyUpdated(quality,
-					gpsAccurracy);
+			gpsQualityListener.gpsQualityAndAccurracyUpdated(quality, gpsAccurracy, bearing, speed);
 		}
 	}
 
@@ -167,7 +166,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	@Override
 	public void onLocationChanged(Location location) {
 
-		reportGPSQuality(location.getAccuracy());
+		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
 
 		DatabaseHelper.getInstance(this).insertGPSFix(location.getLatitude(),
 				location.getLongitude(), location.getSpeed(),
@@ -248,8 +247,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	}
 
 	public interface GPSQualityListener {
-		public void gpsQualityAndAccurracyUpdated(GPSQuality quality,
-				float gpsAccurracy);
+		public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float gpsBearing, float gpsSpeed);
 	}
 
 }

@@ -140,9 +140,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     
     
     @Override
-    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy) {
+    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float bearing, float speed) {
     	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     	trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
+    	
+    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
+    	hudFragment.setSpeedOverGround(speed);
+    	hudFragment.setHeading(bearing);
     }
     
     @Override
