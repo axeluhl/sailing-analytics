@@ -36,13 +36,14 @@ public class HudFragment extends BaseFragment {
 	public void setHeading(float heading)
 	{
 		TextView headingLabel = (TextView)getActivity().findViewById(R.id.hud_hdg_label);
-		headingLabel.setText(getString(R.string.hud_heading_prefix) + String.valueOf(heading) + "°");
+		headingLabel.setText(getString(R.string.hud_heading_prefix) + String.valueOf(Math.round(heading)) + "°");
 	}
 	
-	public void setSpeedOverGround(float speed)
+	public void setSpeedOverGround(float speedInMetersPerSeconds)
 	{
+		float speedInKnots = speedInMetersPerSeconds * 1.9438444924574f;
 		TextView speedLabel = (TextView)getActivity().findViewById(R.id.hud_speed_label);
-		speedLabel.setText(getString(R.string.hud_speed_over_ground_prefix) + String.valueOf(speed) + "kn");
+		speedLabel.setText(getString(R.string.hud_speed_over_ground_prefix) + String.valueOf(speedInKnots) + "kn");
 	}
 	
 	/**
