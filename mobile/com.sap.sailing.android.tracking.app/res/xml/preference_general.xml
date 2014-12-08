@@ -22,7 +22,7 @@
             android:title="@string/device_identifier" android:selectable="false"/>
         
          <SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="@string/preference_heading_from_magnetic_key"
             android:switchTextOn="@string/preference_heading_from_magnetic_key_is_enabled"
             android:switchTextOff="@string/preference_heading_from_magnetic_key_is_disabled"

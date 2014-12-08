@@ -13,12 +13,16 @@ import android.provider.BaseColumns;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardsEventsJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
+import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
+import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
 
 public class DatabaseHelper {
 
@@ -178,7 +182,7 @@ public class DatabaseHelper {
 		cr.insert(SensorGps.CONTENT_URI, cv);
 	}
 	
-	public EventInfo getEventInfo(String eventId) {
+	public EventInfo getEventInfoWithLeaderboard(String eventId) {
 		EventInfo result = new EventInfo();
 		
     	ContentResolver cr = mContext.getContentResolver();
@@ -187,13 +191,82 @@ public class DatabaseHelper {
     	Cursor cursor = cr.query(LeaderboardsEventsJoined.CONTENT_URI, projection, "events.event_id = \"" + eventId + "\"", null, null);
     	if (cursor.moveToFirst())
     	{
-    		result.eventName = cursor.getString(cursor.getColumnIndex("event_name"));
+    		result.name = cursor.getString(cursor.getColumnIndex("event_name"));
     		result.leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
     	}
     	
     	cursor.close();
 		return result;
 	}
+	
+	public EventInfo getEventInfo(String eventId) {
+		EventInfo event = new EventInfo();
+		event.id = eventId;
+		
+		Cursor cursor = mContext.getContentResolver().query(Event.CONTENT_URI,
+				null, "event_id = \"" + eventId + "\"", null, null);
+		
+		if (cursor.moveToFirst()) {
+			event.name = cursor.getString(cursor.getColumnIndex(Event.EVENT_NAME));
+			event.imageUrl = cursor.getString(cursor.getColumnIndex(Event.EVENT_IMAGE_URL));
+			event.startMillis = cursor.getLong(cursor.getColumnIndex(Event.EVENT_DATE_START));
+			event.endMillis = cursor.getLong(cursor.getColumnIndex(Event.EVENT_DATE_END));
+			event.rowId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
+	    }
+		
+    	cursor.close();
+		return event;
+	}
+	
+	public CompetitorInfo getCompetitor(String competitorId)
+	{
+		CompetitorInfo competitor = new CompetitorInfo();
+		competitor.id = competitorId;
+		
+    	Cursor cursor = mContext.getContentResolver().query(Competitor.CONTENT_URI, null, "competitor_id = \"" + competitorId + "\"", null, null);
+		if (cursor.moveToFirst()) {
+			competitor.name = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_DISPLAY_NAME));
+			competitor.countryCode = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_COUNTRY_CODE));
+			competitor.sailId = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_SAIL_ID));
+			competitor.rowId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
+        }
+		
+		cursor.close();
+		return competitor;
+	}
+	
+	public LeaderboardInfo getLeaderboard(String leaderboardName)
+	{
+		LeaderboardInfo leaderboard = new LeaderboardInfo();
+		leaderboard.name = leaderboardName;
+		
+		Cursor lc = mContext.getContentResolver().query(Leaderboard.CONTENT_URI, null, "leaderboard_name = \"" + leaderboardName + "\"", null, null);
+		if (lc.moveToFirst()) {
+			leaderboard.rowId = lc.getInt(lc.getColumnIndex(BaseColumns._ID));
+        }
+		
+		lc.close();	
+		
+		return leaderboard;
+	}
+	
+
+	public void deleteRegttaFromDatabase(EventInfo event, CompetitorInfo competitor, LeaderboardInfo leaderboard)
+	{
+		ContentResolver cr = mContext.getContentResolver();
+		
+		int d1 = cr.delete(Event.CONTENT_URI, BaseColumns._ID + " = " + event.rowId, null);
+		int d2 = cr.delete(Competitor.CONTENT_URI, BaseColumns._ID + " = " + competitor.rowId, null);
+		int d3 = cr.delete(Leaderboard.CONTENT_URI, BaseColumns._ID + " = " + leaderboard.rowId, null);
+		
+		if (BuildConfig.DEBUG)
+		{
+			ExLog.i(mContext, TAG, "Checkout, number of events deleted: " + d1);
+			ExLog.i(mContext, TAG, "Checkout, number of competitors deleted: " + d2);
+			ExLog.i(mContext, TAG, "Checkout, number of leaderbards deleted: " + d3);
+		}
+	}
+
 
 
 	/**

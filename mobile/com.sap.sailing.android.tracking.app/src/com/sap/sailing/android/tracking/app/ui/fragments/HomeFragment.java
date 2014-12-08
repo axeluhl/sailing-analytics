@@ -449,14 +449,14 @@ public class HomeFragment extends BaseFragment implements
 	/**
 	 * Delete Event, Competitor and Leaderboard
 	 */
-	private void deleteRegttaFromDatabase()
-	{
-		ContentResolver cr = getActivity().getContentResolver();
-		
-		cr.delete(Event.CONTENT_URI, BaseColumns._ID + " = " + eventRowId, null);
-		cr.delete(Competitor.CONTENT_URI, BaseColumns._ID + " = " + competitorRowId, null);
-		cr.delete(Leaderboard.CONTENT_URI, BaseColumns._ID + " = " + leaderboardRowId, null);
-	}
+//	private void deleteRegttaFromDatabase()
+//	{
+//		ContentResolver cr = getActivity().getContentResolver();
+//		
+//		cr.delete(Event.CONTENT_URI, BaseColumns._ID + " = " + eventRowId, null);
+//		cr.delete(Competitor.CONTENT_URI, BaseColumns._ID + " = " + competitorRowId, null);
+//		cr.delete(Leaderboard.CONTENT_URI, BaseColumns._ID + " = " + leaderboardRowId, null);
+//	}
 
 	/**
 	 * Return true if the combination of eventId, leaderboardName and

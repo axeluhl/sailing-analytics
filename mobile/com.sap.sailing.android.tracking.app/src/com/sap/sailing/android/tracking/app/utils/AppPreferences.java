@@ -137,4 +137,9 @@ public class AppPreferences {
     {
     	return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_event_id), null);
     }
+    
+    public static boolean getPrintDatabaseOperationDebugMessages()
+    {
+    	return false;
+    }
 }
