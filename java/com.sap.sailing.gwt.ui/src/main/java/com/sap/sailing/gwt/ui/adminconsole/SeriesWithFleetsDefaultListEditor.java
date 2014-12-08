@@ -21,10 +21,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 public class SeriesWithFleetsDefaultListEditor extends SeriesWithFleetsListEditor {
     private final static Map<String, Map<String, List<SeriesDTO>>> seriesStructure = new HashMap<String, Map<String, List<SeriesDTO>>>();
 
-    public SeriesWithFleetsDefaultListEditor(List<SeriesDTO> series, StringMessages stringMessages,
+    public SeriesWithFleetsDefaultListEditor(Iterable<SeriesDTO> series, StringMessages stringMessages,
             ImageResource removeImage, boolean enableFleetRemoval) {
         super(new ArrayList<SeriesDTO>(), new ExpandedUiDefault(stringMessages, removeImage, enableFleetRemoval));
-
         seriesStructure.clear();
         analyzeSeriesStructure(series);
         List<SeriesDTO> seriesCompact = new ArrayList<SeriesDTO>();
@@ -39,7 +38,7 @@ public class SeriesWithFleetsDefaultListEditor extends SeriesWithFleetsListEdito
         super.setValue(seriesCompact);
     }
 
-    private void analyzeSeriesStructure(List<SeriesDTO> series) {
+    private void analyzeSeriesStructure(Iterable<SeriesDTO> series) {
         for (SeriesDTO seriesDTO : series) {
             if (seriesStructure.get(seriesDTO.getName()) == null) {
                 seriesStructure.put(seriesDTO.getName(), new HashMap<String, List<SeriesDTO>>());

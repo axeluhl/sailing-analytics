@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -18,12 +17,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.SeriesDTO;
-import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFleetsDialog {
-
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     protected CheckBox regattaConfigurationCheckbox;
     protected Button regattaConfigurationButton;
 
@@ -31,8 +26,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(regatta, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages, null,
-                callback);
+        super(regatta, regatta.series, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
+                null, callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
 
@@ -74,8 +69,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     }
 
     @Override
-    protected ListEditorComposite<SeriesDTO> createSeriesEditor() {
-        return new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */ false);
+    protected boolean isEnableFleetRemoval() {
+        return false;
     }
 
     @Override

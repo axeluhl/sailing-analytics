@@ -298,14 +298,17 @@ public class StructureImportManagementPanel extends FlowPanel {
         regattaListComposite.fillRegattas((List<RegattaDTO>) regattas);
     }
 
+    // FIXME the Set<String> should be an Iterable<String> because iteration order of fleets is relevant; and why isn't that an Iterable<SeriesDTO> instead of String? SeriesDTO would compare by name
+    // But then again, the series should also be distinguished by the fleets that they host; a Qualification with Yellow/Blue is to be considered different from a Qualification with Yellow/Blue/Red/Green
+    /**
+     * @param structure keys are the series in the regatta, values are the regattas that have this series structure
+     */
     private void showRegattaStructure(final LinkedHashMap<Set<String>, Set<RegattaDTO>> structure) {
-
         Grid grid = new Grid(structure.size(), 2);
         int i = 0;
         for (final Set<String> struct : structure.keySet()) {
             Button editBtn = new Button(stringMessages.editSeries());
             editBtn.addClickHandler(new ClickHandler() {
-
                 @Override
                 public void onClick(ClickEvent event) {
                     setDefaultRegatta(structure.get(struct));

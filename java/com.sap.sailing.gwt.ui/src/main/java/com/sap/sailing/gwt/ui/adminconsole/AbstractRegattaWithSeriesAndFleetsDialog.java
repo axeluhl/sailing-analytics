@@ -35,8 +35,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
 
     protected final List<EventDTO> existingEvents;
 
-    public AbstractRegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, List<EventDTO> existingEvents, String title,
-            String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
+    public AbstractRegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents,
+            String title, String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
         super(title, null, okButton, stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.regatta = regatta;
@@ -58,13 +58,13 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         courseAreaListBox = createListBox(false);
         courseAreaListBox.ensureDebugId("CourseAreaListBox");
         courseAreaListBox.setEnabled(false);
-        this.seriesEditor = createSeriesEditor();
+        this.seriesEditor = createSeriesEditor(series);
         setupEventAndCourseAreaListBoxes(stringMessages);
     }
 
     protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel);
 
-    protected abstract ListEditorComposite<SeriesDTO> createSeriesEditor();
+    protected abstract ListEditorComposite<SeriesDTO> createSeriesEditor(Iterable<SeriesDTO> series);
     
     protected ListEditorComposite<SeriesDTO> getSeriesEditor() {
         return seriesEditor;

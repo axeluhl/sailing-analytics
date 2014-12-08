@@ -19,14 +19,11 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    private final Iterable<RegattaDTO> defaultRegattas;
-
     public DefaultRegattaCreateDialog(List<EventDTO> existingEvents, Iterable<RegattaDTO> selectedRegattas,
             SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<EventAndRegattaDTO> callback) {
-        super(new RegattaDTO(), existingEvents, stringMessages.createDefaultSettingsForAllRegattas(), stringMessages.ok(),
-                stringMessages, null /* RegattaParameterValidator */, callback);
-        this.defaultRegattas = selectedRegattas;
+        super(new RegattaDTO(), getSeriesInRegattas(selectedRegattas), existingEvents, stringMessages.createDefaultSettingsForAllRegattas(),
+                stringMessages.ok(), stringMessages, null /* RegattaParameterValidator */, callback);
         if (existingEvents != null && !existingEvents.isEmpty()) {
             sailingEventsListBox.addItem((existingEvents.get(0)).getName());
         } else {
@@ -35,15 +32,18 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
         sailingEventsListBox.setSelectedIndex(1);
         sailingEventsListBox.setEnabled(false);
         setCourseAreaSelection();
-        createSeriesEditor();
     }
 
-    protected ListEditorComposite<SeriesDTO> createSeriesEditor() {
+    protected ListEditorComposite<SeriesDTO> createSeriesEditor(Iterable<SeriesDTO> series) {
+        return new SeriesWithFleetsDefaultListEditor(series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */ false);
+    }
+
+    private static List<SeriesDTO> getSeriesInRegattas(final Iterable<RegattaDTO> defaultRegattas) {
         List<SeriesDTO> series = new ArrayList<SeriesDTO>();
         for (RegattaDTO regattaDTO : defaultRegattas) {
             series.addAll(regattaDTO.series);
         }
-        return new SeriesWithFleetsDefaultListEditor(series, stringMessages, resources.removeIcon(), /* enableFleetRemoval */ false);
+        return series;
     }
 
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {

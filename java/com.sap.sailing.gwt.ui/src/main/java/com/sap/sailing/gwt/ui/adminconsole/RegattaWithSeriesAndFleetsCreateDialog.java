@@ -14,14 +14,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
-import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
-
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
-
         private StringMessages stringMessages;
         private ArrayList<RegattaDTO> existingRegattas;
 
@@ -109,13 +106,13 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
 
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(new RegattaDTO(), existingEvents, stringMessages.addRegatta(), stringMessages.ok(), stringMessages,
-                new RegattaParameterValidator(stringMessages, existingRegattas), callback);
+        super(new RegattaDTO(), Collections.<SeriesDTO>emptySet(), existingEvents, stringMessages.addRegatta(), stringMessages.ok(),
+                stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
     }
 
     @Override
-    protected ListEditorComposite<SeriesDTO> createSeriesEditor() {
-        return new SeriesWithFleetsListEditor(Collections.<SeriesDTO> emptyList(), stringMessages, resources.removeIcon(), /* enableFleetRemoval */true);
+    protected boolean isEnableFleetRemoval() {
+        return true;
     }
 
     @Override

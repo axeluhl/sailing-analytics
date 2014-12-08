@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -11,17 +12,20 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWithSeriesAndFleetsDialog<RegattaDTO> {
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     protected BetterDateTimeBox startDateBox;
     protected BetterDateTimeBox endDateBox;
     protected TextBox nameEntryField;
     protected TextBox boatClassEntryField;
 
-    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, List<EventDTO> existingEvents, String title,
-            String okButton, StringMessages stringMessages, Validator<RegattaDTO> validator,
-            DialogCallback<RegattaDTO> callback) {
-        super(regatta, existingEvents, title, okButton, stringMessages, validator, callback);
+    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents,
+            String title, String okButton, StringMessages stringMessages,
+            Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
+        super(regatta, series, existingEvents, title, okButton, stringMessages, validator, callback);
         this.stringMessages = stringMessages;
         nameEntryField = createTextBox(null);
         nameEntryField.ensureDebugId("NameTextBox");
@@ -37,8 +41,14 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         if (regatta.boatClass != null) {
             boatClassEntryField.setText(regatta.boatClass.getName());
         }
-        createSeriesEditor();
     }
+
+    @Override
+    protected ListEditorComposite<SeriesDTO> createSeriesEditor(Iterable<SeriesDTO> series) {
+        return new SeriesWithFleetsListEditor(series, stringMessages, resources.removeIcon(), isEnableFleetRemoval());
+    }
+
+    protected abstract boolean isEnableFleetRemoval();
 
     @Override
     protected RegattaDTO getResult() {
