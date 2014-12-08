@@ -41,12 +41,14 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
         
         if (volleyHelperSpy == null)
         {
+        	VolleyHelper.injectInstance(null);
         	volleyHelperSpy = Mockito.spy(VolleyHelper.getInstance(getContext()));
         	VolleyHelper.injectInstance(volleyHelperSpy);
         }
         
         if (databaseHelperMock == null)
         {
+        	DatabaseHelper.injectInstance(null);
         	databaseHelperMock = Mockito.mock(DatabaseHelper.class);
         	DatabaseHelper.injectInstance(databaseHelperMock);
         }
