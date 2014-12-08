@@ -11,6 +11,8 @@ import android.support.v7.widget.Toolbar;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.sensors.CompassManager;
+import com.sap.sailing.android.tracking.app.sensors.CompassManager.MagneticHeadingListener;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
@@ -21,10 +23,11 @@ import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConn
 import com.sap.sailing.android.tracking.app.services.TransmittingService.TransmittingBinder;
 import com.sap.sailing.android.tracking.app.ui.fragments.HudFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
-public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
+public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener, MagneticHeadingListener {
 	
 	TrackingService trackingService;
 	boolean trackingServiceBound;
@@ -37,9 +40,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	
 	private String eventId;
 	
+	private AppPreferences prefs;
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        prefs = new AppPreferences(this);
         
         Intent intent = getIntent();
         eventId = intent.getExtras().getString(getString(R.string.tracking_activity_event_id_parameter)); 
@@ -96,8 +103,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     protected void onSaveInstanceState(Bundle outState) {
     	super.onSaveInstanceState(outState);
     	
-    	TrackingFragment fragment = (TrackingFragment)getSupportFragmentManager()
-				.findFragmentById(R.id.content_frame);
+    	TrackingFragment fragment = (TrackingFragment)getSupportFragmentManager().findFragmentById(R.id.content_frame);
     	getSupportFragmentManager().putFragment(outState, SIS_FRAGMENT, fragment);
     }
     
@@ -138,7 +144,21 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
     }
     
-    
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	CompassManager.getInstance(this).unregisterListener();
+    }
+
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	
+		if (prefs.getHeadingFromMagneticSensorPreferred()) {
+			CompassManager.getInstance(this).registerListener(this);
+		}
+    }
+
     @Override
     public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float bearing, float speed) {
     	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
@@ -146,7 +166,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     	
     	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
     	hudFragment.setSpeedOverGround(speed);
-    	hudFragment.setHeading(bearing);
+    	
+    	if (!prefs.getHeadingFromMagneticSensorPreferred())
+    	{
+    		hudFragment.setHeading(bearing);	
+    	}
     }
     
     @Override
@@ -231,4 +255,21 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             trackingServiceBound = false;
         }
     };
+
+	@Override
+	public void magneticHeadingUpdated(float heading) {
+    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
+    	if (prefs.getHeadingFromMagneticSensorPreferred())
+    	{
+    		hudFragment.setHeading(heading);
+    	}
+    	else
+    	{
+    		if (BuildConfig.DEBUG)
+    		{
+    			ExLog.i(this, TAG, "Received magnet compass update, even though prefs say get from GPS. Unregistering listener." );
+    		}
+    		CompassManager.getInstance(this).unregisterListener();
+    	}
+	}
 }

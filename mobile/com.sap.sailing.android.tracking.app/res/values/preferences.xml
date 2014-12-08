@@ -10,6 +10,7 @@
     <string name="preference_server_url_default">http://95.85.58.11:8000</string>
     
     <string name="preference_energy_saving_enabled_key">preferenceEnergySavingEnabled</string>
+    <string name="preference_heading_from_magnetic_key">preferenceHeadingFromMagneticKey</string>
     
     <string name="settings_category_energy_saving">Battery Saving</string>
     <string name="energy_saving_enabled">Save Energy</string>
@@ -26,4 +27,10 @@
     <string name="preference_tracking_timer_started">trackingTimerStarted</string>
     <string name="preference_tracker_is_tracking">trackerIsTracking</string>
     <string name="preference_tracker_is_tracking_event_id">trackerIsTrackingEventId</string>
+    
+    <string name="preference_heading_from_magnetic_key_is_enabled">magn.</string>
+    <string name="preference_heading_from_magnetic_key_is_disabled">GPS</string>
+    <string name="preference_heading_from_magnetic_key_summary_is_enabled">Reported heading from magnetic compass</string>
+    <string name="preference_heading_from_magnetic_key_summary_is_disabled">Reported heading from GPS</string>
+    <string name="preference_heading_from_magnetic_enabled">Heading</string>
 </resources>

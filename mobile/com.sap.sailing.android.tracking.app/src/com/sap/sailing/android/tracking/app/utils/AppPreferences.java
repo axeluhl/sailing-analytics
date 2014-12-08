@@ -104,6 +104,10 @@ public class AppPreferences {
     	return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
     }
     
+    public boolean getHeadingFromMagneticSensorPreferred() {
+    	return preferences.getBoolean(context.getString(R.string.preference_heading_from_magnetic_key), false);
+    }
+    
     public void setTrackingTimerStarted(long milliseconds)
     {
     	preferences.edit().putLong(context.getString(R.string.preference_tracking_timer_started), milliseconds).commit();
