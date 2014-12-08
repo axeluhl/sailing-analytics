@@ -2,7 +2,7 @@ package com.sap.sailing.android.tracking.app.ui.activities;
 
 
 public class SystemInformationActivity extends BaseActivity {
-    private SystemInformationActivityHelper helper;
+//    private SystemInformationActivityHelper helper;
 
 //    @Override
 //    public void onCreate(Bundle savedInstanceState) {
