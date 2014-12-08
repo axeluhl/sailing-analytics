@@ -146,8 +146,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements
 					return lRInfo;
 				} else {
 					fillLiveRaceInfoDTOWithRaceData(lRInfo, timePointOfRequest);
-					//fillLiveRaceInfoDTOWithWindBotData(lRInfo,
-						//	timePointOfRequest);
 					fillLiveRaceInfoDTOWithStartLineAdavantageData(lRInfo,
 							timePointOfRequest);
 					fillLiveRaceInfoDTOWithStartAnalysisData(lRInfo,

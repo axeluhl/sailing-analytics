@@ -13,6 +13,7 @@ public class StartAnalysisDTO implements Serializable, Comparable<StartAnalysisD
     public String raceName;
     public List<PositionDTO> startLineMarkPositions;
     public List<MarkDTO> startLineMarks;
+    public MarkDTO firstMark;
     public WindAndAdvantagesInfoForStartLineDTO startAnalysisWindLineInfoDTO;
     public List<StartAnalysisCompetitorDTO> startAnalysisCompetitorDTOs;
  

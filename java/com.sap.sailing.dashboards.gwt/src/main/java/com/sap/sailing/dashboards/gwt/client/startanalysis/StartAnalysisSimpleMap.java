@@ -92,7 +92,9 @@ public class StartAnalysisSimpleMap extends AbsolutePanel implements TailFactory
                 map.getElement().getStyle().setBackgroundColor("#4293DB");
                 map.triggerResize();
                 drawStartLine(startAnalysisDTO.startLineMarks);
+                drawLinesFromStartLineToFirstMark(startAnalysisDTO.startLineMarks, startAnalysisDTO.firstMark);
                 drawStartlineMarks(startAnalysisDTO.startLineMarks);
+                drawFirstMark(startAnalysisDTO.firstMark);
                 drawTails(createGPSFixesForCompetitors(startAnalysisDTO));
                 drawBoats(createGPSPositionForCompetitors(startAnalysisDTO));
                 zoomMapToNewBounds(calculateNewBounds(startAnalysisDTO.startLineMarkPositions));
@@ -146,9 +148,44 @@ public class StartAnalysisSimpleMap extends AbsolutePanel implements TailFactory
             }
         }
     }
+    
+    private void drawLinesFromStartLineToFirstMark(List<MarkDTO> startlineMarks, MarkDTO firstMark){
+        if (map != null && startlineMarks != null && firstMark != null) {
+            if (startlineMarks.size() == 2) {
+                LatLng startLinePoint1 = LatLng.newInstance(startlineMarks.get(0).position.latDeg,
+                        startlineMarks.get(0).position.lngDeg);
+                LatLng startLinePoint2 = LatLng.newInstance(startlineMarks.get(1).position.latDeg,
+                        startlineMarks.get(1).position.lngDeg);
+                LatLng firstMarkPoint = LatLng.newInstance(firstMark.position.latDeg,
+                        firstMark.position.lngDeg);
+
+                PolylineOptions options = PolylineOptions.newInstance();
+                options.setGeodesic(true);
+                options.setStrokeColor("#A3A3A3");
+                options.setStrokeWeight(2);
+                options.setStrokeOpacity(1.0);
+
+                MVCArray<LatLng> pointsAsArray1 = MVCArray.newInstance();
+                pointsAsArray1.insertAt(0, startLinePoint1);
+                pointsAsArray1.insertAt(1, firstMarkPoint);
+                
+                MVCArray<LatLng> pointsAsArray2 = MVCArray.newInstance();
+                pointsAsArray2.insertAt(0, startLinePoint2);
+                pointsAsArray2.insertAt(1, firstMarkPoint);
+
+                Polyline startMarkFirstMark1 = Polyline.newInstance(options);
+                Polyline startMarkFirstMark2 = Polyline.newInstance(options);
+                
+                startMarkFirstMark1.setPath(pointsAsArray1);
+                startMarkFirstMark2.setPath(pointsAsArray2);
+
+                startMarkFirstMark1.setMap(map);
+                startMarkFirstMark2.setMap(map);
+            }
+        }
+    }
 
     private void drawStartlineMarks(List<MarkDTO> startlineMarks) {
-
         if (map != null) {
             for (MarkDTO markDTO : startlineMarks) {
                 CourseMarkOverlay courseMarkOverlay = createCourseMarkOverlay(
@@ -156,6 +193,12 @@ public class StartAnalysisSimpleMap extends AbsolutePanel implements TailFactory
                 courseMarkOverlay.addToMap();
             }
         }
+    }
+    
+    private void drawFirstMark(MarkDTO firstMark){
+        CourseMarkOverlay courseMarkOverlay = createCourseMarkOverlay(
+                RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX, firstMark);
+        courseMarkOverlay.addToMap();
     }
 
     private CourseMarkOverlay createCourseMarkOverlay(int zIndex, final MarkDTO markDTO) {
