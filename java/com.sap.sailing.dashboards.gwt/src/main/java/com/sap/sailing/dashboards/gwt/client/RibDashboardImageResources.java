@@ -39,6 +39,6 @@ public interface RibDashboardImageResources extends ClientBundle {
     @Source("images/compass.png")
     ImageResource compass();
     
-    @Source("images/beach.png")
-    ImageResource beach();
+    @Source("images/watch.png")
+    ImageResource watch();
 }

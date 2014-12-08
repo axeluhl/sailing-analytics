@@ -172,6 +172,21 @@
 	z-index: 0;
 }
 
+.windloadinghinttext {
+	position: absolute;
+	bottom: 0pt;
+	height: 15pt;
+	line-height: 15pt;
+	margin-top: 0pt;
+	vertical-align: middle;
+	font-size: 12pt;
+	font-family: "Arial";
+	width: 100%;
+	text-align: center;
+	top: 50%;
+	margin-top: -7pt;
+}
+
 .leaderboardpanel {
 	position: absolute;
 	top: 30%;

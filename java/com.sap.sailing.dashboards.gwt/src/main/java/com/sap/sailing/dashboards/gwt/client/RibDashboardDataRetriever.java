@@ -127,7 +127,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
                         case NO_RACE_LIVE:
                             if (numberOfChachedStartAnalysisDTOs == 0) {
                                 popupRacingNotYetStarted.showWithMessageAndImageAndButtonText("Racing not yet started",
-                                        RibDashboardImageResources.INSTANCE.beach(), "Retry");
+                                        RibDashboardImageResources.INSTANCE.watch(), "Retry");
                             } else {
                                 bottomNotification.show("Race finished!", "#418bcb", "#FFFFFF", false);
                                 setSelection(null);

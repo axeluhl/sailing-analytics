@@ -18,11 +18,11 @@
 			<mgwtcarousel:Carousel ui:field="carousel">
 				<mgwtpanel:Panel styleName="{style.page}">
 					<g:HTMLPanel ui:field="leftwindbotcontainer" styleName="{style.collumn} {style.left}">
-						<div ui:field="windloadinghintleft" class="{style.windloadinghint}">Loading Wind Bot Data...</div>
+						<div ui:field="windloadinghintleft" class="{style.windloadinghint}"><div class="{style.windloadinghinttext}">Loading Wind Bot Data...</div></div>
 					</g:HTMLPanel>
 					<g:HTMLPanel ui:field="rightwindbotcontainer"
 						styleName="{style.collumn} {style.right}">
-						<div ui:field="windloadinghintright" class="{style.windloadinghint}">Loading Wind Bot Data...</div>
+						<div ui:field="windloadinghintright" class="{style.windloadinghint}"><div class="{style.windloadinghinttext}">Loading Wind Bot Data...</div></div>
 					</g:HTMLPanel>
 					<g:HTMLPanel styleName="{style.windcharthint}">Tab on chart to change interval.</g:HTMLPanel>
 				</mgwtpanel:Panel>
@@ -36,7 +36,7 @@
 							<startlineadvantage:StartLineAdvantageComponent
 								ui:field="startLineCAComponent"></startlineadvantage:StartLineAdvantageComponent>
 							<g:HTML styleName="{style.hintpanel}">
-								<div class="{style.hint}" ui:field="hint">Tap to change startline
+								<div class="{style.hint}" ui:field="hint">Tab to change startline
 									advantage type</div>
 							</g:HTML>
 						</g:HTMLPanel>

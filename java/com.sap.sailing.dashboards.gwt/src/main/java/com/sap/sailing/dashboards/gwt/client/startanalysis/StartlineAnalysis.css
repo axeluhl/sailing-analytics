@@ -92,7 +92,7 @@
 	position: absolute;
 	top: 10pt;
 	left: 10pt;
-	width: 40pt;
+	width: 45pt;
 	height: 80pt;
 	z-index: 1;
 }
@@ -101,22 +101,22 @@
 	position: absolute;
 	top: 0pt;
 	right: 0pt;
-	width: 40pt;
-	height: 40pt;
-	border-radius: 20pt;
+	width: 45pt;
+	height: 45pt;
+	border-radius: 22.5pt;
 	background-color: white;
 }
 
 .startanalysis_card_wind_arrow {
-	width: 20pt;
-	height: 20pt;
+	width: 25pt;
+	height: 25pt;
 	margin-top: 10pt;
 	margin-left: 10pt;
 }
 
 .startanalysis_card_wind_canvas {
-	width: 30pt;
-	height: 30pt;
+	width: 25pt;
+	height: 25pt;
 	margin-top: 10pt;
 	margin-left: 10pt;
 }
@@ -124,44 +124,44 @@
 .startanalysis_card_data {
 	position: absolute;
 	right: 0pt;
-	width: 40pt;
-	height: 20pt;
+	width: 45pt;
+	height: 25pt;
 	background-color: white;
-	line-height: 20pt;
+	line-height: 25pt;
 	vertical-align: middle;
-	font-size: 10pt;
+	font-size: 11pt;
 	font-family: "Arial";
 	text-align: center;
 }
 
 .startanalysis_card_wind_data_direction {
-	top: 50pt;
+	top: 55pt;
 }
 
 .startanalysis_card_wind_data_speed {
-	top: 80pt;
+	top: 85pt;
 }
 
 .startanalysis_card_line_data {
 	top: 0pt;
-	left: 50pt;
-	width: 105pt;
+	left: 55pt;
+	width: 110pt;
 	text-align: left;
 	padding-left: 7pt;
 }
 
 .startanalysis_card_line_data_wind {
 	top: 0pt;
-	left: 150pt;
-	width: 80pt;
+	left: 165pt;
+	width: 85pt;
 	text-align: left;
 	padding-left: 7pt;
 }
 
 .startanalysis_card_line_data_geo {
 	top: 0pt;
-	left: 235pt;
-	width: 90pt;
+	left: 250pt;
+	width: 100pt;
 	text-align: left;
 }
 
