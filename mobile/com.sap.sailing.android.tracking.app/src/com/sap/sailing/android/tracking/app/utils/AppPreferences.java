@@ -105,7 +105,7 @@ public class AppPreferences {
     }
     
     public boolean getHeadingFromMagneticSensorPreferred() {
-    	return preferences.getBoolean(context.getString(R.string.preference_heading_from_magnetic_key), false);
+    	return preferences.getBoolean(context.getString(R.string.preference_heading_from_magnetic_key), true);
     }
     
     public void setTrackingTimerStarted(long milliseconds)
