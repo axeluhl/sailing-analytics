@@ -30,7 +30,7 @@
     
     <string name="preference_heading_from_magnetic_key_is_enabled">magn.</string>
     <string name="preference_heading_from_magnetic_key_is_disabled">GPS</string>
-    <string name="preference_heading_from_magnetic_key_summary_is_enabled">Reported heading from magnetic compass</string>
-    <string name="preference_heading_from_magnetic_key_summary_is_disabled">Reported heading from GPS</string>
+    <string name="preference_heading_from_magnetic_key_summary_is_enabled">Heading from magnetic compass</string>
+    <string name="preference_heading_from_magnetic_key_summary_is_disabled">Heading from GPS</string>
     <string name="preference_heading_from_magnetic_enabled">Heading</string>
 </resources>
