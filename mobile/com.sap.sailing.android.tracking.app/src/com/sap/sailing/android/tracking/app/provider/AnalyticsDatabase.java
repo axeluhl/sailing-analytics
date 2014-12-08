@@ -8,7 +8,6 @@ import android.provider.BaseColumns;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CompetitorColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventColumns;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGpsColumns;
 
