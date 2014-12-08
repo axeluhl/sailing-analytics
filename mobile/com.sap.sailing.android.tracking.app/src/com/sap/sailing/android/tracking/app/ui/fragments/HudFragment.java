@@ -1,6 +1,7 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import android.os.Bundle;
+import android.text.method.MovementMethod;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -74,32 +75,43 @@ public class HudFragment extends BaseFragment {
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_MOVE: 
 				 int newTranslation = y - yDelta;
-				 lastTranslation = newTranslation;
-				 if (newTranslation >= minTranslateY && newTranslation < maxTranslateY)
+				 
+				 if (newTranslation > lastTranslation)
 				 {
-					 view.setTranslationY(newTranslation);
+					 animateDown(view);
 				 }
+				 else
+				 {
+					 animateUp(view);
+				 }
+					 
+				 
+				 lastTranslation = newTranslation;
+//				 if (newTranslation >= minTranslateY && newTranslation < maxTranslateY)
+//				 {
+//					 view.setTranslationY(newTranslation);
+//				 }
 				break;
 			case MotionEvent.ACTION_UP:
-				int treshold = Math.round((maxTranslateY - minTranslateY) / 2);
-				if (lastTranslation < treshold) {
-					animateUp(view);
-				} else {
-					animateDown(view);
-				}
-				
-				long eventDuration = 
-			            android.os.SystemClock.elapsedRealtime() 
-			            - event.getDownTime();
-				
-				if (eventDuration < 200) {
-					view.performClick();
-					if (!isUp) 
-					{
-						animateUp(view);
-					}
-				}
-				
+//				int treshold = Math.round((maxTranslateY - minTranslateY) / 2);
+//				if (lastTranslation < treshold) {
+//					animateUp(view);
+//				} else {
+//					animateDown(view);
+//				}
+//				
+//				long eventDuration = 
+//			            android.os.SystemClock.elapsedRealtime() 
+//			            - event.getDownTime();
+//				
+//				if (eventDuration < 200) {
+//					view.performClick();
+//					if (!isUp) 
+//					{
+//						animateUp(view);
+//					}
+//				}
+//				
 				break;
 
 			case MotionEvent.ACTION_DOWN:
