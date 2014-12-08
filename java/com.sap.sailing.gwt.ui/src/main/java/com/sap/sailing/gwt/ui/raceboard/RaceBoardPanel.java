@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -55,6 +56,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
@@ -367,7 +369,14 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             raceInformationHeader.add(raceAdditionalInformationLabel);
             Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             if (event != null) {
-                regattaNameAnchor.setHref("/gwt/Home.html#EventPlace:eventId="+event.id.toString()+"&navigationTab=Regattas&leaderboardName="+leaderboardName);
+                String debugParam = Window.Location.getParameter("gwt.codesvr");
+                String link = "/gwt/Home.html";
+                if (debugParam != null && !debugParam.isEmpty()) {
+                    link += "?gwt.codesvr=" + debugParam;
+                }
+                link += "#EventPlace:eventId="+event.id.toString();
+                link += "&navigationTab=Regatta&leaderboardName=" + URLEncoder.encode(leaderboardName);
+                regattaNameAnchor.setHref(link);
             } else {
                 regattaNameAnchor.setHref("javascript:window.history.back();"); 
             }
