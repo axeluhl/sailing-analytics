@@ -38,6 +38,7 @@ import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
@@ -302,7 +303,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
 
 	@Override
-	public void onPositionSelected() {
+	public void onPositionSelected(LoginType type) {
 		Intent message = new Intent(LoginActivity.this, RacingActivity.class);
         message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseArea.getId());
         message.putExtra(AppConstants.EventIdTag, mSelectedEvent);

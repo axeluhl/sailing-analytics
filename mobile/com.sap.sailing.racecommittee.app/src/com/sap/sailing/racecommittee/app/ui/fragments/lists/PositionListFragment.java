@@ -4,7 +4,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 import java.util.ArrayList;
 
 import android.view.View;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -23,6 +22,8 @@ public class PositionListFragment extends LoggableListFragment{
     private RaceLogEventAuthor author;
     private AppPreferences preferences;
 	
+    private PositionSelectedListenerHost host;
+    
 	@Override
 	public void onResume() {
 		
@@ -36,6 +37,10 @@ public class PositionListFragment extends LoggableListFragment{
 		
 		final ArrayAdapter<String> adapter = new ArrayAdapter<String>( getActivity().getBaseContext(), R.layout.login_list_item, R.id.txt_list_item, values);
 		setListAdapter(adapter);
+		
+		if ( getActivity() instanceof PositionSelectedListenerHost ){
+			this.host = (PositionSelectedListenerHost) getActivity();
+		}
 		
 		super.onResume();
 	}
@@ -73,10 +78,12 @@ public class PositionListFragment extends LoggableListFragment{
 	            break;
         }
 	    
-	    
+	    host.onPositionSelected(selectedLoginType);
 	}
 	
-
+	
+	
+	
 	protected String getHeaderText() {
         return getString(R.string.label_login_position);
     }
