@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Structureimport
-Bundle-SymbolicName: com.sap.sailing.xrr.structureimportCopy
+Bundle-SymbolicName: com.sap.sailing.xrr.structureimport
 Bundle-Version: 1.6.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: .,
