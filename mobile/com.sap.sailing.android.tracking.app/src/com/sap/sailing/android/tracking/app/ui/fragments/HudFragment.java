@@ -72,10 +72,10 @@ public class HudFragment extends BaseFragment {
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_MOVE: 
 				 int newTranslation = y - yDelta;
+				 lastTranslation = newTranslation;
 				 if (newTranslation >= minTranslateY && newTranslation < maxTranslateY)
 				 {
 					 view.setTranslationY(newTranslation);
-					 lastTranslation = newTranslation;
 				 }
 				break;
 			case MotionEvent.ACTION_UP:
@@ -91,6 +91,8 @@ public class HudFragment extends BaseFragment {
 
 					lastTranslation = (int) maxTranslateY;
 				}
+				
+				view.performClick();
 				break;
 
 			case MotionEvent.ACTION_DOWN:
