@@ -23,7 +23,14 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.udpconnector,
  com.googlecode.mgwt;bundle-version="2.0.0"
 Bundle-ActivationPolicy: lazy
-Import-Package: org.osgi.framework;version="1.5.0",
+Import-Package: javax.jms;version="1.1.0",
+ javax.servlet;version="3.1.0",
+ javax.servlet.descriptor;version="3.1.0",
+ javax.servlet.http;version="3.1.0",
+ org.apache.http.client;version="4.2.6",
+ org.json.simple,
+ org.json.simple.parser,
+ org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker
 Web-ContextPath: /dashboards
 Bundle-ClassPath: WEB-INF/classes/,
