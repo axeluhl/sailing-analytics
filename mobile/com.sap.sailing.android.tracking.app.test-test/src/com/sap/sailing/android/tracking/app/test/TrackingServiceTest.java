@@ -3,6 +3,10 @@ package com.sap.sailing.android.tracking.app.test;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.json.JSONObject;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
 import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
@@ -10,6 +14,8 @@ import android.test.ServiceTestCase;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
+import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
@@ -72,25 +78,17 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
      */
 	public void testGPSFixesStoredToDatabase() throws InterruptedException {
 		startService();
-		
-//		LocationManager locationManager = (LocationManager) this.getContext()
-//				.getSystemService(Context.LOCATION_SERVICE);
-		
 		long timestamp = new Date().getTime();
-//		long nanos = System.nanoTime();
 		
         Location location = new Location("Test");
         location.setLatitude(20.0);
         location.setLongitude(30.0);
         location.setAccuracy(0);
         location.setTime(timestamp);
-//        location.setElapsedRealtimeNanos(nanos);
         location.setSpeed(12.5f);
         location.setBearing(123);
         
         getService().onLocationChanged(location);
-        
-//      locationManager.setTestProviderLocation(GPS_MOCK_PROVIDER_NAME, location);
         
         ArrayList<GpsFix> fixes = DatabaseTestHelper.getAllGpsFixesFromDB(getContext());
         assertEquals(1, fixes.size());
@@ -109,31 +107,42 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
     }
 	
 	
+	public void testReportsGpsQualityGreat() {
+		TrackingActivity listener = Mockito.mock(TrackingActivity.class);
+		ArgumentCaptor<GPSQuality> gpsQualityCaptor = ArgumentCaptor.forClass(GPSQuality.class);
+		ArgumentCaptor<Integer> accuracyCaptor = ArgumentCaptor.forClass(Integer.class);
+		ArgumentCaptor<Float> bearingCaptor = ArgumentCaptor.forClass(Float.class);
+		ArgumentCaptor<Float> speedCaptor = ArgumentCaptor.forClass(Float.class);
+		
+		startService();
+		TrackingService service = getService();
+		service.registerGPSQualityListener(listener);
+
+		Mockito.verify(listener, Mockito.times(1))
+				.gpsQualityAndAccurracyUpdated(gpsQualityCaptor.capture(),
+						accuracyCaptor.capture(), bearingCaptor.capture(),
+						speedCaptor.capture());
+		
+	    getService().onLocationChanged(getTestLocation(2, 12.5f, 123));
+	    
+	    assertEquals(GPSQuality.great, gpsQualityCaptor.getValue());
+	    assertEquals(2, accuracyCaptor.getValue().floatValue());
+	    assertEquals(123, bearingCaptor.getValue().floatValue());
+	    assertEquals(12.5f, speedCaptor.getValue().floatValue());
+	    
+		shutdownService();
+	}
 	
-//	private void createGpsTestProvider()
-//	{
-//		LocationManager locationManager = (LocationManager) this.getContext()
-//				.getSystemService(Context.LOCATION_SERVICE);
-//		
-//		if (locationManager.getProvider(GPS_MOCK_PROVIDER_NAME) == null)
-//		{
-//			locationManager.addTestProvider(GPS_MOCK_PROVIDER_NAME, false, false, false, false, false,
-//					false, false, Criteria.POWER_LOW, Criteria.ACCURACY_FINE);	
-//		}
-//		
-//		locationManager.setTestProviderEnabled(GPS_MOCK_PROVIDER_NAME, true);
-//	}
-//	
-//	private void removeGpsTestProvider()
-//	{
-//		LocationManager locationManager = (LocationManager) this.getContext()
-//				.getSystemService(Context.LOCATION_SERVICE);
-//		
-//		if (locationManager.getProvider(GPS_MOCK_PROVIDER_NAME) != null)
-//		{
-//			locationManager.removeTestProvider(GPS_MOCK_PROVIDER_NAME);
-//		}
-//	}
-	
-	
+	private Location getTestLocation(float accurracy, float speed, float bearing)
+	{
+		long timestamp = new Date().getTime();
+		Location location = new Location("Test");
+		location.setLatitude(20.0);
+		location.setLongitude(30.0);
+		location.setAccuracy(accurracy);
+		location.setTime(timestamp);
+		location.setSpeed(speed);
+		location.setBearing(bearing);
+		return location;
+	}
 }

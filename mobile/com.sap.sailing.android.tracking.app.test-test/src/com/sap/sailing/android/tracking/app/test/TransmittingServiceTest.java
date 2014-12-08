@@ -15,7 +15,9 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
+import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
 import com.sap.sailing.android.tracking.app.services.TransmittingService;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
@@ -109,5 +111,6 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		assertEquals("http://127.0.0.1/api/v1/gps_fixes", urlCaptor.getValue());
 		shutdownService();
 	}
+
 
 }
