@@ -36,6 +36,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -494,6 +496,24 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void setEndDate(TimePoint startDate) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public RegattaLikeIdentifier getRegattaLikeIdentifier() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void addListener(RegattaLikeListener listener) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void removeListener(RegattaLikeListener listener) {
                         // TODO Auto-generated method stub
                         
                     }

@@ -202,7 +202,6 @@ import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
-import com.sap.sailing.domain.leaderboard.HasRegattaLog;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -222,6 +221,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -4700,10 +4700,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private RegattaLog getRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
         Leaderboard l = getService().getLeaderboardByName(leaderboardName);
-        if (! (l instanceof HasRegattaLog)) {
+        if (! (l instanceof IsRegattaLike)) {
             throw new DoesNotHaveRegattaLogException();
         }
-        return ((HasRegattaLog) l).getRegattaLog();
+        return ((IsRegattaLike) l).getRegattaLog();
     }
     
     private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
@@ -4951,8 +4951,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         result.add(raceLog);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard instanceof HasRegattaLog) {
-            result.add(((HasRegattaLog) leaderboard).getRegattaLog());
+        if (leaderboard instanceof IsRegattaLike) {
+            result.add(((IsRegattaLike) leaderboard).getRegattaLog());
         }
         return result;
     }

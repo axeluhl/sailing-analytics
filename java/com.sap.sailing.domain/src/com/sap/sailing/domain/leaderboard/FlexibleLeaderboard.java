@@ -6,6 +6,8 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.Renamable;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -21,7 +23,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface FlexibleLeaderboard extends Leaderboard, Renamable, HasRegattaLog {
+public interface FlexibleLeaderboard extends Leaderboard, Renamable, HasRegattaLike, IsRegattaLike {
     /**
      * Moves the column with the name <code>name</code> up. 
      * @param name The name of the column to move.

@@ -3,7 +3,6 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -16,6 +15,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -97,8 +97,7 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     }
     
     @Override
-    public RegattaLog getRegattaLog() {
-        return regatta.getRegattaLog();
+    public IsRegattaLike getRegattaLike() {
+        return regatta;
     }
-
 }

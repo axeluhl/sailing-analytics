@@ -20,7 +20,11 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.regattalike.BaseRegattaLikeImpl;
 import com.sap.sailing.domain.regattalike.FlexibleLeaderboardAsRegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -49,7 +53,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     /**
      * @see RegattaLog for the reason why the leaderboard manages a {@code RegattaLog}
      */
-    private final RegattaLog regattaLog;
+    private final IsRegattaLike regattaLikeHelper;
 
     public FlexibleLeaderboardImpl(String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
             ScoringScheme scoringScheme, CourseArea courseArea) {
@@ -69,7 +73,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.races = new ArrayList<FlexibleRaceColumn>();
         this.raceLogStore = raceLogStore;
         this.courseArea = courseArea;
-        this.regattaLog = regattaLogStore.getRegattaLog(name, /*ignoreCache*/ true);
+        this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore);
     }
 
     /**
@@ -246,9 +250,29 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public void setDefaultCourseArea(CourseArea newCourseArea) {
         this.courseArea = newCourseArea;
     }
+    
+    @Override
+    public IsRegattaLike getRegattaLike() {
+        return regattaLikeHelper;
+    }
 
     @Override
     public RegattaLog getRegattaLog() {
-        return regattaLog;
+        return regattaLikeHelper.getRegattaLog();
+    }
+
+    @Override
+    public RegattaLikeIdentifier getRegattaLikeIdentifier() {
+        return regattaLikeHelper.getRegattaLikeIdentifier();
+    }
+
+    @Override
+    public void addListener(RegattaLikeListener listener) {
+        regattaLikeHelper.addListener(listener);
+    }
+
+    @Override
+    public void removeListener(RegattaLikeListener listener) {
+        regattaLikeHelper.removeListener(listener);
     }
 }

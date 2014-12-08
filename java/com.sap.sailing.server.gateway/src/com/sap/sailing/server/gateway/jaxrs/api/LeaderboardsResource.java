@@ -52,11 +52,11 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.leaderboard.HasRegattaLog;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -346,7 +346,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         ;
 
-        HasRegattaLog hasRegattaLog = (HasRegattaLog) leaderboard;
+        IsRegattaLike isRegattaLike = (IsRegattaLike) leaderboard;
 
         DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
 
@@ -390,9 +390,9 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         
         //add registration if necessary
-        Set<Competitor> registered = new RegisteredCompetitorsAnalyzer<>(hasRegattaLog.getRegattaLog()).analyze();
+        Set<Competitor> registered = new RegisteredCompetitorsAnalyzer<>(isRegattaLike.getRegattaLog()).analyze();
         if (!registered.contains(mappedTo)) {
-            hasRegattaLog.getRegattaLog().add(
+            isRegattaLike.getRegattaLog().add(
                     new RegattaLogRegisterCompetitorEventImpl(now, author, now, UUID.randomUUID(), mappedTo));
         }
         
@@ -401,7 +401,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
         event = new RegattaLogDeviceCompetitorMappingEventImpl(now, author, now, UUID.randomUUID(), mappedTo, device,
                 from, null);
-        hasRegattaLog.getRegattaLog().add(event);
+        isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully added regatta log event");
         return Response.status(Status.OK).build();
     }
@@ -412,7 +412,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return false;
         }
 
-        if (!(leaderboard instanceof HasRegattaLog)) {
+        if (!(leaderboard instanceof IsRegattaLike)) {
             logger.warning("Specified Leaderboard has no attached RegattaLog");
             return false;
         }
@@ -432,7 +432,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .build();
         }
 
-        HasRegattaLog hasRegattaLog = (HasRegattaLog) leaderboard;
+        IsRegattaLike isRegattaLike = (IsRegattaLike) leaderboard;
 
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
                 AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
@@ -468,7 +468,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
         
-        OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(hasRegattaLog.getRegattaLog(),
+        OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(),
                 mappedTo, deviceUuid);
         Serializable deviceMappingEventId = finder.analyze();
 
@@ -481,7 +481,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
                 author, now, UUID.randomUUID(), deviceMappingEventId, closingTimePoint);
 
-        hasRegattaLog.getRegattaLog().add(event);
+        isRegattaLike.getRegattaLog().add(event);
         
         return Response.status(Status.GONE).build();
     }

@@ -48,9 +48,6 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogEventListener;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -121,9 +118,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.regattalike.FlexibleLeaderboardAsRegattaLikeIdentifier;
-import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
-import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -317,7 +312,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final RaceLogReplicator raceLogReplicator;
     private final RegattaLogReplicator regattaLogReplicator;
-    private final Map<RegattaLikeIdentifier, RegattaLogEventListener> regattaLogEventListeners = new ConcurrentHashMap<>();
 
     private final RaceLogScoringReplicator raceLogScoringReplicator;
 
@@ -565,7 +559,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         + ") into regattasByName");
                 regattasByName.put(regatta.getName(), regatta);
                 regatta.addRegattaListener(this);
-                registerRegattaLogReplicator(regatta);
+                registerRegattaLike(regatta);
                 regatta.addRaceColumnListener(raceLogReplicator);
                 regatta.addRaceColumnListener(raceLogScoringReplicator);
             }
@@ -622,7 +616,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         // RaceColumns of RegattaLeaderboards are tracked via its Regatta!
         if (leaderboard instanceof FlexibleLeaderboard) {
-            registerRegattaLogReplicator((FlexibleLeaderboard) leaderboard);
+            registerRegattaLike(((FlexibleLeaderboard) leaderboard).getRegattaLike());
             leaderboard.addRaceColumnListener(raceLogReplicator);
             leaderboard.addRaceColumnListener(raceLogScoringReplicator);
         }
@@ -887,7 +881,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mongoObjectFactory.removeLeaderboard(leaderboardName);
             syncGroupsAfterLeaderboardRemove(leaderboardName, true);
             if (leaderboard instanceof FlexibleLeaderboard) {
-                unregisterRegattaLogReplicator((FlexibleLeaderboard) leaderboard);
+                unregisterRegattaLike(((FlexibleLeaderboard) leaderboard).getRegattaLike());
             }
             leaderboard.destroy();
         }
@@ -1018,45 +1012,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     boatClassName), /*startDate*/ null, /*endDate*/ null, this, getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id,
                     null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
-            registerRegattaLogReplicator(result);
+            registerRegattaLike(result);
             cacheAndReplicateDefaultRegatta(result);
         }
         return result;
     }
     
-    private <T> void registerRegattaLogReplicator(RegattaLog regattaLog, RegattaLikeIdentifier identifier) {
-        RegattaLogEventListener listener = new RegattaLogEventListener() {
-            @Override
-            protected void eventAdded(RegattaLogEvent event) {
-                regattaLogReplicator.regattaLogEventAdded(identifier, event);
-            }
-        };
-        regattaLog.addListener(listener);
-        regattaLogEventListeners.put(identifier, listener);
+    private void registerRegattaLike(IsRegattaLike isRegattaLike) {
+        isRegattaLike.addListener(regattaLogReplicator);
     }
     
-    private void registerRegattaLogReplicator(Regatta regatta) {
-        registerRegattaLogReplicator(regatta.getRegattaLog(), new RegattaAsRegattaLikeIdentifier(regatta));
+    private void unregisterRegattaLike(IsRegattaLike isRegattaLike) {
+        isRegattaLike.removeListener(regattaLogReplicator);
     }
     
-    private void registerRegattaLogReplicator(FlexibleLeaderboard leaderboard) {
-        registerRegattaLogReplicator(leaderboard.getRegattaLog(),
-                new FlexibleLeaderboardAsRegattaLikeIdentifier(leaderboard));
-    }
-    
-    private void unregisterRegattaLogReplicator(RegattaLog regattaLog, RegattaLikeIdentifier identifier) {
-        regattaLog.removeListener(regattaLogEventListeners.remove(identifier));
-    }
-    
-    private void unregisterRegattaLogReplicator(Regatta regatta) {
-        unregisterRegattaLogReplicator(regatta.getRegattaLog(), new RegattaAsRegattaLikeIdentifier(regatta));
-    }
-
-    private void unregisterRegattaLogReplicator(FlexibleLeaderboard leaderboard) {
-        unregisterRegattaLogReplicator(leaderboard.getRegattaLog(), new FlexibleLeaderboardAsRegattaLikeIdentifier(
-                leaderboard));
-    }
-
     @Override
     public Regatta createRegatta(String fullRegattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
@@ -1066,7 +1035,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 useStartTimeInference);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
-            registerRegattaLogReplicator(regatta);
+            registerRegattaLike(regatta);
             replicateSpecificRegattaWithoutRaceColumns(regatta);
         }
         return regatta;
@@ -1710,7 +1679,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regatta.removeRegattaListener(this);
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
-        unregisterRegattaLogReplicator(regatta);
+        unregisterRegattaLike(regatta);
     }
 
     @Override

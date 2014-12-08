@@ -34,7 +34,11 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.regattalike.BaseRegattaLikeImpl;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -73,7 +77,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private TimePoint endDate;
     private final Serializable id;
     private transient RaceLogStore raceLogStore;
-    private final RegattaLog regattaLog;
+    private final IsRegattaLike regattaLikeHelper;
     
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
@@ -152,7 +156,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.scoringScheme = scoringScheme;
         this.defaultCourseArea = courseArea;
         this.configuration = null;
-        this.regattaLog = regattaLogStore.getRegattaLog(name, /*ignoreCache*/ true);
+        this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore);
     }
 
     private void registerRaceLogsOnRaceColumns(Series series) {
@@ -530,6 +534,21 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public RegattaLog getRegattaLog() {
-        return regattaLog;
+        return regattaLikeHelper.getRegattaLog();
+    }
+
+    @Override
+    public RegattaLikeIdentifier getRegattaLikeIdentifier() {
+        return regattaLikeHelper.getRegattaLikeIdentifier();
+    }
+
+    @Override
+    public void addListener(RegattaLikeListener listener) {
+        regattaLikeHelper.addListener(listener);
+    }
+
+    @Override
+    public void removeListener(RegattaLikeListener listener) {
+        regattaLikeHelper.removeListener(listener);
     }
 }

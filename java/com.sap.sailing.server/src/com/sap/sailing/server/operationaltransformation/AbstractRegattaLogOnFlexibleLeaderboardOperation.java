@@ -18,6 +18,6 @@ public abstract class AbstractRegattaLogOnFlexibleLeaderboardOperation<T> extend
         if (! (leaderboard instanceof FlexibleLeaderboard)) {
             throw new CouldNotResolveRegattaLogException();
         }
-        return ((FlexibleLeaderboard) leaderboard).getRegattaLog();
+        return ((FlexibleLeaderboard) leaderboard).getRegattaLike().getRegattaLog();
     }
 }

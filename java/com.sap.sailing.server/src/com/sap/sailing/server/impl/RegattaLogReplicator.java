@@ -2,12 +2,12 @@ package com.sap.sailing.server.impl;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.base.RegattaLikeListener;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.regattalike.FlexibleLeaderboardAsRegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifierResolver;
+import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnFlexibleLeaderboard;
@@ -24,6 +24,7 @@ import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnR
  * 
  */
 public class RegattaLogReplicator implements RegattaLikeListener {
+    private static final long serialVersionUID = 5266000688811193807L;
     private final Replicator service;
 
     public RegattaLogReplicator(Replicator service) {
@@ -31,7 +32,7 @@ public class RegattaLogReplicator implements RegattaLikeListener {
     }
 
     @Override
-    public void regattaLogEventAdded(RegattaLikeIdentifier regattaLikeIdentifier, final RegattaLogEvent event) {
+    public void onRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, final RegattaLogEvent event) {
         regattaLikeIdentifier.resolve(new RegattaLikeIdentifierResolver() {
             @Override
             public void resolveOnRegattaIdentifier(RegattaAsRegattaLikeIdentifier regattaLikeParent) {

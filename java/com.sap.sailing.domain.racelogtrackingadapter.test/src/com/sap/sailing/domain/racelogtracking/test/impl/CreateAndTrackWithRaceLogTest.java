@@ -196,7 +196,7 @@ public class CreateAndTrackWithRaceLogTest {
     @Test
     public void useEventsInRegattaLog() throws NotDenotedForRaceLogTrackingException, Exception {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
-        RegattaLog regattaLog = leaderboard.getRegattaLog();
+        RegattaLog regattaLog = leaderboard.getRegattaLike().getRegattaLog();
         RaceLog raceLog = column.getRaceLog(fleet);
 
         adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
