@@ -62,7 +62,8 @@ public class HudFragment extends BaseFragment {
 	class OverlayOnTouchListener implements OnTouchListener {
         private int yDelta;
         private int lastTranslation;
-
+        boolean isUp = false;
+        
 		@Override
 		public boolean onTouch(View view, MotionEvent event) {
             if (view.getId() != R.id.hud_content_frame) return false;
@@ -81,18 +82,23 @@ public class HudFragment extends BaseFragment {
 			case MotionEvent.ACTION_UP:
 				int treshold = Math.round((maxTranslateY - minTranslateY) / 2);
 				if (lastTranslation < treshold) {
-					view.animate().translationY(minTranslateY).setDuration(100)
-							.setInterpolator(new LinearInterpolator()).start();
-
-					lastTranslation = (int) minTranslateY;
+					animateUp(view);
 				} else {
-					view.animate().translationY(maxTranslateY).setDuration(500)
-							.setInterpolator(new BounceInterpolator()).start();
-
-					lastTranslation = (int) maxTranslateY;
+					animateDown(view);
 				}
 				
-				view.performClick();
+				long eventDuration = 
+			            android.os.SystemClock.elapsedRealtime() 
+			            - event.getDownTime();
+				
+				if (eventDuration < 200) {
+					view.performClick();
+					if (!isUp) 
+					{
+						animateUp(view);
+					}
+				}
+				
 				break;
 
 			case MotionEvent.ACTION_DOWN:
@@ -104,6 +110,22 @@ public class HudFragment extends BaseFragment {
 			}
 
 			return true;
+		}
+		
+		private void animateUp(View view) {
+			view.animate().translationY(minTranslateY).setDuration(100)
+					.setInterpolator(new LinearInterpolator()).start();
+
+			lastTranslation = (int) minTranslateY;
+			isUp = true;
+		}
+
+		private void animateDown(View view) {
+			view.animate().translationY(maxTranslateY).setDuration(500)
+					.setInterpolator(new BounceInterpolator()).start();
+
+			lastTranslation = (int) maxTranslateY;
+			isUp = false;
 		}
 	}
 }
