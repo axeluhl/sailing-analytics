@@ -34,6 +34,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var minutesHeight: NSLayoutConstraint!
     @IBOutlet weak var minutesLabel: UILabel!
     @IBOutlet weak var lastSyncLabel: UILabel!
+    @IBOutlet weak var leaderBoardButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
     @IBOutlet weak var announcementsLabel: PaddedLabel!
 
@@ -116,6 +117,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         } else {
             lastSyncLabel.text = nil
         }
+        leaderBoardButton.hidden = true
         startTrackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
         announcementsLabel.text = "Please listen for announcements"
       
@@ -126,6 +128,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             daysHeight.constant = 0
             hoursHeight.constant = 0
             minutesHeight.constant = 0
+            leaderBoardButton.hidden = false
             startTrackingButton.setTitle("Close", forState: UIControlState.Normal)
             startTrackingButton.backgroundColor = UIColor(hex: 0xEFAD00)
             announcementsLabel.text = " "
@@ -146,6 +149,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         }
         // during race
         else {
+            leaderBoardButton.hidden = false
             regattaStartLabel.text = "Regatta in progress"
             daysHeight.constant = 0
             hoursHeight.constant = 0
