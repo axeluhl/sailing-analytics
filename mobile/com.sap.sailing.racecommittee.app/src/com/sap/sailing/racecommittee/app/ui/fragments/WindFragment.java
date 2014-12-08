@@ -194,11 +194,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         windBearingEditText.setText(bearingFormat.format(enteredWindBearingFrom));
         np_windSpeed.setValue(((int) (Double.valueOf(enteredWindSpeed) * 2)));
         LatLng enteredWindLocation = preferences.getWindPosition();
-        if (enteredWindLocation.latitude != 0 && enteredWindLocation.longitude != 0) {
-            moveMarker(enteredWindLocation);
-            centerMap(enteredWindLocation);
-        }
-
+        
         FragmentManager fragmentManager;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             fragmentManager = getChildFragmentManager();
@@ -213,6 +209,11 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         uiSettings.setAllGesturesEnabled(false);
 
         double markerLat = -1;
+        if (enteredWindLocation.latitude != 0 && enteredWindLocation.longitude != 0) {
+            moveMarker(enteredWindLocation);
+            centerMap(enteredWindLocation);
+        }
+        
         if (savedInstanceState != null) {
             bigMap = savedInstanceState.getBoolean("bigMap", false);
             markerLat = savedInstanceState.getDouble("markerLat", -1);
@@ -414,7 +415,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         if (windMarker != null) {
             windMarker.remove();
         }
-
+        
         windMarker = windMap.addMarker(new MarkerOptions().position(latlng).draggable(true));
         AppPreferences preferences = AppPreferences.on(getActivity().getApplicationContext());
         preferences.setWindPosition(latlng);
