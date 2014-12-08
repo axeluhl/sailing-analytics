@@ -62,13 +62,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
         
         if (getSupportActionBar() != null) {
-        	EventInfo eventInfo = DatabaseHelper.getInstance(this).getEventInfo(eventId);
+        	EventInfo eventInfo = DatabaseHelper.getInstance(this).getEventInfoWithLeaderboard(eventId);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(eventInfo.leaderboardName);
-            getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.eventName);
+            getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
         }
         
         TrackingFragment mainFragment;

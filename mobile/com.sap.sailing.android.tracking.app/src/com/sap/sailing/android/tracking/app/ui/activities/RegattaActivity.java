@@ -10,9 +10,7 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -20,7 +18,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.BaseColumns;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -35,36 +32,25 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.internal.cm;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
 
 public class RegattaActivity extends BaseActivity {
 
     private final static String TAG = RegattaActivity.class.getName();
+   
+    private EventInfo event;
+    private CompetitorInfo competitor;
+    private LeaderboardInfo leaderboard;
     
-    private String eventId;
-    private String competitorId;
-    
-    private int competitorRowId;
-    private String competitorName;
-    private String competitorCountryCode;
-    private String competitorSailId;
-    
-    private String eventName;
-    private int eventRowId;
-    private String eventImageUrl;
-    private long eventStartMillis;
-    private long eventEndMillis;
-    
-    private String leaderboardName;
-    private int leaderboardRowId;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,11 +58,17 @@ public class RegattaActivity extends BaseActivity {
         
         Intent intent = getIntent();
         
-        leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
-        eventId = intent.getStringExtra(getString(R.string.event_id));
-        competitorId = intent.getStringExtra(getString(R.string.competitor_id));
+        event = new EventInfo();
+        competitor = new CompetitorInfo();
+        leaderboard = new LeaderboardInfo();
+        
+        String leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
+        String eventId = intent.getStringExtra(getString(R.string.event_id));
+        String competitorId = intent.getStringExtra(getString(R.string.competitor_id));
 
-        fetchData(eventId, competitorId);
+        competitor = DatabaseHelper.getInstance(this).getCompetitor(competitorId);
+		event = DatabaseHelper.getInstance(this).getEventInfo(eventId);
+		leaderboard = DatabaseHelper.getInstance(this).getLeaderboard(leaderboardName);
         
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -90,7 +82,7 @@ public class RegattaActivity extends BaseActivity {
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(leaderboardName);
-            getSupportActionBar().setSubtitle(eventName);
+            getSupportActionBar().setSubtitle(event.name);
         }
         
         replaceFragment(R.id.content_frame, new RegattaFragment());	
@@ -127,37 +119,6 @@ public class RegattaActivity extends BaseActivity {
     {
     	return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
-    
-    private void fetchData(String eventId, String competitorId)
-    {
-    	Cursor cc = getContentResolver().query(Competitor.CONTENT_URI, null, "competitor_id = \"" + competitorId + "\"", null, null);
-		if (cc.moveToFirst()) {
-			competitorName = cc.getString(cc.getColumnIndex(Competitor.COMPETITOR_DISPLAY_NAME));
-			competitorCountryCode = cc.getString(cc.getColumnIndex(Competitor.COMPETITOR_COUNTRY_CODE));
-			competitorSailId = cc.getString(cc.getColumnIndex(Competitor.COMPETITOR_SAIL_ID));
-			competitorRowId = cc.getInt(cc.getColumnIndex(BaseColumns._ID));
-        }
-		
-		cc.close();
-		
-		Cursor ec = getContentResolver().query(Event.CONTENT_URI, null, "event_id = \"" + eventId + "\"", null, null);
-		if (ec.moveToFirst()) {
-			eventName = ec.getString(ec.getColumnIndex(Event.EVENT_NAME));
-			eventImageUrl = ec.getString(ec.getColumnIndex(Event.EVENT_IMAGE_URL));
-			eventStartMillis = ec.getLong(ec.getColumnIndex(Event.EVENT_DATE_START));
-			eventEndMillis = ec.getLong(ec.getColumnIndex(Event.EVENT_DATE_END));
-			eventRowId = ec.getInt(ec.getColumnIndex(BaseColumns._ID));
-        }
-		
-		ec.close();
-		
-		Cursor lc = getContentResolver().query(Leaderboard.CONTENT_URI, null, "leaderboard_name = \"" + leaderboardName + "\"", null, null);
-		if (lc.moveToFirst()) {
-			leaderboardRowId = lc.getInt(lc.getColumnIndex(BaseColumns._ID));
-        }
-		
-		lc.close();
-    }
 
 	private void userImageUpdated() {
 		runOnUiThread(new Runnable() {
@@ -174,14 +135,14 @@ public class RegattaActivity extends BaseActivity {
     @Override
     protected void onResume() {
         TextView competitorNameTextView = (TextView)findViewById(R.id.competitor_name);
-        competitorNameTextView.setText(competitorName);
+        competitorNameTextView.setText(competitor.name);
         
         TextView sailIdTextView = (TextView)findViewById(R.id.sail_id);
-        sailIdTextView.setText(competitorSailId);
+        sailIdTextView.setText(competitor.sailId);
         
         ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
         //String flagStr = String.format("%s.png", countryCode);
-        String uri = "@drawable/" + competitorCountryCode.toLowerCase(Locale.getDefault());
+        String uri = "@drawable/" + competitor.countryCode.toLowerCase(Locale.getDefault());
         
         int imageResource = getResources().getIdentifier(uri, null, getPackageName());
         
@@ -194,7 +155,7 @@ public class RegattaActivity extends BaseActivity {
 		
 		getRegattaFragment().setChangePhotoButtonHidden(true);
 		
-		if (eventImageUrl != null)
+		if (event.imageUrl != null)
 		{
 			ImageView imageView = (ImageView) findViewById(R.id.userImage);
 	        Bitmap storedImage = getStoredImage();
@@ -205,7 +166,7 @@ public class RegattaActivity extends BaseActivity {
 	        }
 	        else
 	        {
-	        	new DownloadImageTask(imageView).execute(eventImageUrl);
+	        	new DownloadImageTask(imageView).execute(event.imageUrl);
 	        }
 			
 		}
@@ -299,7 +260,7 @@ public class RegattaActivity extends BaseActivity {
         }
 
         File mediaFile;
-            String mImageName="MI_"+ leaderboardName +".png";
+            String mImageName="MI_"+ leaderboard.name +".png";
             mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);  
         return mediaFile;
     } 
@@ -337,13 +298,13 @@ public class RegattaActivity extends BaseActivity {
 	{
 		final String checkoutURLStr = prefs.getServerURL()
 				+ prefs.getServerCheckoutPath().replace("{leaderboard-name}",
-						Uri.encode(leaderboardName));
+						Uri.encode(leaderboard.name));
 		
 		showProgressDialog(R.string.please_wait, R.string.checking_out);
 		
 		JSONObject checkoutData = new JSONObject();
 		try {
-			checkoutData.put("competitorId", competitorId);
+			checkoutData.put("competitorId", competitor.id);
 			checkoutData.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
 			checkoutData.put("toMillis", String.valueOf(System.currentTimeMillis()));
 		} catch (JSONException e) {
@@ -360,7 +321,7 @@ public class RegattaActivity extends BaseActivity {
 		JsonObjectRequest checkoutRequest = new JsonObjectRequest(checkoutURLStr, checkoutData, new Listener<JSONObject>(){
 					@Override
 					public void onResponse(JSONObject response) {
-						deleteRegttaFromDatabase();
+						DatabaseHelper.getInstance(RegattaActivity.this).deleteRegttaFromDatabase(event, competitor, leaderboard);
 						dismissProgressDialog();
 						finish();
 					}
@@ -379,50 +340,8 @@ public class RegattaActivity extends BaseActivity {
 		VolleyHelper.getInstance(this).addRequest(checkoutRequest);
 	}
 	
-	/**
-	 * So the fragment can get the value for its countdown-display.
-	 * @return
-	 */
-	public long getEventStartMillis()
+	public EventInfo getEvent()
 	{
-		return eventStartMillis;
+		return event;
 	}
-	
-	/**
-	 * So the fragment can get the value to decide if thank you note should be shown.
-	 * @return
-	 */
-	public long getEventEndMillis()
-	{
-		return eventEndMillis;
-	}
-	
-	/**
-	 * Event-id for event, so tracking-service can link GPS fixes to event.
-	 * @return
-	 */
-	public String getEventId()
-	{
-		return eventId;
-	}
-	
-	/**
-	 * Delete Event, Competitor and Leaderboard
-	 */
-	private void deleteRegttaFromDatabase()
-	{
-		ContentResolver cr = getContentResolver();
-		
-		int d1 = cr.delete(Event.CONTENT_URI, BaseColumns._ID + " = " + eventRowId, null);
-		int d2 = cr.delete(Competitor.CONTENT_URI, BaseColumns._ID + " = " + competitorRowId, null);
-		int d3 = cr.delete(Leaderboard.CONTENT_URI, BaseColumns._ID + " = " + leaderboardRowId, null);
-		
-		if (BuildConfig.DEBUG)
-		{
-			ExLog.i(this, TAG, "Checkout, number of events deleted: " + d1);
-			ExLog.i(this, TAG, "Checkout, number of competitors deleted: " + d2);
-			ExLog.i(this, TAG, "Checkout, number of leaderbards deleted: " + d3);
-		}
-	}
-	
 }
