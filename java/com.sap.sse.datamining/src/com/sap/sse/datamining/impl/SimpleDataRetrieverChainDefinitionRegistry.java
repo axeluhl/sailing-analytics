@@ -11,8 +11,8 @@ import com.sap.sse.datamining.DataRetrieverChainDefinition;
 
 public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetrieverChainDefinitionRegistry {
     
-    private final Map<Class<?>, Collection<DataRetrieverChainDefinition<?>>> chainDefinitionsMappedBySourceType;
-    private final Map<UUID, DataRetrieverChainDefinition<?>> chainDefinitionsMappedByID;
+    private final Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> chainDefinitionsMappedBySourceType;
+    private final Map<UUID, DataRetrieverChainDefinition<?, ?>> chainDefinitionsMappedByID;
     
     public SimpleDataRetrieverChainDefinitionRegistry() {
         chainDefinitionsMappedBySourceType = new HashMap<>();
@@ -20,10 +20,10 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     }
 
     @Override
-    public void register(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+    public void register(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         Class<?> dataSourceType = dataRetrieverChainDefinition.getDataSourceType();
         if (!chainDefinitionsMappedBySourceType.containsKey(dataSourceType)) {
-            chainDefinitionsMappedBySourceType.put(dataSourceType, new HashSet<DataRetrieverChainDefinition<?>>());
+            chainDefinitionsMappedBySourceType.put(dataSourceType, new HashSet<DataRetrieverChainDefinition<?, ?>>());
         }
         chainDefinitionsMappedBySourceType.get(dataSourceType).add(dataRetrieverChainDefinition);
         
@@ -31,7 +31,7 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     }
 
     @Override
-    public void unregister(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+    public void unregister(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         Class<?> dataSourceType = dataRetrieverChainDefinition.getDataSourceType();
         if (chainDefinitionsMappedBySourceType.containsKey(dataSourceType)) {
             chainDefinitionsMappedBySourceType.get(dataSourceType).remove(dataRetrieverChainDefinition);
@@ -42,21 +42,22 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> get(
+    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType, ?>> get(
             Class<DataSourceType> dataSourceType) {
         return chainDefinitionsMappedBySourceType.containsKey(dataSourceType) ? 
-               (Collection<DataRetrieverChainDefinition<DataSourceType>>)(Collection<?>) 
+               (Collection<DataRetrieverChainDefinition<DataSourceType, ?>>)(Collection<?>) 
                new HashSet<>(chainDefinitionsMappedBySourceType.get(dataSourceType)) : 
-               new HashSet<DataRetrieverChainDefinition<DataSourceType>>();
+               new HashSet<DataRetrieverChainDefinition<DataSourceType, ?>>();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> get(
-            Class<DataSourceType> dataSourceType, Class<?> retrievedDataType) {
-        Collection<DataRetrieverChainDefinition<DataSourceType>> dataRetrieverChainDefinitions = new HashSet<>();
-        for (DataRetrieverChainDefinition<DataSourceType> dataRetrieverChainDefinition : get(dataSourceType)) {
+    public <DataSourceType, DataType> Collection<DataRetrieverChainDefinition<DataSourceType, DataType>> get(
+            Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
+        Collection<DataRetrieverChainDefinition<DataSourceType, DataType>> dataRetrieverChainDefinitions = new HashSet<>();
+        for (DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition : get(dataSourceType)) {
             if (Objects.equals(retrievedDataType, dataRetrieverChainDefinition.getRetrievedDataType())) {
-                dataRetrieverChainDefinitions.add(dataRetrieverChainDefinition);
+                dataRetrieverChainDefinitions.add((DataRetrieverChainDefinition<DataSourceType, DataType>) dataRetrieverChainDefinition);
             }
         }
         return dataRetrieverChainDefinitions;
@@ -64,8 +65,8 @@ public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetriever
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> get(UUID id) {
-        return (DataRetrieverChainDefinition<DataSourceType>) chainDefinitionsMappedByID.get(id);
+    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> get(UUID id) {
+        return (DataRetrieverChainDefinition<DataSourceType, DataType>) chainDefinitionsMappedByID.get(id);
     }
 
 }

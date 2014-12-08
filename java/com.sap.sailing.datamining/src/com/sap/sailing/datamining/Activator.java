@@ -66,7 +66,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     }
 
     @Override
-    public Iterable<DataRetrieverChainDefinition<?>> getDataRetrieverChainDefinitions() {
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions();
     }
     

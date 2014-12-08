@@ -109,7 +109,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         return functionProvider.getDimensionsFor(dataRetrieverChainDefinition);
     }
 
@@ -124,38 +124,38 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+    public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         dataRetrieverChainDefinitionRegistry.register(dataRetrieverChainDefinition);
     }
     
     @Override
-    public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+    public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         dataRetrieverChainDefinitionRegistry.unregister(dataRetrieverChainDefinition);
     }
     
     @Override
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitions(
             Class<DataSourceType> dataSourceType) {
         return dataRetrieverChainDefinitionRegistry.get(dataSourceType);
     }
 
     @Override
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
-            Class<DataSourceType> dataSourceType, Class<?> retrievedDataType) {
+    public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> getDataRetrieverChainDefinitions(
+            Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
         return dataRetrieverChainDefinitionRegistry.get(dataSourceType, retrievedDataType);
     }
 
     @Override
-    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(UUID id) {
+    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition(UUID id) {
         return dataRetrieverChainDefinitionRegistry.get(id);
     }
     
     @Override
-    public <DataSourceType, ResultType> QueryDefinition<DataSourceType, ResultType> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO) {
-        ModifiableQueryDefinition<DataSourceType, ResultType> queryDefinition = null;
+    public <DataSourceType, DataType, ResultType> QueryDefinition<DataSourceType, DataType, ResultType> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO) {
+        ModifiableQueryDefinition<DataSourceType, DataType, ResultType> queryDefinition = null;
         
         Locale locale = DataMiningStringMessages.Util.getLocaleFor(queryDefinitionDTO.getLocaleInfoName());
-        DataRetrieverChainDefinition<DataSourceType> retrieverChain = getDataRetrieverChainDefinition(queryDefinitionDTO.getDataRetrieverChainDefinition().getId());
+        DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain = getDataRetrieverChainDefinition(queryDefinitionDTO.getDataRetrieverChainDefinition().getId());
         @SuppressWarnings("unchecked")
         Function<ResultType> statisticToCalculate = (Function<ResultType>) getFunctionForDTO(queryDefinitionDTO.getStatisticToCalculate());
         
@@ -184,13 +184,13 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <DataSource, DataType, ResultType> Query<ResultType> createQuery(DataSource dataSource, QueryDefinition<DataSource, ResultType> queryDefinition) {
+    public <DataSource, DataType, ResultType> Query<ResultType> createQuery(DataSource dataSource, QueryDefinition<DataSource, DataType, ResultType> queryDefinition) {
         return queryFactory.createQuery(dataSource, queryDefinition, getStringMessages(), getExecutorService());
     }
 
     @Override
     public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
-            DataRetrieverChainDefinition<DataSource> dataRetrieverChainDefinition, int retrieverLevel,
+            DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, int retrieverLevel,
             Iterable<Function<?>> dimensions, Locale locale) {
         return queryFactory.createDimensionValuesQuery(dataSource, dataRetrieverChainDefinition, retrieverLevel, dimensions, locale, getStringMessages(), getExecutorService());
     }

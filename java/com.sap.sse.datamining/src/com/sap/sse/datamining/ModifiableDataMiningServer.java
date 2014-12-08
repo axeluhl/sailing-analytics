@@ -15,7 +15,7 @@ public interface ModifiableDataMiningServer extends DataMiningServer {
 
     public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister);
 
-    public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition);
-    public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition);
+    public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     
 }

@@ -44,7 +44,7 @@ public class TestDimensionsValuesQuery {
     private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     private static final Locale locale = Locale.ENGLISH;
     
-    private DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition;
+    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition;
     private Collection<Test_Regatta> dataSource;
     
     //Test_HasRaceContext dimensions
@@ -145,7 +145,7 @@ public class TestDimensionsValuesQuery {
     @SuppressWarnings("unchecked")
     @Before
     public void initializeDataRetrieverChain() {
-        dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");
+        dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
         dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
         
@@ -157,7 +157,7 @@ public class TestDimensionsValuesQuery {
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAfter(raceRetrieverClass,
+        dataRetrieverChainDefinition.endWith(raceRetrieverClass,
                                                legRetrieverClass,
                                                Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
     }

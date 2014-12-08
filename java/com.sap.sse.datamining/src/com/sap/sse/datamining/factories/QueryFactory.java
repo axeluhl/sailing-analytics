@@ -26,23 +26,22 @@ import com.sap.sse.datamining.shared.GroupKey;
 
 public class QueryFactory {
 
-    public <DataSource, DataType, ResultType> Query<ResultType> createQuery(DataSource dataSource, QueryDefinition<DataSource, ResultType> queryDefinition,
+    public <DataSourceType, DataType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, QueryDefinition<DataSourceType, DataType, ResultType> queryDefinition,
                                                                             DataMiningStringMessages stringMessages, ExecutorService executor) {
-        return new ProcessorQuery<ResultType, DataSource>(dataSource, stringMessages, queryDefinition.getLocale()) {
+        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale()) {
             @Override
-            protected Processor<DataSource, ?> createFirstProcessor() {
+            protected Processor<DataSourceType, ?> createFirstProcessor() {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
                 
                 Function<ResultType> extractionFunction = queryDefinition.getStatisticToCalculate();
-                @SuppressWarnings("unchecked")
-                Class<DataType> dataTypeToRetrieve = (Class<DataType>) extractionFunction.getDeclaringType();
+                Class<DataType> dataTypeToRetrieve = queryDefinition.getDataType();
                 
                 Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>> aggregationProcessor = processorFactory.createAggregationProcessor(/*query*/ this, queryDefinition.getAggregatorType(), queryDefinition.getResultType());
                 Processor<GroupedDataEntry<DataType>, GroupedDataEntry<ResultType>> extractionProcessor = processorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction);
                 
                 Processor<DataType, GroupedDataEntry<DataType>> groupingProcessor = processorFactory.createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, queryDefinition.getDimensionsToGroupBy());
 
-                DataRetrieverChainBuilder<DataSource> chainBuilder = queryDefinition.getDataRetrieverChainDefinition().startBuilding(executor);
+                DataRetrieverChainBuilder<DataSourceType> chainBuilder = queryDefinition.getDataRetrieverChainDefinition().startBuilding(executor);
                 Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(queryDefinition.getFilterSelection());
                 while (chainBuilder.canStepFurther()) {
                     chainBuilder.stepFurther();
@@ -79,7 +78,7 @@ public class QueryFactory {
     }
 
     public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
-            DataRetrieverChainDefinition<DataSource> dataRetrieverChainDefinition, int retrieverLevel,
+            DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, int retrieverLevel,
             Iterable<Function<?>> dimensions, Locale locale,
             DataMiningStringMessages stringMessages, ExecutorService executor) {
         return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale) {

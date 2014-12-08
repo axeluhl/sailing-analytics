@@ -8,14 +8,15 @@ import java.util.Map;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 
-public interface QueryDefinition<DataSourceType, ResultType> {
+public interface QueryDefinition<DataSourceType, DataType, ResultType> {
 
     public Class<DataSourceType> getDataSourceType();
+    public Class<DataType> getDataType();
     public Class<ResultType> getResultType();
     
     public Locale getLocale();
     
-    public DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition();
+    public DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition();
     public Map<Integer, Map<Function<?>, Collection<?>>> getFilterSelection();
     
     public List<Function<?>> getDimensionsToGroupBy();

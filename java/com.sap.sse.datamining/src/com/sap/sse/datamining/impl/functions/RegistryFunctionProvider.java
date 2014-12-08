@@ -76,7 +76,7 @@ public class RegistryFunctionProvider implements FunctionProvider {
     }
     
     @Override
-    public Collection<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
+    public Collection<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         Collection<Function<?>> dimensions = new HashSet<>();
         for (DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation : dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()) {
             dimensions.addAll(getDimensionsFor(dataRetrieverTypeWithInformation.getRetrievedDataType()));

@@ -9,6 +9,6 @@ public interface DataMiningBundleService {
     public Iterable<Class<?>> getInternalClassesWithMarkedMethods();
     public Iterable<Class<?>> getExternalLibraryClasses();
     
-    public Iterable<DataRetrieverChainDefinition<?>> getDataRetrieverChainDefinitions();
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions();
 
 }

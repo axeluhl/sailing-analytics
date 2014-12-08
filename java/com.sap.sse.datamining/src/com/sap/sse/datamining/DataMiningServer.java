@@ -28,7 +28,7 @@ public interface DataMiningServer {
 
     public Iterable<Function<?>> getDimensionsFor(Class<?> sourceType);
     
-    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition);
+    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
 
     /**
      * @return The first function, that matches the given DTO or <code>null</code>
@@ -37,20 +37,20 @@ public interface DataMiningServer {
 
     public DataRetrieverChainDefinitionProvider getDataRetrieverChainDefinitionProvider();
 
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitions(
             Class<DataSourceType> dataSourceType);
 
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
-            Class<DataSourceType> dataSourceType, Class<?> retrievedDataType);
+    public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> getDataRetrieverChainDefinitions(
+            Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType);
 
-    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(UUID id);
+    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition(UUID id);
     
-    public <DataSourceType, ResultType> QueryDefinition<DataSourceType, ResultType> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO);
+    public <DataSourceType, DataType, ResultType> QueryDefinition<DataSourceType, DataType, ResultType> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO);
 
     public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
-            DataRetrieverChainDefinition<DataSource> dataRetrieverChainDefinition, int retrieverLevel,
+            DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, int retrieverLevel,
             Iterable<Function<?>> dimensions, Locale locale);
 
-    public <DataSource, DataType, ResultType> Query<ResultType> createQuery(DataSource dataSource, QueryDefinition<DataSource, ResultType> queryDefinition);
+    public <DataSource, DataType, ResultType> Query<ResultType> createQuery(DataSource dataSource, QueryDefinition<DataSource, DataType, ResultType> queryDefinition);
     
 }

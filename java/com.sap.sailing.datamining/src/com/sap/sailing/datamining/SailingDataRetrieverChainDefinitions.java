@@ -22,13 +22,13 @@ import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
 
 public class SailingDataRetrieverChainDefinitions {
 
-    private static Collection<DataRetrieverChainDefinition<?>> dataRetrieverChainDefinitions;
+    private static Collection<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions;
     
     public SailingDataRetrieverChainDefinitions() {
         dataRetrieverChainDefinitions = new ArrayList<>();
 
-        DataRetrieverChainDefinition<RacingEventService> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                RacingEventService.class, "SailingDomainRetrieverChain");
+        DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                RacingEventService.class, HasTrackedLegOfCompetitorContext.class, "SailingDomainRetrieverChain");
         @SuppressWarnings("unchecked")
         Class<Processor<RacingEventService, LeaderboardGroup>> leaderboardGroupRetrieverType = (Class<Processor<RacingEventService, LeaderboardGroup>>) (Class<?>) LeaderboardGroupRetrievalProcessor.class;
         legOfCompetitorRetrieverChainDefinition.startWith(leaderboardGroupRetrieverType, LeaderboardGroup.class, "LeaderboardGroup");
@@ -45,20 +45,20 @@ public class SailingDataRetrieverChainDefinitions {
         legOfCompetitorRetrieverChainDefinition.addAfter(raceRetrieverType, legRetrieverType, HasTrackedLegContext.class, "Leg");
         @SuppressWarnings("unchecked")
         Class<Processor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext>> legOfCompetitorRetrieverType = (Class<Processor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext>>) (Class<?>) TrackedLegOfCompetitorFilteringRetrievalProcessor.class;
-        legOfCompetitorRetrieverChainDefinition.addAfter(legRetrieverType, legOfCompetitorRetrieverType,
+        legOfCompetitorRetrieverChainDefinition.endWith(legRetrieverType, legOfCompetitorRetrieverType,
                 HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
         dataRetrieverChainDefinitions.add(legOfCompetitorRetrieverChainDefinition);
 
-        DataRetrieverChainDefinition<RacingEventService> gpsFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                legOfCompetitorRetrieverChainDefinition, "SailingDomainRetrieverChain");
+        DataRetrieverChainDefinition<RacingEventService, HasGPSFixContext> gpsFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                legOfCompetitorRetrieverChainDefinition, HasGPSFixContext.class, "SailingDomainRetrieverChain");
         @SuppressWarnings("unchecked")
         Class<Processor<HasTrackedLegOfCompetitorContext, HasGPSFixContext>> gpsFixRetrieverType = (Class<Processor<HasTrackedLegOfCompetitorContext, HasGPSFixContext>>) (Class<?>) GPSFixRetrievalProcessor.class;
-        gpsFixRetrieverChainDefinition.addAfter(legOfCompetitorRetrieverType, gpsFixRetrieverType,
+        gpsFixRetrieverChainDefinition.endWith(legOfCompetitorRetrieverType, gpsFixRetrieverType,
                 HasGPSFixContext.class, "GpsFix");
         dataRetrieverChainDefinitions.add(gpsFixRetrieverChainDefinition);
     }
 
-    public Collection<DataRetrieverChainDefinition<?>> getDataRetrieverChainDefinitions() {
+    public Collection<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions;
     }
 

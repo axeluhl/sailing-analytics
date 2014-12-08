@@ -80,7 +80,7 @@ public class DataMiningActivator implements BundleActivator {
         dataMiningServer.registerAllWithInternalFunctionPolicy(dataMiningBundleService.getInternalClassesWithMarkedMethods());
         dataMiningServer.registerAllWithExternalFunctionPolicy(dataMiningBundleService.getExternalLibraryClasses());
         
-        for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
+        for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
         }
     }
@@ -91,7 +91,7 @@ public class DataMiningActivator implements BundleActivator {
         dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getInternalClassesWithMarkedMethods());
         dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getExternalLibraryClasses());
         
-        for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
+        for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);
         }
     }

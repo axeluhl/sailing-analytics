@@ -12,11 +12,11 @@ import com.sap.sse.datamining.QueryDefinition;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 
-public class ModifiableQueryDefinition<DataSourceType, ResultType> implements QueryDefinition<DataSourceType, ResultType> {
+public class ModifiableQueryDefinition<DataSourceType, DataType, ResultType> implements QueryDefinition<DataSourceType, DataType, ResultType> {
 
     private final Locale locale;
     
-    private final DataRetrieverChainDefinition<DataSourceType> retrieverChain;
+    private final DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain;
     private final Map<Integer, Map<Function<?>, Collection<?>>> filterSelection;
     
     private final List<Function<?>> dimensionsToGroupBy;
@@ -24,7 +24,7 @@ public class ModifiableQueryDefinition<DataSourceType, ResultType> implements Qu
     private final Function<ResultType> statisticToCalculate;
     private final AggregatorType aggregatorType;
 
-    public ModifiableQueryDefinition(Locale locale, DataRetrieverChainDefinition<DataSourceType> retrieverChain, Function<ResultType> statisticToCalculate, AggregatorType aggregatorType) {
+    public ModifiableQueryDefinition(Locale locale, DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain, Function<ResultType> statisticToCalculate, AggregatorType aggregatorType) {
         this.locale = locale;
         
         this.retrieverChain = retrieverChain;
@@ -42,6 +42,11 @@ public class ModifiableQueryDefinition<DataSourceType, ResultType> implements Qu
     }
     
     @Override
+    public Class<DataType> getDataType() {
+        return retrieverChain.getRetrievedDataType();
+    }
+    
+    @Override
     public Class<ResultType> getResultType() {
         return statisticToCalculate.getReturnType();
     }
@@ -52,7 +57,7 @@ public class ModifiableQueryDefinition<DataSourceType, ResultType> implements Qu
     }
 
     @Override
-    public DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition() {
+    public DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition() {
         return retrieverChain;
     }
 
