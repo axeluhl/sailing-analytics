@@ -84,10 +84,6 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         }
     }
 
-    protected Set<Processor<ResultType, ?>> getResultReceivers() {
-        return resultReceivers;
-    }
-
     protected abstract Callable<ResultType> createInstruction(final WorkingType partialElement);
 
     protected abstract Iterable<WorkingType> partitionElement(InputType element);
@@ -119,7 +115,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
 
     protected void tellResultReceiversToFinish() {
-        for (Processor<ResultType, ?> resultReceiver : getResultReceivers()) {
+        for (Processor<ResultType, ?> resultReceiver : resultReceivers) {
             try {
                 resultReceiver.finish();
             } catch (InterruptedException e) {
@@ -137,7 +133,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
 
     private void tellResultReceiversToAbort() {
-        for (Processor<ResultType, ?> resultReceiver : getResultReceivers()) {
+        for (Processor<ResultType, ?> resultReceiver : resultReceivers) {
             resultReceiver.abort();
         }
     }
@@ -145,7 +141,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     @Override
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
         setAdditionalData(additionalDataBuilder);
-        for (Processor<ResultType, ?> resultReceiver : getResultReceivers()) {
+        for (Processor<ResultType, ?> resultReceiver : resultReceivers) {
             additionalDataBuilder = resultReceiver.getAdditionalResultData(additionalDataBuilder);
         }
         return additionalDataBuilder;

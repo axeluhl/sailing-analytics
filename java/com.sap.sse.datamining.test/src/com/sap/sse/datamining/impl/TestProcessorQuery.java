@@ -50,7 +50,7 @@ public class TestProcessorQuery {
     
     private final static DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     
-    private static ProcessorFactory processorFactory;
+    private ProcessorFactory processorFactory;
 
     private boolean receivedElementOrFinished;
     private boolean receivedAbort;
