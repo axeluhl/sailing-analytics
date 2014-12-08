@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -47,6 +48,8 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
     private static RibDashboardDataRetriever INSTANCE = null;
 
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardName";
+    private static final String KEY_SLECTED_TEAM_COOKIE = "selectedTeam";
+    private static final int SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS = 60*1000*60*5;
 
     private String selectedTeamName;
 
@@ -62,6 +65,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
         this.leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
         numberOfChachedStartAnalysisDTOs = 0;
         competitorSelectionPopup = new CompetitorSelectionPopup();
+        selectedTeamName = Cookies.getCookie(KEY_SLECTED_TEAM_COOKIE);
         initBottomNotification();
     }
 
@@ -194,6 +198,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
     public void didClickedOKWithCompetitorName(String competitorName) {
         System.out.println("Did clicked with competitor " + competitorName);
         this.selectedTeamName = competitorName;
+        Cookies.setCookie(KEY_SLECTED_TEAM_COOKIE, competitorName, new Date(new Date().getTime()+SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS));
     }
 
     @Override
