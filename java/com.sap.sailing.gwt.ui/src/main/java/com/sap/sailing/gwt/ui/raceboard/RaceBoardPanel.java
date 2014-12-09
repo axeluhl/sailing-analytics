@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -55,6 +57,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
@@ -358,20 +361,51 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
             } else {
                 fleetForRaceName = " - "+fleetForRaceName;
             }
-            Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
+            final Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
             raceNameLabel.setStyleName("RaceName-Label");
-            Label raceAdditionalInformationLabel = new Label(seriesName + fleetForRaceName);
+            final Label raceAdditionalInformationLabel = new Label(seriesName + fleetForRaceName);
             raceAdditionalInformationLabel.setStyleName("RaceSeriesAndFleet-Label");
             raceInformationHeader.clear();
             raceInformationHeader.add(raceNameLabel);
             raceInformationHeader.add(raceAdditionalInformationLabel);
-            Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
+            final Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             if (event != null) {
-                regattaNameAnchor.setHref("/gwt/Home.html#EventPlace:eventId="+event.id.toString()+"&navigationTab=Regattas&leaderboardName="+leaderboardName);
+                // we don't use the EntryPointLinkFactory here, because of lacking support for Places
+                String debugParam = Window.Location.getParameter("gwt.codesvr");
+                String link = "/gwt/Home.html";
+                if (debugParam != null && !debugParam.isEmpty()) {
+                    link += "?gwt.codesvr=" + debugParam;
+                }
+                link += "#EventPlace:eventId="+event.id.toString();
+                link += "&navigationTab=Regatta&leaderboardName=" + URLEncoder.encode(leaderboardName);
+                regattaNameAnchor.setHref(link);
             } else {
-                regattaNameAnchor.setHref("javascript:window.history.back();"); 
+                String leaderboardGroupNameParam = Window.Location.getParameter("leaderboardGroupName");
+                if(leaderboardGroupNameParam != null) {
+                    Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
+                    leaderboardGroupLinkParameters.put("showRaceDetails", "true");
+                    leaderboardGroupLinkParameters.put("leaderboardGroupName", leaderboardGroupNameParam);
+                    String leaderBoardGroupLink = EntryPointLinkFactory.createLeaderboardGroupLink(leaderboardGroupLinkParameters);
+                    regattaNameAnchor.setHref(leaderBoardGroupLink); 
+                } else {
+                    // fallback 
+                    regattaNameAnchor.setHref("javascript:window.history.back();"); 
+                }
             }
             regattaNameAnchor.setStyleName("RegattaName-Anchor");
+
+            // TODO: Strange behavior... check
+//            Window.addResizeHandler(new ResizeHandler() {
+//                @Override
+//                public void onResize(ResizeEvent event) {
+//                    int headerPanelWidth = raceMap.getRightHeaderPanel().getOffsetWidth() - 150; // 150px is the width of the sapLogo 
+//                    int raceNameAndFleetLabelWidth = raceInformationHeader.getOffsetWidth();
+//                    int regattaAnchorWidth = regattaNameAnchor.getOffsetWidth();
+//                    boolean overlap = raceNameAndFleetLabelWidth + regattaAnchorWidth > headerPanelWidth;  
+//                    raceInformationHeader.setVisible(!overlap);
+//                }
+//            });
+
             Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
             raceTimeLabel.setStyleName("RaceTime-Label");
             regattaAndRaceTimeInformationHeader.clear();
@@ -398,6 +432,5 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         raceInformationLabel.setText(formatter.format(raceColumn.getStartDate(fleet)));
         return raceInformationLabel;
     }
-
 }
 
