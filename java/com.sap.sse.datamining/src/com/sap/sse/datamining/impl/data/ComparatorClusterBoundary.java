@@ -6,11 +6,11 @@ import com.sap.sse.datamining.data.ClusterBoundary;
 
 public class ComparatorClusterBoundary<ElementType> implements ClusterBoundary<ElementType> {
 
-    private final Comparator<ElementType> comparator;
+    private final Comparator<? super ElementType> comparator;
     private final ElementType boundaryValue;
     private final ComparisonStrategy strategy;
 
-    public ComparatorClusterBoundary(Comparator<ElementType> comparator, ElementType boundaryValue,
+    public ComparatorClusterBoundary(Comparator<? super ElementType> comparator, ElementType boundaryValue,
                                      ComparisonStrategy strategy) {
         this.comparator = comparator;
         this.boundaryValue = boundaryValue;

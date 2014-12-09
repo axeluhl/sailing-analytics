@@ -6,6 +6,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.datamining.data.Cluster;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public class GPSFixWithContext implements HasGPSFixContext {
     
@@ -30,9 +31,10 @@ public class GPSFixWithContext implements HasGPSFixContext {
     }
     
     @Override
-    public Cluster<Wind> getWindStrength() {
+    public ClusterDTO getWindStrength() {
         Wind wind = getWind();
-        return Activator.getDefault().getClusterGroups().getWindStrengthCluster().getClusterFor(wind);
+        Cluster<?> cluster = Activator.getDefault().getClusterGroups().getWindStrengthInBeaufortCluster().getClusterFor(wind);
+        return new ClusterDTO(cluster.toString());
     }
 
     private Wind getWind() {
