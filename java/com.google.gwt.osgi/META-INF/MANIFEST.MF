@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Osgi
 Bundle-SymbolicName: com.google.gwt.osgi
-Bundle-Version: 2.7.0.qualifier
+Bundle-Version: 2.7.0
 Bundle-Vendor: GOOGLE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/gwt-user.jar,
