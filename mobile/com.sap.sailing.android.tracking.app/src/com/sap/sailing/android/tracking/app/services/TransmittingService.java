@@ -544,8 +544,8 @@ public class TransmittingService extends Service {
 	public enum APIConnectivity {
 		notReachable (0),
 		reachableTransmissionSuccess (1),
-		reachableTransmissionError(2),
-		noAttempt(4);
+		reachableTransmissionError (2),
+		noAttempt (4);
 		
 		private final int apiConnectivity;
 		
