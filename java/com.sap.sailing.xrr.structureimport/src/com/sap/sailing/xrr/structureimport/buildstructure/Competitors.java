@@ -1,4 +1,4 @@
-package buildstructure;
+package com.sap.sailing.xrr.structureimport.buildstructure;
 
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;

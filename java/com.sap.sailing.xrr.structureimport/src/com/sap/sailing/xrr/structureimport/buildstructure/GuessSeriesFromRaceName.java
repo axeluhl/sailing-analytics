@@ -1,4 +1,4 @@
-package buildstructure;
+package com.sap.sailing.xrr.structureimport.buildstructure;
 
 import com.sap.sailing.xrr.schema.Race;
 

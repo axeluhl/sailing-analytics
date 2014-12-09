@@ -1,4 +1,4 @@
-package eventimport;
+package com.sapsailing.xrr.structureimport.eventimport;
 
 import java.util.HashSet;
 import java.util.Set;

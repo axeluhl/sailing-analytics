@@ -54,8 +54,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import buildstructure.SetRacenumberFromSeries;
-
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -399,6 +397,7 @@ import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
+import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.BuildVersion;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -414,8 +413,7 @@ import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
-
-import eventimport.RegattaJSON;
+import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
 /**
  * The server side implementation of the RPC service.

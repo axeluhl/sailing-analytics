@@ -16,12 +16,6 @@ import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 
-import buildstructure.BuildStructure;
-import buildstructure.Fleet;
-import buildstructure.RegattaStructure;
-import buildstructure.Series;
-import buildstructure.SetRacenumberStrategy;
-
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
@@ -48,10 +42,14 @@ import com.sap.sailing.xrr.schema.Person;
 import com.sap.sailing.xrr.schema.Race;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.schema.Team;
+import com.sap.sailing.xrr.structureimport.buildstructure.BuildStructure;
+import com.sap.sailing.xrr.structureimport.buildstructure.Fleet;
+import com.sap.sailing.xrr.structureimport.buildstructure.RegattaStructure;
+import com.sap.sailing.xrr.structureimport.buildstructure.Series;
+import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberStrategy;
 import com.sap.sse.common.TimePoint;
-
-import eventimport.EventImport;
-import eventimport.RegattaJSON;
+import com.sapsailing.xrr.structureimport.eventimport.EventImport;
+import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
 public class StructureImporter {
 

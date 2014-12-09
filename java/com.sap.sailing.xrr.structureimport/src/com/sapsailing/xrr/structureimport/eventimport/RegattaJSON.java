@@ -1,4 +1,4 @@
-package eventimport;
+package com.sapsailing.xrr.structureimport.eventimport;
 
 public class RegattaJSON {
 

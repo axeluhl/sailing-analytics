@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Structureimport
 Bundle-SymbolicName: com.sap.sailing.xrr.structureimport
-Bundle-Version: 1.6.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: .,
- buildstructure;uses:="com.sap.sailing.xrr.resultimport.schema",
  com.sap.sailing.xrr.structureimport,
- eventimport
+ com.sap.sailing.xrr.structureimport.buildstructure;uses:="com.sap.sailing.xrr.resultimport.schema",
+ com.sapsailing.xrr.structureimport.eventimport
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.google.gwt.osgi;bundle-version="2.6.0",
  com.sap.sailing.domain.common;bundle-version="1.0.0",
