@@ -128,9 +128,12 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	 */
 	public void updateTimer()
 	{
-		long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
-		AutoResizeTextView textView = (AutoResizeTextView) getActivity().findViewById(R.id.tracking_time_label);
-		textView.setText(getTimeFormatString(diff));
+		if (isAdded())
+ {
+			long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
+			AutoResizeTextView textView = (AutoResizeTextView) getActivity().findViewById(R.id.tracking_time_label);
+			textView.setText(getTimeFormatString(diff));
+		}
 	}
 	
 	/**

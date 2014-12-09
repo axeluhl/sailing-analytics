@@ -9,11 +9,10 @@ import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.widget.Toolbar;
 
-import com.google.android.gms.internal.cm;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
@@ -28,11 +27,11 @@ import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConn
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivityListener;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.TransmittingBinder;
 import com.sap.sailing.android.tracking.app.ui.fragments.CompassFragment;
-import com.sap.sailing.android.tracking.app.ui.fragments.HudFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener, MagneticHeadingListener {
 	
@@ -100,6 +99,24 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         	compassFragment = new CompassFragment();
         }
 
+        //Bind the title indicator to the adapter
+        CirclePageIndicator titleIndicator = (CirclePageIndicator)findViewById(R.id.title_page_indicator);
+        titleIndicator.setViewPager(mPager);
+        titleIndicator.setOnPageChangeListener(new OnPageChangeListener() {
+			
+			@Override
+			public void onPageSelected(int arg0) {
+			}
+			
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {				
+			}
+			
+			@Override
+			public void onPageScrollStateChanged(int arg0) {
+			}
+		});
+        
         startTrackingService(eventId);
     }
     
