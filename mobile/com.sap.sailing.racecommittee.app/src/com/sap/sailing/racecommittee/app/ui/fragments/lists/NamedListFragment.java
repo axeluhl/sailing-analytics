@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -32,16 +31,18 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sse.common.Named;
 
-public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>>,
-        DialogListenerHost {
+public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>> {
     
     //private static String TAG = NamedListFragment.class.getName();
     
-    private ItemSelectedListener<T> listener;
+
+
+	private ItemSelectedListener<T> listener;
     private NamedArrayAdapter<T> listAdapter;
     private TextView txt_header;
 
     private View lastSelected;
+    private int mSelectedIndex = -1;
     
     protected ArrayList<T> namedList;
 
@@ -53,12 +54,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         return new NamedArrayAdapter<T>(context, items);
     }
 
-    
-    /*@Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.list_fragment, container, false);
-    }*/
-    
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        this.listener = attachListener(activity);
+    }
+        
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
@@ -68,15 +69,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         return parent;
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        this.listener = attachListener(activity);
-    }
-    
+
+
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
 
-    @Override
+//    @SuppressWarnings("unchecked")
+	@Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -84,15 +82,34 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
         namedList = new ArrayList<T>();
         listAdapter = createAdapter(getActivity(), namedList);
+        if (savedInstanceState != null){
+        	mSelectedIndex = savedInstanceState.getInt("position", -1);
+        	if ( mSelectedIndex >= 0 ){
+        		listAdapter.setSelected(mSelectedIndex);
 
+        	}
+        }
         this.getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         this.setListAdapter(listAdapter);
         getListView().setDivider(null);
         
         showProgressBar(true);
         loadItems();
+        
+        
+//    	if ( mSelectedIndex >= 0 ){
+//    		listener.itemSelected(this,(T) getListView().getItemAtPosition(mSelectedIndex));
+//    	}
     }
 
+    
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putInt("position", mSelectedIndex);
+		super.onSaveInstanceState(outState);
+	}
+    
+    
     private void loadItems() {
         setListShown(false);
         getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
@@ -103,6 +120,8 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         super.onListItemClick(l, v, position, id);
         listAdapter.setSelected(position);
         setStyleClicked(v);
+        
+        mSelectedIndex = position;
         
         // this unchecked cast here seems unavoidable.
         // even SDK example code does it...
@@ -185,19 +204,19 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         manager.beginTransaction().add(dialog, "failedDialog").commitAllowingStateLoss();
     }
     
-    @Override
-    public DialogResultListener getListener() {
-        return new DialogResultListener() {
-            
-            @Override
-            public void onDialogPositiveButton(AttachedDialogFragment dialog) {
-                loadItems();
-            }
-            
-            @Override
-            public void onDialogNegativeButton(AttachedDialogFragment dialog) {
-                
-            }
-        };
-    }
+//    @Override
+//    public DialogResultListener getListener() {
+//        return new DialogResultListener() {
+//            
+//            @Override
+//            public void onDialogPositiveButton(AttachedDialogFragment dialog) {
+//                loadItems();
+//            }
+//            
+//            @Override
+//            public void onDialogNegativeButton(AttachedDialogFragment dialog) {
+//                
+//            }
+//        };
+//    }
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.util.UUID;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -9,10 +10,10 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Window;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -44,7 +45,9 @@ import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost {
-    private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
+
+
+	private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
     private final static String TAG = LoginActivity.class.getName();
@@ -64,10 +67,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             final Serializable eventId = event.getId();
             ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
 
-            setProgressBarIndeterminateVisibility(true);
+            //setProgressBarIndeterminateVisibility(true);
             final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
             progressDialog.setMessage(getString(R.string.loading_configuration));
-            progressDialog.setCancelable(false);
+            //progressDialog.setCancelable(false);
             progressDialog.setIndeterminate(true);
             progressDialog.show();
 
@@ -131,6 +134,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private Serializable mSelectedEvent;
 
     private final int RQS_GooglePlayServices = 1;
+	private UUID mSelectedCourseAreaUUID;
 
     public LoginActivity() {
 //        mLoginDialog = new LoginDialog();
@@ -176,52 +180,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     }
 
 
-//    @Override
-//    public DialogResultListener getListener() {
-//        return new DialogResultListener() {
-//
-//            @Override
-//            public void onDialogNegativeButton(AttachedDialogFragment dialog) {
-//                /* nothing here... */
-//            }
-//
-//            @Override
-//            public void onDialogPositiveButton(AttachedDialogFragment dialog) {
-//                // We have to take the passed instance, LoginActivity.this might be a new instance!
-//                LoginDialog localLoginDialog = (LoginDialog) dialog;
-//                switch (localLoginDialog.getSelectedLoginType()) {
-//                case OFFICER:
-//                    ExLog.i(LoginActivity.this, TAG, "Communication with backend is active.");
-//                    preferences.setSendingActive(true);
-//                    break;
-//                case VIEWER:
-//                    ExLog.i(LoginActivity.this, TAG, "Communication with backend is inactive.");
-//                    preferences.setSendingActive(false);
-//                    break;
-//                default:
-//                    ExLog.i(LoginActivity.this, TAG, "An invalid log type, e.g. NONE, was selected");
-//                    Toast.makeText(LoginActivity.this, getString(R.string.please_select_a_login_type),
-//                            Toast.LENGTH_LONG).show();
-//                    return;
-//                }
-//                preferences.setAuthor(localLoginDialog.getAuthor());
-//
-//                if (mSelectedCourseArea == null) {
-//                    Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();
-//                    ExLog.e(LoginActivity.this, TAG,
-//                            "Course area reference was not set - cannot start racing activity.");
-//                    return;
-//                }
-//                
-//                
-//                
-//                Intent message = new Intent(LoginActivity.this, RacingActivity.class);
-//                message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseArea.getId());
-//                message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
-//                fadeActivity(message);
-//            }
-//        };
-//    }
 
     /** Called when the activity is first created. */
     @Override
@@ -244,11 +202,30 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         if (savedInstanceState == null) {
             ExLog.i(this, TAG, "Seems to be first start. Creating event fragment.");
             addEventListFragment();
+        } else {
+        	long uuidMost = savedInstanceState.getLong("courseUUIDMost", -1);
+        	long uuidLeast = savedInstanceState.getLong("courseUUIDLeast", -1);
+        	if ( uuidMost != -1 && uuidLeast != -1 ){
+        		mSelectedCourseAreaUUID = new UUID(uuidMost, uuidLeast);
+        	}
         }
 
         new AutoUpdater(this).notifyAfterUpdate();
     }
 
+    @Override
+	public void onSaveInstanceState(Bundle outState,
+			PersistableBundle outPersistentState) {
+		if ( mSelectedCourseAreaUUID != null ) {
+			outState.putLong("courseUUIDMost", mSelectedCourseAreaUUID.getMostSignificantBits());
+			outState.putLong("courseUUIDLeast", mSelectedCourseAreaUUID.getLeastSignificantBits());
+
+		}
+    	
+		super.onSaveInstanceState(outState, outPersistentState);
+	}
+    
+    
     @Override
     protected boolean onReset() {
         Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
@@ -272,6 +249,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void selectCourseArea(CourseArea courseArea) {
         mSelectedCourseArea = courseArea;
+        mSelectedCourseAreaUUID = courseArea.getId();
         showAreaPositionListFragment();
         //mLoginDialog.show(getFragmentManager(), "LoginDialog");
     }
@@ -297,26 +275,18 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         addAreaPositionListFragment();
     }
 
-    
-
-    
-//    public interface AreaPosition extends Named, WithID, IsManagedBySharedDomainFactory {
-//        UUID getId();
-//    }
-
 
 	@Override
 	public void onPositionSelected(LoginType type) {
 		
-        if (mSelectedCourseArea == null) {
+        if (mSelectedCourseAreaUUID == null) {
             Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();
             ExLog.e(LoginActivity.this, TAG,
                     "Course area reference was not set - cannot start racing activity.");
             return;
         }
-
 		Intent message = new Intent(LoginActivity.this, RacingActivity.class);
-        message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseArea.getId());
+        message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID );
         message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
         fadeActivity(message);
 	}
