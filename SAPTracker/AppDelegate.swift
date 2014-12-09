@@ -33,6 +33,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().setBackgroundImage(UIImage(named: "navbar_bg"), forBarMetrics: UIBarMetrics.Default)
         UINavigationBar.appearance().tintColor = UIColor.whiteColor()
         UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor(), NSFontAttributeName: UIFont(name: "OpenSans-Bold", size: CGFloat(17.0))!]
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor.lightGrayColor()
+        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor.blackColor()
+        UIPageControl.appearance().backgroundColor = UIColor.whiteColor()
         // needed for missing Swift method
         Appearance.setAppearance()
         return true

@@ -45,4 +45,12 @@ class TrackingPageViewController : UIPageViewController, UIPageViewControllerDat
             }
             return nil
     }
+    
+    func presentationCountForPageViewController(pageViewController: UIPageViewController) -> Int {
+        return 3
+    }
+    
+    func presentationIndexForPageViewController(pageViewController: UIPageViewController) -> Int {
+        return 0
+    }
 }

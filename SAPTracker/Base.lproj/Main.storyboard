@@ -483,7 +483,7 @@
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="edit" translatesAutoresizingMaskIntoConstraints="NO" id="OJh-OU-o9e">
                                 <rect key="frame" x="570" y="84" width="22" height="22"/>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P9e-ZM-HZP">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P9e-ZM-HZP">
                                 <color key="backgroundColor" red="0.93725490199999995" green="0.67843137249999996" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" id="jqD-cx-gQM"/>
@@ -698,7 +698,7 @@
                                 </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ULl-vy-5gb">
-                                <rect key="frame" x="16" y="505" width="568" height="75"/>
+                                <rect key="frame" x="16" y="525" width="568" height="75"/>
                                 <color key="backgroundColor" red="0.87843137250000003" green="0.20000000000000001" blue="0.090196078430000007" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="75" id="Pjg-oD-Zlw">
@@ -728,7 +728,6 @@
                             <constraint firstItem="ULl-vy-5gb" firstAttribute="leading" secondItem="mUm-EE-6Is" secondAttribute="leading" id="3V2-Wg-ReX"/>
                             <constraint firstItem="NT1-c8-AwF" firstAttribute="top" secondItem="9Mo-uS-sYi" secondAttribute="bottom" constant="8" symbolic="YES" id="4cn-03-b6o"/>
                             <constraint firstItem="CY5-XK-zgr" firstAttribute="centerY" secondItem="zse-sv-43R" secondAttribute="centerY" id="7C4-Gz-bHx"/>
-                            <constraint firstAttribute="bottom" secondItem="ULl-vy-5gb" secondAttribute="bottom" constant="20" symbolic="YES" id="83p-EZ-yff"/>
                             <constraint firstItem="IeZ-JM-OWw" firstAttribute="leading" secondItem="NT1-c8-AwF" secondAttribute="leading" id="Ado-mt-IeU"/>
                             <constraint firstItem="CY5-XK-zgr" firstAttribute="centerY" secondItem="xj9-FF-3W6" secondAttribute="centerY" id="Ahu-UI-Ee3"/>
                             <constraint firstItem="9Mo-uS-sYi" firstAttribute="leading" secondItem="xj9-FF-3W6" secondAttribute="leading" id="COM-YR-mcH"/>
@@ -737,6 +736,7 @@
                             <constraint firstItem="zse-sv-43R" firstAttribute="leading" secondItem="7J8-0s-XmP" secondAttribute="trailing" constant="8" id="MAh-oZ-gKw"/>
                             <constraint firstItem="ULl-vy-5gb" firstAttribute="leading" secondItem="mP6-V4-QPK" secondAttribute="leadingMargin" id="Q2v-Hl-3tz"/>
                             <constraint firstItem="CY5-XK-zgr" firstAttribute="centerY" secondItem="7J8-0s-XmP" secondAttribute="centerY" id="Qbs-ys-ZHv"/>
+                            <constraint firstItem="gKu-YN-ryh" firstAttribute="top" secondItem="ULl-vy-5gb" secondAttribute="bottom" id="Vyl-tg-RMd"/>
                             <constraint firstItem="mUm-EE-6Is" firstAttribute="top" secondItem="IeZ-JM-OWw" secondAttribute="bottom" constant="8" symbolic="YES" id="WbM-Xa-hwn"/>
                             <constraint firstItem="xj9-FF-3W6" firstAttribute="top" secondItem="lhj-Lt-OY9" secondAttribute="bottom" constant="8" symbolic="YES" id="ajP-Io-QD1"/>
                             <constraint firstAttribute="trailing" secondItem="fPT-R9-l89" secondAttribute="trailing" constant="16" id="cjT-Sn-zVS"/>
@@ -778,25 +778,25 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Speed" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V9h-qX-rao">
-                                <rect key="frame" x="275" y="20" width="50" height="24"/>
-                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.0 kn" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l5u-i3-029">
                                 <rect key="frame" x="229" y="267" width="143" height="66"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="48"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Speed" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V9h-qX-rao">
+                                <rect key="frame" x="275" y="28" width="50" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="V9h-qX-rao" firstAttribute="centerX" secondItem="l5u-i3-029" secondAttribute="centerX" id="5MQ-LU-1LA"/>
                             <constraint firstAttribute="centerX" secondItem="l5u-i3-029" secondAttribute="centerX" id="dQu-qX-qAM"/>
-                            <constraint firstAttribute="centerX" secondItem="V9h-qX-rao" secondAttribute="centerX" id="ihF-Ez-w6j"/>
-                            <constraint firstItem="V9h-qX-rao" firstAttribute="top" secondItem="FlK-rh-D6W" secondAttribute="top" constant="20" id="nFa-z9-qgJ"/>
                             <constraint firstAttribute="centerY" secondItem="l5u-i3-029" secondAttribute="centerY" id="sTs-Dc-PTq"/>
+                            <constraint firstItem="V9h-qX-rao" firstAttribute="top" secondItem="1e8-Ox-cnV" secondAttribute="bottom" constant="8" symbolic="YES" id="wGe-Uy-Mad"/>
                         </constraints>
                     </view>
                     <connections>
@@ -819,25 +819,25 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Heading" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Tn-6d-NlO">
-                                <rect key="frame" x="267" y="20" width="66" height="24"/>
-                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 °" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sGK-xV-9a0">
                                 <rect key="frame" x="270" y="267" width="61" height="66"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="48"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Heading" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Tn-6d-NlO">
+                                <rect key="frame" x="267" y="28" width="66" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="1Tn-6d-NlO" firstAttribute="top" secondItem="Q83-hZ-kkt" secondAttribute="top" constant="20" id="33R-1K-ajn"/>
                             <constraint firstAttribute="centerX" secondItem="sGK-xV-9a0" secondAttribute="centerX" id="NRR-Iw-Qr5"/>
-                            <constraint firstAttribute="centerX" secondItem="1Tn-6d-NlO" secondAttribute="centerX" id="PY8-t6-3c7"/>
+                            <constraint firstItem="1Tn-6d-NlO" firstAttribute="centerX" secondItem="sGK-xV-9a0" secondAttribute="centerX" id="jy2-XG-Tg0"/>
                             <constraint firstAttribute="centerY" secondItem="sGK-xV-9a0" secondAttribute="centerY" id="kQC-Fr-0h6"/>
+                            <constraint firstItem="1Tn-6d-NlO" firstAttribute="top" secondItem="1lt-tc-EGw" secondAttribute="bottom" constant="8" symbolic="YES" id="nEn-et-VGd"/>
                         </constraints>
                     </view>
                     <connections>
