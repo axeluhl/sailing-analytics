@@ -78,5 +78,6 @@
 	<string name="regatta_in_progress">Die Regatta findet gerade statt.</string>
 	<string name="hud_heading_prefix">HDG: </string>
 	<string name="hud_speed_over_ground_prefix">SPD: </string>
+	<string name="heading">Kurs</string>
 
 </resources>

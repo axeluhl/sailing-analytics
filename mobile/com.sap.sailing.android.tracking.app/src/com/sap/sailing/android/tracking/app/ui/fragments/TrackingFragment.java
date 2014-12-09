@@ -1,6 +1,7 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -43,11 +44,10 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	private String TAG = TrackingFragment.class.getName(); 
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.fragment_tracking, container, false);
+		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
 		
 		Button stopTracking = (Button)view.findViewById(R.id.stop_tracking);
 		stopTracking.setOnClickListener(this);
@@ -286,15 +286,20 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	
 	public void setGPSQualityAndAcurracy(GPSQuality quality, float gpsAccurracy)
 	{
-		SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) getActivity().findViewById(R.id.gps_quality_indicator);
-		indicatorView.setSignalQuality( quality.toInt() );
-		
-		TextView accuracyTextView = (TextView)getActivity().findViewById(R.id.gps_accuracy_label);
-		accuracyTextView.setText("~ " + String.valueOf(Math.round(gpsAccurracy)) + " m");
-		
-		updateTrackingStatus(quality);
-		
-		lastGPSQualityUpdate = System.currentTimeMillis();
+		if (isAdded())
+		{
+			Activity activity = getActivity();
+			System.out.println("ACTIVITY: " + activity);
+			SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) activity.findViewById(R.id.gps_quality_indicator);
+			indicatorView.setSignalQuality( quality.toInt() );
+			
+			TextView accuracyTextView = (TextView)getActivity().findViewById(R.id.gps_accuracy_label);
+			accuracyTextView.setText("~ " + String.valueOf(Math.round(gpsAccurracy)) + " m");
+			
+			updateTrackingStatus(quality);
+			
+			lastGPSQualityUpdate = System.currentTimeMillis();
+		}
 	}
 	
 	public void setUnsentGPSFixesCount(final int count)

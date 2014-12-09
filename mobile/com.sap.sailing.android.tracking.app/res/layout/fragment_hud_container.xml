@@ -28,25 +28,31 @@
                 android:textSize="14sp" />
         </LinearLayout>
     </com.sap.sailing.android.tracking.app.customviews.OpenSansToolbar>
+    
+    <!-- view-pager -->
 
-    <FrameLayout
+    <android.support.v4.view.ViewPager
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar" />
+    
+    
+	<!-- <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar" >
-
-        <!-- The main content -->
 
         <FrameLayout
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- HUD overlay layout -->
-
         <FrameLayout
             android:id="@+id/hud_content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </FrameLayout>
+    </FrameLayout> -->
 
 </RelativeLayout>
