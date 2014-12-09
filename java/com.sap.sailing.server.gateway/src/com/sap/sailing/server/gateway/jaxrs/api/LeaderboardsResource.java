@@ -56,6 +56,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -412,8 +413,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return false;
         }
 
-        if (!(leaderboard instanceof IsRegattaLike)) {
-            logger.warning("Specified Leaderboard has no attached RegattaLog");
+        if (!(leaderboard instanceof HasRegattaLike)) {
+            logger.warning("Specified Leaderboard does not have a RegattaLike child (is not a RegattaLeaderboard/FlexibleLeaderboard)");
             return false;
         }
 

@@ -221,7 +221,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
-import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -4700,10 +4700,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private RegattaLog getRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
         Leaderboard l = getService().getLeaderboardByName(leaderboardName);
-        if (! (l instanceof IsRegattaLike)) {
+        if (! (l instanceof HasRegattaLike)) {
             throw new DoesNotHaveRegattaLogException();
         }
-        return ((IsRegattaLike) l).getRegattaLog();
+        return ((HasRegattaLike) l).getRegattaLike().getRegattaLog();
     }
     
     private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
@@ -4951,8 +4951,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         result.add(raceLog);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard instanceof IsRegattaLike) {
-            result.add(((IsRegattaLike) leaderboard).getRegattaLog());
+        if (leaderboard instanceof HasRegattaLike) {
+            result.add(((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
         }
         return result;
     }
