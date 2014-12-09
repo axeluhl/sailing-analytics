@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.Arrays;
 import java.util.List;
 
 import android.content.Context;
@@ -45,8 +44,8 @@ public class NamedArrayAdapter<T extends Named> extends ArrayAdapter<T> {
 
         T item = getItem(position);
         
-        
         holder.text.setText(item.getName());
+        holder.text.setAlpha(isEnabled(position) ? 1.0f : 0.2f);
         if ( isChecked == position ){
         	holder.text.setTypeface(Typeface.DEFAULT_BOLD);
         	holder.check.setVisibility(View.VISIBLE);
@@ -63,9 +62,9 @@ public class NamedArrayAdapter<T extends Named> extends ArrayAdapter<T> {
     }
     
     static class ViewHolder {
-    	  TextView text;
-    	  ImageView check;
-    	}
+    	TextView text;
+  		ImageView check;
+	}
     
 }
 

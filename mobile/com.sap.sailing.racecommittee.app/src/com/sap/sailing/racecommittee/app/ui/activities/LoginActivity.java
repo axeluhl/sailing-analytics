@@ -304,7 +304,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
 	@Override
 	public void onPositionSelected(LoginType type) {
-		preferences.setAuthor(mPositionListFragment.getAuthor());
+
 		Intent message = new Intent(LoginActivity.this, RacingActivity.class);
         message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseArea.getId());
         message.putExtra(AppConstants.EventIdTag, mSelectedEvent);

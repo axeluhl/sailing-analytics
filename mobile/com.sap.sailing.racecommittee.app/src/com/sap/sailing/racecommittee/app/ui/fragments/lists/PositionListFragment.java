@@ -113,7 +113,7 @@ public class PositionListFragment extends LoggableListFragment{
 	            selectedLoginType = LoginType.NONE;
 	            break;
         }
-	    
+	    preferences.setAuthor(author);
 	    host.onPositionSelected(selectedLoginType);
 	}
 	
