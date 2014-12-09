@@ -28,10 +28,10 @@ public class DatabaseHelper {
 
 	private final static String TAG = DatabaseHelper.class.getName();
 	
-	private static DatabaseHelper mInstance;
-	private Context mContext;
+	protected static DatabaseHelper mInstance;
+	protected Context mContext;
 
-	private DatabaseHelper(Context context) {
+	protected DatabaseHelper(Context context) {
 		mContext = context;
 	}
 
@@ -265,16 +265,5 @@ public class DatabaseHelper {
 			ExLog.i(mContext, TAG, "Checkout, number of competitors deleted: " + d2);
 			ExLog.i(mContext, TAG, "Checkout, number of leaderbards deleted: " + d3);
 		}
-	}
-
-
-
-	/**
-	 * for testing.
-	 * 
-	 * @param instance
-	 */
-	public static void injectInstance(DatabaseHelper instance) {
-		mInstance = instance;
 	}
 }

@@ -3,7 +3,6 @@ package com.sap.sailing.android.tracking.app.test;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -15,7 +14,7 @@ import android.test.ServiceTestCase;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
+import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
@@ -23,8 +22,6 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 	static final String TAG = TrackingServiceTest.class.getName();
 	final String eventId = "test123";
 	long eventRowId;
-//	static final String GPS_MOCK_PROVIDER_NAME = "TestProvider";
-	
 	public TrackingServiceTest() {
 		super(TrackingService.class);
 	}
@@ -32,16 +29,15 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 	@Override
     protected void setUp() throws Exception {
         super.setUp();
+        System.setProperty("dexmaker.dexcache", getContext().getCacheDir().toString());
         DatabaseTestHelper.deleteAllGpsFixesFromDB(getContext());
         DatabaseTestHelper.deleteAllEventsFromDB(getContext());
         eventRowId = DatabaseTestHelper.createNewEventInDBAndReturnItsId(getContext(), "test123", eventId);
-//        createGpsTestProvider();
     }
 	
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-//		removeGpsTestProvider();
 	}
 	
 	private void startService()
@@ -108,26 +104,26 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 	
 	
 	public void testReportsGpsQualityGreat() {
-		TrackingActivity listener = Mockito.mock(TrackingActivity.class);
+		MockGpsListener listener = Mockito.spy(new MockGpsListener());
 		ArgumentCaptor<GPSQuality> gpsQualityCaptor = ArgumentCaptor.forClass(GPSQuality.class);
-		ArgumentCaptor<Integer> accuracyCaptor = ArgumentCaptor.forClass(Integer.class);
+		ArgumentCaptor<Float> accuracyCaptor = ArgumentCaptor.forClass(Float.class);
 		ArgumentCaptor<Float> bearingCaptor = ArgumentCaptor.forClass(Float.class);
 		ArgumentCaptor<Float> speedCaptor = ArgumentCaptor.forClass(Float.class);
 		
 		startService();
 		TrackingService service = getService();
 		service.registerGPSQualityListener(listener);
+		
+		getService().onLocationChanged(getTestLocation(2, 12.5f, 123));
 
 		Mockito.verify(listener, Mockito.times(1))
 				.gpsQualityAndAccurracyUpdated(gpsQualityCaptor.capture(),
 						accuracyCaptor.capture(), bearingCaptor.capture(),
 						speedCaptor.capture());
-		
-	    getService().onLocationChanged(getTestLocation(2, 12.5f, 123));
 	    
 	    assertEquals(GPSQuality.great, gpsQualityCaptor.getValue());
-	    assertEquals(2, accuracyCaptor.getValue().floatValue());
-	    assertEquals(123, bearingCaptor.getValue().floatValue());
+	    assertEquals(2f, accuracyCaptor.getValue().floatValue());
+	    assertEquals(123f, bearingCaptor.getValue().floatValue());
 	    assertEquals(12.5f, speedCaptor.getValue().floatValue());
 	    
 		shutdownService();
@@ -144,5 +140,13 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 		location.setSpeed(speed);
 		location.setBearing(bearing);
 		return location;
+	}
+	
+	public class MockGpsListener implements GPSQualityListener
+	{
+		@Override
+		public void gpsQualityAndAccurracyUpdated(GPSQuality quality,
+				float gpsAccurracy, float gpsBearing, float gpsSpeed) {
+		}
 	}
 }
