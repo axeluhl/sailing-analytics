@@ -129,7 +129,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	public void updateTimer()
 	{
 		if (isAdded())
- {
+		{
 			long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
 			AutoResizeTextView textView = (AutoResizeTextView) getActivity().findViewById(R.id.tracking_time_label);
 			textView.setText(getTimeFormatString(diff));
@@ -157,17 +157,17 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	 */
 	public void updateTrackingStatus( GPSQuality quality )
 	{
-		TextView textView = (TextView)getActivity().findViewById(R.id.tracking_status);
-		
-		if (quality == GPSQuality.noSignal)
-		{
-			textView.setText(getString(R.string.tracking_status_no_gps_signal));
-			textView.setTextColor(Color.parseColor(getString(R.color.sap_red)));
-		}
-		else
-		{
-			textView.setText(getString(R.string.tracking_status_tracking));
-			textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+		if (isAdded()) {
+			TextView textView = (TextView) getActivity().findViewById(
+					R.id.tracking_status);
+
+			if (quality == GPSQuality.noSignal) {
+				textView.setText(getString(R.string.tracking_status_no_gps_signal));
+				textView.setTextColor(Color.parseColor(getString(R.color.sap_red)));
+			} else {
+				textView.setText(getString(R.string.tracking_status_tracking));
+				textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+			}
 		}
 	}
 	
@@ -177,42 +177,40 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	 */
 	public void setAPIConnectivityStatus(final APIConnectivity apiConnectivity)
 	{
-		getActivity().runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				TextView textView = (TextView)getActivity().findViewById(R.id.mode);
-				
-				if (apiConnectivity == APIConnectivity.reachableTransmissionSuccess)
-				{
-					if (prefs.getEnergySavingEnabledByUser())
-					{
-						textView.setText(getString(R.string.tracking_mode_battery_saving));
-						textView.setTextColor(Color.parseColor(getString(R.color.sap_yellow)));
+		if (isAdded()) {
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					TextView textView = (TextView) getActivity().findViewById(
+							R.id.mode);
+
+					if (apiConnectivity == APIConnectivity.reachableTransmissionSuccess) {
+						if (prefs.getEnergySavingEnabledByUser()) {
+							textView.setText(getString(R.string.tracking_mode_battery_saving));
+							textView.setTextColor(Color
+									.parseColor(getString(R.color.sap_yellow)));
+						} else {
+							textView.setText(getString(R.string.tracking_mode_live));
+							textView.setTextColor(Color
+									.parseColor(getString(R.color.sap_green)));
+						}
+
+					} else if (apiConnectivity == APIConnectivity.noAttempt) {
+						textView.setText(getString(R.string.tracking_mode_offline));
+						textView.setTextColor(Color
+								.parseColor(getString(R.color.sap_green)));
+					} else if (apiConnectivity == APIConnectivity.reachableTransmissionError) {
+						textView.setText(getString(R.string.tracking_mode_api_error));
+						textView.setTextColor(Color
+								.parseColor(getString(R.color.sap_red)));
+					} else {
+						textView.setText(getString(R.string.tracking_mode_caching));
+						textView.setTextColor(Color
+								.parseColor(getString(R.color.sap_green)));
 					}
-					else
-					{
-						textView.setText(getString(R.string.tracking_mode_live));
-						textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));	
-					}
-					
 				}
-				else if (apiConnectivity == APIConnectivity.noAttempt)
-				{
-					textView.setText(getString(R.string.tracking_mode_offline));
-					textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
-				}
-				else if  (apiConnectivity == APIConnectivity.reachableTransmissionError)
-				{
-					textView.setText(getString(R.string.tracking_mode_api_error));
-					textView.setTextColor(Color.parseColor(getString(R.color.sap_red)));
-				}
-				else
-				{
-					textView.setText(getString(R.string.tracking_mode_caching));
-					textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
-				}
-			}
-		});
+			});
+		}
 	}
 	
 	/**
@@ -307,14 +305,17 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		}
 	}
 	
-	public void setUnsentGPSFixesCount(final int count)
-	{
-		getActivity().runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				TextView unsentGpsFixesTextView = (TextView)getActivity().findViewById(R.id.tracking_unsent_fixes);
-				unsentGpsFixesTextView.setText(String.valueOf(count));		
-			}});
+	public void setUnsentGPSFixesCount(final int count) {
+		if (isAdded()) {
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					TextView unsentGpsFixesTextView = (TextView) getActivity()
+							.findViewById(R.id.tracking_unsent_fixes);
+					unsentGpsFixesTextView.setText(String.valueOf(count));
+				}
+			});
+		}
 	}
 	
 	private class TimerRunnable implements Runnable {

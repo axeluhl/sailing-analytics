@@ -21,25 +21,28 @@ public class CompassFragment extends BaseFragment {
 
 	public void setBearing(float heading)
 	{
-		TextView bearingTextView = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
-		bearingTextView.setText(String.valueOf(Math.round(heading)) + "°");
+		TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
+		headingText.setText(String.valueOf(Math.round(heading)) + "°");
 	}
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		TextView headingText = (TextView)getActivity().findViewById(R.id.compass_bearing_text_view);
 		if (savedInstanceState != null)
 		{
-			TextView headingText = (TextView)getActivity().findViewById(R.id.compass_bearing_header_text_view);
 			headingText.setText(savedInstanceState.getString(SIS_HEADING_TEXTIVEW));
+		}
+		else
+		{
+			headingText.setText("---°");
 		}
 	}
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		TextView headingText = (TextView)getActivity().findViewById(R.id.compass_bearing_header_text_view);
+		TextView headingText = (TextView)getActivity().findViewById(R.id.compass_bearing_text_view);
 		outState.putString(SIS_HEADING_TEXTIVEW, headingText.getText().toString());
 	}
-	
 }

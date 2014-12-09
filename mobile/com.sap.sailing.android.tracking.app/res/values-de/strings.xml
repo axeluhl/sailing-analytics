@@ -79,5 +79,6 @@
 	<string name="hud_heading_prefix">HDG: </string>
 	<string name="hud_speed_over_ground_prefix">SPD: </string>
 	<string name="heading">Kurs</string>
+	<string name="sog">SOG</string>
 
 </resources>
