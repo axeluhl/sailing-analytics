@@ -20,6 +20,16 @@
             android:key="@string/preference_device_identifier_key"
             android:summary="@string/empty"
             android:title="@string/device_identifier" android:selectable="false"/>
+        
+         <SwitchPreference
+            android:defaultValue="true"
+            android:key="@string/preference_heading_from_magnetic_key"
+            android:switchTextOn="@string/preference_heading_from_magnetic_key_is_enabled"
+            android:switchTextOff="@string/preference_heading_from_magnetic_key_is_disabled"
+            android:summaryOn="@string/preference_heading_from_magnetic_key_summary_is_enabled"
+            android:summaryOff="@string/preference_heading_from_magnetic_key_summary_is_disabled"
+            android:title="@string/preference_heading_from_magnetic_enabled" />
     </PreferenceCategory>
+    
 
 </PreferenceScreen>

@@ -2,24 +2,15 @@ package com.sap.sailing.android.tracking.app.services;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.TargetApi;
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -31,11 +22,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
-import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
-import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 
 public class TrackingService extends Service implements ConnectionCallbacks,
 		OnConnectionFailedListener, LocationListener {
@@ -57,7 +45,8 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	// We use it on Notification start, and to cancel it.
 	private int NOTIFICATION_ID = R.string.tracker_started;
 
-	private int eventId;
+	private String eventId;
+	private long eventRowId;
 
 	@Override
 	public void onCreate() {
@@ -91,7 +80,15 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 					if (intent.getExtras() != null) {
 						eventId = intent
 								.getExtras()
-								.getInt(getString(R.string.tracking_service_event_id_parameter));
+								.getString(getString(R.string.tracking_service_event_id_parameter));
+						
+						eventRowId = DatabaseHelper.getInstance(this).getRowIdForEventId(eventId);
+						
+						if (BuildConfig.DEBUG) {
+							ExLog.i(this, TAG, "Starting Tracking Service with eventId: "+ eventId);
+							ExLog.i(this, TAG, "And with event._id: " + eventRowId);
+						}
+						
 						startTracking();
 					}
 				}
@@ -107,8 +104,8 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		locationUpdateRequested = true;
 
 		ExLog.i(this, TAG, "Started Tracking");
-		//showNotification();
-		
+		// showNotification();
+
 		prefs.setTrackerIsTracking(true);
 		prefs.setTrackerIsTrackingEventId(eventId);
 	}
@@ -119,14 +116,14 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		}
 		locationClient.disconnect();
 		locationUpdateRequested = false;
-		
+
 		if (scheduler != null) {
 			scheduler.shutdown();
 		}
-		
+
 		prefs.setTrackerIsTracking(false);
-		prefs.setTrackerIsTrackingEventId(-1);
-		
+		prefs.setTrackerIsTrackingEventId(null);
+
 		stopSelf();
 		ExLog.i(this, TAG, "Stopped Tracking");
 	}
@@ -149,7 +146,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		ExLog.i(this, TAG, "LocationClient was disconnected");
 	}
 
-	public void reportGPSQuality(float gpsAccurracy) {
+	public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed) {
 		GPSQuality quality = GPSQuality.noSignal;
 
 		if (gpsQualityListener != null) {
@@ -161,7 +158,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 				quality = GPSQuality.great;
 			}
 
-			gpsQualityListener.gpsQualityUpdated(quality);
+			gpsQualityListener.gpsQualityAndAccurracyUpdated(quality, gpsAccurracy, bearing, speed);
 		}
 	}
 
@@ -169,18 +166,12 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	@Override
 	public void onLocationChanged(Location location) {
 
-		reportGPSQuality(location.getAccuracy());
+		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
 
-		ContentResolver cr = getContentResolver();
-		ContentValues cv = new ContentValues();
-		cv.put(SensorGps.GPS_LATITUDE, location.getLatitude());
-		cv.put(SensorGps.GPS_LONGITUDE, location.getLongitude());
-		cv.put(SensorGps.GPS_PROVIDER, location.getProvider());
-		cv.put(SensorGps.GPS_SPEED, location.getSpeed());
-		cv.put(SensorGps.GPS_TIME, location.getTime());
-		cv.put(SensorGps.GPS_EVENT_FK, eventId);
-
-		cr.insert(SensorGps.CONTENT_URI, cv);
+		DatabaseHelper.getInstance(this).insertGPSFix(location.getLatitude(),
+				location.getLongitude(), location.getSpeed(),
+				location.getBearing(), location.getProvider(),
+				location.getTime(), eventRowId);
 
 		ensureTransmittingServiceIsRunning();
 	}
@@ -213,19 +204,19 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 				.show();
 	}
 
-//	private void showNotification() {
-//		Intent intent = new Intent(this, RegattaActivity.class);
-//		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-//				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//		PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
-//		CharSequence text = getText(R.string.tracker_started);
-//		Notification notification = new NotificationCompat.Builder(this)
-//				.setContentTitle(getText(R.string.app_name))
-//				.setContentText(text).setContentIntent(pi)
-//				.setSmallIcon(R.drawable.icon).build();
-//		notification.flags |= Notification.FLAG_NO_CLEAR;
-//		startForeground(NOTIFICATION_ID, notification);
-//	}
+	// private void showNotification() {
+	// Intent intent = new Intent(this, RegattaActivity.class);
+	// intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+	// | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	// PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+	// CharSequence text = getText(R.string.tracker_started);
+	// Notification notification = new NotificationCompat.Builder(this)
+	// .setContentTitle(getText(R.string.app_name))
+	// .setContentText(text).setContentIntent(pi)
+	// .setSmallIcon(R.drawable.icon).build();
+	// notification.flags |= Notification.FLAG_NO_CLEAR;
+	// startForeground(NOTIFICATION_ID, notification);
+	// }
 
 	public void registerGPSQualityListener(GPSQualityListener listener) {
 		gpsQualityListener = listener;
@@ -256,7 +247,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	}
 
 	public interface GPSQualityListener {
-		public void gpsQualityUpdated(GPSQuality quality);
+		public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float gpsBearing, float gpsSpeed);
 	}
 
 }

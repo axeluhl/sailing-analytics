@@ -15,6 +15,8 @@ import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
@@ -53,6 +55,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             selectCourseArea(courseArea);
         }
     };
+
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
@@ -112,13 +115,13 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
     };
 
-
     private LoginDialog mLoginDialog;
     private ProgressBar mProgressSpinner;
-
     private CourseArea mSelectedCourseArea;
 
     private Serializable mSelectedEvent;
+
+    private final int RQS_GooglePlayServices = 1;
 
     public LoginActivity() {
         mLoginDialog = new LoginDialog();
@@ -235,12 +238,22 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         return true;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
+
+        if (resultCode != ConnectionResult.SUCCESS) {
+            GooglePlayServicesUtil.getErrorDialog(resultCode, this, RQS_GooglePlayServices).show();
+        }
+    }
 
     private void selectCourseArea(CourseArea courseArea) {
         mSelectedCourseArea = courseArea;
         mLoginDialog.show(getFragmentManager(), "LoginDialog");
     }
-    
+
     @Override
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
         super.setSupportProgressBarIndeterminateVisibility(visible);

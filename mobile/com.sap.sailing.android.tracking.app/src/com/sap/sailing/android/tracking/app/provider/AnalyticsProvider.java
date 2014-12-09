@@ -20,6 +20,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 public class AnalyticsProvider extends ContentProvider {
 
@@ -93,7 +94,7 @@ public class AnalyticsProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG && AppPreferences.getPrintDatabaseOperationDebugMessages()) {
             String message = "query: uri=" + uri + " projection=" + Arrays.toString(projection) + " selection=["
                     + selection + "] args=" + Arrays.toString(selectionArgs) + " order=[" + sortOrder + "]";
             ExLog.i(getContext(), TAG, message);
@@ -173,7 +174,7 @@ public class AnalyticsProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG && AppPreferences.getPrintDatabaseOperationDebugMessages()) {
             String message = "insert: uri=" + uri + " values=[" + values.toString() + "]";
             ExLog.i(getContext(), TAG, message);
         }
@@ -187,9 +188,9 @@ public class AnalyticsProvider extends ContentProvider {
             return Competitor.buildCompetitorUri(values.getAsString(Competitor.COMPETITOR_ID));
             
         case EVENT:
-            db.insertOrThrow(Tables.EVENTS, null, values);
+            long eventId = db.insertOrThrow(Tables.EVENTS, null, values);
             notifyChange(uri);
-            return Event.buildEventUri(values.getAsString(Event.EVENT_ID));
+            return Event.buildEventUri(String.valueOf(eventId));
             
         case LEADERBOARD:
         	db.insertOrThrow(Tables.LEADERBOARDS, null, values);
@@ -208,7 +209,7 @@ public class AnalyticsProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG && AppPreferences.getPrintDatabaseOperationDebugMessages()) {
             String message = "delete: uri=" + uri + " selection=[" + selection + "] args="
                     + Arrays.toString(selectionArgs);
             ExLog.i(getContext(), TAG, message);
@@ -217,13 +218,18 @@ public class AnalyticsProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
 		switch (sUriMatcher.match(uri)) {
+		
+		case SENSOR_GPS:
+			int numGpsFixesDeleted = db.delete(Tables.SENSOR_GPS, selection, selectionArgs);
+			notifyChange(uri);
+			return numGpsFixesDeleted;
 
 		case SENSOR_GPS_ID:
 			String idStr = uri.getLastPathSegment();
 		    String where = SensorGps._ID + " = " + idStr;
-		    int numRowsDeleted = db.delete(Tables.SENSOR_GPS, where, selectionArgs);
+		    int numGpsFixesWithIdDeleted = db.delete(Tables.SENSOR_GPS, where, selectionArgs);
 			notifyChange(uri);
-			return numRowsDeleted;
+			return numGpsFixesWithIdDeleted;
 			
         case COMPETITOR:
         	int numCompetitorRowsDeleted = db.delete(Tables.COMPETITORS, selection, selectionArgs);
@@ -247,7 +253,7 @@ public class AnalyticsProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		if (BuildConfig.DEBUG) {
+		if (BuildConfig.DEBUG && AppPreferences.getPrintDatabaseOperationDebugMessages()) {
 			String message = "update: uri=" + uri + " values=[" + values == null ? "null"
 					: values.toString() + "] selection=[" + selection + "]"
 							+ " args=" + Arrays.toString(selectionArgs);

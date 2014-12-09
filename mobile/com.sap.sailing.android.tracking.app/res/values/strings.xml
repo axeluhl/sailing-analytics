@@ -28,7 +28,7 @@
     <string name="please_confirm">Please confirm</string>
     <string name="do_you_really_want_to_stop_tracking">Do you really want to stop tracking?</string>
     <string name="ok">OK</string>
-    <string name="signal_quality_indicator_view_description">GPS Quality</string>
+    <string name="signal_accuracy_indicator_view_description">GPS Accuracy</string>
     <string name="poor">poor</string>
     <string name="good">good</string>
     <string name="great">great</string>
@@ -64,5 +64,6 @@
 	<string name="no_qr_code_popup_title">No QR-Code?</string>
 	<string name="no_qr_code_popup_message">Please contact race management if you have not received a QR-Code.</string>
 	<string name="tracking_colon">Tracking:</string>
+	<string name="regatta_in_progress">The regatta is in progress.</string>
 	
 </resources>

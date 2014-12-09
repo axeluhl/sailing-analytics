@@ -1,25 +1,18 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.BaseColumns;
 import android.support.v7.widget.Toolbar;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardsEventsJoined;
+import com.sap.sailing.android.tracking.app.sensors.CompassManager;
+import com.sap.sailing.android.tracking.app.sensors.CompassManager.MagneticHeadingListener;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
@@ -28,9 +21,13 @@ import com.sap.sailing.android.tracking.app.services.TransmittingService;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivityListener;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.TransmittingBinder;
+import com.sap.sailing.android.tracking.app.ui.fragments.HudFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
-public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
+public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener, MagneticHeadingListener {
 	
 	TrackingService trackingService;
 	boolean trackingServiceBound;
@@ -41,16 +38,20 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	private final static String TAG = TrackingActivity.class.getName();
 	private final static String SIS_FRAGMENT = "savedInstanceTrackingFragment";
 	
-	private int eventId;
+	private String eventId;
+	
+	private AppPreferences prefs;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        prefs = new AppPreferences(this);
+        
         Intent intent = getIntent();
-        eventId = intent.getExtras().getInt(getString(R.string.tracking_activity_event_id_parameter)); 
+        eventId = intent.getExtras().getString(getString(R.string.tracking_activity_event_id_parameter)); 
         		
-        setContentView(R.layout.fragment_container);
+        setContentView(R.layout.fragment_hud_container);
         
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -61,49 +62,48 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
         
         if (getSupportActionBar() != null) {
-        	
-        	String leaderboardName = "";
-        	String eventName = "";
-        	ContentResolver cr = getContentResolver();
-        	String projectionStr = "events._id,leaderboards.leaderboard_name,events.event_name";
-        	String[] projection = projectionStr.split(",");
-        	Cursor cursor = cr.query(LeaderboardsEventsJoined.CONTENT_URI, projection, "events._id = " + eventId, null, null);
-        	if (cursor.moveToFirst())
-        	{
-        		eventName = cursor.getString(cursor.getColumnIndex("event_name"));
-        		leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
-        	}
-        	
-        	cursor.close();
-        	
+        	EventInfo eventInfo = DatabaseHelper.getInstance(this).getEventInfoWithLeaderboard(eventId);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
-            getSupportActionBar().setTitle(leaderboardName);
-            getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventName);
+            getSupportActionBar().setTitle(eventInfo.leaderboardName);
+            getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
         }
         
-        TrackingFragment fragment;
+        TrackingFragment mainFragment;
         if (savedInstanceState != null)
         {
-        	fragment = (TrackingFragment)getSupportFragmentManager().getFragment(savedInstanceState, SIS_FRAGMENT);
+        	mainFragment = (TrackingFragment)getSupportFragmentManager().getFragment(savedInstanceState, SIS_FRAGMENT);
         }
         else
         {
-        	fragment = new TrackingFragment();
+        	mainFragment = new TrackingFragment();
         }
         
-        replaceFragment(R.id.content_frame, fragment);
+        HudFragment hudFragment = new HudFragment();
+        
+        replaceFragment(R.id.content_frame, mainFragment);
+        replaceFragment(R.id.hud_content_frame, hudFragment);
+        
         startTrackingService(eventId);
+    }
+    
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+    	super.onWindowFocusChanged(hasFocus);
+    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
+    	hudFragment.layoutOverlay();
+    	
+    	hudFragment.setSpeedOverGround(0);
+    	hudFragment.setHeading(0);
     }
     
     @Override
     protected void onSaveInstanceState(Bundle outState) {
     	super.onSaveInstanceState(outState);
     	
-    	TrackingFragment fragment = (TrackingFragment)getSupportFragmentManager()
-				.findFragmentById(R.id.content_frame);
+    	TrackingFragment fragment = (TrackingFragment)getSupportFragmentManager().findFragmentById(R.id.content_frame);
     	getSupportFragmentManager().putFragment(outState, SIS_FRAGMENT, fragment);
     }
     
@@ -144,23 +144,56 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
     }
     
-    
-    
     @Override
-    public void gpsQualityUpdated(GPSQuality quality) {
-    	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.content_frame);
-    	trackingFragment.setGPSQuality(quality);
+    protected void onPause() {
+    	super.onPause();
+    	CompassManager.getInstance(this).unregisterListener();
+    }
+
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	
+		if (prefs.getHeadingFromMagneticSensorPreferred()) {
+			CompassManager.getInstance(this).registerListener(this);
+		}
+    }
+
+    @Override
+    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float bearing, float speed) {
+    	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+    	trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
+    	
+    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
+    	hudFragment.setSpeedOverGround(speed);
+    	
+    	if (!prefs.getHeadingFromMagneticSensorPreferred())
+    	{
+    		hudFragment.setHeading(bearing);	
+    	}
     }
     
     @Override
     public void apiConnectivityUpdated(APIConnectivity apiConnectivity) {
 		TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.content_frame);
-		trackingFragment.setAPIConnectivityStatus(apiConnectivity);
+		if (trackingFragment != null)
+		{
+			trackingFragment.setAPIConnectivityStatus(apiConnectivity);	
+		}
     }
     
-    private void startTrackingService(int eventId)
+    @Override
+    public void setUnsentGPSFixesCount(int count) {
+    	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.content_frame);
+    	if (trackingFragment != null)
+		{
+    		trackingFragment.setUnsentGPSFixesCount(count);
+		}
+    }
+    
+    private void startTrackingService(String eventId)
     {
     	Intent intent = new Intent(this, TrackingService.class);
 		intent.setAction(getString(R.string.tracking_service_start));
@@ -222,4 +255,21 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             trackingServiceBound = false;
         }
     };
+
+	@Override
+	public void magneticHeadingUpdated(float heading) {
+    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
+    	if (prefs.getHeadingFromMagneticSensorPreferred())
+    	{
+    		hudFragment.setHeading(heading);
+    	}
+    	else
+    	{
+    		if (BuildConfig.DEBUG)
+    		{
+    			ExLog.i(this, TAG, "Received magnet compass update, even though prefs say get from GPS. Unregistering listener." );
+    		}
+    		CompassManager.getInstance(this).unregisterListener();
+    	}
+	}
 }

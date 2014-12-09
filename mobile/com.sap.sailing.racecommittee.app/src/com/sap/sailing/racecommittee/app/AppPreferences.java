@@ -11,6 +11,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -42,6 +43,10 @@ public class AppPreferences {
     private final static String HIDDEN_PREFERENCE_WIND_BEARING = "windBearingPref";
 
     private final static String HIDDEN_PREFERENCE_WIND_SPEED = "windSpeedPref";
+    
+    private final static String HIDDEN_PREFERENCE_WIND_LAT = "windLatPref";
+    
+    private final static String HIDDEN_PREFERENCE_WIND_LNG = "windLngPref";
 
     public static AppPreferences on(Context context) {
         return new AppPreferences(context);
@@ -231,6 +236,12 @@ public class AppPreferences {
         long windSpeedAsLong = preferences.getLong(HIDDEN_PREFERENCE_WIND_SPEED, 0);
         return Double.longBitsToDouble(windSpeedAsLong);
     }
+    
+    public LatLng getWindPosition(){
+    	double lat = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LAT, 0));
+    	double lng = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LNG, 0));
+    	return new LatLng(lat,lng);
+    }
 
     public boolean isPollingActive() {
         return preferences.getBoolean(key(R.string.preference_polling_active_key), false);
@@ -344,6 +355,15 @@ public class AppPreferences {
         preferences.edit().putLong(HIDDEN_PREFERENCE_WIND_SPEED, windSpeedAsLong).commit();
     }
 
+    public void setWindPosition(LatLng latLng) {
+        long lat = Double.doubleToLongBits(latLng.latitude);
+        long lng = Double.doubleToLongBits(latLng.longitude);
+        preferences.edit()
+        	.putLong(HIDDEN_PREFERENCE_WIND_LAT, lat)
+        	.putLong(HIDDEN_PREFERENCE_WIND_LNG, lng)
+        .commit();
+    }
+    
     public void unregisterPollingActiveChangedListener(PollingActiveChangedListener listener) {
         pollingActiveChangedListeners.remove(listener);
         if (pollingActiveChangedListeners.isEmpty()) {

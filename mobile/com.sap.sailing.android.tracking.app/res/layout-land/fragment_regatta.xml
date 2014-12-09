@@ -111,16 +111,15 @@
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/competitor_info_layout"
                 android:layout_toRightOf="@+id/add_photo"
-                android:background="@drawable/background_lighter_box"
+                android:background="@drawable/background_transparent_box"
                 android:orientation="horizontal"
-                android:padding="5dp" >
+                android:padding="0dp" >
 
-                <ImageButton
-                    android:id="@+id/change_photo_button"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:background="@android:color/transparent"
-                    android:src="@android:drawable/ic_menu_edit" />
+                <Button
+                android:id="@+id/change_photo_button"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="@drawable/stift" />
             </LinearLayout>
         </RelativeLayout>
 

@@ -44,23 +44,18 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 			Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		View view = inflater.inflate(R.layout.fragment_regatta, container,
-				false);
+		View view = inflater.inflate(R.layout.fragment_regatta, container, false);
 
-		Button startTrackingButton = (Button) view
-				.findViewById(R.id.start_tracking);
+		Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
 		startTrackingButton.setOnClickListener(this);
 
-		ImageButton changePhotoButton = (ImageButton) view
-				.findViewById(R.id.change_photo_button);
+		Button changePhotoButton = (Button) view.findViewById(R.id.change_photo_button);
 		changePhotoButton.setOnClickListener(this);
 
-		ImageButton addPhotoButton = (ImageButton) view
-				.findViewById(R.id.add_photo_button);
+		ImageButton addPhotoButton = (ImageButton) view.findViewById(R.id.add_photo_button);
 		addPhotoButton.setOnClickListener(this);
 
-		TextView addPhotoText = (TextView) view
-				.findViewById(R.id.add_photo_text);
+		TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
 		addPhotoText.setOnClickListener(this);
 
 		return view;
@@ -68,10 +63,34 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private void checkAndSwitchToThankYouScreenIfRegattaOver() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		long regattaEnd = regattaActivity.getEventEndMillis();
+		long regattaEnd = regattaActivity.getEvent().endMillis;
 
 		if (System.currentTimeMillis() > regattaEnd) {
 			switchToThankYouScreen();
+		}
+	}
+	
+	/**
+	 * If the regatta started, don't display the countdown any more.
+	 */
+	private void checkAndHideCountdownIfRegattaIsInProgress() {
+		TextView textView = (TextView)getActivity().findViewById(R.id.regatta_starts_in);
+		
+		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
+		long regattaStart = regattaActivity.getEvent().startMillis;
+		
+		LinearLayout threeBoxesLayout = (LinearLayout) getActivity()
+				.findViewById(R.id.three_boxes_regatta_starts);
+		
+		if (System.currentTimeMillis() > regattaStart)
+		{
+			textView.setText(getString(R.string.regatta_in_progress));
+			threeBoxesLayout.setVisibility(View.INVISIBLE);	
+		}
+		else
+		{
+			textView.setText(getString(R.string.regatta_starts_in));
+			threeBoxesLayout.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -82,18 +101,14 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 				.findViewById(R.id.start_date_layout);
 		startsInLayout.setVisibility(View.INVISIBLE);
 
-		Button startTrackingButton = (Button) getActivity().findViewById(
-				R.id.start_tracking);
-		startTrackingButton.setBackgroundColor(getActivity().getResources()
-				.getColor(R.color.sap_yellow));
+		Button startTrackingButton = (Button) getActivity().findViewById(R.id.start_tracking);
+		startTrackingButton.setBackgroundColor(getActivity().getResources().getColor(R.color.sap_yellow));
 		startTrackingButton.setText(getActivity().getString(R.string.close));
 
-		TextView bottomAnnouncement = (TextView) getActivity().findViewById(
-				R.id.bottom_announcement);
+		TextView bottomAnnouncement = (TextView) getActivity().findViewById(R.id.bottom_announcement);
 		bottomAnnouncement.setVisibility(View.INVISIBLE);
 
-		RelativeLayout thankYouLayout = (RelativeLayout) getActivity()
-				.findViewById(R.id.thank_you_layout);
+		RelativeLayout thankYouLayout = (RelativeLayout) getActivity().findViewById(R.id.thank_you_layout);
 		thankYouLayout.setVisibility(View.VISIBLE);
 	}
 
@@ -103,6 +118,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		timer = new TimerRunnable();
 		timer.start();
 		checkAndSwitchToThankYouScreenIfRegattaOver();
+		checkAndHideCountdownIfRegattaIsInProgress();
 	}
 
 	@Override
@@ -217,18 +233,18 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
 		intent.putExtra(
 				getString(R.string.tracking_activity_event_id_parameter),
-				regattaActivity.getEventId());
+				regattaActivity.getEvent().id);
 		getActivity().startActivity(intent);
 	}
 
 	private void timerFired() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		updateCountdownTimer(regattaActivity.getEventStartMillis());
+		updateCountdownTimer(regattaActivity.getEvent().startMillis);
 	}
 
 	private void updateCountdownTimer(long startTime) {
 		long diff = startTime - System.currentTimeMillis();
-		if (diff < 0) // event is in the past
+		if (diff < 0) // start of event is in the past
 		{
 			setCountdownTime(0, 0, 0);
 		} else {

@@ -104,6 +104,10 @@ public class AppPreferences {
     	return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
     }
     
+    public boolean getHeadingFromMagneticSensorPreferred() {
+    	return preferences.getBoolean(context.getString(R.string.preference_heading_from_magnetic_key), true);
+    }
+    
     public void setTrackingTimerStarted(long milliseconds)
     {
     	preferences.edit().putLong(context.getString(R.string.preference_tracking_timer_started), milliseconds).commit();
@@ -124,13 +128,18 @@ public class AppPreferences {
     	return preferences.getBoolean(context.getString(R.string.preference_tracker_is_tracking), false);
     }
     
-    public void setTrackerIsTrackingEventId(int eventId)
+    public void setTrackerIsTrackingEventId(String eventId)
     {
-    	preferences.edit().putInt(context.getString(R.string.preference_tracker_is_tracking_event_id), eventId).commit();
+    	preferences.edit().putString(context.getString(R.string.preference_tracker_is_tracking_event_id), eventId).commit();
     }
     
-    public Integer getTrackerIsTrackingEventId()
+    public String getTrackerIsTrackingEventId()
     {
-    	return preferences.getInt(context.getString(R.string.preference_tracker_is_tracking_event_id), -1);
+    	return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_event_id), null);
+    }
+    
+    public static boolean getPrintDatabaseOperationDebugMessages()
+    {
+    	return false;
     }
 }

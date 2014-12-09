@@ -30,7 +30,7 @@ public class SystemInformationActivityHelper {
      */
     public void updateSendingServiceInformation() {
         TextView statusView = (TextView) activity.findViewById(R.id.system_information_persistence_status);
-        ListView waitingView = (ListView) activity.findViewById(R.id.system_information_persistence_waiting);
+        //ListView waitingView = (ListView) activity.findViewById(R.id.system_information_persistence_waiting);
         if (activity.boundSendingService) {
             Date lastSuccessfulSend = activity.sendingService.getLastSuccessfulSend();
             statusView.setText(String.format(

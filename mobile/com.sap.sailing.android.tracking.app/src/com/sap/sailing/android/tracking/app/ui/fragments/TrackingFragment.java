@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -23,19 +21,20 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView;
+import com.sap.sailing.android.tracking.app.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.views.AutoResizeTextView;
-import com.sap.sailing.android.tracking.app.views.SignalQualityIndicatorView;
 
 public class TrackingFragment extends BaseFragment implements OnClickListener {
 
 	static final String SIS_MODE = "instanceStateMode";
 	static final String SIS_STATUS = "instanceStateStatus";
 	static final String SIS_GPS_QUALITY = "instanceStateGpsQuality";
+	static final String SIS_GPS_ACCURACY = "instanceStateGpsAccuracy";
+	static final String SIS_GPS_UNSENT_FIXES = "instanceStateGpsUnsentFixes";
 	
 	private TimerRunnable timer;
 	private AppPreferences prefs;
@@ -50,7 +49,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 
 		View view = inflater.inflate(R.layout.fragment_tracking, container, false);
 		
-		Button stopTracking = (Button) view.findViewById(R.id.stop_tracking);
+		Button stopTracking = (Button)view.findViewById(R.id.stop_tracking);
 		stopTracking.setOnClickListener(this);
 	
 		prefs = new AppPreferences(getActivity());
@@ -65,6 +64,8 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
+		// so it initally updates to "battery-saving" etc.
+		setAPIConnectivityStatus(APIConnectivity.noAttempt);
 		timer = new TimerRunnable();
 		timer.start();
 	}
@@ -88,18 +89,21 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		System.out.println("ON ACTIVITY CREATED");
 		super.onActivityCreated(savedInstanceState);
 		if (savedInstanceState != null)
 		{
 			System.out.println("NOT NULL");
 			TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
 			TextView statusText = (TextView)getActivity().findViewById(R.id.tracking_status);
-			SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.qps_quality_indicator);
-			
+			SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.gps_quality_indicator);
+			TextView accuracyText = (TextView)getActivity().findViewById(R.id.gps_accuracy_label);
+			TextView unsentFixesText = (TextView)getActivity().findViewById(R.id.tracking_unsent_fixes);
+					
 			modeText.setText(savedInstanceState.getString(SIS_MODE));
 			statusText.setText(savedInstanceState.getString(SIS_STATUS));
 			qualityIndicator.setSignalQuality(savedInstanceState.getInt(SIS_GPS_QUALITY));
+			accuracyText.setText(savedInstanceState.getString(SIS_GPS_ACCURACY));
+			unsentFixesText.setText(savedInstanceState.getString(SIS_GPS_UNSENT_FIXES));
 		}
 		else
 		{
@@ -114,11 +118,15 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		
 		TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
 		TextView statusText = (TextView)getActivity().findViewById(R.id.tracking_status);
-		SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.qps_quality_indicator);
+		SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.gps_quality_indicator);
+		TextView accuracyText = (TextView)getActivity().findViewById(R.id.gps_accuracy_label);
+		TextView unsentFixesText = (TextView)getActivity().findViewById(R.id.tracking_unsent_fixes);
 		
 		outState.putString(SIS_MODE, modeText.getText().toString());
 		outState.putString(SIS_STATUS, statusText.getText().toString());
 		outState.putInt(SIS_GPS_QUALITY, qualityIndicator.getSignalQuality());
+		outState.putString(SIS_GPS_ACCURACY, accuracyText.getText().toString());
+		outState.putString(SIS_GPS_UNSENT_FIXES, unsentFixesText.getText().toString());
 	}
 	
 	/**
@@ -142,7 +150,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 			{
 				ExLog.i(getActivity(), TAG, "Setting GPS Quality to 0 because timeout occurred and location is reported as disabled.");
 			}
-			setGPSQuality(GPSQuality.noSignal);
+			setGPSQualityAndAcurracy(GPSQuality.noSignal, 0);
 		}
 	}
 	
@@ -179,8 +187,17 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 				
 				if (apiConnectivity == APIConnectivity.reachableTransmissionSuccess)
 				{
-					textView.setText(getString(R.string.tracking_mode_live));
-					textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+					if (prefs.getEnergySavingEnabledByUser())
+					{
+						textView.setText(getString(R.string.tracking_mode_battery_saving));
+						textView.setTextColor(Color.parseColor(getString(R.color.sap_yellow)));
+					}
+					else
+					{
+						textView.setText(getString(R.string.tracking_mode_live));
+						textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));	
+					}
+					
 				}
 				else if (apiConnectivity == APIConnectivity.noAttempt)
 				{
@@ -228,18 +245,6 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
         }
     } 
     
-    /**
-	 * Returns if network connection is available on the device
-	 * @param context
-	 * @return true if network connection is available, false otherwise
-	 */
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager 
-              = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
-    
 	public void userTappedBackButton()
 	{
 		showStopTrackingConfirmationDialog();
@@ -279,14 +284,27 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		return String.format(getResources().getConfiguration().locale, "%02d:%02d:%02d", hours, minutes, seconds);
 	}
 	
-	public void setGPSQuality(GPSQuality quality)
+	public void setGPSQualityAndAcurracy(GPSQuality quality, float gpsAccurracy)
 	{
-		SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) getActivity().findViewById(R.id.qps_quality_indicator);
+		SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) getActivity().findViewById(R.id.gps_quality_indicator);
 		indicatorView.setSignalQuality( quality.toInt() );
+		
+		TextView accuracyTextView = (TextView)getActivity().findViewById(R.id.gps_accuracy_label);
+		accuracyTextView.setText("~ " + String.valueOf(Math.round(gpsAccurracy)) + " m");
 		
 		updateTrackingStatus(quality);
 		
 		lastGPSQualityUpdate = System.currentTimeMillis();
+	}
+	
+	public void setUnsentGPSFixesCount(final int count)
+	{
+		getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				TextView unsentGpsFixesTextView = (TextView)getActivity().findViewById(R.id.tracking_unsent_fixes);
+				unsentGpsFixesTextView.setText(String.valueOf(count));		
+			}});
 	}
 	
 	private class TimerRunnable implements Runnable {
@@ -301,6 +319,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 				t.start();
 			}
 		}
+		
 		@Override
 		public void run() {
 			while (running) {

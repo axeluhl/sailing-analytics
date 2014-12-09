@@ -8,15 +8,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Service;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -24,17 +20,15 @@ import android.os.IBinder;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 /**
  * Service that handles sending of GPS-fixes (fixes) to the Sailing-API.
@@ -261,18 +255,18 @@ public class TransmittingService extends Service {
 		}
 		
 		sendFixesToAPI(null);
+		reportUnsentGPSFixesCount(DatabaseHelper.getInstance(getBaseContext()).getNumberOfUnsentGPSFixes());
 	}
 	
 	private boolean getTrackingServiceIsCurrentlyTracking()
 	{
-		// TODO: IMPLEMENT THIS METHOD PROPERLY!!
-		return false;
+		return prefs.getTrackerIsTracking();
 	}
 	
 	private void sendFixesToAPI(List<String> failedHosts) {
-		// first, lets fetch all unsent fixes
-		List<GpsFix> fixes = getUnsentFixes(failedHosts);
 		
+		// first, lets fetch all unsent fixes
+		List<GpsFix> fixes = DatabaseHelper.getInstance(getBaseContext()).getUnsentFixes(failedHosts, UPDATE_BATCH_SIZE);
 		// store ids so we can delete the rows later
 		ArrayList<String> ids = new ArrayList<String>();
 		
@@ -337,11 +331,14 @@ public class TransmittingService extends Service {
 			if (host != null)
 			{
 				sendingAttempted = true;
-				VolleyHelper.getInstance(this).addRequest(
-						new JsonObjectRequest(host
-								+ prefs.getServerGpsFixesPostPath(), requestObject,
-								new FixSubmitListener(ids.toArray(idsArr)),
-								new FixSubmitErrorListener(host, getTrackingServiceIsCurrentlyTracking(), failedHosts)));	
+				
+				VolleyHelper.getInstance(this).enqueueRequest(
+						host + prefs.getServerGpsFixesPostPath(),
+						requestObject,
+						new FixSubmitListener(ids.toArray(idsArr)),
+						new FixSubmitErrorListener(host,
+								getTrackingServiceIsCurrentlyTracking(),
+								failedHosts));
 			}
 			else
 			{
@@ -362,6 +359,14 @@ public class TransmittingService extends Service {
 		}
 	}
 	
+	/**
+	 * Get a count of ALL unsent GPS-fixes.
+	 * 
+	 * This method is only interested in the GPS-fixes for the currently tracked event,
+	 * and needs to find out the id of that event first.
+	 * @return
+	 */
+	
 	private float getBatteryPercentage()
 	{
 		IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -376,19 +381,12 @@ public class TransmittingService extends Service {
 			ExLog.i(this, TAG, "Battery: " + (batteryPct * 100) + "%");
 		}
 		
-		
 		return batteryPct;
 	}
 	
 	private void deleteSynced(String[] fixIdStrings)
 	{
-		for (String idStr: fixIdStrings)
-		{
-			ContentValues updateValues = new ContentValues();
-			updateValues.put(SensorGps.GPS_SYNCED, 1);
-			Uri uri = ContentUris.withAppendedId(SensorGps.CONTENT_URI, Long.parseLong(idStr));
-			getContentResolver().delete(uri, null, null);
-		}
+		DatabaseHelper.getInstance(getBaseContext()).deleteGpsFixes(fixIdStrings);
 	}
 	
 	/**
@@ -421,6 +419,18 @@ public class TransmittingService extends Service {
     		apiConnectivityListener.apiConnectivityUpdated( apiConnectivity );
     	}
     }
+    
+    /**
+     * Report the number of currently unsent GPS-fixes
+     * @param unsentGPSFixesCount
+     */
+    private void reportUnsentGPSFixesCount( int unsentGPSFixesCount )
+    {
+    	if (apiConnectivityListener != null)
+    	{
+    		apiConnectivityListener.setUnsentGPSFixesCount(unsentGPSFixesCount);
+    	}
+    }
 	
 //  might need this class in the future:  
 //
@@ -435,60 +445,7 @@ public class TransmittingService extends Service {
 //		}
 //	}
 	
-	private List<GpsFix> getUnsentFixes(List<String> failedHosts)
-	{
-		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
-		String projectionClauseStr = "events._id as _eid,sensor_gps.gps_time,sensor_gps.gps_latitude,"
-				+ "sensor_gps.gps_longitude,sensor_gps.gps_speed,sensor_gps.gps_bearing,sensor_gps.gps_synced,"
-				+ "events.event_server,sensor_gps._id as _gid";
-		String[] projectionClause = projectionClauseStr.split(",");
-		String sortAndLimitClause = SensorGps.GPS_TIME + " DESC LIMIT " + UPDATE_BATCH_SIZE;
-		
-		if (failedHosts != null)
-		{
-			if (failedHosts.size() > 0)
-			{
-				StringBuffer buf = new StringBuffer();
-				buf.append("( ");
-
-				for (String failedHost : failedHosts) {
-					buf.append("\"" + failedHost + "\",");
-				}
-				
-				// remove the last comma
-				buf.setLength(buf.length() - 1);
-				buf.append(" )");
-				
-				selectionClause += " AND " + Event.EVENT_SERVER + " NOT IN " + buf.toString();
-			}
-		}
-		
-		ArrayList<GpsFix> list = new ArrayList<GpsFix>();
-		Cursor cur = getContentResolver().query(EventGpsFixesJoined.CONTENT_URI, projectionClause, selectionClause, null, sortAndLimitClause);
-		while (cur.moveToNext()) {
-			GpsFix gpsFix = new GpsFix();
-			
-			gpsFix.id = cur.getInt(cur.getColumnIndex("_gid"));
-			gpsFix.timestamp = cur.getLong(cur.getColumnIndex(SensorGps.GPS_TIME));
-			gpsFix.latitude  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_LATITUDE));
-			gpsFix.longitude  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_LONGITUDE));
-			gpsFix.speed  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_SPEED));
-			gpsFix.course  = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_BEARING));
-			gpsFix.synced = cur.getInt(cur.getColumnIndex(SensorGps.GPS_SYNCED));
-			gpsFix.host = cur.getString(cur.getColumnIndex(Event.EVENT_SERVER));
-			gpsFix.eventId = cur.getString(cur.getColumnIndex("_eid"));
-			
-			list.add(gpsFix);
-			
-			if (list.size() >= UPDATE_BATCH_SIZE)
-			{
-				break;
-			}
-        }
-		
-		cur.close();
-		return list;
-	}
+	
 	
 	private class FixSubmitListener implements Listener<JSONObject> {
 
@@ -536,27 +493,6 @@ public class TransmittingService extends Service {
             }
         }
     }
-
-	class GpsFix
-	{
-		public int id;
-		public long timestamp;
-		public double latitude;
-		public double longitude;
-		public double speed;
-		public double course;
-		public int synced;
-		public String host;
-		public String eventId;
-
-		@Override
-		public String toString() {
-			return "ID: " + id + ", T: " + timestamp + ", LAT: " + latitude
-					+ ", LON: " + longitude + ", SPD: " + speed + ", CRS: "
-					+ course + ", SYN: " + synced + ", HOST: " + host
-					+ ", EVENT-ID: " + eventId;
-		}
-	}
 	
 	class Timer implements Runnable {
 		public Thread t;
@@ -599,7 +535,6 @@ public class TransmittingService extends Service {
 		apiConnectivityListener = null;
 	}
 	
-    
 	public class TransmittingBinder extends Binder {
 		public TransmittingService getService() {
 			return TransmittingService.this;
@@ -627,6 +562,7 @@ public class TransmittingService extends Service {
 	
 	public interface APIConnectivityListener {
 		public void apiConnectivityUpdated( APIConnectivity apiConnectivity );
+		public void setUnsentGPSFixesCount( int count );
 	}
 	
 }

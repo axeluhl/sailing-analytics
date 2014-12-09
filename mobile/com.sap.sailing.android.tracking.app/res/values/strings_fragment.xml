@@ -17,10 +17,13 @@
     <string name="homefragment_volley_404">This data is not available at the server. Please retry.</string>
     <string name="homefragment_volley_unknown">The server returned an unknown code (%s).</string>
     <string name="homefragment_volley_unexpected">The server returned an unexpected value.</string>
-	<string name="tracking_qps_quality">GPS Quality</string>
+	<string name="tracking_gps_accuracy">GPS Accuracy</string>
 	<string name="tracking_mode">Mode</string>
 	<string name="tracking_mode_live">Live</string>
-	<string name="tracking_mode_caching">Caching</string>
+	<string name="tracking_mode_battery_saving">Battery Saving</string>
+	<string name="tracking_unsent_fixes">Unsent fixes</string>
+	<string name="zero">0</string>
+	<string name="tracking_mode_caching">Offline</string>
 	<string name="tracking_mode_api_error">API-Error</string>
 	<string name="tracking_mode_offline">Offline</string>
 	<string name="tracking_time">Tracking Time</string>
@@ -33,4 +36,6 @@
 	<string name="tracking_status_tracking">Tracking running</string>
 	<string name="tracking_status_not_tracking">Tracking stopped</string>
 	<string name="tracking_status_no_gps_signal">No GPS Signal!</string>
+	<string name="hud_heading_prefix">HDG: </string>
+	<string name="hud_speed_over_ground_prefix">SPD: </string>
 </resources>
