@@ -16,14 +16,13 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 public class SeriesWithFleetsDefaultCreateDialog extends SeriesWithFleetsCreateDialog {
     public SeriesWithFleetsDefaultCreateDialog(SeriesDTO defaultSeries, StringMessages stringMessages,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<SeriesDTO> callback) {
-        super(Collections.<SeriesDTO> emptyList(), stringMessages, callback);
+        super(Collections.<SeriesDTO> emptyList(), stringMessages, defaultSeries.getDiscardThresholds(), callback);
         nameEntryField.setText(defaultSeries.getName());// Otherwise an errorMessage will pop up
         isMedalSeriesCheckbox.setValue(defaultSeries.isFirstColumnIsNonDiscardableCarryForward());
         startsWithZeroScoreCheckbox.setValue(defaultSeries.isStartsWithZeroScore());
         hasSplitFleetContiguousScoringCheckbox.setValue(defaultSeries.hasSplitFleetContiguousScoring());
         firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(defaultSeries.isFirstColumnIsNonDiscardableCarryForward());
         useSeriesResultDiscardingThresholdsCheckbox.setValue(defaultSeries.definesSeriesDiscardThresholds());
-        discardThresholdBoxes.setDiscardThresholds(defaultSeries.getDiscardThresholds());
         fleetListComposite.setValue(defaultSeries.getFleets());
     }
 

@@ -30,13 +30,13 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     private StringMessages stringMessages;
     private SeriesDTO series;
 
-    protected TextBox nameEntryField;
+    protected final TextBox nameEntryField;
     protected CheckBox isMedalSeriesCheckbox;
     protected CheckBox startsWithZeroScoreCheckbox;
     protected CheckBox hasSplitFleetContiguousScoringCheckbox;
     protected CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     protected CheckBox useSeriesResultDiscardingThresholdsCheckbox;
-    protected DiscardThresholdBoxes discardThresholdBoxes;
+    protected final DiscardThresholdBoxes discardThresholdBoxes;
     protected ListEditorComposite<FleetDTO> fleetListComposite;
 
     protected static class SeriesParameterValidator implements Validator<SeriesDTO> {
@@ -99,12 +99,19 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     public SeriesWithFleetsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringMessages,
             DialogCallback<SeriesDTO> callback) {
+        this(existingSeries, stringMessages, /* discard thresholds */ null, callback);
+    }
+    
+    protected SeriesWithFleetsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringMessages,
+            int[] discardThresholds, DialogCallback<SeriesDTO> callback) {
         super(stringMessages.series(), null, stringMessages.ok(), stringMessages.cancel(),  
                 new SeriesParameterValidator(stringMessages, existingSeries), callback);
         this.stringMessages = stringMessages;
         this.series = new SeriesDTO();
-        
-        setNameEntryField();
+        this.discardThresholdBoxes = discardThresholds == null ? new DiscardThresholdBoxes(this, stringMessages) : new DiscardThresholdBoxes(this, discardThresholds, stringMessages);
+        nameEntryField = createTextBox(null);
+        nameEntryField.ensureDebugId("NameTextBox");
+        nameEntryField.setVisibleLength(40);
         
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
         isMedalSeriesCheckbox.ensureDebugId("MedalSeriesCheckbox");
@@ -123,11 +130,9 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                discardThresholdBoxes.getWidget().setVisible(event.getValue());
+                SeriesWithFleetsCreateDialog.this.discardThresholdBoxes.getWidget().setVisible(event.getValue());
             }
         });
-        
-        discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
         Widget widget = discardThresholdBoxes.getWidget();
         widget.ensureDebugId("DiscardThresholdBoxes");
         widget.setVisible(false);
@@ -135,8 +140,9 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         initializeFleetListComposite(stringMessages);
     }
 
-	protected void initializeFleetListComposite(StringMessages stringMessages) {
-		fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
+    protected void initializeFleetListComposite(StringMessages stringMessages) {
+        fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO(
+                LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
         fleetListComposite.ensureDebugId("FleetListEditorComposite");
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<Iterable<FleetDTO>>() {
             @Override
@@ -144,13 +150,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 validate();
             }
         });
-	}
-
-	protected void setNameEntryField() {
-		nameEntryField = createTextBox(null);
-        nameEntryField.ensureDebugId("NameTextBox");
-        nameEntryField.setVisibleLength(40);
-	}
+    }
 
     @Override
     protected SeriesDTO getResult() {
