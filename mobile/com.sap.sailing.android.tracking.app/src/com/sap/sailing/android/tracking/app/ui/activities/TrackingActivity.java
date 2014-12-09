@@ -201,22 +201,12 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     
     @Override
     public void apiConnectivityUpdated(APIConnectivity apiConnectivity) {
-		TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.content_frame);
-		if (trackingFragment != null)
-		{
-			trackingFragment.setAPIConnectivityStatus(apiConnectivity);	
-		}
+		trackingFragment.setAPIConnectivityStatus(apiConnectivity);	
     }
     
     @Override
     public void setUnsentGPSFixesCount(int count) {
-    	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.content_frame);
-    	if (trackingFragment != null)
-		{
-    		trackingFragment.setUnsentGPSFixesCount(count);
-		}
+    	trackingFragment.setUnsentGPSFixesCount(count);
     }
     
     private void startTrackingService(String eventId)
@@ -229,10 +219,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     
     
 	@Override
-	public void onBackPressed() {
-		TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.content_frame);
-		
+	public void onBackPressed() {		
 		trackingFragment.userTappedBackButton();
 	}
 	
