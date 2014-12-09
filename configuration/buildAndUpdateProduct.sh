@@ -528,9 +528,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $gwtcompile -eq 1 ]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*)"
 	    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
+        GWT_XML_FILES=`find com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources -name '*.gwt.xml'`
         if [ $onegwtpermutationonly -eq 1 ]; then
             echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
-            for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
+            for i in $GWT_XML_FILES; do
                 echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
                 cp $i $i.bak
                 cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
@@ -538,7 +539,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             done
         else
             echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
-            for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
+            for i in $GWT_XML_FILES; do
                 echo "INFO: Patching $i files such that all GWT permutations are compiled"
                 cp $i $i.bak
                 cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
@@ -632,7 +633,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     if [ $gwtcompile -eq 1 ]; then
 	# Now move back the backup .gwt.xml files before they were (maybe) patched
 	echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
-	for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
+	for i in $GWT_XML_FILES; do
 	    mv -v $i.bak $i
 	done
     fi

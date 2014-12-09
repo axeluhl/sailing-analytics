@@ -24,29 +24,22 @@
 		</repository>
 	</repositories>
 
-	<dependencies>
-		<dependency>
-			<!-- This dependency is required because the GWT Maven Plugin searches 
-				other GWT modules only in Maven dependencies -->
-			<groupId>com.github.branflake2267</groupId>
-			<artifactId>gwt-maps-api</artifactId>
-			<version>3.9.0-build-17</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.sap.sailing</groupId>
-			<artifactId>com.sap.sailing.gwt.ui</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<classifier>sources</classifier>
-		</dependency>
-		<dependency>
-			<groupId>com.sap.sailing</groupId>
-			<artifactId>com.sap.sailing.domain.common</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<classifier>sources</classifier>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
+  <dependencies>
+    <dependency>
+	    <!-- This dependency is required because the GWT Maven Plugin searches 
+		    other GWT modules only in Maven dependencies -->
+	    <groupId>com.github.branflake2267</groupId>
+	    <artifactId>gwt-maps-api</artifactId>
+	    <version>3.9.0-build-17</version>
+	    <scope>provided</scope>
+    </dependency>
+    <dependency>
+	    <groupId>com.sap.sailing</groupId>
+	    <artifactId>com.sap.sailing.gwt.ui</artifactId>
+	    <version>1.0.0-SNAPSHOT</version>
+	    <classifier>sources</classifier>
+    </dependency>
+    <dependency>
 	<groupId>org.moxieapps.gwt</groupId>
 	<artifactId>org.moxieapps.gwt.highcharts</artifactId>
 	<version>1.6.0-SNAPSHOT</version>
@@ -88,7 +81,7 @@
     	<version>1.0.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
     </dependency>
-	</dependencies>
+  </dependencies>
 	<build>
 		<plugins>
 			<plugin>
