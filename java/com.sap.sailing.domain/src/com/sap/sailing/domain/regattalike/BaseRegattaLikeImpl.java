@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.regattalike;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +14,7 @@ public class BaseRegattaLikeImpl implements IsRegattaLike {
     private static final long serialVersionUID = -5629172342837950344L;
     private final RegattaLog regattaLog;
     private final RegattaLikeIdentifier identifier;
-    private transient final Set<RegattaLikeListener> listeners = new HashSet<>();
+    private transient Set<RegattaLikeListener> listeners = new HashSet<>();
     
     public BaseRegattaLikeImpl(RegattaLikeIdentifier identifier, RegattaLogStore store) {
         regattaLog = store.getRegattaLog(identifier.getName(), /*ignoreCache*/ true);
@@ -46,5 +48,10 @@ public class BaseRegattaLikeImpl implements IsRegattaLike {
     @Override
     public void removeListener(RegattaLikeListener listener) {
         listeners.remove(listener);
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        listeners = new HashSet<>();
     }
 }
