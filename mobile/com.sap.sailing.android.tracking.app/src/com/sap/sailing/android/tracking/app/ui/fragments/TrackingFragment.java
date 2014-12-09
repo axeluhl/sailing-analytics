@@ -92,7 +92,6 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		super.onActivityCreated(savedInstanceState);
 		if (savedInstanceState != null)
 		{
-			System.out.println("NOT NULL");
 			TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
 			TextView statusText = (TextView)getActivity().findViewById(R.id.tracking_status);
 			SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView)getActivity().findViewById(R.id.gps_quality_indicator);
@@ -104,16 +103,11 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 			qualityIndicator.setSignalQuality(savedInstanceState.getInt(SIS_GPS_QUALITY));
 			accuracyText.setText(savedInstanceState.getString(SIS_GPS_ACCURACY));
 			unsentFixesText.setText(savedInstanceState.getString(SIS_GPS_UNSENT_FIXES));
-		}
-		else
-		{
-			System.out.println("NULL");
-		}
+		}	
 	}
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		System.out.println("ON SAVE INSTANCE STATE");
 		super.onSaveInstanceState(outState);
 		
 		TextView modeText = (TextView)getActivity().findViewById(R.id.mode);
@@ -226,23 +220,31 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @SuppressWarnings("deprecation")
     private boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
-        String locationProviders;
+		if (isAdded()) {
+			int locationMode = 0;
+			String locationProviders;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            try {
-                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				try {
+					locationMode = Settings.Secure.getInt(
+							context.getContentResolver(),
+							Settings.Secure.LOCATION_MODE);
 
-            } catch (SettingNotFoundException e) {
-                e.printStackTrace();
-            }
+				} catch (SettingNotFoundException e) {
+					e.printStackTrace();
+				}
 
-            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+				return locationMode != Settings.Secure.LOCATION_MODE_OFF;
 
-        } else {
-            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !TextUtils.isEmpty(locationProviders);
-        }
+			} else {
+				locationProviders = Settings.Secure.getString(
+						context.getContentResolver(),
+						Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+				return !TextUtils.isEmpty(locationProviders);
+			}
+		} else {
+			return false;
+		}
     } 
     
 	public void userTappedBackButton()
