@@ -6,8 +6,14 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 
+import com.google.android.gms.internal.cm;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
@@ -21,6 +27,7 @@ import com.sap.sailing.android.tracking.app.services.TransmittingService;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivityListener;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.TransmittingBinder;
+import com.sap.sailing.android.tracking.app.ui.fragments.CompassFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.HudFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -38,9 +45,14 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	private final static String TAG = TrackingActivity.class.getName();
 	private final static String SIS_FRAGMENT = "savedInstanceTrackingFragment";
 	
-	private String eventId;
-	
+    private ViewPager mPager;
+    private ScreenSlidePagerAdapter mPagerAdapter;
+
+	private String eventId;	
 	private AppPreferences prefs;
+	
+	private TrackingFragment trackingFragment;
+	private CompassFragment compassFragment;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,20 +83,28 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
         }
         
-        TrackingFragment mainFragment;
-        if (savedInstanceState != null)
-        {
-        	mainFragment = (TrackingFragment)getSupportFragmentManager().getFragment(savedInstanceState, SIS_FRAGMENT);
-        }
-        else
-        {
-        	mainFragment = new TrackingFragment();
-        }
         
-        HudFragment hudFragment = new HudFragment();
+        trackingFragment = new TrackingFragment();
+        compassFragment = new CompassFragment();
+        // Instantiate a ViewPager and a PagerAdapter.
+        mPager = (ViewPager) findViewById(R.id.pager);
+        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        mPager.setAdapter(mPagerAdapter);
         
-        replaceFragment(R.id.content_frame, mainFragment);
-        replaceFragment(R.id.hud_content_frame, hudFragment);
+//        TrackingFragment mainFragment;
+//        if (savedInstanceState != null)
+//        {
+//        	mainFragment = (TrackingFragment)getSupportFragmentManager().getFragment(savedInstanceState, SIS_FRAGMENT);
+//        }
+//        else
+//        {
+//        	mainFragment = new TrackingFragment();
+//        }
+//        
+//        HudFragment hudFragment = new HudFragment();
+//        
+//        replaceFragment(R.id.content_frame, mainFragment);
+//        replaceFragment(R.id.hud_content_frame, hudFragment);
         
         startTrackingService(eventId);
     }
@@ -92,11 +112,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
     	super.onWindowFocusChanged(hasFocus);
-    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
-    	hudFragment.layoutOverlay();
-    	
-    	hudFragment.setSpeedOverGround(0);
-    	hudFragment.setHeading(0);
+//    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
+//    	hudFragment.layoutOverlay();
+//    	
+//    	hudFragment.setSpeedOverGround(0);
+//    	hudFragment.setHeading(0);
     }
     
     @Override
@@ -161,16 +181,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
     @Override
     public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float bearing, float speed) {
-    	TrackingFragment trackingFragment = (TrackingFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
-    	trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
-    	
-    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
-    	hudFragment.setSpeedOverGround(speed);
-    	
-    	if (!prefs.getHeadingFromMagneticSensorPreferred())
-    	{
-    		hudFragment.setHeading(bearing);	
-    	}
+    		TrackingFragment trackingFragment = (TrackingFragment) mPagerAdapter.getItem(ScreenSlidePagerAdapter.VIEW_PAGER_FRAGMENT_TRACKING);
+    		trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
+    		
+    		CompassFragment compassFragment = (CompassFragment) mPagerAdapter.getItem(ScreenSlidePagerAdapter.VIEW_PAGER_FRAGMENT_COMPASS);
+    		compassFragment.setBearing(bearing);
     }
     
     @Override
@@ -258,10 +273,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
 	@Override
 	public void magneticHeadingUpdated(float heading) {
-    	HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
+    	//HudFragment hudFragment = (HudFragment) getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
     	if (prefs.getHeadingFromMagneticSensorPreferred())
     	{
-    		hudFragment.setHeading(heading);
+    		if (mPager.getCurrentItem() == ScreenSlidePagerAdapter.VIEW_PAGER_FRAGMENT_COMPASS)
+    		{
+    			compassFragment.setBearing(heading);	
+    		}
     	}
     	else
     	{
@@ -272,4 +290,35 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     		CompassManager.getInstance(this).unregisterListener();
     	}
 	}
+	
+	private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+		
+		public final static int VIEW_PAGER_FRAGMENT_TRACKING = 0;
+		public final static int VIEW_PAGER_FRAGMENT_COMPASS = 1;
+		
+        public ScreenSlidePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+        	if (position == VIEW_PAGER_FRAGMENT_TRACKING)
+        	{
+        		return trackingFragment;	
+        	}
+        	else if (position == VIEW_PAGER_FRAGMENT_COMPASS)
+        	{
+        		return compassFragment;
+        	}
+        	else
+        	{
+        		return null;
+        	}
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+    }
 }
