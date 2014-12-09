@@ -697,8 +697,8 @@
 				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
 				7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */,
-				7F72C7401A2DEA3300F48EE8 /* Helpers */,
 				7F72C73F1A2DEA2100F48EE8 /* Resources */,
+				7F72C7401A2DEA3300F48EE8 /* Helpers */,
 			);
 			name = View;
 			sourceTree = "<group>";

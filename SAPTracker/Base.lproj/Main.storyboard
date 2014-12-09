@@ -480,12 +480,9 @@
                                 <rect key="frame" x="570" y="84" width="22" height="22"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P9e-ZM-HZP">
-                                <rect key="frame" x="16" y="366" width="568" height="50"/>
                                 <color key="backgroundColor" red="0.93725490199999995" green="0.67843137249999996" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="jqD-cx-gQM">
-                                        <variation key="heightClass=compact" constant="33"/>
-                                    </constraint>
+                                    <constraint firstAttribute="height" id="jqD-cx-gQM"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="15"/>
                                 <state key="normal" title="Leader Board">
@@ -565,6 +562,7 @@
                         <outlet property="imageView" destination="D89-pe-zpv" id="tE7-Fb-xBq"/>
                         <outlet property="lastSyncLabel" destination="gHJ-am-Ulb" id="EfM-eF-R1s"/>
                         <outlet property="leaderBoardButton" destination="P9e-ZM-HZP" id="77J-kq-izD"/>
+                        <outlet property="leaderBoardButtonHeight" destination="jqD-cx-gQM" id="nyE-kw-uoZ"/>
                         <outlet property="minutesHeight" destination="qZx-Kn-W0W" id="tMw-RG-HVt"/>
                         <outlet property="minutesLabel" destination="Txm-uf-MP4" id="hw7-il-Zi2"/>
                         <outlet property="nameLabel" destination="oJS-dM-2B6" id="fXn-FX-UbJ"/>

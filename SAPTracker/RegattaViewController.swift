@@ -36,6 +36,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var lastSyncLabel: UILabel!
     @IBOutlet weak var leaderBoardButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
+    @IBOutlet weak var leaderBoardButtonHeight: NSLayoutConstraint!
     @IBOutlet weak var announcementsLabel: PaddedLabel!
 
     var dateFormatter: NSDateFormatter
@@ -54,7 +55,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     }
     
     override func viewDidLoad() {
-        
+       
         // set values
         navigationItem.title = DataManager.sharedManager.selectedEvent!.leaderBoard!.name
         
@@ -79,7 +80,6 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         checkRegattaStatus()
 
         // get image sources
-        super.viewDidLoad()
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
             sourceTypes.append(UIImagePickerControllerSourceType.Camera)
             sourceTypeNames.append("Camera")
@@ -91,21 +91,29 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         
         // point to events API server
         APIManager.sharedManager.initManager(DataManager.sharedManager.selectedEvent!.serverUrl)
-        
+
+        super.viewDidLoad()
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        checkRegattaStatus()
     }
 
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         loop?.invalidate()
     }
-
-    // MARK: - 
+    
+    override func didRotateFromInterfaceOrientation(fromInterfaceOrientation: UIInterfaceOrientation) {
+        checkRegattaStatus()
+    }
+    
+    // MARK: -
     func checkRegattaStatus() {
+        if DataManager.sharedManager.selectedEvent == nil {
+            return
+        }
+        
         let now = NSDate()
         
         isFinished = false
@@ -117,7 +125,6 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         } else {
             lastSyncLabel.text = nil
         }
-        leaderBoardButton.hidden = true
         startTrackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
         announcementsLabel.text = "Please listen for announcements"
       
@@ -125,17 +132,18 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         if now.timeIntervalSinceDate(DataManager.sharedManager.selectedEvent!.endDate) > 0 {
             isFinished = true
             regattaStartLabel.text = "Thank you for participating!"
+            leaderBoardButtonHeight.constant = ButtonHeight.smallButtonPortrait
             daysHeight.constant = 0
             hoursHeight.constant = 0
             minutesHeight.constant = 0
-            leaderBoardButton.hidden = false
-            startTrackingButton.setTitle("Close", forState: UIControlState.Normal)
+            startTrackingButton.setTitle("Check-Out", forState: UIControlState.Normal)
             startTrackingButton.backgroundColor = UIColor(hex: 0xEFAD00)
             announcementsLabel.text = " "
         }
         // before race
         else if now.timeIntervalSinceDate(DataManager.sharedManager.selectedEvent!.startDate) < 0 { regattaStartLabel.text = "Regatta will start in"
             lastSyncLabel.hidden = false
+            leaderBoardButtonHeight.constant = 0
             let delta = floor(now.timeIntervalSinceDate(DataManager.sharedManager.selectedEvent!.startDate)) * -1
             let days = floor(delta / secondsInDay)
             let hours = floor((delta - days * secondsInDay) / secondsInHour)
@@ -149,11 +157,11 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         }
         // during race
         else {
-            leaderBoardButton.hidden = false
             regattaStartLabel.text = "Regatta in progress"
             daysHeight.constant = 0
             hoursHeight.constant = 0
             minutesHeight.constant = 0
+            leaderBoardButtonHeight.constant = ButtonHeight.smallButtonPortrait
             lastSyncLabel.hidden = false
         }
     }

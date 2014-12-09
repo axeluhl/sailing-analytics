@@ -8,6 +8,7 @@
 
 import Foundation
 
+/* Helper class used for created launch screens. */
 class SplashScreenDummy: UIViewController {
  
     override func viewDidLoad() {
@@ -21,6 +22,8 @@ class SplashScreenDummy: UIViewController {
         //UIApplication.sharedApplication().statusBarHidden = true
      }
 }
+
+/* Uncomment this when creating launch screens. */
 /*
 extension UINavigationBar {
     public override func sizeThatFits(size: CGSize) -> CGSize {
