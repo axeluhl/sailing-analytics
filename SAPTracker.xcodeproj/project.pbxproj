@@ -291,6 +291,9 @@
 		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
 		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
 		7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F87CAA61A2CD6BA0076C617 /* Appearance.m */; };
+		7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */; };
+		7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */; };
+		7F8B8D431A373D4400C34B88 /* HeadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* HeadingViewController.swift */; };
 		7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */; };
 		7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */; };
 		7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaViewController.swift */; };
@@ -613,6 +616,9 @@
 		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
 		7F87CAA51A2CD6BA0076C617 /* Appearance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appearance.h; sourceTree = "<group>"; };
 		7F87CAA61A2CD6BA0076C617 /* Appearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appearance.m; sourceTree = "<group>"; };
+		7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingPageViewController.swift; sourceTree = "<group>"; };
+		7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeedViewController.swift; sourceTree = "<group>"; };
+		7F8B8D421A373D4400C34B88 /* HeadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeadingViewController.swift; sourceTree = "<group>"; };
 		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderBoardViewController.swift; sourceTree = "<group>"; };
 		7F99DE3B1A126554009B3619 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
@@ -691,12 +697,15 @@
 			isa = PBXGroup;
 			children = (
 				7F83F15719F154F000C53328 /* HomeViewController.swift */,
-				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
 				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
-				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
+				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
 				7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */,
+				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
+				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
+				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
+				7F8B8D421A373D4400C34B88 /* HeadingViewController.swift */,
 				7F72C73F1A2DEA2100F48EE8 /* Resources */,
 				7F72C7401A2DEA3300F48EE8 /* Helpers */,
 			);
@@ -1500,6 +1509,7 @@
 			files = (
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
 				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
+				7F8B8D431A373D4400C34B88 /* HeadingViewController.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
@@ -1508,6 +1518,7 @@
 				7F23F0881A1A3DEF00F03F1C /* QRCodeManager.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				7FCDB6631A1636610075D7D9 /* Event.swift in Sources */,
+				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
 				7FCDB6621A1636610075D7D9 /* GPSFix.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
@@ -1515,6 +1526,7 @@
 				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
 				7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */,
+				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
 				7FCDB6651A1636610075D7D9 /* Competitor.swift in Sources */,
