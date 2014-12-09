@@ -60,14 +60,6 @@ public class DiscardThresholdBoxes {
         return widget;
     }
     
-    public void setDiscardThresholds(int[] discardThresholds) {
-        if (discardThresholds != null) {
-            for (int i = 0; i < discardThresholds.length; i++) {
-                discardThresholdBoxes[i].setText(discardThresholds[i] + "");
-            }
-        }
-    }
-
     public int[] getDiscardThresholds() {
         List<Integer> discardThresholds = new ArrayList<Integer>();
         // go backwards; starting from first non-zero element, add them; take over leading zeroes which validator shall discard
