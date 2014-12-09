@@ -3,9 +3,13 @@ package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import java.util.ArrayList;
 
+import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -47,6 +51,38 @@ public class PositionListFragment extends LoggableListFragment{
 
 	
 	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View v = super.onCreateView(inflater, container, savedInstanceState);
+		ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
+        parent.addView(v, 1);
+		TextView txt_header = (TextView) parent.findViewById(R.id.txt_listHeader);
+		if ( txt_header != null ){
+			txt_header.setText(getHeaderText());
+			txt_header.setVisibility(View.VISIBLE);
+		} else {
+			ExLog.i(getActivity(), 1, "oh noes txt_listHeader is null!");
+		}
+		return parent;
+	}
+
+
+//	@Override
+//	public void onViewCreated(View view, Bundle savedInstanceState) {
+//		TextView txt_header = (TextView) view.findViewById(R.id.txt_listHeader);
+//		if ( txt_header != null ){
+//			txt_header.setText(getHeaderText());
+//			txt_header.setVisibility(View.VISIBLE);
+//		} else {
+//			ExLog.i(getActivity(), 1, "oh noes txt_listHeader is null!");
+//		}
+//		
+//		
+//		super.onViewCreated(view, savedInstanceState);
+//	}
+
+
+	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		
 		//ExLog.i(getActivity(),position, "PositionListFragment");
@@ -81,12 +117,15 @@ public class PositionListFragment extends LoggableListFragment{
 	    host.onPositionSelected(selectedLoginType);
 	}
 	
-	
+	 public RaceLogEventAuthor getAuthor() {
+	        return author;
+	    }
 	
 	
 	protected String getHeaderText() {
         return getString(R.string.label_login_position);
     }
+	
     
 
 }

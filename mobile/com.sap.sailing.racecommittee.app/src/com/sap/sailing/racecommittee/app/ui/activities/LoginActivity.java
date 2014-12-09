@@ -131,7 +131,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         return eventSelectionListener;
     }
     
-    private LoginDialog mLoginDialog;
+    private PositionListFragment mPositionListFragment;
     private ProgressBar mProgressSpinner;
     private CourseArea mSelectedCourseArea;
 
@@ -140,7 +140,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private final int RQS_GooglePlayServices = 1;
 
     public LoginActivity() {
-        mLoginDialog = new LoginDialog();
+//        mLoginDialog = new LoginDialog();
+        mPositionListFragment = new PositionListFragment();
         mSelectedCourseArea = null;
     }
 
@@ -159,10 +160,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     }
     
     private void addAreaPositionListFragment() {
-        Fragment fragment = new PositionListFragment();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
-        transaction.replace(R.id.login_view_bottom_container, fragment, AreaPositionListFragmentTag);
+        transaction.replace(R.id.login_view_bottom_container, mPositionListFragment, AreaPositionListFragmentTag);
         transaction.commitAllowingStateLoss();
         ExLog.i(this, "LoginActivity", "PositionFragment created.");
     }
@@ -272,7 +272,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private void selectCourseArea(CourseArea courseArea) {
         mSelectedCourseArea = courseArea;
         showAreaPositionListFragment();
-        mLoginDialog.show(getFragmentManager(), "LoginDialog");
+        //mLoginDialog.show(getFragmentManager(), "LoginDialog");
     }
 
     @Override
@@ -304,6 +304,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
 	@Override
 	public void onPositionSelected(LoginType type) {
+		preferences.setAuthor(mPositionListFragment.getAuthor());
 		Intent message = new Intent(LoginActivity.this, RacingActivity.class);
         message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseArea.getId());
         message.putExtra(AppConstants.EventIdTag, mSelectedEvent);

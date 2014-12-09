@@ -3,19 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/welter_extralight_gray_transparent">
+    android:background="@color/white">
 	
     <TextView android:id="@+id/txt_listHeader"
    	    android:layout_width="match_parent"
-   	    android:layout_height="20dp"
+   	    android:layout_height="36dp"
    	    android:gravity="center"
    	    android:textIsSelectable="false"
+   	    android:textSize="22sp"
+   	    android:textColor="@color/black"
    	    android:visibility="gone"/>
     
     <ListView android:id="@id/android:list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:drawSelectorOnTop="true" />
+        android:drawSelectorOnTop="true"
+        android:divider="@null" />
     
 </LinearLayout>

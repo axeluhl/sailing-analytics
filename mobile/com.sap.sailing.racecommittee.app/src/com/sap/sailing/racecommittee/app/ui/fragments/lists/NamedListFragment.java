@@ -8,10 +8,12 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -39,7 +41,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     private NamedArrayAdapter<T> listAdapter;
     private TextView txt_header;
 
-
+    private View lastSelected;
     
     protected ArrayList<T> namedList;
 
@@ -81,11 +83,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         addHeader();
 
         namedList = new ArrayList<T>();
-        listAdapter = createAdapter(getActivity(), /*android.R.layout.simple_list_item_single_choice, */namedList);
+        listAdapter = createAdapter(getActivity(), namedList);
 
         this.getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         this.setListAdapter(listAdapter);
-
+        getListView().setDivider(null);
+        
         showProgressBar(true);
         loadItems();
     }
@@ -98,6 +101,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+        listAdapter.setSelected(position);
+        setStyleClicked(v);
+        
         // this unchecked cast here seems unavoidable.
         // even SDK example code does it...
         @SuppressWarnings("unchecked")
@@ -110,6 +116,33 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     	txt_header.setVisibility(View.VISIBLE);
     }
 
+    private void setStyleClicked(View v){
+    	// reset last styles:
+    	if ( lastSelected != null ){
+    		TextView lastText = (TextView)lastSelected.findViewById(R.id.txt_list_item);
+    		if ( lastText != null ){
+    			lastText.setTypeface(Typeface.DEFAULT);
+        	}
+    		
+    		ImageView lastImg = (ImageView)lastSelected.findViewById(R.id.iv_check);
+    		if ( lastImg != null ){
+    			lastImg.setVisibility(View.INVISIBLE);
+    		}
+    	}
+    	
+    	// set new styles
+    	TextView txt_listitem = (TextView) v.findViewById(R.id.txt_list_item);
+    	if ( txt_listitem != null ){
+    		txt_listitem.setTypeface(Typeface.DEFAULT_BOLD);
+    	}
+		ImageView iv_check = (ImageView)v.findViewById(R.id.iv_check);
+		if ( iv_check != null ){
+			iv_check.setVisibility(View.VISIBLE);
+		}
+    	
+    	lastSelected = v;
+    }
+    
     @Override
     public void onLoadSucceded(Collection<T> data, boolean isCached) {
         setListShown(true);
