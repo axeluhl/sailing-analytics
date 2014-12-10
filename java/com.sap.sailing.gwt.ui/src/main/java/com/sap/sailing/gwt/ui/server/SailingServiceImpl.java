@@ -5127,6 +5127,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<Pair<Double, Double>> pointsForUpwindStarboardAverageAngle = new ArrayList<Pair<Double, Double>>();
         List<Pair<Double, Double>> pointsForUpwindStarboardAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
         List<Pair<Double, Double>> pointsForUpwindStarboardAverageAngleMovingAverage = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForUpwindStarboardAverageConfidence = new ArrayList<Pair<Double, Double>>();
         for (double windInKnots = 0.1; windInKnots < 30; windInKnots = windInKnots + 0.1) {
             try {
                 SpeedWithBearingWithConfidence<Void> averageUpwindStarboard = getService().getPolarDataService()
@@ -5136,6 +5137,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         .getObject().getKnots()));
                 pointsForUpwindStarboardAverageAngle.add(new Pair<Double, Double>(windInKnots, averageUpwindStarboard
                         .getObject().getBearing().getDegrees()));
+
+                pointsForUpwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
+                        averageUpwindStarboard.getConfidence()));
                 
                 SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService().getPolarDataService()
                         .getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots), LegType.UPWIND,
@@ -5151,7 +5155,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(pointsForUpwindStarboardAverageAngle,
                 pointsForUpwindStarboardAverageSpeed, pointsForUpwindStarboardAverageAngleMovingAverage,
-                pointsForUpwindStarboardAverageSpeedMovingAverage);
+                pointsForUpwindStarboardAverageSpeedMovingAverage, pointsForUpwindStarboardAverageConfidence);
 
         return data;
     }

@@ -15,4 +15,6 @@ public interface PolarSheetsXYDiagramData extends Serializable {
 
     List<Pair<Double, Double>> getPointsForUpwindStarboardAverageSpeedMovingAverage();
 
+    List<Pair<Double, Double>> getPointsForUpwindStarboardAverageConfidence();
+
 }

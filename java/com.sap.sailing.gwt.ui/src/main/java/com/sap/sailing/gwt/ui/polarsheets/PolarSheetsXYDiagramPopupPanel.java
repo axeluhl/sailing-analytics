@@ -2,10 +2,14 @@ package com.sap.sailing.gwt.ui.polarsheets;
 
 import java.util.List;
 
+import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SplinePlotOptions;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -20,8 +24,10 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
 
 
     private final Chart chart;
+    private final StringMessages stringMessages;
 
     public PolarSheetsXYDiagramPopupPanel(StringMessages stringMessages, PolarSheetsXYDiagramData result) {
+        this.stringMessages = stringMessages;
         chart = createChart();
         VerticalPanel containerPanel = new VerticalPanel();
         this.add(containerPanel);
@@ -54,6 +60,18 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
         speedSeriesMovingAverage.setName("Upwind Starboard Speed - MovingAverage");
         speedSeriesMovingAverage.setPoints(pointsForUpwindStarboardAverageSpeedMovingAverage);
         chart.addSeries(speedSeriesMovingAverage);
+        
+        Point[] pointsForUpwindStarboardAverageConfidence = toPointArray(result.getPointsForUpwindStarboardAverageConfidence());
+        Series confidenceSeriesMovingAverage = chart
+                .createSeries()
+                .setYAxis(1)
+                .setType(Series.Type.SPLINE)
+                .setPlotOptions(
+                        new SplinePlotOptions().setColor("#AA4643").setMarker(new Marker().setEnabled(false))
+                                .setDashStyle(PlotLine.DashStyle.SHORT_DOT));
+        confidenceSeriesMovingAverage.setName("Upwind Starboard Confidence");
+        confidenceSeriesMovingAverage.setPoints(pointsForUpwindStarboardAverageConfidence);
+        chart.addSeries(confidenceSeriesMovingAverage);
     }
     
     private Point[] toPointArray(List<Pair<Double, Double>> pointsForUpwindStarboardAverageAngle) {
@@ -69,6 +87,10 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
     private Chart createChart() {
         Chart chart = new Chart().setType(Type.LINE);
         chart.setWidth(1000);
+        chart.setTitle(stringMessages.xyDiagram());
+        chart.getXAxis().setAxisTitle(new AxisTitle().setText(stringMessages.windSpeed()));
+        chart.getYAxis(0).setAxisTitle(new AxisTitle().setText(stringMessages.boatSpeed()));
+        chart.getYAxis(1).setAxisTitle(new AxisTitle().setText(stringMessages.confidence()));
         return chart;
     }
 
