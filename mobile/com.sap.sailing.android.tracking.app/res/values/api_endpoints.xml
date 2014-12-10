@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="preference_server_gps_fixes_post_path">/api/v1/gps_fixes</string>
-    <string name="preference_server_checkin_path">/api/v1/leaderboards/{leaderboard-name}/device_mappings/start</string>
-    <string name="preference_server_checkout_path">/api/v1/leaderboards/{leaderboard-name}/device_mappings/end</string>
-    <string name="preference_server_event_path">/api/v1/events/{event_id}</string>
-    <string name="preference_server_leaderboard_path">/api/v1/leaderboards/{leaderboard_name}</string>
-    <string name="preference_server_competitor_path">/api/v1/competitors/{competitor_id}</string>
+    <string name="preference_server_gps_fixes_post_path">/sailingserver/api/v1/gps_fixes</string>
+    <string name="preference_server_checkin_path">/sailingserver/api/v1/leaderboards/{leaderboard-name}/device_mappings/start</string>
+    <string name="preference_server_checkout_path">/sailingserver/api/v1/leaderboards/{leaderboard-name}/device_mappings/end</string>
+    <string name="preference_server_event_path">/sailingserver/api/v1/events/{event_id}</string>
+    <string name="preference_server_leaderboard_path">/sailingserver/api/v1/leaderboards/{leaderboard_name}</string>
+    <string name="preference_server_competitor_path">/sailingserver/api/v1/competitors/{competitor_id}</string>
 </resources>
