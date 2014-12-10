@@ -5,10 +5,7 @@
 
 .media_swipecontainer {
  position: relative;
- width: 830px;
- height: 622px;
  margin: 0 auto;
- overflow: hidden;
 }
 
 .media_swipewrapper {

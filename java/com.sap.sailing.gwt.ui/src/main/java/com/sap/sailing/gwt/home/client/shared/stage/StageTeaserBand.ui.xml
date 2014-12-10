@@ -6,6 +6,7 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.stage.StageResources" />
 	<g:HTMLPanel styleName="{local_res.css.stageteaser_content_band_item} {res.mediaCss.columns}">
+	  <g:Anchor ui:field="actionLink" styleName="{res.mainCss.button} {local_res.css.stageteaser_content_band_action}" />
 	  <div class="{local_res.css.stageteaser_content_band_text}">
 	    <div class="{local_res.css.stageteaser_content_band_text_headline}"><span ui:field="bandTitle" /></div>
 	    <div class="{local_res.css.stageteaser_content_band_text_name}">
@@ -13,6 +14,5 @@
 	        <div ui:field="isLiveDiv" data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
 	    </div>
 	  </div>
-	  <g:Anchor ui:field="actionLink" styleName="{res.mainCss.button} {local_res.css.stageteaser_content_band_action}" />
 	</g:HTMLPanel>
 </ui:UiBinder>
