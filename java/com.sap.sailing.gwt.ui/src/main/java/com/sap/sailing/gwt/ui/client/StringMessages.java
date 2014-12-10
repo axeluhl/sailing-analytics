@@ -1120,4 +1120,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorTryingToGetEvents(String message);
     String createDefaultSettingsForAllRegattas();
     String noOverallEventSelected();
+    String errorTryingToCreateNewEvent(String name, String message);
+    String createNewEvent();
+    String noFleetsDefined();
 }

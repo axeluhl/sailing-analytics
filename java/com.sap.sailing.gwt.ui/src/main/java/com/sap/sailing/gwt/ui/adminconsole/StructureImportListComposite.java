@@ -18,12 +18,19 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class StructureImportListComposite extends RegattaListComposite implements RegattasDisplayer {
 
-    private /*final*/SelectionCheckboxColumn<RegattaDTO> selectionCheckboxColumn;
+    private SelectionCheckboxColumn<RegattaDTO> selectionCheckboxColumn;
+    private final RegattaStructureProvider regattaStructureProvider;
+
+    public static interface RegattaStructureProvider {
+        RegattaStructure getRegattaStructure(RegattaDTO regatta);
+    }
 
     public StructureImportListComposite(final SailingServiceAsync sailingService,
             final RegattaSelectionProvider regattaSelectionProvider, RegattaRefresher regattaRefresher,
-            final ErrorReporter errorReporter, final StringMessages stringMessages) {
+            RegattaStructureProvider regattaStructureProvider, final ErrorReporter errorReporter,
+            final StringMessages stringMessages) {
         super(sailingService, regattaSelectionProvider, regattaRefresher, errorReporter, stringMessages);
+        this.regattaStructureProvider = regattaStructureProvider;
     }
 
     // create Regatta Table in StructureImportManagementPanel
@@ -63,10 +70,25 @@ public class StructureImportListComposite extends RegattaListComposite implement
                 return new NaturalComparator().compare(r1.getName(), r2.getName());
             }
         });
+        TextColumn<RegattaDTO> regattaStructureColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                return regattaStructureProvider.getRegattaStructure(regatta).toString();
+            }
+        };
+        regattaStructureColumn.setSortable(true);
+        columnSortHandler.setComparator(regattaStructureColumn, new Comparator<RegattaDTO>() {
+            @Override
+            public int compare(RegattaDTO r1, RegattaDTO r2) {
+                return new NaturalComparator().compare(regattaStructureProvider.getRegattaStructure(r1).toString(),
+                        regattaStructureProvider.getRegattaStructure(r2).toString());
+            }
+        });
 
         columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
         table.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
+        table.addColumn(regattaStructureColumn, stringMessages.series());
         table.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
 
         return table;

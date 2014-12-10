@@ -12,10 +12,10 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -27,6 +27,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected StringMessages stringMessages;
     protected RegattaDTO regatta;
     
+    protected final BetterDateTimeBox startDateBox;
+    protected final BetterDateTimeBox endDateBox;
     protected final ListBox scoringSchemeListBox;
     protected final ListBox courseAreaListBox;
     protected final ListBox sailingEventsListBox;
@@ -41,6 +43,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         this.stringMessages = stringMessages;
         this.regatta = regatta;
         this.existingEvents = existingEvents;
+        startDateBox = createDateTimeBox(regatta.startDate);
+        startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox = createDateTimeBox(regatta.endDate);
+        endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
         scoringSchemeListBox = createListBox(false);
         scoringSchemeListBox.ensureDebugId("ScoringSchemeListBox");
         for (ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
@@ -193,14 +199,15 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         return result;
     }
     
-    public RegattaDTO getRegattaDTO(){
-        regatta.setName("Default");
-        regatta.boatClass = new BoatClassDTO("Default", 0.0);
-        regatta.scoringScheme = getSelectedScoringSchemeType();
-        regatta.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
-        setCourseAreaInRegatta(regatta);
-        regatta.series = getSeriesEditor().getValue();
-        return regatta;
+    public RegattaDTO getRegattaDTO() {
+        RegattaDTO result = new RegattaDTO();
+        result.startDate = startDateBox.getValue();
+        result.endDate = endDateBox.getValue();
+        result.scoringScheme = getSelectedScoringSchemeType();
+        result.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
+        setCourseAreaInRegatta(result);
+        result.series = getSeriesEditor().getValue();
+        return result;
     }
 
 }

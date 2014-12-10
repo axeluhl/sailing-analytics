@@ -102,6 +102,10 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         this(existingSeries, stringMessages, /* discard thresholds */ null, callback);
     }
     
+    /**
+     * @param existingSeries
+     *            used for validation for duplicate series names
+     */
     protected SeriesWithFleetsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringMessages,
             int[] discardThresholds, DialogCallback<SeriesDTO> callback) {
         super(stringMessages.series(), null, stringMessages.ok(), stringMessages.cancel(),  

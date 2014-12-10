@@ -106,7 +106,6 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         } else {
             regatta.configuration = null;
         }
-        regatta.series = getSeriesEditor().getValue();
         return regatta;
     }
 

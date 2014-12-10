@@ -13,11 +13,23 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
+/**
+ * A variant of the dialog used to create a series within a regatta that has fleets. This variant is actually more of a
+ * series <em>editor</em> that doesn't allow for the full-fledged race sequence editing but initializes its controls
+ * from an already existing series and allows users to change them. The {@link SeriesDTO} object returned from
+ * {@link #getResult()} will be a new one, distinct from the {@link SeriesDTO} one passed to the constructor, but as the
+ * UI controls have been initialized from the latter, in case the user makes no change the resulting {@link SeriesDTO}
+ * will resemble the one passed to the constructor.
+ * 
+ * @author Nils Hirsekorn, Axel Mueller
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class SeriesWithFleetsDefaultCreateDialog extends SeriesWithFleetsCreateDialog {
     public SeriesWithFleetsDefaultCreateDialog(SeriesDTO defaultSeries, StringMessages stringMessages,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<SeriesDTO> callback) {
         super(Collections.<SeriesDTO> emptyList(), stringMessages, defaultSeries.getDiscardThresholds(), callback);
-        nameEntryField.setText(defaultSeries.getName());// Otherwise an errorMessage will pop up
+        nameEntryField.setText(defaultSeries.getName()); // Otherwise an errorMessage will pop up
         isMedalSeriesCheckbox.setValue(defaultSeries.isFirstColumnIsNonDiscardableCarryForward());
         startsWithZeroScoreCheckbox.setValue(defaultSeries.isStartsWithZeroScore());
         hasSplitFleetContiguousScoringCheckbox.setValue(defaultSeries.hasSplitFleetContiguousScoring());

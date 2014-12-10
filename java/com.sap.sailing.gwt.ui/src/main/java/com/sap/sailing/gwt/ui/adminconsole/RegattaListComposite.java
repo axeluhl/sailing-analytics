@@ -9,6 +9,7 @@ import java.util.List;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -131,6 +132,10 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         });
         panel.add(regattaTable);
         initWidget(mainPanel);
+    }
+    
+    public HandlerRegistration addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
+        return regattaSelectionModel.addSelectionChangeHandler(handler);
     }
 
     protected CellTable<RegattaDTO> createRegattaTable() {
