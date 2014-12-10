@@ -13,8 +13,7 @@ import android.net.NetworkInfo;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.services.TransmittingService;
+import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
 /**
  * Informs {@link MessageSendingService} whenever connectivity is restored, so that it can start sending
@@ -54,10 +53,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
 			ExLog.i(context, TAG, "Starting TransmittingService");
     	}
 		
-        Intent transmitStartIntent = new Intent(context, TransmittingService.class);
-        transmitStartIntent.setAction(context.getString(R.string.transmitting_service_start));
-        context.startService(transmitStartIntent);
-        
+		ServiceHelper.getInstance(context).startTransmittingService();
         disable(context);
     }
 
