@@ -6,9 +6,15 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotification;
 import com.sap.sailing.dashboards.gwt.client.device.Location;
@@ -49,13 +55,16 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
 
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardName";
     private static final String KEY_SLECTED_TEAM_COOKIE = "selectedTeam";
-    private static final int SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS = 60*1000*60*5;
+    private static final int SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS = 60 * 1000 * 60 * 5;
 
     private String selectedTeamName;
 
     private CompetitorSelectionPopup competitorSelectionPopup;
     private RacingNotYetStartedPopup popupRacingNotYetStarted;
     private BottomNotification bottomNotification;
+    private FocusPanel competitorEditButton;
+    private Label competitorLabel;
+    private boolean shouldReloadStartAnalysis;
 
     public RibDashboardDataRetriever() {
         initNonFinalMemberVariablesWithNoArgumentConstructor();
@@ -66,6 +75,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
         numberOfChachedStartAnalysisDTOs = 0;
         competitorSelectionPopup = new CompetitorSelectionPopup();
         selectedTeamName = Cookies.getCookie(KEY_SLECTED_TEAM_COOKIE);
+        initCompetitorLabelAndAddToRootPanel();
         initBottomNotification();
     }
 
@@ -107,18 +117,29 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
                             setSelection(singletonList);
                             if (result.startAnalysisDTOList != null) {
                                 int numberOfReceivedStartAnalysisDTOs = result.startAnalysisDTOList.size();
-                                if (numberOfChachedStartAnalysisDTOs != numberOfReceivedStartAnalysisDTOs) {
+                                if (numberOfChachedStartAnalysisDTOs != numberOfReceivedStartAnalysisDTOs || shouldReloadStartAnalysis == true) {
+                                    shouldReloadStartAnalysis = false;
                                     numberOfChachedStartAnalysisDTOs = numberOfReceivedStartAnalysisDTOs;
-                                    notifyNewStartAnalysisListener(result.startAnalysisDTOList);
+                                    notifyNewStartAnalysisListener(result.startAnalysisDTOList, selectedTeamName);
                                 }
                             }
+                            if(competitorEditButton == null){
+                                initCompetitorChangeButtonAndAddToRootPanel();
+                                setCompetitorLabelText(selectedTeamName);
+                            }
+                            if (result.competitorNamesFromLastTrackedRace != null
+                                    && result.competitorNamesFromLastTrackedRace.size() > 0
+                                    && !competitorSelectionPopup.isShown()) {
+                                competitorSelectionPopup.setCompetitorList(result.competitorNamesFromLastTrackedRace);
+                                competitorSelectionPopup.addListener(RibDashboardDataRetriever.this);
+                            }
                             notifyDataObservers(result);
-                            competitorSelectionPopup.hide();
                             break;
                         case NO_COMPETITOR_SELECTED:
                             popupRacingNotYetStarted.hide(true);
                             if (result.competitorNamesFromLastTrackedRace != null
-                                    && result.competitorNamesFromLastTrackedRace.size() > 0 && !competitorSelectionPopup.isShown()) {
+                                    && result.competitorNamesFromLastTrackedRace.size() > 0
+                                    && !competitorSelectionPopup.isShown()) {
                                 competitorSelectionPopup.setCompetitorList(result.competitorNamesFromLastTrackedRace);
                                 competitorSelectionPopup.addListener(RibDashboardDataRetriever.this);
                                 competitorSelectionPopup.show();
@@ -182,12 +203,38 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
         }
     }
 
-    public void notifyNewStartAnalysisListener(List<StartAnalysisDTO> startAnalysisDTOs) {
+    public void notifyNewStartAnalysisListener(List<StartAnalysisDTO> startAnalysisDTOs, String selectedCompetitor) {
         synchronized (MUTEX) {
             for (NewStartAnalysisListener newStartAnalysisListener : newStartAnalysisListeners) {
-                newStartAnalysisListener.addNewStartAnalysisCard(startAnalysisDTOs);
+                newStartAnalysisListener.addNewStartAnalysisCardForCompetitor(startAnalysisDTOs, selectedCompetitor);
             }
         }
+    }
+
+    private void initCompetitorChangeButtonAndAddToRootPanel() {
+        if (competitorEditButton == null) {
+            competitorEditButton = new FocusPanel();
+            competitorEditButton.addStyleName("competitorEditButton");
+            Image settingsImage = new Image();
+            settingsImage.setResource(RibDashboardImageResources.INSTANCE.settings());
+            competitorEditButton.add(settingsImage);
+            competitorEditButton.addDomHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    competitorSelectionPopup.show();
+                }
+            }, ClickEvent.getType());
+            RootPanel.get().add(competitorEditButton);
+        }
+    }
+
+    private void initCompetitorLabelAndAddToRootPanel() {
+        competitorLabel = new Label();
+        competitorLabel.addStyleName("competitorLabel");
+        Document.get().getBody().appendChild(competitorLabel.getElement());
+    }
+
+    private void setCompetitorLabelText(String slectedCompetitor) {
+        competitorLabel.setText(slectedCompetitor);
     }
 
     @Override
@@ -198,7 +245,11 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
     public void didClickedOKWithCompetitorName(String competitorName) {
         System.out.println("Did clicked with competitor " + competitorName);
         this.selectedTeamName = competitorName;
-        Cookies.setCookie(KEY_SLECTED_TEAM_COOKIE, competitorName, new Date(new Date().getTime()+SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS));
+        Cookies.setCookie(KEY_SLECTED_TEAM_COOKIE, competitorName, new Date(new Date().getTime()
+                + SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS));
+        initCompetitorChangeButtonAndAddToRootPanel();
+        setCompetitorLabelText(competitorName);
+        shouldReloadStartAnalysis = true;
     }
 
     @Override

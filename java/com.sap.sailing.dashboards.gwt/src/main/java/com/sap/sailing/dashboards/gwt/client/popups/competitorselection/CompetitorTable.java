@@ -19,9 +19,11 @@ public class CompetitorTable extends AbsolutePanel {
     public CompetitorTable(CompetitorTableRowSelectionListener competitorTableRowSelectionListener) {
         this.competitorTableRowSelectionListener = competitorTableRowSelectionListener;
     }
-    
-    public void setTableContent(List<String> competitorNames){
-        initTable(competitorNames);
+
+    public void setTableContent(List<String> competitorNames) {
+        if (table == null) {
+            initTable(competitorNames);
+        }
     }
 
     private void initTable(List<String> competitorNames) {
@@ -32,19 +34,17 @@ public class CompetitorTable extends AbsolutePanel {
         table.setSkipRowHoverStyleUpdate(true);
         table.setSkipRowHoverCheck(true);
         table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
-        final SingleSelectionModel<String> selectionModel 
-        = new SingleSelectionModel<String>();
+        final SingleSelectionModel<String> selectionModel = new SingleSelectionModel<String>();
         table.setSelectionModel(selectionModel);
-        selectionModel.addSelectionChangeHandler(
-        new SelectionChangeEvent.Handler() {
-           public void onSelectionChange(SelectionChangeEvent event) {
-              String selected = selectionModel.getSelectedObject();
-              if (selected != null) {
-                 competitorTableRowSelectionListener.didSelectedRowWithCompetitorName(selected);
-              }
-           }
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            public void onSelectionChange(SelectionChangeEvent event) {
+                String selected = selectionModel.getSelectedObject();
+                if (selected != null) {
+                    competitorTableRowSelectionListener.didSelectedRowWithCompetitorName(selected);
+                }
+            }
         });
-        
+
         TextColumn<String> competitorNameCollumn = new TextColumn<String>() {
             @Override
             public String getValue(String competitorName) {

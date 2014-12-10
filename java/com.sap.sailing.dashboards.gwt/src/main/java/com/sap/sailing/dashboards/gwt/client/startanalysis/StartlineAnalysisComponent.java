@@ -88,6 +88,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets,
     private List<StartAnalysisDTO> starts;
     private List<StartAnalysisPageChangeListener> pageChangeListener;
     private BottomNotification bottomNotification;
+    private String selectedCompetitor;
 
     /**
      * The class requires a {@link BottomNotification} to inform the user when a new {@link StartlineAnalysisCard} gets
@@ -196,6 +197,11 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets,
 
     }
 
+    private void removeAllStartAnalysisCards() {
+        startanalysis_card_container.clear();
+        numberOfStartAnalysisCards = 0;
+    }
+
     public void registerPageChangeListener(StartAnalysisPageChangeListener s) {
         pageChangeListener.add(s);
     }
@@ -211,12 +217,16 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets,
     }
 
     @Override
-    public void addNewStartAnalysisCard(List<StartAnalysisDTO> startAnalysisDTOs) {
+    public void addNewStartAnalysisCardForCompetitor(List<StartAnalysisDTO> startAnalysisDTOs, String selectedCompetitor) {
         this.bottomNotification.show("New Start Analysis available.", "#F0AB00", "#000000", true);
+        if (!selectedCompetitor.equals(this.selectedCompetitor)) {
+            removeAllStartAnalysisCards();
+        }
         for (int i = numberOfStartAnalysisCards; i <= startAnalysisDTOs.size() - 1; i++) {
             addStartAnalysisCard(startAnalysisDTOs.get(i));
             starts.add(startAnalysisDTOs.get(i));
         }
+        this.selectedCompetitor = selectedCompetitor;
     }
 
     @Override
