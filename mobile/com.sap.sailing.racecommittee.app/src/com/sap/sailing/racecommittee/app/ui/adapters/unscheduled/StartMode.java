@@ -1,21 +1,27 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.unscheduled;
 
+import com.sap.sailing.domain.common.racelog.Flags;
+
 public class StartMode {
     
-    private String mFlag;
+    private Flags mFlag;
     private Boolean mChecked = false;
     
-    public StartMode(String flag) {
+    public StartMode(Flags flag) {
         this(flag, false);
     }
     
-    public StartMode(String flag, Boolean checked) {
+    public StartMode(Flags flag, Boolean checked) {
         mFlag = flag;
         mChecked = checked;
     }
     
-    public String getFlag() {
+    public Flags getFlag() {
         return mFlag;
+    }
+    
+    public String getFlagName() {
+        return mFlag.toString();
     }
     
     public Boolean isChecked() {

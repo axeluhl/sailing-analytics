@@ -5,191 +5,191 @@
     android:background="@color/white"
     android:descendantFocusability="beforeDescendants"
     android:focusableInTouchMode="true"
-    android:orientation="vertical"
-    android:theme="@android:style/Theme.Holo" >
+    android:orientation="vertical">
 
-   <LinearLayout android:id="@+id/ll_topContainer"
+    <LinearLayout
+        android:id="@+id/ll_topContainer"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_margin="12dp"
         android:layout_weight="0.55"
         android:background="@color/background_material_light"
-        android:orientation="horizontal"
-        android:baselineAligned="false" >
-    
-	   <LinearLayout
-	        android:layout_width="0dp"
-	        android:layout_height="wrap_content"
-	        android:layout_margin="12dp"
-	        android:layout_weight="0.59"
-	        android:orientation="vertical" >
-	
-	        <TextView
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:text="@string/enter_wind_direction"
-	            android:textColor="@color/black" />
-	
-	        <EditText
-	            android:id="@+id/editTextWindDirection"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:hint="@string/in_degrees"
-	            android:inputType="numberDecimal"
-	            android:minWidth="200dp"
-	            android:textSize="16sp" />
-	
-	        <com.sap.sailing.racecommittee.app.ui.views.CompassView
-	            android:id="@+id/compassView"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content" >
-	        </com.sap.sailing.racecommittee.app.ui.views.CompassView>
-	    </LinearLayout>
-	    
-		<LinearLayout
-	        android:layout_width="0dp"
-	        android:layout_height="match_parent"
-	        android:layout_weight="0.01"
-	        android:orientation="vertical"
-	        android:background="@color/white" />
-	    
-	    
-	   <LinearLayout
-	        android:layout_width="0dp"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="0.4"
-	        android:layout_margin="12dp"
-	        android:orientation="vertical" >
-	
-	        <TextView
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:text="@string/enter_wind_speed"
-	            android:textColor="@color/black" />
-	
-	        <EditText
-	            android:id="@+id/editTextWindSpeed"
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:hint="@string/in_knots"
-	            android:inputType="numberDecimal"
-	            android:minWidth="200dp"
-	            android:textSize="24sp"
-	            android:visibility="gone" />
+        android:baselineAligned="false"
+        android:orientation="horizontal" >
 
-	        <NumberPicker
-	            android:id="@+id/np_windSpeed"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:theme="@android:style/Theme.Holo" />
-	
-	    </LinearLayout>
-	    
-	</LinearLayout>
-	<RelativeLayout android:id="@+id/rl_bottomContainer"
-	    android:layout_width="match_parent"
-	    android:layout_height="0dp"
-	    android:layout_weight="0.35"
-	    android:layout_marginTop="8dp"
-	    android:padding="8dp"
-	    android:background="@color/background_material_light"
-	    android:layout_marginLeft="12dp"
-	    android:layout_marginRight="12dp"
-	    android:orientation="vertical">
-	    
-	    <LinearLayout android:id="@+id/ll_gpsLine"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentTop="true"
-	        android:orientation="horizontal"
-	        android:paddingBottom="6dp" >
-	        
-	        <TextView
-		        android:layout_width="0dp"
-		        android:layout_height="wrap_content"
-		        android:layout_weight="0.5"
-		        android:text="@string/enter_wind_gps"
-				android:textColor="@color/black" />
-	    
-	        <TextView android:id="@+id/txt_waitingForGPS"
-	            android:layout_width="0dp"
-	            android:layout_height="wrap_content"
-	            android:layout_weight="0.5"
-	            android:text="@string/waiting_for_gps"
-	            android:textAllCaps="true"
-	            android:textColor="@color/red"
-	            android:textSize="16sp" />
-	        
-	    </LinearLayout>
-	    
-	    <fragment android:id="@+id/windMap"
-	        android:layout_width="match_parent"
-	        android:layout_height="fill_parent"
-	        android:layout_below="@+id/ll_gpsLine"
-	        android:name="com.google.android.gms.maps.MapFragment"/>
-	    
-	    <EditText android:id="@+id/et_location"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_alignTop="@+id/windMap"
-	        android:layout_margin="16dp"
-	        android:padding="8dp"
-	        android:background="@color/white"
-	        android:inputType="text"
-	        android:maxLines="1"
-	        android:visibility="gone"
-	        android:alpha="0"
-	        android:hint="@string/searchPosition" />
-	    
-	    <RelativeLayout android:id="@+id/rl_gpsOverlay"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_alignTop="@+id/windMap"
-	        android:layout_alignBottom="@+id/windMap"
-	        android:layout_alignStart="@+id/windMap"
-	        android:layout_alignEnd="@+id/windMap"
-	        android:layout_alignLeft="@+id/windMap"
-	        android:layout_alignRight="@+id/windMap">
-	        
-	        <LinearLayout
-	            android:layout_width="fill_parent"
-	            android:layout_height="fill_parent"
-	            android:layout_centerInParent="true"
-	            android:background="@color/background_material_light"
-	        	android:alpha="0.4">
-	           
-	        </LinearLayout>
-	        
-	        <Button android:id="@+id/btn_set_manual_position"
-		      android:layout_width="wrap_content"
-		      android:layout_height="wrap_content"
-		      android:layout_gravity="center"
-		      android:layout_centerInParent="true"
-		      android:layout_margin="8dp"
-		      android:alpha="1"
-		      android:text="@string/set_position_manually" />
-	        
-	    </RelativeLayout>
-	   
-	    
-	</RelativeLayout>
-	
-	 <Button
-      android:id="@+id/btn_position_set"
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="0.1"
-      android:layout_gravity="center"
-      android:layout_margin="8dp"
-      android:text="@string/store_position" 
-      android:visibility="gone"/>
-	
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:layout_weight="0.59"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/enter_wind_direction"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/editTextWindDirection"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="@string/in_degrees"
+                android:inputType="numberDecimal"
+                android:minWidth="200dp"
+                android:textSize="16sp" />
+
+            <com.sap.sailing.racecommittee.app.ui.views.CompassView
+                android:id="@+id/compassView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.01"
+            android:background="@color/white"
+            android:orientation="vertical" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:layout_weight="0.4"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/enter_wind_speed"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/editTextWindSpeed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/in_knots"
+                android:inputType="numberDecimal"
+                android:minWidth="200dp"
+                android:textSize="24sp"
+                android:visibility="gone" />
+
+            <NumberPicker
+                android:id="@+id/np_windSpeed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" 
+                style="@style/AppTheme.Widget.NumberPicker"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_bottomContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="0.35"
+        android:background="@color/background_material_light"
+        android:orientation="vertical"
+        android:padding="8dp" >
+
+        <LinearLayout
+            android:id="@+id/ll_gpsLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:orientation="horizontal"
+            android:paddingBottom="6dp" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@string/enter_wind_gps"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/txt_waitingForGPS"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@string/waiting_for_gps"
+                android:textAllCaps="true"
+                android:textColor="@color/red"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <fragment
+            android:id="@+id/windMap"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/ll_gpsLine" />
+
+        <EditText
+            android:id="@+id/et_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/windMap"
+            android:layout_margin="16dp"
+            android:alpha="0"
+            android:background="@color/white"
+            android:hint="@string/searchPosition"
+            android:inputType="text"
+            android:maxLines="1"
+            android:padding="8dp"
+            android:visibility="gone" />
+
+        <RelativeLayout
+            android:id="@+id/rl_gpsOverlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/windMap"
+            android:layout_alignEnd="@+id/windMap"
+            android:layout_alignLeft="@+id/windMap"
+            android:layout_alignRight="@+id/windMap"
+            android:layout_alignStart="@+id/windMap"
+            android:layout_alignTop="@+id/windMap" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_centerInParent="true"
+                android:alpha="0.4"
+                android:background="@color/background_material_light" >
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_set_manual_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:alpha="1"
+                android:text="@string/set_position_manually" />
+        </RelativeLayout>
+    </RelativeLayout>
+
     <Button
-      android:id="@+id/btn_wind_send"
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="0.1"
-      android:layout_gravity="center"
-      android:layout_margin="8dp"
-      android:text="@string/store_wind" />
+        android:id="@+id/btn_position_set"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_margin="8dp"
+        android:layout_weight="0.1"
+        android:text="@string/store_position"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btn_wind_send"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_margin="8dp"
+        android:layout_weight="0.1"
+        android:text="@string/store_wind" />
+
 </LinearLayout>

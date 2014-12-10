@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <Button
+        android:id="@+id/confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Confirm Pathfinder Vessel" />
+
+    <RelativeLayout
+        android:id="@+id/input"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true" >
+
+        <TextView
+            android:id="@+id/nationalityLabel"
+            style="@style/AppTheme.LargeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/nationality" />
+
+        <TextView
+            android:id="@+id/numberLabel"
+            style="@style/AppTheme.LargeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/number" />
+
+        <EditText
+            android:id="@+id/numberVessel"
+            style="@style/AppTheme.LargeText"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/numberLabel"
+            android:ems="10"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/nationalityVessel"
+            style="@style/AppTheme.LargeText"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/nationalityLabel"
+            android:ems="10"
+            android:inputType="textCapCharacters" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

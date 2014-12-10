@@ -133,7 +133,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
 
     @Override
     public void notifyTick() {
-        if (mAdapter != null && mUpdateList) {
+        if (mAdapter != null && mAdapter.getCount() >= 0 && mUpdateList) {
             ExLog.i(getActivity(), TAG, "notifyTick() on mAdapter called");
             mAdapter.notifyDataSetChanged();
         }

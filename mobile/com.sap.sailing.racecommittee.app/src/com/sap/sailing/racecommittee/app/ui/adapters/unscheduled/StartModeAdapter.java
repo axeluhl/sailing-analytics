@@ -118,12 +118,12 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
 
         mFlag = ViewHolder.get(convertView, R.id.flag);
         if (mFlag != null) {
-            mFlag.setImageDrawable(mContext.getResources().getDrawable(getResId(mStartMode.getFlag())));
+            mFlag.setImageDrawable(mContext.getResources().getDrawable(getResId(mStartMode.getFlagName())));
         }
 
         mFlagName = ViewHolder.get(convertView, R.id.flag_name);
         if (mFlagName != null) {
-            mFlagName.setText(mStartMode.getFlag());
+            mFlagName.setText(mStartMode.getFlagName());
         }
 
         mChecked = ViewHolder.get(convertView, R.id.checked);

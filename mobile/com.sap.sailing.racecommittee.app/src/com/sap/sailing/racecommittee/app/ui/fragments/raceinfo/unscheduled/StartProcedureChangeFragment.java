@@ -57,9 +57,16 @@ public class StartProcedureChangeFragment extends RaceFragment {
                     for (int i = 0; i < mAdapter.getCount(); i++) {
                         if (mAdapter.getItem(i).isChecked()) {
                             try {
-                                RaceFragment fragment = (RaceFragment) Class.forName(mAdapter.getItem(i).getClassName()).newInstance();
+                                String className = mAdapter.getItem(i).getClassName();
+                                Button startMode = (Button) getActivity().findViewById(R.id.start_mode);
+                                RaceFragment fragment = (RaceFragment) Class.forName(className).newInstance();
                                 RacingActivity activity = (RacingActivity) getActivity();
                                 fragment.setArguments(getArguments());
+                                if (!(fragment instanceof LineStartFragment)) {
+                                    startMode.setEnabled(false);
+                                } else {
+                                    startMode.setEnabled(true);
+                                }
                                 activity.replaceFragment(fragment);
                             } catch (java.lang.InstantiationException ex) {
                                 ExLog.ex(getActivity(), TAG, ex);

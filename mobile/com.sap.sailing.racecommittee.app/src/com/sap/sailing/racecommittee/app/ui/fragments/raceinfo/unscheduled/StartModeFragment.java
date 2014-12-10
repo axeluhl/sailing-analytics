@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Set;
+import java.util.List;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,7 +14,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
@@ -29,13 +31,14 @@ public class StartModeFragment extends RaceFragment {
         public int compare(StartMode left, StartMode right) {
             StartMode leftStartMode = (StartMode) left;
             StartMode rightStartMode = (StartMode) right;
-            return leftStartMode.getFlag().compareToIgnoreCase(rightStartMode.getFlag());
+            return leftStartMode.getFlagName().compareToIgnoreCase(rightStartMode.getFlagName());
         }
     }
 
     private StartModeAdapter mAdapter;
     private NextFragmentListener mListener;
     private ListView mListView;
+    private RRS26RacingProcedure mProcedure;
 
     public StartModeFragment() {
 
@@ -49,6 +52,7 @@ public class StartModeFragment extends RaceFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        mProcedure = getRaceState().getTypedRacingProcedure();
     }
 
     @Override
@@ -71,6 +75,7 @@ public class StartModeFragment extends RaceFragment {
                         }
                     }
                     if (checkedItem != null) {
+                        mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), checkedItem.getFlag());
                         mListener.nextFragment();
                     } else {
                         Toast.makeText(getActivity(), "Please choose one start mode", Toast.LENGTH_LONG).show();
@@ -87,10 +92,15 @@ public class StartModeFragment extends RaceFragment {
         super.onResume();
 
         ArrayList<StartMode> startMode = new ArrayList<StartMode>();
-        Set<Flags> flags = preferences.getRRS26StartmodeFlags();
+
+        List<Flags> flags = mProcedure.getConfiguration().getStartModeFlags();
 
         for (Flags flag : flags) {
-            startMode.add(new StartMode(flag.name()));
+            if (mProcedure.getStartModeFlag() == null) {
+                startMode.add(new StartMode(flag));
+            } else {
+                startMode.add(new StartMode(flag, mProcedure.getStartModeFlag() == flag));
+            }
         }
 
         Collections.sort(startMode, new StartModeComparator());
