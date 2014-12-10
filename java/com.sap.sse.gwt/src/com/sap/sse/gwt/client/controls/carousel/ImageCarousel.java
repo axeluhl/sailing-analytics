@@ -138,6 +138,11 @@ public class ImageCarousel extends Widget {
 
         getElement().appendChild(imageHolder);
 
+        if (getElement().getChildCount() > 20) {
+            setInfiniteScrolling(false);
+            setShowDots(false);
+        }
+
     }
 
     /**
