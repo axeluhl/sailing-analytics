@@ -35,6 +35,8 @@
             <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
+            <string>OpenSans</string>
+            <string>OpenSans</string>
         </mutableArray>
         <mutableArray key="OpenSans-Semibold.ttf">
             <string>OpenSans-Semibold</string>
@@ -628,7 +630,13 @@
         <scene sceneID="So3-Jj-nJP">
             <objects>
                 <pageViewController autoresizesArchivedViewToFullSize="NO" transitionStyle="scroll" navigationOrientation="horizontal" spineLocation="none" id="rjH-vb-OUF" customClass="TrackingPageViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
-                    <navigationItem key="navigationItem" title="Tracking" id="qW6-wb-0HC"/>
+                    <navigationItem key="navigationItem" title="Tracking" id="qW6-wb-0HC">
+                        <barButtonItem key="rightBarButtonItem" image="settings" id="tij-SK-jii">
+                            <connections>
+                                <segue destination="4Fb-v3-mkB" kind="presentation" id="IAz-5k-Rpe"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </pageViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="uEA-fc-QTS" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -935,7 +943,7 @@
                         <sections>
                             <tableViewSection headerTitle="Energy Management" id="PQM-l6-Zw8">
                                 <cells>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="BatterySaving" id="nnw-vJ-ZW6">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="BatterySaving" id="nnw-vJ-ZW6">
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="nnw-vJ-ZW6" id="wMb-jA-3a7">
                                             <autoresizingMask key="autoresizingMask"/>
@@ -965,10 +973,53 @@
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
+                            <tableViewSection headerTitle="Heading" id="F12-k3-BLg">
+                                <cells>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Magnetic Heading" id="z3B-sD-tam">
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="z3B-sD-tam" id="Jpk-Ov-GBc">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Magnetic Heading" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="znj-Lz-5tZ">
+                                                    <rect key="frame" x="15" y="10" width="143" height="24"/>
+                                                    <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="znj-Lz-5tZ" firstAttribute="top" secondItem="Jpk-Ov-GBc" secondAttribute="top" constant="10" id="2wG-98-VVD"/>
+                                                <constraint firstItem="znj-Lz-5tZ" firstAttribute="leading" secondItem="Jpk-Ov-GBc" secondAttribute="leadingMargin" constant="7" id="4mE-IG-RgF"/>
+                                                <constraint firstItem="znj-Lz-5tZ" firstAttribute="top" secondItem="Jpk-Ov-GBc" secondAttribute="topMargin" constant="2" id="tYq-ej-UO4"/>
+                                                <constraint firstAttribute="bottom" secondItem="znj-Lz-5tZ" secondAttribute="bottom" constant="9" id="xbQ-i8-5F3"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="True Heading" id="Ju7-MQ-vT5">
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Ju7-MQ-vT5" id="23L-g4-pKI">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="True Heading" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="wfE-MQ-QHl">
+                                                    <rect key="frame" x="15" y="10" width="106" height="24"/>
+                                                    <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="bottom" secondItem="wfE-MQ-QHl" secondAttribute="bottom" constant="9" id="Jy7-Zj-Z85"/>
+                                                <constraint firstItem="wfE-MQ-QHl" firstAttribute="top" secondItem="23L-g4-pKI" secondAttribute="top" constant="10" id="LyO-0S-s6c"/>
+                                                <constraint firstItem="wfE-MQ-QHl" firstAttribute="top" secondItem="23L-g4-pKI" secondAttribute="topMargin" constant="2" id="bwL-ID-CnT"/>
+                                                <constraint firstItem="wfE-MQ-QHl" firstAttribute="leading" secondItem="23L-g4-pKI" secondAttribute="leadingMargin" constant="7" id="eZw-Dy-PpR"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </cells>
+                            </tableViewSection>
                         </sections>
                         <connections>
-                            <outlet property="dataSource" destination="H1Q-9y-gn2" id="Tl1-lL-apT"/>
-                            <outlet property="delegate" destination="H1Q-9y-gn2" id="kho-xy-7j7"/>
+                            <outlet property="delegate" destination="H1Q-9y-gn2" id="HKX-jS-iho"/>
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Settings" id="SbA-xV-4ro">
@@ -1148,7 +1199,7 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="IAz-5k-Rpe"/>
         <segue reference="QMa-LQ-D8c"/>
     </inferredMetricsTieBreakers>
 </document>

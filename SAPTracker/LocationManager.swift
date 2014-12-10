@@ -79,6 +79,27 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
+    /* User preference for heading type. */
+    private let HeadingDefaultsKey = "heading"
+    
+    enum Heading: Int {
+        case Magnetic = 1, True
+    }
+    
+    var headingPreference: Int {
+        get {
+            let preferences = NSUserDefaults.standardUserDefaults()
+            return preferences.integerForKey(HeadingDefaultsKey)
+        }
+        set {
+            let preferences = NSUserDefaults.standardUserDefaults()
+            preferences.setInteger(newValue, forKey: HeadingDefaultsKey)
+            preferences.synchronize()
+        }
+    }
+
+    // MARK: -
+    /* Create dictionary for location. */
     class func dictionaryForLocation(location: CLLocation) -> [String: AnyObject] {
         return [
             "timestamp": location.timestamp.timeIntervalSince1970,
@@ -90,6 +111,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         ]
     }
     
+    /* Create dictionary for heading. */
     class func dictionaryForHeading(heading: CLHeading) -> [String: AnyObject] {
         return [
             "timestamp": heading.timestamp,
