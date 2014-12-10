@@ -237,11 +237,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if (courseAreaId == null) {
             throw new IllegalStateException("There was no course area id transmitted...");
         }
+        ExLog.i(this, this.getClass().toString(), "trying to load courseArea via id: "+courseAreaId);
         CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
         if (courseArea != null) {
             setupActionBar(courseArea);
             loadRaces(courseArea);
+            ExLog.i(this, this.getClass().toString(), "did load courseArea!");
         } else {
+        	ExLog.i(this, this.getClass().toString(), "courseArea == null :(");
             Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
         }
 
@@ -262,6 +265,9 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if (eventId == null) {
             throw new IllegalStateException("There was no event id transmitted...");
         }
+        
+        ExLog.i(this, this.getClass().toString(), "STARTING WELCOME FRAGMENT: " +dataManager.getDataStore());
+        
         getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.racing_view_right_container,

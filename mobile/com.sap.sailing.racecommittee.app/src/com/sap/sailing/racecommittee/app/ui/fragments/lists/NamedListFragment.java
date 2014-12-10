@@ -73,8 +73,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
 
-//    @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -95,11 +94,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         
         showProgressBar(true);
         loadItems();
-        
-        
-//    	if ( mSelectedIndex >= 0 ){
-//    		listener.itemSelected(this,(T) getListView().getItemAtPosition(mSelectedIndex));
-//    	}
     }
 
     
@@ -112,7 +106,11 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     
     private void loadItems() {
         setListShown(false);
-        getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
+        setupLoader();
+    }
+    
+    public void setupLoader(){
+    	getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
     }
 
     @Override
@@ -203,20 +201,4 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         // allowing a state loss, because we are effectively in Loader#onLoadFinished()
         manager.beginTransaction().add(dialog, "failedDialog").commitAllowingStateLoss();
     }
-    
-//    @Override
-//    public DialogResultListener getListener() {
-//        return new DialogResultListener() {
-//            
-//            @Override
-//            public void onDialogPositiveButton(AttachedDialogFragment dialog) {
-//                loadItems();
-//            }
-//            
-//            @Override
-//            public void onDialogNegativeButton(AttachedDialogFragment dialog) {
-//                
-//            }
-//        };
-//    }
 }

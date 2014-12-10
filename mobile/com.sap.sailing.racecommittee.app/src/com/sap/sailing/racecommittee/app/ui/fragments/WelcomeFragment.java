@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
@@ -31,6 +32,7 @@ public class WelcomeFragment extends Fragment implements OnClickListener {
 
     public WelcomeFragment(DataStore dataStore, Serializable courseAreaId, Serializable eventId,
             RaceLogEventAuthor raceLogEventAuthor) {
+    	ExLog.i(getActivity(), this.getClass().toString(), "eventId: "+ eventId);
         mCourseArea = dataStore.getCourseArea(courseAreaId);
         mEvent = dataStore.getEvent(eventId);
         mEventAuthor = raceLogEventAuthor;
