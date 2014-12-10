@@ -4,14 +4,14 @@
     android:layout_height="match_parent" >
 
     <include
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar_layout"
         layout="@layout/toolbar" />
 
     <LinearLayout
         android:id="@+id/loginLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"
+        android:layout_below="@id/toolbar_layout"
         android:background="@drawable/background"
         android:baselineAligned="false"
         android:orientation="horizontal" >

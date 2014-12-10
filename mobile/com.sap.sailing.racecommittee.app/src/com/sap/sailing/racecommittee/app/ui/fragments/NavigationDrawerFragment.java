@@ -9,11 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -25,6 +29,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
@@ -69,7 +74,9 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
     private final static String TAG = NavigationDrawerFragment.class.getName();
     private ManagedRaceListAdapter mAdapter;
     private NavigationDrawerCallbacks mCallbacks;
-    private Button mChangeFilter;
+    private Button mCurrent;
+    private Button mAll;
+    private TextView mHeader;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private FilterMode mFilterMode;
@@ -121,10 +128,45 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         mAdapter.notifyDataSetChanged();
     }
 
+    @SuppressWarnings("deprecation")
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void filterChanged() {
         mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.getFilter().filterByMode(getFilterMode());
         mAdapter.notifyDataSetChanged();
+
+        if (mCurrent != null && mAll != null) {
+            mCurrent.setTextColor(getResources().getColor(R.color.grey_light));
+            mAll.setTextColor(getResources().getColor(R.color.grey_light));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                mCurrent.setBackground(null);
+                mAll.setBackground(null);
+            } else {
+                mCurrent.setBackgroundDrawable(null);
+                mAll.setBackgroundDrawable(null);
+            }
+
+            Drawable drawable = getResources().getDrawable(R.drawable.nav_drawer_tab_button);
+            switch (getFilterMode()) {
+            case ALL:
+                mAll.setTextColor(getResources().getColor(R.color.white));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    mAll.setBackground(drawable);
+                } else {
+                    mAll.setBackgroundDrawable(drawable);
+                }
+                break;
+
+            default:
+                mCurrent.setTextColor(getResources().getColor(R.color.white));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    mCurrent.setBackground(drawable);
+                } else {
+                    mCurrent.setBackgroundDrawable(drawable);
+                }
+                break;
+            }
+        }
     }
 
     public FilterMode getFilterMode() {
@@ -170,29 +212,32 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
 
         mListView = (ListView) view.findViewById(R.id.listView);
         mListView.setOnScrollListener(this);
-        mChangeFilter = (Button) view.findViewById(R.id.change_filter);
-        if (mChangeFilter != null) {
-            mChangeFilter.setOnClickListener(new OnClickListener() {
+
+        mCurrent = (Button) view.findViewById(R.id.races_current);
+        if (mCurrent != null) {
+            mCurrent.setOnClickListener(new OnClickListener() {
 
                 @Override
-                public void onClick(View view) {
-                    Button button = (Button) view;
-                    String text = button.getText().toString();
-                    if (text.equals(getActivity().getResources().getString(R.string.race_show_all))) {
-                        button.setText(R.string.race_show_less);
-                        button.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources()
-                                .getDrawable(R.drawable.ic_arrow_drop_up_grey600_24dp), null);
-                        setFilterMode(FilterMode.ALL);
-                    } else {
-                        button.setText(R.string.race_show_all);
-                        button.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources()
-                                .getDrawable(R.drawable.ic_arrow_drop_down_grey600_24dp), null);
-                        setFilterMode(FilterMode.ACTIVE);
-                    }
+                public void onClick(View v) {
+                    setFilterMode(FilterMode.ACTIVE);
                     filterChanged();
                 }
             });
         }
+
+        mAll = (Button) view.findViewById(R.id.races_all);
+        if (mAll != null) {
+            mAll.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    setFilterMode(FilterMode.ALL);
+                    filterChanged();
+                }
+            });
+        }
+        
+        mHeader = (TextView) view.findViewById(R.id.regatta_data);
 
         return view;
     }
@@ -292,7 +337,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         filterChanged();
     }
 
-    public void setUp(DrawerLayout drawerLayout) {
+    public void setUp(DrawerLayout drawerLayout, SpannableString header) {
         mDrawerLayout = drawerLayout;
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, (Toolbar) getActivity().findViewById(
                 R.id.toolbar), R.string.nav_drawer_open, R.string.nav_drawer_close) {
@@ -319,6 +364,10 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
             }
         });
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+        
+        if (mHeader != null) {
+            mHeader.setText(header);
+        }
     }
 
     public void setupOn(Collection<ManagedRace> races) {

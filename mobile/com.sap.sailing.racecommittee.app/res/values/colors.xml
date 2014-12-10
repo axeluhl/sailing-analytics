@@ -2,14 +2,26 @@
 
     <color name="white">#FFFFFF</color>
     <color name="white_transparent">#55FFFFFF</color>
-    <color name="black">#000000</color>
-    <color name="red">#FF0000</color>
-    <color name="green">#00FF00</color>
-    <color name="blue">#0000FF</color>
-    <color name="grey">#333333</color>
     
-    <color name="colorPrimary">#ffb2b2b2</color>
-    <color name="colorPrimaryDark">#ff979797</color>
+    <color name="black">#ff000000</color>
+    <color name="black_light">#ff262626</color>
+    
+    <color name="red">#ffff0000</color>
+    
+    <color name="green">#ff00ff00</color>
+    
+    <color name="blue">#ff0000ff</color>
+    
+    <color name="grey_light">#ff929292</color>
+    <color name="grey">#ff262626</color>
+    <color name="grey_dark">#ff333333</color>
+    
+    <color name="orange_light">#fff0ab00</color>
+    <color name="orange">#ffe79b1d</color>
+    <color name="orange_dark">#ffde892d</color>
+    
+    <color name="colorPrimary">@color/orange_light</color>
+    <color name="colorPrimaryDark">@color/orange_dark</color>
 	<color name="colorAccent">@color/red</color>
 	
 	<color name="colorGreyDark">#ffcccccc</color>
