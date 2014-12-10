@@ -65,5 +65,8 @@
 	<string name="no_qr_code_popup_message">Please contact race management if you have not received a QR-Code.</string>
 	<string name="tracking_colon">Tracking:</string>
 	<string name="regatta_in_progress">The regatta is in progress.</string>
+	<string name="heading">Heading</string>
+	<string name="sog">SOG</string>
+	<string name="none">None</string>
 	
 </resources>

@@ -25,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.internal.mc;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -60,9 +61,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private LayoutInflater mInflater;
     private Resources mResources;
     private List<RaceListDataType> mShownViewItems;
-
-    private RelativeLayout panel_right;
-    private RelativeLayout panel_left;
+    
     private ImageView update_badge;
     private LinearLayout race_flag;
     private TextView time;
@@ -194,7 +193,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             group_name.setText(race.getRace().getSeries().getName());
             if (!TextUtils.isEmpty(race.getRaceName())) {
                 if (race.getRace().getFleet() != null) {
-                    race_name.setText(race.getRace().getFleet().getName() + " - " + race.getRaceName());
+                    race_name.setText(race.getRace().getFleet().getName() + " / " + race.getRaceName());
                 } else {
                     race_name.setText(race.getRaceName());
                 }
@@ -221,6 +220,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
                     race_scheduled.setVisibility(View.GONE);
                     race_unscheduled.setVisibility(View.VISIBLE);
+                } else {
+                    if (group_name != null) {
+                        group_name.setTextColor(getContext().getResources().getColor(R.color.white));
+                    }
+                    if (race_name != null) {
+                        race_name.setTextColor(getContext().getResources().getColor(R.color.white));
+                    }
                 }
                 // if (race.isUpdateIndicatorVisible()) {
                 // update_badge.setVisibility(View.VISIBLE);
@@ -253,8 +259,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         arrow_direction = ViewHolder.get(convertView, R.id.arrow_direction);
         current_flag = ViewHolder.get(convertView, R.id.current_flag);
         group_name = ViewHolder.get(convertView, R.id.group_name);
-        panel_left = ViewHolder.get(convertView, R.id.panel_left);
-        panel_right = ViewHolder.get(convertView, R.id.panel_right);
         update_badge = ViewHolder.get(convertView, R.id.update_badge);
         race_flag = ViewHolder.get(convertView, R.id.race_flag);
         time = ViewHolder.get(convertView, R.id.time);
@@ -268,12 +272,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     private void resetValues(View convertView) {
         if (convertView != null) {
-            if (panel_left != null) {
-                panel_left.setBackgroundColor(mResources.getColor(R.color.colorGreyDark));
-            }
-            if (panel_right != null) {
-                panel_right.setBackgroundColor(mResources.getColor(R.color.colorGreyDark));
-            }
             if (update_badge != null) {
                 update_badge.setVisibility(View.GONE);
             }
@@ -294,6 +292,12 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
             if (race_unscheduled != null) {
                 race_unscheduled.setVisibility(View.GONE);
+            }
+            if (race_name != null) {
+                race_name.setTextColor(getContext().getResources().getColor(R.color.grey_light));
+            }
+            if (group_name != null) {
+                group_name.setTextColor(getContext().getResources().getColor(R.color.grey_light));
             }
         }
     }

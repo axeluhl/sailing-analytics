@@ -15,11 +15,9 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
-import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
 import com.sap.sailing.android.tracking.app.services.TransmittingService;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
-import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
+import com.sap.sailing.android.tracking.app.test.extensions.DatabaseHelperTestable;
+import com.sap.sailing.android.tracking.app.test.extensions.VolleyHelperTestable;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 public class TransmittingServiceTest extends ServiceTestCase<TransmittingService> {
@@ -27,8 +25,8 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 	static final String TAG = TransmittingServiceTest.class.getName();
 	final String eventId = "test123";
 	
-	private VolleyHelper volleyHelperSpy;
-	private DatabaseHelper databaseHelperMock;
+	private VolleyHelperTestable volleyHelperSpy;
+	private DatabaseHelperTestable databaseHelperMock;
 	
 	public TransmittingServiceTest() {
 		super(TransmittingService.class);
@@ -37,22 +35,21 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 	@Override
     protected void setUp() throws Exception {
         super.setUp();        
-        System.setProperty( "dexmaker.dexcache", getContext().getCacheDir().getPath() );
+        System.setProperty("dexmaker.dexcache", getContext().getCacheDir().toString());
         DatabaseTestHelper.deleteAllEventsFromDB(getContext());
         DatabaseTestHelper.deleteAllGpsFixesFromDB(getContext());
         
         if (volleyHelperSpy == null)
         {
-        	VolleyHelper.injectInstance(null);
-        	volleyHelperSpy = Mockito.spy(VolleyHelper.getInstance(getContext()));
-        	VolleyHelper.injectInstance(volleyHelperSpy);
+        	VolleyHelperTestable.injectInstance(null);
+        	volleyHelperSpy = Mockito.spy(new VolleyHelperTestable(getContext()));
+        	VolleyHelperTestable.injectInstance(volleyHelperSpy);
         }
         
         if (databaseHelperMock == null)
         {
-        	DatabaseHelper.injectInstance(null);
-        	databaseHelperMock = Mockito.mock(DatabaseHelper.class);
-        	DatabaseHelper.injectInstance(databaseHelperMock);
+        	databaseHelperMock = Mockito.mock(DatabaseHelperTestable.class);
+        	DatabaseHelperTestable.injectInstance(databaseHelperMock);
         }
     }
 	
