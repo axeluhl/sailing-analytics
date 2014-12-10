@@ -4,20 +4,21 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="AppTheme.Base" />
 
-    <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <!-- control style -->
-        <!-- <item name="android:spinnerStyle">@style/Widget.Spinner</item> -->
     </style>
     
-    <style name="Widget.Spinner" parent="android:Widget">
-        <item name="android:background">@color/colorAccent</item>
-        <item name="android:clickable">true</item>
+    <style name="AppTheme.Widget.NumberPicker" parent="@android:style/Theme.Holo.Light">
+        <item name="android:divider">@color/colorAccent</item>
+    </style>
+    
+    <style name="AppTheme.LargeText" parent="AppTheme.Base">
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
     
 </resources>
