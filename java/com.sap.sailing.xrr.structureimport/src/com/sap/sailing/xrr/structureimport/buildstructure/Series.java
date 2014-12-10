@@ -9,7 +9,6 @@ import java.util.Set;
 import com.sap.sailing.xrr.schema.Race;
 
 public class Series {
-
     private String series = "";
     private int maxRaces = 0;
     private int maxRacesIndex = -1;
@@ -22,31 +21,24 @@ public class Series {
 
     @SuppressWarnings("unchecked")
     public void addRace(Race race, int[] numberOfRaces) {
-
         boolean fleetEx = false;
-
         int raceNumber = race.getRaceNumber().intValue();
-
         String[] raceName = race.getRaceName().split(" ");
         String fleetColor = "";
-
         if (raceName.length > 1) {
             fleetColor = raceName[raceName.length - 1];
-            for (Fleet fleet: fleets) {
+            for (Fleet fleet : fleets) {
                 if (fleetColor.equals(fleet.getColor())) {
                     fleetEx = true;
                 }
             }
         }
-
         if (numberOfRaces[raceNumber - 1] <= 1 && !fleetEx) {
             fleetColor = "";
         }
-
         boolean added = false;
-
         int counter = 0;
-        for (Fleet fleet: fleets) {
+        for (Fleet fleet : fleets) {
             if (fleet.getColor().equals(fleetColor)) {
                 fleet.addRace(race);
                 added = true;

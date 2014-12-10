@@ -79,7 +79,7 @@ public class StructureImporter {
         Iterable<RegattaResults> parsedRegattas = parseRegattas(regattas);
         Set<Regatta> addSpecificRegattas = new HashSet<Regatta>();
         for (RegattaResults result : parsedRegattas) {
-            Set<Race> races = new HashSet<Race>();
+            List<Race> races = new ArrayList<Race>();
             // assuming that the last element in getPersonOrBoatOrTeam is an event
             Event event = (Event) result.getPersonOrBoatOrTeam().get(result.getPersonOrBoatOrTeam().size() - 1);
             Iterable<Object> raceOrDivisionOrRegattaSeriesResults = event.getRaceOrDivisionOrRegattaSeriesResult();
