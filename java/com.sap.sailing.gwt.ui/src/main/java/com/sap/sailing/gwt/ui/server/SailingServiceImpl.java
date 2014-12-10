@@ -809,6 +809,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), regatta.getScoringScheme().getType());
         regattaDTO.races = convertToRaceDTOs(regatta);
         regattaDTO.series = convertToSeriesDTOs(regatta);
+        regattaDTO.startDate = regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null;
+        regattaDTO.endDate = regatta.getStartDate() != null ? regatta.getEndDate().asDate() : null;
         BoatClass boatClass = regatta.getBoatClass();
         if (boatClass != null) {
             regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength().getMeters());
@@ -2688,6 +2690,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     regatta = getService().createRegatta(
                             RegattaImpl.getDefaultName(replayRaceDTO.rsc, boatClass.trim()),
                             boatClass.trim(),
+                            /* startDate*/ null, /*endDate*/ null,
                             RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                             Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
                             /* isMedal */false, Collections.singletonList(new FleetImpl(
@@ -3642,9 +3645,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateRegatta(RegattaIdentifier regattaName, UUID defaultCourseAreaUuid, 
+    public void updateRegatta(RegattaIdentifier regattaName, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
             RegattaConfigurationDTO configurationDTO, boolean useStartTimeInference) {
-        getService().apply(new UpdateSpecificRegatta(regattaName, defaultCourseAreaUuid, convertToRegattaConfiguration(configurationDTO), useStartTimeInference));
+        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        getService().apply(new UpdateSpecificRegatta(regattaName, startTimePoint, endTimePoint,
+                defaultCourseAreaUuid, convertToRegattaConfiguration(configurationDTO), useStartTimeInference));
     }
 
     @Override
@@ -3703,12 +3709,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RegattaDTO createRegatta(String regattaName, String boatClassName,
+    public RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate, 
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference) {
+        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         Regatta regatta = getService().apply(
                 new AddSpecificRegatta(
-                        regattaName, boatClassName, UUID.randomUUID(),
+                        regattaName, boatClassName, startTimePoint, endTimePoint, UUID.randomUUID(),
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
                         persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId, useStartTimeInference));
         return convertToRegattaDTO(regatta);

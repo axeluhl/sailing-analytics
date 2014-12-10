@@ -10,9 +10,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class OAuthLogin extends Composite {
     private static OAuthLoginUiBinder uiBinder = GWT.create(OAuthLoginUiBinder.class);

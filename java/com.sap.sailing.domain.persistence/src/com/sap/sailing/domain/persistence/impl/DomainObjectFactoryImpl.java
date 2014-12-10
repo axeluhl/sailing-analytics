@@ -1075,6 +1075,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (dbRegatta != null) {
             String name = (String) dbRegatta.get(FieldNames.REGATTA_NAME.name());
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
+            TimePoint startDate = loadTimePoint(dbRegatta, FieldNames.REGATTA_START_DATE);
+            TimePoint endDate = loadTimePoint(dbRegatta, FieldNames.REGATTA_END_DATE);
             Serializable id = (Serializable) dbRegatta.get(FieldNames.REGATTA_ID.name());
             if (id == null) {
                 id = name;
@@ -1105,7 +1107,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
             Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
-            result = new RegattaImpl(raceLogStore, name, boatClass, series, /* persistent */true,
+            result = new RegattaImpl(raceLogStore, name, boatClass, startDate, endDate, series, /* persistent */true,
                     loadScoringScheme(dbRegatta), id, courseArea, useStartTimeInference == null ? true
                             : useStartTimeInference);
             result.setRegattaConfiguration(configuration);

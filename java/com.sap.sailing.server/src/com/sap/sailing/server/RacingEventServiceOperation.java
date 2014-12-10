@@ -1,10 +1,7 @@
 package com.sap.sailing.server;
 
-import java.io.Serializable;
-
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
-import com.sap.sailing.server.operationaltransformation.CreatePersistentCompetitor;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
@@ -15,7 +12,7 @@ import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 import com.sap.sse.replication.OperationWithResult;
 
 public interface RacingEventServiceOperation<ResultType> extends OperationWithResult<RacingEventService, ResultType>,
-OperationWithTransformationSupport<RacingEventService, RacingEventServiceOperation<?>>, Serializable {
+OperationWithTransformationSupport<RacingEventService, RacingEventServiceOperation<?>> {
     /**
      * Assumes this is the "server" operation and transforms the client's <code>removeColumnFromLeaderboardClientOp</code> according to this
      * operation. The default implementation will probably pass on the untransformed client operation. However, if this
@@ -54,7 +51,4 @@ OperationWithTransformationSupport<RacingEventService, RacingEventServiceOperati
 
     RacingEventServiceOperation<?> transformMoveLeaderboardColumnUpServerOp(MoveLeaderboardColumnUp moveLeaderboardColumnUp);
 
-    RacingEventServiceOperation<?> transformCreatePersistentCompetitorClientOp(CreatePersistentCompetitor createPersistentCompetitor);
-
-    RacingEventServiceOperation<?> transformCreatePersistentCompetitorServerOp(CreatePersistentCompetitor createPersistentCompetitor);
 }

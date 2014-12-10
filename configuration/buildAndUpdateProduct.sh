@@ -49,8 +49,8 @@ ARCH=x86_64
 START_DIR=`pwd`
 
 # needed for maven on sapsailing.com to work correctly
-if [ -f $USER_HOME/.bash_profile ]; then
-    source $USER_HOME/.bash_profile
+if [ -f "$USER_HOME/.bash_profile" ]; then
+    source "$USER_HOME/.bash_profile"
 fi
 
 cd "$PROJECT_HOME"

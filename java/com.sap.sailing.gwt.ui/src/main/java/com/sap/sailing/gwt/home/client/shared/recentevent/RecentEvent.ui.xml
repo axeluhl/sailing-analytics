@@ -8,9 +8,9 @@
     <g:HTMLPanel styleName="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
 	    <div class="{local_res.css.eventteasercontainer}">
 	        <g:Anchor ui:field="eventOverviewLink" styleName="{local_res.css.eventteaser}">
-		        <figure class="{local_res.css.eventteaser_image}"><img ui:field="eventImage" />
+		        <div class="{local_res.css.eventteaser_image}" ui:field="eventImageContainerDiv" >
 		          <div ui:field="isLiveDiv" data-labeltype="live" class="{local_res.css.eventteaser_series} {res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
-		        </figure>
+		        </div>
 		        <div class="{local_res.css.eventteaser_name}"><span ui:field="eventName" /></div>
 		        <div class="{local_res.css.eventteaser_location}">
 		            <span ui:field="venueName" />,&nbsp;<span ui:field="eventStartDate" />

@@ -250,7 +250,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 int courseAreasCount = event.venue.getCourseAreas().size();
                 int i = 1;
                 for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-                    builder.appendEscaped(courseArea.getName());
+                    builder.appendEscaped(courseArea.getName() == null ? "null" : courseArea.getName());
                     if (i < courseAreasCount) {
                         builder.appendHtmlConstant(",&nbsp;");
                         // not more than  4 course areas per line
