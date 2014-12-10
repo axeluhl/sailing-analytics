@@ -16,10 +16,15 @@
         <!-- colorAccent is used as the default value for colorControlActivated which is used to tint widgets -->
         <item name="colorAccent">@color/colorAccent</item>
 
+        <item name="drawerArrowStyle">@style/AppTheme.Widget.DrawerArrowStyle</item>
     </style>
     
     <style name="AppTheme.Widget.NumberPicker" parent="@android:style/Theme.Holo.Light">
         <item name="android:divider">@color/colorAccent</item>
+    </style>
+    
+    <style name="AppTheme.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">false</item>
     </style>
     
     <style name="AppTheme.LargeText" parent="AppTheme.Base">
