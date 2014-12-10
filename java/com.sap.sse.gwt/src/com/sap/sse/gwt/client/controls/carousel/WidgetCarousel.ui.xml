@@ -1,0 +1,58 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+
+ 	    @external slick-slide, slick-prev, slick-next, slick-track;
+
+        .slider {
+			width: 100%;
+
+        }
+
+		.slider .slick-track {
+			
+		}
+
+        .slider ul li > button:before {
+            font-size: 15px;
+        }
+		
+		.slider .slick-slide {
+           	margin: 0px;
+			background-color: #fcfcfc;
+		}
+
+		
+		.slider .slick-prev {
+			left: 20px;
+			z-index:1;
+			height: 60px;
+			width: 60px;
+
+		}
+		.slider .slick-prev:before {
+			color: #000000;
+			font-size: 60px;
+			left: -60px;
+			top: 10px;
+		} 
+		.slider .slick-next {
+			right: 20px;
+			z-index:1;
+			height: 60px;
+			width: 60px;
+		} 
+		.slider .slick-next:before {
+			color: #000000;
+			font-size: 60px;
+			left: -60px;
+		} 
+
+    </ui:style>
+
+	<g:HTMLPanel styleName="{style.slider}" ui:field="sliderMainUi">
+
+	
+	</g:HTMLPanel>
+
+</ui:UiBinder>
