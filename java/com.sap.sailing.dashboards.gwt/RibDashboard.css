@@ -19,7 +19,6 @@
 .mgwt-Scrollbar-Bar {
 	border-radius: 0pt;
 	background-color: #FFDD00;
-	
 }
 
 .highcharts-container {
@@ -69,4 +68,24 @@
 	/* custom */
 	height: 0pt;
 	line-height: 0pt;
+}
+
+.competitorEditButton {
+	position: absolute;
+	height: 23.5pt;
+	width: 23.5pt;
+	right: 10pt;
+	top: 17.5pt;
+}
+
+.competitorLabel{
+	position: absolute;
+	width: 200pt;
+	height: 23.5pt;
+	margin-top: 17.5pt;
+	right: 43.5pt;
+	font-size: 12pt;
+	font-color: black;
+	text-align: right;
+	line-height: 23.5pt;
 }

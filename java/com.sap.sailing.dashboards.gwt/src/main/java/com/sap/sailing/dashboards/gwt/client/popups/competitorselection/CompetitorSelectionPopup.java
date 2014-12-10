@@ -71,6 +71,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         this.getElement().addClassName(style.popupshow());
         this.getElement().removeClassName(style.popuphide());
         RootLayoutPanel.get().addStyleName(style.blurred());
+        RootLayoutPanel.get().removeStyleName(style.not_blurred());
         isVisible = true;
     }
 
@@ -78,6 +79,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         this.getElement().addClassName(style.popuphide());
         this.getElement().removeClassName(style.popupshow());
         RootLayoutPanel.get().addStyleName(style.not_blurred());
+        RootLayoutPanel.get().removeStyleName(style.blurred());
         RootPanel.get().remove(this);
         isVisible = false;
     }
@@ -96,6 +98,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         for (CompetitorSelectionPopupListener newStartAnalysisListener : competitorSelectionPopupListener) {
             newStartAnalysisListener.didClickedOKWithCompetitorName(competitorName);
         }
+        hide();
     }
     
     public boolean isShown(){

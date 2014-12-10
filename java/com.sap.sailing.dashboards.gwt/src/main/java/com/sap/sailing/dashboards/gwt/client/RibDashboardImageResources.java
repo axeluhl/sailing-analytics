@@ -41,4 +41,7 @@ public interface RibDashboardImageResources extends ClientBundle {
     
     @Source("images/watch.png")
     ImageResource watch();
+    
+    @Source("images/settings.png")
+    ImageResource settings();
 }

@@ -14,5 +14,5 @@ import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
  */
 public interface NewStartAnalysisListener {
 
-    public void addNewStartAnalysisCard(List<StartAnalysisDTO> startAnalysisDTOs);
+    public void addNewStartAnalysisCardForCompetitor(List<StartAnalysisDTO> startAnalysisDTOs, String selectedCompetitor);
 }
