@@ -60,7 +60,7 @@
                 android:layout_alignBottom="@id/tracking_unsent_fixes_label"
                 android:layout_alignParentRight="true"
                 android:paddingRight="10dp"
-                android:text="@string/zero" />
+                android:text="@string/none" />
 
             <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                 android:id="@+id/tracking_status_label"

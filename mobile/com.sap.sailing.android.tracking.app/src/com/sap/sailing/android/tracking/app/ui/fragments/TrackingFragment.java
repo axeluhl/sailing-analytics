@@ -312,7 +312,15 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 				public void run() {
 					TextView unsentGpsFixesTextView = (TextView) getActivity()
 							.findViewById(R.id.tracking_unsent_fixes);
-					unsentGpsFixesTextView.setText(String.valueOf(count));
+					if (count == 0)
+					{
+						unsentGpsFixesTextView.setText(getString(R.string.none));
+					}
+					else
+					{
+						unsentGpsFixesTextView.setText(String.valueOf(count));	
+					}
+					
 				}
 			});
 		}
