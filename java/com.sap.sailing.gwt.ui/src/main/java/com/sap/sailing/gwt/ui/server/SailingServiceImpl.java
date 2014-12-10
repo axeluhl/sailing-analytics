@@ -3996,12 +3996,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<RegattaDTO> getRegattas(String url) { 
+    public Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl) { 
         StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), baseDomainFactory);
-        Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(url);
+        Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(manage2SailJsonUrl);
         List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
         Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
-        for(Regatta regatta: regattas){
+        for (Regatta regatta : regattas) {
             regattaDTOs.add(convertToRegattaDTO(regatta));
         }
         return regattaDTOs;

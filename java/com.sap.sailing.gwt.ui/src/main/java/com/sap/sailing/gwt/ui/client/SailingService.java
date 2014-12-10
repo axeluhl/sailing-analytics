@@ -529,7 +529,12 @@ public interface SailingService extends RemoteService {
      */
     RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
 
-    Iterable<RegattaDTO> getRegattas(String url);
+    /**
+     * Imports regatta structure definitions from an ISAF XRR document
+     * 
+     * @param manage2SailJsonUrl the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
+     */
+    Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl);
 
     void createRegattaStructure(Iterable<RegattaDTO> regattas, EventDTO newEvent);
 

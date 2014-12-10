@@ -89,13 +89,13 @@ public class StructureImporter {
                 }
             }
             BuildStructure buildStructure = new BuildStructure(races);
-            final TimePoint startDate = null; // FIXME
-            final TimePoint endDate = null; // FIXME
+            final TimePoint startDate = null; // TODO can regatta start time be inferred from XRR document?
+            final TimePoint endDate = null; // TODO can regatta end time be inferred from XRR document?
             RegattaImpl regatta = new RegattaImpl(
                     RegattaImpl.getDefaultName(event.getTitle(), ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
                     new BoatClassImpl(((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), true),
                     startDate, endDate,
-                    setSeries(buildStructure), false, this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(),
+                    getSeries(buildStructure), false, this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(),
                     null);
             addSpecificRegattas.add(regatta);
         }
@@ -132,8 +132,8 @@ public class StructureImporter {
         return result;
     }
     
-    private Iterable<SeriesImpl> setSeries(BuildStructure structure) {
-        Set<SeriesImpl> series = new HashSet<SeriesImpl>(); 
+    private Iterable<SeriesImpl> getSeries(BuildStructure structure) {
+        List<SeriesImpl> series = new ArrayList<>(); 
         RegattaStructure regattaStructure = structure.getRegattaStructure();
         if (regattaStructure != null) {
             int index = 0;

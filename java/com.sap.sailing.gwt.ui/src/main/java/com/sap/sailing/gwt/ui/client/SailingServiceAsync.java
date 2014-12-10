@@ -644,7 +644,12 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
     
-    void getRegattas(String url, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
+    /**
+     * Imports regatta structure definitions from an ISAF XRR document
+     * 
+     * @param manage2SailJsonUrl the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
+     */
+    void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
 
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
 			EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
