@@ -177,6 +177,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                             public void onSuccess(PolarSheetsXYDiagramData result) {
                                 PolarSheetsXYDiagramPopupPanel popupPanel = new PolarSheetsXYDiagramPopupPanel(stringMessages, result);
                                 popupPanel.show();
+                                popupPanel.center();
                             }
                         });
             }

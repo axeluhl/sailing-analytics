@@ -9,7 +9,6 @@ import org.moxieapps.gwt.highcharts.client.Series.Type;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -25,8 +24,6 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
     public PolarSheetsXYDiagramPopupPanel(StringMessages stringMessages, PolarSheetsXYDiagramData result) {
         chart = createChart();
         VerticalPanel containerPanel = new VerticalPanel();
-        containerPanel.setWidth("100%");
-        containerPanel.setHeight("100%");
         this.add(containerPanel);
         containerPanel.add(chart);
         
@@ -57,9 +54,6 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
         speedSeriesMovingAverage.setName("Upwind Starboard Speed - MovingAverage");
         speedSeriesMovingAverage.setPoints(pointsForUpwindStarboardAverageSpeedMovingAverage);
         chart.addSeries(speedSeriesMovingAverage);
-        
-        this.setWidth("1200px");
-        this.setHeight("800px");
     }
     
     private Point[] toPointArray(List<Pair<Double, Double>> pointsForUpwindStarboardAverageAngle) {
@@ -73,22 +67,9 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
     }
 
     private Chart createChart() {
-        Chart chart = new Chart().setType(Type.LINE);   
-        chart.setHeight("80%");
+        Chart chart = new Chart().setType(Type.LINE);
+        chart.setWidth(1000);
         return chart;
-    }
-    
-    @Override
-    protected void onLoad() {
-        Timer timer = new Timer() {
-            
-            @Override
-            public void run() {
-                chart.setSizeToMatchContainer();
-            }
-        };
-        timer.schedule(200);
-        super.onLoad();
     }
 
 }
