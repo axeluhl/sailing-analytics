@@ -10,15 +10,16 @@ import Foundation
 import CoreLocation
 
 class LocationManager: NSObject, CLLocationManagerDelegate {
-
+    
     struct NotificationType {
-        static let locationServicesDisabled = "location_services_disabled"
-        static let trackingStarted = "tracking_started"
-        static let trackingStopped = "tracking_stopped"
-        static let newLocation = "new_location"
-        static let locationManagerFailed = "location_manager_failed"
+        static let locationServicesDisabled = "locationServicesDisabled"
+        static let trackingStarted = "trackingStarted"
+        static let trackingStopped = "trackingStopped"
+        static let newLocation = "newLocation"
+        static let newHeading = "newHeading"
+        static let locationManagerFailed = "locationManagerFailed"
     }
-
+    
     class var sharedManager: LocationManager {
         struct Singleton {
             static let sharedManager = LocationManager()
@@ -42,7 +43,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         if (CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied) {
             return "Please enable location services for this app."
         }
-        if(coreLocationManager.respondsToSelector("requestAlwaysAuthorization")) {
+        if (coreLocationManager.respondsToSelector("requestAlwaysAuthorization")) {
             coreLocationManager.requestAlwaysAuthorization()
         }
         coreLocationManager.startUpdatingLocation()
@@ -53,7 +54,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         return nil
     }
-
+    
     func stopTracking() {
         coreLocationManager.stopUpdatingLocation()
         coreLocationManager.stopUpdatingHeading()
@@ -68,19 +69,34 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
+    func locationManager(manager: CLLocationManager!, didUpdateHeading newHeading: CLHeading!) {
+        let notification = NSNotification(name: NotificationType.newHeading, object: self, userInfo:LocationManager.dictionaryForHeading(newHeading))
+        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+    }
+
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
         let notification = NSNotification(name: NotificationType.locationManagerFailed, object: self, userInfo: ["error": error])
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
-    class func dictionaryForLocation(location: CLLocation) -> Dictionary<String, AnyObject> {
+    class func dictionaryForLocation(location: CLLocation) -> [String: AnyObject] {
         return [
             "timestamp": location.timestamp.timeIntervalSince1970,
             "latitude" : location.coordinate.latitude,
             "longitude": location.coordinate.longitude,
             "speed": location.speed,
             "course": location.course,
-            "horizontalAccuracy": location.horizontalAccuracy
+            "horizontalAccuracy": location.horizontalAccuracy,
+        ]
+    }
+    
+    class func dictionaryForHeading(heading: CLHeading) -> [String: AnyObject] {
+        return [
+            "timestamp": heading.timestamp,
+            "magneticHeading": heading.magneticHeading,
+            "trueHeading": heading.trueHeading,
+            "description": heading.description,
+            "headingAccuracy": heading.headingAccuracy,
         ]
     }
 }

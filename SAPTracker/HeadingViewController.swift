@@ -14,11 +14,11 @@ class HeadingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newHeading:", name:LocationManager.NotificationType.newHeading, object: nil)
     }
     
-    func newLocation(notification: NSNotification) {
-        let heading = notification.userInfo!["course"] as Double
+    func newHeading(notification: NSNotification) {
+        let heading = notification.userInfo!["trueHeading"] as Double
         headingLabel.text = String(format: "%.0f °", heading)
     }
     
