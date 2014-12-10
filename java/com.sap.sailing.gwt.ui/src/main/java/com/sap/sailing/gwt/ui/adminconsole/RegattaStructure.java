@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -26,10 +25,10 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
  */
 class RegattaStructure {
     private final Iterable<String> seriesNamesInOrder;
-    private final Map<String, LinkedHashSet<String>> seriesNamesToFleetNames;
+    private final LinkedHashMap<String, LinkedHashSet<String>> seriesNamesToFleetNames;
     
     public RegattaStructure(RegattaDTO regatta) {
-        seriesNamesToFleetNames = new HashMap<>();
+        seriesNamesToFleetNames = new LinkedHashMap<>();
         List<String> mySeriesNamesInOrder = new ArrayList<>();
         seriesNamesInOrder = mySeriesNamesInOrder;
         for (SeriesDTO series : regatta.series) {

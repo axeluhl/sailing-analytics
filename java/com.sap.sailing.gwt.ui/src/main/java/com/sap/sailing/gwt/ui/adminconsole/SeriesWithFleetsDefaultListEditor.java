@@ -54,6 +54,21 @@ public class SeriesWithFleetsDefaultListEditor extends SeriesWithFleetsListEdito
                 add(createEditSeriesButton(seriesDTO));
             }
 
+            private String getFleetText(SeriesDTO seriesDTO) {
+                String fleetText = "";
+                if (seriesDTO.getFleets() != null && !seriesDTO.getFleets().isEmpty()) {
+                    if (seriesDTO.getFleets().size() == 1) {
+                        fleetText = "1 " + getStringMessages().fleet();
+                    } else {
+                        fleetText = seriesDTO.getFleets().size() + " " + getStringMessages().fleets();
+                    }
+                    fleetText += ": " + seriesDTO.getFleets().toString();
+                } else {
+                    fleetText = getStringMessages().noFleetsDefined();
+                }
+                return fleetText;
+            }
+
             private Widget createEditSeriesButton(final SeriesDTO seriesDTO) {
                 final Button editSeriesButton = new Button(getStringMessages().editSeries());
                 editSeriesButton.ensureDebugId("SetDefaultSeriesButton");
@@ -86,21 +101,6 @@ public class SeriesWithFleetsDefaultListEditor extends SeriesWithFleetsListEdito
         @Override
         protected Widget createValueWidget(int rowIndex, SeriesDTO seriesDTO) {
             return new CompactSeriesPanel(seriesDTO);
-        }
-
-        protected String getFleetText(SeriesDTO seriesDTO) {
-            String fleetText = "";
-            if (seriesDTO.getFleets() != null && !seriesDTO.getFleets().isEmpty()) {
-                if (seriesDTO.getFleets().size() == 1) {
-                    fleetText = "1 " + getStringMessages().fleet();
-                } else {
-                    fleetText = seriesDTO.getFleets().size() + " " + getStringMessages().fleets();
-                }
-                fleetText += ": " + seriesDTO.getFleets().toString();
-            } else {
-                fleetText = getStringMessages().noFleetsDefined();
-            }
-            return fleetText;
         }
     }
 }

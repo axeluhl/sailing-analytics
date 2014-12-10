@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -55,7 +56,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
     private Button listRegattasButton;
     private Button importDetailsButton;
     private VerticalPanel editSeriesPanel;
-    private final Grid regattaStructureGrid;
+    private final FlexTable regattaStructureGrid;
     private List<EventDTO> existingEvents;
     private ListBox sailingEventsListBox;
     
@@ -89,7 +90,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
                 updateRegattaStructureGrid();
             }
         });
-        regattaStructureGrid = new Grid(0, 2);
+        regattaStructureGrid = new FlexTable();
     }
 
     private void createUI() {
