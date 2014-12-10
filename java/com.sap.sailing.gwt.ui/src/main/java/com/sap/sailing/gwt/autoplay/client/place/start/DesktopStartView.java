@@ -66,9 +66,13 @@ public class DesktopStartView extends Composite implements StartView {
         this.leaderboardParameters = new HashMap<String, String>();
         
         sapHeader = new SAPHeader("Auto player configuration", false);
-        eventSelectionBox = new ListBox(false);
-        leaderboardSelectionBox = new ListBox(false);
-        localeSelectionBox = new ListBox(false);
+        eventSelectionBox = new ListBox();
+        eventSelectionBox.setMultipleSelect(false);
+        leaderboardSelectionBox = new ListBox();
+        leaderboardSelectionBox.setMultipleSelect(false);
+        localeSelectionBox = new ListBox();
+        localeSelectionBox.setMultipleSelect(false);
+
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
         for (String localeName : LocaleInfo.getAvailableLocaleNames()) {

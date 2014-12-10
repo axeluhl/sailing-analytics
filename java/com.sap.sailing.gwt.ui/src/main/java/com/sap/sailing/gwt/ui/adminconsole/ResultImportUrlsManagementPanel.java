@@ -41,8 +41,13 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        urlListBox = new ListBox(/* multiple select */ true);
-        urlProviderSelectionListBox = new ListBox(false);
+
+        urlListBox = new ListBox();
+        urlListBox.setMultipleSelect(true);
+
+        urlProviderSelectionListBox = new ListBox();
+        urlListBox.setMultipleSelect(false);
+
         urlProviderSelectionListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
