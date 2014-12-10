@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,10 +23,10 @@ import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView;
 import com.sap.sailing.android.tracking.app.customviews.SignalQualityIndicatorView;
-import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
 public class TrackingFragment extends BaseFragment implements OnClickListener {
 
@@ -255,10 +254,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	
 	private void stopTracking() {
 		prefs.setTrackingTimerStarted(0);
-		
-		Intent intent = new Intent(getActivity(), TrackingService.class);
-		intent.setAction(getString(R.string.tracking_service_stop));
-		getActivity().startService(intent);
+		ServiceHelper.getInstance(getActivity()).stopTrackingService();
 		getActivity().finish();
 	}
 

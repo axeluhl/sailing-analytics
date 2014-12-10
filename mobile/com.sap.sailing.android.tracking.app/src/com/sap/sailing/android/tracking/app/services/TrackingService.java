@@ -24,6 +24,7 @@ import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
 public class TrackingService extends Service implements ConnectionCallbacks,
 		OnConnectionFailedListener, LocationListener {
@@ -186,9 +187,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 					"ensureTransmittingServiceIsRunning, starting TransmittingService");
 		}
 
-		Intent intent = new Intent(this, TransmittingService.class);
-		intent.setAction(getString(R.string.transmitting_service_start));
-		this.startService(intent);
+		ServiceHelper.getInstance(this).startTransmittingService();
 	}
 
 	@Override

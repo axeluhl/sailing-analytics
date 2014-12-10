@@ -31,6 +31,7 @@ import com.sap.sailing.android.tracking.app.ui.fragments.SpeedFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.viewpagerindicator.CirclePageIndicator;
 
@@ -123,7 +124,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			}
 		});
         
-        startTrackingService(eventId);
+        ServiceHelper.getInstance(this).startTrackingService(eventId);
     }
     
     @Override
@@ -213,15 +214,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     public void setUnsentGPSFixesCount(int count) {
     	trackingFragment.setUnsentGPSFixesCount(count);
     }
-    
-    private void startTrackingService(String eventId)
-    {
-    	Intent intent = new Intent(this, TrackingService.class);
-		intent.setAction(getString(R.string.tracking_service_start));
-		intent.putExtra(getString(R.string.tracking_service_event_id_parameter), eventId);
-		startService(intent);
-    }
-    
     
 	@Override
 	public void onBackPressed() {		
