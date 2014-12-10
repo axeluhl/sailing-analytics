@@ -6,16 +6,19 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.ResilientActivity;
 import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService;
 import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService.MessageSendingBinder;
 import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService.MessageSendingServiceLogger;
@@ -90,12 +93,12 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         
         int errorCount = this.sendingService.getDelayedIntentsCount();
         if (errorCount > 0) {
-            menuItemLive.setIcon(R.drawable.ic_menu_share_red);
+            menuItemLive.setIcon(getTintedDrawable(getResources(), R.drawable.ic_share_white_36dp, R.color.red));
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
             sendingServiceStatus = String.format("Currently %d events waiting to be sent.\nLast successful sent was at %s", 
                     errorCount, lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
         } else {
-            menuItemLive.setIcon(R.drawable.ic_share_grey600_36dp);
+            menuItemLive.setIcon(R.drawable.ic_share_white_36dp);
             sendingServiceStatus = String.format("Currently no event waiting to be sent.", errorCount);
         }
     }
@@ -137,5 +140,12 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     private String getLiveIconText() {
         return String.format("Connected to: %s\n%s", PrefUtils.getString(this, R.string.preference_server_url_key,
                 R.string.preference_server_url_default), sendingServiceStatus);
+    }
+    
+    private Drawable getTintedDrawable(Resources res, int drawableResId, int colorResId) {
+        Drawable drawable = res.getDrawable(drawableResId);
+        int color = res.getColor(colorResId);
+        drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        return drawable;
     }
 }
