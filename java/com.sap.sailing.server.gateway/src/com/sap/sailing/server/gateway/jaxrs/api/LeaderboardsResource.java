@@ -493,4 +493,29 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         logger.fine("Successfully checked out competitor " + mappedTo.getName());
         return Response.status(Status.OK).build();
     }
+    
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{leaderboardName}/competitors/{competitorId}")
+    public Response getCompetitor(@PathParam("leaderboardName") String leaderboardName, @PathParam("competitorId") String competitorIdAsString) {
+        Response response;
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+                competitorIdAsString);
+        
+        if (competitor == null) {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a competitor with id '" + competitorIdAsString + "'.").type(MediaType.TEXT_PLAIN)
+                    .build();
+        } else if (leaderboard == null) {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + leaderboardName + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else {
+            JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
+            json.put("displayName", leaderboard.getDisplayName(competitor));
+            response = Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+        }
+        return response;
+    }
 }

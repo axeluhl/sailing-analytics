@@ -15,6 +15,19 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
+    public static JSONObject getCompetitorJSON(Competitor competitor) {
+        //see http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Competitor-Information
+        JSONObject json = new JSONObject();
+        json.put("id", competitor.getId().toString());
+        json.put("name", competitor.getName());
+        json.put("sailID", competitor.getBoat().getSailID());
+        json.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
+        json.put("countryCode", competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
+        json.put("boatClassName", competitor.getBoat().getBoatClass().getName());
+
+        return json;
+    }
+    
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{competitorId}")
@@ -27,16 +40,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .entity("Could not find a competitor with id '" + competitorIdAsString + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
-            //see http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Competitor-Information
-            JSONObject json = new JSONObject();
-            json.put("id", competitorIdAsString);
-            json.put("name", competitor.getName());
-            json.put("sailID", competitor.getBoat().getSailID());
-            json.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-            json.put("countryCode", competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
-            json.put("boatClassName", competitor.getBoat().getBoatClass().getName());
-
-            String jsonString = json.toJSONString();
+            String jsonString = getCompetitorJSON(competitor).toJSONString();
             response = Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
         }
         return response;
