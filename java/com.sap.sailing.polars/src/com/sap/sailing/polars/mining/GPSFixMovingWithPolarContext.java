@@ -57,7 +57,8 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
 
     @Override
     public RoundedAngleToTheWind getRoundedAngleToTheWind() {
-        return new RoundedAngleToTheWind(getAngleToTheWind().getObject());
+        final BearingWithConfidence<Integer> angleToTheWind = getAngleToTheWind();
+        return angleToTheWind == null ? null : new RoundedAngleToTheWind(angleToTheWind.getObject());
     }
 
     public BearingWithConfidence<Integer> getAngleToTheWind() {
@@ -75,8 +76,8 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
 
     @Override
     public Cluster<Speed> getWindSpeedCluster() {
-        Speed windSpeed = getWindSpeed().getObject();
-        return windSpeedClusterGroup.getClusterFor(windSpeed);
+        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWindSpeed();
+        return windWithConfidence == null ? null : windSpeedClusterGroup.getClusterFor(windWithConfidence.getObject());
     }
 
     public WindWithConfidence<Pair<Position, TimePoint>> getWindSpeed() {
