@@ -32,10 +32,27 @@ public class RegattaDTO extends NamedDTO {
     public boolean useStartTimeInference = true;
 
     public RegattaDTO() {}
-
+    
     public RegattaDTO(String name, ScoringSchemeType scoringScheme /*, List<CompetitorDTO> competitors*/) {
         super(name);
         this.scoringScheme = scoringScheme;
+    }
+    
+    /**
+     * A clone / copy constructor, copying all field values, flat, from <code>other</code> to the new object
+     */
+    public RegattaDTO(RegattaDTO other) {
+        super(other.getName());
+        this.boatClass = other.boatClass;
+        this.startDate = other.startDate;
+        this.endDate = other.endDate;
+        this.races = other.races;
+        this.series = other.series;
+        this.scoringScheme = other.scoringScheme;
+        this.defaultCourseAreaUuid = other.defaultCourseAreaUuid;
+        this.defaultCourseAreaName = other.defaultCourseAreaName;
+        this.configuration = other.configuration;
+        this.useStartTimeInference = other.useStartTimeInference;
     }
     
     public Pair<SeriesDTO, FleetDTO> getSeriesAndFleet(RegattaAndRaceIdentifier raceIdentifier) {

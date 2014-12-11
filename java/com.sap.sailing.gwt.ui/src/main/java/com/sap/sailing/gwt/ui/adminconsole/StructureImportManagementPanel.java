@@ -416,7 +416,10 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         eventManagementPanel.fillEvents();
         final Set<RegattaDTO> regattaConfigurationsToCreate = new HashSet<>();
         for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {
-            regattaConfigurationsToCreate.add(regattaDefaultsPerStructure.get(regattaStructures.get(originalRegattaFromXRR)));
+            RegattaDTO cloneFromDefaults = new RegattaDTO(regattaDefaultsPerStructure.get(regattaStructures.get(originalRegattaFromXRR)));
+            cloneFromDefaults.setName(originalRegattaFromXRR.getName());
+            cloneFromDefaults.boatClass = originalRegattaFromXRR.boatClass;
+            regattaConfigurationsToCreate.add(cloneFromDefaults);
         }
         sailingService.createRegattaStructure(regattaConfigurationsToCreate, newEvent, new AsyncCallback<Void>() {
             @Override

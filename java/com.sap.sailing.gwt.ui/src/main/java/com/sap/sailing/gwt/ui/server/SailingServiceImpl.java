@@ -3662,11 +3662,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+    public List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
+            List<String> columnNames) {
         List<RaceColumnInSeriesDTO> result = new ArrayList<RaceColumnInSeriesDTO>();
-        for(String columnName: columnNames) {
-            RaceColumnInSeries raceColumnInSeries = getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
-            if(raceColumnInSeries != null) {
+        for (String columnName : columnNames) {
+            RaceColumnInSeries raceColumnInSeries = getService().apply(
+                    new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+            if (raceColumnInSeries != null) {
                 result.add(convertToRaceColumnInSeriesDTO(raceColumnInSeries));
             }
         }
@@ -4028,37 +4030,39 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return regattaDTOs;
     }
 
-    private List<String> createRegattasWithRaces(RegattaDTO regatta, String eventName) {
-        List<String> leaderboardNames = new ArrayList<String>();
-            for (SeriesDTO series : regatta.series) {
-                List<String> raceNames = new ArrayList<String>();
-                for (RaceColumnDTO raceColumnInSeries : series.getRaceColumns()) {
-                                        raceNames.add(raceColumnInSeries.getName());
-                                }
-                addRaceColumnsToSeries(regatta.getRegattaIdentifier(), series.getName(), raceNames);
-                        }
+    /**
+     * Uses {@link #addRaceColumnsToSeries} which also handles replication to update the regatta identified
+     * by <code>regatta</code>'s {@link RegattaDTO#getRegattaIdentifier() identifier} with the race columns
+     * as specified by <code>regatta</code>. The domain regatta object is assumed to have no races associated
+     * when this method is called.
+     */
+    private void addRaceColumnsToRegattaSeries(RegattaDTO regatta, String eventName) {
+        for (SeriesDTO series : regatta.series) {
+            List<String> raceNames = new ArrayList<String>();
+            for (RaceColumnDTO raceColumnInSeries : series.getRaceColumns()) {
+                raceNames.add(raceColumnInSeries.getName());
+            }
+            addRaceColumnsToSeries(regatta.getRegattaIdentifier(), series.getName(), raceNames);
+        }
+    }
 
+    @Override
+    public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent) throws MalformedURLException {
+        final List<String> leaderboardNames = new ArrayList<String>();
+        for (RegattaDTO regatta : regattas) {
+            createRegattaFromRegattaDTO(regatta);
+            addRaceColumnsToRegattaSeries(regatta, newEvent.getName());
             if (getLeaderboard(regatta.getName()) == null) {
                 leaderboardNames.add(regatta.getName());
                 createRegattaLeaderboard(regatta.getRegattaIdentifier(), regatta.boatClass.toString(), new int[0]);
             }
-        return leaderboardNames;
-    }
-
-    @Override
-    public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent) {
-        final List<String> leaderboardNames = new ArrayList<String>();
-        for(RegattaDTO regatta: regattas){
-            createRegattaFromRegattaDTO(regatta);
-            leaderboardNames.addAll(createRegattasWithRaces(regatta, newEvent.getName()));
         }
         createAndAddLeaderboardGroup(newEvent, leaderboardNames);
-        
-        //TODO find a way to import the competitors for the selected regattas. You'll need the regattas as Iterable<RegattaResults>
-//        structureImporter.setCompetitors(regattas, "");
+        // TODO find a way to import the competitors for the selected regattas. You'll need the regattas as Iterable<RegattaResults>
+        // structureImporter.setCompetitors(regattas, "");
     }
 
-    private void createAndAddLeaderboardGroup(final EventDTO newEvent, List<String> leaderboardNames) {
+    private void createAndAddLeaderboardGroup(final EventDTO newEvent, List<String> leaderboardNames) throws MalformedURLException {
         LeaderboardGroupDTO leaderboardGroupDTO = null;
         String description = "";
         if (newEvent.getDescription() != null) {
@@ -4076,23 +4080,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
         } else {
             leaderboardNames.addAll(getLeaderboardNames());
-            updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null,
-                    null);
+            updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null, null);
             leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
         }
-
         for (LeaderboardGroupDTO lg : newEvent.getLeaderboardGroups()) {
             eventLeaderboardGroupUUIDs.add(lg.getId());
         }
-
-        try {
-            updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate,
-                    newEvent.venue, newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),
-                    newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
-                    newEvent.getSponsorImageURLs());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
+                newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),
+                newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
+                newEvent.getSponsorImageURLs());
     }
     
     @Override
