@@ -3,12 +3,12 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.dev.util.collect.HashSet;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -322,8 +322,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         for (final Entry<RegattaStructure, RegattaDTO> e : regattaDefaultsPerStructure.entrySet()) {
             final int row = i;
             final RegattaStructure regattaStructure = e.getKey();
-            final RegattaDTO regattaCreationDefaults = e.getValue();
-            updateRegattaStructureGridRow(row, regattaStructure, regattaCreationDefaults);
+            updateRegattaStructureGridRow(row, regattaStructure);
             i++;
         }
     }
@@ -331,26 +330,25 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
     /**
      * Updates a single row in the {@link #regattaStructureGrid}
      */
-    private void updateRegattaStructureGridRow(final int row, final RegattaStructure regattaStructure,
-            final RegattaDTO regattaCreationDefaults) {
+    private void updateRegattaStructureGridRow(final int row, final RegattaStructure regattaStructure) {
         Button editBtn = new Button(stringMessages.editSeries());
         editBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                editRegattaDefaults(row, regattaStructure, regattaCreationDefaults);
+                editRegattaDefaults(row, regattaStructure);
             }
         });
         regattaStructureGrid.setWidget(row, 0, new Label(regattaStructure.toString()));
         regattaStructureGrid.setWidget(row, 1, editBtn);
     }
 
-    private void editRegattaDefaults(final int row, final RegattaStructure regattaStructure, final RegattaDTO regattaCreationDefaults) {
+    private void editRegattaDefaults(final int row, final RegattaStructure regattaStructure) {
         List<EventDTO> existingEvents = new ArrayList<EventDTO>();
         EventDTO selectedEvent = getSelectedEvent();
         if (selectedEvent != null) {
             existingEvents.add(getSelectedEvent());
         }
-        DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingEvents, regattaCreationDefaults,
+        DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingEvents, regattaDefaultsPerStructure.get(regattaStructure),
                 sailingService, errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
                     @Override
                     public void cancel() {
@@ -381,7 +379,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
                                 // requires a re-build of the grid because we don't know the other row to update/remove
                                 updateRegattaStructureGrid();
                             } else {
-                                updateRegattaStructureGridRow(row, newStructureEquivalenceClass, newRegattaCreationDefaults);
+                                updateRegattaStructureGridRow(row, newStructureEquivalenceClass);
                             }
                         }
                     }
