@@ -318,10 +318,19 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         while (regattaStructureGrid.getRowCount() > 0) {
             regattaStructureGrid.removeRow(0);
         }
+        final List<RegattaDTO> originalXRRImportedRegattasToConsider;
+        if (regattaListComposite.getSelectedRegattas().isEmpty()) {
+            originalXRRImportedRegattasToConsider = regattaListComposite.getAllRegattas();
+        } else {
+            originalXRRImportedRegattasToConsider = regattaListComposite.getSelectedRegattas();
+        }
+        final Set<RegattaStructure> structures = new HashSet<>();
+        for (RegattaDTO originalXRRImportedRegatta : originalXRRImportedRegattasToConsider) {
+            structures.add(regattaStructures.get(originalXRRImportedRegatta));
+        }
         int i = 0;
-        for (final Entry<RegattaStructure, RegattaDTO> e : regattaDefaultsPerStructure.entrySet()) {
+        for (RegattaStructure regattaStructure : structures) {
             final int row = i;
-            final RegattaStructure regattaStructure = e.getKey();
             updateRegattaStructureGridRow(row, regattaStructure);
             i++;
         }
