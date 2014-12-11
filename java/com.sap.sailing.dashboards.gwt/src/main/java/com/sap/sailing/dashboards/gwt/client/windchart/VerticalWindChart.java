@@ -66,6 +66,8 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * */
     private static final int LARGE_DISPLAY_INTERVALL_IN_MINUTES = 60;
     private static final int SMALL_DISPLAY_INTERVALL_IN_MINUTES = 15;
+    
+    private static final int MAX_SERIES_POINTS = 100000000;
 
     private static final Logger logger = Logger.getLogger(RibDashboardEntryPoint.class.getName());
 
@@ -157,7 +159,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                 areaPlotOptions.setDashStyle(DashStyle.SOLID).setLineWidth(0.1)
                         .setMarker(new Marker().setEnabled(false)).setShadow(false).setHoverStateEnabled(false)
                         .setLineColor("#FFFFFF").setFillColor(positiveSeriesColorAsHex)
-                        .setOption("negativeFillColor", negativeSeriesColorAsHex)));
+                        .setOption("negativeFillColor", negativeSeriesColorAsHex)).setOption("turboThreshold", MAX_SERIES_POINTS));
     }
 
     /**
