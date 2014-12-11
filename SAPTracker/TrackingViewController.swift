@@ -26,7 +26,11 @@ class TrackingViewController : UIViewController {
     /* Register for notifications. Set up timer */
     override func viewDidLoad() {
         super.viewDidLoad()
+  
+        // set values
+        navigationItem.title = DataManager.sharedManager.selectedEvent!.leaderBoard!.name
         
+        // set tracking event, data for this event is sent in higher priority
         SendGPSFixController.sharedManager.trackingEvent = DataManager.sharedManager.selectedEvent
         
         // set online/buffering label
