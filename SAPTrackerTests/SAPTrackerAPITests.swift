@@ -217,7 +217,6 @@ class SAPTrackerAPITests: XCTestCase {
         
         // test values
         XCTAssertEqual(competitor.name, "Lukas ZIELINSKI")
-        XCTAssertEqual(competitor.displayName, "Lukas ZIELINSKI")
         XCTAssertEqual(competitor.competitorId, "1d028378-e12c-a6bd-afa3-b8b21bc5a9ea")
         XCTAssertEqual(competitor.sailId, "LUK 1")
         XCTAssertEqual(competitor.nationality, "GER")

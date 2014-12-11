@@ -74,7 +74,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 }
             )
         }
-        nameLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.displayName
+        nameLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.name
         flagImageView.image = UIImage(named: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.countryCode)
         sailLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.sailId
         checkRegattaStatus()
