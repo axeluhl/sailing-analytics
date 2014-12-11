@@ -59,7 +59,7 @@ see [leaderboards/{leaderboard_name}](http://www.sapsailing.com/sailingserver/we
 
 ### Competitor Information (in general)
 
-_**Note:** Consider using the leaderboard-dependent verison below - which includes the ``displayName``.
+_**Note:** Consider using the leaderboard-dependent verison below - which includes the ``displayName``._
 
 **Path:** ``competitors/{competitor-id}``
 
