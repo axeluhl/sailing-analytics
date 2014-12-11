@@ -12,7 +12,7 @@
             android:id="@+id/racingLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/background"
+            android:background="@drawable/white"
             android:baselineAligned="false"
             android:orientation="vertical" >
 
