@@ -8,11 +8,14 @@ public class BuildStructure {
     private RegattaStructure structure = null;
 
     public BuildStructure(Iterable<Race> races) {
+        // counts the number of races with a specific numeric index; for example,
+        // numberOfRaces[3] tells how many races with number "3" there were, such as
+        // "R3", "Q3" and so on.
         int[] numberOfRaces = new int[10];
         for (Race race : races) {
             int raceNumber = race.getRaceNumber().intValue();
             if (raceNumber > numberOfRaces.length) {
-                // Array erweitern
+                // expand array; TODO maybe better us a Map<Integer, Integer>?
                 int[] temp = numberOfRaces;
                 numberOfRaces = new int[numberOfRaces.length + 10];
                 for (int j = 0; j < temp.length; j++) {

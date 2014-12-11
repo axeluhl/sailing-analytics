@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import com.google.gwt.dev.util.collect.HashSet;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -64,10 +66,25 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
      * Holds one {@link RegattaDTO} for each distinct regatta structure. The user can work with this panel
      * to adjust the defaults for each structure recognized, working with the table selection to show/hide
      * structures related to regattas in the list. After having set the defaults, pressing the "Import Regatta..."
-     * button will apply these defaults during the creation of the regattas selected.
+     * button will apply these defaults during the creation of the regattas selected. When modifying the
+     * defaults such that a different {@link RegattaStructure} will be needed to describe the modified version,
+     * the old entry shall be removed and a new one with the {@link RegattaStructure} matching the modified
+     * {@link RegattaDTO} shall be inserted.
      */
     private final Map<RegattaStructure, RegattaDTO> regattaDefaultsPerStructure;
     
+    /**
+     * Maps from the {@link RegattaDTO}s coming from the XRR import to the structure to be used when creating
+     * the regatta in the back-end. When a regatta is first added to this map, the {@link RegattaStructure} object
+     * is originally created using the key as construction parameter. Over time, the user may evolve the structure
+     * to be used for import using the editing UIs, leading to a different {@link RegattaStructure} to be associated
+     * where the key is no longer part of the equivalence class defined by the {@link RegattaStructure} value.
+     * A typical case is a modification in the fleet structure, e.g., because the fleets weren't correctly recognized
+     * during the import and required some manual intervention.<p>
+     * 
+     * The default settings to be used when finally creating the regatta in the back-end are maintained
+     * in {@link #regattaDefaultsPerStructure} for which the values of this map can be used as key.
+     */
     private final Map<RegattaDTO, RegattaStructure> regattaStructures;
     
     public StructureImportManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
@@ -121,9 +138,9 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
             @Override
             public void onClick(ClickEvent event) {
                 if (getSelectedEvent() != null) {
-                    List<RegattaDTO> selectedRegattas = regattaListComposite.getSelectedRegattas();
-                    if (!selectedRegattas.isEmpty()) {
-                        createRegattas(selectedRegattas, getSelectedEvent());
+                    List<RegattaDTO> selectedOriginalRegattasFromXRR = regattaListComposite.getSelectedRegattas();
+                    if (!selectedOriginalRegattasFromXRR.isEmpty()) {
+                        createRegattas(selectedOriginalRegattasFromXRR, getSelectedEvent());
                     } else {
                         errorReporter.reportError(stringMessages.pleaseSelectAtLeastOneRegatta());
                     }
@@ -267,18 +284,18 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         }
     }
 
-    private void fillRegattas(Iterable<RegattaDTO> regattas) {
+    private void fillRegattas(Iterable<RegattaDTO> regattasFromXRR) {
         regattaStructures.clear();
         regattaDefaultsPerStructure.clear();
-        for (RegattaDTO regatta : regattas) {
-            RegattaStructure regattaStructure = new RegattaStructure(regatta);
+        for (RegattaDTO regattaFromXRR : regattasFromXRR) {
+            RegattaStructure regattaStructure = new RegattaStructure(regattaFromXRR);
             if (!regattaDefaultsPerStructure.containsKey(regattaStructure)) {
-                RegattaDTO defaultsForRegattasWithStructure = createRegattaDefaults(regatta);
+                RegattaDTO defaultsForRegattasWithStructure = createRegattaDefaults(regattaFromXRR);
                 regattaDefaultsPerStructure.put(regattaStructure, defaultsForRegattasWithStructure);
             }
-            regattaStructures.put(regatta, regattaStructure);
+            regattaStructures.put(regattaFromXRR, regattaStructure);
         }
-        regattaListComposite.fillRegattas((List<RegattaDTO>) regattas);
+        regattaListComposite.fillRegattas((List<RegattaDTO>) regattasFromXRR);
     }
 
     /**
@@ -303,34 +320,70 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         }
         int i = 0;
         for (final Entry<RegattaStructure, RegattaDTO> e : regattaDefaultsPerStructure.entrySet()) {
-            Button editBtn = new Button(stringMessages.editSeries());
-            editBtn.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    editRegattaDefaults(e.getValue());
-                }
-            });
-            regattaStructureGrid.setWidget(i, 0, new Label(e.getKey().toString()));
-            regattaStructureGrid.setWidget(i, 1, editBtn);
+            final int row = i;
+            final RegattaStructure regattaStructure = e.getKey();
+            final RegattaDTO regattaCreationDefaults = e.getValue();
+            updateRegattaStructureGridRow(row, regattaStructure, regattaCreationDefaults);
             i++;
         }
     }
 
-    private void editRegattaDefaults(final RegattaDTO selectedRegatta) {
+    /**
+     * Updates a single row in the {@link #regattaStructureGrid}
+     */
+    private void updateRegattaStructureGridRow(final int row, final RegattaStructure regattaStructure,
+            final RegattaDTO regattaCreationDefaults) {
+        Button editBtn = new Button(stringMessages.editSeries());
+        editBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                editRegattaDefaults(row, regattaStructure, regattaCreationDefaults);
+            }
+        });
+        regattaStructureGrid.setWidget(row, 0, new Label(regattaStructure.toString()));
+        regattaStructureGrid.setWidget(row, 1, editBtn);
+    }
+
+    private void editRegattaDefaults(final int row, final RegattaStructure regattaStructure, final RegattaDTO regattaCreationDefaults) {
         List<EventDTO> existingEvents = new ArrayList<EventDTO>();
         EventDTO selectedEvent = getSelectedEvent();
         if (selectedEvent != null) {
             existingEvents.add(getSelectedEvent());
         }
-        DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingEvents, selectedRegatta,
+        DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingEvents, regattaCreationDefaults,
                 sailingService, errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
                     @Override
                     public void cancel() {
                     }
 
                     @Override
-                    public void ok(final EventAndRegattaDTO newRegatta) {
-                        // FIXME why isn't the association between regatta and event not evaluated here? Where *is* it evaluated?
+                    public void ok(final EventAndRegattaDTO newRegattaWithEvent) {
+                        final RegattaDTO newRegattaCreationDefaults = newRegattaWithEvent.getRegatta();
+                        RegattaStructure newStructureEquivalenceClass = new RegattaStructure(newRegattaCreationDefaults);
+                        final RegattaDTO mergedWith = regattaDefaultsPerStructure.put(newStructureEquivalenceClass, newRegattaCreationDefaults);
+                        if (!regattaStructure.equals(newStructureEquivalenceClass)) {
+                            // the creation defaults (probably particularly the fleet structure) was changed "incompatibly";
+                            // if it equals another existing structure, use the creation defaults just edited for both and
+                            // remove the grid line; otherwise replace the grid line;
+                            // in any case update the StructureImportListComposite to reflect the changed structure
+                            Map<RegattaDTO, RegattaStructure> updatesToPerform = new HashMap<>();
+                            for (Entry<RegattaDTO, RegattaStructure> e : regattaStructures.entrySet()) {
+                                if (e.getValue().equals(regattaStructure)) {
+                                    // found a regatta that referenced the old structure which is now obsolete; let the XRR-imported
+                                    // regatta point to the new structure
+                                    updatesToPerform.put(e.getKey(), newStructureEquivalenceClass);
+                                }
+                            }
+                            regattaStructures.putAll(updatesToPerform); // let original XRR-imported regattas point to their new structure
+                            regattaDefaultsPerStructure.remove(regattaStructure);
+                            regattaListComposite.fillRegattas(regattaStructures.keySet());
+                            if (mergedWith != null) {
+                                // requires a re-build of the grid because we don't know the other row to update/remove
+                                updateRegattaStructureGrid();
+                            } else {
+                                updateRegattaStructureGridRow(row, newStructureEquivalenceClass, newRegattaCreationDefaults);
+                            }
+                        }
                     }
                 });
         dialog.ensureDebugId("DefaultRegattaCreateDialog");
@@ -352,9 +405,13 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         return result;
     }
 
-    private void createRegattas(final Iterable<RegattaDTO> selectedRegattas, EventDTO newEvent) {
+    private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR, EventDTO newEvent) {
         eventManagementPanel.fillEvents();
-        sailingService.createRegattaStructure(selectedRegattas, newEvent, new AsyncCallback<Void>() {
+        final Set<RegattaDTO> regattaConfigurationsToCreate = new HashSet<>();
+        for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {
+            regattaConfigurationsToCreate.add(regattaDefaultsPerStructure.get(regattaStructures.get(originalRegattaFromXRR)));
+        }
+        sailingService.createRegattaStructure(regattaConfigurationsToCreate, newEvent, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught.getMessage()));

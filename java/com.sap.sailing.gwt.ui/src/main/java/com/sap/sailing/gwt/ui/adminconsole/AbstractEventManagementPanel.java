@@ -42,13 +42,14 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
     }
     
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         this.trackedRacesListComposite.fillRegattas(regattas);
         RegattaDTO selectedRegatta = getSelectedRegatta();
         this.availableRegattas.clear();
         this.availableRegattasListBox.clear();
         this.availableRegattasListBox.addItem(this.stringMessages.defaultRegatta());
-        List<RegattaDTO> regattasSortedByName = new ArrayList<RegattaDTO>(regattas);
+        List<RegattaDTO> regattasSortedByName = new ArrayList<RegattaDTO>();
+        Util.addAll(regattas, regattasSortedByName);
         Collections.sort(regattasSortedByName, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO o1, RegattaDTO o2) {

@@ -37,6 +37,7 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -332,15 +333,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
-        if (regattas.isEmpty()) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
+        if (Util.isEmpty(regattas)) {
             regattaTable.setVisible(false);
             noRegattasLabel.setVisible(true);
         } else {
             regattaTable.setVisible(true);
             noRegattasLabel.setVisible(false);
         }
-        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>(regattas);
+        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
+        Util.addAll(regattas, newAllRegattas);
         List<RegattaIdentifier> newAllRegattaIdentifiers = new ArrayList<RegattaIdentifier>();
         for (RegattaDTO regatta : regattas) {
             newAllRegattaIdentifiers.add(regatta.getRegattaIdentifier());

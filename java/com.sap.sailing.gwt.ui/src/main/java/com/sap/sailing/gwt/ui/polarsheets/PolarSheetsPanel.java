@@ -227,7 +227,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         polarSheetsTrackedRacesList.fillRegattas(regattas);
     }
 

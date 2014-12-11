@@ -187,7 +187,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         regattaListComposite.fillRegattas(regattas);
     }
 
