@@ -337,10 +337,11 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("{name}/device_mappings/start")
-    public Response postCheckin(String json, @PathParam("name") String leaderboardName) {
+    public Response postCheckin(String checkinJson, @PathParam("name") String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
 
         if (!leaderboardIsValid(leaderboard)) {
+            logger.warning("Leaderboard does not exist or does not hold a RegattaLog");
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Leaderboard does not exist or does not hold a RegattaLog").type(MediaType.TEXT_PLAIN)
                     .build();
@@ -359,7 +360,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         JSONObject requestObject;
         try {
             logger.fine("Post issued to " + this.getClass().getName());
-            Object requestBody = JSONValue.parseWithException(json);
+            Object requestBody = JSONValue.parseWithException(checkinJson);
             requestObject = Helpers.toJSONObjectSafe(requestBody);
             logger.fine("JSON requestObject is: " + requestObject.toString());
         } catch (ParseException | JsonDeserializationException e) {
@@ -378,6 +379,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
         if (competitorId == null || deviceUuid == null || fromMillis == null || deviceType == null
                 || pushDeviceId == null) {
+            logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
@@ -386,6 +388,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
         Competitor mappedTo = domainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
         if (mappedTo == null) {
+            logger.warning("No competitor found for id " + competitorId);
             return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
                     .type(MediaType.TEXT_PLAIN).build();
         }
@@ -403,7 +406,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         event = new RegattaLogDeviceCompetitorMappingEventImpl(now, author, now, UUID.randomUUID(), mappedTo, device,
                 from, null);
         isRegattaLike.getRegattaLog().add(event);
-        logger.fine("Successfully added regatta log event");
+        logger.fine("Successfully checked in competitor " + mappedTo.getName());
         return Response.status(Status.OK).build();
     }
 
@@ -428,6 +431,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
 
         if (!leaderboardIsValid(leaderboard)) {
+            logger.warning("Leaderboard does not exist or does not hold a RegattaLog");
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Leaderboard does not exist or does not hold a RegattaLog").type(MediaType.TEXT_PLAIN)
                     .build();
@@ -459,12 +463,14 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         TimePoint closingTimePoint = new MillisecondsTimePoint(toMillis);
         
         if (toMillis == null || deviceUuid == null || closingTimePoint == null){
+            logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
 
         Competitor mappedTo = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
         if (mappedTo == null) {
+            logger.warning("No competitor found for id " + competitorId);
             return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
                     .type(MediaType.TEXT_PLAIN).build();
         }
@@ -474,6 +480,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         Serializable deviceMappingEventId = finder.analyze();
 
         if (deviceMappingEventId == null) {
+            logger.warning("No corresponding open competitor to device mapping has been found");
             return Response.status(Status.BAD_REQUEST)
                     .entity("No corresponding open competitor to device mapping has been found")
                     .type(MediaType.TEXT_PLAIN).build();
@@ -483,7 +490,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 author, now, UUID.randomUUID(), deviceMappingEventId, closingTimePoint);
 
         isRegattaLike.getRegattaLog().add(event);
-        
-        return Response.status(Status.GONE).build();
+        logger.fine("Successfully checked out competitor " + mappedTo.getName());
+        return Response.status(Status.OK).build();
     }
 }
