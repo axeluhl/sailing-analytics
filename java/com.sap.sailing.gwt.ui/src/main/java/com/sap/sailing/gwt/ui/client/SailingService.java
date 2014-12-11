@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -546,7 +545,7 @@ public interface SailingService extends RemoteService {
      */
     Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl);
 
-    void createRegattaStructure(Iterable<RegattaDTO> regattas, EventDTO newEvent) throws MalformedURLException;
+    void createRegattaStructure(Iterable<RegattaDTO> regattas, EventDTO newEvent) throws Exception;
 
     Integer getStructureImportOperationProgress();
 }

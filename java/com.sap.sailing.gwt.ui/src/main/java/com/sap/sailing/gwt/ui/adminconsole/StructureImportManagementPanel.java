@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +40,7 @@ import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -419,6 +421,14 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
             RegattaDTO cloneFromDefaults = new RegattaDTO(regattaDefaultsPerStructure.get(regattaStructures.get(originalRegattaFromXRR)));
             cloneFromDefaults.setName(originalRegattaFromXRR.getName());
             cloneFromDefaults.boatClass = originalRegattaFromXRR.boatClass;
+            // copy the race columns from original to clone of template
+            Iterator<SeriesDTO> originalSeriesIter = originalRegattaFromXRR.series.iterator();
+            Iterator<SeriesDTO> cloneFromDefaultsSeriesIter = cloneFromDefaults.series.iterator();
+            while (originalSeriesIter.hasNext() && cloneFromDefaultsSeriesIter.hasNext()) {
+                SeriesDTO originalSeries = originalSeriesIter.next();
+                SeriesDTO cloneFromDefaultsSeries = cloneFromDefaultsSeriesIter.next();
+                cloneFromDefaultsSeries.setRaceColumns(originalSeries.getRaceColumns());
+            }
             regattaConfigurationsToCreate.add(cloneFromDefaults);
         }
         sailingService.createRegattaStructure(regattaConfigurationsToCreate, newEvent, new AsyncCallback<Void>() {

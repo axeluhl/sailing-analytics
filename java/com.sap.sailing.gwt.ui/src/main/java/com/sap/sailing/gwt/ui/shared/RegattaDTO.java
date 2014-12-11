@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +40,9 @@ public class RegattaDTO extends NamedDTO {
     }
     
     /**
-     * A clone / copy constructor, copying all field values, flat, from <code>other</code> to the new object
+     * A clone / copy constructor, copying all field values, flat, from <code>other</code> to the new object, except for the
+     * {@link #series} list which is creates as a new list with all its elements cloned using the {@link SeriesDTO#SeriesDTO(SeriesDTO)}
+     * copy constructor.
      */
     public RegattaDTO(RegattaDTO other) {
         super(other.getName());
@@ -47,7 +50,10 @@ public class RegattaDTO extends NamedDTO {
         this.startDate = other.startDate;
         this.endDate = other.endDate;
         this.races = other.races;
-        this.series = other.series;
+        this.series = new ArrayList<>();
+        for (SeriesDTO otherSeries : other.series) {
+            this.series.add(new SeriesDTO(otherSeries)); // clone the series; clients may replace / alter their fields
+        }
         this.scoringScheme = other.scoringScheme;
         this.defaultCourseAreaUuid = other.defaultCourseAreaUuid;
         this.defaultCourseAreaName = other.defaultCourseAreaName;
