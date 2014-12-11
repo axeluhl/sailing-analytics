@@ -91,7 +91,7 @@ see [leaderboards/{leaderboard_name}](http://www.sapsailing.com/sailingserver/we
 </table>
 
 **Changes**
-* drop ``countryCode`` (is 3-letter IOC acronym enough for you?)
+* drop ``countryCode`` (is thee nationality field (3-letter IOC acronym) sufficient?)
 * drop ``displayName`` (a competitor only has a potentially different displayName in the context of leaderboard -> we are not operating in such a context here)
 * add ``boatClassName``
 
