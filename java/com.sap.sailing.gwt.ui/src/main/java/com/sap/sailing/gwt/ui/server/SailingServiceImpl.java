@@ -101,6 +101,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
@@ -140,6 +141,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -183,6 +185,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetsXYDiagramDataImpl;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -212,7 +215,6 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
-import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -337,6 +339,8 @@ import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
+import com.sap.sailing.polars.PolarDataService;
+import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
@@ -481,7 +485,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final SwissTimingReplayService swissTimingReplayService;
 
     private final QuickRanksLiveCache quickRanksLiveCache;
-
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
@@ -3913,13 +3916,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (RegattaAndRaceIdentifier race : selectedRaces) {
             trackedRaces.add(service.getTrackedRace(race));
         }
-        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, settings, executor);
-        genWorker.startPolarSheetGeneration();
         if (name == null || name.isEmpty()) {
             name = getCommonBoatClass(trackedRaces);
         }
-        PolarSheetsData result = genWorker.get();
+        PolarDataService polarDataService = service.getPolarDataService();
+        PolarSheetsData result = polarDataService.generatePolarSheet(trackedRaces, settings, executor);
         return new PolarSheetGenerationResponseImpl(id, name, result);
+    }
+
+    @Override
+    public List<String> getBoatClassNamesWithPolarSheetsAvailable() {
+        Set<BoatClass> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
+        List<String> names = new ArrayList<String>();
+        for (BoatClass boatClass : boatClasses) {
+            names.add(boatClass.getName());
+        }
+        return names;
+    }
+
+    @Override
+    public PolarSheetGenerationResponse showCachedPolarSheetForBoatClass(String boatClassName) {
+        BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
+        PolarSheetsData data = getService().getPolarDataService().getPolarSheetForBoatClass(boatClass);
+        String name = boatClassName + "_OVERALL";
+        String id = name;
+        return new PolarSheetGenerationResponseImpl(id, name, data);
     }
 
     private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {
@@ -5175,7 +5196,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return null;
     }
-    
+
     @Override
     public ArrayList<EventDTO> getEventsForLeaderboard(String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -5190,5 +5211,45 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return new ArrayList<>(events.values());
+    }
+
+    @Override
+    public PolarSheetsXYDiagramData createXYDiagramForBoatClass(String boatClassName) {
+        BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
+        List<Pair<Double, Double>> pointsForUpwindStarboardAverageSpeed = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForUpwindStarboardAverageAngle = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForUpwindStarboardAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForUpwindStarboardAverageAngleMovingAverage = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForUpwindStarboardAverageConfidence = new ArrayList<Pair<Double, Double>>();
+        for (double windInKnots = 0.1; windInKnots < 30; windInKnots = windInKnots + 0.1) {
+            try {
+                SpeedWithBearingWithConfidence<Void> averageUpwindStarboard = getService().getPolarDataService()
+                        .getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots), LegType.UPWIND,
+                                Tack.STARBOARD, true);
+                pointsForUpwindStarboardAverageSpeed.add(new Pair<Double, Double>(windInKnots, averageUpwindStarboard
+                        .getObject().getKnots()));
+                pointsForUpwindStarboardAverageAngle.add(new Pair<Double, Double>(windInKnots, averageUpwindStarboard
+                        .getObject().getBearing().getDegrees()));
+
+                pointsForUpwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
+                        averageUpwindStarboard.getConfidence()));
+                
+                SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService().getPolarDataService()
+                        .getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots), LegType.UPWIND,
+                                Tack.STARBOARD, false);
+                pointsForUpwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
+                        averageUpwindStarboardMovingAverage.getObject().getKnots()));
+                pointsForUpwindStarboardAverageAngleMovingAverage.add(new Pair<Double, Double>(windInKnots,
+                        averageUpwindStarboardMovingAverage.getObject().getBearing().getDegrees()));
+
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                // Do not add a point to the result
+            }
+        }
+        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(pointsForUpwindStarboardAverageAngle,
+                pointsForUpwindStarboardAverageSpeed, pointsForUpwindStarboardAverageAngleMovingAverage,
+                pointsForUpwindStarboardAverageSpeedMovingAverage, pointsForUpwindStarboardAverageConfidence);
+
+        return data;
     }
 }

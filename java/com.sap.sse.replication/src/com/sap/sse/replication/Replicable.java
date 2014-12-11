@@ -172,11 +172,32 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Repl
      */
     default void applyReceivedReplicated(OperationWithResult<S, ?> operation) {
         if (!hasSentOperationToMaster(operation)) {
-            applyReplicated(operation);
+            assert !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
+            try {
+                setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(true);
+                applyReplicated(operation);
+            } finally {
+                setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
+            }
         } else {
             logger.fine("Ignoring operation "+operation+" received back from master after having sent it there for execution and replication earlier");
         }
     }
+
+    /**
+     * Responds with what has been passed to the last invocation to
+     * {@link #setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean)} in the calling thread;
+     * the default is <code>false</code>. This is required in order to not replicate operations triggered on the replica
+     * while receiving the initial load back to the master.
+     */
+    boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
+    
+    /**
+     * {@link #isCurrentlyFillingFromInitialLoad} responds with what has been passed to the last invocation to this
+     * method in the calling thread; the default is <code>false</code>. This is required in order to not replicate
+     * operations triggered on the replica while receiving the initial load back to the master.
+     */
+    void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean b);
 
     /**
      * If an operation equal to <code>operationWithResultWithIdWrapper</code> has previously been passed to a call to
