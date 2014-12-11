@@ -102,7 +102,7 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
             logger.finer(String.format("%s (%s) was added to log %s.", event, event.getClass().getName(), getId()));
             onSuccessfulAdd(event, notifyListeners);
         } else {
-            logger.fine(String.format("%s (%s) was not added to race log %s because it already existed there.", event, event.getClass().getName(), getId()));
+            logger.finer(String.format("%s (%s) was not added to race log %s because it already existed there.", event, event.getClass().getName(), getId()));
         }
         return isAdded;
     }

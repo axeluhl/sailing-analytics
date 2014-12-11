@@ -11,7 +11,7 @@ public class WindSteppingWithMaxDistance extends WindSteppingImpl {
         super();
     };
 
-    public WindSteppingWithMaxDistance(Integer[] levels, double maxDistance) {
+    public WindSteppingWithMaxDistance(Double[] levels, double maxDistance) {
         super(levels);
         this.maxDistance = maxDistance;
     }
@@ -20,7 +20,7 @@ public class WindSteppingWithMaxDistance extends WindSteppingImpl {
     public int getLevelIndexForValue(double speed) {
         int result = -1;
         for (int i = 0; i < levels.length - 1; i++) {
-            double threshold = levels[i] + ((levels[i+1] - levels[i]) / 2);
+            double threshold = levels[i] + ((levels[i+1] - levels[i]) / 2.);
             if (speed < threshold) {
                 if (threshold - speed <= maxDistance * 2) {
                     result = i;
@@ -39,4 +39,30 @@ public class WindSteppingWithMaxDistance extends WindSteppingImpl {
     public double getMaxDistance() {
         return maxDistance;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        long temp;
+        temp = Double.doubleToLongBits(maxDistance);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WindSteppingWithMaxDistance other = (WindSteppingWithMaxDistance) obj;
+        if (Double.doubleToLongBits(maxDistance) != Double.doubleToLongBits(other.maxDistance))
+            return false;
+        return true;
+    }
+
+
 }

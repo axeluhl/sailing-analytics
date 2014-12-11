@@ -57,7 +57,9 @@ see [events/{event_id}](http://www.sapsailing.com/sailingserver/webservices/api/
 
 see [leaderboards/{leaderboard_name}](http://www.sapsailing.com/sailingserver/webservices/api/v1/leaderboardGetDoc.html)
 
-### Competitor Information
+### Competitor Information (in general)
+
+_**Note:** Consider using the leaderboard-dependent verison below - which includes the ``displayName``._
 
 **Path:** ``competitors/{competitor-id}``
 
@@ -67,18 +69,39 @@ see [leaderboards/{leaderboard_name}](http://www.sapsailing.com/sailingserver/we
 ```
 {
   "name": "Heiko KRÖGER",
+  "id": "af855a56-9726-4a9c-a77e-da955bd289be",
+  "sailID": "GER 1",
+  "nationality": "GER",
+  "boatClassName": "49er",
+  "countryCode": "DE"
+}
+```
+
+**Additional Notes:**
+* Competitor profile image left out for now.
+* No flag image included. These images are present on the server in the GWT-context only as 16x11 pngs currently. How flags are displayed in the app should probably be independent. I would suggest resolving the appropriate image within the app based on the ``countryCode``. The images are exposed through the the static endpoint ``<host>/gwt/images/flags/<countryCode>.png`` ([example](http://www.sapsailing.com/gwt/images/flags/de.png))
+
+### Competitor Information (Leaderboard-specific)
+
+**Path:** ``leaderboards/{leaderboard-name}/competitors/{competitor-id}``
+
+**Verb:** ``GET``
+
+**Response:**
+```
+{
+  "name": "Heiko KROEGER",
   "displayName": "Heiko KRÖGER",
   "id": "af855a56-9726-4a9c-a77e-da955bd289be",
   "sailID": "GER 1",
   "nationality": "GER",
+  "boatClassName": "49er",
   "countryCode": "DE"
 }
 ```
 
 **Additional Notes:**
 * The semantics of ``displayName`` are explained in the JavaDoc of ``Leaderboard#getDisplayName()``.
-* Competitor profile image left out for now.
-* No flag image included. These images are present on the server in the GWT-context only as 16x11 pngs currently. How flags are displayed in the app should probably be independent. I would suggest resolving the appropriate image within the app based on the ``countryCode``.
 
 
 ## Check-In
