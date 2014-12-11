@@ -9,11 +9,35 @@
 		.slider .slick-track {
 			
 		}
+		.slider  li {
+			width: 10px;
+			padding: 2px;
+		}
+
+		.slider .slick-dots li button:before {
+			width: 10px;
+		}
+
+		.slider ul {
+			position: absolute;
+			bottom: -90px;
+			font-size: 10px;
+			overflow: hidden;
+			height: 70px;
+		}
+
+		.slider .slick-dots li {
+			margin: 5px;
+			width: 10px;
+		}
 
         .slider ul > li > button:before {
-            font-size: 15px;
+            font-size: 10px;
+			width: 5spx;
+			padding: 0px;
         }
 		
+
 		.slider .slick-slide {
             margin-left: 15px;
             margin-right: 15px;
