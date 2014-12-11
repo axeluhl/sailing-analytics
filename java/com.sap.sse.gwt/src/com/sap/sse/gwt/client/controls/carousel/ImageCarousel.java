@@ -58,7 +58,7 @@ public class ImageCarousel extends Widget {
     /**
      * slick slider property: centerMode
      */
-    private boolean centerMode = true;
+    private boolean centerMode = false;
     /**
      * slick slider property: variableWidth
      */
@@ -112,7 +112,7 @@ public class ImageCarousel extends Widget {
 			    centerMode : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::centerMode),
 			    variableWidth : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::variableWidth),
 			    lazyLoad : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::lazyload),
-			    swipeToSlide : false,
+			    swipeToSlide : true,
 			    arrows : true,
 			    responsive : true,
 			    slidesToShow : 2

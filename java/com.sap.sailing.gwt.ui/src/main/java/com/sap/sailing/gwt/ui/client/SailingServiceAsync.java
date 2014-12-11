@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -552,8 +553,13 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
+    void getBoatClassNamesWithPolarSheetsAvailable(AsyncCallback<List<String>> asyncCallback);
+    
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
+    
 
+    void showCachedPolarSheetForBoatClass(String boatClassName,
+            AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void denoteForRaceLogTracking(String leaderboardName,
@@ -642,6 +648,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 
+    void createXYDiagramForBoatClass(String itemText, AsyncCallback<PolarSheetsXYDiagramData> asyncCallback);
+    
     void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
             AsyncCallback<Map<Integer, Date>> callback);
 

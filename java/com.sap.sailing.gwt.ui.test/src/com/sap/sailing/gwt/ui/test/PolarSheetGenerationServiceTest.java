@@ -66,7 +66,7 @@ public class PolarSheetGenerationServiceTest {
          
         SailingService service = new MockSailingServiceForPolarSheetGeneration();
 
-        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
+        Double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
                 0.05, false, windStepping, false);
@@ -81,7 +81,6 @@ public class PolarSheetGenerationServiceTest {
         
         PolarSheetsData results = triggerData.getData();
         
-        Assert.assertTrue(results.isComplete());
         Assert.assertNotNull(results);
         
         Assert.assertEquals(4, results.getDataCount());

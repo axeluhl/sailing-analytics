@@ -64,6 +64,19 @@ see [leaderboards/{leaderboard_name}](http://www.sapsailing.com/sailingserver/we
 **Verb:** ``GET``
 
 **Response:**
+<table>
+  <tr><th>Proposed new format</th><th>Old format</th></tr>
+  <tr><td>
+```
+{
+  "name": "Heiko KRÖGER",
+  "id": "af855a56-9726-4a9c-a77e-da955bd289be",
+  "sailID": "GER 1",
+  "nationality": "GER",
+  "boatClassName": "49er",
+}
+```
+  </td><td>
 ```
 {
   "name": "Heiko KRÖGER",
@@ -74,6 +87,13 @@ see [leaderboards/{leaderboard_name}](http://www.sapsailing.com/sailingserver/we
   "countryCode": "DE"
 }
 ```
+  </td></tr>
+</table>
+
+**Changes**
+* drop ``countryCode`` (is thee nationality field (3-letter IOC acronym) sufficient?)
+* drop ``displayName`` (a competitor only has a potentially different displayName in the context of leaderboard -> we are not operating in such a context here)
+* add ``boatClassName``
 
 **Additional Notes:**
 * The semantics of ``displayName`` are explained in the JavaDoc of ``Leaderboard#getDisplayName()``.
