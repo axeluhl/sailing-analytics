@@ -5020,8 +5020,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         DeviceMapping<?> mapping = convertToDeviceMapping(dto);
         TimePoint now = MillisecondsTimePoint.now();
         RaceLogEvent event = null;
-        TimePoint from = mapping.getTimeRange().openBeginning() ? null : mapping.getTimeRange().from();
-        TimePoint to = mapping.getTimeRange().openEnd() ? null : mapping.getTimeRange().to();
+        TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
+        TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
             event = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(now, getService().getServerAuthor(),
