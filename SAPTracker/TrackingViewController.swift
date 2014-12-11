@@ -8,26 +8,20 @@
 
 import Foundation
 
-class TrackingViewController : UIViewController, UIAlertViewDelegate {
+class TrackingViewController : UIViewController {
     
-    enum AlertView: Int {
-        case StopTracking
-    }
     @IBOutlet weak var gpsQuality1: UIView!
     @IBOutlet weak var gpsQuality2: UIView!
     @IBOutlet weak var gpsQuality3: UIView!
     @IBOutlet weak var gpsQuality4: UIView!
     @IBOutlet weak var trackingStatusLabel: UILabel!
     @IBOutlet weak var onlineModeLabel: UILabel!
-    @IBOutlet weak var trackingTimeLabel: UILabel!
     
     let gpsActiveColor = UIColor(hex: 0x8AB54D)
     let gpsInactiveColor = UIColor(hex: 0x445A2F)
     let greenColor = UIColor(hex: 0x408000)
     let redColor = UIColor(hex: 0xFF0000)
     let orangeColor = UIColor(hex: 0xFF8000)
-    let startDate = NSDate()
-    let dateFormatter = NSDateFormatter()
     
     /* Register for notifications. Set up timer */
     override func viewDidLoad() {
@@ -42,12 +36,6 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"networkAvailabilityChanged", name:APIManager.NotificationType.networkAvailabilityChanged, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"locationManagerFailed:", name:LocationManager.NotificationType.locationManagerFailed, object: nil)
-        
-        // start tracking timer
-        let timer = NSTimer(timeInterval: 0.1, target: self, selector: "timer:", userInfo: nil, repeats: true)
-        NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)
-        dateFormatter.dateFormat = "HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
     }
 
     // MARK:- Notifications
@@ -97,42 +85,5 @@ class TrackingViewController : UIViewController, UIAlertViewDelegate {
         trackingStatusLabel.text = "Not Tracking"
         trackingStatusLabel.textColor = redColor
     }
-    
-    // MARK:- Timer
-    
-    func timer(timer: NSTimer) {
-        let currentDate = NSDate()
-        let timeInterval = currentDate.timeIntervalSinceDate(startDate)
-        let timerDate = NSDate(timeIntervalSince1970: timeInterval)
-        trackingTimeLabel.text = dateFormatter.stringFromDate(timerDate)
-    }
-    
-    // MARK:- Buttons
-    
-    /* Stop tracking, go back to regattas view */
-    @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-        let alertView = UIAlertView(title: "Stop tracking?", message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "Stop")
-        alertView.tag = AlertView.StopTracking.rawValue;
-        alertView.show()
-    }
-    
-    /* Alert view delegate */
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        switch alertView.tag {
-            // Stop tracking?
-        case AlertView.StopTracking.rawValue:
-            switch buttonIndex {
-            case alertView.cancelButtonIndex:
-                break
-            default:
-                LocationManager.sharedManager.stopTracking()
-                SendGPSFixController.sharedManager.trackingEvent = nil
-                self.dismissViewControllerAnimated(true, nil)
-            }
-            break
-        default:
-            break
-        }
-    }
-    
+
 }

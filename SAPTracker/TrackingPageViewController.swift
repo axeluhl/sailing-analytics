@@ -16,7 +16,7 @@ class TrackingPageViewController : UIPageViewController, UIPageViewControllerDat
     
     override func viewDidLoad() {
         dataSource = self
-        page1 = storyboard!.instantiateViewControllerWithIdentifier("Tracking") as? TrackingViewController
+        page1 = storyboard!.instantiateViewControllerWithIdentifier("Timer") as? TimerViewController
         page2 = storyboard!.instantiateViewControllerWithIdentifier("Speed") as? UIViewController
         page3 = storyboard!.instantiateViewControllerWithIdentifier("Heading") as? UIViewController
         setViewControllers([page1!], direction: UIPageViewControllerNavigationDirection.Forward, animated: false, completion: nil)
