@@ -360,6 +360,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private ReplicationMasterDescriptor replicatingFromMaster;
     
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
+    
+    private static ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster =  ThreadLocal.withInitial(() -> false);
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
@@ -515,6 +517,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
+    }
+
+    @Override
+    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
+        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
+        RacingEventServiceImpl.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
     }
 
     @Override
