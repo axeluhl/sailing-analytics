@@ -9,10 +9,11 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0 Beta</h1>
-<h2>URL: /api/v1/regattas/{regattaname}/races/{racename}/marks/positions</h2>
+<h2>URL: /api/v1/gps_fixes</h2>
 
 <b>Description:</b>
-<p>Gets all GPS positions of the course marks of a race</p>
+<p>Adds an arbitrary number GPS-fixes that originated from a device with a unique identifier to the GPSFixStore.
+These can be mapped to a competitor or a mark via the DeviceMappings in the RaceLog-Tracking connector.</p>
 <br/>
 <table>
 	<tr>
@@ -20,8 +21,12 @@
 		<td>REST</td>
 	</tr>
 	<tr>
+		<td>Post data input format:</td>
+		<td>JSON</td>
+	</tr>
+	<tr>
 		<td>Output format:</td>
-		<td>Json</td>
+		<td>HTTP 200</td>
 	</tr>
 	<tr>
 		<td>Mandatory parameters:</td>
@@ -29,20 +34,37 @@
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>
-			<div>fromtime (ISO format, such as 2014-02-14T10:12:03Z)</div>
-			<div>fromtimeasmillis</div>
-			<div>totime (ISO format, such as 2014-02-14T10:12:03Z)</div>
-			<div>totimeasmillis</div>
-		</td>
+		<td>None</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>
-		<td>GET</td>
+		<td>POST</td>
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/marks/positions">http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/marks/positions</a></td>
+		<td>
+		POST the following JSON data to <a href="http://www.sapsailing.com/sailingserver/api/v1/gps_fixes">http://www.sapsailing.com/sailingserver/api/v1/gps_fixes</a>
+		<pre><code>
+{
+  "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
+  "fixes" : [
+    {
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
+      "speed" : 3.61,
+      "course" : 258.11,
+    },
+    {
+      "timestamp" : 14144168490000,
+      "latitude" : 55.12456,
+      "longitude" : 8.03456,
+      "speed" : 5.1,
+      "course" : 14.2,
+    }
+  ]
+}
+		</code></pre></td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>
