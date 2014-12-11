@@ -48,8 +48,8 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 
 		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
 		
-		Button stopTracking = (Button)view.findViewById(R.id.stop_tracking);
-		stopTracking.setOnClickListener(this);
+//		Button stopTracking = (Button)view.findViewById(R.id.stop_tracking);
+//		stopTracking.setOnClickListener(this);
 	
 		prefs = new AppPreferences(getActivity());
 		if (prefs.getTrackingTimerStarted() == 0)
@@ -130,7 +130,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		if (isAdded())
 		{
 			long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
-			AutoResizeTextView textView = (AutoResizeTextView) getActivity().findViewById(R.id.tracking_time_label);
+			TextView textView = (TextView) getActivity().findViewById(R.id.tracking_time_label);
 			textView.setText(getTimeFormatString(diff));
 		}
 	}

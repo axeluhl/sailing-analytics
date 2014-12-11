@@ -175,33 +175,4 @@
             </LinearLayout>
         </RelativeLayout>
     </ScrollView>
-
-    <RelativeLayout
-        android:id="@+id/stop_tracking_box"
-        android:layout_width="fill_parent"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/gray" >
-
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:background="@color/white_transparent" />
-
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
-            android:id="@+id/stop_tracking"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_margin="10dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:background="@drawable/rounded_btn_red"
-            android:padding="10dp"
-            android:text="@string/stop_tracking"
-            android:textAllCaps="true"
-            android:textStyle="bold" />
-    </RelativeLayout>
-    
 </RelativeLayout>

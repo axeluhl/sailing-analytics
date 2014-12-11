@@ -3,8 +3,8 @@
     xmlns:custom="http://schemas.android.com/apk/res/com.sap.sailing.android.tracking.app.views"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res/com.sap.sailing.android.tracking.app"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:background="@color/sap_yellow" >
 
     <com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView
