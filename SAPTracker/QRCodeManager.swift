@@ -61,7 +61,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                                 self.delegate.activityIndicatorView?.stopAnimating()
                                 
                                 self.competitorDictionary = competitorResponseObject as? [String: AnyObject]
-                                let competitorName = (self.competitorDictionary!["displayName"]) as String
+                                let competitorName = (self.competitorDictionary!["name"]) as String
                                 let leaderBoardName = (self.leaderBoardDictionary!["name"]) as String
                                 let sailId = (self.competitorDictionary!["sailID"]) as String
                                 var title = "Hello \(competitorName). Welcome to \(leaderBoardName). You are registered as \(sailId)."

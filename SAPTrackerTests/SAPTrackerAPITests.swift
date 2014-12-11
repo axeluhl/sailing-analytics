@@ -198,11 +198,11 @@ class SAPTrackerAPITests: XCTestCase {
     /*
     {
     "name": "Lukas ZIELINSKI",
-    "displayName": "Lukas ZIELINSKI",
     "id": "1d028378-e12c-a6bd-afa3-b8b21bc5a9ea",
     "sailID": "LUK 1",
     "nationality": "GER",
-    "countryCode": "DE"
+    "countryCode": "DE",
+    "boatClassName": "49er"
     }
     */
     func checkCompetitorDictionary(dictionary: [String: AnyObject]) {
