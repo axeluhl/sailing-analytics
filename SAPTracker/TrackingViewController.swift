@@ -50,11 +50,16 @@ class TrackingViewController : UIViewController {
     
     func networkAvailabilityChanged() {
         if (APIManager.sharedManager.networkAvailable) {
-            onlineModeLabel.text = "Online"
-            onlineModeLabel.textColor = greenColor
+            if !BatteryManager.sharedManager.batterySaving {
+                onlineModeLabel.text = "Online"
+                onlineModeLabel.textColor = greenColor
+            } else {
+                onlineModeLabel.text = "Battery Saving"
+                onlineModeLabel.textColor = orangeColor
+            }
         } else {
-            onlineModeLabel.text = "Buffering"
-            onlineModeLabel.textColor = orangeColor
+            onlineModeLabel.text = "Offline"
+            onlineModeLabel.textColor = redColor
         }
     }
     
