@@ -361,7 +361,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
     
-    private static ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster =  ThreadLocal.withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster =  ThreadLocal.withInitial(() -> false);
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
@@ -526,7 +526,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
-        RacingEventServiceImpl.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+        this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
     }
 
     @Override

@@ -122,7 +122,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
     
-    private static ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
     
     private static Ini shiroConfiguration;
     static {
@@ -170,7 +170,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     @Override
     public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
-        SecurityServiceImpl.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+        this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
     }
 
     /**
