@@ -337,7 +337,7 @@ public class RegattaActivity extends BaseActivity {
 					}
 				});
 
-		VolleyHelper.getInstance().addRequest(checkoutRequest);
+		VolleyHelper.getInstance(this).addRequest(checkoutRequest);
 	}
 	
 	public EventInfo getEvent()

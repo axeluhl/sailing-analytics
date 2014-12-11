@@ -332,7 +332,7 @@ public class TransmittingService extends Service {
 			{
 				sendingAttempted = true;
 				
-				VolleyHelper.getInstance().enqueueRequest(
+				VolleyHelper.getInstance(this).enqueueRequest(
 						host + prefs.getServerGpsFixesPostPath(),
 						requestObject,
 						new FixSubmitListener(ids.toArray(idsArr)),

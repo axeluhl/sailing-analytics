@@ -6,6 +6,7 @@ import java.util.Date;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
@@ -16,9 +17,6 @@ import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
 import com.sap.sailing.android.tracking.app.test.extensions.ServiceHelperTestable;
-import com.sap.sailing.android.tracking.app.test.extensions.VolleyHelperTestable;
-import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
-import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
@@ -206,7 +204,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 
 		getService().onLocationChanged(getTestLocation(1, 2f, 3));
 		
-		Mockito.verify(serviceHelperSpy, Mockito.times(1)).startTransmittingService(getService());
+		Mockito.verify(serviceHelperSpy, Mockito.times(1)).startTransmittingService(Mockito.any(Context.class));
 		
 		shutdownService();
 	}
