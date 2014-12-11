@@ -121,8 +121,8 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
             }
             windBotAddedCounterTOConsiderForPanels++;
             if(windloadinghintleft.getStyle().getOpacity() != "0.0" || windloadinghintright.getStyle().getOpacity() != "0.0"){
-                windloadinghintleft.setInnerHTML("Wind bot out of service");
-                windloadinghintright.setInnerHTML("Wind bot out of service");
+                windloadinghintleft.setInnerHTML("Wind bot not available");
+                windloadinghintright.setInnerHTML("Wind bot not available");
             }
         }
         addWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
