@@ -48,5 +48,5 @@ struct ButtonHeight {
     static let bigButtonPortrait = CGFloat(75.0)
     static let bigButtonLandscape = CGFloat(50.0)
     static let smallButtonPortrait = CGFloat(50.0)
-    static let smallButtonLandscape = CGFloat(33.0)
+    static let smallButtonLandscape = CGFloat(50.0)
 }

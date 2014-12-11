@@ -91,9 +91,7 @@
                                 <color key="backgroundColor" white="1" alpha="0.5" colorSpace="calibratedWhite"/>
                                 <accessibility key="accessibilityConfiguration" label="Don't have a QR Code?"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="JQy-0C-pEQ">
-                                        <variation key="heightClass=compact" constant="33"/>
-                                    </constraint>
+                                    <constraint firstAttribute="height" constant="50" id="JQy-0C-pEQ"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="15"/>
                                 <state key="normal" title="Don't have a QR Code?">
@@ -1246,7 +1244,7 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
-        <segue reference="HaH-Jc-FNR"/>
+        <segue reference="QMa-LQ-D8c"/>
+        <segue reference="Xxn-jp-xEB"/>
     </inferredMetricsTieBreakers>
 </document>
