@@ -345,7 +345,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String regattaExistForSelectedBoatClass();
     String reload();
     String addRegatta();
-    String importRegatta();
+    String importRegattas();
     String exchangeName();
     String course();
     String courseLayout();
@@ -1129,4 +1129,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorTryingToCreateNewEvent(String name, String message);
     String createNewEvent();
     String noFleetsDefined();
+    String successfullyCreatedRegattas();
 }

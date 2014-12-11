@@ -15,6 +15,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -29,6 +30,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -107,6 +109,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 updateRegattaStructureGrid();
+                updateImportRegattasButtonEnabledness();
             }
         });
         regattaStructureGrid = new FlexTable();
@@ -134,7 +137,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
         jsonURLTextBox.getElement().setPropertyString("placeholder",
                         "http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json");
         listRegattasButton = new Button(this.stringMessages.listRegattas());
-        importDetailsButton = new Button(this.stringMessages.importRegatta());
+        importDetailsButton = new Button(this.stringMessages.importRegattas());
         importDetailsButton.setEnabled(false);
         importDetailsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -186,6 +189,12 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
     private void createEventSelectionAndCreateEventButtonUI() {
         Grid grid = new Grid(1, 2);
         sailingEventsListBox = new ListBox(false);
+        sailingEventsListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                updateImportRegattasButtonEnabledness();
+            }
+        });
         sailingEventsListBox.ensureDebugId("EventListBox");
         grid.setWidget(0, 0, sailingEventsListBox);
         Button newEventBtn = new Button(stringMessages.createNewEvent());
@@ -277,13 +286,18 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
                     busyIndicator.setBusy(false);
                     editSeriesPanel.clear();
                     fillRegattas(regattas);
-                    importDetailsButton.setEnabled(true);
+                    updateImportRegattasButtonEnabledness();
                     createEventSelectionAndCreateEventButtonUI();
                     editSeriesPanel.add(regattaStructureGrid);
                     updateRegattaStructureGrid();
                 }
             });
         }
+    }
+
+    private void updateImportRegattasButtonEnabledness() {
+        importDetailsButton.setEnabled(!regattaListComposite.getSelectedRegattas().isEmpty() &&
+                getSelectedEvent() != null);
     }
 
     private void fillRegattas(Iterable<RegattaDTO> regattasFromXRR) {
@@ -306,8 +320,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
      * of regattas.
      */
     private RegattaDTO createRegattaDefaults(RegattaDTO regatta) {
-        RegattaDTO result = new RegattaDTO();
-        result.setName("Default");
+        RegattaDTO result = new RegattaDTO("Default", ScoringSchemeType.LOW_POINT);
         result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length in meters */ 5);
         result.series = regatta.series;
         return result;
@@ -440,6 +453,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
             @Override
             public void onSuccess(Void result) {
                 regattaRefresher.fillRegattas();
+                Window.alert(stringMessages.successfullyCreatedRegattas());
             }
         });
     }

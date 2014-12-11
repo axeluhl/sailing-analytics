@@ -34,7 +34,7 @@ public class RegattaDTO extends NamedDTO {
 
     public RegattaDTO() {}
     
-    public RegattaDTO(String name, ScoringSchemeType scoringScheme /*, List<CompetitorDTO> competitors*/) {
+    public RegattaDTO(String name, ScoringSchemeType scoringScheme) {
         super(name);
         this.scoringScheme = scoringScheme;
     }
