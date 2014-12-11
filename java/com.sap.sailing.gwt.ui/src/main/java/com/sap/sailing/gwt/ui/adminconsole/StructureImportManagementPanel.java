@@ -358,7 +358,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
                     public void ok(final EventAndRegattaDTO newRegattaWithEvent) {
                         final RegattaDTO newRegattaCreationDefaults = newRegattaWithEvent.getRegatta();
                         RegattaStructure newStructureEquivalenceClass = new RegattaStructure(newRegattaCreationDefaults);
-                        final RegattaDTO mergedWith = regattaDefaultsPerStructure.put(newStructureEquivalenceClass, newRegattaCreationDefaults);
+                        final RegattaDTO replaced = regattaDefaultsPerStructure.put(newStructureEquivalenceClass, newRegattaCreationDefaults);
                         if (!regattaStructure.equals(newStructureEquivalenceClass)) {
                             // the creation defaults (probably particularly the fleet structure) was changed "incompatibly";
                             // if it equals another existing structure, use the creation defaults just edited for both and
@@ -375,7 +375,7 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
                             regattaStructures.putAll(updatesToPerform); // let original XRR-imported regattas point to their new structure
                             regattaDefaultsPerStructure.remove(regattaStructure);
                             regattaListComposite.fillRegattas(regattaStructures.keySet());
-                            if (mergedWith != null) {
+                            if (replaced != null) {
                                 // requires a re-build of the grid because we don't know the other row to update/remove
                                 updateRegattaStructureGrid();
                             } else {

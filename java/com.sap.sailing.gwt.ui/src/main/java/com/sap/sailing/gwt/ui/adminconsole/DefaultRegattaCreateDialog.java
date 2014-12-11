@@ -21,8 +21,7 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
     public DefaultRegattaCreateDialog(List<EventDTO> existingEvents, RegattaDTO selectedRegatta,
             SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<EventAndRegattaDTO> callback) {
-        super(/* create a new empty default regatta description */ new RegattaDTO(),
-                selectedRegatta.series, existingEvents, stringMessages.createDefaultSettingsForAllRegattas(),
+        super(selectedRegatta, selectedRegatta.series, existingEvents, stringMessages.createDefaultSettingsForAllRegattas(),
                 stringMessages.ok(), stringMessages, null /* RegattaParameterValidator */, callback);
         if (existingEvents != null && !existingEvents.isEmpty()) {
             sailingEventsListBox.addItem((existingEvents.get(0)).getName());

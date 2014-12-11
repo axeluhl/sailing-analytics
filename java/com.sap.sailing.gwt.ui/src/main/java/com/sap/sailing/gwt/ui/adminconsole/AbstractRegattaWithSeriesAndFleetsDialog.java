@@ -22,10 +22,19 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
+/**
+ * Uses a {@link RegattaDTO} to initialize the view. {@link #getRegattaDTO()} can be used by implementations of
+ * {@link #getResult()} to produce a result regatta object and always returns a new {@link RegattaDTO} object.
+ * The original {@link RegattaDTO} passed to the constructor is not modified by this dialog.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <T>
+ */
 public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialogWithBootstrap<T> {
 
     protected StringMessages stringMessages;
-    protected RegattaDTO regatta;
+    private final RegattaDTO regatta;
     
     protected final BetterDateTimeBox startDateBox;
     protected final BetterDateTimeBox endDateBox;

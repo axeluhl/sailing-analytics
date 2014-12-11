@@ -34,7 +34,7 @@ public class SeriesWithFleetsDefaultCreateDialog extends SeriesWithFleetsCreateD
         startsWithZeroScoreCheckbox.setValue(defaultSeries.isStartsWithZeroScore());
         hasSplitFleetContiguousScoringCheckbox.setValue(defaultSeries.hasSplitFleetContiguousScoring());
         firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(defaultSeries.isFirstColumnIsNonDiscardableCarryForward());
-        useSeriesResultDiscardingThresholdsCheckbox.setValue(defaultSeries.definesSeriesDiscardThresholds());
+        useSeriesResultDiscardingThresholdsCheckbox.setValue(defaultSeries.definesSeriesDiscardThresholds(), /* fire events */ true);
         fleetListComposite.setValue(defaultSeries.getFleets());
     }
 
