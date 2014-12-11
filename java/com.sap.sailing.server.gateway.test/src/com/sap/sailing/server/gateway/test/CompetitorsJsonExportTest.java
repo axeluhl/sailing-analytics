@@ -31,6 +31,7 @@ public class CompetitorsJsonExportTest {
     private final String boatClassName = "49er";
     private final String sailID = "GER 1";
     private final String nationality = "GER";
+    private final String countryCode = "DE";
     
     private final @Spy CompetitorsResource competitorsResource = new CompetitorsResource();
 
@@ -55,6 +56,7 @@ public class CompetitorsJsonExportTest {
         assertThat("boatClass is correct", json.get("boatClassName"), equalTo(boatClassName));
         assertThat("sailID is correct", json.get("sailID"), equalTo(sailID));
         assertThat("nationality is correct", json.get("nationality"), equalTo(nationality));
+        assertThat("nationality is correct", json.get("countryCode"), equalTo(countryCode));
     }
 
 }
