@@ -217,7 +217,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         components.add(windChart);
 		editMarkPassingPanel = new EditMarkPassingsPanel(sailingService,
 				asyncActionsExecutor, selectedRaceIdentifier, stringMessages,
-				competitorSelectionModel, errorReporter, timer, userService);
+				competitorSelectionModel, errorReporter, timer);
         editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
         editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
         components.add(editMarkPassingPanel);
