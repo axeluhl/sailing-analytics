@@ -72,10 +72,6 @@ public class HomeFragment extends BaseFragment implements
 
 	private int requestCodeQRCode = 442;
 	private RegattaAdapter adapter;
-	
-	private int eventRowId;
-	private int competitorRowId;
-	private int leaderboardRowId;
 
 	@SuppressLint("InflateParams")
 	@Override
@@ -365,9 +361,7 @@ public class HomeFragment extends BaseFragment implements
 													}
 												});
 
-										VolleyHelper.getInstance(getActivity())
-												.addRequest(
-														getCompetitorRequest);
+										VolleyHelper.getInstance().addRequest(getCompetitorRequest);
 									}
 								}, new ErrorListener() {
 									@Override
@@ -382,8 +376,7 @@ public class HomeFragment extends BaseFragment implements
 									}
 								});
 
-						VolleyHelper.getInstance(getActivity()).addRequest(
-								getEventRequest);
+						VolleyHelper.getInstance().addRequest(getEventRequest);
 					}
 				}, new ErrorListener() {
 					@Override
@@ -397,14 +390,13 @@ public class HomeFragment extends BaseFragment implements
 					}
 				});
 
-		VolleyHelper.getInstance(getActivity()).addRequest(
-				getLeaderboardRequest);
+		VolleyHelper.getInstance().addRequest(getLeaderboardRequest);
 	}
 
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		VolleyHelper.getInstance(getActivity()).cancelRequest(REQUEST_TAG);
+		VolleyHelper.getInstance().cancelRequest(REQUEST_TAG);
 	}
 
 	/**
@@ -445,18 +437,6 @@ public class HomeFragment extends BaseFragment implements
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
-	
-	/**
-	 * Delete Event, Competitor and Leaderboard
-	 */
-//	private void deleteRegttaFromDatabase()
-//	{
-//		ContentResolver cr = getActivity().getContentResolver();
-//		
-//		cr.delete(Event.CONTENT_URI, BaseColumns._ID + " = " + eventRowId, null);
-//		cr.delete(Competitor.CONTENT_URI, BaseColumns._ID + " = " + competitorRowId, null);
-//		cr.delete(Leaderboard.CONTENT_URI, BaseColumns._ID + " = " + leaderboardRowId, null);
-//	}
 
 	/**
 	 * Return true if the combination of eventId, leaderboardName and
@@ -603,7 +583,7 @@ public class HomeFragment extends BaseFragment implements
 							checkinData.competitorId),
 					new CheckinErrorListener());
 
-			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
+			VolleyHelper.getInstance().addRequest(checkinRequest);
 
 		} catch (JSONException e) {
 			ExLog.e(getActivity(), TAG,

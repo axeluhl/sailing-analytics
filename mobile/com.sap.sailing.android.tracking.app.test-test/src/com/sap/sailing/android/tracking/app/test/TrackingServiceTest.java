@@ -206,7 +206,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 
 		getService().onLocationChanged(getTestLocation(1, 2f, 3));
 		
-		Mockito.verify(serviceHelperSpy, Mockito.times(1)).startTransmittingService();
+		Mockito.verify(serviceHelperSpy, Mockito.times(1)).startTransmittingService(getService());
 		
 		shutdownService();
 	}

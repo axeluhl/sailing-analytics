@@ -17,17 +17,11 @@ public class ServiceHelper {
 	private final static String TAG = ServiceHelper.class.getName();
 
 	protected static ServiceHelper mInstance;
-	protected Context mContext;
 
-	protected ServiceHelper(Context context) {
-		mContext = context;
-	}
-
-	public static synchronized ServiceHelper getInstance(Context context) {
+	public static synchronized ServiceHelper getInstance() {
 		if (mInstance == null) {
-			mInstance = new ServiceHelper(context);
+			mInstance = new ServiceHelper();
 		}
-
 		return mInstance;
 	}
 
@@ -36,10 +30,10 @@ public class ServiceHelper {
 	 * starts for the first time, and every time, when a tracking gps-fix is 
 	 * stored, to ensure it gets sent to the API-server.
 	 */
-	public void startTransmittingService() {
-		Intent intent = new Intent(mContext, TransmittingService.class);
-		intent.setAction(mContext.getString(R.string.transmitting_service_start));
-		mContext.startService(intent);
+	public void startTransmittingService(Context context) {
+		Intent intent = new Intent(context, TransmittingService.class);
+		intent.setAction(context.getString(R.string.transmitting_service_start));
+		context.startService(intent);
 	}
 	
 	/**
@@ -47,21 +41,21 @@ public class ServiceHelper {
 	 * the event from the database in order to set the host-address correctly.
 	 * @param eventId id of the event (not the row-id)
 	 */
-	public void startTrackingService(String eventId)
+	public void startTrackingService(Context context, String eventId)
 	{
-		Intent intent = new Intent(mContext, TrackingService.class);
-		intent.setAction(mContext.getString(R.string.tracking_service_start));
-		intent.putExtra(mContext.getString(R.string.tracking_service_event_id_parameter), eventId);
-		mContext.startService(intent);
+		Intent intent = new Intent(context, TrackingService.class);
+		intent.setAction(context.getString(R.string.tracking_service_start));
+		intent.putExtra(context.getString(R.string.tracking_service_event_id_parameter), eventId);
+		context.startService(intent);
 	}
 	
 	/**
 	 * Stop tracking service.
 	 */
-	public void stopTrackingService()
+	public void stopTrackingService(Context context)
 	{
-		Intent intent = new Intent(mContext, TrackingService.class);
-		intent.setAction(mContext.getString(R.string.tracking_service_stop));
-		mContext.startService(intent);
+		Intent intent = new Intent(context, TrackingService.class);
+		intent.setAction(context.getString(R.string.tracking_service_stop));
+		context.startService(intent);
 	}
 }

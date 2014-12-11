@@ -255,7 +255,7 @@ public class TransmittingService extends Service {
 		}
 		
 		sendFixesToAPI(null);
-		reportUnsentGPSFixesCount(DatabaseHelper.getInstance(getBaseContext()).getNumberOfUnsentGPSFixes());
+		reportUnsentGPSFixesCount(DatabaseHelper.getInstance().getNumberOfUnsentGPSFixes(getBaseContext()));
 	}
 	
 	private boolean getTrackingServiceIsCurrentlyTracking()
@@ -266,7 +266,7 @@ public class TransmittingService extends Service {
 	private void sendFixesToAPI(List<String> failedHosts) {
 		
 		// first, lets fetch all unsent fixes
-		List<GpsFix> fixes = DatabaseHelper.getInstance(getBaseContext()).getUnsentFixes(failedHosts, UPDATE_BATCH_SIZE);
+		List<GpsFix> fixes = DatabaseHelper.getInstance().getUnsentFixes(getBaseContext(), failedHosts, UPDATE_BATCH_SIZE);
 		// store ids so we can delete the rows later
 		ArrayList<String> ids = new ArrayList<String>();
 		
@@ -332,7 +332,7 @@ public class TransmittingService extends Service {
 			{
 				sendingAttempted = true;
 				
-				VolleyHelper.getInstance(this).enqueueRequest(
+				VolleyHelper.getInstance().enqueueRequest(
 						host + prefs.getServerGpsFixesPostPath(),
 						requestObject,
 						new FixSubmitListener(ids.toArray(idsArr)),
@@ -386,7 +386,7 @@ public class TransmittingService extends Service {
 	
 	private void deleteSynced(String[] fixIdStrings)
 	{
-		DatabaseHelper.getInstance(getBaseContext()).deleteGpsFixes(fixIdStrings);
+		DatabaseHelper.getInstance().deleteGpsFixes(getBaseContext(), fixIdStrings);
 	}
 	
 	/**

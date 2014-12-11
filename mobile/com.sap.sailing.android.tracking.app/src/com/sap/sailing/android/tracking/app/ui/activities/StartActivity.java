@@ -60,7 +60,7 @@ public class StartActivity extends BaseActivity {
 		}
 
         // start transmitting service that will henceforth run in the background
-		ServiceHelper.getInstance(this).startTransmittingService();
+		ServiceHelper.getInstance().startTransmittingService(this);
         
         intent.setData(null);
         

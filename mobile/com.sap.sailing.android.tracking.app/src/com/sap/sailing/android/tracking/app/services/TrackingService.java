@@ -83,7 +83,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 								.getExtras()
 								.getString(getString(R.string.tracking_service_event_id_parameter));
 						
-						eventRowId = DatabaseHelper.getInstance(this).getRowIdForEventId(eventId);
+						eventRowId = DatabaseHelper.getInstance().getRowIdForEventId(this, eventId);
 						
 						if (BuildConfig.DEBUG) {
 							ExLog.i(this, TAG, "Starting Tracking Service with eventId: "+ eventId);
@@ -169,7 +169,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		
 		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
 
-		DatabaseHelper.getInstance(this).insertGPSFix(location.getLatitude(),
+		DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
 				location.getLongitude(), location.getSpeed(),
 				location.getBearing(), location.getProvider(),
 				location.getTime(), eventRowId);
@@ -187,7 +187,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 					"ensureTransmittingServiceIsRunning, starting TransmittingService");
 		}
 
-		ServiceHelper.getInstance(this).startTransmittingService();
+		ServiceHelper.getInstance().startTransmittingService(this);
 	}
 
 	@Override

@@ -66,9 +66,9 @@ public class RegattaActivity extends BaseActivity {
         String eventId = intent.getStringExtra(getString(R.string.event_id));
         String competitorId = intent.getStringExtra(getString(R.string.competitor_id));
 
-        competitor = DatabaseHelper.getInstance(this).getCompetitor(competitorId);
-		event = DatabaseHelper.getInstance(this).getEventInfo(eventId);
-		leaderboard = DatabaseHelper.getInstance(this).getLeaderboard(leaderboardName);
+        competitor = DatabaseHelper.getInstance().getCompetitor(this, competitorId);
+		event = DatabaseHelper.getInstance().getEventInfo(this, eventId);
+		leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, leaderboardName);
         
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -321,7 +321,7 @@ public class RegattaActivity extends BaseActivity {
 		JsonObjectRequest checkoutRequest = new JsonObjectRequest(checkoutURLStr, checkoutData, new Listener<JSONObject>(){
 					@Override
 					public void onResponse(JSONObject response) {
-						DatabaseHelper.getInstance(RegattaActivity.this).deleteRegttaFromDatabase(event, competitor, leaderboard);
+						DatabaseHelper.getInstance().deleteRegttaFromDatabase(RegattaActivity.this, event, competitor, leaderboard);
 						dismissProgressDialog();
 						finish();
 					}
@@ -337,7 +337,7 @@ public class RegattaActivity extends BaseActivity {
 					}
 				});
 
-		VolleyHelper.getInstance(this).addRequest(checkoutRequest);
+		VolleyHelper.getInstance().addRequest(checkoutRequest);
 	}
 	
 	public EventInfo getEvent()
