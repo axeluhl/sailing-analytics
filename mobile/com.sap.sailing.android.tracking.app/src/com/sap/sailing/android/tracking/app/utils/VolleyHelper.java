@@ -3,7 +3,6 @@ package com.sap.sailing.android.tracking.app.utils;
 import org.json.JSONObject;
 
 import android.app.Application;
-import android.content.Context;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -16,18 +15,14 @@ public class VolleyHelper extends Application {
 
     private static final String TAG = VolleyHelper.class.getName();
     
-    protected Context mContext;
     private RequestQueue mRequestQueue;
     
     protected static VolleyHelper mInstance;
     
-    protected VolleyHelper(Context context) {
-        mContext = context;
-    }
     
-    public static synchronized VolleyHelper getInstance(Context context) {
+    public static synchronized VolleyHelper getInstance() {
         if (mInstance == null) {
-            mInstance = new VolleyHelper(context);
+            mInstance = new VolleyHelper();
         }
         
         return mInstance;
@@ -35,7 +30,7 @@ public class VolleyHelper extends Application {
     
     public RequestQueue getRequestQueue() {
         if (mRequestQueue == null) {
-            mRequestQueue = Volley.newRequestQueue(mContext);
+            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
         }
         
         return mRequestQueue;

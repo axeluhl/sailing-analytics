@@ -78,7 +78,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
         
         if (getSupportActionBar() != null) {
-        	EventInfo eventInfo = DatabaseHelper.getInstance(this).getEventInfoWithLeaderboard(eventId);
+        	EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboard(this, eventId);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
@@ -124,7 +124,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			}
 		});
         
-        ServiceHelper.getInstance(this).startTrackingService(eventId);
+        ServiceHelper.getInstance().startTrackingService(this, eventId);
     }
     
     @Override

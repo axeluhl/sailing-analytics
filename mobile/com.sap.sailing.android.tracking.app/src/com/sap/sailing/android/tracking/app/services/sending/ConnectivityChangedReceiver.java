@@ -53,7 +53,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
 			ExLog.i(context, TAG, "Starting TransmittingService");
     	}
 		
-		ServiceHelper.getInstance(context).startTransmittingService();
+		ServiceHelper.getInstance().startTransmittingService(context);
         disable(context);
     }
 

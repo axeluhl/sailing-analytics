@@ -29,21 +29,17 @@ public class DatabaseHelper {
 	private final static String TAG = DatabaseHelper.class.getName();
 	
 	protected static DatabaseHelper mInstance;
-	protected Context mContext;
 
-	protected DatabaseHelper(Context context) {
-		mContext = context;
-	}
 
-	public static synchronized DatabaseHelper getInstance(Context context) {
+	public static synchronized DatabaseHelper getInstance() {
 		if (mInstance == null) {
-			mInstance = new DatabaseHelper(context);
+			mInstance = new DatabaseHelper();
 		}
 
 		return mInstance;
 	}
 
-	public List<GpsFix> getUnsentFixes(List<String> failedHosts, int updateBatchSize) {
+	public List<GpsFix> getUnsentFixes(Context context, List<String> failedHosts, int updateBatchSize) {
 		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
 		String projectionClauseStr = "events._id as _eid,sensor_gps.gps_time,sensor_gps.gps_latitude,"
 				+ "sensor_gps.gps_longitude,sensor_gps.gps_speed,sensor_gps.gps_bearing,sensor_gps.gps_synced,"
@@ -71,7 +67,7 @@ public class DatabaseHelper {
 		}
 
 		ArrayList<GpsFix> list = new ArrayList<GpsFix>();
-		Cursor cur = mContext.getContentResolver().query(
+		Cursor cur = context.getContentResolver().query(
 				EventGpsFixesJoined.CONTENT_URI, projectionClause,
 				selectionClause, null, sortAndLimitClause);
 		while (cur.moveToNext()) {
@@ -99,14 +95,14 @@ public class DatabaseHelper {
 		return list;
 	}
 	
-	public int getNumberOfUnsentGPSFixes()
+	public int getNumberOfUnsentGPSFixes(Context context)
 	{
 		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
 		String sortAndLimitClause = SensorGps.GPS_TIME + " DESC LIMIT 1";
 	
 		int eventId = -1;
 
-		Cursor cur = mContext.getContentResolver().query(
+		Cursor cur = context.getContentResolver().query(
 				EventGpsFixesJoined.CONTENT_URI,
 				new String[] { "events._id as _eid" }, 
 				selectionClause, 
@@ -123,13 +119,13 @@ public class DatabaseHelper {
 		{
 			if (BuildConfig.DEBUG)
 			{
-				ExLog.i(mContext, TAG, "no event id, reporting 0 gps-fixes.");
+				ExLog.i(context, TAG, "no event id, reporting 0 gps-fixes.");
 			}
 			return 0;
 		}
 		
 		String selectionClause2 = "events._id = " + eventId;
-		Cursor countCursor = mContext.getContentResolver().query(
+		Cursor countCursor = context.getContentResolver().query(
 				EventGpsFixesJoined.CONTENT_URI,
 				new String[] { "count(*) AS count" }, selectionClause2, null, null);
 
@@ -140,7 +136,7 @@ public class DatabaseHelper {
 		return count;
 	}
 	
-	public int deleteGpsFixes(String[] fixIdStrings)
+	public int deleteGpsFixes(Context context, String[] fixIdStrings)
 	{
 		int numDeleted = 0;
 		for (String idStr: fixIdStrings)
@@ -148,17 +144,17 @@ public class DatabaseHelper {
 			ContentValues updateValues = new ContentValues();
 			updateValues.put(SensorGps.GPS_SYNCED, 1);
 			Uri uri = ContentUris.withAppendedId(SensorGps.CONTENT_URI, Long.parseLong(idStr));
-			numDeleted = mContext.getContentResolver().delete(uri, null, null);
+			numDeleted = context.getContentResolver().delete(uri, null, null);
 		}
 		
 		return numDeleted;
 	}
 	
-	public long getRowIdForEventId(String eventId)
+	public long getRowIdForEventId(Context context, String eventId)
 	{
 		int result = 0;
 		
-		ContentResolver cr = mContext.getContentResolver();
+		ContentResolver cr = context.getContentResolver();
 		Cursor cursor = cr.query(Event.CONTENT_URI, null, "event_id = \"" + eventId + "\"", null, null);
 		cursor.moveToFirst();
 		result = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
@@ -166,9 +162,9 @@ public class DatabaseHelper {
 		return result;
 	}
 
-	public void insertGPSFix(double lat, double lon, double speed,
+	public void insertGPSFix(Context context, double lat, double lon, double speed,
 			double bearing, String provider, long timestamp, long eventRowId) {
-		ContentResolver cr = mContext.getContentResolver();
+		ContentResolver cr = context.getContentResolver();
 		ContentValues cv = new ContentValues();
 		
 		cv.put(SensorGps.GPS_LATITUDE, lat);
@@ -182,10 +178,10 @@ public class DatabaseHelper {
 		cr.insert(SensorGps.CONTENT_URI, cv);
 	}
 	
-	public EventInfo getEventInfoWithLeaderboard(String eventId) {
+	public EventInfo getEventInfoWithLeaderboard(Context context, String eventId) {
 		EventInfo result = new EventInfo();
 		
-    	ContentResolver cr = mContext.getContentResolver();
+    	ContentResolver cr = context.getContentResolver();
     	String projectionStr = "events._id,leaderboards.leaderboard_name,events.event_name";
     	String[] projection = projectionStr.split(",");
     	Cursor cursor = cr.query(LeaderboardsEventsJoined.CONTENT_URI, projection, "events.event_id = \"" + eventId + "\"", null, null);
@@ -199,11 +195,11 @@ public class DatabaseHelper {
 		return result;
 	}
 	
-	public EventInfo getEventInfo(String eventId) {
+	public EventInfo getEventInfo(Context context, String eventId) {
 		EventInfo event = new EventInfo();
 		event.id = eventId;
 		
-		Cursor cursor = mContext.getContentResolver().query(Event.CONTENT_URI,
+		Cursor cursor = context.getContentResolver().query(Event.CONTENT_URI,
 				null, "event_id = \"" + eventId + "\"", null, null);
 		
 		if (cursor.moveToFirst()) {
@@ -218,12 +214,12 @@ public class DatabaseHelper {
 		return event;
 	}
 	
-	public CompetitorInfo getCompetitor(String competitorId)
+	public CompetitorInfo getCompetitor(Context context, String competitorId)
 	{
 		CompetitorInfo competitor = new CompetitorInfo();
 		competitor.id = competitorId;
 		
-    	Cursor cursor = mContext.getContentResolver().query(Competitor.CONTENT_URI, null, "competitor_id = \"" + competitorId + "\"", null, null);
+    	Cursor cursor = context.getContentResolver().query(Competitor.CONTENT_URI, null, "competitor_id = \"" + competitorId + "\"", null, null);
 		if (cursor.moveToFirst()) {
 			competitor.name = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_DISPLAY_NAME));
 			competitor.countryCode = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_COUNTRY_CODE));
@@ -235,12 +231,12 @@ public class DatabaseHelper {
 		return competitor;
 	}
 	
-	public LeaderboardInfo getLeaderboard(String leaderboardName)
+	public LeaderboardInfo getLeaderboard(Context context, String leaderboardName)
 	{
 		LeaderboardInfo leaderboard = new LeaderboardInfo();
 		leaderboard.name = leaderboardName;
 		
-		Cursor lc = mContext.getContentResolver().query(Leaderboard.CONTENT_URI, null, "leaderboard_name = \"" + leaderboardName + "\"", null, null);
+		Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null, "leaderboard_name = \"" + leaderboardName + "\"", null, null);
 		if (lc.moveToFirst()) {
 			leaderboard.rowId = lc.getInt(lc.getColumnIndex(BaseColumns._ID));
         }
@@ -251,9 +247,9 @@ public class DatabaseHelper {
 	}
 	
 
-	public void deleteRegttaFromDatabase(EventInfo event, CompetitorInfo competitor, LeaderboardInfo leaderboard)
+	public void deleteRegttaFromDatabase(Context context, EventInfo event, CompetitorInfo competitor, LeaderboardInfo leaderboard)
 	{
-		ContentResolver cr = mContext.getContentResolver();
+		ContentResolver cr = context.getContentResolver();
 		
 		int d1 = cr.delete(Event.CONTENT_URI, BaseColumns._ID + " = " + event.rowId, null);
 		int d2 = cr.delete(Competitor.CONTENT_URI, BaseColumns._ID + " = " + competitor.rowId, null);
@@ -261,9 +257,9 @@ public class DatabaseHelper {
 		
 		if (BuildConfig.DEBUG)
 		{
-			ExLog.i(mContext, TAG, "Checkout, number of events deleted: " + d1);
-			ExLog.i(mContext, TAG, "Checkout, number of competitors deleted: " + d2);
-			ExLog.i(mContext, TAG, "Checkout, number of leaderbards deleted: " + d3);
+			ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
+			ExLog.i(context, TAG, "Checkout, number of competitors deleted: " + d2);
+			ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d3);
 		}
 	}
 }

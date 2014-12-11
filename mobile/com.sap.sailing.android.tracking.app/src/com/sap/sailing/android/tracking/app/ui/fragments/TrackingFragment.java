@@ -254,7 +254,7 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 	
 	private void stopTracking() {
 		prefs.setTrackingTimerStarted(0);
-		ServiceHelper.getInstance(getActivity()).stopTrackingService();
+		ServiceHelper.getInstance().stopTrackingService(getActivity());
 		getActivity().finish();
 	}
 
