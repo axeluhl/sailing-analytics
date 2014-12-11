@@ -246,8 +246,23 @@ public class DatabaseHelper {
 		return leaderboard;
 	}
 	
+	public void deleteRegattaFromDatabase(Context context, String eventId, String competitorId, String leaderboardName)
+	{
+		ContentResolver cr = context.getContentResolver();
+		
+		int d1 = cr.delete(Event.CONTENT_URI, Event.EVENT_ID + " = \"" + eventId + "\"", null);
+		int d2 = cr.delete(Competitor.CONTENT_URI, Competitor.COMPETITOR_ID + " = \"" + competitorId + "\"", null);
+		int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_NAME + " = \"" + leaderboardName + "\"", null);
+		
+		if (BuildConfig.DEBUG)
+		{
+			ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
+			ExLog.i(context, TAG, "Checkout, number of competitors deleted: " + d2);
+			ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d3);
+		}
+	}
 
-	public void deleteRegttaFromDatabase(Context context, EventInfo event, CompetitorInfo competitor, LeaderboardInfo leaderboard)
+	public void deleteRegattaFromDatabase(Context context, EventInfo event, CompetitorInfo competitor, LeaderboardInfo leaderboard)
 	{
 		ContentResolver cr = context.getContentResolver();
 		

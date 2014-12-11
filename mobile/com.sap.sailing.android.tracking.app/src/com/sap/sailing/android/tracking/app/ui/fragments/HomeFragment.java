@@ -56,6 +56,7 @@ import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -299,14 +300,14 @@ public class HomeFragment extends BaseFragment implements
 															JSONObject response) {
 														startActivity.dismissProgressDialog();
 														
-														final String competitorDisplayName;
+														final String competitorName;
 														final String competitorId;
 														final String competitorSailId;
 														final String competitorNationality;
 														final String competitorCountryCode;
 
 														try {
-															competitorDisplayName = response.getString("displayName");
+															competitorName = response.getString("name");
 															competitorId = response.getString("id");
 															competitorSailId = response.getString("sailID");
 															competitorNationality = response.getString("nationality");
@@ -323,7 +324,7 @@ public class HomeFragment extends BaseFragment implements
 														}
 
 														CheckinData data = new CheckinData();
-														data.competitorDisplayName = competitorDisplayName;
+														data.competitorName = competitorName;
 														data.competitorId = competitorId;
 														data.competitorSailId = competitorSailId;
 														data.competitorNationality = competitorNationality;
@@ -402,7 +403,7 @@ public class HomeFragment extends BaseFragment implements
 	 */
 	private void displayUserConfirmationScreen(final CheckinData checkinData) {
 		String message1 = getString(R.string.confirm_data_hello_name).replace(
-				"{full_name}", checkinData.competitorDisplayName);
+				"{full_name}", checkinData.competitorName);
 		String message2 = getString(
 				R.string.confirm_data_you_are_signed_in_as_sail_id).replace(
 				"{sail_id}", checkinData.competitorSailId);
@@ -511,13 +512,10 @@ public class HomeFragment extends BaseFragment implements
 
 			ContentValues ccv = new ContentValues();
 
-			ccv.put(Competitor.COMPETITOR_COUNTRY_CODE,
-					checkinData.competitorCountryCode);
-			ccv.put(Competitor.COMPETITOR_DISPLAY_NAME,
-					checkinData.competitorDisplayName);
+			ccv.put(Competitor.COMPETITOR_COUNTRY_CODE,checkinData.competitorCountryCode);
+			ccv.put(Competitor.COMPETITOR_DISPLAY_NAME,checkinData.competitorName);
 			ccv.put(Competitor.COMPETITOR_ID, checkinData.competitorId);
-			ccv.put(Competitor.COMPETITOR_NATIONALITY,
-					checkinData.competitorNationality);
+			ccv.put(Competitor.COMPETITOR_NATIONALITY,checkinData.competitorNationality);
 			ccv.put(Competitor.COMPETITOR_SAIL_ID, checkinData.competitorSailId);
 			ccv.put(Competitor.COMPETITOR_LEADERBOARD_FK, lastLeaderboardId);
 
@@ -532,13 +530,11 @@ public class HomeFragment extends BaseFragment implements
 				cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
 				adapter.notifyDataSetChanged();
 			} catch (RemoteException e1) {
-				ExLog.e(getActivity(), TAG,
-						"Batch insert failed: " + e1.getMessage());
+				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e1.getMessage());
 				displayDatabaseError();
 				return;
 			} catch (OperationApplicationException e1) {
-				ExLog.e(getActivity(), TAG,
-						"Batch insert failed: " + e1.getMessage());
+				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e1.getMessage());
 				displayDatabaseError();
 				return;
 			}
@@ -572,12 +568,15 @@ public class HomeFragment extends BaseFragment implements
 					checkinData.competitorId, checkinData.deviceUid, "TODO!!",
 					date.getTime());
 
-			JsonObjectRequest checkinRequest = new JsonObjectRequest(
-					checkinData.checkinURL, requestObject, new CheckinListener(
-							checkinData.leaderboardName, checkinData.eventId,
-							checkinData.competitorId),
-					new CheckinErrorListener());
+			JsonObjectRequest checkinRequest = new JsonObjectRequest(checkinData.checkinURL,
+					requestObject, new CheckinListener(checkinData.leaderboardName,
+							checkinData.eventId, checkinData.competitorId),
+					new CheckinErrorListener(checkinData.leaderboardName, checkinData.eventId,
+							checkinData.competitorId));
 
+			System.out.println("CHECK IN REQUEST: " + checkinRequest);
+			System.out.println("CHECK IN REQOBJ : " + requestObject);
+			
 			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
 
 		} catch (JSONException e) {
@@ -699,7 +698,7 @@ public class HomeFragment extends BaseFragment implements
 		public String eventFirstImageUrl;
 		public String eventServerUrl;
 		public String checkinURL;
-		public String competitorDisplayName;
+		public String competitorName;
 		public String competitorId;
 		public String competitorSailId;
 		public String competitorNationality;
@@ -773,14 +772,35 @@ public class HomeFragment extends BaseFragment implements
 
 	private class CheckinErrorListener implements ErrorListener {
 
+		public String leaderboardName;
+		public String eventId;
+		public String competitorId;
+		
+		public CheckinErrorListener(String leaderboardName, String eventId, String competitorId) {
+			this.leaderboardName = leaderboardName;
+			this.eventId = eventId;
+			this.competitorId = competitorId;
+		}
+		
 		@Override
 		public void onErrorResponse(VolleyError error) {
+			if (error.getMessage() != null)
+			{
+				ExLog.e(getActivity(), TAG, error.getMessage().toString());	
+			}
+			else
+			{
+				ExLog.e(getActivity(), TAG, "Unknown Error");
+			}
+			
+			
 			StartActivity startActivity = (StartActivity)getActivity();
 			startActivity.dismissProgressDialog();
 			startActivity.showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
-			ExLog.e(getActivity(), TAG, error.getMessage().toString());
-			Toast.makeText(getActivity(), "Error while receiving server data",
-					Toast.LENGTH_LONG).show();
+			
+			DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), eventId, leaderboardName, competitorId);			
+			
+			Toast.makeText(getActivity(), "Error while receiving server data", Toast.LENGTH_LONG).show();
 		}
 	}
 
