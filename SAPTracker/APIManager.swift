@@ -25,7 +25,7 @@ public class APIManager: NSObject {
     private var serverUrlString: String?
     
     /* Base url of all requests, contains serverUrlString */
-    private let baseUrlString = "/api/v1"
+    private let baseUrlString = "/sailingserver/api/v1"
     
     /* AFNetworking operation manager */
     private var manager: AFHTTPRequestOperationManager?

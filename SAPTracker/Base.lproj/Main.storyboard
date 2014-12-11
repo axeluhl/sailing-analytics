@@ -469,7 +469,7 @@
                                 <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P9e-ZM-HZP">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P9e-ZM-HZP">
                                 <color key="backgroundColor" red="0.93725490199999995" green="0.67843137249999996" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" id="jqD-cx-gQM"/>
@@ -876,6 +876,7 @@
                     </view>
                     <connections>
                         <outlet property="headingLabel" destination="sGK-xV-9a0" id="Dd1-vE-nCQ"/>
+                        <outlet property="titleLabel" destination="1Tn-6d-NlO" id="Yqj-yu-oZE"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2c7-d1-yoX" userLabel="First Responder" sceneMemberID="firstResponder"/>
