@@ -42,9 +42,9 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
         
         if (volleyHelperSpy == null)
         {
-        	VolleyHelperTestable.injectInstance(null);
-        	volleyHelperSpy = Mockito.spy(new VolleyHelperTestable());
-        	VolleyHelperTestable.injectInstance(volleyHelperSpy);
+        	VolleyHelperTestable.injectInstance(null, null);
+        	volleyHelperSpy = Mockito.spy(new VolleyHelperTestable(getContext()));
+        	VolleyHelperTestable.injectInstance(getContext(), volleyHelperSpy);
         }
         
         if (databaseHelperMock == null)
@@ -90,7 +90,7 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		
 		startService();
 		
-		Thread.sleep(5000); 
+		Thread.sleep(3500); 
 
 		Mockito.verify(volleyHelperSpy, Mockito.times(1)).enqueueRequest(
 				urlCaptor.capture(), jsonObjectCaptor.capture(), 

@@ -306,16 +306,11 @@ public class HomeFragment extends BaseFragment implements
 														final String competitorCountryCode;
 
 														try {
-															competitorDisplayName = response
-																	.getString("displayName");
-															competitorId = response
-																	.getString("id");
-															competitorSailId = response
-																	.getString("sailID");
-															competitorNationality = response
-																	.getString("nationality");
-															competitorCountryCode = response
-																	.getString("countryCode");
+															competitorDisplayName = response.getString("displayName");
+															competitorId = response.getString("id");
+															competitorSailId = response.getString("sailID");
+															competitorNationality = response.getString("nationality");
+															competitorCountryCode = response.getString("countryCode");
 														} catch (JSONException e) {
 															ExLog.e(getActivity(),
 																	TAG,
@@ -361,7 +356,7 @@ public class HomeFragment extends BaseFragment implements
 													}
 												});
 
-										VolleyHelper.getInstance().addRequest(getCompetitorRequest);
+										VolleyHelper.getInstance(getActivity()).addRequest(getCompetitorRequest);
 									}
 								}, new ErrorListener() {
 									@Override
@@ -376,7 +371,7 @@ public class HomeFragment extends BaseFragment implements
 									}
 								});
 
-						VolleyHelper.getInstance().addRequest(getEventRequest);
+						VolleyHelper.getInstance(getActivity()).addRequest(getEventRequest);
 					}
 				}, new ErrorListener() {
 					@Override
@@ -390,13 +385,13 @@ public class HomeFragment extends BaseFragment implements
 					}
 				});
 
-		VolleyHelper.getInstance().addRequest(getLeaderboardRequest);
+		VolleyHelper.getInstance(getActivity()).addRequest(getLeaderboardRequest);
 	}
 
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		VolleyHelper.getInstance().cancelRequest(REQUEST_TAG);
+		VolleyHelper.getInstance(getActivity()).cancelRequest(REQUEST_TAG);
 	}
 
 	/**
@@ -583,7 +578,7 @@ public class HomeFragment extends BaseFragment implements
 							checkinData.competitorId),
 					new CheckinErrorListener());
 
-			VolleyHelper.getInstance().addRequest(checkinRequest);
+			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
 
 		} catch (JSONException e) {
 			ExLog.e(getActivity(), TAG,
