@@ -321,7 +321,7 @@ public class RegattaActivity extends BaseActivity {
 		JsonObjectRequest checkoutRequest = new JsonObjectRequest(checkoutURLStr, checkoutData, new Listener<JSONObject>(){
 					@Override
 					public void onResponse(JSONObject response) {
-						DatabaseHelper.getInstance().deleteRegttaFromDatabase(RegattaActivity.this, event, competitor, leaderboard);
+						DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this, event, competitor, leaderboard);
 						dismissProgressDialog();
 						finish();
 					}
