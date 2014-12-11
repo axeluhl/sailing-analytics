@@ -33,6 +33,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
             json.put("name", competitor.getName());
             json.put("sailID", competitor.getBoat().getSailID());
             json.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
+            json.put("countryCode", competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
             json.put("boatClassName", competitor.getBoat().getBoatClass().getName());
 
             String jsonString = json.toJSONString();
