@@ -89,7 +89,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     var headingPreference: Int {
         get {
             let preferences = NSUserDefaults.standardUserDefaults()
-            return preferences.integerForKey(HeadingDefaultsKey)
+            var heading = preferences.integerForKey(HeadingDefaultsKey)
+            if heading == 0 {
+                heading = Heading.Magnetic.rawValue
+                self.headingPreference = heading
+            }
+            return heading
         }
         set {
             let preferences = NSUserDefaults.standardUserDefaults()
