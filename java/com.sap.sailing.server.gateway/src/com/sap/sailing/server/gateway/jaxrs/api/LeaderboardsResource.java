@@ -347,7 +347,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         ;
 
-        IsRegattaLike isRegattaLike = (IsRegattaLike) leaderboard;
+        IsRegattaLike isRegattaLike = ((HasRegattaLike) leaderboard).getRegattaLike();
 
         DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
 
@@ -433,7 +433,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .build();
         }
 
-        IsRegattaLike isRegattaLike = (IsRegattaLike) leaderboard;
+        IsRegattaLike isRegattaLike = ((HasRegattaLike) leaderboard).getRegattaLike();
 
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
                 AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
