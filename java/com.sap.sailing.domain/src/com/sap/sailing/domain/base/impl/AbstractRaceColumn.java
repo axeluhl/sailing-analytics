@@ -192,10 +192,12 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             // is the tracked race's attachedRaceLogs field and the logListener field. The collections and the
             // DynamicTrackedRaceLogListener are re-established after de-serialization in corresponding readObject(...)
             // methods. However, the connections are not. That's what we need to do here, simply by invoking:
-            TrackedRace trackedRace = getTrackedRace(fleet);
-            if (trackedRace != null) {
-                trackedRace.attachRaceLog(raceLog);
-            }
+            ois.registerValidation(() -> {
+                TrackedRace trackedRace = getTrackedRace(fleet);
+                if (trackedRace != null) {
+                    trackedRace.attachRaceLog(raceLog);
+                }
+            }, /* prio */ 0);
             // because this will add the race log to the tracked race's attachedRaceLogs collection again, and
             // the new DynamicTrackedRaceLogListener that the readObject(...) method had constructed for the
             // tracked race will be added as a listener to the race log whose listeners collection otherwise would
