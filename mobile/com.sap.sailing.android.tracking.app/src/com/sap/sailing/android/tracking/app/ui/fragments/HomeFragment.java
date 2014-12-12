@@ -57,7 +57,7 @@ import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
-import com.sap.sailing.android.tracking.app.utils.JsonStatusOnlyRequest;
+import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -562,7 +562,7 @@ public class HomeFragment extends BaseFragment implements
 					checkinData.competitorId, checkinData.deviceUid, "TODO!!",
 					date.getTime());
 
-			JsonStatusOnlyRequest checkinRequest = new JsonStatusOnlyRequest(checkinData.checkinURL,
+			JsonObjectOrStatusOnlyRequest checkinRequest = new JsonObjectOrStatusOnlyRequest(checkinData.checkinURL,
 					requestObject, new CheckinListener(checkinData.leaderboardName,
 							checkinData.eventId, checkinData.competitorId),
 					new CheckinErrorListener(checkinData.leaderboardName, checkinData.eventId,
