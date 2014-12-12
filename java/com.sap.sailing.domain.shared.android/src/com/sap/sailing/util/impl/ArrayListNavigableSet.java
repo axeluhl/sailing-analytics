@@ -310,7 +310,7 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
             }
             @Override
             public E next() {
-                if (i == 0) {
+                if (i >= 0) {
                     throw new NoSuchElementException();
                 }
                 return list.get(i--);
