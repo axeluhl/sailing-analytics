@@ -1,7 +1,9 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -330,4 +332,27 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             return 3;
         }
     }
+	
+	public void showStopTrackingConfirmationDialog() {
+		AlertDialog dialog = new AlertDialog.Builder(this)
+				.setTitle(R.string.please_confirm)
+				.setMessage(R.string.do_you_really_want_to_stop_tracking)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setPositiveButton(android.R.string.yes,
+						new DialogInterface.OnClickListener() {
+
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								stopTracking();
+							}
+						}).setNegativeButton(android.R.string.no, null).create();
+		
+		dialog.show();
+	}
+	
+	public void stopTracking() {
+		prefs.setTrackingTimerStarted(0);
+		ServiceHelper.getInstance().stopTrackingService(this);
+		finish();
+	}
 }
