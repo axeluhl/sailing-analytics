@@ -2,9 +2,7 @@ package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,22 +11,19 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView;
 import com.sap.sailing.android.tracking.app.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
-public class TrackingFragment extends BaseFragment implements OnClickListener {
+public class TrackingFragment extends BaseFragment {
 
 	static final String SIS_MODE = "instanceStateMode";
 	static final String SIS_STATUS = "instanceStateStatus";
@@ -47,9 +42,6 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		super.onCreateView(inflater, container, savedInstanceState);
 
 		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
-		
-//		Button stopTracking = (Button)view.findViewById(R.id.stop_tracking);
-//		stopTracking.setOnClickListener(this);
 	
 		prefs = new AppPreferences(getActivity());
 		if (prefs.getTrackingTimerStarted() == 0)
@@ -67,17 +59,6 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		setAPIConnectivityStatus(APIConnectivity.noAttempt);
 		timer = new TimerRunnable();
 		timer.start();
-	}
-	
-	@Override
-	public void onClick(View view) {
-		switch (view.getId()) {
-		case R.id.stop_tracking:
-			showStopTrackingConfirmationDialog();
-			break;
-		default:
-			break;
-		}
 	}
 	
 	@Override
@@ -131,7 +112,10 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
 		{
 			long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
 			TextView textView = (TextView) getActivity().findViewById(R.id.tracking_time_label);
-			textView.setText(getTimeFormatString(diff));
+			if (textView != null)
+			{
+				textView.setText(getTimeFormatString(diff));
+			}
 		}
 	}
 	
@@ -249,31 +233,10 @@ public class TrackingFragment extends BaseFragment implements OnClickListener {
     
 	public void userTappedBackButton()
 	{
-		showStopTrackingConfirmationDialog();
-	}
-	
-	private void stopTracking() {
-		prefs.setTrackingTimerStarted(0);
-		ServiceHelper.getInstance().stopTrackingService(getActivity());
-		getActivity().finish();
+		TrackingActivity activity = (TrackingActivity)getActivity();
+		activity.showStopTrackingConfirmationDialog();
 	}
 
-	private void showStopTrackingConfirmationDialog() {
-		AlertDialog dialog = new AlertDialog.Builder(getActivity())
-				.setTitle(R.string.please_confirm)
-				.setMessage(R.string.do_you_really_want_to_stop_tracking)
-				.setIcon(android.R.drawable.ic_dialog_alert)
-				.setPositiveButton(android.R.string.yes,
-						new DialogInterface.OnClickListener() {
-
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-								stopTracking();
-							}
-						}).setNegativeButton(android.R.string.no, null).create();
-		
-		dialog.show();
-	}
 	
 	private String getTimeFormatString(long milliseconds) {
 		int seconds = (int) (milliseconds / 1000) % 60 ;
