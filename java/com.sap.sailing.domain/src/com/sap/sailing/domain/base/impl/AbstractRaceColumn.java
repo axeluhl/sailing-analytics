@@ -186,6 +186,20 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
             raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet)));
+            // now comes a little secrecy (see bug 2506) about how, after de-serialization, the connections
+            // between race column, race log, tracked race and the listener pumping stuff from the race log
+            // into the tracked race are re-established. The race log's listener structure is transient, and so
+            // is the tracked race's attachedRaceLogs field and the logListener field. The collections and the
+            // DynamicTrackedRaceLogListener are re-established after de-serialization in corresponding readObject(...)
+            // methods. However, the connections are not. That's what we need to do here, simply by invoking:
+            TrackedRace trackedRace = getTrackedRace(fleet);
+            if (trackedRace != null) {
+                trackedRace.attachRaceLog(raceLog);
+            }
+            // because this will add the race log to the tracked race's attachedRaceLogs collection again, and
+            // the new DynamicTrackedRaceLogListener that the readObject(...) method had constructed for the
+            // tracked race will be added as a listener to the race log whose listeners collection otherwise would
+            // only hold the RaceColumnRaceLogReplicator object added above.
         }
     }
 
