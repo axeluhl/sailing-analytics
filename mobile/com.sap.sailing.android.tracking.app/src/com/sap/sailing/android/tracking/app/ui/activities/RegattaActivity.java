@@ -305,7 +305,7 @@ public class RegattaActivity extends BaseActivity {
 		try {
 			checkoutData.put("competitorId", competitor.id);
 			checkoutData.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
-			checkoutData.put("toMillis", String.valueOf(System.currentTimeMillis()));
+			checkoutData.put("toMillis", System.currentTimeMillis());
 		} catch (JSONException e) {
 			showErrorPopup(
 					R.string.error,
@@ -313,8 +313,6 @@ public class RegattaActivity extends BaseActivity {
 			ExLog.e(this, TAG, "Error populating checkout-data: " + e.getMessage());
 			return;
 		}
-		
-		ExLog.w(this, TAG, "CHECKOUT DATA: " + checkoutData);
 		
 		JsonObjectOrStatusOnlyRequest checkoutRequest = new JsonObjectOrStatusOnlyRequest(
 				checkoutURLStr, checkoutData, new Listener<JSONObject>() {
