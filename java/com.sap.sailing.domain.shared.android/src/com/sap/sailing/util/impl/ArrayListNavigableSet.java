@@ -280,10 +280,16 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
             }
             @Override
             public E next() {
+                if (i >= list.size()) {
+                    throw new NoSuchElementException();
+                }
                 return list.get(i++);
             }
             @Override
             public void remove() {
+                if (i == 0) {
+                    throw new IllegalStateException();
+                }
                 list.remove(--i);
             }
         };
@@ -304,10 +310,16 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
             }
             @Override
             public E next() {
+                if (i == 0) {
+                    throw new NoSuchElementException();
+                }
                 return list.get(i--);
             }
             @Override
             public void remove() {
+                if (i == list.size()-1) {
+                    throw new IllegalStateException();
+                }
                 list.remove(i);
             }
         };
