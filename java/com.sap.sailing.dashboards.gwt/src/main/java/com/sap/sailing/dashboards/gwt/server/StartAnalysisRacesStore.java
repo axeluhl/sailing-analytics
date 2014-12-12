@@ -103,12 +103,9 @@ public class StartAnalysisRacesStore {
         baseDomainFactory = racingEventService.getBaseDomainFactory();
         this.listeners = new ArrayList<StartAnalysisRacesStoreListener>();
 
-        // startAnalysisCompetitorDTOsForCompetitorNameForTrackedRace = new HashMap<TrackedRace, Map<String,
-        // StartAnalysisCompetitorDTO>>();
         startAnalysisDTOListForCompetitorName = new HashMap<String, List<StartAnalysisDTO>>();
         rankingListAtMarkOneForTrackedRace = new HashMap<TrackedRace, List<Competitor>>();
         gpsFixesPathBeforeStartForCompetitor = new HashMap<TrackedRace, Map<String, List<GPSFixDTO>>>();
-        // startAnalysisDTOWithStaticData = new HashMap<TrackedRace, StartAnalysisDTO>();
 
     }
 
@@ -174,7 +171,8 @@ public class StartAnalysisRacesStore {
         startAnalysisDTO.startLineMarkPositions = getStartLineBoyPositions(trackedRace);
         startAnalysisDTO.firstMark = getMarksOfWayPoint(trackedRace, getFirstMarkWayPoint(trackedRace)).get(0);
         startAnalysisDTO.startAnalysisWindLineInfoDTO = createStartAnalysisWindAndLineData(trackedRace);
-        startAnalysisDTO.startLineMarks = getMarksOfWayPoint(trackedRace, trackedRace.getStartLine(trackedRace.getStartTimeReceived()).getWaypoint());
+        startAnalysisDTO.startLineMarks = getMarksOfWayPoint(trackedRace,
+                trackedRace.getStartLine(trackedRace.getStartTimeReceived()).getWaypoint());
         return startAnalysisDTO;
     }
 
@@ -219,12 +217,12 @@ public class StartAnalysisRacesStore {
         Waypoint firstMarkWayPoint = null;
         Iterator<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints().iterator();
         int wayPointCounter = 0;
-        while (waypoints.hasNext()){
+        while (waypoints.hasNext()) {
             Waypoint wayPoint = waypoints.next();
-            if(wayPointCounter == 1){
+            if (wayPointCounter == 1) {
                 return wayPoint;
             }
-            wayPointCounter ++;
+            wayPointCounter++;
         }
         return firstMarkWayPoint;
     }
@@ -435,75 +433,37 @@ public class StartAnalysisRacesStore {
             if (markPassings.iterator().hasNext()) {
                 if (getIndexOfMarkPassingMark(markPassings, trackedRace) == 1) {
                     logger.log(Level.INFO, "Received Mark Passing " + competitor.getName() + " Mark 1");
-                    getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).add(competitor);
-                    logger.log(Level.INFO, "Received Mark Passing " + competitor.getName() + " RankingList Size"
-                            + getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size());
-                    if (getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size() == MINIMUM_NUMBER_OF_COMPETITORS_IN_STARTANALYSISRANKINGTABLE) {
-                        for (Competitor competitorInRankingList : getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace)) {
-                            getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitorInRankingList.getName())
-                                    .add(createStartAnalysisDTOForCompetitor(competitorInRankingList, trackedRace));
+                    if (!getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace)
+                            .contains(competitor)) {
+                        getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).add(competitor);
+                        logger.log(Level.INFO, "Received Mark Passing " + competitor.getName() + " RankingList Size"
+                                + getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size());
+                        if (getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size() == MINIMUM_NUMBER_OF_COMPETITORS_IN_STARTANALYSISRANKINGTABLE) {
+                            for (Competitor competitorInRankingList : getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace)) {
+                                getOrCreateAndAddStartAnalysisDTOListForCompetitorName(
+                                        competitorInRankingList.getName()).add(
+                                        createStartAnalysisDTOForCompetitor(competitorInRankingList, trackedRace));
+                            }
+                            logger.log(Level.INFO, "Received Mark Passing "
+                                    + competitor.getName()
+                                    + " StartAnalysisDTOlist for competitor size: "
+                                    + getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitor.getName())
+                                            .size());
+                            notifyListernersAboutStartAnalysisDTOChange();
+                        } else if (getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size() > MINIMUM_NUMBER_OF_COMPETITORS_IN_STARTANALYSISRANKINGTABLE) {
+                            getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitor.getName()).add(
+                                    createStartAnalysisDTOForCompetitor(competitor, trackedRace));
+                            logger.log(Level.INFO, "Received Mark Passing "
+                                    + competitor.getName()
+                                    + " StartAnalysisDTOlist for competitor size: "
+                                    + getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitor.getName())
+                                            .size());
+                            notifyListernersAboutStartAnalysisDTOChange();
                         }
-                        logger.log(Level.INFO, "Received Mark Passing " + competitor.getName()
-                                + " StartAnalysisDTOlist for competitor size: "
-                                + getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitor.getName()).size());
-                        notifyListernersAboutStartAnalysisDTOChange();
-                    } else if (getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size() > MINIMUM_NUMBER_OF_COMPETITORS_IN_STARTANALYSISRANKINGTABLE) {
-                        getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitor.getName()).add(
-                                createStartAnalysisDTOForCompetitor(competitor, trackedRace));
-                        logger.log(Level.INFO, "Received Mark Passing " + competitor.getName()
-                                + " StartAnalysisDTOlist for competitor size: "
-                                + getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitor.getName()).size());
-                        notifyListernersAboutStartAnalysisDTOChange();
                     }
                 }
             }
-            // if (getIndexOfMarkPassingMark(markPassings, trackedRace) == 1) {
-            // // Add Competitor name to raning list at mark one for TrackedRace
-            // getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).add(competitor.getName());
-            // // Create StartAnalysisCompetitorDTO
-            // StartAnalysisCompetitorDTO startAnalysisCompetitorDTO =
-            // createStartAnalysisCompetitorDTO(
-            // trackedRace,
-            // getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).size(),
-            // competitor);
-            // // Add created StartAnalysisiCompetitorDTO to
-            // StartAnalyisisCompetitorDTOsMap for TrackedRace
-            // getOrCreateStartAnalysisCompetitorDTOsMapForTrackedRace(trackedRace).put(
-            // startAnalysisCompetitorDTO.rankingTableEntryDTO.teamName,
-            // startAnalysisCompetitorDTO);
-            // if
-            // (getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).size()
-            // == 3) {
-            // StartAnalysisDTO staticStartAnalysisDTO =
-            // getOrCreateStaticStartAnalysisDTOForTrackedRace(trackedRace);
-            // for (String competitorName :
-            // getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace)) {
-            // List<StartAnalysisDTO> startAnalysisListForCompetitor =
-            // startAnalysisDTOListForCompetitorName
-            // .get(competitorName);
-            // startAnalysisListForCompetitor.add(createStartAnalysisDTOForCompetitorName(
-            // staticStartAnalysisDTO, competitorName, trackedRace));
-            // startAnalysisDTOListForCompetitorName.put(competitorName,
-            // startAnalysisListForCompetitor);
-            // }
-            // notifyListernersAboutStartAnalysisDTOsChanges();
-            // } else if
-            // (getOrCreateRankingListAtMarkOneForTrackedRace(trackedRace).size()
-            // > 3) {
-            // StartAnalysisDTO staticStartAnalysisDTO =
-            // getOrCreateStaticStartAnalysisDTOForTrackedRace(trackedRace);
-            // List<StartAnalysisDTO> startAnalysisListForCompetitor =
-            // startAnalysisDTOListForCompetitorName
-            // .get(competitor.getName());
-            // startAnalysisListForCompetitor.add(createStartAnalysisDTOForCompetitorName(
-            // staticStartAnalysisDTO, competitor.getName(), trackedRace));
-            // startAnalysisDTOListForCompetitorName.put(competitor.getName(),
-            // startAnalysisListForCompetitor);
-            // notifyListernersAboutStartAnalysisDTOsChanges();
-            // trackedRace.removeListener(this);
-            // }
-            // }
-            // }
+           
         }
     }
 }
