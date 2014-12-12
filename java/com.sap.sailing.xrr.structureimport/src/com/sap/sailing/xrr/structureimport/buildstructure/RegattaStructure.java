@@ -9,8 +9,8 @@ public class RegattaStructure {
     List<Series> series = new ArrayList<Series>();
     GuessSeriesStrategy guessSeriesStrategy;
     
-    public RegattaStructure(GuessSeriesStrategy guessSeries) {
-        this.guessSeriesStrategy = guessSeries;
+    public RegattaStructure(GuessSeriesStrategy guessSeriesStrategy) {
+        this.guessSeriesStrategy = guessSeriesStrategy;
     }
 
     public void addRace(Race race, int[] numberOfRaces) {

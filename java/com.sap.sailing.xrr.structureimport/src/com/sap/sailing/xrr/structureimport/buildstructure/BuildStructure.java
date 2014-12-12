@@ -15,7 +15,7 @@ public class BuildStructure {
         for (Race race : races) {
             int raceNumber = race.getRaceNumber().intValue();
             if (raceNumber > numberOfRaces.length) {
-                // expand array; TODO maybe better us a Map<Integer, Integer>?
+                // expand array; TODO maybe better use a Map<Integer, Integer>?
                 int[] temp = numberOfRaces;
                 numberOfRaces = new int[numberOfRaces.length + 10];
                 for (int j = 0; j < temp.length; j++) {

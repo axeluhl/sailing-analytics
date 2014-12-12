@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.AbstractColor;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
@@ -44,6 +45,8 @@ import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.schema.Team;
 import com.sap.sailing.xrr.structureimport.buildstructure.BuildStructure;
 import com.sap.sailing.xrr.structureimport.buildstructure.Fleet;
+import com.sap.sailing.xrr.structureimport.buildstructure.GuessFleetOrderingFromFleetName;
+import com.sap.sailing.xrr.structureimport.buildstructure.GuessFleetOrderingStrategy;
 import com.sap.sailing.xrr.structureimport.buildstructure.RegattaStructure;
 import com.sap.sailing.xrr.structureimport.buildstructure.Series;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberStrategy;
@@ -155,18 +158,17 @@ public class StructureImporter {
     
     private List<com.sap.sailing.domain.base.Fleet> getFleets(List<Fleet> fleets) {
         List<com.sap.sailing.domain.base.Fleet> fleetsImpl = new ArrayList<com.sap.sailing.domain.base.Fleet>();
+        GuessFleetOrderingStrategy fleetOrderingStrategy = new GuessFleetOrderingFromFleetName();
         String fleetColor = "";
         if (fleets.size() <= 1) {
             fleetColor = "Default";
             FleetImpl fleetImpl = new FleetImpl(fleetColor, 0, getColorFromString(fleetColor));
             fleetsImpl.add(fleetImpl);
         } else {
-            int index = 0;
             for (Fleet fleet : fleets) {
                 fleetColor = fleet.getColor();
-                FleetImpl fleetImpl = new FleetImpl(fleetColor, index, getColorFromString(fleetColor));
+                FleetImpl fleetImpl = new FleetImpl(fleetColor, fleetOrderingStrategy.guessOrder(fleet.getColor()), getColorFromString(fleetColor));
                 fleetsImpl.add(fleetImpl);
-                index++;
             }
         }
         return fleetsImpl;
@@ -179,6 +181,9 @@ public class StructureImporter {
                 result = fleetColor.getColor();
                 break;
             }
+        }
+        if (result == null) {
+            result = AbstractColor.getColorByLowercaseNameStatic(colorString.toLowerCase());
         }
         if (result == null) {
             result = Color.BLACK;

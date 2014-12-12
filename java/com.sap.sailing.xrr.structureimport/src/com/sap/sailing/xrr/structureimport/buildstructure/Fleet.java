@@ -42,7 +42,6 @@ public class Fleet implements Comparable {
             numRaces++;
         }
         races.add(race);
-
     }
 
     public Iterable<Race> getRaces() {
@@ -57,7 +56,6 @@ public class Fleet implements Comparable {
     public int compareTo(Object o) {
         int a = getValueOfColor(this.color);
         int b = getValueOfColor(((Fleet) o).getColor());
-
         int result = 0;
         if (a < b) {
             result = -1;

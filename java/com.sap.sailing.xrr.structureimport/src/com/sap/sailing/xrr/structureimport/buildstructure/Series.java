@@ -49,7 +49,6 @@ public class Series {
             }
             counter++;
         }
-
         if (!added) {
             Fleet newFleet = new Fleet(fleetColor);
             newFleet.addRace(race);
@@ -60,7 +59,6 @@ public class Series {
             fleets.add(newFleet);
             Collections.sort(fleets);
         }
-
     }
 
     public char getFirstChar() {
