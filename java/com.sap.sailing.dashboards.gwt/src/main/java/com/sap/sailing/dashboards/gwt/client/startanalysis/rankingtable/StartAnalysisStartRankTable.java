@@ -33,8 +33,8 @@ public class StartAnalysisStartRankTable extends AbsolutePanel {
 
         StartAnalysisStartRankTableRankAtFirstMarkColumn<StartAnalysisCompetitorDTO> rankColumn = new StartAnalysisStartRankTableRankAtFirstMarkColumn<StartAnalysisCompetitorDTO>() {
             @Override    
-            public String getValue(StartAnalysisCompetitorDTO object) {
-                return ""+object.rankingTableEntryDTO.rankAtFirstMark;    
+            public Pair<String, String> getValue(StartAnalysisCompetitorDTO saCompetitor) {
+                return new Pair<String, String>(""+saCompetitor.rankingTableEntryDTO.rankAtFirstMark, saCompetitor.rankingTableEntryDTO.tailColor);   
             }  
         };
         
