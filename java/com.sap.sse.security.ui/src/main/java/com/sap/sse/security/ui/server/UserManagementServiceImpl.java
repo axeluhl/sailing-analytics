@@ -96,7 +96,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserDTO getCurrentUser() {
-        logger.info("Request: " + getThreadLocalRequest().getRequestURL());
+        logger.fine("Request: " + getThreadLocalRequest().getRequestURL());
         User user = getSecurityService().getCurrentUser();
         if (user == null) {
             return null;
