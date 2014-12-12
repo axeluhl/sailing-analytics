@@ -57,6 +57,7 @@ import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.JsonStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -480,8 +481,7 @@ public class HomeFragment extends BaseFragment implements
 			clv.put(Leaderboard.LEADERBOARD_NAME, checkinData.leaderboardName);
 			cr.insert(Leaderboard.CONTENT_URI, clv);
 
-			Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null,
-					null);
+			Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null, null);
 			long lastLeaderboardId = 0;
 
 			if (cur.moveToLast()) {
@@ -499,10 +499,8 @@ public class HomeFragment extends BaseFragment implements
 			ContentValues cev = new ContentValues();
 			cev.put(Event.EVENT_ID, checkinData.eventId);
 			cev.put(Event.EVENT_NAME, checkinData.eventName);
-			cev.put(Event.EVENT_DATE_START,
-					Long.parseLong(checkinData.eventStartDateStr));
-			cev.put(Event.EVENT_DATE_END,
-					Long.parseLong(checkinData.eventEndDateStr));
+			cev.put(Event.EVENT_DATE_START, Long.parseLong(checkinData.eventStartDateStr));
+			cev.put(Event.EVENT_DATE_END, Long.parseLong(checkinData.eventEndDateStr));
 			cev.put(Event.EVENT_SERVER, checkinData.eventServerUrl);
 			cev.put(Event.EVENT_IMAGE_URL, checkinData.eventFirstImageUrl);
 			cev.put(Event.EVENT_LEADERBOARD_FK, lastLeaderboardId);
@@ -523,10 +521,6 @@ public class HomeFragment extends BaseFragment implements
 					.newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
 
 			try {
-				for (ContentProviderOperation op : opList) {
-					System.out.println("** INSERT: " + op);
-				}
-
 				cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
 				adapter.notifyDataSetChanged();
 			} catch (RemoteException e1) {
@@ -568,14 +562,11 @@ public class HomeFragment extends BaseFragment implements
 					checkinData.competitorId, checkinData.deviceUid, "TODO!!",
 					date.getTime());
 
-			JsonObjectRequest checkinRequest = new JsonObjectRequest(checkinData.checkinURL,
+			JsonStatusOnlyRequest checkinRequest = new JsonStatusOnlyRequest(checkinData.checkinURL,
 					requestObject, new CheckinListener(checkinData.leaderboardName,
 							checkinData.eventId, checkinData.competitorId),
 					new CheckinErrorListener(checkinData.leaderboardName, checkinData.eventId,
 							checkinData.competitorId));
-
-			System.out.println("CHECK IN REQUEST: " + checkinRequest);
-			System.out.println("CHECK IN REQOBJ : " + requestObject);
 			
 			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
 
