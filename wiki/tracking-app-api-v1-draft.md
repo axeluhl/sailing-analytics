@@ -113,7 +113,7 @@ Result: fixes transmitted after the time specified in the checkin request are ad
 _Question: What should be done if a second device is mapped to competitor?_
 * _Answer:_ For now, according to our internal logic, both devices are actually mapped. If they send fixes for the same timerange, we will see some weird behaviour.
 
-**Path:** ``/leaderboards/{leaderboard-name}/device_mappings/start``
+**Path:** ``leaderboards/{leaderboard-name}/device_mappings/start``
 
 **Verb:** ``POST``
 
@@ -143,7 +143,7 @@ For future versions, think about whether this is the right place to transmit the
 
 Ends the device to competitor coupling. Does not delete it, but rather marks the end timepoint. Fixes submitted for this device that have a timestamp which lies after the end timepoint specified in the checkout request are not added to races in the leaderboard.
 
-**Path:** ``/leaderboards/{leaderboard-name}/device_mappings/end``
+**Path:** ``leaderboards/{leaderboard-name}/device_mappings/end``
 
 **Verb:** ``POST``
 
@@ -202,9 +202,9 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 
 ## Get Team Information (including team image)
 
-Alows to retrieve team information for the team of a certain competitor
+Allows to retrieve team information for the team of a certain competitor
 
-**Path:** ``/team/{competitor-id}``
+**Path:** ``team/{competitor-id}``
 
 **Verb:** ``GET``
 
@@ -228,9 +228,9 @@ Alows to retrieve team information for the team of a certain competitor
 
 ## Set Team Image
 
-Alows to retrieve team information for the team of a certain competitor
+Set the team image of a certain competitor
 
-**Path:** ``/team/{competitor-id}/image``
+**Path:** ``team/{competitor-id}/image``
 
 **Verb:** ``POST``
 
