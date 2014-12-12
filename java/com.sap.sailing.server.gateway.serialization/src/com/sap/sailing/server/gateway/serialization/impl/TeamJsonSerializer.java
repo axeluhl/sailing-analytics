@@ -12,6 +12,7 @@ public class TeamJsonSerializer implements JsonSerializer<Team> {
     public static final String FIELD_SAILORS = "sailors";
     public static final String FIELD_COACH = "coach";
     public static final String FIELD_NATIONALITY = "nationality";
+    public static final String FIELD_IMAGE_URI = "imageUri";
     
     private final JsonSerializer<Person> personJsonSerializer;
     
@@ -36,6 +37,11 @@ public class TeamJsonSerializer implements JsonSerializer<Team> {
         }
         result.put(FIELD_SAILORS, jsonSailors);
         
+        if (team.getImage() != null){
+        	result.put(FIELD_IMAGE_URI, team.getImage().toString());
+        }
+        
         return result;
     }
 }
+
