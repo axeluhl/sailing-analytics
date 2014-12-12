@@ -31,12 +31,11 @@ import android.widget.TextView;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.internal.cm;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
@@ -316,12 +315,13 @@ public class RegattaActivity extends BaseActivity {
 		}
 		
 		ExLog.w(this, TAG, "CHECKOUT DATA: " + checkoutData);
-
 		
-		JsonObjectRequest checkoutRequest = new JsonObjectRequest(checkoutURLStr, checkoutData, new Listener<JSONObject>(){
+		JsonObjectOrStatusOnlyRequest checkoutRequest = new JsonObjectOrStatusOnlyRequest(
+				checkoutURLStr, checkoutData, new Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
-						DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this, event, competitor, leaderboard);
+						DatabaseHelper.getInstance().deleteRegattaFromDatabase(
+								RegattaActivity.this, event, competitor, leaderboard);
 						dismissProgressDialog();
 						finish();
 					}

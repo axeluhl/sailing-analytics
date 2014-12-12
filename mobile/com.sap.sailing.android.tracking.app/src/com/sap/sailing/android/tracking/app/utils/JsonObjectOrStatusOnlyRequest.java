@@ -13,14 +13,14 @@ import com.android.volley.Response.Listener;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 
-public class JsonStatusOnlyRequest extends JsonObjectRequest {
+public class JsonObjectOrStatusOnlyRequest extends JsonObjectRequest {
 
-	public JsonStatusOnlyRequest(String url, JSONObject jsonRequest, Listener<JSONObject> listener,
+	public JsonObjectOrStatusOnlyRequest(String url, JSONObject jsonRequest, Listener<JSONObject> listener,
 			ErrorListener errorListener) {
 		super(url, jsonRequest, listener, errorListener);
 	}
 
-	public JsonStatusOnlyRequest(int method, String url, JSONObject jsonRequest,
+	public JsonObjectOrStatusOnlyRequest(int method, String url, JSONObject jsonRequest,
 			Listener<JSONObject> listener, ErrorListener errorListener) {
 		super(method, url, jsonRequest, listener, errorListener);
 	}
