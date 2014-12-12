@@ -198,3 +198,45 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 * JSON array may contain one or several fixes
 * **speed** Speed over ground in meters per second.
 * **course** Bearing in degrees.
+
+
+## Get Team Information (including team image)
+
+Alows to retrieve team information for the team of a certain competitor
+
+**Path:** ``/team/{competitor-id}``
+
+**Verb:** ``GET``
+
+**Response:**
+```
+{  
+   "name":"asd team",
+   "coach":null,
+   "sailors":[  
+      {  
+         "name":"asd",
+         "description":null,
+         "nationality":{  
+            "IOC":"ALB"
+         }
+      }
+   ],
+   "imageUri":"http://images.forbes.com/media/lists/companies/google_200x200.jpg"
+}
+```
+
+## Set Team Image
+
+Alows to retrieve team information for the team of a certain competitor
+
+**Path:** ``/team/{competitor-id}/image``
+
+**Verb:** ``POST``
+
+**Request:**
+```
+{
+  "imageUri":"http://images.forbes.com/media/lists/companies/google_200x200.jpg"
+}
+```
