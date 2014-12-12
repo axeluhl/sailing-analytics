@@ -24,16 +24,18 @@ import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 
 /**
- * This class contains all components of the Dashboard and the basic UI Elements
- * of the Dashboard, like top and bottom bars, logos and headers. It initializes the windbot
- * components according to their available number. 
+ * This class contains all components of the Dashboard and the basic UI Elements of the Dashboard, like top and bottom
+ * bars, logos and headers. It initializes the windbot components according to their available number.
  * 
  * @author Alexander Ries
  * 
  */
-public class RibDashboardPanel extends Composite implements RibDashboardDataRetrieverListener, NumberOfWindBotsChangeListener{
+public class RibDashboardPanel extends Composite implements RibDashboardDataRetrieverListener,
+        NumberOfWindBotsChangeListener {
 
-    interface RootUiBinder extends UiBinder<Widget, RibDashboardPanel> {}
+    interface RootUiBinder extends UiBinder<Widget, RibDashboardPanel> {
+    }
+
     private static RootUiBinder uiBinder = GWT.create(RootUiBinder.class);
     private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
 
@@ -60,10 +62,10 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     @UiField
     public DivElement hint;
-    
+
     @UiField
     public DivElement windloadinghintleft;
-    
+
     @UiField
     public DivElement windloadinghintright;
 
@@ -102,12 +104,13 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         RootPanel.get().add(bottomNotification);
     }
 
-    private void initWindBotComponents(List<String> windBotIDs, WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
+    private void initWindBotComponents(List<String> windBotIDs,
+            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
         int windBotAddedCounterTOConsiderForPanels = 0;
         leftwindbotcontainer.clear();
         removeWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
         windBotComponents.clear();
-        for(String windBotID : windBotIDs){
+        for (String windBotID : windBotIDs) {
             if (windBotAddedCounterTOConsiderForPanels == 0) {
                 WindBotComponent leftwindBotComponent = new WindBotComponent(windBotID);
                 leftwindbotcontainer.add(leftwindBotComponent);
@@ -120,33 +123,38 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
                 windloadinghintright.getStyle().setOpacity(0.0);
             }
             windBotAddedCounterTOConsiderForPanels++;
-            if(windloadinghintleft.getStyle().getOpacity() != "0.0" || windloadinghintright.getStyle().getOpacity() != "0.0"){
-                windloadinghintleft.setInnerHTML("Wind bot not available");
-                windloadinghintright.setInnerHTML("Wind bot not available");
+            if (windloadinghintleft.getStyle().getOpacity() != "0.0"
+                    || windloadinghintright.getStyle().getOpacity() != "0.0") {
+                windloadinghintleft.setInnerHTML("Wind bot not available.");
+                windloadinghintright.setInnerHTML("Wind bot not available.");
             }
         }
         addWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
     }
-    
-    private void addWindBotComponentsAsDataRetrieverListener(WindBotDataRetrieverProvider windBotDataRetrieverProvider){
-        for(WindBotComponent windBotComponent : windBotComponents){
+
+    private void addWindBotComponentsAsDataRetrieverListener(WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
+        for (WindBotComponent windBotComponent : windBotComponents) {
             windBotDataRetrieverProvider.addWindBotDataRetrieverListener(windBotComponent);
         }
     }
-    
-    private void removeWindBotComponentsAsDataRetrieverListener(WindBotDataRetrieverProvider windBotDataRetrieverProvider){
-        for(WindBotComponent windBotComponent : windBotComponents){
+
+    private void removeWindBotComponentsAsDataRetrieverListener(
+            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
+        for (WindBotComponent windBotComponent : windBotComponents) {
             windBotDataRetrieverProvider.removeWindBotDataRetrieverListener(windBotComponent);
         }
     }
 
     @Override
     public void updateUIWithNewLiveRaceInfo(RibDashboardRaceInfoDTO liveRaceInfoDTO) {
-        this.header.getElement().setInnerText(liveRaceInfoDTO.idOfLastTrackedRace.getRaceName());
+        if (liveRaceInfoDTO != null && liveRaceInfoDTO.idOfLastTrackedRace != null) {
+            this.header.getElement().setInnerText(liveRaceInfoDTO.idOfLastTrackedRace.getRaceName());
+        }
     }
 
     @Override
-    public void numberOfWindBotsChanged(List<String> windBotIDs, WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
+    public void numberOfWindBotsChanged(List<String> windBotIDs,
+            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
         logger.log(Level.INFO, "Number of Windbots changed");
         initWindBotComponents(windBotIDs, windBotDataRetrieverProvider);
     }
