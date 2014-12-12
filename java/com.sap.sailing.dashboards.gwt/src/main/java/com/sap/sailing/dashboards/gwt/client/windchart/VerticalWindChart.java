@@ -225,7 +225,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         Point[] seriesPoints = verticalWindChartSeries.getPoints();
         long pointRangeInMilliseconds;
         int seriesPointsLenght = seriesPoints.length;
-        if (seriesPointsLenght > 0) {
+        if (seriesPointsLenght > 0 && !seriesPoints[0].getX().equals(null)) {
             long earliesPointAsTimestamp = seriesPoints[0].getX().longValue();
             long latestPointAsTimestamp;
             if (seriesPointsLenght > 1) {
