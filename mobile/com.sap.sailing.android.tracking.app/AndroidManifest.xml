@@ -63,7 +63,7 @@
         <activity
             android:name=".ui.activities.TrackingActivity"
             android:label="@string/title_activity_tracking"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="unspecified" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activities.StartActivity" />

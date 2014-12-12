@@ -31,7 +31,7 @@ public class TrackingFragment extends BaseFragment {
 	static final String SIS_GPS_ACCURACY = "instanceStateGpsAccuracy";
 	static final String SIS_GPS_UNSENT_FIXES = "instanceStateGpsUnsentFixes";
 	
-	private TimerRunnable timer;
+	
 	private AppPreferences prefs;
 	private long lastGPSQualityUpdate;
 	
@@ -57,14 +57,6 @@ public class TrackingFragment extends BaseFragment {
 		super.onResume();
 		// so it initally updates to "battery-saving" etc.
 		setAPIConnectivityStatus(APIConnectivity.noAttempt);
-		timer = new TimerRunnable();
-		timer.start();
-	}
-	
-	@Override
-	public void onPause() {
-		super.onPause();
-		timer.stop();
 	}
 	
 	@Override
@@ -102,22 +94,7 @@ public class TrackingFragment extends BaseFragment {
 		outState.putString(SIS_GPS_ACCURACY, accuracyText.getText().toString());
 		outState.putString(SIS_GPS_UNSENT_FIXES, unsentFixesText.getText().toString());
 	}
-	
-	/**
-	 * Update UI with a string containing the time since tracking started, e.g. 01:22:45
-	 */
-	public void updateTimer()
-	{
-		if (isAdded())
-		{
-			long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
-			TextView textView = (TextView) getActivity().findViewById(R.id.tracking_time_label);
-			if (textView != null)
-			{
-				textView.setText(getTimeFormatString(diff));
-			}
-		}
-	}
+
 	
 	/**
 	 * If last GPS update is too long ago, let's assume there's no signal and set quality to .noSignal
@@ -237,15 +214,6 @@ public class TrackingFragment extends BaseFragment {
 		activity.showStopTrackingConfirmationDialog();
 	}
 
-	
-	private String getTimeFormatString(long milliseconds) {
-		int seconds = (int) (milliseconds / 1000) % 60 ;
-		int minutes = (int) ((milliseconds / (1000*60)) % 60);
-		int hours   = (int) ((milliseconds / (1000*60*60)) % 24);
-		
-		return String.format(getResources().getConfiguration().locale, "%02d:%02d:%02d", hours, minutes, seconds);
-	}
-	
 	public void setGPSQualityAndAcurracy(GPSQuality quality, float gpsAccurracy)
 	{
 		if (isAdded())
@@ -285,40 +253,5 @@ public class TrackingFragment extends BaseFragment {
 		}
 	}
 	
-	private class TimerRunnable implements Runnable {
-		
-		public Thread t;
-		public volatile boolean running = true;
-		
-		public void start() {
-			running = true;
-			if (t == null) {
-				t = new Thread(this);
-				t.start();
-			}
-		}
-		
-		@Override
-		public void run() {
-			while (running) {
-				getActivity().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						checkLastGPSReceived();
-						updateTimer();
-					}
-				});
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		public void stop()
-		{
-			running = false;
-		}
-	}
+	
 }
