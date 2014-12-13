@@ -106,6 +106,5 @@ public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
     @Override
     public void setAngleOffset(double offset) {
         angleOffset = offset;
-        Window.alert("Orientation Changed: "+offset);
     }
 }
