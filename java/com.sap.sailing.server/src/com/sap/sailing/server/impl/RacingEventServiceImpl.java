@@ -1559,7 +1559,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         stopTrackingWind(regatta, race);
                     }
                 }
-                raceTracker.stop();
+                raceTracker.stop(/* preemptive */ false);
                 final Object trackerId = raceTracker.getID();
                 final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
                 try {
@@ -1613,7 +1613,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * The tracker will initially try to connect to the tracking infrastructure to obtain basic race master data. If
      * this fails after some timeout, to avoid garbage and lingering threads, the task scheduled by this method will
      * check after the timeout expires if race master data was successfully received. If so, the tracker continues
-     * normally. Otherwise, the tracker is shut down orderly by calling {@link RaceTracker#stop() stopping}.
+     * normally. Otherwise, the tracker is shut down orderly by calling {@link RaceTracker#stop(boolean) stopping}.
      * 
      * @return the scheduled task, in case the caller wants to {@link ScheduledFuture#cancel(boolean) cancel} it, e.g.,
      *         when the tracker is stopped or has successfully received the race
@@ -1633,7 +1633,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         if (trackersForRegatta != null) {
                             trackersForRegatta.remove(tracker);
                         }
-                        tracker.stop();
+                        tracker.stop(/* preemptive */ true);
                         final Object trackerId = tracker.getID();
                         final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
                         try {
@@ -1665,7 +1665,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 RaceTracker raceTracker = trackerIter.next();
                 if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
                     logger.info("Found tracker to stop for races " + raceTracker.getRaces());
-                    raceTracker.stop();
+                    raceTracker.stop(/* preemptive */ false);
                     trackerIter.remove();
                     final Object trackerId = raceTracker.getID();
                     final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
@@ -1844,7 +1844,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     }
                     if (!foundReachableRace) {
                         // firstly stop the tracker
-                        raceTracker.stop();
+                        raceTracker.stop(/* preemptive */ true);
                         // remove it from the raceTrackers by Regatta
                         trackerIter.remove();
                         final Object trackerId = raceTracker.getID();
@@ -2385,7 +2385,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 final Set<RaceTracker> trackers = raceTrackersByRegatta.get(regatta.getRegatta());
                 if (trackers != null) {
                     for (RaceTracker tracker : trackers) {
-                        tracker.stop();
+                        tracker.stop(/* preemptive */ true);
                     }
                 }
             }
