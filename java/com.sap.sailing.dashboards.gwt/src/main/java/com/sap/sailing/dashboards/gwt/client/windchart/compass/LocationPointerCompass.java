@@ -1,6 +1,7 @@
 package com.sap.sailing.dashboards.gwt.client.windchart.compass;
 
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Image;
@@ -20,6 +21,8 @@ import com.sap.sailing.domain.common.dto.PositionDTO;
 public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
         LocationPointerCompassAngleDistanceListener {
 
+    private double angleOffset;
+    
     private Image compassNeedle;
 
     /**
@@ -46,6 +49,7 @@ public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
         initDistanceToPointedLocationLabel();
         locationPointerCompassAngleDistance = new LocationPointerCompassAngleDistance();
         locationPointerCompassAngleDistance.addListener(this);
+        locationPointerCompassAngleDistance.triggerOrientationRead();
     }
 
     private void initCompassNeedle() {
@@ -71,7 +75,7 @@ public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
     private void updateNeedleAngle(double newDirection) {
         // Adapt degrees to image angle
         synchronized (this) {
-            String winddirectionformatted = NumberFormat.getFormat("#0").format(newDirection);
+            String winddirectionformatted = NumberFormat.getFormat("#0").format(newDirection-angleOffset);
             compassNeedle.getElement().getStyle().setProperty("transform", "rotate(" + winddirectionformatted + "deg)");
             compassNeedle.getElement().getStyle()
                     .setProperty("webkitTransform", "rotate(" + winddirectionformatted + "deg)");
@@ -97,5 +101,11 @@ public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
     public void angleAndDistanceChanged(double angle, double distance) {
         updateNeedleAngle(angle);
         updateDistanceToPointedLocationLabel(distance, angle);
+    }
+
+    @Override
+    public void setAngleOffset(double offset) {
+        angleOffset = offset;
+        Window.alert("Orientation Changed: "+offset);
     }
 }
