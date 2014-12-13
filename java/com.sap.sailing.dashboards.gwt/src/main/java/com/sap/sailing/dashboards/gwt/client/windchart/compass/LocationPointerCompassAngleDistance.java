@@ -7,6 +7,8 @@ import com.sap.sailing.dashboards.gwt.client.device.Compass;
 import com.sap.sailing.dashboards.gwt.client.device.CompassListener;
 import com.sap.sailing.dashboards.gwt.client.device.Location;
 import com.sap.sailing.dashboards.gwt.client.device.LocationListener;
+import com.sap.sailing.dashboards.gwt.client.device.Orientation;
+import com.sap.sailing.dashboards.gwt.client.device.OrientationListener;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 
 /**
@@ -18,7 +20,7 @@ import com.sap.sailing.domain.common.dto.PositionDTO;
  * @author Alexander Ries (D062114)
  *
  */
-public class LocationPointerCompassAngleDistance implements LocationListener, CompassListener {
+public class LocationPointerCompassAngleDistance implements LocationListener, CompassListener, OrientationListener {
 
     private List<LocationPointerCompassAngleDistanceListener> listeners;
     private double latDevice;
@@ -38,6 +40,11 @@ public class LocationPointerCompassAngleDistance implements LocationListener, Co
         listeners = new ArrayList<LocationPointerCompassAngleDistanceListener>();
         Compass.getInstance().addListener(this);
         Location.getInstance().addListener(this);
+        Orientation.getInstance().addListener(this);
+    }
+    
+    public void triggerOrientationRead(){
+        Orientation.getInstance().triggerDeviceOrientationRead();
     }
 
     private double getAngleBetweenGPSPoints(double lat1, double lng1, double lat2, double lng2) {
@@ -115,5 +122,16 @@ public class LocationPointerCompassAngleDistance implements LocationListener, Co
         latBot = positionDTO.latDeg;
         lonBot = positionDTO.lngDeg;
         calulateNewAngleAndDistance();
+    }
+
+    private void setAngleOffsetAtListeners(double offset) {
+        for (LocationPointerCompassAngleDistanceListener listener : listeners) {
+            listener.setAngleOffset(offset);
+        }
+    }
+
+    @Override
+    public void orientationChanged(double orintationHeading) {
+        setAngleOffsetAtListeners(orintationHeading);
     }
 }
