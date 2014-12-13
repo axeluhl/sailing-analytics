@@ -49,11 +49,12 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
         return new Callable<GroupedDataEntry<DataType>>() {
             @Override
             public GroupedDataEntry<DataType> call() throws Exception {
-                return new GroupedDataEntry<DataType>(createCompoundKeyFor(element, dimensions.iterator()), element);
+                return new GroupedDataEntry<DataType>(createCompoundKeyFor(element,
+                        dimensions.iterator()), element);
             }
         };
     }
-
+    
     private GroupKey createCompoundKeyFor(DataType input, Iterator<Function<?>> dimensionsIterator) {
         Function<?> mainDimension = dimensionsIterator.next();
         GroupKey key = createGroupKeyFor(input, mainDimension);
@@ -64,7 +65,7 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
     }
 
     protected abstract GroupKey createGroupKeyFor(DataType input, Function<?> dimension);
-
+    
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
     }

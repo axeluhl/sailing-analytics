@@ -2675,7 +2675,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             }
                         }
                         logger.info("Finished loading mark tracks for " + getRace().getName());
-
                     } finally {
                         synchronized (TrackedRaceImpl.this) {
                             loadingFromGPSFixStore = false;
