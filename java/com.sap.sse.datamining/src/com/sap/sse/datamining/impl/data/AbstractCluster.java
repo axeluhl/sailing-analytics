@@ -2,17 +2,19 @@ package com.sap.sse.datamining.impl.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 
 public abstract class AbstractCluster<ElementType> implements Cluster<ElementType> {
 
-    protected final String name;
+    private final String messageKey;
     private Collection<ClusterBoundary<ElementType>> boundaries;
 
-    public AbstractCluster(String name, Collection<ClusterBoundary<ElementType>> boundaries) {
-        this.name = name;
+    public AbstractCluster(String messageKey, Collection<ClusterBoundary<ElementType>> boundaries) {
+        this.messageKey = messageKey;
         this.boundaries = new ArrayList<>(boundaries);
     }
     
@@ -30,15 +32,17 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
     public Class<ElementType> getClusterElementsType() {
         return boundaries.iterator().next().getClusterElementsType();
     }
-
+    
     @Override
-    public String getName() {
-        return name;
+    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+        return stringMessages.get(locale, messageKey) + " " + getBoundariesAsString();
     }
+    
+    protected abstract String getBoundariesAsString();
     
     @Override
     public String toString() {
-        return getName() + boundaries;
+        return messageKey + " " + getBoundariesAsString();
     }
 
     protected Collection<ClusterBoundary<ElementType>> getClusterBoundaries() {
@@ -50,7 +54,7 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
         final int prime = 31;
         int result = 1;
         result = prime * result + ((boundaries == null) ? 0 : boundaries.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((messageKey == null) ? 0 : messageKey.hashCode());
         return result;
     }
 
@@ -68,10 +72,10 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
                 return false;
         } else if (!boundaries.equals(other.boundaries))
             return false;
-        if (name == null) {
-            if (other.name != null)
+        if (messageKey == null) {
+            if (other.messageKey != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!messageKey.equals(other.messageKey))
             return false;
         return true;
     }
