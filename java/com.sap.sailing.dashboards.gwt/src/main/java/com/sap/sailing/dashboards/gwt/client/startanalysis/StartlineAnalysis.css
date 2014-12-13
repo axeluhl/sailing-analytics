@@ -69,16 +69,6 @@
 	top: -20pt;
 }
 
-.googlehider {
-	position: absolute;
-	bottom: 0pt;
-	right: 0pt;
-	left: 0pt;
-	height: 20%;
-	background-color: #4293DB;
-	z-index: 1;
-}
-
 .startanalysis_card_table {
 	position: absolute;
 	bottom: 10pt;

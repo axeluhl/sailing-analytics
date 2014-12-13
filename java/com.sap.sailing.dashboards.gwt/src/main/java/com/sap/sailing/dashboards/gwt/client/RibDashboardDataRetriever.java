@@ -150,7 +150,6 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
                                 popupRacingNotYetStarted.showWithMessageAndImageAndButtonText("Racing not yet started",
                                         RibDashboardImageResources.INSTANCE.watch(), "Retry");
                             } else {
-                                bottomNotification.show("Race finished!", "#418bcb", "#FFFFFF", true);
                                 setSelection(null);
                             }
                             break;

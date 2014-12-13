@@ -25,6 +25,5 @@
 		</div>
 		<g:HTMLPanel ui:field="startanalysis_card_table"
 			styleName="{style.startanalysis_card_table}"></g:HTMLPanel>
-		<g:HTMLPanel styleName="{style.googlehider}"></g:HTMLPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 

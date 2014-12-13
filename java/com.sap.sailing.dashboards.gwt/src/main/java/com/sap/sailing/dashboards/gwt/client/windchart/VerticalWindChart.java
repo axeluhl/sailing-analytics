@@ -10,6 +10,8 @@ import org.moxieapps.gwt.highcharts.client.Axis.Type;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.DateTimeLabelFormats;
+import org.moxieapps.gwt.highcharts.client.Global;
+import org.moxieapps.gwt.highcharts.client.Highcharts;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.Point;
@@ -99,6 +101,11 @@ public class VerticalWindChart extends Composite implements HasWidgets {
     }
 
     private void initVerticalWindChartWithColors(String positiveFillColor, String negativeFillColor) {
+        Highcharts.setOptions(
+                new Highcharts.Options().setGlobal(
+                    new Global()
+                      .setUseUTC(false)
+              ));
         verticalWindChart = new Chart();
         setChartOptions();
         setXAxisOptions();
