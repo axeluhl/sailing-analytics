@@ -21,8 +21,11 @@ public class CompassFragment extends BaseFragment {
 
 	public void setBearing(float heading)
 	{
-		TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
-		headingText.setText(String.valueOf(Math.round(heading)) + "°");
+		if (isAdded())
+		{
+			TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
+			headingText.setText(String.valueOf(Math.round(heading)) + "°");
+		}
 	}
 	
 	@Override
