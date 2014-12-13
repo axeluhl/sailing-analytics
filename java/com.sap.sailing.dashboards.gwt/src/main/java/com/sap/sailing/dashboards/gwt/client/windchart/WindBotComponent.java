@@ -41,7 +41,6 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
  */
 public class WindBotComponent extends Composite implements HasWidgets, WindBotDataRetrieverListener {
 
-    private String windBotID = null;
     private SinWave speedSinWave;
     private SinWave directionSinWave;
     private boolean inSimulationMode;

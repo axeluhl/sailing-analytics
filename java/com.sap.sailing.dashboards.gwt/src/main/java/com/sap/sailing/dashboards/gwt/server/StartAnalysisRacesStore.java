@@ -49,7 +49,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class StartAnalysisRacesStore {
 
-    private RacingEventService racingEventService;
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
     /**
@@ -99,7 +98,6 @@ public class StartAnalysisRacesStore {
      */
     public StartAnalysisRacesStore(RacingEventService racingEventService) {
 
-        this.racingEventService = racingEventService;
         baseDomainFactory = racingEventService.getBaseDomainFactory();
         this.listeners = new ArrayList<StartAnalysisRacesStoreListener>();
 

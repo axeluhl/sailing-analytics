@@ -3,7 +3,6 @@ package com.sap.sailing.dashboards.gwt.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -31,7 +30,6 @@ public class WindBotDataRetriever implements TimeListener, RaceSelectionChangeLi
     private List<WindBotDataRetrieverListener> windBotDataRetrieverListeners;
     private List<String> windBotIDsInLiveRace;
 
-    private static final Logger logger = Logger.getLogger(WindBotDataRetriever.class.getName());
     private static final int WIND_CHART_RESOLUTION_IN_MILLISECONDS = 5000;
     public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
     private boolean didInitialLoading;

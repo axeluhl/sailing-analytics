@@ -5,10 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +19,6 @@ import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
 import com.sap.sailing.dashboards.gwt.shared.ResponseMessage;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
-import com.sap.sailing.dashboards.gwt.shared.dto.WindBotComponentDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -45,7 +42,6 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -92,7 +88,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements
 	 * {@link MovingAverage} for the true wind speed and the second one contains
 	 * an average for the true wind direction for a wind bot.
 	 * */
-	private Map<String, Pair<MovingAverage, MovingAverage>> speedAndDirectionAverageForWindBotID;
 
 	private Map<String, List<StartAnalysisDTO>> startAnalysisDTOsForCompetitor;
 	private StartAnalysisRacesStore startAnalysisRacesStore;
@@ -108,7 +103,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements
 		startAnalysisDTOsForCompetitor = new HashMap<String, List<StartAnalysisDTO>>();
 		averageStartLineAdvantageByWind = new MovingAverage(400);
 		averageStartLineAdvantageByGeometry = new MovingAverage(400);
-		speedAndDirectionAverageForWindBotID = new HashMap<String, Pair<MovingAverage, MovingAverage>>();
 	}
 
 	protected RacingEventService getRacingEventService() {
@@ -162,55 +156,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements
 		}
 	}
 
-	private void fillLiveRaceInfoDTOWithWindBotData(
-			RibDashboardRaceInfoDTO lRInfo, TimePoint timePoint) {
-		if (runningRace != null || runningRace.isLive(timePoint) != false) {
-			Map<String, WindBotComponentDTO> windBots = new HashMap<String, WindBotComponentDTO>();
-
-			List<String> windSourcesToDeliver = new ArrayList<String>();
-			Iterator<WindSource> windsourcedInRace = runningRace
-					.getWindSources().iterator();
-			while (windsourcedInRace.hasNext()) {
-				WindSource currentWindSource = windsourcedInRace.next();
-				windSourcesToDeliver.add(currentWindSource.name());
-			}
-			WindInfoForRaceDTO windInfoForRaceDTO = getAveragedWindInfo(
-					runningRace.getRaceIdentifier(),
-					new Date(
-							runningRace.getTimePointOfNewestEvent().asMillis() - 10000),
-					new Date(runningRace.getTimePointOfNewestEvent().asMillis()),
-					1000, windSourcesToDeliver, true);
-
-			Set<WindSource> windSourcesWithWind = windInfoForRaceDTO.windTrackInfoByWindSource
-					.keySet();
-			for (WindSource windSource : windSourcesWithWind) {
-				WindTrackInfoDTO windTrackInfoDTOForSource = windInfoForRaceDTO.windTrackInfoByWindSource
-						.get(windSource);
-				if (windTrackInfoDTOForSource.windFixes != null
-						&& windTrackInfoDTOForSource.windFixes.size() > 0) {
-					WindDTO windDTO = windTrackInfoDTOForSource.windFixes
-							.get(windTrackInfoDTOForSource.windFixes.size() - 1);
-					if (windSource.getType() == WindSourceType.EXPEDITION) {
-						WindBotComponentDTO windBotDTO = new WindBotComponentDTO();
-						windBotDTO.id = windSource.getId().toString();
-						windBotDTO.liveWindSpeedInKts = windDTO.trueWindSpeedInKnots;
-						windBotDTO.liveWindDirectionInDegrees = windDTO.trueWindBearingDeg;
-						windBotDTO.position = windDTO.position;
-						Pair<Double, Double> windAverages = getUpdatedWindBotAverages(
-								windSource.getId().toString(),
-								windDTO.trueWindSpeedInKnots,
-								windDTO.trueWindBearingDeg);
-						windBotDTO.averageWindSpeedInKts = windAverages.getA();
-						windBotDTO.averageWindDirectionInDegrees = windAverages
-								.getB();
-						windBots.put(windSource.getId().toString(), windBotDTO);
-					}
-				}
-				lRInfo.windBotDTOForID = windBots;
-			}
-		}
-	}
-
 	private void fillLiveRaceInfoDTOWithRaceData(
 			RibDashboardRaceInfoDTO lRInfo, TimePoint now) {
 		if (runningRace != null) {
@@ -235,29 +180,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements
 			RibDashboardRaceInfoDTO lRInfo, String competiorName) {
 		lRInfo.startAnalysisDTOList = startAnalysisDTOsForCompetitor
 				.get(competiorName);
-	}
-
-	private Pair<Double, Double> getUpdatedWindBotAverages(String botId,
-			double windSpeed, double windDirection) {
-		Pair<MovingAverage, MovingAverage> windBotAveragesPair = speedAndDirectionAverageForWindBotID
-				.get(botId);
-		if (windBotAveragesPair == null) {
-			MovingAverage newSpeedAverage = new MovingAverage(400);
-			MovingAverage newDirectionAverage = new MovingAverage(400);
-			Pair<MovingAverage, MovingAverage> newWindBotAveragesPair = new Pair<MovingAverage, MovingAverage>(
-					newSpeedAverage, newDirectionAverage);
-			speedAndDirectionAverageForWindBotID.put(botId,
-					newWindBotAveragesPair);
-			windBotAveragesPair = newWindBotAveragesPair;
-		}
-		MovingAverage speedAverage = windBotAveragesPair.getA();
-		MovingAverage directionAverage = windBotAveragesPair.getB();
-		speedAverage.add(windSpeed);
-		directionAverage.add(windDirection);
-		Pair<Double, Double> windAverages = new Pair<Double, Double>(
-				Double.valueOf(speedAverage.getAverage()),
-				Double.valueOf(directionAverage.getAverage()));
-		return windAverages;
 	}
 
 	// returns true if race is still live
