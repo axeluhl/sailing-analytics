@@ -26,6 +26,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
@@ -289,12 +290,11 @@ public class TransmittingService extends Service {
 
 				JSONObject json = new JSONObject();
 				try {
-					json.put("bearingDeg", fix.course);
-					json.put("timeMillis", fix.timestamp);
-					json.put("speedMperS", fix.speed);
-					json.put("lonDeg", fix.longitude);
-					json.put("deviceUuid", prefs.getDeviceIdentifier());
-					json.put("latDeg", fix.latitude);
+					json.put("course", fix.course);
+					json.put("timestamp", fix.timestamp);
+					json.put("speed", fix.speed);
+					json.put("longitude", fix.longitude);
+					json.put("latitude", fix.latitude);
 				} catch (JSONException ex) {
 					ExLog.i(this, TAG, "Error while building geolocation json "
 							+ ex.getMessage());
@@ -317,8 +317,8 @@ public class TransmittingService extends Service {
 			JSONObject requestObject = new JSONObject();
 			
 			try {
-				requestObject.put("fixes", jsonArray);
 				requestObject.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
+				requestObject.put("fixes", jsonArray);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -332,13 +332,12 @@ public class TransmittingService extends Service {
 			{
 				sendingAttempted = true;
 				
-				VolleyHelper.getInstance(this).enqueueRequest(
-						host + prefs.getServerGpsFixesPostPath(),
-						requestObject,
-						new FixSubmitListener(ids.toArray(idsArr)),
-						new FixSubmitErrorListener(host,
-								getTrackingServiceIsCurrentlyTracking(),
-								failedHosts));
+				JsonObjectOrStatusOnlyRequest request = new JsonObjectOrStatusOnlyRequest(host
+						+ prefs.getServerGpsFixesPostPath(), requestObject, new FixSubmitListener(
+						ids.toArray(idsArr)), new FixSubmitErrorListener(host,
+						getTrackingServiceIsCurrentlyTracking(), failedHosts));
+						
+				VolleyHelper.getInstance(this).addRequest(request);
 			}
 			else
 			{

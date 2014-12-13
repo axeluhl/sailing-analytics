@@ -228,16 +228,18 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
 		}
 		
-		SpeedFragment speedFragment = getViewPagerAdapter().getSpeedFragment();
-		if (speedFragment != null && speedFragment.isAdded())
-		{
-			speedFragment.setSpeed(speed);
-		}
+		ScreenSlidePagerAdapter viewPagerAdapter = getViewPagerAdapter();
 		
-		CompassFragment compassFragment = getViewPagerAdapter().getCompassFragment();
-		if (compassFragment != null && compassFragment.isAdded())
-		{
-			compassFragment.setBearing(bearing);
+		if (viewPagerAdapter != null) {
+			SpeedFragment speedFragment = viewPagerAdapter.getSpeedFragment();
+			if (speedFragment != null && speedFragment.isAdded()) {
+				speedFragment.setSpeed(speed);
+			}
+
+			CompassFragment compassFragment = viewPagerAdapter.getCompassFragment();
+			if (compassFragment != null && compassFragment.isAdded()) {
+				compassFragment.setBearing(bearing);
+			}
 		}
 	}
 
@@ -308,10 +310,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		// getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
 		if (prefs.getHeadingFromMagneticSensorPreferred()) {
 			if (mPager.getCurrentItem() == ScreenSlidePagerAdapter.VIEW_PAGER_FRAGMENT_COMPASS) {
-				CompassFragment compassFragment = getViewPagerAdapter().getCompassFragment();
-				if (compassFragment != null && compassFragment.isAdded())
-				{
-					compassFragment.setBearing(heading);
+				
+				ScreenSlidePagerAdapter viewPagerAdapter = getViewPagerAdapter();
+				if (viewPagerAdapter != null) {
+					CompassFragment compassFragment = viewPagerAdapter.getCompassFragment();
+					if (compassFragment != null && compassFragment.isAdded()) {
+						compassFragment.setBearing(heading);
+					}
 				}
 			}
 		} else {
