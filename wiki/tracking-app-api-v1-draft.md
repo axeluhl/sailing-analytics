@@ -113,7 +113,7 @@ Result: fixes transmitted after the time specified in the checkin request are ad
 _Question: What should be done if a second device is mapped to competitor?_
 * _Answer:_ For now, according to our internal logic, both devices are actually mapped. If they send fixes for the same timerange, we will see some weird behaviour.
 
-**Path:** ``/leaderboards/{leaderboard-name}/device_mappings/start``
+**Path:** ``leaderboards/{leaderboard-name}/device_mappings/start``
 
 **Verb:** ``POST``
 
@@ -143,7 +143,7 @@ For future versions, think about whether this is the right place to transmit the
 
 Ends the device to competitor coupling. Does not delete it, but rather marks the end timepoint. Fixes submitted for this device that have a timestamp which lies after the end timepoint specified in the checkout request are not added to races in the leaderboard.
 
-**Path:** ``/leaderboards/{leaderboard-name}/device_mappings/end``
+**Path:** ``leaderboards/{leaderboard-name}/device_mappings/end``
 
 **Verb:** ``POST``
 
@@ -198,3 +198,45 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 * JSON array may contain one or several fixes
 * **speed** Speed over ground in meters per second.
 * **course** Bearing in degrees.
+
+
+## Get Team Information (including team image)
+
+Allows to retrieve team information for the team of a certain competitor
+
+**Path:** ``team/{competitor-id}``
+
+**Verb:** ``GET``
+
+**Response:**
+```
+{  
+   "name":"asd team",
+   "coach":null,
+   "sailors":[  
+      {  
+         "name":"asd",
+         "description":null,
+         "nationality":{  
+            "IOC":"ALB"
+         }
+      }
+   ],
+   "imageUri":"http://images.forbes.com/media/lists/companies/google_200x200.jpg"
+}
+```
+
+## Set Team Image
+
+Set the team image of a certain competitor
+
+**Path:** ``team/{competitor-id}/image``
+
+**Verb:** ``POST``
+
+**Request:**
+```
+{
+  "imageUri":"http://images.forbes.com/media/lists/companies/google_200x200.jpg"
+}
+```

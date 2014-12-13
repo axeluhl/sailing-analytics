@@ -1,11 +1,10 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.util.Collection;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -14,16 +13,18 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
 public interface DataMiningServiceAsync {
 
-    void getAllStatistics(String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
+    void getAllStatistics(String localeInfoName, AsyncCallback<Iterable<FunctionDTO>> callback);
 
-    void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<Collection<FunctionDTO>> callback);
+    void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<Iterable<FunctionDTO>> callback);
+    void getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
+            AsyncCallback<Iterable<FunctionDTO>> callback);
     
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
-            AsyncCallback<Collection<DataRetrieverChainDefinitionDTO>> callback);
-    
-    void getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition, String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
+            AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>> callback);
 
-    <ResultType extends Number> void runQuery(QueryDefinition queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
+    void getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName, AsyncCallback<QueryResult<Set<Object>>> callback);
+
+    <ResultType extends Number> void runQuery(QueryDefinitionDTO queryDefinition, AsyncCallback<QueryResult<ResultType>> callback);
     
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining

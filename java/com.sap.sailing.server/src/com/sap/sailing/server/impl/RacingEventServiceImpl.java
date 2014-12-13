@@ -2323,6 +2323,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (leaderboard instanceof LeaderboardGroupMetaLeaderboard) {
                 ((LeaderboardGroupMetaLeaderboard) leaderboard)
                         .registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
+            } else if (leaderboard instanceof FlexibleLeaderboard) {
+                // and re-establish the RaceLogReplicator as listener on FlexibleLeaderboard objects
+                leaderboard.addRaceColumnListener(raceLogReplicator);
             }
         }
 
@@ -2361,6 +2364,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Regatta regatta : regattasByName.values()) {
             RegattaImpl regattaImpl = (RegattaImpl) regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
+            regattaImpl.addRaceColumnListener(raceLogReplicator);
         }
         logger.info(logoutput.toString());
     }
@@ -2378,8 +2382,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         if (raceTrackersByRegatta != null && !raceTrackersByRegatta.isEmpty()) {
             for (DynamicTrackedRegatta regatta : regattaTrackingCache.values()) {
-                for (RaceTracker tracker : raceTrackersByRegatta.get(regatta)) {
-                    tracker.stop();
+                final Set<RaceTracker> trackers = raceTrackersByRegatta.get(regatta.getRegatta());
+                if (trackers != null) {
+                    for (RaceTracker tracker : trackers) {
+                        tracker.stop();
+                    }
                 }
             }
         }

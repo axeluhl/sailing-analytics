@@ -18,13 +18,13 @@
 	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
   	
 	<!-- Other module inherits -->
-    	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
-  	<inherits name="com.sap.sse.SSECommon" />
-    	<inherits name="com.sap.sse.datamining.DataMiningDomain" />
-  	<inherits name="com.sap.sailing.domain.SailingDomain" />
-    	<inherits name="com.sap.sse.gwt.AdminConsole" />
+	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
+	<inherits name="com.sap.sse.SSECommon" />
+	<inherits name="com.sap.sse.datamining.DataMiningDomain" />
+	<inherits name="com.sap.sailing.domain.SailingDomain" />
+	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
-    	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
 
 	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint" />
@@ -32,6 +32,9 @@
 	<!-- Specify the paths for translatable code -->
 <!-- <extend-property name="locale" values="de"/> --> <set-property name="user.agent" value="gecko1_8" />
   	<extend-property name="locale" values="ru"/>
+
+	<!-- Disable logging -->
+	<set-property name="gwt.logging.enabled" value="FALSE"/>
 
   	<source path='common'/>
   	<source path="client" />

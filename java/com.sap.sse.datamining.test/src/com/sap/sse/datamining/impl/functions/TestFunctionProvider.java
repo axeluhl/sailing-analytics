@@ -81,30 +81,30 @@ public class TestFunctionProvider {
     @Test
     public void testGetDimensionsForDataRetrieverChainDefinition() {
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = createDataRetrieverChainDefinition();
+        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition = createDataRetrieverChainDefinition();
 
         Collection<Function<?>> expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
         expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
-        assertThat(functionProvider.getMinimizedDimensionsFor(dataRetrieverChainDefinition), is(expectedDimensions));
+        assertThat(functionProvider.getDimensionsFor(dataRetrieverChainDefinition), is(expectedDimensions));
     }
     
     @SuppressWarnings("unchecked")
-    public DataRetrieverChainDefinition<Collection<Test_Regatta>> createDataRetrieverChainDefinition() {
-        DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");
+    public DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> createDataRetrieverChainDefinition() {
+        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
-        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
-                                               Test_HasRaceContext.class);
+                                               Test_HasRaceContext.class, "race");
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(raceRetrieverClass,
                                                legRetrieverClass,
-                                               Test_HasLegOfCompetitorContext.class);
+                                               Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
         
         return dataRetrieverChainDefinition;
     }

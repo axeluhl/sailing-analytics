@@ -12,30 +12,36 @@ import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 
-public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
-        DataRetrieverChainDefinition<DataSourceType> {
+public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implements
+        DataRetrieverChainDefinition<DataSourceType, DataType> {
 
     private final UUID id;
     private final String nameMessageKey;
     
     private final Class<DataSourceType> dataSourceType;
+    private final Class<DataType> retrievedDataType;
     private final List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation;
+    
+    private boolean isComplete;
 
-    public SimpleDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, String nameMessageKey) {
+    public SimpleDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType, String nameMessageKey) {
         id = UUID.randomUUID();
         this.nameMessageKey = nameMessageKey;
         
         this.dataSourceType = dataSourceType;
+        this.retrievedDataType = retrievedDataType;
         dataRetrieverTypesWithInformation = new ArrayList<>();
+        
+        isComplete = false;
     }
 
-    public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType> dataRetrieverChainDefinition, String nameMessageKey) {
-        this(dataRetrieverChainDefinition.getDataSourceType(), nameMessageKey);
+    public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, Class<DataType> retrievedDataType, String nameMessageKey) {
+        this(dataRetrieverChainDefinition.getDataSourceType(), retrievedDataType, nameMessageKey);
         dataRetrieverTypesWithInformation.addAll(dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation());
     }
     
     @Override
-    public UUID getUUID() {
+    public UUID getID() {
         return id;
     }
     
@@ -50,20 +56,20 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
     }
     
     @Override
-    public Class<?> getRetrievedDataType() {
-        return dataRetrieverTypesWithInformation.get(dataRetrieverTypesWithInformation.size() - 1).getRetrievedDataType();
+    public Class<DataType> getRetrievedDataType() {
+        return retrievedDataType;
     }
 
     @Override
     public <ResultType> void startWith(Class<Processor<DataSourceType, ResultType>> retrieverType,
-                                       Class<ResultType> retrievedDataType) {
+                                       Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
         if (isInitialized()) {
             throw new UnsupportedOperationException("This retriever chain definition already has been started with '"
                                                     + dataRetrieverTypesWithInformation.get(0).getRetrieverType().getSimpleName() + "'");
         }
         checkThatRetrieverHasUsableConstructor(retrieverType);
         
-        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(retrieverType, retrievedDataType);
+        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(retrieverType, retrievedDataType, retrievedDataTypeMessageKey);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 
@@ -72,12 +78,15 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
     }
 
     @Override
-    public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType> void addAsLast(
+    public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType> void addAfter(
             Class<Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
             Class<Processor<NextInputType, NextResultType>> nextRetrieverType,
-            Class<NextResultType> retrievedDataType) {
+            Class<NextResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
         if (!isInitialized()) {
             throw new UnsupportedOperationException("This retriever chain definition hasn't been started yet");
+        }
+        if (isComplete) {
+            throw new UnsupportedOperationException("This retriever chain definition is already complete");
         }
         DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(dataRetrieverTypesWithInformation.size() - 1);
         @SuppressWarnings("unchecked")
@@ -89,7 +98,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
         }
         checkThatRetrieverHasUsableConstructor(nextRetrieverType);
 
-        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(nextRetrieverType, retrievedDataType);
+        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(nextRetrieverType, retrievedDataType, retrievedDataTypeMessageKey);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 
@@ -104,12 +113,25 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
     }
     
     @Override
+    public <NextInputType, PreviousInputType, PreviousResultType extends NextInputType> void endWith(
+            Class<Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
+            Class<Processor<NextInputType, DataType>> lastRetrieverType, Class<DataType> retrievedDataType,
+            String retrievedDataTypeMessageKey) {
+        addAfter(previousRetrieverType, lastRetrieverType, retrievedDataType, retrievedDataTypeMessageKey);
+        isComplete = true;
+    }
+    
+    @Override
     public List<? extends DataRetrieverTypeWithInformation<?, ?>> getDataRetrieverTypesWithInformation() {
         return dataRetrieverTypesWithInformation;
     }
 
     @Override
     public DataRetrieverChainBuilder<DataSourceType> startBuilding(ExecutorService executor) {
+        if (!isComplete) {
+            throw new UnsupportedOperationException("This retriever chain definition hasn't been completed yet");
+        }
+        
         return new SimpleDataRetrieverChainBuilder<>(executor, dataRetrieverTypesWithInformation);
     }
 
@@ -120,6 +142,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
         result = prime * result
                 + ((dataRetrieverTypesWithInformation == null) ? 0 : dataRetrieverTypesWithInformation.hashCode());
         result = prime * result + ((dataSourceType == null) ? 0 : dataSourceType.hashCode());
+        result = prime * result + ((retrievedDataType == null) ? 0 : retrievedDataType.hashCode());
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
@@ -132,7 +155,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SimpleDataRetrieverChainDefinition<?> other = (SimpleDataRetrieverChainDefinition<?>) obj;
+        SimpleDataRetrieverChainDefinition<?, ?> other = (SimpleDataRetrieverChainDefinition<?, ?>) obj;
         if (dataRetrieverTypesWithInformation == null) {
             if (other.dataRetrieverTypesWithInformation != null)
                 return false;
@@ -142,6 +165,11 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType> implements
             if (other.dataSourceType != null)
                 return false;
         } else if (!dataSourceType.equals(other.dataSourceType))
+            return false;
+        if (retrievedDataType == null) {
+            if (other.retrievedDataType != null)
+                return false;
+        } else if (!retrievedDataType.equals(other.retrievedDataType))
             return false;
         if (id == null) {
             if (other.id != null)

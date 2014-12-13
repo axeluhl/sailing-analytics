@@ -11,9 +11,11 @@ public class DataMiningStringMessagesImpl implements DataMiningStringMessages {
     private static final String MESSAGE_PARAMETER_END = "\\}";
     
     private final String resourceBaseName;
+    private final ClassLoader resourceClassLoader;
     
-    public DataMiningStringMessagesImpl(String resourceBaseName) {
+    public DataMiningStringMessagesImpl(String resourceBaseName, ClassLoader resourceClassLoader) {
         this.resourceBaseName = resourceBaseName;
+        this.resourceClassLoader = resourceClassLoader;
     }
     
     @Override
@@ -33,7 +35,11 @@ public class DataMiningStringMessagesImpl implements DataMiningStringMessages {
     }
 
     private ResourceBundle getResourceBundle(Locale locale) {
-        return ResourceBundle.getBundle(resourceBaseName, locale);
+        if (resourceClassLoader != null) {
+            return ResourceBundle.getBundle(resourceBaseName, locale, resourceClassLoader);
+        } else {
+            return ResourceBundle.getBundle(resourceBaseName, locale);
+        }
     }
     
     @Override

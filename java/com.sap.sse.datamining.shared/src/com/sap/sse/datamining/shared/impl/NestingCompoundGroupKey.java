@@ -3,7 +3,7 @@ package com.sap.sse.datamining.shared.impl;
 import com.sap.sse.datamining.shared.GroupKey;
 
 
-public class CompoundGroupKey extends AbstractGroupKey {
+public class NestingCompoundGroupKey extends AbstractGroupKey {
 
     private static final long serialVersionUID = -7902450253393172550L;
     
@@ -14,13 +14,13 @@ public class CompoundGroupKey extends AbstractGroupKey {
      * Constructor for the GWT-Serialization. Don't use this!
      */
     @Deprecated
-    CompoundGroupKey() { }
+    NestingCompoundGroupKey() { }
     
-    public CompoundGroupKey(GroupKey mainKey) {
+    public NestingCompoundGroupKey(GroupKey mainKey) {
         this(mainKey, null);
     }
 
-    public CompoundGroupKey(GroupKey mainKey, GroupKey subKey) {
+    public NestingCompoundGroupKey(GroupKey mainKey, GroupKey subKey) {
         this.mainKey = mainKey;
         this.subKey = subKey;
     }
@@ -66,7 +66,7 @@ public class CompoundGroupKey extends AbstractGroupKey {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        CompoundGroupKey other = (CompoundGroupKey) obj;
+        NestingCompoundGroupKey other = (NestingCompoundGroupKey) obj;
         if (mainKey == null) {
             if (other.mainKey != null)
                 return false;

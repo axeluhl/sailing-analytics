@@ -12,9 +12,9 @@
 	    </div>
 	    <div class="{local_res.css.loginform_content}">
 			    <div><ui:text from="{i18n.generalWelcome}" /></div>
-			    <div><s:TextBoxWithWatermark ui:field="userNameTextBox" styleName="{local_res.css.glowing_border}" /></div>
+			    <div><s:TextBoxWithWatermark ui:field="userNameTextBox" styleName="{local_res.css.glowing_border}" name="username" /></div>
 				<div>
-				    <s:PasswordTextBoxWithWatermark ui:field="passwordTextBox" styleName="{local_res.css.glowing_border}" />
+				    <s:PasswordTextBoxWithWatermark ui:field="passwordTextBox" styleName="{local_res.css.glowing_border}" name="password"/>
 				    <g:Anchor href="javascript:;" ui:field="forgotPasswordAnchor" text="{i18n.forgotPassword}" />
 				</div>
 				<div>

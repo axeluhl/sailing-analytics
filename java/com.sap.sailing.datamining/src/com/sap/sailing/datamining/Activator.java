@@ -1,9 +1,8 @@
 package com.sap.sailing.datamining;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -13,60 +12,48 @@ import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sse.datamining.ClassesWithFunctionsRegistrationService;
+import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistrationService;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.impl.i18n.DataMiningStringMessagesImpl;
 
-public class Activator implements BundleActivator {
+public class Activator implements BundleActivator, DataMiningBundleService {
     
-    public static final String dataRetrieverGroupName = "Sailing";
-    private static final Logger LOGGER = Logger.getLogger(Activator.class.getSimpleName());
+    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Sailing_StringMessages";
+    
+    private static Activator INSTANCE;
 
-    private static BundleContext context;
-    private static ServiceReference<ClassesWithFunctionsRegistrationService> classesWithFunctionsRegistrationServiceReference;
-    private static ServiceReference<DataRetrieverChainDefinitionRegistrationService> dataRetrieverChainDefinitionRegistrationServiceServiceReference;
+    private final DataMiningStringMessages sailingDataMiningStringMessages;
+    private final SailingDataRetrieverChainDefinitions dataRetrieverChainDefinitions;
+    private final SailingClusterGroups clusterGroups;
+    
+    private ServiceReference<DataMiningBundleService> dataMiningBundleServiceReference;
+    
+    public Activator() {
+        dataRetrieverChainDefinitions = new SailingDataRetrieverChainDefinitions();
+        sailingDataMiningStringMessages = new DataMiningStringMessagesImpl(STRING_MESSAGES_BASE_NAME, Activator.class.getClassLoader());
+        clusterGroups = new SailingClusterGroups();
+    }
 
     @Override
     public void start(BundleContext context) throws Exception {
-        Activator.context = context;
+        INSTANCE = this;
         
-        classesWithFunctionsRegistrationServiceReference = Activator.context.getServiceReference(ClassesWithFunctionsRegistrationService.class);
-        if (classesWithFunctionsRegistrationServiceReference != null) {
-            Activator.context.getService(classesWithFunctionsRegistrationServiceReference)
-                    .registerInternalClassesWithMarkedMethods(getInternalClassesWithMarkedMethods());
-            Activator.context.getService(classesWithFunctionsRegistrationServiceReference)
-                    .registerExternalLibraryClasses(getExternalLibraryClasses());
-        } else {
-            LOGGER.log(Level.WARNING, "Couldn't register the sailing classes with functions. No registration service was available.");
-        }
-        
-        dataRetrieverChainDefinitionRegistrationServiceServiceReference = Activator.context.getServiceReference(DataRetrieverChainDefinitionRegistrationService.class);
-        if (dataRetrieverChainDefinitionRegistrationServiceServiceReference != null) {
-            for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : SailingDataRetrieverChainDefinitions.getDataRetrieverChainDefinitions()) {
-                Activator.context.getService(dataRetrieverChainDefinitionRegistrationServiceServiceReference).addDataRetrieverChainDefinition(dataRetrieverChainDefinition);
-            }
-        } else {
-            LOGGER.log(Level.WARNING, "Couldn't register the sailing data retriever chain definitions. No registration service was available.");
-        }
+        dataMiningBundleServiceReference = context.registerService(DataMiningBundleService.class, this, null).getReference();
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        if (classesWithFunctionsRegistrationServiceReference != null) {
-            Activator.context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(
-                    getInternalClassesWithMarkedMethods());
-            Activator.context.getService(classesWithFunctionsRegistrationServiceReference).unregisterAllFunctionsOf(
-                    getExternalLibraryClasses());
-        }
-        
-        if (dataRetrieverChainDefinitionRegistrationServiceServiceReference != null) {
-            for (DataRetrieverChainDefinition<?> dataRetrieverChainDefinition : SailingDataRetrieverChainDefinitions.getDataRetrieverChainDefinitions()) {
-                Activator.context.getService(dataRetrieverChainDefinitionRegistrationServiceServiceReference).removeDataRetrieverChainDefinition(dataRetrieverChainDefinition);
-            }
-        }
+        context.ungetService(dataMiningBundleServiceReference);
+    }
+    
+    @Override
+    public DataMiningStringMessages getStringMessages() {
+        return sailingDataMiningStringMessages;
     }
 
-    public static Set<Class<?>> getInternalClassesWithMarkedMethods() {
+    @Override
+    public Iterable<Class<?>> getInternalClassesWithMarkedMethods() {
         Set<Class<?>> internalClasses = new HashSet<>();
         internalClasses.add(HasTrackedRaceContext.class);
         internalClasses.add(HasTrackedLegContext.class);
@@ -75,8 +62,26 @@ public class Activator implements BundleActivator {
         return internalClasses;
     }
 
-    public static Set<Class<?>> getExternalLibraryClasses() {
-        return new HashSet<>();
+    @Override
+    public Iterable<Class<?>> getExternalLibraryClasses() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
+        return dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions();
+    }
+    
+    public SailingClusterGroups getClusterGroups() {
+        return clusterGroups;
+    }
+    
+    public static Activator getDefault() {
+        if (INSTANCE == null) {
+            INSTANCE = new Activator(); // probably non-OSGi case, as in test execution
+        }
+        
+        return INSTANCE;
     }
 
 }

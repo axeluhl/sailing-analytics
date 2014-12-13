@@ -206,8 +206,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         final LinkedList<String> acceptedImages = new LinkedList<String>();
         for (String candidateImageUrl : imageURLs) {
             ImageSize imageSize = getImageSize(candidateImageUrl);
-            if (imageSize != null && imageSize.getHeight() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS
-                    && !candidateImageUrl.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
+            if (imageSize != null && imageSize.getHeight() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
                 acceptedImages.add(candidateImageUrl);
             }
         }

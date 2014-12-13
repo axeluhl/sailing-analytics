@@ -15,7 +15,7 @@ public class SpeedClusterGroupFromWindSteppingCreator {
             rawDoubleLevelMids[i] = rawIntegerStepping[i];
         }
         
-        return new SpeedClusterGroup("Speed Cluster Group", rawDoubleLevelMids, maxDistance);
+        return new SpeedClusterGroup("SpeedClusterGroup", rawDoubleLevelMids, maxDistance);
     }
 
 }
