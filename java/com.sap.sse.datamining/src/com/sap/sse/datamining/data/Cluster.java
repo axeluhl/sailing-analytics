@@ -6,7 +6,7 @@ import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 
 public interface Cluster<ElementType> {
 
-    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages);
+    public String getAsLocalizedString(Locale locale, DataMiningStringMessages stringMessages);
     
     public boolean isInRange(ElementType value);
 

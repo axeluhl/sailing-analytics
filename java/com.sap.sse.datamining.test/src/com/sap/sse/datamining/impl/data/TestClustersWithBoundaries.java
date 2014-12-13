@@ -35,8 +35,8 @@ public class TestClustersWithBoundaries {
         assertThat(cluster.isInRange(-1), is(false));
         assertThat(cluster.isInRange(10), is(false));
         
-        assertThat(cluster.getLocalizedName(Locale.ENGLISH, stringMessages), is("Test Cluster English [0 - 10["));
-        assertThat(cluster.getLocalizedName(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch [0 - 10["));
+        assertThat(cluster.getAsLocalizedString(Locale.ENGLISH, stringMessages), is("Test Cluster English [0 - 10["));
+        assertThat(cluster.getAsLocalizedString(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch [0 - 10["));
     }
     
     @Test
@@ -48,8 +48,8 @@ public class TestClustersWithBoundaries {
         assertThat(cluster.isInRange(Integer.MAX_VALUE), is(true));
         assertThat(cluster.isInRange(-1), is(false));
 
-        assertThat(cluster.getLocalizedName(Locale.ENGLISH, stringMessages), is("Test Cluster English [0 - " + INFINITE));
-        assertThat(cluster.getLocalizedName(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch [0 - " + INFINITE));
+        assertThat(cluster.getAsLocalizedString(Locale.ENGLISH, stringMessages), is("Test Cluster English [0 - " + INFINITE));
+        assertThat(cluster.getAsLocalizedString(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch [0 - " + INFINITE));
         
         cluster = new ClusterWithSingleBoundary<>("TestCluster", upperBound);
 
@@ -58,8 +58,8 @@ public class TestClustersWithBoundaries {
         assertThat(cluster.isInRange(10), is(false));
         assertThat(cluster.isInRange(11), is(false));
 
-        assertThat(cluster.getLocalizedName(Locale.ENGLISH, stringMessages), is("Test Cluster English -" + INFINITE + " - 10["));
-        assertThat(cluster.getLocalizedName(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch -" + INFINITE + " - 10["));
+        assertThat(cluster.getAsLocalizedString(Locale.ENGLISH, stringMessages), is("Test Cluster English -" + INFINITE + " - 10["));
+        assertThat(cluster.getAsLocalizedString(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch -" + INFINITE + " - 10["));
     }
 
 }

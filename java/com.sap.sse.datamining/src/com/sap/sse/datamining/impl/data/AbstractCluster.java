@@ -34,7 +34,7 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
     }
     
     @Override
-    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+    public String getAsLocalizedString(Locale locale, DataMiningStringMessages stringMessages) {
         return stringMessages.get(locale, messageKey) + " " + getBoundariesAsString();
     }
     
