@@ -2382,8 +2382,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         if (raceTrackersByRegatta != null && !raceTrackersByRegatta.isEmpty()) {
             for (DynamicTrackedRegatta regatta : regattaTrackingCache.values()) {
-                for (RaceTracker tracker : raceTrackersByRegatta.get(regatta)) {
-                    tracker.stop();
+                final Set<RaceTracker> trackers = raceTrackersByRegatta.get(regatta);
+                if (trackers != null) {
+                    for (RaceTracker tracker : trackers) {
+                        tracker.stop();
+                    }
                 }
             }
         }
