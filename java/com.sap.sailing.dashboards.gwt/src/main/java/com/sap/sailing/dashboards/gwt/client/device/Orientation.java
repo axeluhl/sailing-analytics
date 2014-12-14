@@ -29,6 +29,7 @@ public class Orientation {
     private static native void initOrientationEventListener(Orientation orientationFetcher) /*-{
 		window.onorientationchange = function() {
 			var orientationDegrees = window.orientation;
+			if(orientationDegrees != null)
 			orientationFetcher.@com.sap.sailing.dashboards.gwt.client.device.Orientation::receivedOrientationDegreesChange(I)(orientationDegrees);
 		};
     }-*/;
@@ -39,6 +40,7 @@ public class Orientation {
 
     private static native void readDeviceOrientation(Orientation orientationFetcher) /*-{
 		var orientationDegrees = window.orientation;
+		if(orientationDegrees != null)
 		orientationFetcher.@com.sap.sailing.dashboards.gwt.client.device.Orientation::receivedOrientationDegreesChange(I)(orientationDegrees);
     }-*/;
 
