@@ -6,8 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -79,15 +77,6 @@ public class StartActivity extends AbstractActivity {
             }
         });
         view.setRecentEvents(recentEventsOfLast12Month);
-        // See bug 2232: the stage image sizes are scaled incorrectly. https://github.com/ubilabs/sap-sailing-analytics/issues/421 and
-        // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2232 have the details. A quick fix may be to send a resize event
-        // after everything has been rendered.
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                view.adjustSizes();
-            }
-        });
     }
     
     /**
