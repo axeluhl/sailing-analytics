@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.client.place.start;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -13,10 +12,15 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.TimeRange;
+import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartActivity extends AbstractActivity {
     private final StartClientFactory clientFactory;
@@ -48,36 +52,32 @@ public class StartActivity extends AbstractActivity {
     protected void fillStartPageEvents(final StartView view, List<EventBaseDTO> events) {
         List<Pair<StageEventType, EventBaseDTO>> featuredEvents = new ArrayList<Pair<StageEventType, EventBaseDTO>>();
         List<EventBaseDTO> recentEventsOfLast12Month = new ArrayList<EventBaseDTO>();
-        List<EventBaseDTO> upcomingSoonEvents = new ArrayList<EventBaseDTO>();
-        List<EventBaseDTO> popularEvents = new ArrayList<EventBaseDTO>();
-        Date now = new Date();
+        TimePoint now = MillisecondsTimePoint.now();
         final int MAX_STAGE_EVENTS = 5;
-        final long ONE_DAY_IN_MS = (1000 * 60 * 60 * 24);
-        final long FOUR_WEEK_IN_MS = 4L * 7 * ONE_DAY_IN_MS;
-        final long ONE_YEAR_IN_MS = 365 * ONE_DAY_IN_MS;
         for (EventBaseDTO event : events) {
             if (event.startDate != null && event.endDate != null) {
-                if (now.after(event.startDate) && now.before(event.endDate)) {
+                if (now.after(new MillisecondsTimePoint(event.startDate)) && now.before(new MillisecondsTimePoint(event.endDate))) {
                     featuredEvents.add(new Pair<StageEventType, EventBaseDTO>(StageEventType.RUNNING, event));
-                } else if (event.startDate.after(now) && event.startDate.getTime() - now.getTime() < FOUR_WEEK_IN_MS) {
-                    upcomingSoonEvents.add(event);
-                } else if (event.endDate.before(now) && event.endDate.getTime() > now.getTime() - ONE_YEAR_IN_MS) {
+                } else if (new MillisecondsTimePoint(event.startDate).after(now) &&
+                        new MillisecondsTimePoint(event.startDate).before(now.plus(Duration.ONE_WEEK.times(4)))) {
+                    featuredEvents.add(new Pair<StageEventType, EventBaseDTO>(StageEventType.UPCOMING_SOON, event));
+                } else if (new MillisecondsTimePoint(event.endDate).before(now) &&
+                        new MillisecondsTimePoint(event.endDate).after(now.minus(Duration.ONE_YEAR))) {
                     recentEventsOfLast12Month.add(event);
+                    featuredEvents.add(new Pair<StageEventType, EventBaseDTO>(StageEventType.POPULAR, event));
                 }
             }
         }
-        if (featuredEvents.size() < MAX_STAGE_EVENTS) {
-            fillingUpEventsList(MAX_STAGE_EVENTS, featuredEvents, StageEventType.UPCOMING_SOON, upcomingSoonEvents);
-        }
-        if (featuredEvents.size() < MAX_STAGE_EVENTS) {
-            fillingUpEventsList(MAX_STAGE_EVENTS, featuredEvents, StageEventType.POPULAR, popularEvents);
-        }
-        // fallback for the case we did not find any events
-        if (featuredEvents.size() < MAX_STAGE_EVENTS) {
-            fillingUpEventsList(MAX_STAGE_EVENTS, featuredEvents, StageEventType.POPULAR, recentEventsOfLast12Month);
-        }
         Collections.sort(featuredEvents, new FeaturedEventsComparator());
+        featuredEvents = featuredEvents.subList(0, MAX_STAGE_EVENTS);
         view.setFeaturedEvents(featuredEvents);
+        Collections.sort(recentEventsOfLast12Month, new Comparator<EventBaseDTO>() {
+            @Override
+            public int compare(EventBaseDTO o1, EventBaseDTO o2) {
+                final long diff = o2.endDate.getTime() - o1.endDate.getTime();
+                return diff > 0l ? 1 : diff < 0l ? -1 : 0;
+            }
+        });
         view.setRecentEvents(recentEventsOfLast12Month);
         // See bug 2232: the stage image sizes are scaled incorrectly. https://github.com/ubilabs/sap-sailing-analytics/issues/421 and
         // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2232 have the details. A quick fix may be to send a resize event
@@ -90,38 +90,20 @@ public class StartActivity extends AbstractActivity {
         });
     }
     
-    private void fillingUpEventsList(int maxAmountOfElements, List<Pair<StageEventType, EventBaseDTO>> resultList,
-            StageEventType type, List<EventBaseDTO> listToTakeElementsFrom) {
-        int maxElementsToFill = maxAmountOfElements - resultList.size();
-        int elementsToTransfer = listToTakeElementsFrom.size() > maxElementsToFill ? maxElementsToFill
-                : listToTakeElementsFrom.size();
-        for (int i = 0; i < elementsToTransfer; i++) {
-            resultList.add(new Pair<StageEventType, EventBaseDTO>(type, listToTakeElementsFrom.get(i)));
-        }
-    }
-
     /**
-     * Comparator for sorting a pair of event and stageType first by order number of stage type and then by event start
-     * date.
+     * Sorts events by their time-wise distance from the current point in time.
      * 
      * @author Frank
+     * @author Axel Uhl
      */
     private class FeaturedEventsComparator implements Comparator<Pair<StageEventType, EventBaseDTO>> {
         @Override
         public int compare(Pair<StageEventType, EventBaseDTO> eventAndStageType1,
                 Pair<StageEventType, EventBaseDTO> eventAndStageType2) {
-            int result;
-            Date now = new Date();
-            if (eventAndStageType1.getA().ordinal() == eventAndStageType2.getA().ordinal()) {
-                if(eventAndStageType1.getB().startDate.before(now)) {
-                    result = eventAndStageType2.getB().startDate.compareTo(eventAndStageType1.getB().startDate);
-                } else {
-                    result = eventAndStageType1.getB().startDate.compareTo(eventAndStageType2.getB().startDate);
-                }
-            } else {
-                result = eventAndStageType1.getA().ordinal() - eventAndStageType2.getA().ordinal();
-            }
-            return result;
+            TimePoint now = MillisecondsTimePoint.now();
+            TimeRange event1Range = new TimeRangeImpl(new MillisecondsTimePoint(eventAndStageType1.getB().startDate), new MillisecondsTimePoint(eventAndStageType1.getB().endDate));
+            TimeRange event2Range = new TimeRangeImpl(new MillisecondsTimePoint(eventAndStageType2.getB().startDate), new MillisecondsTimePoint(eventAndStageType2.getB().endDate));
+            return event1Range.timeDifference(now).compareTo(event2Range.timeDifference(now));
         }
     }
 
