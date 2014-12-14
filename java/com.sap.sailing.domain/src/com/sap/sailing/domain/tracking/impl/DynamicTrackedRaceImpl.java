@@ -291,7 +291,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 for (WindSource windSource : getWindSources()) {
                     if (windSource.getType().canBeStored()) {
                         WindTrack windTrack = getOrCreateWindTrack(windSource);
-                        // replicate all wind fixed that may have been loaded by the wind store
+                        // replicate all wind fixes that may have been loaded by the wind store
                         windTrack.lockForRead();
                         try {
                             for (Wind wind : windTrack.getRawFixes()) {

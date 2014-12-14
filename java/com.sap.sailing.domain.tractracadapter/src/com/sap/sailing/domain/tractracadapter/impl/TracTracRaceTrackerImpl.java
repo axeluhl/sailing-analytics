@@ -215,7 +215,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
-     * data from there. Receiving continues until {@link #stop()} is called.
+     * data from there. Receiving continues until {@link #stop(boolean)} is called.
      * <p>
      * 
      * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
@@ -484,13 +484,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
     
     @Override
-    public void stop() throws InterruptedException {
-        if (!stopped) {
-            stop(/* stop receivers preemtively */false);
-        }
-    }
-
-    private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
+    public void stop(boolean stopReceiversPreemtively) throws InterruptedException {
         if (!stopped) {
             stopped = true;
             raceSubscriber.stop();

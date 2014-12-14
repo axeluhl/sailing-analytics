@@ -115,7 +115,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         };
         GroupKey compoundKey;
         try {
-            compoundKey = GroupKeyFactory.createCompoundKeyFor(key, PolarDataDimensionCollectionFactory
+            compoundKey = GroupKeyFactory.createNestingCompoundKeyFor(key, PolarDataDimensionCollectionFactory
                     .getClusterKeyDimensions().iterator());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();

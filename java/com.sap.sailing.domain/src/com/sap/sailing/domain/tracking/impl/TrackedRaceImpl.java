@@ -1087,12 +1087,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
                                                                            // write lock after updating the cache
                     if (rankedCompetitors == null) {
-                        RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
-                        rankedCompetitors = new ArrayList<Competitor>();
-                        for (Competitor c : getRace().getCompetitors()) {
-                            rankedCompetitors.add(c);
+                        // RaceRankComparator requires course read lock
+                        getRace().getCourse().lockForRead();
+                        try {
+                            RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
+                            rankedCompetitors = new ArrayList<Competitor>();
+                            for (Competitor c : getRace().getCompetitors()) {
+                                rankedCompetitors.add(c);
+                            }
+                            Collections.sort(rankedCompetitors, comparator);
+                        } finally {
+                            getRace().getCourse().unlockAfterRead();
                         }
-                        Collections.sort(rankedCompetitors, comparator);
                         synchronized (competitorRankings) {
                             competitorRankings.put(timePoint, rankedCompetitors);
                         }
@@ -2691,7 +2697,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             }
                         }
                         logger.info("Finished loading mark tracks for " + getRace().getName());
-
                     } finally {
                         synchronized (TrackedRaceImpl.this) {
                             loadingFromGPSFixStore = false;

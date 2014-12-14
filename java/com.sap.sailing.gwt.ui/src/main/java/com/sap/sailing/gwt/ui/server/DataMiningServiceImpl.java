@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -9,32 +10,33 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.datamining.factories.SailingDataMiningFactory;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.QueryDefinition;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 
 public class DataMiningServiceImpl extends RemoteServiceServlet implements DataMiningService {
     private static final long serialVersionUID = -7951930891674894528L;
 
     private final BundleContext context;
-
-    private final SailingDataMiningFactory sailingDataMiningFactory;
-    private final FunctionDTOFactory functionDTOFactory;
-
+    
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+
+    private final FunctionDTOFactory functionDTOFactory;
     
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
@@ -42,8 +44,6 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         
-        sailingDataMiningFactory = new SailingDataMiningFactory(getDataMiningServer().getFunctionProvider(),
-                                                                getDataMiningServer().getDataRetrieverChainDefinitionRegistry());
         functionDTOFactory = new FunctionDTOFactory();
     }
 
@@ -71,43 +71,31 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public Collection<FunctionDTO> getAllStatistics(String localeInfoName) {
-        Collection<Function<?>> statistics = getDataMiningServer().getFunctionProvider().getAllStatistics();
+    public Iterable<FunctionDTO> getAllStatistics(String localeInfoName) {
+        Iterable<Function<?>> statistics = getDataMiningServer().getAllStatistics();
         return functionsAsFunctionDTOs(statistics, localeInfoName);
     }
 
     @Override
-    public Collection<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+    public Iterable<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
-        Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(baseDataType);
+        Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(baseDataType);
         return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
     
     @Override
-    public Collection<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
-        Class<?> baseDataType = getBaseDataType(statisticToCalculate);
-        return dataRetrieverChainDefinitionsAsDTOs(getDataMiningServer().getDataRetrieverChainDefinitionRegistry().getDataRetrieverChainDefinitions(RacingEventService.class, baseDataType), localeInfoName);
-    }
-    
-    private Collection<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
-            Collection<DataRetrieverChainDefinition<RacingEventService>> dataRetrieverChainDefinitions, String localeInfoName) {
-        Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
-        DataMiningStringMessages dataMiningStringMessages = getDataMiningServer().getStringMessages();
-        
-        Collection<DataRetrieverChainDefinitionDTO> DTOs = new ArrayList<>();
-        for (DataRetrieverChainDefinition<RacingEventService> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
-            DTOs.add(new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getUUID(), dataRetrieverChainDefinition.getLocalizedName(locale, dataMiningStringMessages),
-                                                         dataRetrieverChainDefinition.getDataSourceType().getSimpleName(), dataRetrieverChainDefinition.getRetrievedDataType().getSimpleName()));
-        }
-        return DTOs;
+    public Iterable<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
+        DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(dataRetrieverChainDefinition);
+        return functionsAsFunctionDTOs(dimensions, localeInfoName);
     }
 
     private Class<?> getBaseDataType(FunctionDTO statisticToCalculate) {
-        Function<?> function = getDataMiningServer().getFunctionProvider().getFunctionForDTO(statisticToCalculate);
+        Function<?> function = getDataMiningServer().getFunctionForDTO(statisticToCalculate);
         return function.getDeclaringType();
     }
     
-    private Collection<FunctionDTO> functionsAsFunctionDTOs(Collection<Function<?>> functions, String localeInfoName) {
+    private Collection<FunctionDTO> functionsAsFunctionDTOs(Iterable<Function<?>> functions, String localeInfoName) {
         Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
         DataMiningStringMessages dataMiningStringMessages = getDataMiningServer().getStringMessages();
         
@@ -118,23 +106,62 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         return functionDTOs;
     }
     
-//    @Override
-//    public QueryResult<Set<Object>> getDimensionValuesFor(Collection<FunctionDTO> dimensions) throws Exception {
-//        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), null, dimensions);
-//        return dimensionValuesQuery.run();
-//    }
     @Override
-    public QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition,
-            String localeInfoName) throws Exception {
-        Query<Set<Object>> dimensionValuesQuery = sailingDataMiningFactory.createDimensionValuesQuery(getRacingEventService(), dataRetrieverChainDefinition, localeInfoName);
-        return dimensionValuesQuery.run();
+    public Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+        Class<?> baseDataType = getBaseDataType(statisticToCalculate);
+        @SuppressWarnings("unchecked")
+        Iterable<DataRetrieverChainDefinition<RacingEventService, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<RacingEventService,?>>)(Iterable<?>) getDataMiningServer().getDataRetrieverChainDefinitions(RacingEventService.class, baseDataType);
+        return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
+    }
+    
+    private Collection<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
+            Iterable<DataRetrieverChainDefinition<RacingEventService, ?>> dataRetrieverChainDefinitions, String localeInfoName) {
+        Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
+        DataMiningStringMessages dataMiningStringMessages = getDataMiningServer().getStringMessages();
+        
+        Collection<DataRetrieverChainDefinitionDTO> DTOs = new ArrayList<>();
+        for (DataRetrieverChainDefinition<RacingEventService, ?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
+            Collection<LocalizedTypeDTO> retrievedDataTypesChain = new ArrayList<>();
+            for (DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation : dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()) {
+                String typeName = retrieverTypeWithInformation.getRetrievedDataType().getSimpleName();
+                String displayName = retrieverTypeWithInformation.getRetrievedDataTypeMessageKey() != null && !retrieverTypeWithInformation.getRetrievedDataTypeMessageKey().isEmpty() ?
+                                        dataMiningStringMessages.get(locale, retrieverTypeWithInformation.getRetrievedDataTypeMessageKey()) : 
+                                        typeName;
+                LocalizedTypeDTO localizedRetrievedDataType = new LocalizedTypeDTO(typeName, displayName);
+                retrievedDataTypesChain.add(localizedRetrievedDataType);
+            }
+            DTOs.add(new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getID(), dataRetrieverChainDefinition.getLocalizedName(locale, dataMiningStringMessages),
+                                                         dataRetrieverChainDefinition.getDataSourceType().getSimpleName(), retrievedDataTypesChain));
+        }
+        return DTOs;
     }
 
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
-        @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
-        Query<ResultType> query = (Query<ResultType>) sailingDataMiningFactory.createQuery(getRacingEventService(), queryDefinition);
-        return query.run();
+    public QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
+            int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName) throws Exception {
+        DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
+        Locale locale = DataMiningStringMessages.Util.getLocaleFor(localeInfoName);
+        Query<Set<Object>> dimensionValuesQuery = getDataMiningServer().createDimensionValuesQuery(getRacingEventService(), retrieverChainDefinition, retrieverLevel, dimensions, locale);
+        QueryResult<Set<Object>> result = dimensionValuesQuery.run();
+        return result;
+    }
+
+    private Collection<Function<?>> functionDTOsAsFunctions(Iterable<FunctionDTO> functionDTOs) {
+        List<Function<?>> functions = new ArrayList<>();
+        DataMiningServer dataMiningServer = getDataMiningServer();
+        for (FunctionDTO functionDTO : functionDTOs) {
+            functions.add(dataMiningServer.getFunctionForDTO(functionDTO));
+        }
+        return functions;
+    }
+
+    @Override
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDTO queryDefinitionDTO) throws Exception {
+        QueryDefinition<RacingEventService, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
+        Query<ResultType> query = getDataMiningServer().createQuery(getRacingEventService(), queryDefinition);
+        QueryResult<ResultType> result = query.run();
+        return result;
     }
     
     @Override

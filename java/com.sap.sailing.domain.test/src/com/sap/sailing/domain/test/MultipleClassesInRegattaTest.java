@@ -87,9 +87,9 @@ public class MultipleClassesInRegattaTest {
     
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
-        kiwotest1.stop();
-        kiwotest2.stop();
-        kiwotest3.stop();
-        weym470may112014_2.stop();
+        kiwotest1.stop(/* preemptive */ false);
+        kiwotest2.stop(/* preemptive */ false);
+        kiwotest3.stop(/* preemptive */ false);
+        weym470may112014_2.stop(/* preemptive */ false);
     }
 }
