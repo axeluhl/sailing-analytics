@@ -33,7 +33,7 @@ public class LocationPointerCompassAngleDistance implements LocationListener, Co
      * compass events from the device.
      * */
     private double angle;
-
+    private double compassHeading;
     private static Double degreesToRadiansFactor = Math.PI / 180.0;
 
     public LocationPointerCompassAngleDistance() {
@@ -96,11 +96,16 @@ public class LocationPointerCompassAngleDistance implements LocationListener, Co
     private void calulateNewAngleAndDistance() {
         angle = getAngleBetweenGPSPoints(latDevice, lonDevice, latBot, lonBot);
         double distance = getDistanceBetweenGPSPoints(latDevice, lonDevice, latBot, lonBot);
-        notifyListenerAboutAngleAndDistanceChange(angle, distance);
+        notifyListenerAboutAngleAndDistanceChange(calulateNewAngleFromPositionAngleAndCompassHeading(this.angle, this.compassHeading), distance);
     }
 
     @Override
     public void compassHeadingChanged(double compassHeading) {
+        this.compassHeading = compassHeading;
+        notifyListenerAboutAngleChange(calulateNewAngleFromPositionAngleAndCompassHeading(this.angle, this.compassHeading));
+    }
+    
+    private double calulateNewAngleFromPositionAngleAndCompassHeading(double positionAngle, double compassAngle){
         double compassWidgetAngle;
         if (compassHeading > angle) {
             compassWidgetAngle = 360 + (angle - compassHeading);
@@ -108,7 +113,7 @@ public class LocationPointerCompassAngleDistance implements LocationListener, Co
             compassWidgetAngle = angle - compassHeading;
         }
         compassWidgetAngle = compassWidgetAngle % 360;
-        notifyListenerAboutAngleChange(compassWidgetAngle);
+        return compassWidgetAngle;
     }
 
     @Override
