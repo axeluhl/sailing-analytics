@@ -10,10 +10,6 @@ import Foundation
 
 class TrackingViewController : UIViewController {
     
-    @IBOutlet weak var gpsAccuracy: UILabel!
-    @IBOutlet weak var trackingStatusLabel: UILabel!
-    @IBOutlet weak var onlineModeLabel: UILabel!
-    
     struct Color {
         static let GpsActive = UIColor(hex: 0x8AB54D)
         static let GpsInactive = UIColor(hex: 0x445A2F)
@@ -22,12 +18,18 @@ class TrackingViewController : UIViewController {
         static let Orange = UIColor(hex: 0xFF8000)
     }
     
+    @IBOutlet weak var gpsAccuracy: UILabel!
+    @IBOutlet weak var trackingStatusLabel: UILabel!
+    @IBOutlet weak var cachedFixesLabel: UILabel!
+    @IBOutlet weak var onlineModeLabel: UILabel!
+    
     /* Register for notifications. Set up timer */
     override func viewDidLoad() {
         super.viewDidLoad()
   
         // set values
         navigationItem.title = DataManager.sharedManager.selectedEvent!.leaderBoard!.name
+        cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
         
         // set tracking event, data for this event is sent in higher priority
         SendGPSFixController.sharedManager.trackingEvent = DataManager.sharedManager.selectedEvent
@@ -67,6 +69,7 @@ class TrackingViewController : UIViewController {
         gpsAccuracy.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
         trackingStatusLabel.text = "Tracking"
         trackingStatusLabel.textColor = Color.Green
+        cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
     }
     
     func locationManagerFailed(notification: NSNotification) {

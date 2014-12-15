@@ -98,6 +98,18 @@ public class DataManager: NSObject {
         return results as [GPSFix]
     }
 
+    func countCachedFixes() -> Int {
+        let request = NSFetchRequest()
+        request.entity = NSEntityDescription.entityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!)
+        request.includesSubentities = false
+        var error: NSError? = nil
+        let count = self.managedObjectContext!.countForFetchRequest(request, error:&error)
+        if(count == NSNotFound) {
+            //Handle error
+        }
+        return count
+    }
+
     /* Get all sailing events. */
     func eventsFetchedResultsController()->NSFetchedResultsController {
         let fetchRequest = NSFetchRequest(entityName: "Event")

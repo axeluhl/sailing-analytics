@@ -40,6 +40,8 @@
             <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
+            <string>OpenSans</string>
+            <string>OpenSans</string>
         </mutableArray>
         <mutableArray key="OpenSans-Semibold.ttf">
             <string>OpenSans-Semibold</string>
@@ -664,7 +666,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Xww-rc-pOA">
-                                <rect key="frame" x="16" y="72" width="46" height="24"/>
+                                <rect key="frame" x="16" y="104" width="46" height="24"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -675,14 +677,19 @@
                                 <color key="textColor" red="0.25098039220000001" green="0.50196078430000002" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Online" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="tJY-RR-vpe">
-                                <rect key="frame" x="531" y="72" width="53" height="24"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Cached Fixes" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Ujw-jg-ilY">
+                                <rect key="frame" x="16" y="72" width="103" height="24"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
-                                <color key="textColor" red="0.25098040700000002" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="dz3-w7-CCh">
+                                <rect key="frame" x="574" y="72" width="10" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UcT-H2-Fxp">
-                                <rect key="frame" x="0.0" y="104" width="600" height="432"/>
+                                <rect key="frame" x="0.0" y="136" width="600" height="400"/>
                                 <connections>
                                     <segue destination="rjH-vb-OUF" kind="embed" id="ln5-SR-WkO"/>
                                 </connections>
@@ -701,10 +708,18 @@
                                     <constraint firstAttribute="height" constant="16" id="LMm-3U-vXx"/>
                                 </constraints>
                             </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Online" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="tJY-RR-vpe">
+                                <rect key="frame" x="531" y="104" width="53" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
+                                <color key="textColor" red="0.25098040700000002" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="tJY-RR-vpe" secondAttribute="trailing" id="4KI-fl-gq3"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="dz3-w7-CCh" secondAttribute="trailing" id="5YC-rH-Z2d"/>
+                            <constraint firstItem="Ujw-jg-ilY" firstAttribute="top" secondItem="r6d-OU-cRI" secondAttribute="bottom" constant="8" symbolic="YES" id="76Y-1b-oFJ"/>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="top" secondItem="Xww-rc-pOA" secondAttribute="bottom" constant="8" symbolic="YES" id="9el-UI-bzr"/>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="bottom" secondItem="nE0-bK-d8x" secondAttribute="top" id="C25-aA-8XZ"/>
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="top" secondItem="Z1d-5I-pbj" secondAttribute="bottom" constant="8" symbolic="YES" id="C3i-US-IRf"/>
@@ -714,15 +729,18 @@
                             <constraint firstAttribute="trailing" secondItem="UcT-H2-Fxp" secondAttribute="trailing" id="H5v-h3-ogW"/>
                             <constraint firstItem="Xww-rc-pOA" firstAttribute="leading" secondItem="6kF-Wb-Hv2" secondAttribute="leadingMargin" id="JQs-RK-ocI"/>
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="leading" secondItem="Z1d-5I-pbj" secondAttribute="leading" id="L9y-4I-Xx1"/>
+                            <constraint firstItem="Ujw-jg-ilY" firstAttribute="leading" secondItem="6kF-Wb-Hv2" secondAttribute="leadingMargin" id="MH7-cy-19A"/>
+                            <constraint firstItem="dz3-w7-CCh" firstAttribute="centerY" secondItem="Ujw-jg-ilY" secondAttribute="centerY" id="NPU-zR-WBN"/>
                             <constraint firstItem="Xww-rc-pOA" firstAttribute="centerY" secondItem="tJY-RR-vpe" secondAttribute="centerY" id="NVc-vI-Vxb"/>
+                            <constraint firstItem="Xww-rc-pOA" firstAttribute="top" secondItem="Ujw-jg-ilY" secondAttribute="bottom" constant="8" symbolic="YES" id="Owh-AZ-oxm"/>
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="centerY" secondItem="5Xu-6g-tqP" secondAttribute="centerY" id="P76-PO-mR4"/>
-                            <constraint firstItem="Xww-rc-pOA" firstAttribute="top" secondItem="r6d-OU-cRI" secondAttribute="bottom" constant="8" symbolic="YES" id="PNy-6l-EMm"/>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="leading" secondItem="6kF-Wb-Hv2" secondAttribute="leading" id="aeW-WH-6Nh"/>
                             <constraint firstItem="BFc-m8-XKV" firstAttribute="centerY" secondItem="DiM-MR-SGV" secondAttribute="centerY" constant="-1" id="faz-m8-tTU"/>
                             <constraint firstAttribute="trailingMargin" secondItem="5Xu-6g-tqP" secondAttribute="trailing" id="j12-j8-u1B"/>
                             <constraint firstItem="Z1d-5I-pbj" firstAttribute="top" secondItem="qL4-PH-8ve" secondAttribute="bottom" constant="8" symbolic="YES" id="pnF-1D-Rxo"/>
                             <constraint firstAttribute="trailing" secondItem="BFc-m8-XKV" secondAttribute="trailing" constant="16" id="r8t-UX-UKm"/>
                         </constraints>
+                        <variation key="heightClass=compact"/>
                     </view>
                     <navigationItem key="navigationItem" title="Tracking" id="qfB-FT-Ysz">
                         <barButtonItem key="rightBarButtonItem" image="settings" id="mAh-dw-JIF">
@@ -732,6 +750,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="cachedFixesLabel" destination="dz3-w7-CCh" id="a8y-RP-qGE"/>
                         <outlet property="gpsAccuracy" destination="DiM-MR-SGV" id="1WL-d1-Fvc"/>
                         <outlet property="onlineModeLabel" destination="tJY-RR-vpe" id="No0-Q6-OAj"/>
                         <outlet property="trackingStatusLabel" destination="5Xu-6g-tqP" id="3vP-mX-3mm"/>

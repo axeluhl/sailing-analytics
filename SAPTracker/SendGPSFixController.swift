@@ -11,7 +11,7 @@ import Foundation
 class SendGPSFixController: NSObject {
     
     struct NotificationType {
-        static let GpsFixesSynced = "GpsFixesSynced"
+        static let gpsFixesSynced = "gpsFixesSynced"
     }
     
     private struct SyncPeriod {
@@ -85,7 +85,7 @@ class SendGPSFixController: NSObject {
                     for gpsFix in gpsFixes {
                         DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
                     }
-                    let notification = NSNotification(name: NotificationType.GpsFixesSynced, object: self)
+                    let notification = NSNotification(name: NotificationType.gpsFixesSynced, object: self)
                     NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
                 },
                 failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
