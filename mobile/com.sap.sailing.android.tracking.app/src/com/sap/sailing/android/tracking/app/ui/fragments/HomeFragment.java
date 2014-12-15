@@ -96,8 +96,7 @@ public class HomeFragment extends BaseFragment implements
 			listView.addHeaderView(inflater.inflate(
 					R.layout.regatta_listview_header, null));
 			
-			adapter = new RegattaAdapter(getActivity(),
-					R.layout.ragatta_listview_row, null, 0);
+			adapter = new RegattaAdapter(getActivity(), R.layout.ragatta_listview_row, null, 0);
 			listView.setAdapter(adapter);
 			listView.setOnItemClickListener(new ItemClickListener());
 		}
@@ -183,8 +182,7 @@ public class HomeFragment extends BaseFragment implements
 			leaderboardNameFromQR = "";
 		}
 
-		final String competitorId = uri
-				.getQueryParameter(CheckinHelper.COMPETITOR_ID);
+		final String competitorId = uri.getQueryParameter(CheckinHelper.COMPETITOR_ID);
 		final String checkinURLStr = prefs.getServerURL()
 				+ prefs.getServerCheckinPath().replace("{leaderboard-name}",
 						leaderboardNameFromQR);
@@ -467,7 +465,6 @@ public class HomeFragment extends BaseFragment implements
 		Date date = new Date();
 		
 		StartActivity startActivity = (StartActivity)getActivity();
-		
 		startActivity.showProgressDialog(R.string.please_wait, R.string.checking_in);
 
 		try {
@@ -538,8 +535,7 @@ public class HomeFragment extends BaseFragment implements
 	 * @param regattaName
 	 * @param eventName
 	 */
-	private void startRegatta(String leaderboardName, String eventId,
-			String competitorId) {
+	private void startRegatta(String leaderboardName, String eventId, String competitorId) {
 		Intent intent = new Intent(getActivity(), RegattaActivity.class);
 		intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
 		intent.putExtra(getString(R.string.event_id), eventId);
@@ -551,7 +547,8 @@ public class HomeFragment extends BaseFragment implements
 	public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
 		switch (loaderId) {
 		case REGATTA_LOADER:
-			String[] projection = new String[] { "events.event_id",
+			String[] projection = new String[] { 
+					"events.event_id",
 					"events._id", "events.event_name", "events.event_server",
 					"competitors.competitor_display_name",
 					"competitors.competitor_id",
@@ -613,6 +610,7 @@ public class HomeFragment extends BaseFragment implements
 		{
 			EventInfo event = new EventInfo();
 			event.name = eventName;
+			event.id = eventId;
 			event.startMillis = Long.parseLong(eventStartDateStr);
 			event.endMillis = Long.parseLong(eventEndDateStr);
 			event.imageUrl = eventFirstImageUrl;
@@ -699,6 +697,7 @@ public class HomeFragment extends BaseFragment implements
 		public void onResponse(JSONObject response) {
 			StartActivity startActivity = (StartActivity)getActivity();
 			startActivity.dismissProgressDialog();
+			
 			startRegatta(leaderboardName, eventId, competitorId);
 		}
 	}

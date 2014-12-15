@@ -149,7 +149,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:gravity="left"
-                    android:padding="0dp"
+                    android:padding="5dp"
                     android:text="@string/thank_you_you_successfully_participated"
                     android:textColor="@color/white"
                     android:textStyle="bold" />
