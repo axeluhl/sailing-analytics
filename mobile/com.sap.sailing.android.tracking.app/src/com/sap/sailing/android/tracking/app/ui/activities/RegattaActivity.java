@@ -243,7 +243,7 @@ public class RegattaActivity extends BaseActivity {
      * Get Path for cached leaderbaord image.
      * @return
      */
-    private File getImageFile(String fileName) {
+    public File getImageFile(String fileName) {
     	
     	File mediaStorageDir = getMediaStorageDir();
 
@@ -253,7 +253,7 @@ public class RegattaActivity extends BaseActivity {
         return mediaFile;
     }
     
-    private File getMediaStorageDir() {
+    public File getMediaStorageDir() {
     	File mediaStorageDir;
 
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
