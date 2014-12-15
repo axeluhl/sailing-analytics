@@ -208,7 +208,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 			if (requestCode == CAMERA_REQUEST_CODE) {
 				Bitmap photo = (Bitmap) data.getExtras().get("data");
-				activity.updatePictureChosenByUser(photo);
+				activity.updateLeaderboardPictureChosenByUser(photo);
 			} else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
 				Uri selectedImage = data.getData();
 				InputStream imageStream;
@@ -216,7 +216,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 					imageStream = getActivity().getContentResolver()
 							.openInputStream(selectedImage);
 					Bitmap photo = BitmapFactory.decodeStream(imageStream);
-					activity.updatePictureChosenByUser(photo);
+					activity.updateLeaderboardPictureChosenByUser(photo);
 				} catch (FileNotFoundException e) {
 					ExLog.e(getActivity(), TAG,
 							"File not found exception after picking image from gallery");
@@ -258,19 +258,13 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	}
 
 	private void setCountdownTime(int days, int hours, int minutes) {
-		TextView daysTextView = (TextView) getActivity().findViewById(
-				R.id.starts_in_days);
-		TextView hoursTextView = (TextView) getActivity().findViewById(
-				R.id.starts_in_hours);
-		TextView minutesTextView = (TextView) getActivity().findViewById(
-				R.id.starts_in_minutes);
+		TextView daysTextView = (TextView) getActivity().findViewById(R.id.starts_in_days);
+		TextView hoursTextView = (TextView) getActivity().findViewById(R.id.starts_in_hours);
+		TextView minutesTextView = (TextView) getActivity().findViewById(R.id.starts_in_minutes);
 
-		TextView daysTextViewLabel = (TextView) getActivity().findViewById(
-				R.id.starts_in_days_label);
-		TextView hoursTextViewLabel = (TextView) getActivity().findViewById(
-				R.id.starts_in_hours_label);
-		TextView minutesTextViewLabel = (TextView) getActivity().findViewById(
-				R.id.starts_in_minutes_label);
+		TextView daysTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_days_label);
+		TextView hoursTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_hours_label);
+		TextView minutesTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_minutes_label);
 
 		daysTextView.setText(String.format("%02d", days));
 		hoursTextView.setText(String.format("%02d", hours));

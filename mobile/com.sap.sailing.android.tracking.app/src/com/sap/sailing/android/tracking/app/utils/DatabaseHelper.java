@@ -199,7 +199,7 @@ public class DatabaseHelper {
 		return result;
 	}
 	
-	public EventInfo getEventInfo(Context context, String eventId) {
+	public EventInfo getEventInfo(Context context, String eventId) {		
 		EventInfo event = new EventInfo();
 		event.id = eventId;
 		
