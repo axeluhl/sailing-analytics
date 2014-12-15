@@ -27,8 +27,8 @@ public class ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>
         super(dataType, executor, resultReceivers, dimensions);
     }
 
-    protected GroupKey createGroupKeyFor(DataType input, Function<?> mainDimension) {
-        Object keyValue = mainDimension.tryToInvoke(input);
+    protected GroupKey createGroupKeyFor(DataType input, Function<?> dimension) {
+        Object keyValue = dimension.tryToInvoke(input);
         return new GenericGroupKey<Object>(keyValue);
     }
 

@@ -10,14 +10,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.Statistic;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidExternalFunctionFilterCriterion;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidStatisticFilterCriterion;
 
 public class SimpleFunctionRegistry implements FunctionRegistry {
+
+    private final FilterCriterion<Method> isValidDimension = new MethodIsValidDimensionFilterCriterion();
+    private final FilterCriterion<Method> isValidStatistic = new MethodIsValidStatisticFilterCriterion();
+    private final FilterCriterion<Method> isValidConnector = new MethodIsValidConnectorFilterCriterion();
+    private final FilterCriterion<Method> isValidExternalFunction = new MethodIsValidExternalFunctionFilterCriterion();
     
     private final FunctionFactory functionFactory;
     
@@ -53,12 +60,12 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
     private void scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions) {
         for (Method method : internalClass.getMethods()) {
-            if (isValidDimension(method) || isValidStatistic(method)) {
+            if (isValidDimension.matches(method) || isValidStatistic.matches(method)) {
                 registerFunction(previousFunctions, method);
                 continue;
             }
             
-            if (isConnector(method)) {
+            if (isValidConnector.matches(method)) {
                 handleConnectorMethod(method, previousFunctions);
             }
         }
@@ -101,29 +108,11 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         scanInternalClass(returnType, previousFunctionsClone); 
     }
 
-    private boolean isValidDimension(Method method) {
-        return method.getAnnotation(Dimension.class) != null &&
-               !method.getReturnType().equals(Void.TYPE) &&
-               method.getParameterTypes().length == 0;
-    }
-
-    private boolean isValidStatistic(Method method) {
-        return method.getAnnotation(Statistic.class) != null &&
-               !method.getReturnType().equals(Void.TYPE) &&
-               method.getParameterTypes().length == 0;
-    }
-
-    private boolean isConnector(Method method) {
-        return method.getAnnotation(Connector.class) != null &&
-                !method.getReturnType().equals(Void.TYPE) &&
-                method.getParameterTypes().length == 0;
-    }
-
     @Override
     public void registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan) {
         for (Class<?> externalClass : externalClassesToScan) {
             for (Method method : externalClass.getMethods()) {
-                if (isValidExternalFunction(method)) {
+                if (isValidExternalFunction.matches(method)) {
                     Function<?> function = functionFactory.createMethodWrappingFunction(method);
                     addExternalFunction(function);
                 }
@@ -137,10 +126,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             externalFunctions.put(declaringType, new HashSet<Function<?>>());
         }
         externalFunctions.get(declaringType).add(function);
-    }
-
-    private boolean isValidExternalFunction(Method method) {
-        return !method.getReturnType().equals(Void.TYPE) && !method.getDeclaringClass().equals(Object.class);
     }
 
     @Override

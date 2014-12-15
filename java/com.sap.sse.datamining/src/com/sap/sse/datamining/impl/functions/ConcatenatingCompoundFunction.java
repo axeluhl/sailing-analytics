@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
 
@@ -124,16 +125,16 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
 
     @Override
     public ReturnType tryToInvoke(Object instance) {
-        return tryToInvoke(instance, new Object[0]);
+        return tryToInvoke(instance, ParameterProvider.NULL);
     }
-
-    @SuppressWarnings("unchecked") // The cast has to work. The types were checked in the constructor.
+    
+    @SuppressWarnings("unchecked")
     @Override
-    public ReturnType tryToInvoke(Object instance, Object... parameters) {
+    public ReturnType tryToInvoke(Object instance, ParameterProvider parameterProvider) {
         Iterator<Function<?>> functionsIterator = functions.iterator();
-        Object result = functionsIterator.next().tryToInvoke(instance, parameters);
+        Object result = functionsIterator.next().tryToInvoke(instance, parameterProvider);
         while (functionsIterator.hasNext()) {
-            Function<?> function = (Function<?>) functionsIterator.next();
+            Function<?> function = functionsIterator.next();
             result = function.tryToInvoke(result);
             if (result == null) {
                 return null;
