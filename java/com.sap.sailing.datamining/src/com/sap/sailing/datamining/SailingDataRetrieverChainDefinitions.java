@@ -9,10 +9,10 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.impl.components.GPSFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardGroupRetrievalProcessor;
-import com.sap.sailing.datamining.impl.components.RegattaLeaderboardFilteringRetrievalProcessor;
-import com.sap.sailing.datamining.impl.components.TrackedLegFilteringRetrievalProcessor;
-import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorFilteringRetrievalProcessor;
-import com.sap.sailing.datamining.impl.components.TrackedRaceFilteringRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.RegattaLeaderboardRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.server.RacingEventService;
@@ -33,18 +33,18 @@ public class SailingDataRetrieverChainDefinitions {
         Class<Processor<RacingEventService, LeaderboardGroup>> leaderboardGroupRetrieverType = (Class<Processor<RacingEventService, LeaderboardGroup>>) (Class<?>) LeaderboardGroupRetrievalProcessor.class;
         legOfCompetitorRetrieverChainDefinition.startWith(leaderboardGroupRetrieverType, LeaderboardGroup.class, "LeaderboardGroup");
         @SuppressWarnings("unchecked")
-        Class<Processor<LeaderboardGroup, RegattaLeaderboard>> regattaLeaderboardRetrieverType = (Class<Processor<LeaderboardGroup, RegattaLeaderboard>>) (Class<?>) RegattaLeaderboardFilteringRetrievalProcessor.class;
+        Class<Processor<LeaderboardGroup, RegattaLeaderboard>> regattaLeaderboardRetrieverType = (Class<Processor<LeaderboardGroup, RegattaLeaderboard>>) (Class<?>) RegattaLeaderboardRetrievalProcessor.class;
         legOfCompetitorRetrieverChainDefinition.addAfter(leaderboardGroupRetrieverType, regattaLeaderboardRetrieverType,
                 RegattaLeaderboard.class, "RegattaLeaderboard");
         @SuppressWarnings("unchecked")
-        Class<Processor<RegattaLeaderboard, HasTrackedRaceContext>> raceRetrieverType = (Class<Processor<RegattaLeaderboard, HasTrackedRaceContext>>) (Class<?>) TrackedRaceFilteringRetrievalProcessor.class;
+        Class<Processor<RegattaLeaderboard, HasTrackedRaceContext>> raceRetrieverType = (Class<Processor<RegattaLeaderboard, HasTrackedRaceContext>>) (Class<?>) TrackedRaceRetrievalProcessor.class;
         legOfCompetitorRetrieverChainDefinition.addAfter(regattaLeaderboardRetrieverType, raceRetrieverType,
                 HasTrackedRaceContext.class, "Race");
         @SuppressWarnings("unchecked")
-        Class<Processor<HasTrackedRaceContext, HasTrackedLegContext>> legRetrieverType = (Class<Processor<HasTrackedRaceContext, HasTrackedLegContext>>) (Class<?>) TrackedLegFilteringRetrievalProcessor.class;
+        Class<Processor<HasTrackedRaceContext, HasTrackedLegContext>> legRetrieverType = (Class<Processor<HasTrackedRaceContext, HasTrackedLegContext>>) (Class<?>) TrackedLegRetrievalProcessor.class;
         legOfCompetitorRetrieverChainDefinition.addAfter(raceRetrieverType, legRetrieverType, HasTrackedLegContext.class, "Leg");
         @SuppressWarnings("unchecked")
-        Class<Processor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext>> legOfCompetitorRetrieverType = (Class<Processor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext>>) (Class<?>) TrackedLegOfCompetitorFilteringRetrievalProcessor.class;
+        Class<Processor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext>> legOfCompetitorRetrieverType = (Class<Processor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext>>) (Class<?>) TrackedLegOfCompetitorRetrievalProcessor.class;
         legOfCompetitorRetrieverChainDefinition.endWith(legRetrieverType, legOfCompetitorRetrieverType,
                 HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
         dataRetrieverChainDefinitions.add(legOfCompetitorRetrieverChainDefinition);
