@@ -1,6 +1,8 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
@@ -34,7 +37,11 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private final int CAMERA_REQUEST_CODE = 3118;
 	private final int SELECT_PHOTO_REQUEST_CODE = 1693;
-
+	private final int IMAGE_MAX_SIZE = 2000;
+	
+	private final String CAMERA_TEMP_FILE = "cameraTempFile";
+	
+	
 	private boolean showingThankYouNote;
 
 	private TimerRunnable timer;
@@ -198,6 +205,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private void showTakePhotoActivity() {
 		Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		File photoFile = ((RegattaActivity)getActivity()).getImageFile(CAMERA_TEMP_FILE);
+		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
 		startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
 	}
 
@@ -207,26 +216,75 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 			RegattaActivity activity = (RegattaActivity) getActivity();
 
 			if (requestCode == CAMERA_REQUEST_CODE) {
-				Bitmap photo = (Bitmap) data.getExtras().get("data");
-				activity.updateLeaderboardPictureChosenByUser(photo);
+				File photoFile = ((RegattaActivity)getActivity()).getImageFile(CAMERA_TEMP_FILE);
+				Bitmap photo;
+				try {
+					photo = decodeUri(Uri.fromFile(photoFile));
+					activity.updateLeaderboardPictureChosenByUser(photo);
+				} catch (FileNotFoundException e) {
+					if (BuildConfig.DEBUG)
+					{
+						ExLog.i(getActivity(), TAG, "update photo, file not found: " + photoFile);
+					}
+				} catch (IOException e) {
+					if (BuildConfig.DEBUG)
+					{
+						ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
+					}
+				}
 			} else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
 				Uri selectedImage = data.getData();
-				InputStream imageStream;
+				
 				try {
-					imageStream = getActivity().getContentResolver()
-							.openInputStream(selectedImage);
-					Bitmap photo = BitmapFactory.decodeStream(imageStream);
+					Bitmap photo = decodeUri(selectedImage);
 					activity.updateLeaderboardPictureChosenByUser(photo);
 				} catch (FileNotFoundException e) {
 					ExLog.e(getActivity(), TAG,
 							"File not found exception after picking image from gallery");
-					return;
+				} catch (IOException e) {
+					if (BuildConfig.DEBUG)
+					{
+						ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
+					}
 				}
 			}
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
 	}
+	
+	/**
+	 * Decode image with maximum size 
+	 * @param uri
+	 * @return
+	 * @throws IOException
+	 */
+	private Bitmap decodeUri(Uri uri) throws IOException{
+	    Bitmap bitmap = null;
+
+	    BitmapFactory.Options options = new BitmapFactory.Options();
+	    options.inJustDecodeBounds = true;
+
+	    InputStream fis = getActivity().getContentResolver().openInputStream(uri);
+	    BitmapFactory.decodeStream(fis, null, options);
+	    fis.close();
+
+	    int scale = 1;
+	    if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
+	        scale = (int)Math.pow(2, (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / 
+	           (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
+	    }
+
+	    BitmapFactory.Options options2 = new BitmapFactory.Options();
+	    options2.inSampleSize = scale;
+	    fis = getActivity().getContentResolver().openInputStream(uri);
+	    bitmap = BitmapFactory.decodeStream(fis, null, options2);
+	    fis.close();
+
+	    return bitmap;
+	}
+	
+
 
 	private void startTrackingActivity() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
