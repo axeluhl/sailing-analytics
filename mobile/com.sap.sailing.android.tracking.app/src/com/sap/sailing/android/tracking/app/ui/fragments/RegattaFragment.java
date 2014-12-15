@@ -63,7 +63,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private void checkAndSwitchToThankYouScreenIfRegattaOver() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		long regattaEnd = regattaActivity.getEventEndMillis();
+		long regattaEnd = regattaActivity.getEvent().endMillis;
 
 		if (System.currentTimeMillis() > regattaEnd) {
 			switchToThankYouScreen();
@@ -77,7 +77,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		TextView textView = (TextView)getActivity().findViewById(R.id.regatta_starts_in);
 		
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		long regattaStart = regattaActivity.getEventStartMillis();
+		long regattaStart = regattaActivity.getEvent().startMillis;
 		
 		LinearLayout threeBoxesLayout = (LinearLayout) getActivity()
 				.findViewById(R.id.three_boxes_regatta_starts);
@@ -233,13 +233,13 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
 		intent.putExtra(
 				getString(R.string.tracking_activity_event_id_parameter),
-				regattaActivity.getEventId());
+				regattaActivity.getEvent().id);
 		getActivity().startActivity(intent);
 	}
 
 	private void timerFired() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		updateCountdownTimer(regattaActivity.getEventStartMillis());
+		updateCountdownTimer(regattaActivity.getEvent().startMillis);
 	}
 
 	private void updateCountdownTimer(long startTime) {

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
-    android:background="@color/colorGrey" >
+    android:layout_height="100dp" >
 
     <RelativeLayout
         android:id="@+id/panel_right"
@@ -11,8 +10,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_margin="2dp"
-        android:background="@color/colorGreyDark" >
+        android:layout_margin="2dp" >
 
         <LinearLayout
             android:id="@+id/race_scheduled"
@@ -26,6 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:textColor="@color/white"
                 android:text="13:36"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -34,6 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:textColor="@color/white"
                 android:text="@string/race_started" />
 
             <TextView
@@ -41,6 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:textColor="@color/white"
                 android:text="@string/race_finished" />
         </LinearLayout>
 
@@ -50,6 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/race_unscheduled"
+            android:textColor="@color/grey_light"
             android:visibility="gone" />
     </RelativeLayout>
 
@@ -59,8 +61,7 @@
         android:layout_height="match_parent"
         android:layout_margin="2dp"
         android:layout_toLeftOf="@id/panel_right"
-        android:layout_toStartOf="@id/panel_right"
-        android:background="@color/colorGreyDark" >
+        android:layout_toStartOf="@id/panel_right" >
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -82,7 +83,9 @@
                 android:id="@+id/race_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fleet Yellow - Race 3" />
+                android:text="Fleet Yellow - Race 3"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -120,6 +123,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
+                    android:textColor="@color/white"
                     android:text="01:12" />
             </LinearLayout>
         </LinearLayout>

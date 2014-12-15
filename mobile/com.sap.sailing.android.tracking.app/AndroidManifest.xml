@@ -69,30 +69,8 @@
                 android:value=".ui.activities.StartActivity" />
         </activity>
         <activity
-            android:name=".ui.activities.StartTrackingActivity"
-            android:screenOrientation="unspecified" >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="sapsailing.com"
-                    android:path="/apps/com.sap.sailing.tracking.app.apk"
-                    android:scheme="http" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".ui.activities.SystemInformationActivity"
-            android:screenOrientation="unspecified" />
-        <activity
             android:name=".ui.activities.SettingsActivity"
             android:screenOrientation="unspecified" />
-        <activity
-            android:name=".ui.activities.StopTrackingActivity"
-            android:screenOrientation="unspecified" />
-
         <service
             android:name=".services.TrackingService"
             android:exported="false"

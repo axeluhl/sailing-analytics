@@ -31,6 +31,8 @@
                 android:id="@+id/userImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
                 android:src="@drawable/picture" />
 
             <LinearLayout
@@ -116,10 +118,10 @@
                 android:padding="0dp" >
 
                 <Button
-                android:id="@+id/change_photo_button"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@drawable/stift" />
+                    android:id="@+id/change_photo_button"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:background="@drawable/stift" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -135,9 +137,9 @@
                 android:id="@+id/thank_you_layout"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:gravity="center_vertical"
                 android:layout_weight="1"
                 android:baselineAligned="false"
+                android:gravity="center_vertical"
                 android:measureWithLargestChild="false"
                 android:orientation="horizontal"
                 android:visibility="invisible" >
@@ -276,7 +278,7 @@
             </RelativeLayout>
         </RelativeLayout>
     </LinearLayout>
-    
+
     <View
         android:id="@+id/bottom_bar"
         android:layout_width="fill_parent"

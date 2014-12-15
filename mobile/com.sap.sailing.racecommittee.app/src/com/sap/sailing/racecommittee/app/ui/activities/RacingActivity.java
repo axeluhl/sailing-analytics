@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -103,7 +104,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-
     private static ProgressBar mProgressSpinner;
     private static final int RacesLoaderId = 0;
 
@@ -158,8 +158,9 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         // check if the fragment is actively shown already, otherwise show it
         if ((windFragment != null && !windFragment.isFragmentUIActive()) || windFragment == null) {
             windFragment = new WindFragment();
-            getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                    .replace(R.id.racing_view_right_container, windFragment)
+            getFragmentManager().beginTransaction()
+//                    .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                    .replace(R.id.racing_view_container, windFragment)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null).commit();
         }
     }
@@ -179,22 +180,22 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     @Override
     public void onBackPressed() {
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_right_container);
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_container);
         if (!(fragment instanceof RaceInfoFragment || fragment instanceof WelcomeFragment)) {
-	        if (getFragmentManager().getBackStackEntryCount() > 0) {
-	            getFragmentManager().popBackStackImmediate();
-	            getFragmentManager().beginTransaction().commit();
-	
-	            // fix for filled out RaceInfoFragment
-	            if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
-	                ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
-	                getFragmentManager().popBackStackImmediate();
-	                onRaceItemClicked(selectedRace);
-	            }
-	        } 
+            if (getFragmentManager().getBackStackEntryCount() > 0) {
+                getFragmentManager().popBackStackImmediate();
+                getFragmentManager().beginTransaction().commit();
+
+                // fix for filled out RaceInfoFragment
+                if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
+                    ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
+                    getFragmentManager().popBackStackImmediate();
+                    onRaceItemClicked(selectedRace);
+                }
+            }
         } else {
-        	logoutSession();
-	    }
+            logoutSession();
+        }
     }
 
     @Override
@@ -229,9 +230,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             }
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
-
-        navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
-        navDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
         if (courseAreaId == null) {
@@ -270,10 +268,17 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         
         getFragmentManager()
                 .beginTransaction()
-                .replace(R.id.racing_view_right_container,
+                .replace(R.id.racing_view_container,
                         new WelcomeFragment(dataManager.getDataStore(), courseAreaId, eventId, preferences.getAuthor()))
                 .commit();
 
+        navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        String race = getResources().getString(R.string.nav_header)
+                .replace("#AREA#", dataManager.getDataStore().getCourseArea(courseAreaId).getName())
+                .replace("#EVENT#", dataManager.getDataStore().getEvent(eventId).getName())
+                .replace("#AUTHOR#", preferences.getAuthor().getName());
+        SpannableString string = new SpannableString(race);
+        navDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), string);
     }
 
     @Override
@@ -298,8 +303,9 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         infoFragment = new RaceInfoFragment();
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
-        getFragmentManager().beginTransaction().setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                .replace(R.id.racing_view_right_container, infoFragment)
+        getFragmentManager().beginTransaction()
+//                .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+                .replace(R.id.racing_view_container, infoFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null).commit();
 
     }

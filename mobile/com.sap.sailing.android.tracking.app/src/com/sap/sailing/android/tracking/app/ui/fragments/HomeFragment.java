@@ -56,6 +56,8 @@ import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -72,10 +74,6 @@ public class HomeFragment extends BaseFragment implements
 
 	private int requestCodeQRCode = 442;
 	private RegattaAdapter adapter;
-	
-	private int eventRowId;
-	private int competitorRowId;
-	private int leaderboardRowId;
 
 	@SuppressLint("InflateParams")
 	@Override
@@ -303,23 +301,18 @@ public class HomeFragment extends BaseFragment implements
 															JSONObject response) {
 														startActivity.dismissProgressDialog();
 														
-														final String competitorDisplayName;
+														final String competitorName;
 														final String competitorId;
 														final String competitorSailId;
 														final String competitorNationality;
 														final String competitorCountryCode;
 
 														try {
-															competitorDisplayName = response
-																	.getString("displayName");
-															competitorId = response
-																	.getString("id");
-															competitorSailId = response
-																	.getString("sailID");
-															competitorNationality = response
-																	.getString("nationality");
-															competitorCountryCode = response
-																	.getString("countryCode");
+															competitorName = response.getString("name");
+															competitorId = response.getString("id");
+															competitorSailId = response.getString("sailID");
+															competitorNationality = response.getString("nationality");
+															competitorCountryCode = response.getString("countryCode");
 														} catch (JSONException e) {
 															ExLog.e(getActivity(),
 																	TAG,
@@ -332,7 +325,7 @@ public class HomeFragment extends BaseFragment implements
 														}
 
 														CheckinData data = new CheckinData();
-														data.competitorDisplayName = competitorDisplayName;
+														data.competitorName = competitorName;
 														data.competitorId = competitorId;
 														data.competitorSailId = competitorSailId;
 														data.competitorNationality = competitorNationality;
@@ -365,9 +358,7 @@ public class HomeFragment extends BaseFragment implements
 													}
 												});
 
-										VolleyHelper.getInstance(getActivity())
-												.addRequest(
-														getCompetitorRequest);
+										VolleyHelper.getInstance(getActivity()).addRequest(getCompetitorRequest);
 									}
 								}, new ErrorListener() {
 									@Override
@@ -382,8 +373,7 @@ public class HomeFragment extends BaseFragment implements
 									}
 								});
 
-						VolleyHelper.getInstance(getActivity()).addRequest(
-								getEventRequest);
+						VolleyHelper.getInstance(getActivity()).addRequest(getEventRequest);
 					}
 				}, new ErrorListener() {
 					@Override
@@ -397,8 +387,7 @@ public class HomeFragment extends BaseFragment implements
 					}
 				});
 
-		VolleyHelper.getInstance(getActivity()).addRequest(
-				getLeaderboardRequest);
+		VolleyHelper.getInstance(getActivity()).addRequest(getLeaderboardRequest);
 	}
 
 	@Override
@@ -415,7 +404,7 @@ public class HomeFragment extends BaseFragment implements
 	 */
 	private void displayUserConfirmationScreen(final CheckinData checkinData) {
 		String message1 = getString(R.string.confirm_data_hello_name).replace(
-				"{full_name}", checkinData.competitorDisplayName);
+				"{full_name}", checkinData.competitorName);
 		String message2 = getString(
 				R.string.confirm_data_you_are_signed_in_as_sail_id).replace(
 				"{sail_id}", checkinData.competitorSailId);
@@ -444,18 +433,6 @@ public class HomeFragment extends BaseFragment implements
 
 		AlertDialog alert = builder.create();
 		alert.show();
-	}
-	
-	/**
-	 * Delete Event, Competitor and Leaderboard
-	 */
-	private void deleteRegttaFromDatabase()
-	{
-		ContentResolver cr = getActivity().getContentResolver();
-		
-		cr.delete(Event.CONTENT_URI, BaseColumns._ID + " = " + eventRowId, null);
-		cr.delete(Competitor.CONTENT_URI, BaseColumns._ID + " = " + competitorRowId, null);
-		cr.delete(Leaderboard.CONTENT_URI, BaseColumns._ID + " = " + leaderboardRowId, null);
 	}
 
 	/**
@@ -504,8 +481,7 @@ public class HomeFragment extends BaseFragment implements
 			clv.put(Leaderboard.LEADERBOARD_NAME, checkinData.leaderboardName);
 			cr.insert(Leaderboard.CONTENT_URI, clv);
 
-			Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null,
-					null);
+			Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null, null);
 			long lastLeaderboardId = 0;
 
 			if (cur.moveToLast()) {
@@ -523,10 +499,8 @@ public class HomeFragment extends BaseFragment implements
 			ContentValues cev = new ContentValues();
 			cev.put(Event.EVENT_ID, checkinData.eventId);
 			cev.put(Event.EVENT_NAME, checkinData.eventName);
-			cev.put(Event.EVENT_DATE_START,
-					Long.parseLong(checkinData.eventStartDateStr));
-			cev.put(Event.EVENT_DATE_END,
-					Long.parseLong(checkinData.eventEndDateStr));
+			cev.put(Event.EVENT_DATE_START, Long.parseLong(checkinData.eventStartDateStr));
+			cev.put(Event.EVENT_DATE_END, Long.parseLong(checkinData.eventEndDateStr));
 			cev.put(Event.EVENT_SERVER, checkinData.eventServerUrl);
 			cev.put(Event.EVENT_IMAGE_URL, checkinData.eventFirstImageUrl);
 			cev.put(Event.EVENT_LEADERBOARD_FK, lastLeaderboardId);
@@ -536,13 +510,10 @@ public class HomeFragment extends BaseFragment implements
 
 			ContentValues ccv = new ContentValues();
 
-			ccv.put(Competitor.COMPETITOR_COUNTRY_CODE,
-					checkinData.competitorCountryCode);
-			ccv.put(Competitor.COMPETITOR_DISPLAY_NAME,
-					checkinData.competitorDisplayName);
+			ccv.put(Competitor.COMPETITOR_COUNTRY_CODE,checkinData.competitorCountryCode);
+			ccv.put(Competitor.COMPETITOR_DISPLAY_NAME,checkinData.competitorName);
 			ccv.put(Competitor.COMPETITOR_ID, checkinData.competitorId);
-			ccv.put(Competitor.COMPETITOR_NATIONALITY,
-					checkinData.competitorNationality);
+			ccv.put(Competitor.COMPETITOR_NATIONALITY,checkinData.competitorNationality);
 			ccv.put(Competitor.COMPETITOR_SAIL_ID, checkinData.competitorSailId);
 			ccv.put(Competitor.COMPETITOR_LEADERBOARD_FK, lastLeaderboardId);
 
@@ -550,20 +521,14 @@ public class HomeFragment extends BaseFragment implements
 					.newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
 
 			try {
-				for (ContentProviderOperation op : opList) {
-					System.out.println("** INSERT: " + op);
-				}
-
 				cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
 				adapter.notifyDataSetChanged();
 			} catch (RemoteException e1) {
-				ExLog.e(getActivity(), TAG,
-						"Batch insert failed: " + e1.getMessage());
+				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e1.getMessage());
 				displayDatabaseError();
 				return;
 			} catch (OperationApplicationException e1) {
-				ExLog.e(getActivity(), TAG,
-						"Batch insert failed: " + e1.getMessage());
+				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e1.getMessage());
 				displayDatabaseError();
 				return;
 			}
@@ -597,12 +562,12 @@ public class HomeFragment extends BaseFragment implements
 					checkinData.competitorId, checkinData.deviceUid, "TODO!!",
 					date.getTime());
 
-			JsonObjectRequest checkinRequest = new JsonObjectRequest(
-					checkinData.checkinURL, requestObject, new CheckinListener(
-							checkinData.leaderboardName, checkinData.eventId,
-							checkinData.competitorId),
-					new CheckinErrorListener());
-
+			JsonObjectOrStatusOnlyRequest checkinRequest = new JsonObjectOrStatusOnlyRequest(checkinData.checkinURL,
+					requestObject, new CheckinListener(checkinData.leaderboardName,
+							checkinData.eventId, checkinData.competitorId),
+					new CheckinErrorListener(checkinData.leaderboardName, checkinData.eventId,
+							checkinData.competitorId));
+			
 			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
 
 		} catch (JSONException e) {
@@ -724,7 +689,7 @@ public class HomeFragment extends BaseFragment implements
 		public String eventFirstImageUrl;
 		public String eventServerUrl;
 		public String checkinURL;
-		public String competitorDisplayName;
+		public String competitorName;
 		public String competitorId;
 		public String competitorSailId;
 		public String competitorNationality;
@@ -798,14 +763,35 @@ public class HomeFragment extends BaseFragment implements
 
 	private class CheckinErrorListener implements ErrorListener {
 
+		public String leaderboardName;
+		public String eventId;
+		public String competitorId;
+		
+		public CheckinErrorListener(String leaderboardName, String eventId, String competitorId) {
+			this.leaderboardName = leaderboardName;
+			this.eventId = eventId;
+			this.competitorId = competitorId;
+		}
+		
 		@Override
 		public void onErrorResponse(VolleyError error) {
+			if (error.getMessage() != null)
+			{
+				ExLog.e(getActivity(), TAG, error.getMessage().toString());	
+			}
+			else
+			{
+				ExLog.e(getActivity(), TAG, "Unknown Error");
+			}
+			
+			
 			StartActivity startActivity = (StartActivity)getActivity();
 			startActivity.dismissProgressDialog();
 			startActivity.showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
-			ExLog.e(getActivity(), TAG, error.getMessage().toString());
-			Toast.makeText(getActivity(), "Error while receiving server data",
-					Toast.LENGTH_LONG).show();
+			
+			DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), eventId, leaderboardName, competitorId);			
+			
+			Toast.makeText(getActivity(), "Error while receiving server data", Toast.LENGTH_LONG).show();
 		}
 	}
 

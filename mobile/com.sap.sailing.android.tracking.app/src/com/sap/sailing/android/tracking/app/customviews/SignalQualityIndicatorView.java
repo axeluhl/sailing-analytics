@@ -90,7 +90,7 @@ public class SignalQualityIndicatorView extends View {
 		rect.bottom = (int) this.height;
 		canvas.drawRect(rect, paintDark);
 
-		// then draw green box on tom
+		// then draw green box on top
 		
 		rect.top = (int) (this.height - (signalQuality * boxHeight));
 		rect.left = 0;
