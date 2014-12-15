@@ -102,6 +102,8 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         @Override
         public void lock() {
             readLock.lock();
+            final Thread currentThread = Thread.currentThread();
+            readers.add(currentThread);
         }
 
         @Override
