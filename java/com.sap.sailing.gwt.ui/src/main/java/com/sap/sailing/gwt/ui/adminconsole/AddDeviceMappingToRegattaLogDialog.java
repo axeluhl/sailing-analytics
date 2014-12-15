@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -98,8 +99,8 @@ public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog
                 }
                 String eventIdAsString = events.getValue().id.toString();
                 return baseUrlWithoutTrailingSlash + DeviceMappingConstants.URL_BASE
-                        + "?" + DeviceMappingConstants.EVENT_ID + "=" + eventIdAsString
-                        + "&" + DeviceMappingConstants.LEADERBOARD_NAME + "=" + leaderboardName
+                        + "?" + DeviceMappingConstants.EVENT_ID + "=" + URL.encodeQueryString(eventIdAsString)
+                        + "&" + DeviceMappingConstants.LEADERBOARD_NAME + "=" + URL.encodeQueryString(leaderboardName)
                         + "&" + mappedItemQueryParam;
             }
         });

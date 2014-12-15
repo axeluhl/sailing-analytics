@@ -52,6 +52,6 @@ public class DeviceMappingQRCodeWidget extends BaseQRIdentifierWidget {
             throw new QRCodeURLCreationException("No item selected for mapping");
         }
         
-        return urlFactory.createURL(serverUrl, mappedItemType + "=" + mappedItemId);
+        return urlFactory.createURL(serverUrl, mappedItemType + "=" + URL.encodeQueryString(mappedItemId));
     }
 }
