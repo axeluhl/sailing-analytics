@@ -116,14 +116,14 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     
     @Override
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
-        if (!isLocatable()) {
+        if (!isLocalizable()) {
             return getSimpleName();
         }
         return stringMessages.get(locale, additionalData.getMessageKey());
     }
 
     @Override
-    public boolean isLocatable() {
+    public boolean isLocalizable() {
         return additionalData != null && !additionalData.getMessageKey().isEmpty();
     }
     

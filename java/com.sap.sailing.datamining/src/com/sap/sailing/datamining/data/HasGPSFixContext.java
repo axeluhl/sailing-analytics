@@ -13,7 +13,7 @@ public interface HasGPSFixContext {
     @Connector
     public GPSFixMoving getGPSFix();
     
-    @Dimension(messageKey="WindStrength", ordinal=10)
-    public ClusterDTO getWindStrength();
+    @Dimension(messageKey="WindStrengthInBeaufort", ordinal=10)
+    public ClusterDTO getWindStrengthAsBeaufortCluster();
 
 }

@@ -90,7 +90,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         if (name != null && !name.isEmpty()) {
             return name;
         }
-        if (!isLocatable()) {
+        if (!isLocalizable()) {
             return getSimpleName();
         }
         
@@ -98,9 +98,9 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     }
     
     @Override
-    public boolean isLocatable() {
+    public boolean isLocalizable() {
         for (Function<?> function : functions) {
-            if (function.isLocatable()) {
+            if (function.isLocalizable()) {
                 return true;
             }
         }
@@ -111,7 +111,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         for (Function<?> function : functions) {
-            if (function.isLocatable()) {
+            if (function.isLocalizable()) {
                 if (!first) {
                     builder.append(LOCALIZED_NAME_CHAIN_CONNECTOR);
                 }
