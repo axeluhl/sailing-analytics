@@ -10,18 +10,17 @@ import Foundation
 
 class TrackingViewController : UIViewController {
     
-    @IBOutlet weak var gpsQuality1: UIView!
-    @IBOutlet weak var gpsQuality2: UIView!
-    @IBOutlet weak var gpsQuality3: UIView!
-    @IBOutlet weak var gpsQuality4: UIView!
+    @IBOutlet weak var gpsAccuracy: UILabel!
     @IBOutlet weak var trackingStatusLabel: UILabel!
     @IBOutlet weak var onlineModeLabel: UILabel!
     
-    let gpsActiveColor = UIColor(hex: 0x8AB54D)
-    let gpsInactiveColor = UIColor(hex: 0x445A2F)
-    let greenColor = UIColor(hex: 0x408000)
-    let redColor = UIColor(hex: 0xFF0000)
-    let orangeColor = UIColor(hex: 0xFF8000)
+    struct Color {
+        static let GpsActive = UIColor(hex: 0x8AB54D)
+        static let GpsInactive = UIColor(hex: 0x445A2F)
+        static let Green = UIColor(hex: 0x408000)
+        static let Red = UIColor(hex: 0xFF0000)
+        static let Orange = UIColor(hex: 0xFF8000)
+    }
     
     /* Register for notifications. Set up timer */
     override func viewDidLoad() {
@@ -52,47 +51,28 @@ class TrackingViewController : UIViewController {
         if (APIManager.sharedManager.networkAvailable) {
             if !BatteryManager.sharedManager.batterySaving {
                 onlineModeLabel.text = "Online"
-                onlineModeLabel.textColor = greenColor
+                onlineModeLabel.textColor = Color.Green
             } else {
                 onlineModeLabel.text = "Battery Saving"
-                onlineModeLabel.textColor = orangeColor
+                onlineModeLabel.textColor = Color.Orange
             }
         } else {
             onlineModeLabel.text = "Offline"
-            onlineModeLabel.textColor = redColor
+            onlineModeLabel.textColor = Color.Red
         }
     }
     
     func newLocation(notification: NSNotification) {
         let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as Double
-        gpsQuality1.backgroundColor = gpsInactiveColor
-        gpsQuality2.backgroundColor = gpsInactiveColor
-        gpsQuality3.backgroundColor = gpsInactiveColor
-        gpsQuality4.backgroundColor = gpsInactiveColor
-        if (horizontalAccuracy < 0) {
-        }
-        else if (horizontalAccuracy > 163) {
-            gpsQuality1.backgroundColor = gpsActiveColor
-            gpsQuality2.backgroundColor = gpsActiveColor
-        }
-        else if (horizontalAccuracy > 48) {
-            gpsQuality1.backgroundColor = gpsActiveColor
-            gpsQuality2.backgroundColor = gpsActiveColor
-            gpsQuality3.backgroundColor = gpsActiveColor
-        }
-        else {
-            gpsQuality1.backgroundColor = gpsActiveColor
-            gpsQuality2.backgroundColor = gpsActiveColor
-            gpsQuality3.backgroundColor = gpsActiveColor
-            gpsQuality4.backgroundColor = gpsActiveColor
-        }
+        gpsAccuracy.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
         trackingStatusLabel.text = "Tracking"
-        trackingStatusLabel.textColor = greenColor
+        trackingStatusLabel.textColor = Color.Green
     }
     
     func locationManagerFailed(notification: NSNotification) {
+        gpsAccuracy.text = "no GPS"
         trackingStatusLabel.text = "Not Tracking"
-        trackingStatusLabel.textColor = redColor
+        trackingStatusLabel.textColor = Color.Red
     }
 
 }

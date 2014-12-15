@@ -39,6 +39,7 @@
             <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
+            <string>OpenSans</string>
         </mutableArray>
         <mutableArray key="OpenSans-Semibold.ttf">
             <string>OpenSans-Semibold</string>
@@ -47,10 +48,10 @@
         </mutableArray>
     </customFonts>
     <scenes>
-        <!--Tracker-->
+        <!--Home-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
-                <viewController id="vXZ-lx-hvc" customClass="HomeViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Home" id="vXZ-lx-hvc" customClass="HomeViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="jyV-Pf-zRb"/>
                         <viewControllerLayoutGuide type="bottom" id="2fi-mo-0CV"/>
@@ -650,8 +651,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Quality" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Z1d-5I-pbj">
-                                <rect key="frame" x="16" y="8" width="93" height="24"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Accuracy" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Z1d-5I-pbj">
+                                <rect key="frame" x="16" y="8" width="107" height="24"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -680,54 +681,36 @@
                                 <color key="textColor" red="0.25098040700000002" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NSJ-Gr-Ehk">
-                                <rect key="frame" x="476" y="15" width="21" height="11"/>
-                                <color key="backgroundColor" red="0.54117647059999996" green="0.70980392160000005" blue="0.30588235289999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="11" id="OYx-o3-itn"/>
-                                    <constraint firstAttribute="width" constant="21" id="TVt-gf-YsL"/>
-                                </constraints>
-                            </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="s7Y-o3-cbx">
-                                <rect key="frame" x="505" y="15" width="21" height="11"/>
-                                <color key="backgroundColor" red="0.54117647059999996" green="0.70980392160000005" blue="0.30588235289999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="21" id="GPd-oc-sLD"/>
-                                    <constraint firstAttribute="height" constant="11" id="YvN-4y-Fde"/>
-                                </constraints>
-                            </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zuW-rZ-Pm6">
-                                <rect key="frame" x="534" y="15" width="21" height="11"/>
-                                <color key="backgroundColor" red="0.54117647059999996" green="0.70980392160000005" blue="0.30588235289999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="11" id="cHa-Yy-Kjl"/>
-                                    <constraint firstAttribute="width" constant="21" id="wb0-J5-PLS"/>
-                                </constraints>
-                            </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ve7-LV-Ftl">
-                                <rect key="frame" x="563" y="15" width="21" height="11"/>
-                                <color key="backgroundColor" red="0.54117647059999996" green="0.70980392160000005" blue="0.30588235289999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="21" id="Paa-6K-baa"/>
-                                    <constraint firstAttribute="height" constant="11" id="dan-dd-JEs"/>
-                                </constraints>
-                            </view>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UcT-H2-Fxp">
                                 <rect key="frame" x="0.0" y="104" width="600" height="432"/>
                                 <connections>
                                     <segue destination="rjH-vb-OUF" kind="embed" id="ln5-SR-WkO"/>
                                 </connections>
                             </containerView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="no GPS" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DiM-MR-SGV">
+                                <rect key="frame" x="506" y="8" width="58" height="24"/>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BFc-m8-XKV" customClass="GPSAccuracyView" customModule="SAPTracker" customModuleProvider="target">
+                                <rect key="frame" x="572" y="11" width="12" height="16"/>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="12" id="L7J-jC-mZv"/>
+                                    <constraint firstAttribute="height" constant="16" id="LMm-3U-vXx"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="ve7-LV-Ftl" firstAttribute="centerY" secondItem="NSJ-Gr-Ehk" secondAttribute="centerY" id="438-Mh-ZEa"/>
                             <constraint firstAttribute="trailingMargin" secondItem="tJY-RR-vpe" secondAttribute="trailing" id="4KI-fl-gq3"/>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="top" secondItem="Xww-rc-pOA" secondAttribute="bottom" constant="8" symbolic="YES" id="9el-UI-bzr"/>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="bottom" secondItem="nE0-bK-d8x" secondAttribute="top" id="C25-aA-8XZ"/>
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="top" secondItem="Z1d-5I-pbj" secondAttribute="bottom" constant="8" symbolic="YES" id="C3i-US-IRf"/>
+                            <constraint firstItem="DiM-MR-SGV" firstAttribute="centerY" secondItem="Z1d-5I-pbj" secondAttribute="centerY" id="Cef-PW-vmq"/>
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="leading" secondItem="Xww-rc-pOA" secondAttribute="leading" id="Ds0-KV-sZv"/>
-                            <constraint firstItem="zuW-rZ-Pm6" firstAttribute="leading" secondItem="s7Y-o3-cbx" secondAttribute="trailing" constant="8" id="FLe-eI-LYq"/>
+                            <constraint firstItem="BFc-m8-XKV" firstAttribute="leading" secondItem="DiM-MR-SGV" secondAttribute="trailing" constant="8" id="F7t-A9-cT8"/>
                             <constraint firstAttribute="trailing" secondItem="UcT-H2-Fxp" secondAttribute="trailing" id="H5v-h3-ogW"/>
                             <constraint firstItem="Xww-rc-pOA" firstAttribute="leading" secondItem="6kF-Wb-Hv2" secondAttribute="leadingMargin" id="JQs-RK-ocI"/>
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="leading" secondItem="Z1d-5I-pbj" secondAttribute="leading" id="L9y-4I-Xx1"/>
@@ -735,14 +718,10 @@
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="centerY" secondItem="5Xu-6g-tqP" secondAttribute="centerY" id="P76-PO-mR4"/>
                             <constraint firstItem="Xww-rc-pOA" firstAttribute="top" secondItem="r6d-OU-cRI" secondAttribute="bottom" constant="8" symbolic="YES" id="PNy-6l-EMm"/>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="leading" secondItem="6kF-Wb-Hv2" secondAttribute="leading" id="aeW-WH-6Nh"/>
-                            <constraint firstItem="ve7-LV-Ftl" firstAttribute="centerY" secondItem="Z1d-5I-pbj" secondAttribute="centerY" id="bOb-io-Wlk"/>
-                            <constraint firstItem="ve7-LV-Ftl" firstAttribute="centerY" secondItem="s7Y-o3-cbx" secondAttribute="centerY" id="fiU-6M-Ao2"/>
+                            <constraint firstItem="BFc-m8-XKV" firstAttribute="centerY" secondItem="DiM-MR-SGV" secondAttribute="centerY" constant="-1" id="faz-m8-tTU"/>
                             <constraint firstAttribute="trailingMargin" secondItem="5Xu-6g-tqP" secondAttribute="trailing" id="j12-j8-u1B"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="ve7-LV-Ftl" secondAttribute="trailing" id="jtj-Nt-ETH"/>
-                            <constraint firstItem="s7Y-o3-cbx" firstAttribute="leading" secondItem="NSJ-Gr-Ehk" secondAttribute="trailing" constant="8" id="lsK-fh-7Wq"/>
-                            <constraint firstItem="ve7-LV-Ftl" firstAttribute="centerY" secondItem="zuW-rZ-Pm6" secondAttribute="centerY" id="mh5-7u-6K8"/>
-                            <constraint firstItem="ve7-LV-Ftl" firstAttribute="leading" secondItem="zuW-rZ-Pm6" secondAttribute="trailing" constant="8" id="njK-GV-0an"/>
                             <constraint firstItem="Z1d-5I-pbj" firstAttribute="top" secondItem="qL4-PH-8ve" secondAttribute="bottom" constant="8" symbolic="YES" id="pnF-1D-Rxo"/>
+                            <constraint firstAttribute="trailing" secondItem="BFc-m8-XKV" secondAttribute="trailing" constant="16" id="r8t-UX-UKm"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Tracking" id="qfB-FT-Ysz">
@@ -753,10 +732,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="gpsQuality1" destination="NSJ-Gr-Ehk" id="i2m-h9-P0G"/>
-                        <outlet property="gpsQuality2" destination="s7Y-o3-cbx" id="JgJ-f0-uXV"/>
-                        <outlet property="gpsQuality3" destination="zuW-rZ-Pm6" id="0Sy-tz-8IO"/>
-                        <outlet property="gpsQuality4" destination="ve7-LV-Ftl" id="6WL-FG-sv8"/>
+                        <outlet property="gpsAccuracy" destination="DiM-MR-SGV" id="1WL-d1-Fvc"/>
                         <outlet property="onlineModeLabel" destination="tJY-RR-vpe" id="No0-Q6-OAj"/>
                         <outlet property="trackingStatusLabel" destination="5Xu-6g-tqP" id="3vP-mX-3mm"/>
                     </connections>
@@ -1245,6 +1221,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="QMa-LQ-D8c"/>
-        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="HaH-Jc-FNR"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -275,6 +275,7 @@
 		7F14A20F1A13B9A6001C1ECB /* ZW.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A1091A13B9A6001C1ECB /* ZW.png */; };
 		7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */; };
 		7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F193A8E1A39ACF500D71773 /* TimerViewController.swift */; };
+		7F193A911A39E54600D71773 /* GPSAccuracyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F193A901A39E54600D71773 /* GPSAccuracyView.swift */; };
 		7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */; };
 		7F23F0881A1A3DEF00F03F1C /* QRCodeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */; };
 		7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C605919F160E400C32D93 /* LocationManager.swift */; };
@@ -596,6 +597,7 @@
 		7F14A1091A13B9A6001C1ECB /* ZW.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ZW.png; sourceTree = "<group>"; };
 		7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewController.swift; sourceTree = "<group>"; };
 		7F193A8E1A39ACF500D71773 /* TimerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerViewController.swift; sourceTree = "<group>"; };
+		7F193A901A39E54600D71773 /* GPSAccuracyView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSAccuracyView.swift; sourceTree = "<group>"; };
 		7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryManager.swift; sourceTree = "<group>"; };
 		7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeManager.swift; sourceTree = "<group>"; };
 		7F2C605919F160E400C32D93 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
@@ -705,6 +707,7 @@
 				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
 				7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */,
 				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
+				7F193A901A39E54600D71773 /* GPSAccuracyView.swift */,
 				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
 				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
 				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
@@ -1538,6 +1541,7 @@
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
 				7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */,
 				7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */,
+				7F193A911A39E54600D71773 /* GPSAccuracyView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
