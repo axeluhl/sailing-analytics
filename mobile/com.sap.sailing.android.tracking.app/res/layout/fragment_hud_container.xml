@@ -15,38 +15,72 @@
             android:orientation="vertical"
             android:padding="0dp" >
 
-            <com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView
+            <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:lines="1"
+                android:singleLine="true"
                 android:textSize="18sp" />
 
-            <com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView
+            <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
                 android:id="@+id/toolbar_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:lines="1"
+                android:singleLine="true"
                 android:textSize="14sp" />
         </LinearLayout>
     </com.sap.sailing.android.tracking.app.customviews.OpenSansToolbar>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/title_page_indicator"
+        android:layout_below="@id/toolbar"
+        android:orientation="vertical" >
 
-    <FrameLayout
+        <RelativeLayout
+            android:id="@+id/tracking_linear_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="0dp" >
+        </RelativeLayout>
+
+        <android.support.v4.view.ViewPager
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/tracking_linear_layout"
+            android:layout_weight="1" />
+	</LinearLayout>
+    
+	<com.viewpagerindicator.CirclePageIndicator
+        android:id="@+id/title_page_indicator"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#00000000"
+        android:paddingBottom="10dp"	
+        android:paddingTop="10dp" />
+    
+    
+<!-- <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar" >
-
-        <!-- The main content -->
 
         <FrameLayout
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- HUD overlay layout -->
-
         <FrameLayout
             android:id="@+id/hud_content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </FrameLayout>
+    </FrameLayout> -->
 
 </RelativeLayout>

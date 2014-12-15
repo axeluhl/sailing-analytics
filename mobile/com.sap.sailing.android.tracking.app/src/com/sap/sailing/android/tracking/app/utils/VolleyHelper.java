@@ -16,13 +16,14 @@ public class VolleyHelper extends Application {
 
     private static final String TAG = VolleyHelper.class.getName();
     
-    private Context mContext;
     private RequestQueue mRequestQueue;
+    private Context mContext;
     
-    private static VolleyHelper mInstance;
+    protected static VolleyHelper mInstance;
     
-    private VolleyHelper(Context context) {
-        mContext = context;
+    protected VolleyHelper(Context context){
+    	super();
+    	mContext = context;
     }
     
     public static synchronized VolleyHelper getInstance(Context context) {
@@ -60,14 +61,5 @@ public class VolleyHelper extends Application {
         if (mRequestQueue != null) {
             mRequestQueue.cancelAll((tag == null) ? TAG : tag);
         }
-    }
-    
-    /**
-     * for testing.
-     * @param instance
-     */
-    public static void injectInstance(VolleyHelper instance)
-    {
-    	mInstance = instance;
     }
 }

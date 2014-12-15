@@ -8,15 +8,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Service;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -24,17 +20,13 @@ import android.os.IBinder;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
-import com.sap.sailing.android.tracking.app.utils.SqlDebugHelper;
+import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
@@ -264,7 +256,7 @@ public class TransmittingService extends Service {
 		}
 		
 		sendFixesToAPI(null);
-		reportUnsentGPSFixesCount(DatabaseHelper.getInstance(getBaseContext()).getNumberOfUnsentGPSFixes());
+		reportUnsentGPSFixesCount(DatabaseHelper.getInstance().getNumberOfUnsentGPSFixes(getBaseContext()));
 	}
 	
 	private boolean getTrackingServiceIsCurrentlyTracking()
@@ -275,7 +267,7 @@ public class TransmittingService extends Service {
 	private void sendFixesToAPI(List<String> failedHosts) {
 		
 		// first, lets fetch all unsent fixes
-		List<GpsFix> fixes = DatabaseHelper.getInstance(getBaseContext()).getUnsentFixes(failedHosts, UPDATE_BATCH_SIZE);
+		List<GpsFix> fixes = DatabaseHelper.getInstance().getUnsentFixes(getBaseContext(), failedHosts, UPDATE_BATCH_SIZE);
 		// store ids so we can delete the rows later
 		ArrayList<String> ids = new ArrayList<String>();
 		
@@ -298,12 +290,11 @@ public class TransmittingService extends Service {
 
 				JSONObject json = new JSONObject();
 				try {
-					json.put("bearingDeg", fix.course);
-					json.put("timeMillis", fix.timestamp);
-					json.put("speedMperS", fix.speed);
-					json.put("lonDeg", fix.longitude);
-					json.put("deviceUuid", prefs.getDeviceIdentifier());
-					json.put("latDeg", fix.latitude);
+					json.put("course", fix.course);
+					json.put("timestamp", fix.timestamp);
+					json.put("speed", fix.speed);
+					json.put("longitude", fix.longitude);
+					json.put("latitude", fix.latitude);
 				} catch (JSONException ex) {
 					ExLog.i(this, TAG, "Error while building geolocation json "
 							+ ex.getMessage());
@@ -326,8 +317,8 @@ public class TransmittingService extends Service {
 			JSONObject requestObject = new JSONObject();
 			
 			try {
-				requestObject.put("fixes", jsonArray);
 				requestObject.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
+				requestObject.put("fixes", jsonArray);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -341,13 +332,12 @@ public class TransmittingService extends Service {
 			{
 				sendingAttempted = true;
 				
-				VolleyHelper.getInstance(this).enqueueRequest(
-						host + prefs.getServerGpsFixesPostPath(),
-						requestObject,
-						new FixSubmitListener(ids.toArray(idsArr)),
-						new FixSubmitErrorListener(host,
-								getTrackingServiceIsCurrentlyTracking(),
-								failedHosts));
+				JsonObjectOrStatusOnlyRequest request = new JsonObjectOrStatusOnlyRequest(host
+						+ prefs.getServerGpsFixesPostPath(), requestObject, new FixSubmitListener(
+						ids.toArray(idsArr)), new FixSubmitErrorListener(host,
+						getTrackingServiceIsCurrentlyTracking(), failedHosts));
+						
+				VolleyHelper.getInstance(this).addRequest(request);
 			}
 			else
 			{
@@ -395,7 +385,7 @@ public class TransmittingService extends Service {
 	
 	private void deleteSynced(String[] fixIdStrings)
 	{
-		DatabaseHelper.getInstance(getBaseContext()).deleteGpsFixes(fixIdStrings);
+		DatabaseHelper.getInstance().deleteGpsFixes(getBaseContext(), fixIdStrings);
 	}
 	
 	/**
@@ -553,8 +543,8 @@ public class TransmittingService extends Service {
 	public enum APIConnectivity {
 		notReachable (0),
 		reachableTransmissionSuccess (1),
-		reachableTransmissionError(2),
-		noAttempt(4);
+		reachableTransmissionError (2),
+		noAttempt (4);
 		
 		private final int apiConnectivity;
 		

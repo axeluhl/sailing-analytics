@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import android.content.Context;
 import android.content.Intent;
 import android.test.ServiceTestCase;
 
@@ -16,8 +17,8 @@ import com.android.volley.Response.Listener;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TransmittingService;
-import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
-import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
+import com.sap.sailing.android.tracking.app.test.extensions.DatabaseHelperTestable;
+import com.sap.sailing.android.tracking.app.test.extensions.VolleyHelperTestable;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 public class TransmittingServiceTest extends ServiceTestCase<TransmittingService> {
@@ -25,8 +26,8 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 	static final String TAG = TransmittingServiceTest.class.getName();
 	final String eventId = "test123";
 	
-	private VolleyHelper volleyHelperSpy;
-	private DatabaseHelper databaseHelperMock;
+	private VolleyHelperTestable volleyHelperSpy;
+	private DatabaseHelperTestable databaseHelperMock;
 	
 	public TransmittingServiceTest() {
 		super(TransmittingService.class);
@@ -35,20 +36,21 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 	@Override
     protected void setUp() throws Exception {
         super.setUp();        
-        System.setProperty( "dexmaker.dexcache", getContext().getCacheDir().getPath() );
+        System.setProperty("dexmaker.dexcache", getContext().getCacheDir().toString());
         DatabaseTestHelper.deleteAllEventsFromDB(getContext());
         DatabaseTestHelper.deleteAllGpsFixesFromDB(getContext());
         
         if (volleyHelperSpy == null)
         {
-        	volleyHelperSpy = Mockito.spy(VolleyHelper.getInstance(getContext()));
-        	VolleyHelper.injectInstance(volleyHelperSpy);
+        	VolleyHelperTestable.injectInstance(null, null);
+        	volleyHelperSpy = Mockito.spy(new VolleyHelperTestable(getContext()));
+        	VolleyHelperTestable.injectInstance(getContext(), volleyHelperSpy);
         }
         
         if (databaseHelperMock == null)
         {
-        	databaseHelperMock = Mockito.mock(DatabaseHelper.class);
-        	DatabaseHelper.injectInstance(databaseHelperMock);
+        	databaseHelperMock = Mockito.mock(DatabaseHelperTestable.class);
+        	DatabaseHelperTestable.injectInstance(databaseHelperMock);
         }
     }
 	
@@ -84,11 +86,11 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		fix.host = "http://127.0.0.1";
 		list.add(fix);
 		
-		Mockito.when(databaseHelperMock.getUnsentFixes(Mockito.anyList(), Mockito.anyInt())).thenReturn(list);
+		Mockito.when(databaseHelperMock.getUnsentFixes(Mockito.any(Context.class), Mockito.anyList(), Mockito.anyInt())).thenReturn(list);
 		
 		startService();
 		
-		Thread.sleep(4000); 
+		Thread.sleep(3500); 
 
 		Mockito.verify(volleyHelperSpy, Mockito.times(1)).enqueueRequest(
 				urlCaptor.capture(), jsonObjectCaptor.capture(), 
@@ -104,8 +106,9 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		assertEquals(14, jsonFix.getLong("speedMperS"));
 		assertEquals(101.5, jsonFix.getDouble("bearingDeg"));
 		
-		assertEquals("http://127.0.0.1/api/v1/gps_fixes", urlCaptor.getValue());
+		assertEquals("http://127.0.0.1/sailingserver/api/v1/gps_fixes", urlCaptor.getValue());
 		shutdownService();
 	}
+
 
 }
