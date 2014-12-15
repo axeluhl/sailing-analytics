@@ -8,7 +8,6 @@ import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -151,9 +150,9 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                     throw new QRCodeURLCreationException("from cannt lie after to");
                 }
                 return baseUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
-                        + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + URL.encodeQueryString(leaderboardName) + "&"
-                        + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + URL.encodeQueryString(raceColumnName)
-                        + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + URL.encodeQueryString(fleetName)
+                        + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + DeviceMappingQRCodeWidget.encode(leaderboardName) + "&"
+                        + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + DeviceMappingQRCodeWidget.encode(raceColumnName)
+                        + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + DeviceMappingQRCodeWidget.encode(fleetName)
                         + "&" + mappedItemQueryParam + "&" + DeviceMappingConstants.FROM_MILLIS + "=" + fromMillis
                         + "&" + DeviceMappingConstants.TO_MILLIS + "=" + toMillis;
             }
