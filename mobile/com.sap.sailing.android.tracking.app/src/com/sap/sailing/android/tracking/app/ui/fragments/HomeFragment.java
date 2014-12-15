@@ -2,7 +2,6 @@ package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -14,19 +13,13 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.OperationApplicationException;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.provider.BaseColumns;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -49,17 +42,19 @@ import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneUUIDIdentifierImpl;
 
@@ -82,8 +77,6 @@ public class HomeFragment extends BaseFragment implements
 		super.onCreateView(inflater, container, savedInstanceState);
 
 		prefs = new AppPreferences(getActivity());
-
-		getActivity().getContentResolver();
 
 		View view = inflater.inflate(R.layout.fragment_home, container, false);
 
@@ -184,12 +177,9 @@ public class HomeFragment extends BaseFragment implements
 
 		String leaderboardNameFromQR;
 		try {
-			leaderboardNameFromQR = URLEncoder.encode(
-					uri.getQueryParameter(CheckinHelper.LEADERBOARD_NAME),
-					"UTF-8").replace("+", "%20");
+			leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(CheckinHelper.LEADERBOARD_NAME),"UTF-8").replace("+", "%20");
 		} catch (UnsupportedEncodingException e) {
-			ExLog.e(getActivity(), TAG, "Failed to encode leaderboard name: "
-					+ e.getMessage());
+			ExLog.e(getActivity(), TAG, "Failed to encode leaderboard name: " + e.getMessage());
 			leaderboardNameFromQR = "";
 		}
 
@@ -436,30 +426,6 @@ public class HomeFragment extends BaseFragment implements
 	}
 
 	/**
-	 * Return true if the combination of eventId, leaderboardName and
-	 * competitorId does not exist in the DB.
-	 * 
-	 * @param eventId
-	 * @param leaderboardName
-	 * @param competitorId
-	 * @return
-	 */
-	private boolean eventLeaderboardCompetitorCombnationAvailable(
-			String eventId, String leaderboardName, String competitorId) {
-
-		ContentResolver cr = getActivity().getContentResolver();
-		String sel = "leaderboards.leaderboard_name = \"" + leaderboardName
-				+ "\" AND competitors.competitor_id = \"" + competitorId
-				+ "\" AND events.event_id = \"" + eventId + "\"";
-
-		int count = cr.query(
-				AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI,
-				null, sel, null, null).getCount();
-
-		return count == 0;
-	}
-
-	/**
 	 * Perform a checkin request and launch RegattaAcitivity afterwards
 	 * 
 	 * TODO: Google Cloud Messaging token?
@@ -468,74 +434,21 @@ public class HomeFragment extends BaseFragment implements
 	 */
 	private void checkInWithAPIAndDisplayTrackingActivity(
 			CheckinData checkinData) {
-		if (eventLeaderboardCompetitorCombnationAvailable(checkinData.eventId,
-				checkinData.leaderboardName, checkinData.competitorId)) {
-
-			// inserting leaderboard first in order to get the ID.
-			// This should be atomic, but couldn't get withValueBackReference to
-			// work yet.
-
-			ContentResolver cr = getActivity().getContentResolver();
-
-			ContentValues clv = new ContentValues();
-			clv.put(Leaderboard.LEADERBOARD_NAME, checkinData.leaderboardName);
-			cr.insert(Leaderboard.CONTENT_URI, clv);
-
-			Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null, null);
-			long lastLeaderboardId = 0;
-
-			if (cur.moveToLast()) {
-				lastLeaderboardId = cur.getLong(cur
-						.getColumnIndex(BaseColumns._ID));
-			}
-
-			cur.close();
-
-			// now, with the leaderboard id, insert event and competitor
-			// todo: fix this so its atomic.
-
-			ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
-
-			ContentValues cev = new ContentValues();
-			cev.put(Event.EVENT_ID, checkinData.eventId);
-			cev.put(Event.EVENT_NAME, checkinData.eventName);
-			cev.put(Event.EVENT_DATE_START, Long.parseLong(checkinData.eventStartDateStr));
-			cev.put(Event.EVENT_DATE_END, Long.parseLong(checkinData.eventEndDateStr));
-			cev.put(Event.EVENT_SERVER, checkinData.eventServerUrl);
-			cev.put(Event.EVENT_IMAGE_URL, checkinData.eventFirstImageUrl);
-			cev.put(Event.EVENT_LEADERBOARD_FK, lastLeaderboardId);
-
-			opList.add(ContentProviderOperation.newInsert(Event.CONTENT_URI)
-					.withValues(cev).build());
-
-			ContentValues ccv = new ContentValues();
-
-			ccv.put(Competitor.COMPETITOR_COUNTRY_CODE,checkinData.competitorCountryCode);
-			ccv.put(Competitor.COMPETITOR_DISPLAY_NAME,checkinData.competitorName);
-			ccv.put(Competitor.COMPETITOR_ID, checkinData.competitorId);
-			ccv.put(Competitor.COMPETITOR_NATIONALITY,checkinData.competitorNationality);
-			ccv.put(Competitor.COMPETITOR_SAIL_ID, checkinData.competitorSailId);
-			ccv.put(Competitor.COMPETITOR_LEADERBOARD_FK, lastLeaderboardId);
-
-			opList.add(ContentProviderOperation
-					.newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
+		if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(
+				getActivity(), checkinData.eventId, checkinData.leaderboardName, checkinData.competitorId)) {
 
 			try {
-				cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
+				DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.getEvent(),
+						checkinData.getCompetitor(), checkinData.getLeaderboard());
 				adapter.notifyDataSetChanged();
-			} catch (RemoteException e1) {
-				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e1.getMessage());
-				displayDatabaseError();
-				return;
-			} catch (OperationApplicationException e1) {
-				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e1.getMessage());
+			} catch (GeneralDatabaseHelperException e) {
+				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
 				displayDatabaseError();
 				return;
 			}
 
 			if (BuildConfig.DEBUG) {
-				ExLog.i(getActivity(), TAG,
-						"Batch-insert of checkinData completed.");
+				ExLog.i(getActivity(), TAG, "Batch-insert of checkinData completed.");
 			}
 		} else {
 			ExLog.w(getActivity(), TAG,
@@ -695,6 +608,35 @@ public class HomeFragment extends BaseFragment implements
 		public String competitorNationality;
 		public String competitorCountryCode;
 		public String deviceUid;
+		
+		public EventInfo getEvent()
+		{
+			EventInfo event = new EventInfo();
+			event.name = eventName;
+			event.startMillis = Long.parseLong(eventStartDateStr);
+			event.endMillis = Long.parseLong(eventEndDateStr);
+			event.imageUrl = eventFirstImageUrl;
+			event.server = eventServerUrl;
+			return event;
+		}
+		
+		public LeaderboardInfo getLeaderboard()
+		{
+			LeaderboardInfo leaderboard = new LeaderboardInfo();
+			leaderboard.name = leaderboardName;
+			return leaderboard;
+		}
+		
+		public CompetitorInfo getCompetitor()
+		{
+			CompetitorInfo competitor = new CompetitorInfo();
+			competitor.name = competitorName;
+			competitor.id = competitorId;
+			competitor.sailId = competitorSailId;
+			competitor.nationality = competitorNationality;
+			competitor.countryCode = competitorCountryCode;
+			return competitor;
+		}
 	}
 
 	private class ClickListener implements OnClickListener {

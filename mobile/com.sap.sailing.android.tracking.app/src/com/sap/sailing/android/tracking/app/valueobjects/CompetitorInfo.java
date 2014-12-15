@@ -5,6 +5,7 @@ public class CompetitorInfo {
 	public String id;
 	public String name;
 	public String countryCode;
+	public String nationality;
 	public String sailId;
 	public int rowId; 
 			
