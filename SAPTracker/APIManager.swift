@@ -100,28 +100,29 @@ public class APIManager: NSObject {
     }
     
     /* Map a device to competitor. */
-    public func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushId: String!, fromMillis: Double!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    public func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushDeviceId: String!, fromMillis: Int64!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
         let urlString = baseUrlString + "/leaderboards/\(leaderBoardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/start"
         
         var body = [String: AnyObject]()
         body["competitorId"] = competitorId
+        body["deviceType"] = "ios"
         body["deviceUuid"] = deviceUuid
-        body["pushId"] = pushId
-        body["fromMillis"] = fromMillis
+        body["pushDeviceId"] = pushDeviceId
+        body["fromMillis"] = NSNumber(longLong: fromMillis)
         
         manager!.POST(urlString, parameters: body, success: success, failure: failure)
     }
     
     /* Disconnect a device from competitor. */
-    public func checkOut(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Double!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+    public func checkOut(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, toMillis: Int64!, success:(AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
         let urlString = baseUrlString + "/leaderboards/\(leaderBoardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/end"
         
         var body = [String: AnyObject]()
         body["competitorId"] = competitorId
         body["deviceUuid"] = deviceUuid
-        body["toMillis"] = toMillis
+        body["toMillis"] = NSNumber(longLong: toMillis)
         
         manager!.POST(urlString, parameters: body, success: success, failure: failure)
     }
@@ -142,7 +143,7 @@ public class APIManager: NSObject {
         }
         body["fixes"] = array
         
-        manager!.POST(urlString, parameters: array, success: success, failure: failure)
+        manager!.POST(urlString, parameters: body, success: success, failure: failure)
     }
     
 }

@@ -23,6 +23,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         BITHockeyManager.sharedHockeyManager().startManager()
         BITHockeyManager.sharedHockeyManager().authenticator.authenticateInstallation()
   
+        // set up connection logging for debug builds
+        #if DEBUG
+        AFNetworkActivityLogger.sharedLogger().startLogging()
+        AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelDebug
+        #endif
+        
         // initialize core data, migrate database if needed, or delete if migration needed but not possible
         DataManager.sharedManager
         

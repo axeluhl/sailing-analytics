@@ -54,3 +54,13 @@
 #define COCOAPODS_VERSION_MINOR_HockeySDK 6
 #define COCOAPODS_VERSION_PATCH_HockeySDK 2
 
+// Debug build configuration
+#ifdef DEBUG
+
+  // AFNetworkActivityLogger
+  #define COCOAPODS_POD_AVAILABLE_AFNetworkActivityLogger
+  #define COCOAPODS_VERSION_MAJOR_AFNetworkActivityLogger 2
+  #define COCOAPODS_VERSION_MINOR_AFNetworkActivityLogger 0
+  #define COCOAPODS_VERSION_PATCH_AFNetworkActivityLogger 3
+
+#endif

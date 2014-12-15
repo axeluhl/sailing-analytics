@@ -91,7 +91,7 @@ public class DataManager: NSObject {
     func latestLocations() -> [GPSFix] {
         let fetchRequest = NSFetchRequest()
         fetchRequest.entity = NSEntityDescription.entityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timeMillis", ascending: false)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
         fetchRequest.fetchLimit = APIManager.Constants.maxSendGPSFix
         var error: NSError? = nil
         let results = self.managedObjectContext!.executeFetchRequest(fetchRequest, error: &error)

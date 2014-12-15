@@ -14,4 +14,8 @@
 #import "HockeySDK.h"
 #import "Appearance.h"
 
+#if DEBUG
+#import "AFNetworkActivityLogger.h"
+#endif
+
 #endif

@@ -22,11 +22,11 @@
         <relationship name="leaderBoard" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="LeaderBoard" inverseName="event" inverseEntity="LeaderBoard" syncable="YES"/>
     </entity>
     <entity name="GPSFix" representedClassName="GPSFix" syncable="YES">
-        <attribute name="bearingDeg" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="latDeg" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="lonDeg" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="speedMperS" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="timeMillis" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="course" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="speed" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <relationship name="event" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Event" inverseName="gpsFixes" inverseEntity="Event" syncable="YES"/>
     </entity>
     <entity name="LeaderBoard" representedClassName="LeaderBoard" syncable="YES">
@@ -37,7 +37,7 @@
     <elements>
         <element name="Competitor" positionX="-9" positionY="81" width="128" height="150"/>
         <element name="Event" positionX="-63" positionY="27" width="128" height="193"/>
-        <element name="GPSFix" positionX="-63" positionY="-18" width="128" height="133"/>
+        <element name="GPSFix" positionX="-63" positionY="-18" width="128" height="135"/>
         <element name="LeaderBoard" positionX="-36" positionY="72" width="128" height="90"/>
     </elements>
 </model>

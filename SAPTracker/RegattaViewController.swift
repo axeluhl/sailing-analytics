@@ -259,7 +259,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 break
             default:
                 let now = NSDate()
-                let toMillis = round(now.timeIntervalSince1970 * 1000)
+                let toMillis = Int64(now.timeIntervalSince1970 * 1000)
                 APIManager.sharedManager.checkOut(DataManager.sharedManager.selectedEvent!.leaderBoard!.name,
                     competitorId: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.competitorId,
                     deviceUuid: DeviceUDIDManager.UDID,
