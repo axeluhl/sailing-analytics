@@ -19,6 +19,10 @@ class HeadingViewController: UIViewController {
         titleLabel.text = LocationManager.sharedManager.headingPreference == LocationManager.Heading.True.rawValue ? "True Heading" : "Magnetic Heading"
     }
     
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
     func newHeading(notification: NSNotification) {
         titleLabel.text = LocationManager.sharedManager.headingPreference == LocationManager.Heading.True.rawValue ? "True Heading" : "Magnetic Heading"
         

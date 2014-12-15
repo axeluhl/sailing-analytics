@@ -22,8 +22,12 @@ class GPSAccuracyView: UIView {
         setup()
     }
     
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
     private func setup() {
-        backgroundColor = UIColor.darkGrayColor()
+        backgroundColor = UIColor.grayColor()
         
         addSubview(barView)
         barView.frame = bounds
@@ -35,10 +39,11 @@ class GPSAccuracyView: UIView {
     }
 
     private func drawBar(horizontalAccuracy: Double) {
-        var height = 0.3
+        var height = 1.0
         var color = TrackingViewController.Color.Red
         if (horizontalAccuracy < 0) {
         } else if (horizontalAccuracy > 48) {
+            var height = 0.3
         } else if (horizontalAccuracy > 10) {
             height = 0.66
             color = TrackingViewController.Color.Orange
@@ -59,6 +64,6 @@ class GPSAccuracyView: UIView {
     
     
     func locationManagerFailed(notification: NSNotification) {
-        drawBar(0)
+        drawBar(-1.0)
     }
 }

@@ -19,6 +19,10 @@ class SpeedViewController: UIViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
     }
     
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
     func newLocation(notification: NSNotification) {
         let ms = notification.userInfo!["speed"] as Double
         let kn = ms * knPerMs
