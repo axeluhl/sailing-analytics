@@ -28,6 +28,8 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
+import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 
@@ -55,6 +57,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 		Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
 		startTrackingButton.setOnClickListener(this);
+		
+		Button showLeaderboardButton = (Button) view.findViewById(R.id.show_leaderboards_button);
+		showLeaderboardButton.setOnClickListener(this);
 
 		Button changePhotoButton = (Button) view.findViewById(R.id.change_photo_button);
 		changePhotoButton.setOnClickListener(this);
@@ -70,7 +75,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private void checkAndSwitchToThankYouScreenIfRegattaOver() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		long regattaEnd = regattaActivity.getEvent().endMillis;
+		long regattaEnd = regattaActivity.event.endMillis;
 
 		if (System.currentTimeMillis() > regattaEnd) {
 			switchToThankYouScreen();
@@ -84,7 +89,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		TextView textView = (TextView)getActivity().findViewById(R.id.regatta_starts_in);
 		
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		long regattaStart = regattaActivity.getEvent().startMillis;
+		long regattaStart = regattaActivity.event.startMillis;
 		
 		LinearLayout threeBoxesLayout = (LinearLayout) getActivity()
 				.findViewById(R.id.three_boxes_regatta_starts);
@@ -141,6 +146,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
+		case R.id.show_leaderboards_button:
+			startLeaderboardActivity();
+			break;
 		case R.id.start_tracking:
 			if (showingThankYouNote) {
 				RegattaActivity regattaActivity = (RegattaActivity) getActivity();
@@ -290,20 +298,29 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	    return bitmap;
 	}
 	
-
+	private void startLeaderboardActivity() {
+		RegattaActivity activity = (RegattaActivity)getActivity();
+		
+		Intent intent = new Intent(getActivity(), LeaderboardWebViewActivity.class);
+		intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_SERVER_URL, activity.event.server);
+		intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_EVENT_ID, activity.event.id);
+		intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_LEADERBOARD_NAME, activity.leaderboard.name);
+		
+		getActivity().startActivity(intent);
+	}
 
 	private void startTrackingActivity() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
 		intent.putExtra(
 				getString(R.string.tracking_activity_event_id_parameter),
-				regattaActivity.getEvent().id);
+				regattaActivity.event.id);
 		getActivity().startActivity(intent);
 	}
 
 	private void timerFired() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		updateCountdownTimer(regattaActivity.getEvent().startMillis);
+		updateCountdownTimer(regattaActivity.event.startMillis);
 	}
 
 	private void updateCountdownTimer(long startTime) {
