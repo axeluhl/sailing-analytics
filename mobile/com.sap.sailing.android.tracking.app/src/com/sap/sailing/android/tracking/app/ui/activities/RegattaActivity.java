@@ -31,7 +31,6 @@ import android.widget.TextView;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.google.android.gms.internal.fr;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
@@ -87,7 +86,6 @@ public class RegattaActivity extends BaseActivity {
         }
         
         replaceFragment(R.id.content_frame, new RegattaFragment());	
-        
     }
 
     @Override
@@ -151,21 +149,22 @@ public class RegattaActivity extends BaseActivity {
 		}
 		
 		getRegattaFragment().setChangePhotoButtonHidden(true);
+		ExLog.w(this, TAG, "Event Image URL: " + event.imageUrl);
 		
-		if (event.imageUrl != null)
+		ImageView imageView = (ImageView) findViewById(R.id.userImage);
+		Bitmap storedImage = getStoredImage(getLeaderboardImageFileName(leaderboard.name));
+		
+		if (storedImage == null)
 		{
-			ImageView imageView = (ImageView) findViewById(R.id.userImage);
-	        Bitmap storedImage = getStoredImage(getLeaderboardImageFileName(leaderboard.name));
-	        if (storedImage != null)
-	        {
-	        	imageView.setImageBitmap(storedImage);
-	        	userImageUpdated();
-	        }
-	        else
-	        {
-	        	new DownloadImageTask(imageView).execute(event.imageUrl);
-	        }
-			
+			if (event.imageUrl != null)
+			{
+				new DownloadImageTask(imageView).execute(event.imageUrl);
+			}
+		}
+		else
+		{
+			imageView.setImageBitmap(storedImage);
+			userImageUpdated();
 		}
 		
     	super.onResume();
@@ -250,6 +249,16 @@ public class RegattaActivity extends BaseActivity {
         return mediaFile;
     }
     
+	public void deleteImageFile(String fileName) {
+		File mediaStorageDir = getMediaStorageDir();
+
+		File mediaFile;
+		String mImageName = "MI_" + fileName + ".png";
+		mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
+
+		mediaFile.delete();
+	}
+    
     public File getMediaStorageDir() {
     	File mediaStorageDir;
 
@@ -333,6 +342,7 @@ public class RegattaActivity extends BaseActivity {
 					public void onResponse(JSONObject response) {
 						DatabaseHelper.getInstance().deleteRegattaFromDatabase(
 								RegattaActivity.this, event, competitor, leaderboard);
+						deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
 						dismissProgressDialog();
 						finish();
 					}
