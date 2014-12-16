@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -97,7 +99,15 @@ public class ProcessorFactory {
     }
 
     public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessor(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers, List<Function<?>> dimensionsToGroupBy) {
-        return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(dataType, executor, resultReceivers, dimensionsToGroupBy);
+        Collection<Pair<Function<?>, ParameterProvider>> dimensionsToGroupByWithNullParameterProvider = new ArrayList<>();
+        for (Function<?> dimension : dimensionsToGroupBy) {
+            dimensionsToGroupByWithNullParameterProvider.add(new Pair<Function<?>, ParameterProvider>(dimension, ParameterProvider.NULL));
+        }
+        return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(dataType, executor, resultReceivers, dimensionsToGroupByWithNullParameterProvider);
+    }
+
+    public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessorWithParameter(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers, List<Pair<Function<?>, ParameterProvider>> dimensionsToGroupByWithParameterProvider) {
+        return new ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>(dataType, executor, resultReceivers, dimensionsToGroupByWithParameterProvider);
     }
 
     /**

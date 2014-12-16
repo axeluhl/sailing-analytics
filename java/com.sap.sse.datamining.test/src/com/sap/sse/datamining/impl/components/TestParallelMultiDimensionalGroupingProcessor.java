@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -24,6 +25,8 @@ import com.sap.sse.datamining.test.util.components.NullProcessor;
 import com.sap.sse.datamining.test.util.components.Number;
 
 public class TestParallelMultiDimensionalGroupingProcessor {
+    
+    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
     
     private Processor<Number, GroupedDataEntry<Number>> processor;
     private Collection<Processor<GroupedDataEntry<Number>, ?>> receivers;
@@ -57,16 +60,16 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructionWithEmptyDimensions() {
-        Iterable<Function<?>> dimensions = new ArrayList<>();
-        new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, ConcurrencyTestsUtil.getExecutor(), receivers, dimensions);
+        List<Function<?>> dimensions = new ArrayList<>();
+        processorFactory.createGroupingProcessor(Number.class, receivers, dimensions);
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructionWithFunctionsInsteadOfDimensions() {
-        Collection<Function<?>> functions = new ArrayList<>();
+        List<Function<?>> functions = new ArrayList<>();
         Method method = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
         functions.add(FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(method));
-        new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, ConcurrencyTestsUtil.getExecutor(), receivers, functions);
+        processorFactory.createGroupingProcessor(Number.class, receivers, functions);
     }
 
     @Test
