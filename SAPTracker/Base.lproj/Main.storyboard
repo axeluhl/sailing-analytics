@@ -279,7 +279,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="D89-pe-zpv">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="profile_placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="D89-pe-zpv">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="154"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                 <constraints>
@@ -472,7 +472,7 @@
                                 <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P9e-ZM-HZP">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P9e-ZM-HZP">
                                 <color key="backgroundColor" red="0.93725490199999995" green="0.67843137249999996" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" id="jqD-cx-gQM"/>
@@ -752,7 +752,6 @@
                             <constraint firstItem="Z1d-5I-pbj" firstAttribute="top" secondItem="qL4-PH-8ve" secondAttribute="bottom" constant="8" symbolic="YES" id="pnF-1D-Rxo"/>
                             <constraint firstAttribute="trailing" secondItem="BFc-m8-XKV" secondAttribute="trailing" constant="16" id="r8t-UX-UKm"/>
                         </constraints>
-                        <variation key="heightClass=compact"/>
                     </view>
                     <navigationItem key="navigationItem" title="Tracking" id="qfB-FT-Ysz">
                         <barButtonItem key="rightBarButtonItem" image="settings" id="mAh-dw-JIF">
@@ -1247,6 +1246,7 @@
         <image name="DE.png" width="64" height="64"/>
         <image name="edit" width="33" height="33"/>
         <image name="home_bg" width="434" height="289"/>
+        <image name="profile_placeholder" width="360" height="256"/>
         <image name="scan_white" width="214" height="214"/>
         <image name="settings" width="22" height="22"/>
     </resources>
