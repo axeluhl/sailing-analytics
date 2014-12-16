@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
+import com.google.android.gms.internal.fr;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
@@ -103,10 +104,6 @@ public class RegattaActivity extends BaseActivity {
             ExLog.i(this, TAG, "Clicked SETTINGS.");
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
-//        case R.id.options_menu_info:
-//            ExLog.i(this, TAG, "Clicked INFO.");
-//            startActivity(new Intent(this, SystemInformationActivity.class));
-//            return true;
         case R.id.options_menu_checkout:
         	ExLog.i(this, TAG, "Clicked CHECKOUT.");
         	checkout();
@@ -351,6 +348,20 @@ public class RegattaActivity extends BaseActivity {
 				});
 
 		VolleyHelper.getInstance(this).addRequest(checkoutRequest);
+	}
+	
+	@Override
+	public void onBackPressed() {
+		RegattaFragment fragment = (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+
+		if (fragment.isShowingBigCheckoutButton())
+		{
+			//do nothing, user must checkout himself at this point.
+		}
+		else
+		{
+			super.onBackPressed();
+		}
 	}
 	
 	public EventInfo getEvent()

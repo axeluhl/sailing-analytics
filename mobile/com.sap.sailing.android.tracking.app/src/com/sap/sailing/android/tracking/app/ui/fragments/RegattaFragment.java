@@ -101,6 +101,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		}
 	}
 
+	public boolean isShowingBigCheckoutButton() {
+		return showingThankYouNote;
+	}
+	
 	private void switchToThankYouScreen() {
 		showingThankYouNote = true;
 
