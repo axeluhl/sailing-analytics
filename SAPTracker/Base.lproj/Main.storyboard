@@ -679,16 +679,26 @@
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Cached Fixes" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Ujw-jg-ilY">
                                 <rect key="frame" x="16" y="72" width="103" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="aFo-6u-YNo">
+                                        <variation key="heightClass=compact" constant="0.0"/>
+                                    </constraint>
+                                </constraints>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="dz3-w7-CCh">
                                 <rect key="frame" x="574" y="72" width="10" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="itl-Pi-yYx">
+                                        <variation key="heightClass=compact" constant="0.0"/>
+                                    </constraint>
+                                </constraints>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UcT-H2-Fxp">
+                            <containerView opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="UcT-H2-Fxp">
                                 <rect key="frame" x="0.0" y="136" width="600" height="400"/>
                                 <connections>
                                     <segue destination="rjH-vb-OUF" kind="embed" id="ln5-SR-WkO"/>
@@ -719,7 +729,9 @@
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="tJY-RR-vpe" secondAttribute="trailing" id="4KI-fl-gq3"/>
                             <constraint firstAttribute="trailingMargin" secondItem="dz3-w7-CCh" secondAttribute="trailing" id="5YC-rH-Z2d"/>
-                            <constraint firstItem="Ujw-jg-ilY" firstAttribute="top" secondItem="r6d-OU-cRI" secondAttribute="bottom" constant="8" symbolic="YES" id="76Y-1b-oFJ"/>
+                            <constraint firstItem="Ujw-jg-ilY" firstAttribute="top" secondItem="r6d-OU-cRI" secondAttribute="bottom" constant="8" symbolic="YES" id="76Y-1b-oFJ">
+                                <variation key="heightClass=compact" constant="0.0"/>
+                            </constraint>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="top" secondItem="Xww-rc-pOA" secondAttribute="bottom" constant="8" symbolic="YES" id="9el-UI-bzr"/>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="bottom" secondItem="nE0-bK-d8x" secondAttribute="top" id="C25-aA-8XZ"/>
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="top" secondItem="Z1d-5I-pbj" secondAttribute="bottom" constant="8" symbolic="YES" id="C3i-US-IRf"/>

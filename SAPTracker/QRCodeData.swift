@@ -25,8 +25,7 @@ public class QRCodeData {
     }
     
     public func parseString(urlString: String) -> Bool {
-        let urlStringEscaped = urlString.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
-        let url = NSURL(string: urlStringEscaped)
+        let url = NSURL(string: urlString)
         
         if (url == nil || url!.scheme == nil || url!.host == nil) {
             return false
