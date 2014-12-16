@@ -15,8 +15,11 @@ class LeaderBoardViewController: UIViewController, UIWebViewDelegate, UIAlertVie
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // TODO: create URL
-        webView!.loadRequest(NSURLRequest(URL: NSURL(string: "http://championsleague2014.sapsailing.com/gwt/Home.html#LeaderboardPlace:eventId=eb326f1b-81e8-468b-89cb-10131a8d8459&leaderboardName=Champions%20League%202014&showRaceDetails=true&showSettings=true")!))
+        let serverUrl = DataManager.sharedManager.selectedEvent!.serverUrl
+        let eventId = DataManager.sharedManager.selectedEvent!.eventId
+        let leaderBoardName = DataManager.sharedManager.selectedEvent!.leaderBoard!.name.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+        let url = "\(serverUrl)/gwt/Home.html#LeaderboardPlace:eventId=\(eventId)&leaderboardName=\(leaderBoardName)&showRaceDetails=true&showSettings=true"
+        webView!.loadRequest(NSURLRequest(URL: NSURL(string: url)!))
     }
     
     @IBAction func done(sender: AnyObject) {
