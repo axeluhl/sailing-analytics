@@ -235,6 +235,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 					{
 						ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
 					}
+				} finally {
+					((RegattaActivity)getActivity()).deleteFile(CAMERA_TEMP_FILE);
 				}
 			} else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
 				Uri selectedImage = data.getData();
