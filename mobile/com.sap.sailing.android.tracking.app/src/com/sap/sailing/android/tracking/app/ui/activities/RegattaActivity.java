@@ -47,9 +47,9 @@ public class RegattaActivity extends BaseActivity {
     private final static String TAG = RegattaActivity.class.getName();
     private final static String LEADERBOARD_IMAGE_FILENAME_PREFIX = "leaderboardImage_";
    
-    private EventInfo event;
-    private CompetitorInfo competitor;
-    private LeaderboardInfo leaderboard;
+    public EventInfo event;
+    public CompetitorInfo competitor;
+    public LeaderboardInfo leaderboard;
     
     
     @Override
@@ -372,10 +372,5 @@ public class RegattaActivity extends BaseActivity {
 		{
 			super.onBackPressed();
 		}
-	}
-	
-	public EventInfo getEvent()
-	{
-		return event;
 	}
 }
