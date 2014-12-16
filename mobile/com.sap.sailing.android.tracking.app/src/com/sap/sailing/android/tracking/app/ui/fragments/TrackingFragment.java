@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.android.gms.internal.mp;
+import com.google.android.gms.internal.mv;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
@@ -30,7 +32,6 @@ public class TrackingFragment extends BaseFragment {
 	static final String SIS_GPS_QUALITY = "instanceStateGpsQuality";
 	static final String SIS_GPS_ACCURACY = "instanceStateGpsAccuracy";
 	static final String SIS_GPS_UNSENT_FIXES = "instanceStateGpsUnsentFixes";
-	
 	
 	private AppPreferences prefs;
 	private long lastGPSQualityUpdate;
@@ -247,11 +248,8 @@ public class TrackingFragment extends BaseFragment {
 					{
 						unsentGpsFixesTextView.setText(String.valueOf(count));	
 					}
-					
 				}
 			});
 		}
 	}
-	
-	
 }
