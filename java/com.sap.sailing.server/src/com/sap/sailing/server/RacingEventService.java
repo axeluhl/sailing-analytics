@@ -62,6 +62,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -138,7 +139,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * <p>
      * 
      * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable
-     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop() stopped}.
+     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop(boolean) stopped}.
      * 
      * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
      * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
@@ -498,6 +499,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     WindStore getWindStore();
 
+    PolarDataService getPolarDataService();
+    
     GPSFixStore getGPSFixStore();
     
     RaceTracker getRaceTrackerById(Object id);

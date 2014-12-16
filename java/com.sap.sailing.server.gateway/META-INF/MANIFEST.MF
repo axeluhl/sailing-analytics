@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.sap.sailing.server.gateway
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sap.sailing.server,
+Import-Package: com.sap.sailing.polars,
+ com.sap.sailing.polars.regression,
+ com.sap.sailing.server,
  com.sap.sailing.server.operationaltransformation,
  com.sap.sailing.server.racelog.tracking,
  javax.ws.rs;version="1.1.1",

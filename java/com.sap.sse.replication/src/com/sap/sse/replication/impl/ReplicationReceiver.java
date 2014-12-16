@@ -284,7 +284,7 @@ public class ReplicationReceiver implements Runnable {
      *            the replicable to which to apply or for which to queue the operation
      */
     private synchronized <S, O extends OperationWithResult<S, ?>> void applyOrQueue(OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
-        if (suspended) {
+        if (isSuspended()) {
             queue(operation, replicable);
         } else {
             apply(operation, replicable);

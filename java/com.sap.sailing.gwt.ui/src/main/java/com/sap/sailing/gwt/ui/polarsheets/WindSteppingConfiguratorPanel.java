@@ -27,9 +27,9 @@ public class WindSteppingConfiguratorPanel extends HorizontalPanel {
 
     public WindSteppingConfiguratorPanel(WindSteppingWithMaxDistance windStepping) {
         setupPlusAndMinusButtons();
-        Integer[] levels = windStepping.getRawStepping();
+        Double[] levels = windStepping.getRawStepping();
         for (int i = 0; i < levels.length; i++) {
-            TextBox textBox = createSingleBox(levels[i]);
+            TextBox textBox = createSingleBox((int) Math.round(levels[i]));
             textBoxes.add(textBox);
         }
         updateTextBoxes();
@@ -69,12 +69,12 @@ public class WindSteppingConfiguratorPanel extends HorizontalPanel {
     }
 
     public WindSteppingWithMaxDistance getStepping(double maxDistance) {
-        List<Integer> levelList = new ArrayList<Integer>(); 
+        List<Double> levelList = new ArrayList<Double>(); 
         for (TextBox box : textBoxes) {
-            levelList.add(Integer.parseInt(box.getValue()));
+            levelList.add(new Double(Integer.parseInt(box.getValue())));
         }
         Collections.sort(levelList);
-        Integer[] levels = levelList.toArray(new Integer[levelList.size()]);
+        Double[] levels = levelList.toArray(new Double[levelList.size()]);
         return new WindSteppingWithMaxDistance(levels, maxDistance);
     }
     

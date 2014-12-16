@@ -967,6 +967,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String distanceToLine();
     String beatAngleTooltip();
     String beatAngle();
+    String showBoatClassChartsLabel();
+    String showDiagram();
     String runAutomaticallyTooltip();
     String rerunQueryAfterRefreshTooltip();
     String queryDefinitionProvider();
@@ -1111,4 +1113,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String serverReplies();
     String errorCommunicatingWithServer();
     String userManagement();
+    String filterBy();
+    String showXYDiagram();
+    String xyDiagram();
+    String boatSpeed();
+    String confidence();
 }

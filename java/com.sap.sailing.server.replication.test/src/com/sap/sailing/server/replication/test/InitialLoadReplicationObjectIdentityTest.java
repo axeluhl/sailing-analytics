@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.test;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -18,10 +20,16 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
@@ -33,15 +41,27 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -105,14 +125,39 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         assertTrue(master.getAllRegattas().iterator().hasNext());
         assertNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));
         
+        /* RaceDefinition and DynamicTrackedRace */
+        RaceDefinition masterRace = new RaceDefinitionImpl("Test Race", new CourseImpl("Test Course", Collections.<Waypoint>emptyList()),
+                masterRegatta.getBoatClass(), Collections.<Competitor>emptyList());
+        masterRegatta.addRace(masterRace);
+        DynamicTrackedRace masterTrackedRace = master.createTrackedRace(new RegattaNameAndRaceName(masterRegatta.getName(), masterRace.getName()),
+                master.getWindStore(), master.getGPSFixStore(), /* delayToLiveInMillis */ 3000,
+                /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 10000);
+        
         /* Leaderboard */
         final String leaderboardName = "Great Leaderboard";
         final int[] discardThresholds = new int[] { 17, 23 };
         CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint(), null);
         assertNull(master.getLeaderboardByName(leaderboardName));
-        master.apply(createTestLeaderboard);
+        FlexibleLeaderboard masterLeaderboard = master.apply(createTestLeaderboard);
         assertNotNull(master.getLeaderboardByName(leaderboardName));
         assertNull(replica.getLeaderboardByName(leaderboardName));
+        masterLeaderboard.addRace(masterTrackedRace, "R1", /* medalRace */ false);
+        RaceColumn masterR1 = masterLeaderboard.getRaceColumnByName("R1");
+        final RaceLog masterR1RaceLog = masterR1.getRaceLog(masterR1.getFleets().iterator().next());
+        assertNotNull(masterR1RaceLog);
+        final WindImpl masterWindFix = new WindImpl(new DegreePosition(12, 13), MillisecondsTimePoint.now(), 
+                new KnotSpeedWithBearingImpl(12.7, new DegreeBearingImpl(123)));
+        masterR1RaceLog.add(RaceLogEventFactoryImpl.INSTANCE.createWindFixEvent(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0),
+                /* passId */ 1, masterWindFix));
+        // assert that the wind fix shows up in the tracked race now because the tracked race has the DynamicTrackedRaceLogListener
+        // propagating the wind fix race log event into the wind track for source RACECOMMITTEE
+        WindTrack masterRCWindFixes = masterTrackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.RACECOMMITTEE));
+        masterRCWindFixes.lockForRead();
+        try {
+            assertEquals(masterWindFix, masterRCWindFixes.getRawFixes().iterator().next());
+        } finally {
+            masterRCWindFixes.unlockAfterRead();
+        }
 
         /* LeaderboardGroup */
         final String leaderBoardGroupName = "Great Leaderboard Group";
@@ -151,15 +196,43 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
 
         Event replicaEvent = replica.getEvent(eventId);
         assertNotNull(replicaEvent);
-        assertNotNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));
+        Regatta replicaRegatta = replica.getRegatta(masterRegatta.getRegattaIdentifier());
+        assertNotNull(replicaRegatta);
         LeaderboardGroup replicaLeaderboardGroup = replica.getLeaderboardGroupByName(leaderBoardGroupName);
         assertNotNull(replicaLeaderboardGroup);
         assertNotNull(replica.getLeaderboardByName(leaderboardName));
         assertTrue(replica.getAllRegattas().iterator().hasNext());
         assertSame(replicaLeaderboardGroup, replicaEvent.getLeaderboardGroups().iterator().next());
-        //System.out.println("InitialLoadReplicationObjectIdentityTest.testInitialLoad - replica.getAllMediaTracks: " + replica.getAllMediaTracks());
-        
         assertThat(replica.getAllMediaTracks().size(), is(3));
+        Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+        RaceColumn replicaR1 = replicaLeaderboard.getRaceColumnByName("R1");
+        TrackedRace replicaTrackedRace = replicaR1.getTrackedRace(replicaR1.getFleets().iterator().next());
+        assertNotNull(replicaTrackedRace);
+        RaceLog replicaR1RaceLog = replicaR1.getRaceLog(replicaR1.getFleets().iterator().next());
+        replicaR1RaceLog.lockForRead();
+        try {
+            RaceLogEvent replicaRaceLogEvent = replicaR1RaceLog.getRawFixes().iterator().next();
+            assertTrue(replicaRaceLogEvent instanceof RaceLogWindFixEvent);
+        } finally {
+            replicaR1RaceLog.unlockAfterRead();
+        }
+        // now (see bug 2506) add a wind fix event to the race log and check that it arrived at the wind track
+        final WindImpl replicaWindFix = new WindImpl(new DegreePosition(14, 15), MillisecondsTimePoint.now(), 
+                new KnotSpeedWithBearingImpl(22.9, new DegreeBearingImpl(155)));
+        replicaR1RaceLog.add(RaceLogEventFactoryImpl.INSTANCE.createWindFixEvent(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0),
+                /* passId */ 1, replicaWindFix));
+        // assert that the wind fix shows up in the tracked race now because the tracked race has the DynamicTrackedRaceLogListener
+        // propagating the wind fix race log event into the wind track for source RACECOMMITTEE
+        WindTrack replicaRCWindFixes = replicaTrackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.RACECOMMITTEE));
+        replicaRCWindFixes.lockForRead();
+        try {
+            Iterator<Wind> replicaRCWindFixesIter = replicaRCWindFixes.getRawFixes().iterator();
+            replicaRCWindFixesIter.next();
+            assertEquals(replicaWindFix, replicaRCWindFixesIter.next());
+        } finally {
+            replicaRCWindFixes.unlockAfterRead();
+        }
+
     }
 
     @Test

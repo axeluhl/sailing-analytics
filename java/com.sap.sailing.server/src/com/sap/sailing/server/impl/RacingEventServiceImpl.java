@@ -25,9 +25,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -86,6 +89,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -135,8 +139,11 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.polars.PolarDataService;
+import com.sap.sailing.polars.factory.PolarDataServiceFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
@@ -330,6 +337,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final AbstractLogEventAuthor raceLogEventAuthorForServer = new LogEventAuthorImpl(
             RacingEventService.class.getName(), 0);
 
+    private final PolarDataService polarDataService;
+
     /**
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
      * unpredictable fashion
@@ -351,6 +360,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private ReplicationMasterDescriptor replicatingFromMaster;
     
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
+    
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster =  ThreadLocal.withInitial(() -> false);
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
@@ -471,6 +482,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
+        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+        // TODO find out how many executors we have on server side and how to manage them
+        Executor polarExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
+        /* maximumPoolSize */THREAD_POOL_SIZE,
+        /* keepAliveTime */60, TimeUnit.SECONDS,
+        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        polarDataService = PolarDataServiceFactory.createStandardPolarDataService(polarExecutor);
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaLibrary = new MediaLibrary();
@@ -499,6 +517,21 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
+    }
+
+    @Override
+    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
+        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
+        this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+    }
+
+    @Override
+    public PolarDataService getPolarDataService() {
+        return polarDataService;
     }
 
     @Override
@@ -1317,6 +1350,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * race. When a tracked race is removed, the {@link TrackedRaceReplicator} that was added as listener to that
      * tracked race is removed again.
      * 
+     * A {@link PolarFixCacheUpdater} is added to every race so that polar fixes are aggregated when new GPS fixes
+     * arrive.
+     * 
      * @author Axel Uhl (d043530)
      * 
      */
@@ -1325,8 +1361,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         private final Map<TrackedRace, TrackedRaceReplicator> trackedRaceReplicators;
 
+        private final Map<TrackedRace, PolarFixCacheUpdater> polarFixCacheUpdaters;
+
         public RaceAdditionListener() {
             this.trackedRaceReplicators = new HashMap<TrackedRace, TrackedRaceReplicator>();
+            this.polarFixCacheUpdaters = new HashMap<TrackedRace, PolarFixCacheUpdater>();
         }
 
         @Override
@@ -1334,6 +1373,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TrackedRaceReplicator trackedRaceReplicator = trackedRaceReplicators.remove(trackedRace);
             if (trackedRaceReplicator != null) {
                 trackedRace.removeListener(trackedRaceReplicator);
+            }
+            PolarFixCacheUpdater polarFixCacheUpdater = polarFixCacheUpdaters.remove(trackedRace);
+            if (polarFixCacheUpdater != null) {
+                trackedRace.removeListener(polarFixCacheUpdater);
             }
         }
 
@@ -1355,7 +1398,26 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */true, true);
+
+            PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace);
+            polarFixCacheUpdaters.put(trackedRace, polarFixCacheUpdater);
+            trackedRace.addListener(polarFixCacheUpdater);
         }
+    }
+
+    private class PolarFixCacheUpdater extends AbstractRaceChangeListener {
+
+        private final TrackedRace race;
+
+        public PolarFixCacheUpdater(TrackedRace race) {
+            this.race = race;
+        }
+
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+            polarDataService.competitorPositionChanged(fix, item, race);
+        }
+
     }
 
     private class TrackedRaceReplicator implements RaceChangeListener {
@@ -1497,7 +1559,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         stopTrackingWind(regatta, race);
                     }
                 }
-                raceTracker.stop();
+                raceTracker.stop(/* preemptive */ false);
                 final Object trackerId = raceTracker.getID();
                 final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
                 try {
@@ -1551,7 +1613,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * The tracker will initially try to connect to the tracking infrastructure to obtain basic race master data. If
      * this fails after some timeout, to avoid garbage and lingering threads, the task scheduled by this method will
      * check after the timeout expires if race master data was successfully received. If so, the tracker continues
-     * normally. Otherwise, the tracker is shut down orderly by calling {@link RaceTracker#stop() stopping}.
+     * normally. Otherwise, the tracker is shut down orderly by calling {@link RaceTracker#stop(boolean) stopping}.
      * 
      * @return the scheduled task, in case the caller wants to {@link ScheduledFuture#cancel(boolean) cancel} it, e.g.,
      *         when the tracker is stopped or has successfully received the race
@@ -1571,7 +1633,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         if (trackersForRegatta != null) {
                             trackersForRegatta.remove(tracker);
                         }
-                        tracker.stop();
+                        tracker.stop(/* preemptive */ true);
                         final Object trackerId = tracker.getID();
                         final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
                         try {
@@ -1603,7 +1665,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 RaceTracker raceTracker = trackerIter.next();
                 if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
                     logger.info("Found tracker to stop for races " + raceTracker.getRaces());
-                    raceTracker.stop();
+                    raceTracker.stop(/* preemptive */ false);
                     trackerIter.remove();
                     final Object trackerId = raceTracker.getID();
                     final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
@@ -1782,7 +1844,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     }
                     if (!foundReachableRace) {
                         // firstly stop the tracker
-                        raceTracker.stop();
+                        raceTracker.stop(/* preemptive */ true);
                         // remove it from the raceTrackers by Regatta
                         trackerIter.remove();
                         final Object trackerId = raceTracker.getID();
@@ -1862,11 +1924,34 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 replicate(new TrackRegatta(regatta.getRegattaIdentifier()));
                 regattaTrackingCache.put(regatta, result);
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
+                addRaceTrackingFinishedListenerForPolarFixCache(result);
             }
             return result;
         } finally {
             LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
         }
+    }
+
+    private void addRaceTrackingFinishedListenerForPolarFixCache(DynamicTrackedRegatta result) {
+        RaceListener raceListenerForPolarFixCacheUpdate = new RaceListener() {
+            @Override
+            public void raceRemoved(TrackedRace trackedRace) {
+                // TODO remove fixes from polar fix cache
+            }
+
+            @Override
+            public void raceAdded(final TrackedRace trackedRace) {
+                trackedRace.addListener(new AbstractRaceChangeListener() {
+                    @Override
+                    public void statusChanged(TrackedRaceStatus newStatus) {
+                        if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+                            polarDataService.newRaceFinishedTracking(trackedRace);
+                        }
+                    }
+                });
+            }
+        };
+        result.addRaceListener(raceListenerForPolarFixCacheUpdate);
     }
 
     @Override
@@ -2238,6 +2323,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (leaderboard instanceof LeaderboardGroupMetaLeaderboard) {
                 ((LeaderboardGroupMetaLeaderboard) leaderboard)
                         .registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
+            } else if (leaderboard instanceof FlexibleLeaderboard) {
+                // and re-establish the RaceLogReplicator as listener on FlexibleLeaderboard objects
+                leaderboard.addRaceColumnListener(raceLogReplicator);
             }
         }
 
@@ -2276,6 +2364,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Regatta regatta : regattasByName.values()) {
             RegattaImpl regattaImpl = (RegattaImpl) regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
+            regattaImpl.addRaceColumnListener(raceLogReplicator);
         }
         logger.info(logoutput.toString());
     }
@@ -2293,8 +2382,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         if (raceTrackersByRegatta != null && !raceTrackersByRegatta.isEmpty()) {
             for (DynamicTrackedRegatta regatta : regattaTrackingCache.values()) {
-                for (RaceTracker tracker : raceTrackersByRegatta.get(regatta)) {
-                    tracker.stop();
+                final Set<RaceTracker> trackers = raceTrackersByRegatta.get(regatta.getRegatta());
+                if (trackers != null) {
+                    for (RaceTracker tracker : trackers) {
+                        tracker.stop(/* preemptive */ true);
+                    }
                 }
             }
         }

@@ -1,13 +1,28 @@
 package com.sap.sailing.domain.common.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 
 public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSettings {
     
     public static PolarSheetGenerationSettings createStandardPolarSettings() {
-        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
-        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
-        return new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.1, true, true, 2, 0.05, true, windStepping,
+        Double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
+        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.5);
+        return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
+                false);
+    }
+    
+    public static PolarSheetGenerationSettings createBackendPolarSettings() {
+        List<Double> levelList = new ArrayList<Double>();
+        for (double levelValue = 0.5; levelValue < 35; levelValue = levelValue + 0.5) {
+            levelList.add(levelValue);
+        }
+        Double[] levels = levelList.toArray(new Double[levelList.size()]);
+        
+        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 0.5);
+        return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
                 false);
     }
 
@@ -107,5 +122,86 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     public boolean splitByWindgauges() {
         return splitByWindGauges;
     }
+
+    @Override
+    public boolean areDefault() {
+        return createStandardPolarSettings().equals(this);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        long temp;
+        temp = Double.doubleToLongBits(minimumConfidenceMeasure);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + ((minimumDataCountPerAngle == null) ? 0 : minimumDataCountPerAngle.hashCode());
+        result = prime * result + ((minimumDataCountPerGraph == null) ? 0 : minimumDataCountPerGraph.hashCode());
+        temp = Double.doubleToLongBits(minimumWindConfidence);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + ((numberOfHistogramColumns == null) ? 0 : numberOfHistogramColumns.hashCode());
+        temp = Double.doubleToLongBits(outlierDetectionNeighboorhoodRadius);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(outlierMinimumNeighboorhoodPct);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + (shouldRemoveOutliers ? 1231 : 1237);
+        result = prime * result + (splitByWindGauges ? 1231 : 1237);
+        result = prime * result + (useOnlyEstimationForWindDirection ? 1231 : 1237);
+        result = prime * result + (useOnlyWindGaugesForWindSpeed ? 1231 : 1237);
+        result = prime * result + ((windStepping == null) ? 0 : windStepping.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PolarSheetGenerationSettingsImpl other = (PolarSheetGenerationSettingsImpl) obj;
+        if (Double.doubleToLongBits(minimumConfidenceMeasure) != Double
+                .doubleToLongBits(other.minimumConfidenceMeasure))
+            return false;
+        if (minimumDataCountPerAngle == null) {
+            if (other.minimumDataCountPerAngle != null)
+                return false;
+        } else if (!minimumDataCountPerAngle.equals(other.minimumDataCountPerAngle))
+            return false;
+        if (minimumDataCountPerGraph == null) {
+            if (other.minimumDataCountPerGraph != null)
+                return false;
+        } else if (!minimumDataCountPerGraph.equals(other.minimumDataCountPerGraph))
+            return false;
+        if (Double.doubleToLongBits(minimumWindConfidence) != Double.doubleToLongBits(other.minimumWindConfidence))
+            return false;
+        if (numberOfHistogramColumns == null) {
+            if (other.numberOfHistogramColumns != null)
+                return false;
+        } else if (!numberOfHistogramColumns.equals(other.numberOfHistogramColumns))
+            return false;
+        if (Double.doubleToLongBits(outlierDetectionNeighboorhoodRadius) != Double
+                .doubleToLongBits(other.outlierDetectionNeighboorhoodRadius))
+            return false;
+        if (Double.doubleToLongBits(outlierMinimumNeighboorhoodPct) != Double
+                .doubleToLongBits(other.outlierMinimumNeighboorhoodPct))
+            return false;
+        if (shouldRemoveOutliers != other.shouldRemoveOutliers)
+            return false;
+        if (splitByWindGauges != other.splitByWindGauges)
+            return false;
+        if (useOnlyEstimationForWindDirection != other.useOnlyEstimationForWindDirection)
+            return false;
+        if (useOnlyWindGaugesForWindSpeed != other.useOnlyWindGaugesForWindSpeed)
+            return false;
+        if (windStepping == null) {
+            if (other.windStepping != null)
+                return false;
+        } else if (!windStepping.equals(other.windStepping))
+            return false;
+        return true;
+    }
+
 
 }

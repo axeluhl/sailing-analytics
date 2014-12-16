@@ -147,7 +147,7 @@ public class CreateAndTrackWithRaceLogTest {
         testSize(race.getTrack(comp1), 5);
 
         //stop tracking, then no more fixes arrive at race
-        service.getRaceTrackerById(raceLog.getId()).stop();
+        service.getRaceTrackerById(raceLog.getId()).stop(/* preemptive */ false);
         gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(8), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
         testSize(race.getTrack(comp1), 5);
     }

@@ -139,12 +139,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
         splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, rightComponent, Direction.CENTER, 0);
 
         // add additional toggle buttons panel that currently only contains the video button
-        List<Pair<Button, Component<?>>> additionalVerticalButtons = new ArrayList<Pair<Button, Component<?>>>();
-        additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaSelectionButton,
-                mediaPlayerManagerComponent));
+        List<Pair<Button, String>> additionalVerticalButtons = new ArrayList<Pair<Button, String>>();
+        additionalVerticalButtons.add(new Pair<Button, String>(mediaSelectionButton,
+                mediaPlayerManagerComponent.getDependentCssClassName()));
         if (/* TODO check for correct role; was: user != null */ true) {
-            additionalVerticalButtons.add(new Pair<Button, Component<?>>(mediaManagementButton,
-                    mediaPlayerManagerComponent));
+            additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
+                    "managemedia"));
         }
 
         // ensure that toggle buttons are positioned right

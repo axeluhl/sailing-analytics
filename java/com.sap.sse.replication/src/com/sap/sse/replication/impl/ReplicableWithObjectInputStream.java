@@ -65,15 +65,20 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
 
     @Override
     default void initiallyFillFrom(InputStream is) throws IOException, ClassNotFoundException, InterruptedException {
-        final ObjectInputStream objectInputStream = createObjectInputStreamResolvingAgainstCache(is);
-        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        assert !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(); // no nested receiving of initial load
+        setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(true);
         try {
-            initiallyFillFromInternal(objectInputStream);
+            final ObjectInputStream objectInputStream = createObjectInputStreamResolvingAgainstCache(is);
+            ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            try {
+                initiallyFillFromInternal(objectInputStream);
+            } finally {
+                Thread.currentThread().setContextClassLoader(oldContextClassloader);
+            }
         } finally {
-            Thread.currentThread().setContextClassLoader(oldContextClassloader);
+            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
         }
-        
     }
     
     /**
@@ -103,7 +108,9 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     default <T> void replicate(O operation) {
         @SuppressWarnings("unchecked")
         final OperationWithResult<S, T> castOperation = (OperationWithResult<S, T>) operation;
-        if (getMasterDescriptor() != null) {
+        // if this is a replica and this replicable is not currently in the process of handling replication data (either an operation
+        // or the initial load) coming from the master, send the operation back to the master
+        if (getMasterDescriptor() != null && !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()) {
             try {
                 sendReplicaInitiatedOperationToMaster(castOperation);
             } catch (IOException e) {
@@ -216,6 +223,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     default <T> T applyReplicated(OperationWithResult<S, T> operation) {
         OperationWithResult<S, T> reso = (OperationWithResult<S, T>) operation;
         try {
+            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(true);
             @SuppressWarnings("unchecked")
             S replicable = (S) this;
             T result = reso.internalApplyTo(replicable);
@@ -226,6 +234,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             }
             return result;
         } catch (Exception e) {
+            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
             logger.log(Level.SEVERE, "apply", e);
             throw new RuntimeException(e);
         }

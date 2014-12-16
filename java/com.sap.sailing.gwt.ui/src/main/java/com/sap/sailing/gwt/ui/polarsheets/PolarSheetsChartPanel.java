@@ -42,10 +42,13 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     private PolarSheetGenerationSettings settings;
     
     private final Map<String,PolarSheetsData> polarSheetsDataMap;
+    
+    private final AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel;
 
-    public PolarSheetsChartPanel(StringMessages stringMessages) {
+    public PolarSheetsChartPanel(StringMessages stringMessages, AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel) {
         super(Unit.PCT);
         this.stringMessages = stringMessages;
+        this.angleOverDataSizeHistogramPanel = angleOverDataSizeHistogramPanel;
         polarSheetsDataMap = new HashMap<String, PolarSheetsData>();
         setSize("100%", "100%");
         chart = createPolarSheetChart();
@@ -90,13 +93,12 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
      * @param windSpeedLevel The id of the windspeed level in the windspeed steppings
      * @param windSpeed The actual windspeed
      */
-    private void createSeriesForWindspeed(String name, int windSpeedLevel, int windSpeed) {
+    private void createSeriesForWindspeed(String name, int windSpeedLevel, String seriesName) {
         Series[] seriesPerWindSpeed = seriesMap.get(name);
         Number[] forEachDeg = initializeDataForNewSeries();
         seriesPerWindSpeed[windSpeedLevel] = chart.createSeries().setPoints(forEachDeg);
-        String actualSeriesName = name + "-" + windSpeed;
-        seriesPerWindSpeed[windSpeedLevel].setName(actualSeriesName);
-        nameForSeries.put(seriesPerWindSpeed[windSpeedLevel],actualSeriesName);
+        seriesPerWindSpeed[windSpeedLevel].setName(seriesName);
+        nameForSeries.put(seriesPerWindSpeed[windSpeedLevel],seriesName);
         chart.addSeries(seriesPerWindSpeed[windSpeedLevel]);
     }
 
@@ -117,14 +119,16 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         if (seriesMap.containsKey(seriesId)) {
             for (int i = 0; i < stepCount; i++) {
                 if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i))) {
+                    String actualSeriesName = seriesId + "-" + result.getStepping().getRawStepping()[i];
                     if (seriesMap.get(seriesId)[i] == null) {
-                        createSeriesForWindspeed(seriesId, i, result.getStepping().getRawStepping()[i]);
+                        createSeriesForWindspeed(seriesId, i, actualSeriesName);
                     }
                     Series series = seriesMap.get(seriesId)[i];
-                    series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
+                    //series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
                     Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result, i);
                     if (points != null) {
                         series.setPoints(points);
+                        angleOverDataSizeHistogramPanel.addData(result.getHistogramDataMap().get(i), seriesId, actualSeriesName);
                     }
                 }
             }
@@ -154,14 +158,16 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         Point[] points = new Point[360];
         List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngleForWindspeed(windspeed));
         Integer max = Collections.max(dataCountList);
-        if (max <= 0) {
+        if (max < settings.getMinimumDataCountPerAngle()) {
             return null;
         }
         for (int i = 0; i < 360; i++) {
             if (result.getHistogramDataMap().get(windspeed) == null
                     || result.getHistogramDataMap().get(windspeed).get(i) == null
                     || result.getHistogramDataMap().get(windspeed).get(i).getConfidenceMeasure() < settings
-                            .getMinimumConfidenceMeasure()) {
+                            .getMinimumConfidenceMeasure()
+                    || result.getHistogramDataMap().get(windspeed).get(i).getDataCount() < settings
+                            .getMinimumDataCountPerAngle()) {
                 points[i] = new Point(0);
                 continue;
             }
@@ -203,6 +209,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
             }
             seriesMap.remove(seriesId);
             polarSheetsDataMap.remove(seriesId);
+            angleOverDataSizeHistogramPanel.removeSeries(seriesId);
         }
     }
 
@@ -213,6 +220,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         chart.removeAllSeries();
         seriesMap.clear();
         polarSheetsDataMap.clear();
+        angleOverDataSizeHistogramPanel.clear();
     }
 
     /**

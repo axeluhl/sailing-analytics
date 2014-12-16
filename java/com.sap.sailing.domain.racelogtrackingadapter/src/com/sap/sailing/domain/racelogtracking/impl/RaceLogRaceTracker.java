@@ -115,7 +115,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     }
 
     @Override
-    public void stop() {
+    public void stop(boolean preemptive) {
         // mark passing calculator is automatically stopped, when the race status is set to {@link TrackedRaceStatusEnum#FINISHED}
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 100));
 
