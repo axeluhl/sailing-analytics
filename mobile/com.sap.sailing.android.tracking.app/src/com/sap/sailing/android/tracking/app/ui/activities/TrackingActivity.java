@@ -14,9 +14,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.widget.Toolbar;
-import android.view.MotionEvent;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
@@ -52,6 +50,9 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
 	private final static String TAG = TrackingActivity.class.getName();
 	private final static String SIS_TRACKING_FRAGMENT = "savedInstanceTrackingFragment";
+	private final static String SIS_LAST_VIEWPAGER_ITEM = "instanceStateLastViewPagerItem";
+	private final static String SIS_LAST_SPEED_TEXT = "instanceStateLastSpeedText";
+	private final static String SIS_LAST_COMPASS_TEXT = "instanceStateLastCompassText";
 
 	private ViewPager mPager;
 	private ScreenSlidePagerAdapter mPagerAdapter;
@@ -59,9 +60,20 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	private String eventId;
 	private AppPreferences prefs;
 
-	private TrackingFragment trackingFragment;
-	
+	private TrackingFragment trackingFragment;	
 	private TimerRunnable timer;
+	
+	private int lastViewPagerItem;
+	
+	/**
+	 * This isn't nice. The callbacks for fragments inside a 
+	 * view pager are unreliable, but I want the values
+	 * to be displayed immediately after device rotation.
+	 * Thus they are cached here and the fragments can pick
+	 * them up.
+	 */
+	public String lastSpeedIndicatorText = "";
+	public String lastCompassIndicatorText = "";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -101,12 +113,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		}
 		mPager.setAdapter(mPagerAdapter);
-		mPager.setOffscreenPageLimit(3);
+		mPager.setOffscreenPageLimit(0);
 
-		// ok, here be dragons.
-		// however, I haven't found out how the ViewPager retains and dismisses fragments, so I check for every case.
-		// The easy way (if savedInstanceState != null) takeFromBundle(); doesn't work, since only some fragments are
-		// saved to the bundle it seems.
 		if (savedInstanceState != null) {
 			Fragment tFragment = getSupportFragmentManager().getFragment(savedInstanceState, SIS_TRACKING_FRAGMENT);
 			if (tFragment != null) {
@@ -114,6 +122,10 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			} else {
 				trackingFragment = new TrackingFragment();
 			}
+			
+			lastViewPagerItem = savedInstanceState.getInt(SIS_LAST_VIEWPAGER_ITEM);
+			lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT);
+			lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT);
 		} else {
 			trackingFragment = new TrackingFragment();
 		}
@@ -125,6 +137,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
 			@Override
 			public void onPageSelected(int arg0) {
+				lastViewPagerItem = arg0;
 			}
 
 			@Override
@@ -141,22 +154,16 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	}
 
 	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		super.onWindowFocusChanged(hasFocus);
-		// HudFragment hudFragment = (HudFragment)
-		// getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
-		// hudFragment.layoutOverlay();
-		//
-		// hudFragment.setSpeedOverGround(0);
-		// hudFragment.setHeading(0);
-	}
-
-	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
+		
+		outState.putInt(SIS_LAST_VIEWPAGER_ITEM, lastViewPagerItem);
+		outState.putString(SIS_LAST_SPEED_TEXT, lastSpeedIndicatorText);
+		outState.putString(SIS_LAST_COMPASS_TEXT, lastCompassIndicatorText);
+		
 		if (trackingFragment.isAdded()) {
 			getSupportFragmentManager().putFragment(outState, SIS_TRACKING_FRAGMENT, trackingFragment);
-		}
+		}	
 	}
 
 	@Override
@@ -219,7 +226,9 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		{
 			mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		}
+
 		mPager.setAdapter(mPagerAdapter);
+		mPager.setCurrentItem(lastViewPagerItem);
 	}
 
 	@Override
@@ -366,14 +375,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		public int getCount() {
 			return 3;
 		}
-		
-//		public StopTrackingButtonFragment getStopTrackingButtonFragment() {
-//			if (stbFragment != null && stbFragment.isAdded())
-//			{
-//				return stbFragment;
-//			}
-//			else return null;
-//		}
 		
 		public CompassFragment getCompassFragment() {
 			if (cFragment != null && cFragment.isAdded())
