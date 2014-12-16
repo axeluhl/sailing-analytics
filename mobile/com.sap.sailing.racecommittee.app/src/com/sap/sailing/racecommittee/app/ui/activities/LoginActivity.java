@@ -29,6 +29,7 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentif
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
@@ -70,48 +71,30 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             setSupportActionBar(toolbar);
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
-
+        
+        UUID courseUUID = preferences.getCourseUUID();
+        if ( courseUUID != new UUID(0,0) ){
+        	mSelectedCourseAreaUUID = courseUUID;
+        }
+        
         // on first create add event list fragment
         if (savedInstanceState == null) {
             ExLog.i(this, TAG, "Seems to be first start. Creating event fragment.");
             addEventListFragment();
         }
         
-        UUID courseUUID = preferences.getCourseUUID();
-        if ( courseUUID != new UUID(0,0) ){
-        	mSelectedCourseAreaUUID = courseUUID;
-        }
         Serializable eventId = preferences.getEventID();
         if ( eventId != null ){
         	mSelectedEvent = eventId;
-        	
+        	addCourseAreaListFragment(eventId);
         }
+        
 
-        new AutoUpdater(this).notifyAfterUpdate();
         
+        // sets up the global configuration and adds it to the preferences
+        setupDataManager(mSelectedEvent);
         
-        if ( preferences.isSetUp() ){
-        	
-        	// IST JETZT IN ON RESUME
-        	
-        	//setupDataManager(eventId);
-            //showCourseAreaListFragment(eventId);
-        	//selectCourseArea(mSelectedCourseAreaUUID);
-//        	setupDataManager(eventId);
-//        	
-//        	Bundle args = new Bundle();
-//            args.putSerializable(AppConstants.EventIdTag, eventId);
-//            CourseAreaListFragment fragment = new CourseAreaListFragment();
-//            fragment.setArguments(args);
-//        	fragment.setupLoader();
-//        	
-//            ExLog.i(LoginActivity.this, TAG,
-//                    "mSelectedEvent : " + mSelectedEvent);
-//    		Intent message = new Intent(LoginActivity.this, RacingActivity.class);
-//            message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID );
-//            message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
-//            fadeActivity(message);
-        }
+        new AutoUpdater(this).notifyAfterUpdate();        
     }
     @Override
     public void onResume() {
@@ -123,22 +106,17 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             GooglePlayServicesUtil.getErrorDialog(resultCode, this, RQS_GooglePlayServices).show();
         }
         
-        
-        // HIER 
-        if ( mSelectedEvent != null && preferences.isSetUp() ){
-        	OnlineDataManager.create(this);
-        	setupDataManager(mSelectedEvent);
-        	Handler handler = new Handler();
-        	handler.postDelayed(new Runnable() {
-
-        	    @Override
-        	    public void run() {
-        	    	showCourseAreaListFragment(mSelectedEvent);
-        	    }
-
-        	}, 5000); // 5000ms delay
-        	//
-        }
+        if (  mSelectedEvent != null && preferences.isSetUp() ){
+//        	Handler handler = new Handler();
+//        	handler.postDelayed(new Runnable() {
+//
+//        	    @Override
+//        	    public void run() {
+//        	    	showCourseAreaListFragment(mSelectedEvent);
+//        	    }
+//
+//        	}, 5000); // 5000ms delay
+        } 
     }
     
     // oben links
@@ -182,7 +160,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         progressDialog.setIndeterminate(true);
         progressDialog.show();
     	
-        ReadonlyDataManager dataManager = OnlineDataManager.create(LoginActivity.this);
+        ReadonlyDataManager dataManager = DataManager.create(LoginActivity.this);
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(
                 getApplicationContext()).getDeviceIdentifier());
 
@@ -250,7 +228,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.login_view_right_container, fragment, CourseAreaListFragmentTag);
-        transaction.commitAllowingStateLoss();
+        transaction.commit();
         ExLog.i(this, "LoginActivity", "CourseFragment created.");
     }
 

@@ -24,8 +24,6 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
@@ -34,8 +32,6 @@ import com.sap.sse.common.Named;
 public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>> {
     
     //private static String TAG = NamedListFragment.class.getName();
-    
-
 
 	private ItemSelectedListener<T> listener;
     private NamedArrayAdapter<T> listAdapter;
@@ -46,32 +42,27 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     
     protected ArrayList<T> namedList;
 
-    protected abstract ItemSelectedListener<T> attachListener(Activity activity);
+    protected void addHeader() {
+    	txt_header.setText(getHeaderText());
+    	txt_header.setVisibility(View.VISIBLE);
+    }
 
-    protected abstract String getHeaderText();
+    protected abstract ItemSelectedListener<T> attachListener(Activity activity);
 
     protected NamedArrayAdapter<T> createAdapter(Context context, ArrayList<T> items) {
         return new NamedArrayAdapter<T>(context, items);
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        this.listener = attachListener(activity);
-    }
-        
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
-        ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
-        parent.addView(v, 1);
-        txt_header = (TextView) parent.findViewById(R.id.txt_listHeader);
-        return parent;
-    }
-
-
-
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
+        
+    protected abstract String getHeaderText();
+
+
+
+    private void loadItems() {
+        setListShown(false);
+        setupLoader();
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -98,21 +89,21 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		outState.putInt("position", mSelectedIndex);
-		super.onSaveInstanceState(outState);
-	}
-    
-    
-    private void loadItems() {
-        setListShown(false);
-        setupLoader();
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        this.listener = attachListener(activity);
     }
     
-    public void setupLoader(){
-    	getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
+        parent.addView(v, 1);
+        txt_header = (TextView) parent.findViewById(R.id.txt_listHeader);
+        return parent;
     }
-
+    
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
@@ -128,11 +119,38 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         listener.itemSelected(this, item);
     }
 
-    protected void addHeader() {
-    	txt_header.setText(getHeaderText());
-    	txt_header.setVisibility(View.VISIBLE);
+    @Override
+    public void onLoadFailed(Exception reason) {
+        setListShown(true);
+        namedList.clear();
+        listAdapter.notifyDataSetChanged();
+        
+        showProgressBar(false);
+
+        String message = reason.getMessage();
+        if (message == null) {
+            message = reason.toString();
+        }
+        showLoadFailedDialog(message);
     }
 
+    @Override
+    public void onLoadSucceded(Collection<T> data, boolean isCached) {
+        setListShown(true);
+        namedList.clear();
+        namedList.addAll(data);
+        Collections.sort(namedList, new NaturalNamedComparator());
+        listAdapter.notifyDataSetChanged();
+
+        showProgressBar(false);
+    }
+
+    @Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putInt("position", mSelectedIndex);
+		super.onSaveInstanceState(outState);
+	}
+    
     private void setStyleClicked(View v){
     	// reset last styles:
     	if ( lastSelected != null ){
@@ -159,38 +177,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     	
     	lastSelected = v;
     }
-    
-    @Override
-    public void onLoadSucceded(Collection<T> data, boolean isCached) {
-        setListShown(true);
-        namedList.clear();
-        namedList.addAll(data);
-        Collections.sort(namedList, new NaturalNamedComparator());
-        listAdapter.notifyDataSetChanged();
 
-        showProgressBar(false);
-    }
-
-    @Override
-    public void onLoadFailed(Exception reason) {
-        setListShown(true);
-        namedList.clear();
-        listAdapter.notifyDataSetChanged();
-        
-        showProgressBar(false);
-
-        String message = reason.getMessage();
-        if (message == null) {
-            message = reason.toString();
-        }
-        showLoadFailedDialog(message);
-    }
-
-    private void showProgressBar(boolean visible) {
-        Activity activity = getActivity();
-        if (activity != null) {
-            activity.setProgressBarIndeterminateVisibility(visible);
-        }
+    public void setupLoader(){
+    	getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
     }
 
     private void showLoadFailedDialog(String message) {
@@ -200,5 +189,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         // We cannot use DialogFragment#show here because we need to commit the transaction
         // allowing a state loss, because we are effectively in Loader#onLoadFinished()
         manager.beginTransaction().add(dialog, "failedDialog").commitAllowingStateLoss();
+    }
+
+    private void showProgressBar(boolean visible) {
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.setProgressBarIndeterminateVisibility(visible);
+        }
     }
 }

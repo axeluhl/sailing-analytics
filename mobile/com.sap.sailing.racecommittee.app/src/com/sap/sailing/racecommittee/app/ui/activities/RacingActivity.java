@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.tracking.Wind;
@@ -273,6 +274,21 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 .commit();
 
         navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        
+        
+        // CODE TO DEBUG
+        
+        ExLog.i(this, this.getClass().toString(), "STARTING WELCOME FRAGMENT eventcount: " +dataManager.getDataStore().getEvents().size());
+        
+        EventBase e = dataManager.getDataStore().getEvent(eventId);
+        if ( e == null ){
+        	ExLog.e(this, TAG, "Noooo the event is null :/");
+        }
+        
+        // /CODE TO DEBUG
+        
+        
+        
         String race = getResources().getString(R.string.nav_header)
                 .replace("#AREA#", dataManager.getDataStore().getCourseArea(courseAreaId).getName())
                 .replace("#EVENT#", dataManager.getDataStore().getEvent(eventId).getName())
