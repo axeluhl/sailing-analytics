@@ -58,6 +58,8 @@ public class PolarDataMinerTest {
         PolarDataMiner miner = new PolarDataMiner();
 
         BoatClass mockedBoatClass = mock(BoatClass.class);
+        
+        when(mockedBoatClass.getName()).thenReturn("49ER");
 
         GPSFixMoving fix1_1 = createMockedFix(13, 00, 54.431952, 10.186767, 45, 10.5);
         GPSFixMoving fix1_2 = createMockedFix(13, 30, 54.485034, 10.538303, 44.8, 10.6);

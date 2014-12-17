@@ -127,6 +127,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -3906,10 +3907,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<String> getBoatClassNamesWithPolarSheetsAvailable() {
-        Set<BoatClass> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
+        Set<BoatClassMasterdata> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
         List<String> names = new ArrayList<String>();
-        for (BoatClass boatClass : boatClasses) {
-            names.add(boatClass.getName());
+        for (BoatClassMasterdata boatClass : boatClasses) {
+            names.add(boatClass.getDisplayName());
         }
         return names;
     }

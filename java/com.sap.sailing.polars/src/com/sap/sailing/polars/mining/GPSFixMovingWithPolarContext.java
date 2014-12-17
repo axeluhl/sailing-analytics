@@ -3,10 +3,10 @@ package com.sap.sailing.polars.mining;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -93,8 +93,8 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     }
 
     @Override
-    public BoatClass getBoatClass() {
-        return race.getRace().getBoatClass();
+    public BoatClassMasterdata getBoatClassMasterData() {
+        return BoatClassMasterdata.resolveBoatClass(race.getRace().getBoatClass().getName());
     }
     
     private Set<WindSource> collectWindSourcesToIgnoreForBearing() {
