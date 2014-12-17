@@ -11,22 +11,20 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 
 public class SpeedFragment extends BaseFragment {
 
-	private String TAG = SpeedFragment.class.getName(); 
-	private final String SIS_SPEED_TEXTIVEW = "SpeedFragmentSpeedTextView"; 
+	//private String TAG = SpeedFragment.class.getName();
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
-		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_speed, container, false);		
+		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_speed, container, false);
 		return view;
 	}
 
-	public void setSpeed(float speedInMetersPerSecond)
-	{
-		if (isAdded())
-		{
+	public void setSpeed(float speedInMetersPerSecond) {
+		if (isAdded()) {
 			float speedInKnots = speedInMetersPerSecond * 1.9438444924574f;
 
 			NumberFormat df = DecimalFormat.getInstance();
@@ -34,30 +32,29 @@ public class SpeedFragment extends BaseFragment {
 			df.setMaximumFractionDigits(2);
 			df.setRoundingMode(RoundingMode.HALF_UP);
 			String formattedSpeed = df.format(speedInKnots);
-			
+
 			TextView speedText = (TextView) getActivity().findViewById(R.id.speed_text_view);
 			speedText.setText(formattedSpeed + "kn");
+			TrackingActivity activity = (TrackingActivity) getActivity();
+
+			if (activity != null) {
+				activity.lastSpeedIndicatorText = speedText.getText().toString();
+			}
 		}
 	}
-	
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		TextView speedText = (TextView)getActivity().findViewById(R.id.speed_text_view);
-		if (savedInstanceState != null)
-		{
-			speedText.setText(savedInstanceState.getString(SIS_SPEED_TEXTIVEW));
+
+		TextView speedText = (TextView) getActivity().findViewById(R.id.speed_text_view);
+
+		TrackingActivity activity = (TrackingActivity) getActivity();
+		if (activity != null) {
+			speedText.setText(activity.lastSpeedIndicatorText);
+		} else {
+			speedText.setText("");
 		}
-		else
-		{
-			speedText.setText("--kn");
-		}
-	}
-	
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		TextView speedText = (TextView)getActivity().findViewById(R.id.speed_text_view);
-		outState.putString(SIS_SPEED_TEXTIVEW, speedText.getText().toString());
+
 	}
 }

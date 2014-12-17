@@ -53,6 +53,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.activities.LeaderboardWebViewActivity"
+            android:label="@string/title_activity_webview"
+            android:screenOrientation="unspecified" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activities.LeaderboardWebViewActivity" />
+        </activity>
+        <activity
             android:name=".ui.activities.RegattaActivity"
             android:label="@string/title_activity_regatta"
             android:screenOrientation="unspecified" >

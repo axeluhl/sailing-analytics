@@ -3,16 +3,20 @@ package com.sap.sailing.android.tracking.app.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.provider.BaseColumns;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
@@ -195,18 +199,19 @@ public class DatabaseHelper {
 		return result;
 	}
 	
-	public EventInfo getEventInfo(Context context, String eventId) {
+	public EventInfo getEventInfo(Context context, String eventId) {		
 		EventInfo event = new EventInfo();
 		event.id = eventId;
 		
 		Cursor cursor = context.getContentResolver().query(Event.CONTENT_URI,
-				null, "event_id = \"" + eventId + "\"", null, null);
+				null, "event_id = \"" + eventId + "\"", null, null);		
 		
 		if (cursor.moveToFirst()) {
 			event.name = cursor.getString(cursor.getColumnIndex(Event.EVENT_NAME));
 			event.imageUrl = cursor.getString(cursor.getColumnIndex(Event.EVENT_IMAGE_URL));
 			event.startMillis = cursor.getLong(cursor.getColumnIndex(Event.EVENT_DATE_START));
 			event.endMillis = cursor.getLong(cursor.getColumnIndex(Event.EVENT_DATE_END));
+			event.server = cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER));	
 			event.rowId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
 	    }
 		
@@ -277,4 +282,107 @@ public class DatabaseHelper {
 			ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d3);
 		}
 	}
+	
+	/**
+	 * Attempt to check in to a race.
+	 * 
+	 * @param context
+	 * @param event
+	 * @param competitor
+	 * @param leaderboard
+	 * @return success or failure
+	 * @throws GeneralDatabaseHelperException 
+	 * @throws OperationApplicationException
+	 * @throws RemoteException
+	 */
+	public void storeCheckinRow(Context context, EventInfo event, CompetitorInfo competitor,
+			LeaderboardInfo leaderboard) throws GeneralDatabaseHelperException {
+
+		// inserting leaderboard first in order to get the ID.
+		// This should be atomic, but couldn't get withValueBackReference to
+		// work yet.
+
+		ContentResolver cr = context.getContentResolver();
+
+		ContentValues clv = new ContentValues();
+		clv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
+		cr.insert(Leaderboard.CONTENT_URI, clv);
+
+		Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null, null);
+		long lastLeaderboardId = 0;
+
+		if (cur.moveToLast()) {
+			lastLeaderboardId = cur.getLong(cur.getColumnIndex(BaseColumns._ID));
+		}
+
+		cur.close();
+
+		// now, with the leaderboard id, insert event and competitor
+		// todo: fix this so its atomic.
+
+		ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
+
+		ContentValues cev = new ContentValues();
+		cev.put(Event.EVENT_ID, event.id);
+		cev.put(Event.EVENT_NAME, event.name);
+		cev.put(Event.EVENT_DATE_START, event.startMillis);
+		cev.put(Event.EVENT_DATE_END, event.endMillis);
+		cev.put(Event.EVENT_SERVER, event.server);
+		cev.put(Event.EVENT_IMAGE_URL, event.imageUrl);
+		cev.put(Event.EVENT_LEADERBOARD_FK, lastLeaderboardId);
+
+		opList.add(ContentProviderOperation.newInsert(Event.CONTENT_URI).withValues(cev).build());
+
+		ContentValues ccv = new ContentValues();
+
+		ccv.put(Competitor.COMPETITOR_COUNTRY_CODE, competitor.countryCode);
+		ccv.put(Competitor.COMPETITOR_DISPLAY_NAME, competitor.name);
+		ccv.put(Competitor.COMPETITOR_ID, competitor.id);
+		ccv.put(Competitor.COMPETITOR_NATIONALITY, competitor.nationality);
+		ccv.put(Competitor.COMPETITOR_SAIL_ID, competitor.sailId);
+		ccv.put(Competitor.COMPETITOR_LEADERBOARD_FK, lastLeaderboardId);
+
+		opList.add(ContentProviderOperation.newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
+
+		try {
+			cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
+		} catch (RemoteException e) {
+			throw new GeneralDatabaseHelperException(e.getMessage());
+		} catch (OperationApplicationException e) {
+			throw new GeneralDatabaseHelperException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Return true if the combination of eventId, leaderboardName and
+	 * competitorId does not exist in the DB.
+	 * 
+	 * @param eventId
+	 * @param leaderboardName
+	 * @param competitorId
+	 * @return
+	 */
+	public boolean eventLeaderboardCompetitorCombnationAvailable(Context context,
+			String eventId, String leaderboardName, String competitorId) {
+
+		ContentResolver cr = context.getContentResolver();
+		String sel = "leaderboards.leaderboard_name = \"" + leaderboardName
+				+ "\" AND competitors.competitor_id = \"" + competitorId
+				+ "\" AND events.event_id = \"" + eventId + "\"";
+
+		int count = cr.query(
+				AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI,
+				null, sel, null, null).getCount();
+
+		return count == 0;
+	}
+	
+	public class GeneralDatabaseHelperException extends Exception {
+		private static final long serialVersionUID = 4333494334720305541L;
+
+		public GeneralDatabaseHelperException(String message) {
+	        super(message);
+		}
+	}
+	
 }

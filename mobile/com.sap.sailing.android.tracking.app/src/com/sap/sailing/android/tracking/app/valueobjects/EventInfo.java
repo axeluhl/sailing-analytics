@@ -9,6 +9,7 @@ public class EventInfo {
 	public long startMillis;
 	public long endMillis;
 	public int rowId;
+	public String server;
 
 	@Override
 	public String toString() {
@@ -16,6 +17,6 @@ public class EventInfo {
 				+ leaderboardName + ", eventImageUrl: " + imageUrl
 				+ ", eventStartMillis: " + startMillis
 				+ ", eventEndMillis: " + endMillis + ", eventRowId: "
-				+ rowId;
+				+ rowId + ", server: " + server;
 	}
 }
