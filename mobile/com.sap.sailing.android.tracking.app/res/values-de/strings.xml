@@ -21,6 +21,7 @@
     <string name="scan_race_barcode">Scan Race Barcode</string>
     <string name="gps_fix_interval">GPS Fix Interval</string>
     <string name="title_activity_regatta">Regatta</string>
+    <string name="title_activity_webview">Leaderboard</string>
     <string name="title_activity_start">GPS Tracker einstellen</string>
     <string name="title_activity_tracking">Tracking</string>
     <string name="hello_world">Hello wörld!</string>
@@ -81,4 +82,5 @@
 	<string name="heading">Kurs</string>
 	<string name="sog">SOG</string>
 	<string name="none">Keine</string>
+	<string name="show_leaderboard">Leaderboard</string>
 </resources>

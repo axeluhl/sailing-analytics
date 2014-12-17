@@ -151,11 +151,11 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		GPSQuality quality = GPSQuality.noSignal;
 
 		if (gpsQualityListener != null) {
-			if (gpsAccurracy > 163) {
+			if (gpsAccurracy > 48) {
 				quality = GPSQuality.poor;
-			} else if (gpsAccurracy > 48) {
+			} else if (gpsAccurracy > 10) {
 				quality = GPSQuality.good;
-			} else if (gpsAccurracy < 48) {
+			} else if (gpsAccurracy <= 10) {
 				quality = GPSQuality.great;
 			}
 

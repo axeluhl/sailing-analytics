@@ -287,19 +287,41 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:background="@color/white_transparent" />
-
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
-            android:id="@+id/start_tracking"
+        
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_margin="10dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:background="@drawable/rounded_btn_green"
-            android:padding="10dp"
-            android:text="@string/start_tracking"
-            android:textAllCaps="true"
-            android:textStyle="bold" />
+            android:layout_below="@id/white_bar"
+            android:orientation="horizontal" >
+
+            <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+                android:id="@+id/show_leaderboards_button"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_margin="10dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:background="@drawable/rounded_btn_yellow"
+                android:padding="10dp"
+                android:text="@string/show_leaderboard"
+                android:textAllCaps="true"
+                android:layout_weight="0.50"
+                android:textStyle="bold" />
+
+            <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+                android:id="@+id/start_tracking"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_margin="10dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:layout_weight="0.50"
+                android:background="@drawable/rounded_btn_green"
+                android:padding="10dp"
+                android:text="@string/start_tracking"
+                android:textAllCaps="true"
+                android:textStyle="bold" />
+        </LinearLayout>
     </RelativeLayout>
 
     <RelativeLayout
