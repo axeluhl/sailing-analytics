@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,6 +45,7 @@ public class RegattaActivity extends BaseActivity {
 
     private final static String TAG = RegattaActivity.class.getName();
     private final static String LEADERBOARD_IMAGE_FILENAME_PREFIX = "leaderboardImage_";
+    private final static String FLAG_IMAGE_FILENAME_PREFIX = "flagImage_";
    
     public EventInfo event;
     public CompetitorInfo competitor;
@@ -126,6 +126,15 @@ public class RegattaActivity extends BaseActivity {
 			}
 		});
     }
+	
+//	private void flagImageUpdated() {
+//		runOnUiThread(new Runnable() {
+//			@Override
+//			public void run() {
+//				ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);				
+//			}
+//		});
+//    }
 
     @Override
     protected void onResume() {
@@ -135,21 +144,21 @@ public class RegattaActivity extends BaseActivity {
         TextView sailIdTextView = (TextView)findViewById(R.id.sail_id);
         sailIdTextView.setText(competitor.sailId);
         
-        ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
+//        ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
         //String flagStr = String.format("%s.png", countryCode);
-        String uri = "@drawable/" + competitor.countryCode.toLowerCase(Locale.getDefault());
-        
-        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-        
-		try {
-			Drawable res = getResources().getDrawable(imageResource);
-			flagImageView.setImageDrawable(res);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//        String uri = "@drawable/" + competitor.countryCode.toLowerCase(Locale.getDefault());
+//        
+//        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+//        
+//		try {
+//			Drawable res = getResources().getDrawable(imageResource);
+//			flagImageView.setImageDrawable(res);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		
 		getRegattaFragment().setChangePhotoButtonHidden(true);
-		ExLog.w(this, TAG, "Event Image URL: " + event.imageUrl);
+		//ExLog.w(this, TAG, "Event Image URL: " + event.imageUrl);
 		
 		ImageView imageView = (ImageView) findViewById(R.id.userImage);
 		Bitmap storedImage = getStoredImage(getLeaderboardImageFileName(leaderboard.name));
@@ -158,13 +167,24 @@ public class RegattaActivity extends BaseActivity {
 		{
 			if (event.imageUrl != null)
 			{
-				new DownloadImageTask(imageView).execute(event.imageUrl);
+				new DownloadLeaderboardImageTask(imageView).execute(event.imageUrl);
 			}
 		}
 		else
 		{
 			imageView.setImageBitmap(storedImage);
 			userImageUpdated();
+		}
+		
+		ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
+		Bitmap storedFlagImage = getStoredImage(getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault())));
+		
+		if (storedFlagImage == null) {
+			String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
+					competitor.countryCode.toLowerCase(Locale.getDefault()));
+			new DownloadFlagImageTask(flagImageView, competitor.countryCode).execute(urlStr);
+		} else {
+			flagImageView.setImageBitmap(storedFlagImage);
 		}
 		
     	super.onResume();
@@ -201,6 +221,7 @@ public class RegattaActivity extends BaseActivity {
             return;
         } 
         try {
+        	System.out.println("*** STORE IMAGE: " + image +", FILENAME: " + fileName);
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();
@@ -281,19 +302,21 @@ public class RegattaActivity extends BaseActivity {
         return mediaStorageDir;
     }
     
-	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+    
+	private class DownloadLeaderboardImageTask extends AsyncTask<String, Void, Bitmap> {
 		ImageView bmImage;
-
-		public DownloadImageTask(ImageView bmImage) {
+		String downloadUrl;
+		
+		public DownloadLeaderboardImageTask(ImageView bmImage) {
 			this.bmImage = bmImage;
 		}
 
 		protected Bitmap doInBackground(String... urls) {
-			String urldisplay = urls[0];
+			downloadUrl = urls[0];
 			Bitmap mIcon11 = null;
 			
 			try {
-				InputStream in = new java.net.URL(urldisplay).openStream();
+				InputStream in = new java.net.URL(downloadUrl).openStream();
 				mIcon11 = BitmapFactory.decodeStream(in);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -302,14 +325,58 @@ public class RegattaActivity extends BaseActivity {
 		}
 
 		protected void onPostExecute(Bitmap result) {
-			bmImage.setImageBitmap(result);
-			storeImage(result, getLeaderboardImageFileName(leaderboard.name));
-			userImageUpdated();
+			if (result != null) {
+				bmImage.setImageBitmap(result);
+				storeImage(result, getLeaderboardImageFileName(leaderboard.name));
+				userImageUpdated();
+			} else {
+				ExLog.e(RegattaActivity.this, TAG, "Failed to download leaderboard image at url " + downloadUrl);
+			}
+		}
+	}
+	
+	private class DownloadFlagImageTask extends AsyncTask<String, Void, Bitmap> {
+		ImageView bmImage;
+		String countryCode;
+		String downloadUrl;
+
+		public DownloadFlagImageTask(ImageView bmImage, String countryCode) {
+			this.bmImage = bmImage;
+			this.countryCode = countryCode;
+		}
+
+		protected Bitmap doInBackground(String... urls) {
+			downloadUrl = urls[0];
+			Bitmap mIcon11 = null;
+			
+			System.out.println("URL DISPLAY: " + downloadUrl);
+			
+			try {
+				InputStream in = new java.net.URL(downloadUrl).openStream();
+				mIcon11 = BitmapFactory.decodeStream(in);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return mIcon11;
+		}
+
+		protected void onPostExecute(Bitmap result) {
+			System.out.println("RESULT: " + result);
+			if (result != null) {
+				bmImage.setImageBitmap(result);
+				storeImage(result, getFlagImageFileName(countryCode));
+			} else {
+				ExLog.e(RegattaActivity.this, TAG, "Failed to download flag image at url " + downloadUrl);
+			}
 		}
 	}
 	
 	private String getLeaderboardImageFileName(String leaderboardName) {
 		return LEADERBOARD_IMAGE_FILENAME_PREFIX + leaderboardName;
+	}
+	
+	private String getFlagImageFileName(String countryCode) {
+		return FLAG_IMAGE_FILENAME_PREFIX + countryCode;
 	}
 	
 	/**
