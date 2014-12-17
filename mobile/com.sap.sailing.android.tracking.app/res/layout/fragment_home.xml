@@ -40,6 +40,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
         android:layout_above="@+id/noQrCode"
         android:background="@drawable/rounded_btn_yellow"
         android:textAllCaps="true"
@@ -65,7 +66,9 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/scanQr"
         android:layout_alignParentTop="true"
-        >
+        android:divider="@android:color/white"
+  		android:dividerHeight="1dp" >
+
     </ListView>
 
 </RelativeLayout>
