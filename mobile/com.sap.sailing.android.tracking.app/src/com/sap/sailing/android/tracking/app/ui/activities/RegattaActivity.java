@@ -45,10 +45,11 @@ import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
 public class RegattaActivity extends BaseActivity {
 
     private final static String TAG = RegattaActivity.class.getName();
+    private final static String LEADERBOARD_IMAGE_FILENAME_PREFIX = "leaderboardImage_";
    
-    private EventInfo event;
-    private CompetitorInfo competitor;
-    private LeaderboardInfo leaderboard;
+    public EventInfo event;
+    public CompetitorInfo competitor;
+    public LeaderboardInfo leaderboard;
     
     
     @Override
@@ -85,7 +86,6 @@ public class RegattaActivity extends BaseActivity {
         }
         
         replaceFragment(R.id.content_frame, new RegattaFragment());	
-        
     }
 
     @Override
@@ -102,10 +102,6 @@ public class RegattaActivity extends BaseActivity {
             ExLog.i(this, TAG, "Clicked SETTINGS.");
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
-//        case R.id.options_menu_info:
-//            ExLog.i(this, TAG, "Clicked INFO.");
-//            startActivity(new Intent(this, SystemInformationActivity.class));
-//            return true;
         case R.id.options_menu_checkout:
         	ExLog.i(this, TAG, "Clicked CHECKOUT.");
         	checkout();
@@ -153,21 +149,22 @@ public class RegattaActivity extends BaseActivity {
 		}
 		
 		getRegattaFragment().setChangePhotoButtonHidden(true);
+		ExLog.w(this, TAG, "Event Image URL: " + event.imageUrl);
 		
-		if (event.imageUrl != null)
+		ImageView imageView = (ImageView) findViewById(R.id.userImage);
+		Bitmap storedImage = getStoredImage(getLeaderboardImageFileName(leaderboard.name));
+		
+		if (storedImage == null)
 		{
-			ImageView imageView = (ImageView) findViewById(R.id.userImage);
-	        Bitmap storedImage = getStoredImage();
-	        if (storedImage != null)
-	        {
-	        	imageView.setImageBitmap(storedImage);
-	        	userImageUpdated();
-	        }
-	        else
-	        {
-	        	new DownloadImageTask(imageView).execute(event.imageUrl);
-	        }
-			
+			if (event.imageUrl != null)
+			{
+				new DownloadImageTask(imageView).execute(event.imageUrl);
+			}
+		}
+		else
+		{
+			imageView.setImageBitmap(storedImage);
+			userImageUpdated();
 		}
 		
     	super.onResume();
@@ -177,9 +174,9 @@ public class RegattaActivity extends BaseActivity {
      * 
      * @param bitmap
      */
-    public void updatePictureChosenByUser(final Bitmap bitmap)
+    public void updateLeaderboardPictureChosenByUser(final Bitmap bitmap)
     {
-    	storeImage(bitmap);
+    	storeImage(bitmap, getLeaderboardImageFileName(leaderboard.name));
     	
     	runOnUiThread(new Runnable() {
 			@Override
@@ -196,8 +193,8 @@ public class RegattaActivity extends BaseActivity {
      * Store image for quicker retrieval later.
      * @param images
      */
-    private void storeImage(Bitmap image) {
-        File pictureFile = getMediaFile();
+    private void storeImage(Bitmap image, String fileName) {
+        File pictureFile = getImageFile(fileName);
         if (pictureFile == null) {
             Log.d(TAG,
                     "Error creating media file, check storage permissions: ");// e.getMessage());
@@ -215,12 +212,12 @@ public class RegattaActivity extends BaseActivity {
     }
     
     /**
-     * Get leaderboard image if there's one saved.
+     * Get stored image if there's one saved.
      * @return
      */
-    private Bitmap getStoredImage()
+    private Bitmap getStoredImage(String fileName)
     {
-    	File pictureFile = getMediaFile();
+    	File pictureFile = getImageFile(fileName);
     	if (pictureFile == null)
     	{
     		return null;
@@ -228,21 +225,44 @@ public class RegattaActivity extends BaseActivity {
     	
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-		Bitmap image = BitmapFactory.decodeFile(pictureFile.getAbsolutePath(),
-				options);
+		Bitmap image = BitmapFactory.decodeFile(pictureFile.getAbsolutePath(), options);
 		return image;
     }
+    
+
+//    private File getMediaFile(){
+//    	
+//    	
+//    } 
     
     /**
      * Get Path for cached leaderbaord image.
      * @return
      */
-    private File getMediaFile(){
+    public File getImageFile(String fileName) {
     	
-		File mediaStorageDir;
+    	File mediaStorageDir = getMediaStorageDir();
 
-		if (Environment.MEDIA_MOUNTED.equals(Environment
-				.getExternalStorageState())) {
+        File mediaFile;
+            String mImageName="MI_"+ fileName +".png";
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);  
+        return mediaFile;
+    }
+    
+	public void deleteImageFile(String fileName) {
+		File mediaStorageDir = getMediaStorageDir();
+
+		File mediaFile;
+		String mImageName = "MI_" + fileName + ".png";
+		mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
+
+		mediaFile.delete();
+	}
+    
+    public File getMediaStorageDir() {
+    	File mediaStorageDir;
+
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 			mediaStorageDir = new File(
 					Environment.getExternalStorageDirectory()
 							+ "/Android/data/"
@@ -257,12 +277,9 @@ public class RegattaActivity extends BaseActivity {
                 return null;
             }
         }
-
-        File mediaFile;
-            String mImageName="MI_"+ leaderboard.name +".png";
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);  
-        return mediaFile;
-    } 
+        
+        return mediaStorageDir;
+    }
     
 	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 		ImageView bmImage;
@@ -274,6 +291,7 @@ public class RegattaActivity extends BaseActivity {
 		protected Bitmap doInBackground(String... urls) {
 			String urldisplay = urls[0];
 			Bitmap mIcon11 = null;
+			
 			try {
 				InputStream in = new java.net.URL(urldisplay).openStream();
 				mIcon11 = BitmapFactory.decodeStream(in);
@@ -285,9 +303,13 @@ public class RegattaActivity extends BaseActivity {
 
 		protected void onPostExecute(Bitmap result) {
 			bmImage.setImageBitmap(result);
-			storeImage(result);
+			storeImage(result, getLeaderboardImageFileName(leaderboard.name));
 			userImageUpdated();
 		}
+	}
+	
+	private String getLeaderboardImageFileName(String leaderboardName) {
+		return LEADERBOARD_IMAGE_FILENAME_PREFIX + leaderboardName;
 	}
 	
 	/**
@@ -320,6 +342,7 @@ public class RegattaActivity extends BaseActivity {
 					public void onResponse(JSONObject response) {
 						DatabaseHelper.getInstance().deleteRegattaFromDatabase(
 								RegattaActivity.this, event, competitor, leaderboard);
+						deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
 						dismissProgressDialog();
 						finish();
 					}
@@ -331,15 +354,23 @@ public class RegattaActivity extends BaseActivity {
 						showErrorPopup(
 								R.string.error,
 								R.string.error_could_not_complete_operation_on_server_try_again);
-
 					}
 				});
 
 		VolleyHelper.getInstance(this).addRequest(checkoutRequest);
 	}
 	
-	public EventInfo getEvent()
-	{
-		return event;
+	@Override
+	public void onBackPressed() {
+		RegattaFragment fragment = (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+
+		if (fragment.isShowingBigCheckoutButton())
+		{
+			//do nothing, user must checkout himself at this point.
+		}
+		else
+		{
+			super.onBackPressed();
+		}
 	}
 }

@@ -1,6 +1,8 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +26,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
+import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 
@@ -34,7 +39,11 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private final int CAMERA_REQUEST_CODE = 3118;
 	private final int SELECT_PHOTO_REQUEST_CODE = 1693;
-
+	private final int IMAGE_MAX_SIZE = 2000;
+	
+	private final String CAMERA_TEMP_FILE = "cameraTempFile";
+	
+	
 	private boolean showingThankYouNote;
 
 	private TimerRunnable timer;
@@ -48,6 +57,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 		Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
 		startTrackingButton.setOnClickListener(this);
+		
+		Button showLeaderboardButton = (Button) view.findViewById(R.id.show_leaderboards_button);
+		showLeaderboardButton.setOnClickListener(this);
 
 		Button changePhotoButton = (Button) view.findViewById(R.id.change_photo_button);
 		changePhotoButton.setOnClickListener(this);
@@ -63,7 +75,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private void checkAndSwitchToThankYouScreenIfRegattaOver() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		long regattaEnd = regattaActivity.getEvent().endMillis;
+		long regattaEnd = regattaActivity.event.endMillis;
 
 		if (System.currentTimeMillis() > regattaEnd) {
 			switchToThankYouScreen();
@@ -77,7 +89,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		TextView textView = (TextView)getActivity().findViewById(R.id.regatta_starts_in);
 		
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		long regattaStart = regattaActivity.getEvent().startMillis;
+		long regattaStart = regattaActivity.event.startMillis;
 		
 		LinearLayout threeBoxesLayout = (LinearLayout) getActivity()
 				.findViewById(R.id.three_boxes_regatta_starts);
@@ -94,6 +106,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		}
 	}
 
+	public boolean isShowingBigCheckoutButton() {
+		return showingThankYouNote;
+	}
+	
 	private void switchToThankYouScreen() {
 		showingThankYouNote = true;
 
@@ -130,6 +146,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
+		case R.id.show_leaderboards_button:
+			startLeaderboardActivity();
+			break;
 		case R.id.start_tracking:
 			if (showingThankYouNote) {
 				RegattaActivity regattaActivity = (RegattaActivity) getActivity();
@@ -198,6 +217,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private void showTakePhotoActivity() {
 		Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		File photoFile = ((RegattaActivity)getActivity()).getImageFile(CAMERA_TEMP_FILE);
+		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
 		startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
 	}
 
@@ -207,25 +228,85 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 			RegattaActivity activity = (RegattaActivity) getActivity();
 
 			if (requestCode == CAMERA_REQUEST_CODE) {
-				Bitmap photo = (Bitmap) data.getExtras().get("data");
-				activity.updatePictureChosenByUser(photo);
+				File photoFile = ((RegattaActivity)getActivity()).getImageFile(CAMERA_TEMP_FILE);
+				Bitmap photo;
+				try {
+					photo = decodeUri(Uri.fromFile(photoFile));
+					activity.updateLeaderboardPictureChosenByUser(photo);
+				} catch (FileNotFoundException e) {
+					if (BuildConfig.DEBUG)
+					{
+						ExLog.i(getActivity(), TAG, "update photo, file not found: " + photoFile);
+					}
+				} catch (IOException e) {
+					if (BuildConfig.DEBUG)
+					{
+						ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
+					}
+				} finally {
+					((RegattaActivity)getActivity()).deleteFile(CAMERA_TEMP_FILE);
+				}
 			} else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
 				Uri selectedImage = data.getData();
-				InputStream imageStream;
+				
 				try {
-					imageStream = getActivity().getContentResolver()
-							.openInputStream(selectedImage);
-					Bitmap photo = BitmapFactory.decodeStream(imageStream);
-					activity.updatePictureChosenByUser(photo);
+					Bitmap photo = decodeUri(selectedImage);
+					activity.updateLeaderboardPictureChosenByUser(photo);
 				} catch (FileNotFoundException e) {
 					ExLog.e(getActivity(), TAG,
 							"File not found exception after picking image from gallery");
-					return;
+				} catch (IOException e) {
+					if (BuildConfig.DEBUG)
+					{
+						ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
+					}
 				}
 			}
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
+	/**
+	 * Decode image with maximum size 
+	 * @param uri
+	 * @return
+	 * @throws IOException
+	 */
+	private Bitmap decodeUri(Uri uri) throws IOException{
+	    Bitmap bitmap = null;
+
+	    BitmapFactory.Options options = new BitmapFactory.Options();
+	    options.inJustDecodeBounds = true;
+
+	    InputStream fis = getActivity().getContentResolver().openInputStream(uri);
+	    BitmapFactory.decodeStream(fis, null, options);
+	    fis.close();
+
+	    int scale = 1;
+	    if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
+	        scale = (int)Math.pow(2, (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / 
+	           (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
+	    }
+
+	    BitmapFactory.Options options2 = new BitmapFactory.Options();
+	    options2.inSampleSize = scale;
+	    fis = getActivity().getContentResolver().openInputStream(uri);
+	    bitmap = BitmapFactory.decodeStream(fis, null, options2);
+	    fis.close();
+
+	    return bitmap;
+	}
+	
+	private void startLeaderboardActivity() {
+		RegattaActivity activity = (RegattaActivity)getActivity();
+		
+		Intent intent = new Intent(getActivity(), LeaderboardWebViewActivity.class);
+		intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_SERVER_URL, activity.event.server);
+		intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_EVENT_ID, activity.event.id);
+		intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_LEADERBOARD_NAME, activity.leaderboard.name);
+		
+		getActivity().startActivity(intent);
 	}
 
 	private void startTrackingActivity() {
@@ -233,13 +314,13 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
 		intent.putExtra(
 				getString(R.string.tracking_activity_event_id_parameter),
-				regattaActivity.getEvent().id);
+				regattaActivity.event.id);
 		getActivity().startActivity(intent);
 	}
 
 	private void timerFired() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		updateCountdownTimer(regattaActivity.getEvent().startMillis);
+		updateCountdownTimer(regattaActivity.event.startMillis);
 	}
 
 	private void updateCountdownTimer(long startTime) {
@@ -258,19 +339,13 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	}
 
 	private void setCountdownTime(int days, int hours, int minutes) {
-		TextView daysTextView = (TextView) getActivity().findViewById(
-				R.id.starts_in_days);
-		TextView hoursTextView = (TextView) getActivity().findViewById(
-				R.id.starts_in_hours);
-		TextView minutesTextView = (TextView) getActivity().findViewById(
-				R.id.starts_in_minutes);
+		TextView daysTextView = (TextView) getActivity().findViewById(R.id.starts_in_days);
+		TextView hoursTextView = (TextView) getActivity().findViewById(R.id.starts_in_hours);
+		TextView minutesTextView = (TextView) getActivity().findViewById(R.id.starts_in_minutes);
 
-		TextView daysTextViewLabel = (TextView) getActivity().findViewById(
-				R.id.starts_in_days_label);
-		TextView hoursTextViewLabel = (TextView) getActivity().findViewById(
-				R.id.starts_in_hours_label);
-		TextView minutesTextViewLabel = (TextView) getActivity().findViewById(
-				R.id.starts_in_minutes_label);
+		TextView daysTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_days_label);
+		TextView hoursTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_hours_label);
+		TextView minutesTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_minutes_label);
 
 		daysTextView.setText(String.format("%02d", days));
 		hoursTextView.setText(String.format("%02d", hours));
