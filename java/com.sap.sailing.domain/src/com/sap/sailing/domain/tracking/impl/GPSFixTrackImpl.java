@@ -528,19 +528,14 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                         if (fromPos == null) {
                             result = Distance.NULL;
                         } else {
-                            lockForRead();
-                            try {
-                                NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
-                                /* fromInclusive */false, new DummyGPSFix(to),
-                                /* toInclusive */false);
-                                for (GPSFix fix : subset) {
-                                    double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(
-                                            fix.getPosition()).getNauticalMiles();
-                                    distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
-                                    fromPos = fix.getPosition();
-                                }
-                            } finally {
-                                unlockAfterRead();
+                            NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
+                            /* fromInclusive */false, new DummyGPSFix(to),
+                            /* toInclusive */false);
+                            for (GPSFix fix : subset) {
+                                double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(
+                                        fix.getPosition()).getNauticalMiles();
+                                distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
+                                fromPos = fix.getPosition();
                             }
                             Position toPos = getEstimatedPosition(to, false);
                             distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();

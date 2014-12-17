@@ -23,7 +23,7 @@ public class ConcurrentHashBagTest {
     }
     
     /**
-     * Trying to provoke a negative size() value
+     * Trying to provoke a negative size() value using two different keys
      */
     @Test
     public void testMassConcurrentInsertAndRemove() throws InterruptedException {
@@ -53,7 +53,76 @@ public class ConcurrentHashBagTest {
         t3.start();
         t4.start();
         t5.start();
-        Thread.sleep(10000);
+        Thread.sleep(1000);
+        stopped[0] = true;
+        assertFalse(sawNegativeSize[0]);
+    }
+
+    /**
+     * Trying to provoke a negative size() value using only one key
+     */
+    @Test
+    public void testMassConcurrentInsertAndRemoveWithSingleKey() throws InterruptedException {
+        final boolean[] sawNegativeSize = new boolean[1];
+        final boolean[] stopped = new boolean[1];
+        final Runnable adderRemover = () -> {
+            while (!stopped[0]) {
+                bag.add("a");
+                bag.remove("a");
+            }
+        };
+        Thread t1 = new Thread(adderRemover);
+        Thread t2 = new Thread(adderRemover);
+        Thread t3 = new Thread(adderRemover);
+        Thread t4 = new Thread(adderRemover);
+        Thread t5 = new Thread(() -> {
+            while (!stopped[0]) {
+                if (bag.size() < 0) {
+                    sawNegativeSize[0] = true;
+                }
+            }
+        });
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+        t5.start();
+        Thread.sleep(1000);
+        stopped[0] = true;
+        assertFalse(sawNegativeSize[0]);
+    }
+
+    /**
+     * Trying to provoke a negative size() value using only one key
+     */
+    @Test
+    public void testMassConcurrentInsertAndRemoveWithSingleKeyRemovingMoreThanAdded() throws InterruptedException {
+        final boolean[] sawNegativeSize = new boolean[1];
+        final boolean[] stopped = new boolean[1];
+        final Runnable adderRemover = () -> {
+            while (!stopped[0]) {
+                bag.add("a");
+                bag.remove("a");
+                bag.remove("a");
+            }
+        };
+        Thread t1 = new Thread(adderRemover);
+        Thread t2 = new Thread(adderRemover);
+        Thread t3 = new Thread(adderRemover);
+        Thread t4 = new Thread(adderRemover);
+        Thread t5 = new Thread(() -> {
+            while (!stopped[0]) {
+                if (bag.size() < 0) {
+                    sawNegativeSize[0] = true;
+                }
+            }
+        });
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+        t5.start();
+        Thread.sleep(1000);
         stopped[0] = true;
         assertFalse(sawNegativeSize[0]);
     }
