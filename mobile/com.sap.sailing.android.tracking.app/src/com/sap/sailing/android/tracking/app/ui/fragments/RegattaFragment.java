@@ -331,7 +331,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
 	private void timerFired() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		updateCountdownTimer(regattaActivity.event.startMillis);
+		if (regattaActivity != null)
+		{
+			updateCountdownTimer(regattaActivity.event.startMillis);
+		}
 	}
 
 	private void updateCountdownTimer(long startTime) {
