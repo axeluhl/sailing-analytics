@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -110,6 +111,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		return showingThankYouNote;
 	}
 	
+	@SuppressWarnings("deprecation")
+	@SuppressLint("NewApi")
 	private void switchToThankYouScreen() {
 		showingThankYouNote = true;
 
@@ -118,7 +121,15 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 		startsInLayout.setVisibility(View.INVISIBLE);
 
 		Button startTrackingButton = (Button) getActivity().findViewById(R.id.start_tracking);
-		startTrackingButton.setBackgroundColor(getActivity().getResources().getColor(R.color.sap_yellow));
+		
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+			startTrackingButton.setBackgroundDrawable(getResources().getDrawable(
+					R.drawable.rounded_btn_yellow));
+		} else {
+			startTrackingButton.setBackground(getResources().getDrawable(
+					R.drawable.rounded_btn_yellow));
+		}
+		
 		startTrackingButton.setText(getActivity().getString(R.string.close));
 
 		TextView bottomAnnouncement = (TextView) getActivity().findViewById(R.id.bottom_announcement);
