@@ -30,11 +30,11 @@ public class WelcomeFragment extends Fragment implements OnClickListener {
         // needed for screen rotation
     }
 
-    public WelcomeFragment(DataStore dataStore, Serializable courseAreaId, Serializable eventId,
+    public WelcomeFragment(EventBase event, CourseArea course,
             RaceLogEventAuthor raceLogEventAuthor) {
-    	ExLog.i(getActivity(), this.getClass().toString(), "eventId: "+ eventId);
-        mCourseArea = dataStore.getCourseArea(courseAreaId);
-        mEvent = dataStore.getEvent(eventId);
+    	//ExLog.i(getActivity(), this.getClass().toString(), "eventId: "+ eventId);
+        mCourseArea = course;
+        mEvent = event;
         mEventAuthor = raceLogEventAuthor;
     }
 

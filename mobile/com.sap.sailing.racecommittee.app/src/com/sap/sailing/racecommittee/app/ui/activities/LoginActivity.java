@@ -11,7 +11,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PersistableBundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Window;
@@ -30,7 +29,6 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
@@ -55,6 +53,89 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private final static String TAG = LoginActivity.class.getName();
 
     
+    // oben links
+    private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
+
+        public void itemSelected(Fragment sender, EventBase event) {
+            final Serializable eventId = event.getId();
+            ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
+            preferences.setEventID(eventId);
+            setupDataManager(eventId);
+            showCourseAreaListFragment(eventId);
+        }
+    };
+    
+    // oben rechts
+    private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
+
+        public void itemSelected(Fragment sender, CourseArea courseArea) {
+            ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
+            ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
+            selectCourseArea(courseArea.getId());
+        }
+    };
+    
+    private PositionListFragment mPositionListFragment;
+    
+    private ProgressBar mProgressSpinner;
+
+
+    private Serializable mSelectedEvent;
+    
+    private final int RQS_GooglePlayServices = 1;
+ 
+    private UUID mSelectedCourseAreaUUID;
+    public LoginActivity() {
+//        mLoginDialog = new LoginDialog();
+        mPositionListFragment = new PositionListFragment();
+//        mSelectedCourseArea = null;
+    }
+
+    private void addAreaPositionListFragment() {
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
+        transaction.replace(R.id.login_view_bottom_container, mPositionListFragment, AreaPositionListFragmentTag);
+        transaction.commitAllowingStateLoss();
+        ExLog.i(this, "LoginActivity", "PositionFragment created.");
+    }
+
+    
+    private void addCourseAreaListFragment(Serializable eventId) {
+        Bundle args = new Bundle();
+        args.putSerializable(AppConstants.EventIdTag, eventId);
+        mSelectedEvent = eventId;
+        hideAreaPositionListFragment();
+        Fragment fragment = new CourseAreaListFragment();
+        fragment.setArguments(args);
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
+        transaction.replace(R.id.login_view_right_container, fragment, CourseAreaListFragmentTag);
+        transaction.commit();
+        ExLog.i(this, "LoginActivity", "CourseFragment created.");
+    }
+    
+    private void addEventListFragment() {
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(R.id.login_view_left_container, new EventListFragment());
+        transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
+        transaction.commit();
+    }
+	public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
+        return courseAreaSelectionListener;
+    }
+
+    public ItemSelectedListener<EventBase> getEventSelectionListener() {
+        return eventSelectionListener;
+    }
+
+    private void hideAreaPositionListFragment(){
+    	 FragmentTransaction transaction = getFragmentManager().beginTransaction();
+         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
+         transaction.replace(R.id.login_view_bottom_container, new Fragment(), AreaPositionListFragmentTag);
+         transaction.commitAllowingStateLoss();
+         ExLog.i(this, "LoginActivity", "PositionFragment created.");
+    }
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,30 +153,67 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
         
+        addEventListFragment();
+        
         UUID courseUUID = preferences.getCourseUUID();
         if ( courseUUID != new UUID(0,0) ){
         	mSelectedCourseAreaUUID = courseUUID;
-        }
-        
-        // on first create add event list fragment
-        if (savedInstanceState == null) {
-            ExLog.i(this, TAG, "Seems to be first start. Creating event fragment.");
-            addEventListFragment();
+        	
         }
         
         Serializable eventId = preferences.getEventID();
         if ( eventId != null ){
         	mSelectedEvent = eventId;
-        	addCourseAreaListFragment(eventId);
+//        	setupDataManager(eventId);
+//            showCourseAreaListFragment(eventId);
         }
         
-
+//        // on first create add event list fragment
+//        if (savedInstanceState == null) {
+//            ExLog.i(this, TAG, "Seems to be first start. Creating event fragment.");
+//            addEventListFragment();
+//        }
         
         // sets up the global configuration and adds it to the preferences
-        setupDataManager(mSelectedEvent);
+        setupDataManager(null);
         
         new AutoUpdater(this).notifyAfterUpdate();        
     }
+    
+    @Override
+	public void onPositionSelected(LoginType type) {
+		
+        if (mSelectedCourseAreaUUID == null) {
+            Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();
+            ExLog.e(LoginActivity.this, TAG,
+                    "Course area reference was not set - cannot start racing activity.");
+            return;
+        }
+        preferences.setLoginType(type);
+        preferences.isSetUp(true);
+        
+        ExLog.i(LoginActivity.this, TAG,
+                "mSelectedEvent : " + mSelectedEvent);
+		Intent message = new Intent(LoginActivity.this, RacingActivity.class);
+        message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID );
+        message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
+        fadeActivity(message);
+	}
+
+    @Override
+    protected boolean onReset() {
+        Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
+        if (courseAreaFragment != null) {
+            getFragmentManager().beginTransaction().remove(courseAreaFragment).commit();
+        }
+        recreate();
+        return true;
+    }
+
+
+
+
+    
     @Override
     public void onResume() {
         super.onResume();
@@ -107,53 +225,39 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
         
         if (  mSelectedEvent != null && preferences.isSetUp() ){
-//        	Handler handler = new Handler();
-//        	handler.postDelayed(new Runnable() {
-//
-//        	    @Override
-//        	    public void run() {
-//        	    	showCourseAreaListFragment(mSelectedEvent);
-//        	    }
-//
-//        	}, 5000); // 5000ms delay
+        	showCourseAreaListFragment(mSelectedEvent);
+        	
+        	
+        	Intent message = new Intent(LoginActivity.this, RacingActivity.class);
+            message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID );
+            message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
+            fadeActivity(message);
         } 
     }
-    
-    // oben links
-    private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
-        public void itemSelected(Fragment sender, EventBase event) {
-            final Serializable eventId = event.getId();
-            ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
-            preferences.setEventID(eventId);
-            
-            setupDataManager(eventId);
-            showCourseAreaListFragment(eventId);
+    private void selectCourseArea(UUID courseAreaUUID) {
+        //mSelectedCourseArea = courseArea;
+        mSelectedCourseAreaUUID = courseAreaUUID;
+        preferences.setCourseUUID(mSelectedCourseAreaUUID);
+        showAreaPositionListFragment();
+    }
+
+
+
+    @Override
+    public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
+        super.setSupportProgressBarIndeterminateVisibility(visible);
+
+        if (mProgressSpinner != null) {
+            if (visible) {
+                mProgressSpinner.setVisibility(View.VISIBLE);
+            } else {
+                mProgressSpinner.setVisibility(View.GONE);
+            }
         }
-    };
-    
-    // oben rechts
-    private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
+    }
 
-        public void itemSelected(Fragment sender, CourseArea courseArea) {
-            ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
-            ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
-            selectCourseArea(courseArea.getId());
-        }
-    };
-
-
-    private PositionListFragment mPositionListFragment;
-    
-    private ProgressBar mProgressSpinner;
- 
-    private Serializable mSelectedEvent;
-    private final int RQS_GooglePlayServices = 1;
-
-    private UUID mSelectedCourseAreaUUID;
-
-    
-    private void setupDataManager(final Serializable eventId){
+    private void setupDataManager(Serializable eventId){
     	final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setMessage(getString(R.string.loading_configuration));
         progressDialog.setCancelable(false);
@@ -200,116 +304,12 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                                 Toast.LENGTH_LONG).show();
                         //showCourseAreaListFragment(eventId);
                     }
-                });
-        // always reload the configuration...
-        getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
+                }); 
+       // always reload the configuration...
+        getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();;
     }
     
-    public LoginActivity() {
-//        mLoginDialog = new LoginDialog();
-        mPositionListFragment = new PositionListFragment();
-//        mSelectedCourseArea = null;
-    }
-	private void addAreaPositionListFragment() {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
-        transaction.replace(R.id.login_view_bottom_container, mPositionListFragment, AreaPositionListFragmentTag);
-        transaction.commitAllowingStateLoss();
-        ExLog.i(this, "LoginActivity", "PositionFragment created.");
-    }
-
-    private void addCourseAreaListFragment(Serializable eventId) {
-        Bundle args = new Bundle();
-        args.putSerializable(AppConstants.EventIdTag, eventId);
-        mSelectedEvent = eventId;
-        hideAreaPositionListFragment();
-        Fragment fragment = new CourseAreaListFragment();
-        fragment.setArguments(args);
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
-        transaction.replace(R.id.login_view_right_container, fragment, CourseAreaListFragmentTag);
-        transaction.commit();
-        ExLog.i(this, "LoginActivity", "CourseFragment created.");
-    }
-
-    private void addEventListFragment() {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.login_view_left_container, new EventListFragment());
-        transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
-        transaction.commit();
-    }
-    
-    public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
-        return courseAreaSelectionListener;
-    }
-    
-    public ItemSelectedListener<EventBase> getEventSelectionListener() {
-        return eventSelectionListener;
-    }
-
-    private void hideAreaPositionListFragment(){
-    	 FragmentTransaction transaction = getFragmentManager().beginTransaction();
-         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
-         transaction.replace(R.id.login_view_bottom_container, new Fragment(), AreaPositionListFragmentTag);
-         transaction.commitAllowingStateLoss();
-         ExLog.i(this, "LoginActivity", "PositionFragment created.");
-    }
-
-
-
-
-    
-    @Override
-	public void onPositionSelected(LoginType type) {
-		
-        if (mSelectedCourseAreaUUID == null) {
-            Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();
-            ExLog.e(LoginActivity.this, TAG,
-                    "Course area reference was not set - cannot start racing activity.");
-            return;
-        }
-        
-        preferences.isSetUp(true);
-        
-        ExLog.i(LoginActivity.this, TAG,
-                "mSelectedEvent : " + mSelectedEvent);
-		Intent message = new Intent(LoginActivity.this, RacingActivity.class);
-        message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID );
-        message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
-        fadeActivity(message);
-	}
-
-    @Override
-    protected boolean onReset() {
-        Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
-        if (courseAreaFragment != null) {
-            getFragmentManager().beginTransaction().remove(courseAreaFragment).commit();
-        }
-        recreate();
-        return true;
-    }
-
-
-
-    private void selectCourseArea(UUID courseAreaUUID) {
-        //mSelectedCourseArea = courseArea;
-        mSelectedCourseAreaUUID = courseAreaUUID;
-        preferences.setCourseUUID(mSelectedCourseAreaUUID);
-        showAreaPositionListFragment();
-    }
-
-    @Override
-    public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
-        super.setSupportProgressBarIndeterminateVisibility(visible);
-
-        if (mProgressSpinner != null) {
-            if (visible) {
-                mProgressSpinner.setVisibility(View.VISIBLE);
-            } else {
-                mProgressSpinner.setVisibility(View.GONE);
-            }
-        }
-    }
+   
     
     private void showAreaPositionListFragment() {
         addAreaPositionListFragment();

@@ -12,6 +12,7 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
@@ -102,13 +103,106 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             }
 
             setSupportProgressBarIndeterminateVisibility(false);
+
         }
+
     }
 
-    private static ProgressBar mProgressSpinner;
-    private static final int RacesLoaderId = 0;
+    private class EventLoadClient implements LoadClient<Collection<EventBase>> {
 
+    	@Override
+        public void onLoadFailed(Exception ex) {
+            setSupportProgressBarIndeterminateVisibility(false);
+            AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this);
+            builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage()))
+                    .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_warning_grey600_36dp)
+                    .setCancelable(true)
+                    .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            setSupportProgressBarIndeterminateVisibility(true);
+
+//                            ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
+//                            getLoaderManager().restartLoader(RacesLoaderId, null,
+//                                    dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
+                            dialog.cancel();
+                        }
+                    }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            builder.create().show();
+        }
+
+		@Override
+		public void onLoadSucceded(Collection<EventBase> data, boolean isCached) {
+			// TODO Auto-generated method stub
+			Toast.makeText(RacingActivity.this,
+                    String.format(getString(R.string.loading_events_succeded), data.size()), Toast.LENGTH_SHORT).show();
+			setSupportProgressBarIndeterminateVisibility(false);
+			
+			for (EventBase event : data) {
+				dataManager.getDataStore().addEvent(event);
+				if ( event.getId().toString().equals(mEventId.toString()) ){
+					mEvent = event;
+				}
+			}
+			
+			if (mCourseArea != null) {
+				setupFragments();
+			 } else {
+				 loadCourses(mEvent);
+	         }	
+	    }
+    }
+    
+    private class CourseLoadClient implements LoadClient<Collection<CourseArea>> {
+
+		@Override
+		public void onLoadFailed(Exception reason) {
+			setSupportProgressBarIndeterminateVisibility(false);
+			ExLog.e(getApplicationContext(), TAG, "Errors loading CourseData");
+			ExLog.e(getApplicationContext(), TAG, reason.getMessage());
+			
+		}
+
+		@Override
+		public void onLoadSucceded(Collection<CourseArea> data, boolean isCached) {
+			Toast.makeText(RacingActivity.this,
+                    String.format("Loading of CourseData succeeded", data.size()), Toast.LENGTH_SHORT).show();
+			setSupportProgressBarIndeterminateVisibility(false);
+			
+			for (CourseArea course : data) {
+				if ( course.getId().toString().equals(mCourseAreaId.toString())){
+					mCourseArea = course;
+					setupFragments();
+				}
+			}
+			
+		}
+    	
+    }
+    
+    private void setupFragments(){
+    	Handler handler = new Handler();
+		final Runnable r = new Runnable() {
+		    public void run() {
+                setupActionBar(mCourseArea);
+                loadRaces(mCourseArea);
+                loadNavDrawer( mCourseArea,  mEvent);
+		      	loadWelcomeFragment(mCourseArea, mEvent);       	        	
+		    }
+		};
+		handler.post(r);
+    }
+    
+    private static ProgressBar mProgressSpinner;
+    private static final int RacesLoaderId = 2;
+    private static final int EventsLoaderId = 1;
+    private static final int CourseLoaderId = 0;
+    
     private static final String TAG = RacingActivity.class.getName();
+	
 
     private Button currentTime;
     private ReadonlyDataManager dataManager;
@@ -119,6 +213,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private Button windButton;
 
     private WindFragment windFragment;
+	private Serializable mEventId;
+    private EventBase mEvent;
+	private CourseArea mCourseArea;
+	private Serializable mCourseAreaId;
 
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
@@ -147,14 +245,29 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         return eventId;
     }
 
+    private void loadCourses(final EventBase event){
+    	
+    	setSupportProgressBarIndeterminateVisibility(true);
+    	ExLog.i(this, TAG, "Issuing loading of courses from data manager");
+    	getLoaderManager().initLoader(CourseLoaderId, null, dataManager.createCourseAreasLoader(event, new CourseLoadClient()));
+    }
+    
     private void loadRaces(final CourseArea courseArea) {
         setSupportProgressBarIndeterminateVisibility(true);
 
         ExLog.i(this, TAG, "Issuing loading of managed races from data manager");
-        getLoaderManager().initLoader(RacesLoaderId, null,
-                dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
+        getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
+    }
+    
+    
+    private void loadEvents(){
+    	setSupportProgressBarIndeterminateVisibility(true);
+    	ExLog.i(this, TAG, "Issuing loading of events from data manager");
+    	getLoaderManager().initLoader(EventsLoaderId, null, dataManager.createEventsLoader(new EventLoadClient()));
     }
 
+    
+    
     public void loadWindFragment() {
         // check if the fragment is actively shown already, otherwise show it
         if ((windFragment != null && !windFragment.isFragmentUIActive()) || windFragment == null) {
@@ -190,11 +303,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 // fix for filled out RaceInfoFragment
                 if (infoFragment != null && infoFragment.isFragmentUIActive() && selectedRace != null) {
                     ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
+                    
                     getFragmentManager().popBackStackImmediate();
                     onRaceItemClicked(selectedRace);
                 }
             }
         } else {
+
             logoutSession();
         }
     }
@@ -222,6 +337,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         dataManager = DataManager.create(this);
 
+   	 	navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
@@ -233,19 +350,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
+        mCourseAreaId = courseAreaId;
         if (courseAreaId == null) {
             throw new IllegalStateException("There was no course area id transmitted...");
         }
         ExLog.i(this, this.getClass().toString(), "trying to load courseArea via id: "+courseAreaId);
         CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
-        if (courseArea != null) {
-            setupActionBar(courseArea);
-            loadRaces(courseArea);
-            ExLog.i(this, this.getClass().toString(), "did load courseArea!");
-        } else {
-        	ExLog.i(this, this.getClass().toString(), "courseArea == null :(");
-            Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
-        }
+        mCourseArea = courseArea;
 
         currentTime = (Button) findViewById(R.id.currentTime);
         windButton = (Button) findViewById(R.id.windButton);
@@ -264,39 +375,57 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if (eventId == null) {
             throw new IllegalStateException("There was no event id transmitted...");
         }
-        
-        ExLog.i(this, this.getClass().toString(), "STARTING WELCOME FRAGMENT: " +dataManager.getDataStore());
-        
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.racing_view_container,
-                        new WelcomeFragment(dataManager.getDataStore(), courseAreaId, eventId, preferences.getAuthor()))
-                .commit();
-
-        navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
-        
-        
-        // CODE TO DEBUG
-        
-        ExLog.i(this, this.getClass().toString(), "STARTING WELCOME FRAGMENT eventcount: " +dataManager.getDataStore().getEvents().size());
+        mEventId = eventId;
         
         EventBase e = dataManager.getDataStore().getEvent(eventId);
         if ( e == null ){
         	ExLog.e(this, TAG, "Noooo the event is null :/");
+        	loadEvents();
+        	//setupDataStore();
+        	//loadNavDrawer( courseAreaId,  eventId);
+        } else {
+        	
+        	
+        	if (courseArea != null) {
+                setupActionBar(courseArea);
+                loadRaces(courseArea);
+                ExLog.i(this, this.getClass().toString(), "did load courseArea!");
+            } else {
+            	ExLog.i(this, this.getClass().toString(), "courseArea == null :(");
+                Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
+            }
+        	loadNavDrawer( courseArea,  e);
+        	loadWelcomeFragment(courseArea, e);
+        	
         }
         
         // /CODE TO DEBUG
         
         
         
-        String race = getResources().getString(R.string.nav_header)
-                .replace("#AREA#", dataManager.getDataStore().getCourseArea(courseAreaId).getName())
-                .replace("#EVENT#", dataManager.getDataStore().getEvent(eventId).getName())
-                .replace("#AUTHOR#", preferences.getAuthor().getName());
-        SpannableString string = new SpannableString(race);
-        navDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), string);
+       
+    }
+    
+    
+    private void loadNavDrawer(CourseArea courseArea, EventBase event){
+    	 String race = getResources().getString(R.string.nav_header)
+                 .replace("#AREA#", courseArea.getName())
+                 .replace("#EVENT#",event.getName())
+                 .replace("#AUTHOR#", preferences.getAuthor().getName());
+         SpannableString string = new SpannableString(race);
+         navDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), string);
     }
 
+    private void loadWelcomeFragment(CourseArea courseArea, EventBase event){
+        getFragmentManager()
+        .beginTransaction()
+        .replace(R.id.racing_view_container,
+                new WelcomeFragment( event, courseArea, preferences.getAuthor()))
+        .commit();
+
+        
+    }
+    
     @Override
     public void onNavigationDrawerItemSelected(RaceListDataType selectedItem) {
         if (selectedItem instanceof RaceListDataTypeRace) {

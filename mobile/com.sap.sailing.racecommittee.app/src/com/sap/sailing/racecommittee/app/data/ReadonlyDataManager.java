@@ -68,6 +68,9 @@ public interface ReadonlyDataManager {
     public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
             Serializable parentEventId, LoadClient<Collection<CourseArea>> callback);
 
+    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
+            EventBase parentEvent, LoadClient<Collection<CourseArea>> callback);
+    
     
     /**
      * Creates a new {@link LoaderCallbacks} object for loading racing referee positions.

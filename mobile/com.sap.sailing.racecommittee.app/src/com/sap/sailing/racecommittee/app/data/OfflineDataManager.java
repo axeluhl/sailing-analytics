@@ -174,6 +174,19 @@ public class OfflineDataManager extends DataManager {
                 });
     }
 
+	@Override
+	public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
+			final EventBase parentEvent, LoadClient<Collection<CourseArea>> callback) {
+		// TODO Auto-generated method stub
+		return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
+                new Callable<Collection<CourseArea>>() {
+                    @Override
+                    public Collection<CourseArea> call() throws Exception {
+                            return dataStore.getCourseAreas(parentEvent);
+                    }
+                });
+	}
+    
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(Serializable courseAreaId,
             LoadClient<Collection<ManagedRace>> callback) {

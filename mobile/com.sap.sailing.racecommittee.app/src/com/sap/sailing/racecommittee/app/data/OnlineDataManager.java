@@ -104,8 +104,8 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<Collection<EventBase>>> create(int id, Bundle args) throws Exception {
             	ExLog.i(context, TAG, String.format("Creating Events-OnlineDataLoader %d", id));
-                DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
-                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer()));
+            	EventBaseJsonDeserializer serializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer());
+                DataParser<Collection<EventBase>> parser = new EventsDataParser(serializer);
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
 
 //                ExLog.i(context, TAG, "getEventsLoader created new loader...");
@@ -134,6 +134,23 @@ public class OnlineDataManager extends DataManager {
                 });
     }
 
+	@Override
+	public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
+			final EventBase parentEvent, LoadClient<Collection<CourseArea>> callback) {
+		// TODO Auto-generated method stub
+		return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
+                new Callable<Collection<CourseArea>>() {
+                    @Override
+                    public Collection<CourseArea> call() throws Exception {
+
+
+                            return dataStore.getCourseAreas(parentEvent);
+
+
+                    }
+                });
+	}
+    
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(final Serializable courseAreaId,
             LoadClient<Collection<ManagedRace>> callback) {
