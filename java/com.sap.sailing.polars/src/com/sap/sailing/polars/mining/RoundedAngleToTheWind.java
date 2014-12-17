@@ -12,14 +12,14 @@ public class RoundedAngleToTheWind {
 
     @Override
     public String toString() {
-        return "" + angle;
+        return "" + getAngle();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + angle;
+        result = prime * result + getAngle();
         return result;
     }
 
@@ -32,9 +32,13 @@ public class RoundedAngleToTheWind {
         if (getClass() != obj.getClass())
             return false;
         RoundedAngleToTheWind other = (RoundedAngleToTheWind) obj;
-        if (angle != other.angle)
+        if (getAngle() != other.getAngle())
             return false;
         return true;
+    }
+
+    public int getAngle() {
+        return angle;
     }
 
 }

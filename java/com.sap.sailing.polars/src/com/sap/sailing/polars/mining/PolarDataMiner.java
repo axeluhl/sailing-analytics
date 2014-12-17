@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
@@ -36,7 +38,7 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 
-public class PolarDataMiner {
+public class PolarDataMiner implements PolarSheetAnalyzer {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static final ThreadPoolExecutor executor = createExecutor();
@@ -224,6 +226,38 @@ public class PolarDataMiner {
             }
         }
         return dataCounts;
+    }
+
+
+
+    @Override
+    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass,
+            Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
+        return incrementalRegressionProcessor.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+    }
+
+
+
+    @Override
+    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(
+            BoatClass boatClass, Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
+        return incrementalRegressionProcessor.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+    }
+
+
+
+    @Override
+    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
+            Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
+        return incrementalRegressionProcessor.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
+    }
+
+
+
+    @Override
+    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
+            Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
+        return incrementalRegressionProcessor.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
     }
 
 }

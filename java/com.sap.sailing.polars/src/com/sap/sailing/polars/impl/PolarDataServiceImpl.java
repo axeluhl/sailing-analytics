@@ -23,8 +23,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
 import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
-import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
-import com.sap.sailing.polars.analysis.impl.PolarSheetAnalyzerImpl;
 import com.sap.sailing.polars.caching.PolarFixCache;
 import com.sap.sailing.polars.caching.PolarSheetPerBoatClassCache;
 import com.sap.sailing.polars.data.PolarFix;
@@ -45,8 +43,6 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     private final PolarFixCache polarFixCache;
     private final PolarSheetPerBoatClassCache polarSheetPerBoatClassCache;
-    
-    private final PolarSheetAnalyzer polarSheetAnalyzer;
 
     private final PolarDataMiner polarDataMiner;
 
@@ -54,7 +50,6 @@ public class PolarDataServiceImpl implements PolarDataService {
         this.polarFixCache = new PolarFixCache(executor);
         this.polarSheetPerBoatClassCache = new PolarSheetPerBoatClassCache(this);
         polarFixCache.addListener(polarSheetPerBoatClassCache);
-        this.polarSheetAnalyzer = new PolarSheetAnalyzerImpl(this);
         this.polarDataMiner = new PolarDataMiner();
     }
 
@@ -69,15 +64,15 @@ public class PolarDataServiceImpl implements PolarDataService {
         SpeedWithBearingWithConfidence<Void> speedWithBearing = null;
         if (tack.equals(Tack.STARBOARD)) {
             if (legType.equals(LegType.UPWIND)) {
-                speedWithBearing = polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+                speedWithBearing = polarDataMiner.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
             } else if (legType.equals(LegType.DOWNWIND)) {
-                speedWithBearing = polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+                speedWithBearing = polarDataMiner.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
             }
         } else if (tack.equals(Tack.PORT)) {
             if (legType.equals(LegType.UPWIND)) {
-                return polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
+                return polarDataMiner.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
             } else if (legType.equals(LegType.DOWNWIND)) {
-                return polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
+                return polarDataMiner.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
             }
         }
         return speedWithBearing;
