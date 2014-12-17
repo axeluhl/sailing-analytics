@@ -1060,8 +1060,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
         if (logger.isLoggable(Level.FINEST)) {
             FixType last;
+            lockForRead();
             try {
-                lockForRead();
                 if (logger.isLoggable(Level.FINEST)) {
                     logger.finest("GPS fix "+fix+" for "+getTrackedItem()+", isValid="+isValid(getInternalRawFixes(), fix)+
                             ", time/distance/speed from last: "+
