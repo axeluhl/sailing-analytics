@@ -7,7 +7,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class SimulatorResultsDTO implements IsSerializable {
 
     private Date startTime;
-    private long timeStep;
     private long legDuration;
     private RaceMapDataDTO raceCourse;
     private WindFieldDTO windField;
@@ -16,7 +15,6 @@ public class SimulatorResultsDTO implements IsSerializable {
 
     public SimulatorResultsDTO(){
         this.startTime = null;
-        this.timeStep = 0;
         this.legDuration = 0;
         this.raceCourse = null;
         this.windField = null;
@@ -24,9 +22,8 @@ public class SimulatorResultsDTO implements IsSerializable {
         this.notificationMessage = "";
     }
 
-    public SimulatorResultsDTO(final Date startTime, final long timeStep, final long legDuration, final RaceMapDataDTO raceCourse, final PathDTO[] paths, final WindFieldDTO windField, final String notificationMessage) {
+    public SimulatorResultsDTO(final Date startTime, final long legDuration, final RaceMapDataDTO raceCourse, final PathDTO[] paths, final WindFieldDTO windField, final String notificationMessage) {
         this.startTime = startTime;
-        this.timeStep = timeStep;
         this.legDuration = legDuration;
         this.raceCourse = raceCourse;
         this.paths = paths;
@@ -40,14 +37,6 @@ public class SimulatorResultsDTO implements IsSerializable {
 
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
-    }
-
-    public long getTimeStep() {
-        return this.timeStep;
-    }
-
-    public void setTimeStep(long timeStep) {
-        this.timeStep = timeStep;
     }
 
     public long getLegDuration() {

@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -34,9 +33,9 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     protected NavigableMap<Speed, NavigableMap<Bearing, Speed>> speedTable;
     protected NavigableMap<Double,Object> extTable = null;
     protected NavigableMap<Speed, Bearing> beatAngles;
-    protected NavigableMap<Speed, Bearing> jibeAngles;
+    protected NavigableMap<Speed, Bearing> gybeAngles;
     protected NavigableMap<Speed, Speed> beatSOG;
-    protected NavigableMap<Speed, Speed> jibeSOG;
+    protected NavigableMap<Speed, Speed> gybeSOG;
     
     protected double scaleBearing = 1.0;
     protected double scaleSpeed = 1.0;
@@ -72,8 +71,8 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     }
 
     @Override
-    public NavigableMap<Speed, Bearing> getJibeAngles() {
-        return this.jibeAngles;
+    public NavigableMap<Speed, Bearing> getGybeAngles() {
+        return this.gybeAngles;
     }
 
     @Override
@@ -82,8 +81,8 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     }
 
     @Override
-    public NavigableMap<Speed, Speed> getJibeSOG() {
-        return this.jibeSOG;
+    public NavigableMap<Speed, Speed> getGybeSOG() {
+        return this.gybeSOG;
     }
 
     // this constructor creates an instance with a hard-coded set of values
@@ -93,16 +92,16 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
     // a constructor that allows a generic set of parameters
     public PolarDiagramBase(NavigableMap<Speed, NavigableMap<Bearing, Speed>> speeds,
-            NavigableMap<Speed, Bearing> beats, NavigableMap<Speed, Bearing> jibes,
-            NavigableMap<Speed, Speed> beatSOGs, NavigableMap<Speed, Speed> jibeSOGs) {
+            NavigableMap<Speed, Bearing> beats, NavigableMap<Speed, Bearing> gybes,
+            NavigableMap<Speed, Speed> beatSOGs, NavigableMap<Speed, Speed> gybeSOGs) {
 
         wind = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180));
 
         speedTable = speeds;
         beatAngles = beats;
-        jibeAngles = jibes;
+        gybeAngles = gybes;
         beatSOG = beatSOGs;
-        jibeSOG = jibeSOGs;
+        gybeSOG = gybeSOGs;
 
         for (Speed s : speedTable.keySet()) {
 
@@ -110,8 +109,8 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
                 speedTable.get(s).put(beatAngles.get(s), beatSOG.get(s));
             }
 
-            if (jibeAngles.containsKey(s) && !speedTable.get(s).containsKey(jibeAngles.get(s))) {
-                speedTable.get(s).put(jibeAngles.get(s), jibeSOG.get(s));
+            if (gybeAngles.containsKey(s) && !speedTable.get(s).containsKey(gybeAngles.get(s))) {
+                speedTable.get(s).put(gybeAngles.get(s), gybeSOG.get(s));
             }
 
         }
@@ -407,80 +406,31 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         NavigableMap<Bearing, Speed> floorSpeeds = speedTable.get(floorWind);
         NavigableMap<Bearing, Speed> ceilingSpeeds = speedTable.get(ceilingWind);
 
-		double floorSpeed;
-		if (floorSpeeds.size() == 0) {
-			floorSpeed = 0.0;
-		} else {
-			Speed floorSpeed1 = null;
-			Entry<Bearing, Speed> floorEntry = floorSpeeds.floorEntry(relativeBearing);
-			if (floorEntry != null) {
-				floorSpeed1 = floorEntry.getValue();
-			}
-			Speed floorSpeed2 = null;
-			floorEntry = floorSpeeds.ceilingEntry(relativeBearing);
-			if (floorEntry != null) {
-				floorSpeed2 = floorEntry.getValue();
-			}
-			Bearing floorBearing1 = floorSpeeds.floorKey(relativeBearing);
-			Bearing floorBearing2 = floorSpeeds.ceilingKey(relativeBearing);
-			if (floorBearing1 == null) {
-				// for gps-polar: if no floor-bearing known; extrapolate boat-speed constantly with bearing
-				floorSpeed = floorSpeed2.getKnots();
-			} else if (floorBearing2 == null) {
-				//  for gps-polar: if no ceiling-bearing known; extrapolate boat-speed constantly with bearing
-				floorSpeed = floorSpeed1.getKnots();
-			} else if (floorSpeed1.equals(floorSpeed2)) {
-				floorSpeed = floorSpeed1.getKnots();
-			} else {
-				floorSpeed = floorSpeed1.getKnots()
-						+ (relativeBearing.getRadians() - floorBearing1
-								.getRadians())
-						* (floorSpeed2.getKnots() - floorSpeed1.getKnots())
-						/ (floorBearing2.getRadians() - floorBearing1
-								.getRadians());
-			}
-		}
-
-        double ceilingSpeed;
-		if (ceilingSpeeds.size() == 0) {
-			ceilingSpeed = 0.0;
-		} else {
-			Speed ceilingSpeed1 = null;
-			Entry<Bearing, Speed> entry = ceilingSpeeds.floorEntry(relativeBearing);
-			if (entry != null) {
-				ceilingSpeed1 = entry.getValue();
-			}
-			Speed ceilingSpeed2 = null;
-			entry = ceilingSpeeds.ceilingEntry(relativeBearing);
-			if (entry != null) {
-				ceilingSpeed2 = entry.getValue();
-			}
-			Bearing ceilingBearing1 = ceilingSpeeds.floorKey(relativeBearing);
-			Bearing ceilingBearing2 = ceilingSpeeds.ceilingKey(relativeBearing);
-			if (ceilingBearing1 == null) {
-				//  for gps-polar: if no floor-bearing known; extrapolate boat-speed constantly with bearing
-				ceilingSpeed = ceilingSpeed2.getKnots();
-			} else if (ceilingBearing2 == null) {
-				//  for gps-polar: if no ceiling-bearing known; extrapolate boat-speed constantly with bearing
-				ceilingSpeed = ceilingSpeed1.getKnots();
-			} else if (ceilingSpeed1.equals(ceilingSpeed2)) {
-				ceilingSpeed = ceilingSpeed1.getKnots();
-			} else {
-				ceilingSpeed = ceilingSpeed1.getKnots()
-						+ (relativeBearing.getRadians() - ceilingBearing1
-								.getRadians())
-						* (ceilingSpeed2.getKnots() - ceilingSpeed1.getKnots())
-						/ (ceilingBearing2.getRadians() - ceilingBearing1
-								.getRadians());
-			}
-		}
-        if (floorSpeeds.size() == 0) {
-        	// for gps-polar: if no boat-speeds known for floor-wind-speed, extrapolate linearly 
-        	floorSpeed = ceilingSpeed * floorWind.getKnots() / ceilingWind.getKnots();
+        // Taylor estimations of order 1
+        Speed floorSpeed1 = floorSpeeds.floorEntry(relativeBearing).getValue();
+        Speed floorSpeed2 = floorSpeeds.ceilingEntry(relativeBearing).getValue();
+        Bearing floorBearing1 = floorSpeeds.floorKey(relativeBearing);
+        Bearing floorBearing2 = floorSpeeds.ceilingKey(relativeBearing);
+        double floorSpeed;
+        if (floorSpeed1.equals(floorSpeed2)) {
+            floorSpeed = floorSpeed1.getKnots();
+        } else {
+            floorSpeed = floorSpeed1.getKnots() + (relativeBearing.getRadians() - floorBearing1.getRadians())
+                    * (floorSpeed2.getKnots() - floorSpeed1.getKnots())
+                    / (floorBearing2.getRadians() - floorBearing1.getRadians());
         }
-        if (ceilingSpeeds.size() == 0) {
-        	// for gps-polar: if no boat-speeds known for ceiling-wind-speed, extrapolate linearly 
-        	ceilingSpeed = floorSpeed * ceilingWind.getKnots() / floorWind.getKnots();
+
+        Speed ceilingSpeed1 = ceilingSpeeds.floorEntry(relativeBearing).getValue();
+        Speed ceilingSpeed2 = ceilingSpeeds.ceilingEntry(relativeBearing).getValue();
+        Bearing ceilingBearing1 = ceilingSpeeds.floorKey(relativeBearing);
+        Bearing ceilingBearing2 = ceilingSpeeds.ceilingKey(relativeBearing);
+        double ceilingSpeed;
+        if (ceilingSpeed1.equals(ceilingSpeed2)) {
+            ceilingSpeed = ceilingSpeed1.getKnots();
+        } else {
+            ceilingSpeed = ceilingSpeed1.getKnots() + (relativeBearing.getRadians() - ceilingBearing1.getRadians())
+                    * (ceilingSpeed2.getKnots() - ceilingSpeed1.getKnots())
+                    / (ceilingBearing2.getRadians() - ceilingBearing1.getRadians());
         }
 
         double speed;
@@ -694,55 +644,37 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     public Bearing[] optimalDirectionsDownwind() {
 
         Bearing windBearing = wind.getBearing().reverse();
-        Bearing estJibeAngleRight = null;
-        Bearing estJibeAngleLeft = null;
+        Bearing estGybeAngleRight = null;
+        Bearing estGybeAngleLeft = null;
         if (getTargetDirection().equals(new DegreeBearingImpl(0))) {
             windBearing = wind.getBearing().reverse();
-            estJibeAngleRight = null;
-            estJibeAngleLeft = null;
-            // lookup jibe-angles based on wind-values
-            Map.Entry<Speed, Bearing> floorEntry = jibeAngles.floorEntry(wind);
-            Bearing floorJibeAngle = null;
-            if (floorEntry != null) {
-            	floorJibeAngle = floorEntry.getValue();
+            estGybeAngleRight = null;
+            estGybeAngleLeft = null;
+            Bearing floorGybeAngle = gybeAngles.floorEntry(wind).getValue();
+            Bearing ceilingGybeAngle = gybeAngles.ceilingEntry(wind).getValue();
+            if (floorGybeAngle == null) {
+                floorGybeAngle = new DegreeBearingImpl(0);
             }
-            Map.Entry<Speed, Bearing> ceilingEntry = jibeAngles.ceilingEntry(wind);            
-            Bearing ceilingJibeAngle = null;
-            if (ceilingEntry != null) {
-            	ceilingJibeAngle = ceilingEntry.getValue();
+            if (ceilingGybeAngle == null) {
+                ceilingGybeAngle = new DegreeBearingImpl(0);
             }
-            // handle jibe-angles for out-of-definition-range wind-values 
-            if (floorJibeAngle == null) {
-                floorJibeAngle = ceilingJibeAngle;
-            }
-            if (ceilingJibeAngle == null) {
-                ceilingJibeAngle = floorJibeAngle;
-            }
-            // lookup wind-support-values based on wind-values
-            Speed floorSpeed = jibeAngles.floorKey(wind);
-            Speed ceilingSpeed = jibeAngles.ceilingKey(wind);
-            // handle out-of-definition-range wind-values 
-            if (floorSpeed == null) {
-                floorSpeed = ceilingSpeed;
-            }
-            if (ceilingSpeed == null) {
-                ceilingSpeed = floorSpeed;
-            }
-            double jibeAngle;
+            Speed floorSpeed = gybeAngles.floorKey(wind);
+            Speed ceilingSpeed = gybeAngles.ceilingKey(wind);
+            double gybeAngle;
             if (floorSpeed.equals(ceilingSpeed)) {
-                jibeAngle = floorJibeAngle.getRadians();
+                gybeAngle = floorGybeAngle.getRadians();
             } else {
-                jibeAngle = floorJibeAngle.getRadians() + (wind.getKnots() - floorSpeed.getKnots())
-                        * (ceilingJibeAngle.getRadians() - floorJibeAngle.getRadians())
+                gybeAngle = floorGybeAngle.getRadians() + (wind.getKnots() - floorSpeed.getKnots())
+                        * (ceilingGybeAngle.getRadians() - floorGybeAngle.getRadians())
                         / (ceilingSpeed.getKnots() - floorSpeed.getKnots());
             }
-            // Bearing estJibeAngle = new RadianBearingImpl(jibeAngle);
+            // Bearing estGybeAngle = new RadianBearingImpl(gybeAngle);
 
-            double scaledJibeAngle = Math.PI-(Math.PI-jibeAngle)*this.scaleBearing;
-            estJibeAngleRight = windBearing.add(new RadianBearingImpl(+scaledJibeAngle));
-            estJibeAngleLeft = windBearing.add(new RadianBearingImpl(-scaledJibeAngle));
+            double scaledGybeAngle = Math.PI-(Math.PI-gybeAngle)*this.scaleBearing;
+            estGybeAngleRight = windBearing.add(new RadianBearingImpl(+scaledGybeAngle));
+            estGybeAngleLeft = windBearing.add(new RadianBearingImpl(-scaledGybeAngle));
 
-            return new Bearing[] { estJibeAngleRight, estJibeAngleLeft };
+            return new Bearing[] { estGybeAngleRight, estGybeAngleLeft };
 
         } else {
 
@@ -763,17 +695,17 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
                             * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians()) > maxSpeedRight) {
                         maxSpeedRight = getSpeedAtBearing(b).getKnots()
                                 * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians());
-                        estJibeAngleRight = b;
+                        estGybeAngleRight = b;
                     }
                 } else if (getSpeedAtBearing(b).getKnots()
                         * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians()) > maxSpeedLeft) {
                     maxSpeedLeft = getSpeedAtBearing(b).getKnots()
                             * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians());
-                    estJibeAngleLeft = b;
+                    estGybeAngleLeft = b;
                 }
             }
 
-            return new Bearing[] { estJibeAngleLeft, estJibeAngleRight };
+            return new Bearing[] { estGybeAngleLeft, estGybeAngleRight };
         }
     }
 
@@ -801,6 +733,8 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         return 4000;
     }
 
+    // TO BE REVIEWED
+    // not sure I use the right terms and conventions
     @Override
     public WindSide getWindSide(Bearing bearing) {
         WindSide windSide = null;

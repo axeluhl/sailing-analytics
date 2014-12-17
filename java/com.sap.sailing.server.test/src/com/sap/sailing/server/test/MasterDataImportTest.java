@@ -137,12 +137,12 @@ public class MasterDataImportTest {
     private Set<Serializable> storedLogUUIDs = new HashSet<Serializable>();
 
     @After
-    public void tearDown() {
+    public void tearDown() throws MalformedURLException, IOException, InterruptedException {
         deleteAllDataFromDatabase();
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException {
         deleteAllDataFromDatabase();
     }
 
@@ -153,7 +153,7 @@ public class MasterDataImportTest {
         return spyResource;
     }
 
-    private void deleteAllDataFromDatabase() {
+    private void deleteAllDataFromDatabase() throws MalformedURLException, IOException, InterruptedException {
         MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().getWriteConcern().fsync();
         service.getDB().dropDatabase();

@@ -30,6 +30,4 @@ public interface PolarSheetGenerationSettings extends Serializable{
 
     boolean splitByWindgauges();
 
-    boolean areDefault();
-
 }

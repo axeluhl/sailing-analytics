@@ -183,8 +183,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
             boolean includeCombinedWindForAllLegMiddles, AsyncCallback<WindInfoForRaceDTO> callback);
 
-    void getPolarResults(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
-    
     void getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime, AsyncCallback<SimulatorResultsDTO> callback);
     
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
@@ -555,13 +553,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
-    void getBoatClassNamesWithPolarSheetsAvailable(AsyncCallback<List<String>> asyncCallback);
-    
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
-    
 
-    void showCachedPolarSheetForBoatClass(String boatClassName,
-            AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void denoteForRaceLogTracking(String leaderboardName,

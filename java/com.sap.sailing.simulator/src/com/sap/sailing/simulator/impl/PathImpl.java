@@ -74,12 +74,8 @@ public class PathImpl implements Path, Serializable {
         int idx = 1;
         while (idx < this.pathPoints.size()) {
 
-            if ((this.pathPoints.get(idx).getTimePoint().asMillis() >= nextTimePoint.asMillis())||(idx == this.pathPoints.size()-1)) {
+            if (this.pathPoints.get(idx).getTimePoint().asMillis() >= nextTimePoint.asMillis()) {
 
-                if (idx == this.pathPoints.size()-1) {
-                	nextTimePoint = endTime;
-                }
-                
                 // reached point after next timestep
                 TimedPositionWithSpeed p1 = this.pathPoints.get(idx - 1);
                 TimedPositionWithSpeed p2 = this.pathPoints.get(idx);

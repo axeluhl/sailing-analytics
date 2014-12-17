@@ -42,13 +42,10 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     private PolarSheetGenerationSettings settings;
     
     private final Map<String,PolarSheetsData> polarSheetsDataMap;
-    
-    private final AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel;
 
-    public PolarSheetsChartPanel(StringMessages stringMessages, AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel) {
+    public PolarSheetsChartPanel(StringMessages stringMessages) {
         super(Unit.PCT);
         this.stringMessages = stringMessages;
-        this.angleOverDataSizeHistogramPanel = angleOverDataSizeHistogramPanel;
         polarSheetsDataMap = new HashMap<String, PolarSheetsData>();
         setSize("100%", "100%");
         chart = createPolarSheetChart();
@@ -124,11 +121,10 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
                         createSeriesForWindspeed(seriesId, i, result.getStepping().getRawStepping()[i]);
                     }
                     Series series = seriesMap.get(seriesId)[i];
-                    //series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
+                    series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
                     Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result, i);
                     if (points != null) {
                         series.setPoints(points);
-                        angleOverDataSizeHistogramPanel.addData(result.getHistogramDataMap().get(i));
                     }
                 }
             }
@@ -158,16 +154,14 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         Point[] points = new Point[360];
         List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngleForWindspeed(windspeed));
         Integer max = Collections.max(dataCountList);
-        if (max < settings.getMinimumDataCountPerAngle()) {
+        if (max <= 0) {
             return null;
         }
         for (int i = 0; i < 360; i++) {
             if (result.getHistogramDataMap().get(windspeed) == null
                     || result.getHistogramDataMap().get(windspeed).get(i) == null
                     || result.getHistogramDataMap().get(windspeed).get(i).getConfidenceMeasure() < settings
-                            .getMinimumConfidenceMeasure()
-                    || result.getHistogramDataMap().get(windspeed).get(i).getDataCount() < settings
-                            .getMinimumDataCountPerAngle()) {
+                            .getMinimumConfidenceMeasure()) {
                 points[i] = new Point(0);
                 continue;
             }

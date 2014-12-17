@@ -1,15 +1,20 @@
-package com.sap.sailing.gwt.ui.test;
+package com.sap.sailing.domain.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -24,12 +29,10 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -41,10 +44,15 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
+import com.sap.sailing.domain.polarsheets.DataPointWithOriginInfo;
+import com.sap.sailing.domain.polarsheets.PerRaceAndCompetitorPolarSheetGenerationWorker;
+import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
+import com.sap.sailing.domain.polarsheets.PolarSheetHistogramBuilder;
+import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
@@ -53,63 +61,137 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingByTimeComparator;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
-import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
-public class PolarSheetGenerationServiceTest {
-    
-    private static final String BOAT_CLASS = "Forelle";
+public class PolarSheetGenerationTest {
     
     @Test
-    public void testPolarSheetGenerationService() throws Exception {
-         
-        SailingService service = new MockSailingServiceForPolarSheetGeneration();
+    public void testPolarSheetRawDataGeneration() throws InterruptedException {
+        Executor executor = new ThreadPoolExecutor(/* corePoolSize */Runtime.getRuntime().availableProcessors(),
+        /* maximumPoolSize */Runtime.getRuntime().availableProcessors(),
+        /* keepAliveTime */60, TimeUnit.SECONDS,
+        /* workQueue */new LinkedBlockingQueue<Runnable>());
 
+        MockTrackedRaceForPolarSheetGeneration race = new MockTrackedRaceForPolarSheetGeneration();
+        
         Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
         WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
                 0.05, false, windStepping, false);
         
-        List<RegattaAndRaceIdentifier> idList = new ArrayList<RegattaAndRaceIdentifier>();
-        idList.add(new RegattaNameAndRaceName("IrgendeineRegatta", "IrgendeinRennen"));
+        TimePoint startTime = new MillisecondsTimePoint(9);
+        TimePoint endTime = new MillisecondsTimePoint(80);
+        // Only used for storing and exporting results in this test case:
+        PolarSheetGenerationWorker resultContainer = new PolarSheetGenerationWorker(new HashSet<TrackedRace>(),
+                settings, executor);
+
+        BoatClass forelle = new BoatClassImpl("Forelle", true);
+        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, new TeamImpl("SAP", null, null),
+                new BoatImpl("Schnelle Forelle", forelle, "GER000"));
+
+        PerRaceAndCompetitorPolarSheetGenerationWorker task = new PerRaceAndCompetitorPolarSheetGenerationWorker(race,
+                resultContainer, startTime, endTime, competitor, settings);
+  
+        executor.execute(task);
         
-        PolarSheetGenerationResponse triggerData = service.generatePolarSheetForRaces(idList, settings, "");
-        Assert.assertNotNull(triggerData);
-        Assert.assertEquals(BOAT_CLASS, triggerData.getName());
-        Assert.assertNotNull(triggerData.getId());
-        
-        PolarSheetsData results = triggerData.getData();
-        
-        Assert.assertTrue(results.isComplete());
-        Assert.assertNotNull(results);
-        
-        Assert.assertEquals(4, results.getDataCount());
-        Assert.assertEquals(4.0, results.getAveragedPolarDataByWindSpeed()[0][45]);
-        Assert.assertEquals(2.0, results.getAveragedPolarDataByWindSpeed()[0][55]);
-        Assert.assertEquals(6.0, results.getAveragedPolarDataByWindSpeed()[0][35]);
-        
-    }
-    
-    
-    @SuppressWarnings("serial")
-    private class MockSailingServiceForPolarSheetGeneration extends SailingServiceImplMock {
-        @Override
-        protected RacingEventService getService() {
-            RacingEventService service = new MockRacingEventServiceForPolarSheetGeneration();
-            return service;
-        }
-    }
-    
-    private class MockRacingEventServiceForPolarSheetGeneration extends RacingEventServiceImpl {
-        
-        @Override
-        public DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
-            MockTrackedRaceForPolarSheetGeneration trackedRace = new MockTrackedRaceForPolarSheetGeneration();
-            return trackedRace;
+        double timeUntilTimeout = 1000;
+        while (!task.isDone() && timeUntilTimeout > 0) {
+            Thread.sleep(100);
+            timeUntilTimeout = timeUntilTimeout - 0.1;
         }
         
+        Assert.assertTrue(task.isDone());
+        
+        PolarSheetsData data = resultContainer.getPolarData();
+        Assert.assertEquals(4, data.getDataCount());
+        Assert.assertEquals(4.0, data.getAveragedPolarDataByWindSpeed()[0][45]);
+        Assert.assertEquals(2.0, data.getAveragedPolarDataByWindSpeed()[0][55]);
+        Assert.assertEquals(6.0, data.getAveragedPolarDataByWindSpeed()[0][35]);
+        
     }
+    
+    @Test
+    public void testHistogramBuilder() {
+        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
+        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
+        PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 10, 0, false, true, 5,
+                0.05, false, windStepping, false);
+        PolarSheetHistogramBuilder builder = new PolarSheetHistogramBuilder(settings);
+        
+        
+        List<DataPointWithOriginInfo> rawData = new ArrayList<DataPointWithOriginInfo>();
+        rawData.add(new DataPointWithOriginInfo(1.09, "", ""));
+        rawData.add(new DataPointWithOriginInfo(1.0, "", ""));
+        rawData.add(new DataPointWithOriginInfo(1.11, "", ""));
+        rawData.add(new DataPointWithOriginInfo(1.46, "", ""));
+        rawData.add(new DataPointWithOriginInfo(1.56, "", ""));
+        rawData.add(new DataPointWithOriginInfo(2.05, "", ""));
+        rawData.add(new DataPointWithOriginInfo(2.09, "", ""));
+        rawData.add(new DataPointWithOriginInfo(3.0, "", ""));
+        rawData.add(new DataPointWithOriginInfo(2.999, "", ""));
+        PolarSheetsHistogramData result = builder.build(rawData, 0, 0);
+        Number[] xValues = result.getxValues();
+        Assert.assertEquals(10, xValues.length);
+        Assert.assertTrue(xValues[4].doubleValue() > 1.9 - 0.001 && xValues[4].doubleValue() < 1.9 + 0.001);
+        Number[] yValues = result.getyValues();
+        Assert.assertEquals(10, yValues.length);
+        Assert.assertEquals(3, yValues[0]);
+        Assert.assertEquals(0, yValues[1]);
+        Assert.assertEquals(2, yValues[2]);
+        Assert.assertEquals(2, yValues[9]);
+    }
+    
+    @Test
+    public void testOutlierNeighborhoodAlgorithm() {
+        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
+        List<DataPointWithOriginInfo> values = new ArrayList<DataPointWithOriginInfo>();
+        values.add(new DataPointWithOriginInfo(0., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        int[] count = new int[1];
+        count[0] = values.size();
+        Map<Integer, List<DataPointWithOriginInfo>> valuesInMap = new HashMap<Integer, List<DataPointWithOriginInfo>>();
+        valuesInMap.put(0, values);
+        double pct = PolarSheetGenerationWorker.getNeighboorhoodSizePercentage(count, valuesInMap, 0, 0,
+                new DataPointWithOriginInfo(0.0, "", ""), settings);
+
+        Assert.assertTrue(pct < 0.05);
+
+        pct = PolarSheetGenerationWorker.getNeighboorhoodSizePercentage(count, valuesInMap, 0, 2,
+                new DataPointWithOriginInfo(20.0, "", ""), settings);
+  
+        Assert.assertTrue(pct > 0.05);
+        
+    }
+    
     
     @SuppressWarnings("serial")
     private class MockTrackedRaceForPolarSheetGeneration extends MockedTrackedRace {
@@ -163,11 +245,7 @@ public class PolarSheetGenerationServiceTest {
             waypoints.add(new WaypointImpl(null));
             waypoints.add(new WaypointImpl(null));
             waypoints.add(new WaypointImpl(null));
-            ArrayList<Competitor> competitors = new ArrayList<Competitor>();
-            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, new TeamImpl("SAP", null, null),
-                    new BoatImpl("Schnelle Forelle", forelle, "GER000"));
-            competitors.add(competitor);
-            RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", waypoints), forelle, competitors);
+            RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", waypoints), forelle, new ArrayList<Competitor>());
             return race;
         }
         
@@ -187,20 +265,10 @@ public class PolarSheetGenerationServiceTest {
         
         @Override
         public Set<WindSource> getWindSources(WindSourceType type) {
-            Set<WindSource> sources = new HashSet<WindSource>();
+            Set<WindSource> sources = new HashSet<>();
             sources.add(new WindSourceImpl(type));
             return sources;
         }
-        
-        @Override
-        public TimePoint getStartOfRace() {
-            return new MillisecondsTimePoint(9);
-        }
-        
-        @Override
-        public TimePoint getEndOfRace() {
-            return new MillisecondsTimePoint(80);
-        };
     }
     
     @SuppressWarnings("serial")
