@@ -68,7 +68,6 @@
         android:textColor="@color/black"
         android:text="@string/no_qr_code" />
         
-        
     </LinearLayout>
     
 
