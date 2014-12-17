@@ -7,11 +7,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 
 public class CompassFragment extends BaseFragment {
 	
-	private String TAG = CompassFragment.class.getName(); 
-	private final String SIS_HEADING_TEXTIVEW = "CompassFragmentHeadingTextView"; 
+	//private String TAG = CompassFragment.class.getName(); 
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
@@ -25,6 +25,12 @@ public class CompassFragment extends BaseFragment {
 		{
 			TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
 			headingText.setText(String.valueOf(Math.round(heading)) + "°");
+			
+			TrackingActivity activity = (TrackingActivity) getActivity();
+
+			if (activity != null) {
+				activity.lastCompassIndicatorText = headingText.getText().toString();
+			}
 		}
 	}
 	
@@ -32,20 +38,12 @@ public class CompassFragment extends BaseFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		TextView headingText = (TextView)getActivity().findViewById(R.id.compass_bearing_text_view);
-		if (savedInstanceState != null)
-		{
-			headingText.setText(savedInstanceState.getString(SIS_HEADING_TEXTIVEW));
+		
+		TrackingActivity activity = (TrackingActivity) getActivity();
+		if (activity != null) {
+			headingText.setText(activity.lastCompassIndicatorText);
+		} else {
+			headingText.setText("");
 		}
-		else
-		{
-			headingText.setText("---°");
-		}
-	}
-	
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		TextView headingText = (TextView)getActivity().findViewById(R.id.compass_bearing_text_view);
-		outState.putString(SIS_HEADING_TEXTIVEW, headingText.getText().toString());
-	}
+	}	
 }
