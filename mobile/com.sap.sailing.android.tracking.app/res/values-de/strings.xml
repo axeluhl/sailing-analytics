@@ -83,4 +83,6 @@
 	<string name="sog">SOG</string>
 	<string name="none">Keine</string>
 	<string name="show_leaderboard">Leaderboard</string>
+	<string name="desc_regatta_user_image">Benutzerdefiniertes Bild für Regatta</string>
+	<string name="desc_add_photo_button">Foto hinzufügen Button</string>
 </resources>
