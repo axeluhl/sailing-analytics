@@ -42,7 +42,7 @@ public class PolarResource extends AbstractSailingServerResource {
         ResponseBuilder responseBuilder;
         try {
             speedWithConfidence = getService().getPolarDataService().getSpeed(boatClass, new KnotSpeedImpl(windSpeed),
-                    new DegreeBearingImpl(angle), true);
+                    new DegreeBearingImpl(angle));
             String resultString = "Speed: " + speedWithConfidence.getObject().getKnots() + "kn; Confidence: "
                     + speedWithConfidence.getConfidence();
             responseBuilder = Response.ok(resultString, MediaType.TEXT_PLAIN);

@@ -117,10 +117,9 @@ public class PolarDataMiner {
      * @return
      * @throws NotEnoughDataHasBeenAddedException
      */
-    public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind,
-            boolean useLinearRegression)
+    public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind, useLinearRegression).getA();
+        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind).getA();
     }
 
 
@@ -144,7 +143,7 @@ public class PolarDataMiner {
                 try {
                     int convertedAngle = convertAngleIfNecessary(angle);
                     speedWithConfidenceAndDataCount = incrementalRegressionProcessor.estimateBoatSpeed(boatClass,
-                            new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle), true);
+                            new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle));
                 } catch (NotEnoughDataHasBeenAddedException e) {
                     // No data so put in a 0 speed with 0 confidence
                     speedWithConfidenceAndDataCount = new Pair<SpeedWithConfidence<Void>, Integer>(
@@ -216,7 +215,7 @@ public class PolarDataMiner {
             if (angle >= startAngleInclusive && angle < endAngleExclusive) {
                 try {
                     dataCounts[angle] = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed,
-                            new DegreeBearingImpl(convertAngleIfNecessary(angle)), true).getB();
+                            new DegreeBearingImpl(convertAngleIfNecessary(angle))).getB();
                 } catch (NotEnoughDataHasBeenAddedException e) {
                     dataCounts[angle] = 0;
                 }

@@ -40,12 +40,11 @@ public interface PolarDataService {
      * @param boatClass
      * @param windSpeed
      * @param bearingToTheWind
-     *            Boat's direction relative to the wind. either in -180 -> +180 or 0 -> 359 degrees
-     * @param useLinearRegression if true uses lin. Regression for estimation in the wind interval, if false simple arithm. mean in interval
+     *            Boat's direction relative to the wind. either in -180 -> +180 or 0 -> 359 degrees interval
      * @return The speed the boat is moving at for the specified wind and bearing according to the polar diagram.
      * @throws NotEnoughDataHasBeenAddedException
      */
-    SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind, boolean useLinearRegression)
+    SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
             throws NotEnoughDataHasBeenAddedException;
     
     /**
@@ -126,9 +125,6 @@ public interface PolarDataService {
      * @return array with datacount for all angles in the given area, else null
      */
     Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
-
-    SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
-            LegType legType, Tack tack, boolean useLinReg) throws NotEnoughDataHasBeenAddedException;
     
 
 }

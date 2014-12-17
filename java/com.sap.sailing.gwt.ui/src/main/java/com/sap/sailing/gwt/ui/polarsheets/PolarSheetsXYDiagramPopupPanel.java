@@ -44,16 +44,6 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
         });
         containerPanel.add(closeButton);
         
-        Point[] pointsForUpwindStarboardAverageAngle = toPointArray(result.getPointsForUpwindStarboardAverageAngle());
-        Series angleSeries = chart.createSeries();
-        angleSeries.setPoints(pointsForUpwindStarboardAverageAngle);
-        //chart.addSeries(angleSeries);
-        
-        Point[] pointsForUpwindStarboardAverageSpeed = toPointArray(result.getPointsForUpwindStarboardAverageSpeed());
-        Series speedSeries = chart.createSeries();
-        speedSeries.setName("Upwind Starboard Speed - LinearRegressions");
-        speedSeries.setPoints(pointsForUpwindStarboardAverageSpeed);
-        chart.addSeries(speedSeries);
         
         Point[] pointsForUpwindStarboardAverageSpeedMovingAverage = toPointArray(result.getPointsForUpwindStarboardAverageSpeedMovingAverage());
         Series speedSeriesMovingAverage = chart.createSeries();
