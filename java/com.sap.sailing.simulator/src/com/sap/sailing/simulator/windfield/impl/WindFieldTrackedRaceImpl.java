@@ -35,14 +35,12 @@ public class WindFieldTrackedRaceImpl extends WindFieldGeneratorImpl implements 
     	Position pos = timedPosition.getPosition();
     	double epsLat = (new MeterDistance(EPSILON_DISTANCE_METER)).getCentralAngleDeg();
     	double qLat = Math.floor(pos.getLatDeg() / epsLat) * epsLat;
-    	double epsLng = epsLat / Math.cos(qLat * Math.PI / 180.0);
+    	double epsLng = epsLat / Math.cos(pos.getLatDeg());
     	double qLng = Math.floor(pos.getLngDeg() / epsLng) * epsLng;
     	TimePoint time = timedPosition.getTimePoint();
     	long epsTime = EPSILON_TIME_MILLIS;
-    	TimePoint qTime = new MillisecondsTimePoint((long) (Math.floor(time.asMillis() / epsTime) * epsTime));
-    	Position qPosition = new DegreePosition(qLat, qLng);
-    	Wind wind = this.race.getWind(qPosition, qTime);
-        return wind;
+    	long qTime = (long) (Math.floor(time.asMillis() / epsTime) * epsTime);
+        return this.race.getWind(new DegreePosition(qLat, qLng), new MillisecondsTimePoint(qTime));
     }
     
 }
