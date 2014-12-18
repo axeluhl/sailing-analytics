@@ -60,5 +60,12 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringMessages.boatClass() + ":"));
         formGrid.setWidget(1, 1, boatClassEntryField);
+        formGrid.insertRow(2);
+        formGrid.insertRow(2);
+        formGrid.setWidget(2, 0, new Label(stringMessages.startDate() + ":"));
+        formGrid.setWidget(2, 1, startDateBox);
+        formGrid.setWidget(3, 0, new Label(stringMessages.endDate() + ":"));
+        formGrid.setWidget(3, 1, endDateBox);
+
     }
 }

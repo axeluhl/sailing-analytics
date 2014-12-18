@@ -45,15 +45,15 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             Date endDate = regattaToValidate.endDate;
             String datesErrorMessage = null;
             // remark: startDate == null and endDate == null is valid
-            if(startDate != null && endDate != null) {
-                if(startDate.after(endDate)) {
-                    datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate(); 
+            if (startDate != null && endDate != null) {
+                if (startDate.after(endDate)) {
+                    datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
                 }
-            } else if((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
+            } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
             }
             
-            if(datesErrorMessage != null) {
+            if (datesErrorMessage != null) {
                 errorMessage = datesErrorMessage;
             } else if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
