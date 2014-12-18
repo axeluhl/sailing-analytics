@@ -34,17 +34,10 @@ public class NetworkHelper {
     	super();
     }
 
-	public void executeHttpRequestAsnchronously(HttpRequest request,
-			NetworkHelperSuccessListener successListener, NetworkHelperFailureListener failureListener) {
-		
-		NetworkRequestTask task = new NetworkRequestTask(successListener, failureListener, false);
-		task.execute(request);
-    }
-
 	public void executeHttpJsonRequestAsnchronously(HttpRequest request,
 			NetworkHelperSuccessListener successListener, NetworkHelperFailureListener failureListener) {
 		
-		NetworkRequestTask task = new NetworkRequestTask(successListener, failureListener, true);
+		NetworkRequestTask task = new NetworkRequestTask(successListener, failureListener);
 		task.execute(request);
     }
 	
@@ -52,13 +45,15 @@ public class NetworkHelper {
 	{
 		private NetworkHelperSuccessListener successListener;
 		private NetworkHelperFailureListener failureListener;
-		private boolean expectingJsonObject;
+		
+		private JSONObject response;
+		private boolean isSuccess = false;
+		private NetworkHelperError error;
 
 		public NetworkRequestTask(NetworkHelperSuccessListener successListener, 
-				NetworkHelperFailureListener failureListener, boolean expectingJsonObject) {
+				NetworkHelperFailureListener failureListener) {
 			this.successListener = successListener;
 			this.failureListener = failureListener;
-			this.expectingJsonObject = expectingJsonObject;
 		}
 		
 		@Override
@@ -67,25 +62,35 @@ public class NetworkHelper {
 			HttpRequest request = params[0];
 			try {
 				stream = request.execute();
-				String response = readStream(stream);
+				String responseStr = readStream(stream);
+
+				response = null;
+
+				if (responseStr.length() > 0) {
+					response = new JSONObject(responseStr);
+				}
 				
-				if (expectingJsonObject)
-				{
-					JSONObject jsonObject = new JSONObject(response);
-					successListener.performAction(jsonObject);
-				}
-				else
-				{
-					successListener.performAction(response);
-				}
+				isSuccess = true;
 			} catch (IOException e) {
-				failureListener.performAction();
+				error = new NetworkHelperError(e.getMessage());
 			} catch (JSONException e) {
+				error = new NetworkHelperError(e.getMessage());
 				ExLog.e(mContext, TAG, "Failed to parse JSON: " + e.getMessage());
-				failureListener.performAction();
 			}
 			
 			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			if (isSuccess)
+			{
+				successListener.performAction(response);
+			}
+			else
+			{
+				failureListener.performAction(error);
+			}
 		}
 		
 		private String readStream(InputStream inputStream) throws IOException {
@@ -99,6 +104,23 @@ public class NetworkHelper {
 	    }
 	}
     
-    public interface NetworkHelperSuccessListener { public void performAction(Object response); }
-    public interface NetworkHelperFailureListener { public void performAction(); }
+	/**
+	 * perfomAction called in case of network request success
+	 */
+    public interface NetworkHelperSuccessListener { public void performAction(JSONObject response); }
+    
+    /**
+	 * perfomAction called in case of network request failure
+	 */
+    public interface NetworkHelperFailureListener { public void performAction(NetworkHelperError e); }
+    
+    /**
+     * Error class for NetworkHelper
+     *
+     */
+    public class NetworkHelperError {
+    	String message;
+    	public NetworkHelperError(String message) { this.message = message; }
+    	public String getMessage() { return message; }
+    }
 }
