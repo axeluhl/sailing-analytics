@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import AVFoundation
 
 @objc protocol QRCodeManagerDelegate {
     optional var activityIndicatorView: UIActivityIndicatorView { get }
@@ -31,6 +32,41 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         self.delegate = delegate
     }
     
+    class func deviceCanReadQRCodes() -> Bool {
+        var session: AVCaptureSession!
+        var output: AVCaptureMetadataOutput!
+        (session, output) = QRCodeManager.setUpCaptureSession(nil)
+        let types = output.availableMetadataObjectTypes as [String]
+        var deviceCanReadQRCodes = false
+        for type in types {
+            if type == AVMetadataObjectTypeQRCode {
+                deviceCanReadQRCodes = true
+                break
+            }
+        }
+        return deviceCanReadQRCodes
+    }
+
+    class func setUpCaptureSession(delegate: AVCaptureMetadataOutputObjectsDelegate?) -> (session: AVCaptureSession!, output: AVCaptureMetadataOutput!) {
+        var device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
+        
+        var writeError : NSError? = nil
+        var input = AVCaptureDeviceInput.deviceInputWithDevice(device, error: &writeError) as? AVCaptureDeviceInput
+        
+        var output = AVCaptureMetadataOutput()
+        output.setMetadataObjectsDelegate(delegate, queue: dispatch_get_main_queue())
+        
+        let session = AVCaptureSession()
+        session.canSetSessionPreset(AVCaptureSessionPresetHigh)
+        if session.canAddInput(input) {
+            session.addInput(input)
+        }
+        if session.canAddOutput(output) {
+            session.addOutput(output)
+        }
+        return (session, output)
+    }
+
     func parseUrl(url: NSString) {
         
         qrcodeData = QRCodeData()

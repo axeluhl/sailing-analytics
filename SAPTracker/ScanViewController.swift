@@ -33,23 +33,9 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     
     /* Set up camera and QR code scanner */
     @IBAction func startScanning() {
-        var device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
-        
-        var writeError : NSError? = nil
-        var input = AVCaptureDeviceInput.deviceInputWithDevice(device, error: &writeError) as? AVCaptureDeviceInput
-        
-        var output = AVCaptureMetadataOutput()
-        output.setMetadataObjectsDelegate(self, queue: dispatch_get_main_queue())
-        
-        session = AVCaptureSession()
-        session.canSetSessionPreset(AVCaptureSessionPresetHigh)
-        if session.canAddInput(input) {
-            session.addInput(input)
-        }
-        if session.canAddOutput(output) {
-            session.addOutput(output)
-        }
-        output.metadataObjectTypes = [AVMetadataObjectTypeEAN13Code,AVMetadataObjectTypeEAN8Code,AVMetadataObjectTypeQRCode]
+        var output: AVCaptureMetadataOutput!
+        (session, output) = QRCodeManager.setUpCaptureSession(self)
+        output.metadataObjectTypes = [AVMetadataObjectTypeQRCode]
         
         previewLayer = AVCaptureVideoPreviewLayer(session: session)
         previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
