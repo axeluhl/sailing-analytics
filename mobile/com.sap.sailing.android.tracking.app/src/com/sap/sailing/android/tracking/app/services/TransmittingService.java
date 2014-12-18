@@ -1,5 +1,7 @@
 package com.sap.sailing.android.tracking.app.services;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,18 +19,18 @@ import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.IBinder;
 
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
-import com.android.volley.VolleyError;
+import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
-import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperError;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFailureListener;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
-import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 /**
@@ -324,11 +326,22 @@ public class TransmittingService extends Service {
 				{
 					currentlySending = true;
 					sendingAttempted = true; // will be set to false in the listeners
-					VolleyHelper.getInstance(this).enqueueRequest(host
-							+ prefs.getServerGpsFixesPostPath(), 
-							requestObject, 
-							new FixSubmitListener(ids.toArray(idsArr)),  
-							new FixSubmitErrorListener(host, getTrackingServiceIsCurrentlyTracking(), failedHosts));
+
+					HttpJsonPostRequest request;
+					try {
+						request = new HttpJsonPostRequest(new URL(host
+								+ prefs.getServerGpsFixesPostPath()), requestObject.toString(), this);
+					
+
+					NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(
+							request,
+							new FixSubmitListener(ids.toArray(idsArr)),
+							new FixSubmitErrorListener(host,
+									getTrackingServiceIsCurrentlyTracking(), failedHosts));
+					
+					} catch (MalformedURLException e) {
+						ExLog.w(this, TAG, "Warning, can't send fixes, MalformedURLException: " + e.getMessage());
+					}
 				}
 			} else {
 				ExLog.w(this, TAG, "Warning, can't send fixes, host is null!");
@@ -432,8 +445,7 @@ public class TransmittingService extends Service {
 	// }
 	// }
 
-	private class FixSubmitListener implements Listener<JSONObject> {
-
+	private class FixSubmitListener implements NetworkHelperSuccessListener {
 		private String[] ids;
 
 		public FixSubmitListener(String[] ids) {
@@ -441,14 +453,13 @@ public class TransmittingService extends Service {
 		}
 
 		@Override
-		public void onResponse(JSONObject response) {
+		public void performAction(JSONObject response) {
 			deleteSynced(ids);
 			markSuccessfulTransmission();
-			// markAsSynced(ids);
 		}
 	}
 
-	private class FixSubmitErrorListener implements ErrorListener {
+	private class FixSubmitErrorListener implements NetworkHelperFailureListener {
 		private String host;
 		private List<String> failedHosts;
 		private boolean currentlyTracking = false;
@@ -461,7 +472,7 @@ public class TransmittingService extends Service {
 		}
 
 		@Override
-		public void onErrorResponse(VolleyError error) {
+		public void performAction(NetworkHelperError error) {
 			markFailedTransmission();
 			ExLog.e(TransmittingService.this, TAG,
 					"Error while sending GPS fix " + error.getMessage());
