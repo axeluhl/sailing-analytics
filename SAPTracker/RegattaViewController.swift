@@ -13,10 +13,10 @@ import Darwin
 class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate {
     
     enum ActionSheet: Int {
-        case Menu, Image
+        case Menu
     }
     enum AlertView: Int {
-        case CheckOut
+        case CheckOut, Image
     }
     
     var sourceTypes = [UIImagePickerControllerSourceType]()
@@ -181,7 +181,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         actionSheet.cancelButtonIndex = 3
         actionSheet.showInView(self.view)
     }
-    
+
+    // MARK: - UIActionSheetDelegate
+
     func actionSheet(actionSheet: UIActionSheet!, clickedButtonAtIndex buttonIndex: Int) {
         if actionSheet.tag == ActionSheet.Menu.rawValue {
             switch buttonIndex{
@@ -191,14 +193,10 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 performSegueWithIdentifier("Settings", sender: actionSheet)
                 break
             case 2:
-                showImageActionSheet(actionSheet)
+                showImageAlertView(actionSheet)
                 break
             default:
                 break
-            }
-        } else if actionSheet.tag == ActionSheet.Image.rawValue {
-            if buttonIndex < actionSheet.cancelButtonIndex {
-                imagePicker(sourceTypes[buttonIndex])
             }
         }
     }
@@ -223,15 +221,14 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     
     // MARK: - Image picker
     
-    @IBAction func showImageActionSheet(sender: AnyObject) {
+    @IBAction func showImageAlertView(sender: AnyObject) {
         if sourceTypes.count == 1 {
             imagePicker(sourceTypes[0])
         }
         if sourceTypes.count == 2 {
-            let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: sourceTypeNames[0], sourceTypeNames[1], "Cancel")
-            actionSheet.tag = ActionSheet.Image.rawValue
-            actionSheet.cancelButtonIndex = 2
-            actionSheet.showInView(self.view)
+            let alertView = UIAlertView(title: "Select a photo for your team", message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: sourceTypeNames[0], sourceTypeNames[1])
+            alertView.tag = AlertView.Image.rawValue;
+            alertView.show()
         }
     }
     
@@ -259,6 +256,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         alertView.show()
     }
     
+    // MARK: - UIAlertViewDelegate
+    
     func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
         switch alertView.tag {
             // Check-out
@@ -282,6 +281,11 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 DataManager.sharedManager.saveContext()
                 self.navigationController!.popViewControllerAnimated(true)
                 break
+            }
+            break
+        case AlertView.Image.rawValue:
+            if buttonIndex != alertView.cancelButtonIndex {
+                imagePicker(sourceTypes[buttonIndex - 1])
             }
             break
         default:

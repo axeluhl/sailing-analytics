@@ -315,7 +315,7 @@
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
-                                    <action selector="showImageActionSheet:" destination="G3a-SV-Maf" eventType="touchUpInside" id="DRs-ws-eQf"/>
+                                    <action selector="showImageAlertView:" destination="G3a-SV-Maf" eventType="touchUpInside" id="tVC-OA-ePP"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CaR-gy-mOG">
@@ -328,7 +328,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <action selector="showImageActionSheet:" destination="G3a-SV-Maf" eventType="touchUpInside" id="jtQ-tE-Ok0"/>
+                                    <action selector="showImageAlertView:" destination="G3a-SV-Maf" eventType="touchUpInside" id="oQF-Ar-8Ca"/>
                                 </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2UK-je-59c">
