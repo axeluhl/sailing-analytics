@@ -392,7 +392,7 @@ import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.impl.PolarDiagramCSV;
+import com.sap.sailing.simulator.impl.PolarDiagramGPS;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -449,7 +449,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
     deviceIdentifierStringSerializationHandlerTracker;
-
+    
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
     private final DomainObjectFactory domainObjectFactory;
@@ -1472,6 +1472,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public Boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier) {
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        BoatClass boatClass = trackedRace.getRace().getBoatClass();
+        PolarDataService polarData = getService().getPolarDataService();
+        PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarData);
+        return new Boolean(polarDiagram != null);
+    };
+
+    @Override
     public SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         SimulatorResultsDTO result = null;
@@ -1484,13 +1493,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (trackedLeg == null) {
                 return result;
             }
-            
-            Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();
-            Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, fromTimePoint);
+            Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();            
             
             // get next mark as end-position
             Waypoint toWaypoint = trackedLeg.getLeg().getTo();
-            Position endPosition = trackedRace.getApproximatePosition(toWaypoint, fromTimePoint);
 
             TimePoint startTimePoint = null;
             TimePoint endTimePoint = null;
@@ -1507,9 +1513,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
+            Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
+            Position endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
 
             if (startTimePoint.asDate().equals(prevStartTime)) {
-                return new SimulatorResultsDTO(startTimePoint.asDate(), 0, null, null, null, null);
+                return new SimulatorResultsDTO(startTimePoint.asDate(), 0, 0, null, null, null, null);
             }
             
             // determine legtype upwind/downwind/reaching
@@ -1530,14 +1538,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<Position> course = new ArrayList<Position>();
             course.add(startPosition);
             course.add(endPosition);
-            String csvFilePath = "PolarDiagram49STG.csv";
-            PolarDiagram polarDiagram = null;
-            try {
-                polarDiagram = new PolarDiagramCSV(csvFilePath);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            BoatClass boatClass = trackedRace.getRace().getBoatClass();
+            PolarDataService polarData = getService().getPolarDataService();
+            PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarData);
             SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField, SailingSimulatorConstants.ModeEvent, true, true);
             
             // for upwind/downwind, run simulation with start-time, start-position, end-position and windfield
@@ -1571,7 +1574,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
                 posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
-                result = new SimulatorResultsDTO(startTimePoint.asDate(), legDuration, rcDTO, pathDTOs, null, null);
+                result = new SimulatorResultsDTO(startTimePoint.asDate(), timeStep.asMillis(), legDuration, rcDTO, pathDTOs, null, null);
             }
         }
         

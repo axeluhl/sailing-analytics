@@ -374,7 +374,7 @@ public class SimulatorUtils {
         Map<String, Path> paths = new HashMap<String, Path>();
 
         // get instance of heuristic searcher
-        PathGeneratorTreeGrowWind genTreeGrow = new PathGeneratorTreeGrowWind(parameters);
+        PathGeneratorTreeGrow genTreeGrow = new PathGeneratorTreeGrow(parameters);
 
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1, null);
@@ -383,7 +383,7 @@ public class SimulatorUtils {
         PathCandidate leftBestCand = genTreeGrow.getBestCand();
         int left1TurnMiddle = 1000;
         if (leftBestCand != null) {
-            left1TurnMiddle = leftBestCand.path.indexOf("LR");
+            left1TurnMiddle = leftBestCand.getIndexOfTurnLR();
         }
 
         // search best right-starting 1-turner
@@ -393,7 +393,7 @@ public class SimulatorUtils {
         PathCandidate rightBestCand = genTreeGrow.getBestCand();
         int right1TurnMiddle = 1000;
         if (rightBestCand != null) {
-            right1TurnMiddle = rightBestCand.path.indexOf("RL");
+            right1TurnMiddle = rightBestCand.getIndexOfTurnRL();
         }
 
         // search best multi-turn course
