@@ -39,8 +39,9 @@
     <string name="flag_ap">AP Flag</string>
     <string name="flag_november">November</string>
     <string name="flag_jury">Jury</string>
-    <string name="label_login_events">Select an event:</string>
-    <string name="label_login_course_area">Select a course area:</string>
+    <string name="label_login_events">Select Event</string>
+    <string name="label_login_course_area">Select Area</string>
+    <string name="label_login_position">Select Position</string>
     <string name="login_type_officer_on_start_vessel">Login as race officer on the selected course\'s start vessel.</string>
     <string name="login_type_officer_on_finish_vessel">Login as race officer on the selected course\'s finish vessel.</string>
     <string name="login_type_shore_control">Login as shore control.</string>
@@ -186,6 +187,8 @@
 	<string name="loading_configuration_failed">There was an error loading the configuration.</string>
 	<string name="loading_configuration_not_found">There was no remote configuration found for this device.</string>
 	<string name="loading_configuration_succeded">Remote configuration applied.</string>
+	
+	<string name="loading_events_succeded">Events loaded.</string>
 	
 	<string name="gate_launch_stops_after">Gate Launch stops after %dmin</string>
 	

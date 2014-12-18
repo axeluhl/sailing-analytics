@@ -16,13 +16,14 @@ public class VolleyHelper extends Application {
 
     private static final String TAG = VolleyHelper.class.getName();
     
-    protected Context mContext;
     private RequestQueue mRequestQueue;
+    private Context mContext;
     
     protected static VolleyHelper mInstance;
     
-    protected VolleyHelper(Context context) {
-        mContext = context;
+    protected VolleyHelper(Context context){
+    	super();
+    	mContext = context;
     }
     
     public static synchronized VolleyHelper getInstance(Context context) {

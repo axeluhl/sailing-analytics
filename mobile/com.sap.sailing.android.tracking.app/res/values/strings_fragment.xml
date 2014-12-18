@@ -38,4 +38,6 @@
 	<string name="tracking_status_no_gps_signal">No GPS Signal!</string>
 	<string name="hud_heading_prefix">HDG: </string>
 	<string name="hud_speed_over_ground_prefix">SPD: </string>
+	<string name="desc_regatta_user_image">Regatta User Image</string>
+	<string name="desc_add_photo_button">Add Photo Button</string>
 </resources>

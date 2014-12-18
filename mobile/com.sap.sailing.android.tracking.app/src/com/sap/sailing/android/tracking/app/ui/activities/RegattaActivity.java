@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,12 +30,11 @@ import android.widget.TextView;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.internal.cm;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
@@ -46,10 +44,12 @@ import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
 public class RegattaActivity extends BaseActivity {
 
     private final static String TAG = RegattaActivity.class.getName();
+    private final static String LEADERBOARD_IMAGE_FILENAME_PREFIX = "leaderboardImage_";
+    private final static String FLAG_IMAGE_FILENAME_PREFIX = "flagImage_";
    
-    private EventInfo event;
-    private CompetitorInfo competitor;
-    private LeaderboardInfo leaderboard;
+    public EventInfo event;
+    public CompetitorInfo competitor;
+    public LeaderboardInfo leaderboard;
     
     
     @Override
@@ -66,9 +66,9 @@ public class RegattaActivity extends BaseActivity {
         String eventId = intent.getStringExtra(getString(R.string.event_id));
         String competitorId = intent.getStringExtra(getString(R.string.competitor_id));
 
-        competitor = DatabaseHelper.getInstance(this).getCompetitor(competitorId);
-		event = DatabaseHelper.getInstance(this).getEventInfo(eventId);
-		leaderboard = DatabaseHelper.getInstance(this).getLeaderboard(leaderboardName);
+        competitor = DatabaseHelper.getInstance().getCompetitor(this, competitorId);
+		event = DatabaseHelper.getInstance().getEventInfo(this, eventId);
+		leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, leaderboardName);
         
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -86,7 +86,6 @@ public class RegattaActivity extends BaseActivity {
         }
         
         replaceFragment(R.id.content_frame, new RegattaFragment());	
-        
     }
 
     @Override
@@ -103,10 +102,6 @@ public class RegattaActivity extends BaseActivity {
             ExLog.i(this, TAG, "Clicked SETTINGS.");
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
-//        case R.id.options_menu_info:
-//            ExLog.i(this, TAG, "Clicked INFO.");
-//            startActivity(new Intent(this, SystemInformationActivity.class));
-//            return true;
         case R.id.options_menu_checkout:
         	ExLog.i(this, TAG, "Clicked CHECKOUT.");
         	checkout();
@@ -131,6 +126,15 @@ public class RegattaActivity extends BaseActivity {
 			}
 		});
     }
+	
+//	private void flagImageUpdated() {
+//		runOnUiThread(new Runnable() {
+//			@Override
+//			public void run() {
+//				ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);				
+//			}
+//		});
+//    }
 
     @Override
     protected void onResume() {
@@ -140,35 +144,47 @@ public class RegattaActivity extends BaseActivity {
         TextView sailIdTextView = (TextView)findViewById(R.id.sail_id);
         sailIdTextView.setText(competitor.sailId);
         
-        ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
+//        ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
         //String flagStr = String.format("%s.png", countryCode);
-        String uri = "@drawable/" + competitor.countryCode.toLowerCase(Locale.getDefault());
-        
-        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-        
-		try {
-			Drawable res = getResources().getDrawable(imageResource);
-			flagImageView.setImageDrawable(res);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//        String uri = "@drawable/" + competitor.countryCode.toLowerCase(Locale.getDefault());
+//        
+//        int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+//        
+//		try {
+//			Drawable res = getResources().getDrawable(imageResource);
+//			flagImageView.setImageDrawable(res);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		
 		getRegattaFragment().setChangePhotoButtonHidden(true);
+		//ExLog.w(this, TAG, "Event Image URL: " + event.imageUrl);
 		
-		if (event.imageUrl != null)
+		ImageView imageView = (ImageView) findViewById(R.id.userImage);
+		Bitmap storedImage = getStoredImage(getLeaderboardImageFileName(leaderboard.name));
+		
+		if (storedImage == null)
 		{
-			ImageView imageView = (ImageView) findViewById(R.id.userImage);
-	        Bitmap storedImage = getStoredImage();
-	        if (storedImage != null)
-	        {
-	        	imageView.setImageBitmap(storedImage);
-	        	userImageUpdated();
-	        }
-	        else
-	        {
-	        	new DownloadImageTask(imageView).execute(event.imageUrl);
-	        }
-			
+			if (event.imageUrl != null)
+			{
+				new DownloadLeaderboardImageTask(imageView).execute(event.imageUrl);
+			}
+		}
+		else
+		{
+			imageView.setImageBitmap(storedImage);
+			userImageUpdated();
+		}
+		
+		ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
+		Bitmap storedFlagImage = getStoredImage(getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault())));
+		
+		if (storedFlagImage == null) {
+			String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
+					competitor.countryCode.toLowerCase(Locale.getDefault()));
+			new DownloadFlagImageTask(flagImageView, competitor.countryCode).execute(urlStr);
+		} else {
+			flagImageView.setImageBitmap(storedFlagImage);
 		}
 		
     	super.onResume();
@@ -178,9 +194,9 @@ public class RegattaActivity extends BaseActivity {
      * 
      * @param bitmap
      */
-    public void updatePictureChosenByUser(final Bitmap bitmap)
+    public void updateLeaderboardPictureChosenByUser(final Bitmap bitmap)
     {
-    	storeImage(bitmap);
+    	storeImage(bitmap, getLeaderboardImageFileName(leaderboard.name));
     	
     	runOnUiThread(new Runnable() {
 			@Override
@@ -197,14 +213,15 @@ public class RegattaActivity extends BaseActivity {
      * Store image for quicker retrieval later.
      * @param images
      */
-    private void storeImage(Bitmap image) {
-        File pictureFile = getMediaFile();
+    private void storeImage(Bitmap image, String fileName) {
+        File pictureFile = getImageFile(fileName);
         if (pictureFile == null) {
             Log.d(TAG,
                     "Error creating media file, check storage permissions: ");// e.getMessage());
             return;
         } 
         try {
+        	System.out.println("*** STORE IMAGE: " + image +", FILENAME: " + fileName);
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();
@@ -216,12 +233,12 @@ public class RegattaActivity extends BaseActivity {
     }
     
     /**
-     * Get leaderboard image if there's one saved.
+     * Get stored image if there's one saved.
      * @return
      */
-    private Bitmap getStoredImage()
+    private Bitmap getStoredImage(String fileName)
     {
-    	File pictureFile = getMediaFile();
+    	File pictureFile = getImageFile(fileName);
     	if (pictureFile == null)
     	{
     		return null;
@@ -229,21 +246,44 @@ public class RegattaActivity extends BaseActivity {
     	
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-		Bitmap image = BitmapFactory.decodeFile(pictureFile.getAbsolutePath(),
-				options);
+		Bitmap image = BitmapFactory.decodeFile(pictureFile.getAbsolutePath(), options);
 		return image;
     }
+    
+
+//    private File getMediaFile(){
+//    	
+//    	
+//    } 
     
     /**
      * Get Path for cached leaderbaord image.
      * @return
      */
-    private File getMediaFile(){
+    public File getImageFile(String fileName) {
     	
-		File mediaStorageDir;
+    	File mediaStorageDir = getMediaStorageDir();
 
-		if (Environment.MEDIA_MOUNTED.equals(Environment
-				.getExternalStorageState())) {
+        File mediaFile;
+            String mImageName="MI_"+ fileName +".png";
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);  
+        return mediaFile;
+    }
+    
+	public void deleteImageFile(String fileName) {
+		File mediaStorageDir = getMediaStorageDir();
+
+		File mediaFile;
+		String mImageName = "MI_" + fileName + ".png";
+		mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
+
+		mediaFile.delete();
+	}
+    
+    public File getMediaStorageDir() {
+    	File mediaStorageDir;
+
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 			mediaStorageDir = new File(
 					Environment.getExternalStorageDirectory()
 							+ "/Android/data/"
@@ -258,25 +298,25 @@ public class RegattaActivity extends BaseActivity {
                 return null;
             }
         }
-
-        File mediaFile;
-            String mImageName="MI_"+ leaderboard.name +".png";
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);  
-        return mediaFile;
-    } 
+        
+        return mediaStorageDir;
+    }
     
-	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+    
+	private class DownloadLeaderboardImageTask extends AsyncTask<String, Void, Bitmap> {
 		ImageView bmImage;
-
-		public DownloadImageTask(ImageView bmImage) {
+		String downloadUrl;
+		
+		public DownloadLeaderboardImageTask(ImageView bmImage) {
 			this.bmImage = bmImage;
 		}
 
 		protected Bitmap doInBackground(String... urls) {
-			String urldisplay = urls[0];
+			downloadUrl = urls[0];
 			Bitmap mIcon11 = null;
+			
 			try {
-				InputStream in = new java.net.URL(urldisplay).openStream();
+				InputStream in = new java.net.URL(downloadUrl).openStream();
 				mIcon11 = BitmapFactory.decodeStream(in);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -285,10 +325,58 @@ public class RegattaActivity extends BaseActivity {
 		}
 
 		protected void onPostExecute(Bitmap result) {
-			bmImage.setImageBitmap(result);
-			storeImage(result);
-			userImageUpdated();
+			if (result != null) {
+				bmImage.setImageBitmap(result);
+				storeImage(result, getLeaderboardImageFileName(leaderboard.name));
+				userImageUpdated();
+			} else {
+				ExLog.e(RegattaActivity.this, TAG, "Failed to download leaderboard image at url " + downloadUrl);
+			}
 		}
+	}
+	
+	private class DownloadFlagImageTask extends AsyncTask<String, Void, Bitmap> {
+		ImageView bmImage;
+		String countryCode;
+		String downloadUrl;
+
+		public DownloadFlagImageTask(ImageView bmImage, String countryCode) {
+			this.bmImage = bmImage;
+			this.countryCode = countryCode;
+		}
+
+		protected Bitmap doInBackground(String... urls) {
+			downloadUrl = urls[0];
+			Bitmap mIcon11 = null;
+			
+			System.out.println("URL DISPLAY: " + downloadUrl);
+			
+			try {
+				InputStream in = new java.net.URL(downloadUrl).openStream();
+				mIcon11 = BitmapFactory.decodeStream(in);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return mIcon11;
+		}
+
+		protected void onPostExecute(Bitmap result) {
+			System.out.println("RESULT: " + result);
+			if (result != null) {
+				bmImage.setImageBitmap(result);
+				storeImage(result, getFlagImageFileName(countryCode));
+			} else {
+				ExLog.e(RegattaActivity.this, TAG, "Failed to download flag image at url " + downloadUrl);
+			}
+		}
+	}
+	
+	private String getLeaderboardImageFileName(String leaderboardName) {
+		return LEADERBOARD_IMAGE_FILENAME_PREFIX + leaderboardName;
+	}
+	
+	private String getFlagImageFileName(String countryCode) {
+		return FLAG_IMAGE_FILENAME_PREFIX + countryCode;
 	}
 	
 	/**
@@ -306,7 +394,7 @@ public class RegattaActivity extends BaseActivity {
 		try {
 			checkoutData.put("competitorId", competitor.id);
 			checkoutData.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
-			checkoutData.put("toMillis", String.valueOf(System.currentTimeMillis()));
+			checkoutData.put("toMillis", System.currentTimeMillis());
 		} catch (JSONException e) {
 			showErrorPopup(
 					R.string.error,
@@ -315,13 +403,13 @@ public class RegattaActivity extends BaseActivity {
 			return;
 		}
 		
-		ExLog.w(this, TAG, "CHECKOUT DATA: " + checkoutData);
-
-		
-		JsonObjectRequest checkoutRequest = new JsonObjectRequest(checkoutURLStr, checkoutData, new Listener<JSONObject>(){
+		JsonObjectOrStatusOnlyRequest checkoutRequest = new JsonObjectOrStatusOnlyRequest(
+				checkoutURLStr, checkoutData, new Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
-						DatabaseHelper.getInstance(RegattaActivity.this).deleteRegttaFromDatabase(event, competitor, leaderboard);
+						DatabaseHelper.getInstance().deleteRegattaFromDatabase(
+								RegattaActivity.this, event, competitor, leaderboard);
+						deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
 						dismissProgressDialog();
 						finish();
 					}
@@ -333,15 +421,23 @@ public class RegattaActivity extends BaseActivity {
 						showErrorPopup(
 								R.string.error,
 								R.string.error_could_not_complete_operation_on_server_try_again);
-
 					}
 				});
 
 		VolleyHelper.getInstance(this).addRequest(checkoutRequest);
 	}
 	
-	public EventInfo getEvent()
-	{
-		return event;
+	@Override
+	public void onBackPressed() {
+		RegattaFragment fragment = (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+
+		if (fragment.isShowingBigCheckoutButton())
+		{
+			//do nothing, user must checkout himself at this point.
+		}
+		else
+		{
+			super.onBackPressed();
+		}
 	}
 }

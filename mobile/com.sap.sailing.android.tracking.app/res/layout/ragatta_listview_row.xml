@@ -25,6 +25,7 @@
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/nextPage"
         android:paddingLeft="15dp"
+        android:singleLine="true"
         android:textColor="@color/white" />
 
 </RelativeLayout>

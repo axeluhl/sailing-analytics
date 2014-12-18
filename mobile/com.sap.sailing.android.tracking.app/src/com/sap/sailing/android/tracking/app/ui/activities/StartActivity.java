@@ -8,8 +8,8 @@ import android.support.v7.widget.Toolbar;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.services.TransmittingService;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
+import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
 public class StartActivity extends BaseActivity {
     
@@ -60,10 +60,7 @@ public class StartActivity extends BaseActivity {
 		}
 
         // start transmitting service that will henceforth run in the background
-        
-        Intent serviceIntent = new Intent(this, TransmittingService.class);
-        serviceIntent.setAction(getString(R.string.transmitting_service_start));
-        this.startService(serviceIntent);
+		ServiceHelper.getInstance().startTransmittingService(this);
         
         intent.setData(null);
         

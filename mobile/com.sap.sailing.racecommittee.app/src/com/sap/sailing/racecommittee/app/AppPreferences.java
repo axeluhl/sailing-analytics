@@ -1,17 +1,21 @@
 package com.sap.sailing.racecommittee.app;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -22,6 +26,7 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
 
 /**
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
@@ -47,6 +52,15 @@ public class AppPreferences {
     private final static String HIDDEN_PREFERENCE_WIND_LAT = "windLatPref";
     
     private final static String HIDDEN_PREFERENCE_WIND_LNG = "windLngPref";
+    
+    private final static String HIDDEN_PREFERENCE_COURSE_UUID_LEAST = "courseUUIDLeast";
+    private final static String HIDDEN_PREFERENCE_COURSE_UUID_MOST = "courseUUIDMost";
+
+    private final static String HIDDEN_PREFERENCE_EVENT_ID = "eventId";
+    
+    private final static String HIDDEN_PREFERENCE_IS_SET_UP = "isSetUp";
+    
+    private final static String HIDDEN_PREFERENCE_LOGIN_TYPE = "loginType";
 
     public static AppPreferences on(Context context) {
         return new AppPreferences(context);
@@ -143,6 +157,25 @@ public class AppPreferences {
         return preferences.getBoolean(key(R.string.preference_racing_procedure_gatestart_haspathfinder_key), true);
     }
 
+	public LoginType getLoginType() {
+		int type = preferences.getInt(HIDDEN_PREFERENCE_LOGIN_TYPE, -1);
+		switch( type ){
+			case 0:{
+				return LoginType.NONE;
+			}
+			case 1:{
+				return LoginType.VIEWER;
+			}
+			case 2:{
+				return LoginType.OFFICER;
+			}
+			
+			default:{
+				return LoginType.NONE;
+			}
+		}
+	}
+    
     public String getMailRecipient() {
         return preferences.getString(key(R.string.preference_mail_key), "");
     }
@@ -243,6 +276,28 @@ public class AppPreferences {
     	return new LatLng(lat,lng);
     }
 
+    public UUID getCourseUUID(){
+    	long least = preferences.getLong(HIDDEN_PREFERENCE_COURSE_UUID_LEAST, 0);
+    	long most  = preferences.getLong(HIDDEN_PREFERENCE_COURSE_UUID_MOST, 0);
+    	return new UUID(most,least);
+    }
+    
+    public Serializable getEventID(){
+    	String id = preferences.getString(HIDDEN_PREFERENCE_EVENT_ID, "");
+    	if ( id != "" ){
+    		return (Serializable) id;
+    	}
+    	return null;
+    }
+    
+    public boolean isSetUp(){
+    	return preferences.getBoolean(HIDDEN_PREFERENCE_IS_SET_UP, false);
+    }
+    
+    public void isSetUp(boolean isIt){
+    	preferences.edit().putBoolean(HIDDEN_PREFERENCE_IS_SET_UP, isIt).commit();
+    }
+    
     public boolean isPollingActive() {
         return preferences.getBoolean(key(R.string.preference_polling_active_key), false);
     }
@@ -306,6 +361,32 @@ public class AppPreferences {
                 .commit();
     }
 
+	public void setLoginType(LoginType type) {
+		
+		Editor setEdit = preferences.edit();
+		
+		switch( type ){
+			case NONE:{
+				setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 0);
+				break;
+			}
+			case VIEWER:{
+				setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 1);
+				break;
+			}
+			case OFFICER:{
+				setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 2);
+				break;
+			}
+			
+			default:{
+				break;
+			}
+		}
+		
+		setEdit.commit();
+	}
+    
     public void setMailRecipient(String mail) {
         preferences.edit().putString(key(R.string.preference_mail_key), mail).commit();
     }
@@ -364,6 +445,28 @@ public class AppPreferences {
         .commit();
     }
     
+    
+    public void setCourseUUID(UUID uuid){
+    	long least = uuid.getLeastSignificantBits(); 
+    	long most  = uuid.getMostSignificantBits();
+    	
+    	preferences.edit()
+    		.putLong(HIDDEN_PREFERENCE_COURSE_UUID_LEAST, least)
+    		.putLong(HIDDEN_PREFERENCE_COURSE_UUID_MOST, most)
+    	.commit();
+    }
+    
+    public void setEventID(Serializable id){
+    	ExLog.i(getContext(), this.getClass().toString(), "Saving eventId: "+ id);
+    	
+    	
+    	preferences.edit()
+    		.putString(HIDDEN_PREFERENCE_EVENT_ID, id.toString())
+    	.commit();
+    	
+    	ExLog.i(getContext(), this.getClass().toString(), "Loading eventId: "+ getEventID());
+    }
+    
     public void unregisterPollingActiveChangedListener(PollingActiveChangedListener listener) {
         pollingActiveChangedListeners.remove(listener);
         if (pollingActiveChangedListeners.isEmpty()) {
@@ -375,4 +478,6 @@ public class AppPreferences {
         return preferences.getBoolean(context.getResources().getString(R.string.preference_wakelock_key), context
                 .getResources().getBoolean(R.bool.preference_wakelock_default));
     }
+
+
 }

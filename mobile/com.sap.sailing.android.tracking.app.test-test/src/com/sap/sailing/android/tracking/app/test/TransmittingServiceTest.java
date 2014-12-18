@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import android.content.Context;
 import android.content.Intent;
 import android.test.ServiceTestCase;
 
@@ -41,9 +42,9 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
         
         if (volleyHelperSpy == null)
         {
-        	VolleyHelperTestable.injectInstance(null);
+        	VolleyHelperTestable.injectInstance(null, null);
         	volleyHelperSpy = Mockito.spy(new VolleyHelperTestable(getContext()));
-        	VolleyHelperTestable.injectInstance(volleyHelperSpy);
+        	VolleyHelperTestable.injectInstance(getContext(), volleyHelperSpy);
         }
         
         if (databaseHelperMock == null)
@@ -85,11 +86,11 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		fix.host = "http://127.0.0.1";
 		list.add(fix);
 		
-		Mockito.when(databaseHelperMock.getUnsentFixes(Mockito.anyList(), Mockito.anyInt())).thenReturn(list);
+		Mockito.when(databaseHelperMock.getUnsentFixes(Mockito.any(Context.class), Mockito.anyList(), Mockito.anyInt())).thenReturn(list);
 		
 		startService();
 		
-		Thread.sleep(4000); 
+		Thread.sleep(3500); 
 
 		Mockito.verify(volleyHelperSpy, Mockito.times(1)).enqueueRequest(
 				urlCaptor.capture(), jsonObjectCaptor.capture(), 
@@ -105,7 +106,7 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		assertEquals(14, jsonFix.getLong("speedMperS"));
 		assertEquals(101.5, jsonFix.getDouble("bearingDeg"));
 		
-		assertEquals("http://127.0.0.1/api/v1/gps_fixes", urlCaptor.getValue());
+		assertEquals("http://127.0.0.1/sailingserver/api/v1/gps_fixes", urlCaptor.getValue());
 		shutdownService();
 	}
 

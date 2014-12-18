@@ -10,8 +10,16 @@ public class VolleyHelperTestable extends VolleyHelper {
 		super(context);
 	}
 
-    public static void injectInstance(VolleyHelper instance)
+	private static Context mContext;
+	
+	@Override
+	public Context getApplicationContext() {
+		return mContext;
+	}
+	
+    public static void injectInstance(Context context, VolleyHelper instance)
     {
+    	mContext = context;
     	mInstance = instance;
     }
 }

@@ -43,10 +43,12 @@ import com.sap.sailing.racecommittee.app.data.parsers.DeviceConfigurationParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
+import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
@@ -101,11 +103,12 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<EventBase>>(callback, new LoaderCreator<Collection<EventBase>>() {
             @Override
             public Loader<DataLoaderResult<Collection<EventBase>>> create(int id, Bundle args) throws Exception {
-                DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
-                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer()));
+            	ExLog.i(context, TAG, String.format("Creating Events-OnlineDataLoader %d", id));
+            	EventBaseJsonDeserializer serializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer());
+                DataParser<Collection<EventBase>> parser = new EventsDataParser(serializer);
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
 
-                ExLog.i(context, TAG, "getEventsLoader created new loader...");
+//                ExLog.i(context, TAG, "getEventsLoader created new loader...");
 
                 return new OnlineDataLoader<Collection<EventBase>>(context, 
                         new URL(preferences.getServerBaseURL() + "/sailingserver/events"), parser, handler);
@@ -131,12 +134,30 @@ public class OnlineDataManager extends DataManager {
                 });
     }
 
+	@Override
+	public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
+			final EventBase parentEvent, LoadClient<Collection<CourseArea>> callback) {
+		// TODO Auto-generated method stub
+		return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
+                new Callable<Collection<CourseArea>>() {
+                    @Override
+                    public Collection<CourseArea> call() throws Exception {
+
+
+                            return dataStore.getCourseAreas(parentEvent);
+
+
+                    }
+                });
+	}
+    
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(final Serializable courseAreaId,
             LoadClient<Collection<ManagedRace>> callback) {
         return new DataLoaderCallbacks<Collection<ManagedRace>>(callback, new LoaderCreator<Collection<ManagedRace>>() {
             @Override
             public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
+            	ExLog.i(context, TAG, String.format("Creating races-OnlineDataLoader %d", id));
                 ConfigurationLoader<RegattaConfiguration> globalConfiguration = PreferencesRegattaConfigurationLoader.loadFromPreferences(preferences);
                 
                 DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(preferences.getAuthor(),
@@ -156,6 +177,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<Mark>>(callback, new LoaderCreator<Collection<Mark>>() {
             @Override
             public Loader<DataLoaderResult<Collection<Mark>>> create(int id, Bundle args) throws Exception {
+            	ExLog.i(context, TAG, String.format("Creating marks-OnlineDataLoader %d", id));
                 JsonDeserializer<Mark> markDeserializer = new MarkDeserializer(domainFactory);
                 DataParser<Collection<Mark>> parser = new MarksDataParser(markDeserializer);
                 DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this);
@@ -180,6 +202,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<CourseBase>(callback, new LoaderCreator<CourseBase>() {
             @Override
             public Loader<DataLoaderResult<CourseBase>> create(int id, Bundle args) throws Exception {
+            	ExLog.i(context, TAG, String.format("Creating Course-OnlineDataLoader %d", id));
                 JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(
                         new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(domainFactory),
                                 new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
@@ -250,4 +273,11 @@ public class OnlineDataManager extends DataManager {
             }
         }, getContext());
     }
+
+	@Override
+	public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
+			PositionListFragment positionListFragment) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

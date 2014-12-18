@@ -24,6 +24,7 @@ import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
 public class TrackingService extends Service implements ConnectionCallbacks,
 		OnConnectionFailedListener, LocationListener {
@@ -82,7 +83,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 								.getExtras()
 								.getString(getString(R.string.tracking_service_event_id_parameter));
 						
-						eventRowId = DatabaseHelper.getInstance(this).getRowIdForEventId(eventId);
+						eventRowId = DatabaseHelper.getInstance().getRowIdForEventId(this, eventId);
 						
 						if (BuildConfig.DEBUG) {
 							ExLog.i(this, TAG, "Starting Tracking Service with eventId: "+ eventId);
@@ -150,11 +151,11 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		GPSQuality quality = GPSQuality.noSignal;
 
 		if (gpsQualityListener != null) {
-			if (gpsAccurracy > 163) {
+			if (gpsAccurracy > 48) {
 				quality = GPSQuality.poor;
-			} else if (gpsAccurracy > 48) {
+			} else if (gpsAccurracy > 10) {
 				quality = GPSQuality.good;
-			} else if (gpsAccurracy < 48) {
+			} else if (gpsAccurracy <= 10) {
 				quality = GPSQuality.great;
 			}
 
@@ -168,7 +169,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		
 		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
 
-		DatabaseHelper.getInstance(this).insertGPSFix(location.getLatitude(),
+		DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
 				location.getLongitude(), location.getSpeed(),
 				location.getBearing(), location.getProvider(),
 				location.getTime(), eventRowId);
@@ -186,9 +187,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 					"ensureTransmittingServiceIsRunning, starting TransmittingService");
 		}
 
-		Intent intent = new Intent(this, TransmittingService.class);
-		intent.setAction(getString(R.string.transmitting_service_start));
-		this.startService(intent);
+		ServiceHelper.getInstance().startTransmittingService(this);
 	}
 
 	@Override
