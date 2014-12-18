@@ -1,6 +1,8 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
@@ -36,7 +38,7 @@ import android.widget.Toast;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
@@ -50,6 +52,10 @@ import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperError;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFailureListener;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
@@ -199,181 +205,214 @@ public class HomeFragment extends BaseFragment implements
 		
 		final StartActivity startActivity = (StartActivity)getActivity();
 
-		final String getEventUrl = prefs.getServerURL()
-				+ prefs.getServerEventPath(eventId);
-		final String getLeaderboardUrl = prefs.getServerURL()
-				+ prefs.getServerLeaderboardPath(leaderboardName);
-		final String getCompetitorUrl = prefs.getServerURL()
-				+ prefs.getServerCompetitorPath(competitorId);
+		final String getEventUrl = prefs.getServerURL() + prefs.getServerEventPath(eventId);
+		final String getLeaderboardUrl = prefs.getServerURL() + prefs.getServerLeaderboardPath(leaderboardName);
+		final String getCompetitorUrl = prefs.getServerURL() + prefs.getServerCompetitorPath(competitorId);
 
 		startActivity.showProgressDialog(R.string.please_wait, R.string.getting_leaderboard);
-		JsonObjectRequest getLeaderboardRequest = new JsonObjectRequest(
-				getLeaderboardUrl, null, new Listener<JSONObject>() {
+		
+		try {
+			HttpGetRequest getLeaderboardRequest = new HttpGetRequest(new URL(getLeaderboardUrl),
+					getActivity());
+			NetworkHelper.getInstance(getActivity()).executeHttpJsonRequestAsnchronously(
+					getLeaderboardRequest, new NetworkHelperSuccessListener() {
 
-					@Override
-					public void onResponse(JSONObject response) {
-						startActivity.dismissProgressDialog();
-						
-						final String leaderboardName;
+						@Override
+						public void performAction(JSONObject response) {
+							// TODO Auto-generated method stub
 
-						try {
-							leaderboardName = response.getString("name");
-						} catch (JSONException e) {
-							ExLog.e(getActivity(), TAG,
-									"Error getting data from call on URL: "
-											+ getLeaderboardUrl + ", Error: "
-											+ e.getMessage());
 							startActivity.dismissProgressDialog();
-							displayAPIErrorRecommendRetry();
-							return;
-						}
-						
-						startActivity.showProgressDialog(R.string.please_wait, R.string.getting_event);
-						
-						JsonObjectRequest getEventRequest = new JsonObjectRequest(
-								getEventUrl, null, new Listener<JSONObject>() {
 
-									@Override
-									public void onResponse(JSONObject response) {
-										startActivity.dismissProgressDialog();
-										
-										final String eventId;
-										final String eventName;
-										final String eventStartDateStr;
-										final String eventEndDateStr;
-										final String eventFirstImageUrl;
+							final String leaderboardName;
 
-										try {
-											eventId = response.getString("id");
-											eventName = response
-													.getString("name");
-											eventStartDateStr = response
-													.getString("startDate");
-											eventEndDateStr = response
-													.getString("endDate");
+							try {
+								leaderboardName = response.getString("name");
+							} catch (JSONException e) {
+								ExLog.e(getActivity(), TAG, "Error getting data from call on URL: "
+										+ getLeaderboardUrl + ", Error: " + e.getMessage());
+								startActivity.dismissProgressDialog();
+								displayAPIErrorRecommendRetry();
+								return;
+							}
 
-											JSONArray imageUrls = response
-													.getJSONArray("imageURLs");
-											
-											if (imageUrls.length() > 0)
-											{
-												eventFirstImageUrl = imageUrls
-														.getString(0);	
-											}
-											else
-											{
-												eventFirstImageUrl = null;
-											}
+							startActivity.showProgressDialog(R.string.please_wait,
+									R.string.getting_event);
 
+							HttpGetRequest getEventRequest;
+							try {
+								getEventRequest = new HttpGetRequest(new URL(getEventUrl),
+										getActivity());
+								NetworkHelper.getInstance(getActivity())
+										.executeHttpJsonRequestAsnchronously(getEventRequest,
+												new NetworkHelperSuccessListener() {
 
-										} catch (JSONException e) {
-											ExLog.e(getActivity(),
-													TAG,
-													"Error getting data from call on URL: "
-															+ getEventUrl
-															+ ", Error: "
-															+ e.getMessage());
-											displayAPIErrorRecommendRetry();
-											return;
-										}
-										
-										startActivity.showProgressDialog(R.string.please_wait, R.string.getting_competitor);
-										
-										JsonObjectRequest getCompetitorRequest = new JsonObjectRequest(
-												getCompetitorUrl, null,
-												new Listener<JSONObject>() {
 													@Override
-													public void onResponse(
-															JSONObject response) {
+													public void performAction(JSONObject response) {
 														startActivity.dismissProgressDialog();
-														
-														final String competitorName;
-														final String competitorId;
-														final String competitorSailId;
-														final String competitorNationality;
-														final String competitorCountryCode;
+
+														final String eventId;
+														final String eventName;
+														final String eventStartDateStr;
+														final String eventEndDateStr;
+														final String eventFirstImageUrl;
 
 														try {
-															competitorName = response.getString("name");
-															competitorId = response.getString("id");
-															competitorSailId = response.getString("sailID");
-															competitorNationality = response.getString("nationality");
-															competitorCountryCode = response.getString("countryCode");
+															eventId = response.getString("id");
+															eventName = response.getString("name");
+															eventStartDateStr = response
+																	.getString("startDate");
+															eventEndDateStr = response
+																	.getString("endDate");
+
+															JSONArray imageUrls = response
+																	.getJSONArray("imageURLs");
+
+															if (imageUrls.length() > 0) {
+																eventFirstImageUrl = imageUrls
+																		.getString(0);
+															} else {
+																eventFirstImageUrl = null;
+															}
+
 														} catch (JSONException e) {
 															ExLog.e(getActivity(),
 																	TAG,
 																	"Error getting data from call on URL: "
-																			+ getCompetitorUrl
+																			+ getEventUrl
 																			+ ", Error: "
 																			+ e.getMessage());
 															displayAPIErrorRecommendRetry();
 															return;
 														}
 
-														CheckinData data = new CheckinData();
-														data.competitorName = competitorName;
-														data.competitorId = competitorId;
-														data.competitorSailId = competitorSailId;
-														data.competitorNationality = competitorNationality;
-														data.competitorCountryCode = competitorCountryCode;
-														data.eventId = eventId;
-														data.eventName = eventName;
-														data.eventStartDateStr = eventStartDateStr;
-														data.eventEndDateStr = eventEndDateStr;
-														data.eventFirstImageUrl = eventFirstImageUrl;
-														data.eventServerUrl = hostWithPort;
-														data.checkinURL = checkinURLStr;
-														data.leaderboardName = leaderboardName;
-														data.deviceUid = deviceUuid
-																.getStringRepresentation();
+														startActivity.showProgressDialog(
+																R.string.please_wait,
+																R.string.getting_competitor);
 
-														displayUserConfirmationScreen(data);
+														HttpGetRequest getCompetitorRequest;
+														try {
+															getCompetitorRequest = new HttpGetRequest(
+																	new URL(getCompetitorUrl),
+																	getActivity());
+															NetworkHelper
+																	.getInstance(getActivity())
+																	.executeHttpJsonRequestAsnchronously(
+																			getCompetitorRequest,
+																			new NetworkHelperSuccessListener() {
 
+																				@Override
+																				public void performAction(
+																						JSONObject response) {
+																					startActivity
+																							.dismissProgressDialog();
+
+																					final String competitorName;
+																					final String competitorId;
+																					final String competitorSailId;
+																					final String competitorNationality;
+																					final String competitorCountryCode;
+
+																					try {
+																						competitorName = response
+																								.getString("name");
+																						competitorId = response
+																								.getString("id");
+																						competitorSailId = response
+																								.getString("sailID");
+																						competitorNationality = response
+																								.getString("nationality");
+																						competitorCountryCode = response
+																								.getString("countryCode");
+																					} catch (JSONException e) {
+																						ExLog.e(getActivity(),
+																								TAG,
+																								"Error getting data from call on URL: "
+																										+ getCompetitorUrl
+																										+ ", Error: "
+																										+ e.getMessage());
+																						displayAPIErrorRecommendRetry();
+																						return;
+																					}
+
+																					CheckinData data = new CheckinData();
+																					data.competitorName = competitorName;
+																					data.competitorId = competitorId;
+																					data.competitorSailId = competitorSailId;
+																					data.competitorNationality = competitorNationality;
+																					data.competitorCountryCode = competitorCountryCode;
+																					data.eventId = eventId;
+																					data.eventName = eventName;
+																					data.eventStartDateStr = eventStartDateStr;
+																					data.eventEndDateStr = eventEndDateStr;
+																					data.eventFirstImageUrl = eventFirstImageUrl;
+																					data.eventServerUrl = hostWithPort;
+																					data.checkinURL = checkinURLStr;
+																					data.leaderboardName = leaderboardName;
+																					data.deviceUid = deviceUuid
+																							.getStringRepresentation();
+
+																					displayUserConfirmationScreen(data);
+
+																				}
+																			},
+																			new NetworkHelperFailureListener() {
+
+																				@Override
+																				public void performAction(
+																						NetworkHelperError e) {
+																					ExLog.e(getActivity(),
+																							TAG,
+																							"Failed to get competitor from API: "
+																									+ e.getMessage());
+																					startActivity
+																							.dismissProgressDialog();
+																					displayAPIErrorRecommendRetry();
+																					return;
+																				}
+																			});
+
+														} catch (MalformedURLException e2) {
+															ExLog.e(getActivity(), TAG,
+																	"Error: Failed to perform checking due to a MalformedURLException: "
+																			+ e2.getMessage());
+														}
 													}
-												}, new ErrorListener() {
+												}, new NetworkHelperFailureListener() {
+
 													@Override
-													public void onErrorResponse(
-															VolleyError error) {
-														ExLog.e(getActivity(),
-																TAG,
-																"Failed to get competitor from API: "
-																		+ error.getMessage());
+													public void performAction(NetworkHelperError e) {
+														ExLog.e(getActivity(), TAG,
+																"Failed to get leaderboard from API: "
+																		+ e.getMessage());
 														startActivity.dismissProgressDialog();
 														displayAPIErrorRecommendRetry();
 														return;
 													}
 												});
+							} catch (MalformedURLException e1) {
+								ExLog.e(getActivity(), TAG,
+										"Error: Failed to perform checking due to a MalformedURLException: "
+												+ e1.getMessage());
+							}
+						}
+					}, new NetworkHelperFailureListener() {
 
-										VolleyHelper.getInstance(getActivity()).addRequest(getCompetitorRequest);
-									}
-								}, new ErrorListener() {
-									@Override
-									public void onErrorResponse(
-											VolleyError error) {
-										ExLog.e(getActivity(), TAG,
-												"Failed to get leaderboard from API: "
-														+ error.getMessage());
-										startActivity.dismissProgressDialog();
-										displayAPIErrorRecommendRetry();
-										return;
-									}
-								});
+						@Override
+						public void performAction(NetworkHelperError e) {
+							ExLog.e(getActivity(), TAG,
+									"Failed to get event from API: " + e.getMessage());
+							startActivity.dismissProgressDialog();
+							displayAPIErrorRecommendRetry();
+						}
+					});
 
-						VolleyHelper.getInstance(getActivity()).addRequest(getEventRequest);
-					}
-				}, new ErrorListener() {
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						ExLog.e(getActivity(),
-								TAG,
-								"Failed to get event from API: "
-										+ error.getMessage());
-						startActivity.dismissProgressDialog();
-						displayAPIErrorRecommendRetry();
-					}
-				});
+		} catch (MalformedURLException e) {
+			ExLog.e(getActivity(),
+					TAG,
+					"Error: Failed to perform checking due to a MalformedURLException: "
+							+ e.getMessage());
+		}
 
-		VolleyHelper.getInstance(getActivity()).addRequest(getLeaderboardRequest);
 	}
 
 	@Override
