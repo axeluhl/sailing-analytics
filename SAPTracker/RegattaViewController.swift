@@ -23,6 +23,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     var sourceTypeNames = [String]()
     
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var yourTeamPhotoButton: UIButton!
+    @IBOutlet weak var editTeamPhotoButton: UIButton!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var flagImageView: UIImageView!
     @IBOutlet weak var sailLabel: UILabel!
@@ -62,6 +64,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         // set regatta image, either load it from server or load from core data
         if DataManager.sharedManager.selectedEvent!.userImage != nil {
             imageView.image = UIImage(data:  DataManager.sharedManager.selectedEvent!.userImage!)
+            self.yourTeamPhotoButton.hidden = true
         } else if DataManager.sharedManager.selectedEvent!.imageUrl != nil {
             let imageUrl = NSURL(string: DataManager.sharedManager.selectedEvent!.imageUrl!)
             let urlRequest = NSURLRequest(URL: imageUrl!)
@@ -69,10 +72,14 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 placeholderImage: nil,
                 success: { (request:NSURLRequest!,response:NSHTTPURLResponse!, image:UIImage!) -> Void in
                     self.imageView.image = image
+                    self.yourTeamPhotoButton.hidden = true
                 },
                 failure: { (request:NSURLRequest!,response:NSHTTPURLResponse!, error:NSError!) -> Void in
+                    self.editTeamPhotoButton.hidden = true
                 }
             )
+        } else {
+            self.editTeamPhotoButton.hidden = true
         }
         nameLabel.text = DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.name
         flagImageView.image = UIImage(named: DataManager.sharedManager.selectedEvent!.leaderBoard!.competitor!.countryCode)
@@ -240,6 +247,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     func imagePickerController(picker: UIImagePickerController!, didFinishPickingImage image: UIImage!, editingInfo: NSDictionary!) {
         dismissViewControllerAnimated(true, completion: nil)
         imageView.image = image
+        yourTeamPhotoButton.hidden = true
+        editTeamPhotoButton.hidden = false
         DataManager.sharedManager.selectedEvent!.userImage = UIImageJPEGRepresentation(image, 0.8)
     }
     
@@ -265,15 +274,13 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                     deviceUuid: DeviceUDIDManager.UDID,
                     toMillis: toMillis,
                     success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
-                        DataManager.sharedManager.deleteEvent(DataManager.sharedManager.selectedEvent!)
-                        DataManager.sharedManager.saveContext()
-                        self.navigationController!.popViewControllerAnimated(true)
                     },
                     failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
-                        let alertView = UIAlertView(title: "Couldn't check-out", message: "", delegate: nil, cancelButtonTitle: "Cancel")
-                        alertView.show()
                     }
                 )
+                DataManager.sharedManager.deleteEvent(DataManager.sharedManager.selectedEvent!)
+                DataManager.sharedManager.saveContext()
+                self.navigationController!.popViewControllerAnimated(true)
                 break
             }
             break
