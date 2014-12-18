@@ -26,7 +26,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
+public class PathGeneratorTreeGrow extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     private boolean debugMsgOn = false;
@@ -42,7 +42,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
     ArrayList<List<PathCandidate>> isocPositions = null;
     String gridFile = null;
 
-    public PathGeneratorTreeGrowWind(SimulationParameters params) {
+    public PathGeneratorTreeGrow(SimulationParameters params) {
         this.parameters = params;
     }
 
