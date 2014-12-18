@@ -55,5 +55,4 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(ReadonlyDataManager manager) {
         return manager.createCourseAreasLoader(parentEventId, this);
     }
-
 }

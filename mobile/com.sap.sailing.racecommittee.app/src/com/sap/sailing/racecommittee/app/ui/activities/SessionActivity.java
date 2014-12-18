@@ -60,6 +60,7 @@ public abstract class SessionActivity extends BaseActivity {
     }
 
     private void doLogout() {
+    	preferences.isSetUp(false);
         unloadAllRaces();
         fadeActivity(LoginActivity.class, true);
     }
