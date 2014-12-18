@@ -50,10 +50,12 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
+import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 
 public class OfflineDataManager extends DataManager {
 
@@ -172,6 +174,19 @@ public class OfflineDataManager extends DataManager {
                 });
     }
 
+	@Override
+	public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
+			final EventBase parentEvent, LoadClient<Collection<CourseArea>> callback) {
+		// TODO Auto-generated method stub
+		return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
+                new Callable<Collection<CourseArea>>() {
+                    @Override
+                    public Collection<CourseArea> call() throws Exception {
+                            return dataStore.getCourseAreas(parentEvent);
+                    }
+                });
+	}
+    
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(Serializable courseAreaId,
             LoadClient<Collection<ManagedRace>> callback) {
@@ -228,5 +243,12 @@ public class OfflineDataManager extends DataManager {
             }
         });
     }
+
+	@Override
+	public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
+			PositionListFragment positionListFragment) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
