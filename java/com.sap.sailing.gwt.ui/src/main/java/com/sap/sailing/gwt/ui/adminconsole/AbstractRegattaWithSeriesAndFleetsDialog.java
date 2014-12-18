@@ -92,16 +92,20 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(4, 2);
+        Grid formGrid = new Grid(6, 2);
         panel.add(formGrid);
-        formGrid.setWidget(0, 0, new Label(stringMessages.scoringSystem() + ":"));
-        formGrid.setWidget(0, 1, scoringSchemeListBox);
-        formGrid.setWidget(1, 0, new Label(stringMessages.event() + ":"));
-        formGrid.setWidget(1, 1, sailingEventsListBox);
-        formGrid.setWidget(2, 0, new Label(stringMessages.courseArea() + ":"));
-        formGrid.setWidget(2, 1, courseAreaListBox);
-        formGrid.setWidget(3, 0, new Label(stringMessages.useStartTimeInference() + ":"));
-        formGrid.setWidget(3, 1, useStartTimeInferenceCheckBox);
+        formGrid.setWidget(0, 0, new Label(stringMessages.startDate() + ":"));
+        formGrid.setWidget(0, 1, startDateBox);
+        formGrid.setWidget(1, 0, new Label(stringMessages.endDate() + ":"));
+        formGrid.setWidget(1, 1, endDateBox);
+        formGrid.setWidget(2, 0, new Label(stringMessages.scoringSystem() + ":"));
+        formGrid.setWidget(2, 1, scoringSchemeListBox);
+        formGrid.setWidget(3, 0, new Label(stringMessages.event() + ":"));
+        formGrid.setWidget(3, 1, sailingEventsListBox);
+        formGrid.setWidget(4, 0, new Label(stringMessages.courseArea() + ":"));
+        formGrid.setWidget(4, 1, courseAreaListBox);
+        formGrid.setWidget(5, 0, new Label(stringMessages.useStartTimeInference() + ":"));
+        formGrid.setWidget(5, 1, useStartTimeInferenceCheckBox);
         setupAdditionalWidgetsOnPanel(panel);
         return panel;
     }
