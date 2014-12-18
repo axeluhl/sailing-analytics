@@ -58,7 +58,7 @@ Saving: 100.00% (24426/24426k, 1188/1188 files), done.
 bloom: creating from 1 file (3635 objects). 
 </pre>
 
-As bup is using the standard GIT repository layout one does not need to use bup to access files. But yuo have to keep in mind that as bup is splitting the files it would require some additional effort to put these files together again. The following chain shows how to access a repository. It assumes that one has logged into the backup server.
+As bup is using the standard GIT repository layout one does not need to use bup to access files. But you have to keep in mind that as bup is splitting the files it would require some additional effort to put these files together again. The following chain shows how to access a repository. It assumes that one has logged into the backup server.
 
 <pre>
 [backup@ip-172-31-25-136 ~]$ git clone file:///home/backup/database dbtest
