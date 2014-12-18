@@ -1116,6 +1116,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorCommunicatingWithServer();
     String userManagement();
     String structureImportUrls();
+    String filterBy();
     String editSeries();
     String pleaseSelectAtLeastOneRegatta();
     String pleaseSelectAnEvent();

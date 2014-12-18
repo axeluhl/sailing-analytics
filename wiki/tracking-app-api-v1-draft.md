@@ -57,16 +57,15 @@ see [events/{event_id}](http://www.sapsailing.com/sailingserver/webservices/api/
 
 see [leaderboards/{leaderboard_name}](http://www.sapsailing.com/sailingserver/webservices/api/v1/leaderboardGetDoc.html)
 
-### Competitor Information
+### Competitor Information (in general)
+
+_**Note:** Consider using the leaderboard-dependent verison below - which includes the ``displayName``._
 
 **Path:** ``competitors/{competitor-id}``
 
 **Verb:** ``GET``
 
 **Response:**
-<table>
-  <tr><th>Proposed new format</th><th>Old format</th></tr>
-  <tr><td>
 ```
 {
   "name": "Heiko KRÖGER",
@@ -74,31 +73,35 @@ see [leaderboards/{leaderboard_name}](http://www.sapsailing.com/sailingserver/we
   "sailID": "GER 1",
   "nationality": "GER",
   "boatClassName": "49er",
+  "countryCode": "DE"
 }
 ```
-  </td><td>
+
+**Additional Notes:**
+* Competitor profile image left out for now.
+* No flag image included. These images are present on the server in the GWT-context only as 16x11 pngs currently. How flags are displayed in the app should probably be independent. I would suggest resolving the appropriate image within the app based on the ``countryCode``. The images are exposed through the the static endpoint ``<host>/gwt/images/flags/<countryCode>.png`` ([example](http://www.sapsailing.com/gwt/images/flags/de.png))
+
+### Competitor Information (Leaderboard-specific)
+
+**Path:** ``leaderboards/{leaderboard-name}/competitors/{competitor-id}``
+
+**Verb:** ``GET``
+
+**Response:**
 ```
 {
-  "name": "Heiko KRÖGER",
+  "name": "Heiko KROEGER",
   "displayName": "Heiko KRÖGER",
   "id": "af855a56-9726-4a9c-a77e-da955bd289be",
   "sailID": "GER 1",
   "nationality": "GER",
+  "boatClassName": "49er",
   "countryCode": "DE"
 }
 ```
-  </td></tr>
-</table>
-
-**Changes**
-* drop ``countryCode`` (is thee nationality field (3-letter IOC acronym) sufficient?)
-* drop ``displayName`` (a competitor only has a potentially different displayName in the context of leaderboard -> we are not operating in such a context here)
-* add ``boatClassName``
 
 **Additional Notes:**
 * The semantics of ``displayName`` are explained in the JavaDoc of ``Leaderboard#getDisplayName()``.
-* Competitor profile image left out for now.
-* No flag image included. These images are present on the server in the GWT-context only as 16x11 pngs currently. How flags are displayed in the app should probably be independent. I would suggest resolving the appropriate image within the app based on the ``countryCode``.
 
 
 ## Check-In
@@ -110,7 +113,7 @@ Result: fixes transmitted after the time specified in the checkin request are ad
 _Question: What should be done if a second device is mapped to competitor?_
 * _Answer:_ For now, according to our internal logic, both devices are actually mapped. If they send fixes for the same timerange, we will see some weird behaviour.
 
-**Path:** ``/leaderboards/{leaderboard-name}/device_mappings/start``
+**Path:** ``leaderboards/{leaderboard-name}/device_mappings/start``
 
 **Verb:** ``POST``
 
@@ -140,7 +143,7 @@ For future versions, think about whether this is the right place to transmit the
 
 Ends the device to competitor coupling. Does not delete it, but rather marks the end timepoint. Fixes submitted for this device that have a timestamp which lies after the end timepoint specified in the checkout request are not added to races in the leaderboard.
 
-**Path:** ``/leaderboards/{leaderboard-name}/device_mappings/end``
+**Path:** ``leaderboards/{leaderboard-name}/device_mappings/end``
 
 **Verb:** ``POST``
 
@@ -195,3 +198,45 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 * JSON array may contain one or several fixes
 * **speed** Speed over ground in meters per second.
 * **course** Bearing in degrees.
+
+
+## Get Team Information (including team image)
+
+Allows to retrieve team information for the team of a certain competitor
+
+**Path:** ``team/{competitor-id}``
+
+**Verb:** ``GET``
+
+**Response:**
+```
+{  
+   "name":"asd team",
+   "coach":null,
+   "sailors":[  
+      {  
+         "name":"asd",
+         "description":null,
+         "nationality":{  
+            "IOC":"ALB"
+         }
+      }
+   ],
+   "imageUri":"http://images.forbes.com/media/lists/companies/google_200x200.jpg"
+}
+```
+
+## Set Team Image
+
+Set the team image of a certain competitor
+
+**Path:** ``team/{competitor-id}/image``
+
+**Verb:** ``POST``
+
+**Request:**
+```
+{
+  "imageUri":"http://images.forbes.com/media/lists/companies/google_200x200.jpg"
+}
+```

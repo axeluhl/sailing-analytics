@@ -513,11 +513,12 @@ public class ReplicationServiceImpl implements ReplicationService {
         try {
             final GZIPInputStream gzipInputStream = new GZIPInputStream(rabbitInputStreamProvider.getInputStream());
             for (Replicable<?, ?> replicable : getReplicables()) {
-                logger.info("Starting to receive initial load");
+                logger.info("Starting to receive initial load for "+replicable.getId());
                 replicable.initiallyFillFrom(gzipInputStream);
-                logger.info("Done receiving initial load");
-                replicator.setSuspended(false); // apply queued operations
+                logger.info("Done receiving initial load for "+replicable.getId());
             }
+            logger.info("Resuming replicator to apply queues");
+            replicator.setSuspended(false); // apply queued operations
         } finally {
             // delete initial load queue
             DeleteOk deleteOk = consumer.getChannel().queueDelete(queueName);

@@ -41,7 +41,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
     
     @Override
-    public void registerAllWithInternalFunctionPolicy(Collection<Class<?>> internalClassesToScan) {
+    public void registerAllWithInternalFunctionPolicy(Iterable<Class<?>> internalClassesToScan) {
         for (Class<?> internalClass : internalClassesToScan) {
             scanInternalClass(internalClass);
         }
@@ -120,7 +120,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
 
     @Override
-    public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan) {
+    public void registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan) {
         for (Class<?> externalClass : externalClassesToScan) {
             for (Method method : externalClass.getMethods()) {
                 if (isValidExternalFunction(method)) {
@@ -144,7 +144,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
 
     @Override
-    public void unregisterAllFunctionsOf(Collection<Class<?>> classesToUnregister) {
+    public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister) {
         for (Class<?> classToUnregister : classesToUnregister) {
             unregisterAllFunctionsOf(classToUnregister);
         }

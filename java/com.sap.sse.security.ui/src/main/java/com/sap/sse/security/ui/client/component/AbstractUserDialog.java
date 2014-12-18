@@ -98,9 +98,11 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
         super(title, message, stringMessages.ok(), stringMessages.cancel(),
                 validator, callback);
         nameBox = createTextBox("", 30);
+        nameBox.setName("username");
         emailBox = createTextBox("", 30);
         oldPwBox = createPasswordTextBox("", 30);
         pwBox = createPasswordTextBox("", 30);
+        nameBox.setName("password");
         pwRepeat = createPasswordTextBox("", 30);
         if (user != null) {
             nameBox.setText(user.getName());

@@ -1,22 +1,23 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
 
-public abstract class AbstractParallelMultiDimensionalGroupingProcessor<DataType>
+public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType>
                       extends AbstractSimpleParallelProcessor<DataType, GroupedDataEntry<DataType>> {
 
     private Iterable<Function<?>> dimensions;
 
     @SuppressWarnings("unchecked")
-    public AbstractParallelMultiDimensionalGroupingProcessor(Class<DataType> dataType,
+    public AbstractParallelMultiDimensionalNestingGroupingProcessor(Class<DataType> dataType,
                                                              ExecutorService executor,
                                                              Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
                                                              Iterable<Function<?>> dimensions) {
@@ -48,13 +49,23 @@ public abstract class AbstractParallelMultiDimensionalGroupingProcessor<DataType
         return new Callable<GroupedDataEntry<DataType>>() {
             @Override
             public GroupedDataEntry<DataType> call() throws Exception {
-                return new GroupedDataEntry<DataType>(GroupKeyFactory.createCompoundKeyFor(element,
+                return new GroupedDataEntry<DataType>(createCompoundKeyFor(element,
                         dimensions.iterator()), element);
             }
         };
     }
+    
+    private GroupKey createCompoundKeyFor(DataType input, Iterator<Function<?>> dimensionsIterator) {
+        Function<?> mainDimension = dimensionsIterator.next();
+        GroupKey key = createGroupKeyFor(input, mainDimension);
+        if (dimensionsIterator.hasNext()) {
+            key = new NestingCompoundGroupKey(key, createCompoundKeyFor(input, dimensionsIterator));
+        }
+        return key;
+    }
 
     protected abstract GroupKey createGroupKeyFor(DataType input, Function<?> dimension);
+    
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
     }

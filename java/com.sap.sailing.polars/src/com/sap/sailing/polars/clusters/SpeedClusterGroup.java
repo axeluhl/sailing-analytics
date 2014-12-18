@@ -20,14 +20,14 @@ public class SpeedClusterGroup extends FixClusterGroup<Speed> {
      * mid and boundary is smaller or equal {@code maxDistance}
      * 
      * 
-     * @param name
+     * @param messageKey
      * @param levelMidsInKnots
      *            sorted low -> high. E.g. [2,4,6,10,15,20,30]
      * @param maxDistanceInKnots
      *            the clusters will max span <-maxDistanceInKnots-|mid|-maxDistanceinKnots->
      */
-    public SpeedClusterGroup(String name, double[] levelMidsInKnots, double maxDistanceInKnots) {
-        super(name, createClustersForLevelMids(levelMidsInKnots, maxDistanceInKnots));
+    public SpeedClusterGroup(String messageKey, double[] levelMidsInKnots, double maxDistanceInKnots) {
+        super(messageKey, createClustersForLevelMids(levelMidsInKnots, maxDistanceInKnots));
     }
 
     private static Collection<Cluster<Speed>> createClustersForLevelMids(double[] levelMidsInKnots,

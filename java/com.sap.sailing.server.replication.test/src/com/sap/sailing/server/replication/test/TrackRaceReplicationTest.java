@@ -194,7 +194,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Override
     public void tearDown() throws Exception {
         if (racesHandle != null) {
-            racesHandle.getRaceTracker().stop();
+            racesHandle.getRaceTracker().stop(/* preemptive */ false);
         }
         super.tearDown();
     }
