@@ -1,7 +1,9 @@
 package com.sap.sailing.android.tracking.app.customviews;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.Button;
 
@@ -22,6 +24,7 @@ public class OpenSansButton extends Button {
 		init();
 	}
 
+	@TargetApi(Build.VERSION_CODES.L)
 	public OpenSansButton(Context context, AttributeSet attrs,
 			int defStyleAttr, int defStyleRes) {
 		super(context, attrs, defStyleAttr, defStyleRes);
