@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -31,7 +32,18 @@ public class SeriesDTO extends NamedDTO {
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }
     
-    
+    /**
+     * Copy/clone constructor; the {@link #raceColumns} collection is created as a copy and not just assigned by reference.
+     * Therefore, altering the elements in the {@link #raceColumns} collection of the new object does not alter the {@link #raceColumns}
+     * collection in <code>otherSeries</code>.
+     */
+    public SeriesDTO(SeriesDTO otherSeries) {
+        this(otherSeries.getName(), otherSeries.getFleets(),
+                otherSeries.getRaceColumns() == null ? null : new ArrayList<RaceColumnDTO>(otherSeries.getRaceColumns()),
+                otherSeries.isMedal(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
+                otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring());
+    }
+
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
     }

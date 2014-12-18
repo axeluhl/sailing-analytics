@@ -11,9 +11,9 @@ public class WindSteppingImpl implements WindStepping {
     protected WindSteppingImpl() {};
 
     private static final long serialVersionUID = 2215693490331489508L;
-    protected Integer[] levels;
+    protected Double[] levels;
 
-    public WindSteppingImpl(Integer[] levels) {
+    public WindSteppingImpl(Double[] levels) {
         this.levels = levels;
     }
     
@@ -24,7 +24,7 @@ public class WindSteppingImpl implements WindStepping {
     @Override
     public int getLevelIndexForValue(double speed) {
         for (int i = 0; i < levels.length - 1; i++) {
-            if (speed < levels[i] + ((levels[i+1] - levels[i]) / 2)) {
+            if (speed < levels[i] + ((levels[i+1] - levels[i]) / 2.)) {
                 return i;
             }  
         }
@@ -32,14 +32,14 @@ public class WindSteppingImpl implements WindStepping {
     }
 
     @Override
-    public Integer[] getRawStepping() {
+    public Double[] getRawStepping() {
         return levels;
     }
 
     @Override
-    public int getSteppedValueForValue(double speed) {
+    public Double getSteppedValueForValue(double speed) {
         int levelIndex = getLevelIndexForValue(speed);
-        int result = - 1;
+        Double result = -1.0;
         if (levelIndex >= 0) {
             result = levels[levelIndex];
         }

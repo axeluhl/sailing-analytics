@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.base.racegroup;
 
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sse.common.Named;
 
 /**

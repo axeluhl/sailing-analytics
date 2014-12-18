@@ -52,7 +52,7 @@ public class DurationTest {
         assertEquals(0, oneSecond.asMinutes(), 0.2);
         assertEquals(1, oneSecond.asSeconds(), 0);
         assertEquals(1000, oneSecond.asMillis());
-        assertEquals("1.0seconds 1000millis", oneSecond.toString());
+        assertEquals("1.0s==1000ms", oneSecond.toString());
         Duration oneHour = Duration.ONE_HOUR;
         assertEquals(0, oneHour.asDays(), 0);
         assertEquals(1, oneHour.asHours(), 0);

@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 
 public class PlaceHolderDeviceIdentifierMongoHandler extends PlaceHolderDeviceIdentifierSerializationHandler
 implements DeviceIdentifierMongoHandler {

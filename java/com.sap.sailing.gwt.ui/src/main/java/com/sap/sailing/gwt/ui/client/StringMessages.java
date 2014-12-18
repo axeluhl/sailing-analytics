@@ -9,6 +9,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String swissTimingEvents();
     String trackedBefore();
     String listRaces();
+    String listRegattas();
     String wind();
     String windPanelLabel();
     String refresh();
@@ -344,6 +345,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String regattaExistForSelectedBoatClass();
     String reload();
     String addRegatta();
+    String importRegattas();
     String exchangeName();
     String course();
     String courseLayout();
@@ -967,9 +969,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String distanceToLine();
     String beatAngleTooltip();
     String beatAngle();
-
     String showBoatClassChartsLabel();
-
     String showDiagram();
     String runAutomaticallyTooltip();
     String rerunQueryAfterRefreshTooltip();
@@ -1115,4 +1115,20 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String serverReplies();
     String errorCommunicatingWithServer();
     String userManagement();
+    String structureImportUrls();
+    String filterBy();
+    String editSeries();
+    String pleaseSelectAtLeastOneRegatta();
+    String pleaseSelectAnEvent();
+    String showXYDiagram();
+    String xyDiagram();
+    String boatSpeed();
+    String confidence();
+    String errorTryingToGetEvents(String message);
+    String createDefaultSettingsForAllRegattas();
+    String noOverallEventSelected();
+    String errorTryingToCreateNewEvent(String name, String message);
+    String createNewEvent();
+    String noFleetsDefined();
+    String successfullyCreatedRegattas();
 }

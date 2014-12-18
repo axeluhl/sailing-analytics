@@ -4,17 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
-import com.sap.sse.datamining.shared.annotations.DataRetriever;
 
-@DataRetriever(dataType=RegattaLeaderboard.class,
-               groupName=Activator.dataRetrieverGroupName,
-               level=1)
 public class RegattaLeaderboardFilteringRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<LeaderboardGroup, RegattaLeaderboard> {
 

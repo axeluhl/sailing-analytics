@@ -26,10 +26,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.shared.DefaultPermissions;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -37,7 +39,6 @@ import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 public class UserDetailsView extends FlowPanel {
@@ -48,6 +49,7 @@ public class UserDetailsView extends FlowPanel {
     private final Label usernameLabel;
     private final Label emailLabel;
     private final StringListEditorComposite rolesEditor;
+    private final StringListEditorComposite permissionsEditor;
     private final VerticalPanel accountPanels;
     private UserDTO user;
 
@@ -60,12 +62,16 @@ public class UserDetailsView extends FlowPanel {
         for (DefaultRoles defaultRole : DefaultRoles.values()) {
             defaultRoleNames.add(defaultRole.getRolename());
         }
+        List<String> defaultPermissionNames = new ArrayList<>();
+        for (DefaultPermissions defaultPermission : DefaultPermissions.values()) {
+            defaultPermissionNames.add(defaultPermission.getPermissionname());
+        }
         rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, IconResources.INSTANCE.remove(), defaultRoleNames,
                 stringMessages.enterRoleName());
         rolesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                Iterable<String> newRoleList = event.getValue();
+                final Iterable<String> newRoleList = event.getValue();
                 final UserDTO selectedUser = UserDetailsView.this.user;
                 userManagementService.setRolesForUser(selectedUser.getName(), newRoleList, new MarkedAsyncCallback<SuccessInfo>(
                         new AsyncCallback<SuccessInfo>() {
@@ -79,8 +85,38 @@ public class UserDetailsView extends FlowPanel {
                                 if (!result.isSuccessful()) {
                                     Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), result.getMessage()));
                                 } else {
+                                    selectedUser.setRoles(newRoleList);
                                     if (userService.getCurrentUser().getName().equals(selectedUser.getName())) {
                                         // if the current user's roles changed, update the user object in the user service and notify others
+                                        userService.updateUser(/* notify other instances */ true);
+                                    }
+                                }
+                            }
+                        }));
+            }
+        });
+        permissionsEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getPermissions(), stringMessages, IconResources.INSTANCE.remove(), defaultPermissionNames,
+                stringMessages.enterPermissionName());
+        permissionsEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
+                final Iterable<String> newPermissionList = event.getValue();
+                final UserDTO selectedUser = UserDetailsView.this.user;
+                userManagementService.setPermissionsForUser(selectedUser.getName(), newPermissionList, new MarkedAsyncCallback<SuccessInfo>(
+                        new AsyncCallback<SuccessInfo>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.errorUpdatingPermissions(selectedUser.getName(), caught.getMessage()));
+                            }
+
+                            @Override
+                            public void onSuccess(SuccessInfo result) {
+                                if (!result.isSuccessful()) {
+                                    Window.alert(stringMessages.errorUpdatingPermissions(selectedUser.getName(), result.getMessage()));
+                                } else {
+                                    selectedUser.setPermissions(newPermissionList);
+                                    if (userService.getCurrentUser().getName().equals(selectedUser.getName())) {
+                                        // if the current user's permissions changed, update the user object in the user service and notify others
                                         userService.updateUser(/* notify other instances */ true);
                                     }
                                 }
@@ -131,6 +167,7 @@ public class UserDetailsView extends FlowPanel {
         decoratorPanel.setWidget(fp);
         this.add(decoratorPanel);
         this.add(rolesEditor);
+        this.add(permissionsEditor);
         updateUser(user, userManagementService);
     }
 
@@ -203,6 +240,7 @@ public class UserDetailsView extends FlowPanel {
                 accountPanels.add(accountPanelDecorator);
             }
             rolesEditor.setValue(user.getRoles(), /* fireEvents */ false);
+            permissionsEditor.setValue(user.getPermissions(), /* fireEvents */ false);
         }
     }
 

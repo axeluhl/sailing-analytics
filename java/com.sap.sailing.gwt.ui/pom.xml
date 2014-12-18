@@ -88,7 +88,7 @@
     </dependency>
     <dependency>
     	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sse.security</artifactId>
+    	<artifactId>com.sap.sse.security.common</artifactId>
     	<version>1.0.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
     </dependency>
@@ -110,7 +110,7 @@
           <!-- GWT version detected from dependencyManagement -->
           <execution>
 	        <configuration>
-		      <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx4096m</extraJvmArgs>
+		  <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2048m</extraJvmArgs>
 		  <!--
 		  <userAgents>chrome</userAgents>
 		  -->
@@ -131,7 +131,7 @@
 		        <module>com.sap.sailing.gwt.ui.PolarSheets</module>
 		      </modules>
 		      <gen>${basedir}/.generated</gen>
-		      <localWorkers>3</localWorkers>
+		      <localWorkers>7</localWorkers>
 		      <webappDirectory>${basedir}</webappDirectory>
 		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
                 <!-- Uncomment the following to obtain details split-point reports

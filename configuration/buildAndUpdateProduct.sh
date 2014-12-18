@@ -49,8 +49,8 @@ ARCH=x86_64
 START_DIR=`pwd`
 
 # needed for maven on sapsailing.com to work correctly
-if [ -f $USER_HOME/.bash_profile ]; then
-    source $USER_HOME/.bash_profile
+if [ -f "$USER_HOME/.bash_profile" ]; then
+    source "$USER_HOME/.bash_profile"
 fi
 
 cd "$PROJECT_HOME"
@@ -85,9 +85,10 @@ reporting=0
 suppress_confirmation=0
 extra=''
 parallelexecution=0
+p2local=0
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -u -g -t -a -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
+    echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
@@ -105,6 +106,7 @@ if [ $# -eq 0 ]; then
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
+    echo "-v Build local p2 respository, and use this instead of p2.sapsailing.com"
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo ""
@@ -141,7 +143,7 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocparm:n:l:s:w:u'
+options=':bgtocparvm:n:l:s:w:u'
 while getopts $options option
 do
     case $option in
@@ -160,6 +162,7 @@ do
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
         u) suppress_confirmation=1;;
+        v) p2local=1;;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -508,14 +511,27 @@ echo "Starting $@ of server..."
 
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
+        if [ $offline -eq 1 ]; then
+            echo "INFO: Activating offline mode"
+            extra="$extra -o"
+        fi
+
+        if [ $proxy -eq 1 ]; then
+            echo "INFO: Activating proxy profile"
+            extra="$extra -P no-debug.with-proxy"
+            MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
+        else
+            extra="$extra -P no-debug.without-proxy"
+        fi
 
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*)"
 	    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
+        GWT_XML_FILES=`find com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources -name '*.gwt.xml'`
         if [ $onegwtpermutationonly -eq 1 ]; then
             echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
-            for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
+            for i in $GWT_XML_FILES; do
                 echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
                 cp $i $i.bak
                 cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
@@ -523,7 +539,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             done
         else
             echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
-            for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
+            for i in $GWT_XML_FILES; do
                 echo "INFO: Patching $i files such that all GWT permutations are compiled"
                 cp $i $i.bak
                 cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
@@ -533,8 +549,24 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	else
 	    echo "INFO: GWT Compilation disabled"
-	    extra="-Pdebug.no-gwt-compile"
+	    extra="$extra -Pdebug.no-gwt-compile"
 	fi
+
+	if [ $p2local -eq 1 ]; then
+	    echo "INFO: Building and using local p2 repo"
+	    #build local p2 repo
+	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
+	    echo "Maven version used: `mvn --version`"
+	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee $START_DIR/build.log)
+	    # now get the exit status from mvn, and not that of tee which is what $? contains now
+	    MVN_EXIT_CODE=${PIPESTATUS[0]}
+	    echo "Maven exit code is $MVN_EXIT_CODE"
+	    #create local target definition
+	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
+	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
+	else
+	    echo "INFO: Using remote p2 repo (http://p2.sapsailing.com/p2/sailing/)"
+        fi
 
     # back to root!
     cd $PROJECT_HOME
@@ -545,19 +577,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     else
         extra="$extra -DskipTests=false"
         # TODO: Think about http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html
-	fi
-
-	if [ $offline -eq 1 ]; then
-	    echo "INFO: Activating offline mode"
-	    extra="$extra -o"
-	fi
-
-	if [ $proxy -eq 1 ]; then
-	    echo "INFO: Activating proxy profile"
-	    extra="$extra -P no-debug.with-proxy"
-	    MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
-	else
-	    extra="$extra -P no-debug.without-proxy"
 	fi
 
     if [ $android -eq 0 ] && [ $gwtcompile -eq 0 ] && [ $testing -eq 0 ]; then
@@ -614,7 +633,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     if [ $gwtcompile -eq 1 ]; then
 	# Now move back the backup .gwt.xml files before they were (maybe) patched
 	echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
-	for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
+	for i in $GWT_XML_FILES; do
 	    mv -v $i.bak $i
 	done
     fi

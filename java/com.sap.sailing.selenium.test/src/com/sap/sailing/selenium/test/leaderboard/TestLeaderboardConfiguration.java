@@ -49,6 +49,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     private List<TrackedRaceDescriptor> trackedRaces;
     private List<RaceDescriptor> leaderboardRaces;
     
+    @Override
     @Before
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
@@ -66,6 +67,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             this.leaderboardRaces.add(leaderboardRace);
         }
         clearState(getContextRoot());
+        super.setUp();
         configureLeaderboard();
     }
     

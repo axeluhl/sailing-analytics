@@ -45,6 +45,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     private RaceDescriptor raceColumn;
     
     
+    @Override
     @Before
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
@@ -52,6 +53,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         this.trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, RACE);
         this.raceColumn = new RaceDescriptor("R1", "Default", false, false, 0.0);
         clearState(getContextRoot());
+        super.setUp();
         configureLeaderboard();
     }
     

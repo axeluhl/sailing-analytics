@@ -1,5 +1,7 @@
 package com.sap.sse.security;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -7,11 +9,17 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.subject.PrincipalCollection;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.shared.UserManagementException;
 
 public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
     private static final Logger logger = Logger.getLogger(AbstractUserStoreBasedRealm.class.getName());
@@ -82,5 +90,24 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
             }
         }
         return result;
+    }
+
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+        final SimpleAuthorizationInfo ai = new SimpleAuthorizationInfo();
+        final List<String> roles = new ArrayList<>();
+        final List<String> permissions = new ArrayList<>();
+        for (Object r : principals) {
+            String username = r.toString();
+            try {
+                Util.addAll(getUserStore().getRolesFromUser(username), roles);
+                Util.addAll(getUserStore().getPermissionsFromUser(username), permissions);
+            } catch (UserManagementException e) {
+               throw new AuthenticationException(e.getMessage());
+            }
+        }
+        ai.addRoles(roles);
+        ai.addStringPermissions(permissions);
+        return ai;
     }
 }

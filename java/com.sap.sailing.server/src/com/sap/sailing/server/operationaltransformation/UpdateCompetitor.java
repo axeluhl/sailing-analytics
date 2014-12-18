@@ -27,6 +27,14 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
         this.newNationality = newNationality;
     }
 
+    /**
+     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+    
     @Override
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
         Competitor result = toState.getBaseDomainFactory().getCompetitorStore()

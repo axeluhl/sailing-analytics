@@ -42,7 +42,9 @@ public class TestParallelExtractionProcessor {
         Processor<GroupedDataEntry<Integer>, Void> receiver = new NullProcessor<GroupedDataEntry<Integer>, Void>((Class<GroupedDataEntry<Integer>>)(Class<?>) GroupedDataEntry.class, Void.class) {
             @Override
             public void processElement(GroupedDataEntry<Integer> element) {
-                receivedValues.put(element.getKey(), element.getDataEntry());
+                synchronized (receivedValues) {
+                    receivedValues.put(element.getKey(), element.getDataEntry());
+                }
             }
         };
         

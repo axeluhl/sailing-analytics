@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.List;
-
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
@@ -28,6 +26,6 @@ public abstract class AbstractRegattaPanel extends FormPanel implements Regattas
     }
 
     @Override
-    public abstract void fillRegattas(List<RegattaDTO> result);
+    public abstract void fillRegattas(Iterable<RegattaDTO> result);
     
 }

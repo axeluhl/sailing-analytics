@@ -27,9 +27,9 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
-import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.util.ClearStateTestSupport;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -72,7 +72,7 @@ public class Activator implements BundleActivator {
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, racingEventService.getId().toString());
         context.registerService(Replicable.class.getName(), racingEventService, replicableServiceProperties);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
-        context.registerService(RacingEventServiceWithTestSupport.class.getName(), racingEventService, null);
+        context.registerService(ClearStateTestSupport.class.getName(), racingEventService, null);
                 
         Dictionary<String, String> properties = new Hashtable<String, String>();
         properties.put(TypeBasedServiceFinder.TYPE, GPSFixImpl.class.getName());

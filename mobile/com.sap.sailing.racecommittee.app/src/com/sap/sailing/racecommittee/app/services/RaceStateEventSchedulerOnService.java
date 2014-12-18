@@ -2,9 +2,9 @@ package com.sap.sailing.racecommittee.app.services;
 
 import java.util.Collection;
 
-import com.sap.sailing.domain.racelog.state.RaceStateEvent;
-import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
-import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public class RaceStateEventSchedulerOnService implements RaceStateEventScheduler {

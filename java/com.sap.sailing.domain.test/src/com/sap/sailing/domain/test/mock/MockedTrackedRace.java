@@ -7,6 +7,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -35,7 +36,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -463,6 +463,30 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void setUseStartTimeInference(boolean useStartTimeInference) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public TimePoint getStartDate() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void setStartDate(TimePoint startDate) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public TimePoint getEndDate() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void setEndDate(TimePoint startDate) {
                         // TODO Auto-generated method stub
                         
                     }

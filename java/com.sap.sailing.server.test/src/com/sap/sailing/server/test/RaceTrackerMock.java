@@ -47,7 +47,7 @@ public class RaceTrackerMock implements RaceTracker{
     }
 
     @Override
-    public void stop() throws MalformedURLException, IOException, InterruptedException {
+    public void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
         isTracking = false;
     }
 

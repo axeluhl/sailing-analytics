@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -182,8 +183,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
             boolean includeCombinedWindForAllLegMiddles, AsyncCallback<WindInfoForRaceDTO> callback);
 
-    void getPolarResults(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
-    
     void getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime, AsyncCallback<SimulatorResultsDTO> callback);
     
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
@@ -385,7 +384,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
     void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void createRegatta(String regattaName, String boatClassName,
+    void createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference, AsyncCallback<RegattaDTO> callback);
 
@@ -461,7 +460,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             PolarSheetGenerationSettings settings, String name, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
 
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
             RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference, AsyncCallback<Void> callback);
 
     /**
@@ -511,6 +510,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
+    
+    void getStructureImportOperationProgress(AsyncCallback<Integer> asyncCallback);
 
     void getLeaderboardGroupNamesFromRemoteServer(String host, AsyncCallback<List<String>> leaderboardGroupNames);
 
@@ -648,4 +649,17 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             AsyncCallback<Iterable<LeaderboardSearchResultDTO>> callback);
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
+
+    void createXYDiagramForBoatClass(String itemText, AsyncCallback<PolarSheetsXYDiagramData> asyncCallback);
+    
+    /**
+     * Imports regatta structure definitions from an ISAF XRR document
+     * 
+     * @param manage2SailJsonUrl the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
+     */
+    void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
+
+    void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
+			EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
+
 }

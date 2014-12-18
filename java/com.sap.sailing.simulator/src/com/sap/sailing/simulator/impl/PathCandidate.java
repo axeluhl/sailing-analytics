@@ -7,7 +7,6 @@ public class PathCandidate implements Comparable<PathCandidate> {
 
     public PathCandidate(TimedPosition pos, boolean reached, double vrt, double hrz, int trn, String path, char sid, Wind wind) {
         this.pos = pos;   // time and position
-        this.wind = wind;
         this.reached = reached;
         this.vrt = vrt;   // height of target projected onto wind
         this.hrz = hrz;   // distance from middle line
@@ -17,21 +16,12 @@ public class PathCandidate implements Comparable<PathCandidate> {
     }
 
     TimedPosition pos;
-    Wind wind;
     boolean reached;
     double vrt;
     double hrz;
     int trn;
     String path;
     char sid;
-
-    public int getIndexOfTurnLR() {
-    	return path.indexOf("LR");
-    }
-
-    public int getIndexOfTurnRL() {
-    	return path.indexOf("RL");
-    }
 
     @Override
     // sort descending by time, -#turns, width

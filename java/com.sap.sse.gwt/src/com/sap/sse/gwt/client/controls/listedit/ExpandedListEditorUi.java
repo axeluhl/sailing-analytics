@@ -73,6 +73,9 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
     @Override
     public void refresh() {
         expandedValuesGrid.clear();
+        for (int i=expandedValuesGrid.getRowCount()-1; i>=0; i--) {
+            expandedValuesGrid.removeRow(i);
+        }
         for (ValueType value : context.getValue()) {
             addRow(value);
         }

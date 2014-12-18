@@ -2,106 +2,158 @@ package com.sap.sailing.gwt.home.client.shared.mainmedia;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
-import com.sap.sailing.gwt.idangerous.Swiper;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 
 public class MainMedia extends Composite {
-    
+
     private static final int MAX_VIDEO_COUNT = 3;
 
-    private static final MainMediaResources.LocalCss STYLES = MainMediaResources.INSTANCE.css(); 
+    @UiField
+    HTMLPanel videosPanel;
 
-    @UiField HTMLPanel videosPanel;
-    @UiField DivElement videoLightBoxData;
-    
-    @UiField HTMLPanel mediaSlides;
+    @UiField
+    DivElement videoLightBoxData;
 
-    private Swiper swiper;
-    private int videoCounter;
-    
+    @UiField
+    ImageCarousel imageCarousel;
+
+    private final HashSet<String> addedVideoUrls = new HashSet<String>(MAX_VIDEO_COUNT);
+
     interface MainMediaUiBinder extends UiBinder<Widget, MainMedia> {
     }
-    
+
     private static MainMediaUiBinder uiBinder = GWT.create(MainMediaUiBinder.class);
 
     public MainMedia(PlaceNavigator navigator) {
-        videoCounter = 0;
-        
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
 
     public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
-        for(Pair<StageEventType, EventBaseDTO> featuredEventTypeAndEvent: featuredEvents) {
-            if(featuredEventTypeAndEvent.getB().getVideoURLs().size() > 0 && videoCounter < MAX_VIDEO_COUNT) {
-                addVideoToVideoPanel(featuredEventTypeAndEvent.getB());
+        for (Pair<StageEventType, EventBaseDTO> featuredEventTypeAndEvent : featuredEvents) {
+            if (featuredEventTypeAndEvent.getB().getVideoURLs().size() > 0 && addedVideoUrls.size() < MAX_VIDEO_COUNT) {
+                String youTubeRandomUrl = getRandomVideoURL(featuredEventTypeAndEvent.getB());
+                addVideoToVideoPanel(youTubeRandomUrl, featuredEventTypeAndEvent.getB());
             }
         }
     }
 
     public void setRecentEvents(List<EventBaseDTO> recentEvents) {
-        List<String> photoGalleryUrls = new ArrayList<String>();
-        for (EventBaseDTO event : recentEvents) {
-            photoGalleryUrls.addAll(event.getPhotoGalleryImageURLs());
-            if (!event.getVideoURLs().isEmpty() && videoCounter < MAX_VIDEO_COUNT) {
-                addVideoToVideoPanel(event);
+        class Holder {
+            public Holder(String url, int height, int width) {
+                this.url = url;
+                this.height = height;
+                this.width = width;
             }
-        }
-        // shuffle the image url list (Remark: Collections.shuffle() is not implemented in GWT)
-        int gallerySize = photoGalleryUrls.size();
-        Random random = new Random(gallerySize);
-        for (int i = 0; i < gallerySize; i++) {
-            Collections.swap(photoGalleryUrls, i, random.nextInt(gallerySize));
-        }
-        for (String url : photoGalleryUrls) {
-            SimplePanel imageContainer = new SimplePanel();
-            imageContainer.addStyleName(STYLES.media_swiperslide());
-            String image = "url(" + url + ")";
-            imageContainer.getElement().getStyle().setBackgroundImage(image);
-            mediaSlides.add(imageContainer);
-        }
-        this.swiper = Swiper.createWithLoopOption(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide());
-        // See bug 2232: the stage image sizes are scaled incorrectly. https://github.com/ubilabs/sap-sailing-analytics/issues/421 and
-        // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2232 have the details. A quick fix may be to send a resize event
-        // after everything has been rendered.
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            String url;
+            int height;
+            int width;
             @Override
-            public void execute() {
-                swiper.reInit();
+            public int hashCode() {
+                final int prime = 31;
+                int result = 1;
+                result = prime * result + height;
+                result = prime * result + ((url == null) ? 0 : url.hashCode());
+                result = prime * result + width;
+                return result;
             }
-        });
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj)
+                    return true;
+                if (obj == null)
+                    return false;
+                if (getClass() != obj.getClass())
+                    return false;
+                Holder other = (Holder) obj;
+                if (height != other.height)
+                    return false;
+                if (url == null) {
+                    if (other.url != null)
+                        return false;
+                } else if (!url.equals(other.url))
+                    return false;
+                if (width != other.width)
+                    return false;
+                return true;
+            }
+        }
+
+        final Set<Holder> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable amount of shuffling
+        final List<Pair<String, EventBaseDTO>> videoCandidates = new LinkedList<>();
+
+        for (EventBaseDTO event : recentEvents) {
+            for (String url : event.getSailingLovesPhotographyImages()) {
+                ImageSize size = event.getImageSize(url);
+                photoGalleryUrls.add(new Holder(url, size.getHeight(), size.getWidth()));
+            }
+            for (String videoUrl : event.getVideoURLs()) {
+                videoCandidates.add(new Pair<String, EventBaseDTO>(videoUrl, event));
+            }
+        }
+
+        final int numberOfCandidatesAvailable = videoCandidates.size();
+        if (numberOfCandidatesAvailable <= (MAX_VIDEO_COUNT - addedVideoUrls.size())) {
+            // add all we have, no randomize
+            for (Pair<String, EventBaseDTO> videoCandidateInfo : videoCandidates) {
+                addVideoToVideoPanel(videoCandidateInfo.getA(), videoCandidateInfo.getB());
+            }
+        } else {
+            // fill up the list randomly from videoCandidates
+            final Random videosRandomizer = new Random(numberOfCandidatesAvailable);
+            randomlyPick: for (int i = 0; i < numberOfCandidatesAvailable; i++) {
+                int nextVideoindex = videosRandomizer.nextInt(numberOfCandidatesAvailable);
+                final Pair<String, EventBaseDTO> videoCandidateInfo = videoCandidates.get(nextVideoindex);
+                final String youtubeUrl = videoCandidateInfo.getA();
+                addVideoToVideoPanel(youtubeUrl, videoCandidateInfo.getB());
+                if (addedVideoUrls.size() == MAX_VIDEO_COUNT) {
+                    break randomlyPick;
+                }
+            }
+        }
+        Random random = new Random();
+        List<Holder> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
+        final int gallerySize = photoGalleryUrls.size();
+        for (int i = 0; i < gallerySize; i++) {
+            Collections.swap(shuffledPhotoGallery, i, random.nextInt(gallerySize));
+        }
+        for (Holder holder : shuffledPhotoGallery) {
+            imageCarousel.addImage(holder.url, holder.height, holder.width);
+        }
     }
 
-    private void addVideoToVideoPanel(EventBaseDTO event) {
-        String youtubeUrl = getRandomVideoURL(event);
+    private void addVideoToVideoPanel(String youtubeUrl, EventBaseDTO event) {
+        if (addedVideoUrls.contains(youtubeUrl)) {
+            return;
+        }
         String eventName = event.getName();
         String youtubeId = YoutubeApi.getIdByUrl(youtubeUrl);
         if (youtubeId != null && !youtubeId.trim().isEmpty()) {
             MainMediaVideo video = new MainMediaVideo(eventName, youtubeId);
             videosPanel.add(video);
-            videoCounter++;
+            addedVideoUrls.add(youtubeUrl);
         }
     }
-    
+
     private String getRandomVideoURL(EventBaseDTO event) {
         final String result;
         List<String> videoURLs = event.getVideoURLs();
@@ -113,17 +165,6 @@ public class MainMedia extends Composite {
         return result;
     }
 
-    @UiHandler("nextPictureLink")
-    public void nextStageTeaserLinkClicked(ClickEvent e) {
-        if (this.swiper != null) {
-            this.swiper.swipeNext();
-        }
-    }
 
-    @UiHandler("prevPictureLink")
-    public void prevStageTeaserLinkClicked(ClickEvent e) {
-        if (this.swiper != null) {
-            this.swiper.swipePrev();
-        }
-    }
+
 }

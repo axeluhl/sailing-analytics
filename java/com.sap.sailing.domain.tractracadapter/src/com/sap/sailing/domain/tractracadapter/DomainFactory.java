@@ -105,7 +105,7 @@ public interface DomainFactory {
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
-     * data from there. Receiving continues until {@link TracTracRaceTracker#stop()} is called.
+     * data from there. Receiving continues until {@link TracTracRaceTracker#stop(boolean)} is called.
      * <p>
      * 
      * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one

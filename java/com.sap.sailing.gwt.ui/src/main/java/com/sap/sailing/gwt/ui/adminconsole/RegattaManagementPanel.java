@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -172,6 +171,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
         sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(),
+                newRegatta.startDate, newRegatta.endDate, 
                 new RegattaCreationParametersDTO(seriesStructure), true,
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.useStartTimeInference, new AsyncCallback<RegattaDTO>() {
             @Override
@@ -187,7 +187,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         regattaListComposite.fillRegattas(regattas);
     }
 

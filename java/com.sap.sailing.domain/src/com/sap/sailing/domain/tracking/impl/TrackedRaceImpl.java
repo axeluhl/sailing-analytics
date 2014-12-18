@@ -31,6 +31,9 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -81,9 +84,6 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -1077,12 +1077,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
                                                                            // write lock after updating the cache
                     if (rankedCompetitors == null) {
-                        RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
-                        rankedCompetitors = new ArrayList<Competitor>();
-                        for (Competitor c : getRace().getCompetitors()) {
-                            rankedCompetitors.add(c);
+                        // RaceRankComparator requires course read lock
+                        getRace().getCourse().lockForRead();
+                        try {
+                            RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
+                            rankedCompetitors = new ArrayList<Competitor>();
+                            for (Competitor c : getRace().getCompetitors()) {
+                                rankedCompetitors.add(c);
+                            }
+                            Collections.sort(rankedCompetitors, comparator);
+                        } finally {
+                            getRace().getCourse().unlockAfterRead();
                         }
-                        Collections.sort(rankedCompetitors, comparator);
                         synchronized (competitorRankings) {
                             competitorRankings.put(timePoint, rankedCompetitors);
                         }
@@ -2675,7 +2681,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             }
                         }
                         logger.info("Finished loading mark tracks for " + getRace().getName());
-
                     } finally {
                         synchronized (TrackedRaceImpl.this) {
                             loadingFromGPSFixStore = false;

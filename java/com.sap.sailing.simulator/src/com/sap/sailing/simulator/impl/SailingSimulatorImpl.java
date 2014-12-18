@@ -113,7 +113,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         //
 
         // get instance of heuristic searcher
-        PathGeneratorTreeGrow genTreeGrow = new PathGeneratorTreeGrow(this.simulationParameters);
+        PathGeneratorTreeGrowWind genTreeGrow = new PathGeneratorTreeGrowWind(this.simulationParameters);
 
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1, null);
@@ -123,7 +123,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         long left1TurnMidtime = 1000000000;
         long left1TurnTimestep = genTreeGrow.getUsedTimeStep(); 
         if (leftBestCand != null) {
-            left1TurnMiddle = leftBestCand.getIndexOfTurnLR();
+            left1TurnMiddle = leftBestCand.path.indexOf("LR");
             left1TurnMidtime = left1TurnMiddle * left1TurnTimestep; 
         }
 
@@ -135,7 +135,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         long right1TurnMidtime = 1000000000;
         long right1TurnTimestep = genTreeGrow.getUsedTimeStep(); 
         if (rightBestCand != null) {
-            right1TurnMiddle = rightBestCand.getIndexOfTurnRL();
+            right1TurnMiddle = rightBestCand.path.indexOf("RL");
             right1TurnMidtime = right1TurnMiddle * right1TurnTimestep; 
         }
 

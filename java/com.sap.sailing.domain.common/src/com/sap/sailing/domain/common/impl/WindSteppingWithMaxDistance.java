@@ -11,7 +11,7 @@ public class WindSteppingWithMaxDistance extends WindSteppingImpl {
         super();
     };
 
-    public WindSteppingWithMaxDistance(Integer[] levels, double maxDistance) {
+    public WindSteppingWithMaxDistance(Double[] levels, double maxDistance) {
         super(levels);
         this.maxDistance = maxDistance;
     }
@@ -20,7 +20,7 @@ public class WindSteppingWithMaxDistance extends WindSteppingImpl {
     public int getLevelIndexForValue(double speed) {
         int result = -1;
         for (int i = 0; i < levels.length - 1; i++) {
-            double threshold = levels[i] + ((levels[i+1] - levels[i]) / 2);
+            double threshold = levels[i] + ((levels[i+1] - levels[i]) / 2.);
             if (speed < threshold) {
                 if (threshold - speed <= maxDistance * 2) {
                     result = i;

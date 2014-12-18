@@ -21,6 +21,14 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
+import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
+import com.sap.sailing.domain.abstractlog.race.scoring.impl.AdditionalScoringInformationEventImpl;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -40,8 +48,8 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -56,15 +64,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.analyzing.impl.AdditionalScoringInformationFinder;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
-import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
-import com.sap.sailing.domain.racelog.scoring.impl.AdditionalScoringInformationEventImpl;
-import com.sap.sailing.domain.racelog.state.RaceState;
-import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -812,7 +812,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     @Test
     public void testAdditionalScoreInformationLeadsToChangedScoreForOneColumn() throws NoWindException {
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
-        Regatta dummyRegatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE , "Dummy", new BoatClassImpl("Extreme40", false), trackedRegattaRegistry, new HighPointFirstGets10Or8AndLastBreaksTie(), "578876345345", new CourseAreaImpl("Humba", UUID.randomUUID()));
+        Regatta dummyRegatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE , "Dummy", new BoatClassImpl("Extreme40", false), 
+                /*startDate*/ null, /*endDate*/ null, trackedRegattaRegistry, new HighPointFirstGets10Or8AndLastBreaksTie(), "578876345345", new CourseAreaImpl("Humba", UUID.randomUUID()));
         trackedRegattaRegistry.getOrCreateTrackedRegatta(dummyRegatta);
         Competitor[] competitors = createCompetitors(10).toArray(new Competitor[0]);
         TimePoint now = MillisecondsTimePoint.now();
@@ -831,11 +832,11 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
         RaceLog raceLogForRace2 = leaderboardHighPoint10Or8AndLastBreaksTie.getRaceColumnByName("R2").getRaceLog(leaderboardHighPoint10Or8AndLastBreaksTie.getFleet(null));
-        raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new RaceLogEventAuthorImpl("Plopp", 1), later, "12345678", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.UNKNOWN));
+        raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new LogEventAuthorImpl("Plopp", 1), later, "12345678", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.UNKNOWN));
         assertEquals(new Double(20), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new RaceLogEventAuthorImpl("Plopp", 1), later.plus(Duration.ONE_MINUTE), "123456789873773762", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+        raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new LogEventAuthorImpl("Plopp", 1), later.plus(Duration.ONE_MINUTE), "123456789873773762", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
         assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(16), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
@@ -847,15 +848,15 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         AdditionalScoringInformationEvent event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assert event != null;
         try {
-            raceLogForRace2.revokeEvent(new RaceLogEventAuthorImpl("Plopp", 1), event);
-        } catch (NotRevokableException e) {
-            e.printStackTrace();
+            raceLogForRace2.revokeEvent(new LogEventAuthorImpl("Plopp", 1), event);
+        } catch (NotRevokableException e1) {
+            e1.printStackTrace();
         }
         event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assert event == null;
         assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        RaceState raceStateForRace2 = RaceStateImpl.create(raceLogForRace2, new RaceLogEventAuthorImpl("Simon", 1));
+        RaceState raceStateForRace2 = RaceStateImpl.create(raceLogForRace2, new LogEventAuthorImpl("Simon", 1));
         assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
         raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND), /*enable*/true, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assertTrue(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
@@ -1320,7 +1321,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             series.add(medalSeries);
         }
 
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, series, /* persistent */ false, scoringScheme, "123", null);
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
+                /*startDate*/ null, /*endDate*/ null, series, /* persistent */ false, scoringScheme, "123", null);
         return regatta;
     }
     
@@ -1385,7 +1387,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             series.add(finalSeries);
         }
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("Extreme40", /* typicallyStartsUpwind */ false);
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
                 series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN), "123", /* course area */null);
         List<Competitor> competitors = createCompetitors(12);
         final int firstYellowCompetitorIndex = 3;
