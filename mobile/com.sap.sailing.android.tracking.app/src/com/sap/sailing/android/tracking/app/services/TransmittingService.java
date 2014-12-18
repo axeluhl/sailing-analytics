@@ -295,7 +295,7 @@ public class TransmittingService extends Service {
 			}
 
 		}
-
+		
 		if (jsonArray.length() > 0) {
 			// send
 			String[] idsArr = new String[ids.size()];
@@ -323,14 +323,12 @@ public class TransmittingService extends Service {
 				else
 				{
 					currentlySending = true;
-					sendingAttempted = true; // will be set to false in the
-												// listeners
-					JsonObjectOrStatusOnlyRequest request = new JsonObjectOrStatusOnlyRequest(host
-							+ prefs.getServerGpsFixesPostPath(), requestObject,
-							new FixSubmitListener(ids.toArray(idsArr)), new FixSubmitErrorListener(
-									host, getTrackingServiceIsCurrentlyTracking(), failedHosts));
-
-					VolleyHelper.getInstance(this).addRequest(request);
+					sendingAttempted = true; // will be set to false in the listeners
+					VolleyHelper.getInstance(this).enqueueRequest(host
+							+ prefs.getServerGpsFixesPostPath(), 
+							requestObject, 
+							new FixSubmitListener(ids.toArray(idsArr)),  
+							new FixSubmitErrorListener(host, getTrackingServiceIsCurrentlyTracking(), failedHosts));
 				}
 			} else {
 				ExLog.w(this, TAG, "Warning, can't send fixes, host is null!");

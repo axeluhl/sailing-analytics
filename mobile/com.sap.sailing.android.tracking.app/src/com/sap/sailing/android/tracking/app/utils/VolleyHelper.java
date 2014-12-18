@@ -44,7 +44,7 @@ public class VolleyHelper extends Application {
 
 	public <T> void enqueueRequest(String urlStr, JSONObject requestJsonObject,
 			Listener<JSONObject> listener, ErrorListener errorListener) {
-		addRequest(new JsonObjectRequest(urlStr, requestJsonObject, listener,
+		addRequest(new JsonObjectOrStatusOnlyRequest(urlStr, requestJsonObject, listener,
 				errorListener));
 	}
     

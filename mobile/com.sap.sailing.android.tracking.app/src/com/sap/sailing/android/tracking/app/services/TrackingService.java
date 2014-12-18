@@ -149,7 +149,6 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 
 	public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed) {
 		GPSQuality quality = GPSQuality.noSignal;
-
 		if (gpsQualityListener != null) {
 			if (gpsAccurracy > 48) {
 				quality = GPSQuality.poor;

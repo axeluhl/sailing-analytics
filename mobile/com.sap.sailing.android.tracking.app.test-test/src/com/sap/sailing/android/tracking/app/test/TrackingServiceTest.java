@@ -152,14 +152,14 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 		TrackingService service = getService();
 		service.registerGPSQualityListener(listener);
 
-		getService().onLocationChanged(getTestLocation(50, 12.5f, 123));
+		getService().onLocationChanged(getTestLocation(12, 12.5f, 123));
 
 		Mockito.verify(listener, Mockito.times(1)).gpsQualityAndAccurracyUpdated(
 				gpsQualityCaptor.capture(), accuracyCaptor.capture(), bearingCaptor.capture(),
 				speedCaptor.capture());
 
 		assertEquals(GPSQuality.good, gpsQualityCaptor.getValue());
-		assertEquals(50f, accuracyCaptor.getValue().floatValue());
+		assertEquals(12f, accuracyCaptor.getValue().floatValue());
 		assertEquals(123f, bearingCaptor.getValue().floatValue());
 		assertEquals(12.5f, speedCaptor.getValue().floatValue());
 

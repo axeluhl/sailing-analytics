@@ -100,11 +100,11 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		assertEquals(1, json.getJSONArray("fixes").length());
 		
 		JSONObject jsonFix = (JSONObject)json.getJSONArray("fixes").get(0);
-		assertEquals(timestamp, jsonFix.getLong("timeMillis"));
-		assertEquals(12, jsonFix.getLong("lonDeg"));
-		assertEquals(13, jsonFix.getLong("latDeg"));
-		assertEquals(14, jsonFix.getLong("speedMperS"));
-		assertEquals(101.5, jsonFix.getDouble("bearingDeg"));
+		assertEquals(timestamp, jsonFix.getLong("timestamp"));
+		assertEquals(12, jsonFix.getLong("longitude"));
+		assertEquals(13, jsonFix.getLong("latitude"));
+		assertEquals(14, jsonFix.getLong("speed"));
+		assertEquals(101.5, jsonFix.getDouble("course"));
 		
 		assertEquals("http://127.0.0.1/sailingserver/api/v1/gps_fixes", urlCaptor.getValue());
 		shutdownService();
