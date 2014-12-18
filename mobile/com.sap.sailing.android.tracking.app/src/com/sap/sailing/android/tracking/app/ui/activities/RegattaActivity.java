@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Locale;
 
 import org.json.JSONException;
@@ -27,16 +29,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
-import com.android.volley.VolleyError;
+import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
-import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperError;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFailureListener;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
-import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
@@ -403,28 +405,30 @@ public class RegattaActivity extends BaseActivity {
 			return;
 		}
 		
-		JsonObjectOrStatusOnlyRequest checkoutRequest = new JsonObjectOrStatusOnlyRequest(
-				checkoutURLStr, checkoutData, new Listener<JSONObject>() {
-					@Override
-					public void onResponse(JSONObject response) {
-						DatabaseHelper.getInstance().deleteRegattaFromDatabase(
-								RegattaActivity.this, event, competitor, leaderboard);
-						deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
-						dismissProgressDialog();
-						finish();
-					}
-				}, new ErrorListener() {
-
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						dismissProgressDialog();
-						showErrorPopup(
-								R.string.error,
-								R.string.error_could_not_complete_operation_on_server_try_again);
-					}
-				});
-
-		VolleyHelper.getInstance(this).addRequest(checkoutRequest);
+		try {
+			HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkoutURLStr), checkoutData.toString(), this);
+			NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(request, new NetworkHelperSuccessListener() {
+				
+				@Override
+				public void performAction(JSONObject response) {
+					DatabaseHelper.getInstance().deleteRegattaFromDatabase(
+							RegattaActivity.this, event, competitor, leaderboard);
+					deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
+					dismissProgressDialog();
+					finish();
+				}
+			}, new NetworkHelperFailureListener() {
+				
+				@Override
+				public void performAction(NetworkHelperError e) {
+					dismissProgressDialog();
+					showErrorPopup(R.string.error,R.string.error_could_not_complete_operation_on_server_try_again);
+				}
+			});
+			
+		} catch (MalformedURLException e) {
+			ExLog.w(this, TAG, "Error, can't check out, MalformedURLException: " + e.getMessage());
+		}
 	}
 	
 	@Override
