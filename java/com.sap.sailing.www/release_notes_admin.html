@@ -37,6 +37,34 @@
 				</ul>				
 				<h2 class="articleHeadline">Administration</h2>
 				<div class="innerContent">
+					<h2 class="articleSubheadline">December 2014</h2>
+					<ul class="bulletList">
+					    <li>We added user management. The /gwt/AdminConsole.html entry point for a fresh server set-up uses
+						admin/admin as username/password. You can change the password in the "Advanced &gt; User Management"
+						tab where also new users can be created. If you assign a use the role "admin" then the user will
+						be able to use the administration console. Stay tuned for a more sophisticated set of roles and
+						permissions to be added in the future.
+					    </li>
+					    <li>Reverse replication is now possible for selected events. When a replica instance receives a
+					        modifying operation, such as a user logging in (creating a user session) or a wind fix being
+						entered through the Race Committee App, this change will be sent from the replica to the master
+						and from there be replicated to all other replicas attached.
+					    </li>
+					    <li>Starting a server with auto-replication enabled has been changed. The REPLICATE_ON_START environment
+					        variable no longer is a Boolean value (True/False) but now has to list the replication services to be
+						replicated from the master. The default environments for replicas at
+						<a href="http://releases.sapsailing.com/environments">http://releases.sapsailing.com/environments</a>
+						show how this works.
+					    </li>
+					    <li>The "Connectors" category has a new tab in the administration console, entitled "Regatta Structure Import".
+					        If your regatta management system happens to be <a href="http://manage2sail.com>Manage2Sail</a> 
+						you can enter an event ID and show the list of regattas, then set defaults for how they shall be
+						created in the SAP Sailing Analytics. This allows you to import and create many regattas at once,
+						saving the laborious effort of manually creating them. Obviously, this can come in handy at large
+						events with regattas on many course areas in several different boat classes.
+					    </li>
+					</ul>
+					
 					<h2 class="articleSubheadline">July 2014</h2>
 					<ul class="bulletList">
 					    <li>Replication has become much more robust and efficient. The initial load which used to be sent in a
