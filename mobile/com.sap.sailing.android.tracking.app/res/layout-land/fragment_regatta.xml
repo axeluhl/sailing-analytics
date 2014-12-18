@@ -101,7 +101,6 @@
                         android:id="@+id/flag_image"
                         android:layout_width="20dp"
                         android:layout_height="fill_parent"
-                        android:background="@color/sap_yellow"
                         android:scaleType="fitXY"
                         android:textColor="@color/white" />
                 </RelativeLayout>
