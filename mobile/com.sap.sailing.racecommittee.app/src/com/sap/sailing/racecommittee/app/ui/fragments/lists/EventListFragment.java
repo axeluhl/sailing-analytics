@@ -5,7 +5,6 @@ import java.util.Collection;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -15,7 +14,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 
 public class EventListFragment extends NamedListFragment<EventBase> {
 
-	
     @Override
     protected ItemSelectedListener<EventBase> attachListener(Activity activity) {
         if (activity instanceof EventSelectedListenerHost) {

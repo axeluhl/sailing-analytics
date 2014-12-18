@@ -8,8 +8,6 @@ import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.TextView;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;

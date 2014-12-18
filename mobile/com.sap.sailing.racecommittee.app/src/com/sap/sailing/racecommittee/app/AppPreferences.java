@@ -15,7 +15,6 @@ import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.sap.sailing.android.shared.data.EventData.Event;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
