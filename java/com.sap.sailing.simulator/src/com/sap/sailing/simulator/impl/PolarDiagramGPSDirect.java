@@ -108,7 +108,7 @@ public class PolarDiagramGPSDirect implements PolarDiagram, Serializable  {
 		}
 		Speed speed = null;
 		try {
-			speed = this.polarData.getSpeed(this.boatClass, this.wind, bearing.getDifferenceTo(wind.getBearing())).getObject();
+			speed = this.polarData.getSpeed(this.boatClass, this.wind, bearing.getDifferenceTo(wind.getBearing()), false).getObject();
 		} catch (NotEnoughDataHasBeenAddedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
