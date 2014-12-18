@@ -23,3 +23,4 @@ Export-Package: com.sap.sailing.simulator,
  com.sap.sailing.simulator.util,
  com.sap.sailing.simulator.windfield,
  com.sap.sailing.simulator.windfield.impl
+Bundle-Activator: com.sap.sailing.simulator.impl.Activator

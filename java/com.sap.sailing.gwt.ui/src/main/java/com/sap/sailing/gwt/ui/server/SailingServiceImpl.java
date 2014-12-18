@@ -389,10 +389,10 @@ import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
+import com.sap.sailing.simulator.PolarDiagramFactory;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -450,6 +450,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
     deviceIdentifierStringSerializationHandlerTracker;
 
+    private final ServiceTracker<PolarDiagramFactory, PolarDiagramFactory> polarDiagramService;
+    
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
     private final DomainObjectFactory domainObjectFactory;
@@ -497,6 +499,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceLogTrackingAdapterTracker = createAndOpenRaceLogTrackingAdapterTracker(context);
         deviceIdentifierStringSerializationHandlerTracker = createAndOpenDeviceIdentifierStringSerializationHandlerTracker(context);
         igtimiAdapterTracker = createAndOpenIgtimiTracker(context);
+        polarDiagramService = createAndOpenPolarDiagramService(context);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
         domainObjectFactory = getService().getDomainObjectFactory();
@@ -589,6 +592,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> result =
         		new ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory>(
                 context, RaceLogTrackingAdapterFactory.class.getName(), null);
+        result.open();
+        return result;
+    }
+
+    protected ServiceTracker<PolarDiagramFactory, PolarDiagramFactory> createAndOpenPolarDiagramService(BundleContext context) {
+        ServiceTracker<PolarDiagramFactory, PolarDiagramFactory> result = new ServiceTracker<PolarDiagramFactory, PolarDiagramFactory>(
+                context, PolarDiagramFactory.class.getName(), null);
         result.open();
         return result;
     }
@@ -1530,13 +1540,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<Position> course = new ArrayList<Position>();
             course.add(startPosition);
             course.add(endPosition);
-            String csvFilePath = "PolarDiagram49STG.csv";
-            PolarDiagram polarDiagram = null;
-            try {
-                polarDiagram = new PolarDiagramCSV(csvFilePath);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            BoatClass boatClass = trackedRace.getRace().getBoatClass();
+            PolarDiagram polarDiagram = polarDiagramService.getService().getPolarDiagram(boatClass);
+            if (polarDiagram == null) {
+            	return null;
             }
             SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField, SailingSimulatorConstants.ModeEvent, true, true);
             
