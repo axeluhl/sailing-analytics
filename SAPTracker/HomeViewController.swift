@@ -82,9 +82,14 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let rows = info.numberOfObjects
         if rows < 3 {
             tableView.removeConstraint(tableViewHeight)
-            let layoutConstraint = NSLayoutConstraint(item: tableView, attribute: NSLayoutAttribute.Height, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.Height, multiplier: 1.0, constant: CGFloat(22 + 44 * rows))
-            tableView.addConstraint(layoutConstraint)
+            tableViewHeight = NSLayoutConstraint(item: tableView, attribute: NSLayoutAttribute.Height, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.Height, multiplier: 1.0, constant: CGFloat(22 + 44 * rows))
+            tableView.addConstraint(tableViewHeight)
             tableView.scrollEnabled = false
+        } else {
+            tableView.removeConstraint(tableViewHeight)
+            tableViewHeight = NSLayoutConstraint(item: tableView, attribute: NSLayoutAttribute.Height, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.Height, multiplier: 1.0, constant: CGFloat(22 + 44 * 3))
+            tableView.addConstraint(tableViewHeight)
+            tableView.scrollEnabled = true
         }
     }
     
