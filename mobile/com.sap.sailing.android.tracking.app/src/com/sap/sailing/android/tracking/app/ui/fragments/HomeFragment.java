@@ -35,10 +35,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
-import com.android.volley.VolleyError;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
+import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
@@ -51,13 +49,11 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
-import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFailureListener;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
-import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneUUIDIdentifierImpl;
@@ -415,12 +411,6 @@ public class HomeFragment extends BaseFragment implements
 
 	}
 
-	@Override
-	public void onDetach() {
-		super.onDetach();
-		VolleyHelper.getInstance(getActivity()).cancelRequest(REQUEST_TAG);
-	}
-
 	/**
 	 * Display a confirmation-dialog in which the user confirms his full name
 	 * and sail-id.
@@ -505,21 +495,25 @@ public class HomeFragment extends BaseFragment implements
 		startActivity.showProgressDialog(R.string.please_wait, R.string.checking_in);
 
 		try {
-			JSONObject requestObject = CheckinHelper.getCheckinJson(
-					checkinData.competitorId, checkinData.deviceUid, "TODO!!",
-					date.getTime());
+			JSONObject requestObject = CheckinHelper.getCheckinJson(checkinData.competitorId,
+					checkinData.deviceUid, "TODO!!", date.getTime());
 
-			JsonObjectOrStatusOnlyRequest checkinRequest = new JsonObjectOrStatusOnlyRequest(checkinData.checkinURL,
-					requestObject, new CheckinListener(checkinData.leaderboardName,
-							checkinData.eventId, checkinData.competitorId),
+			HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkinData.checkinURL),
+					requestObject.toString(), getActivity());
+
+			NetworkHelper.getInstance(getActivity()).executeHttpJsonRequestAsnchronously(
+					request,
+					new CheckinListener(checkinData.leaderboardName, checkinData.eventId,
+							checkinData.competitorId),
 					new CheckinErrorListener(checkinData.leaderboardName, checkinData.eventId,
 							checkinData.competitorId));
-			
-			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
 
 		} catch (JSONException e) {
+			ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
+			displayAPIErrorRecommendRetry();
+		} catch (MalformedURLException e) {
 			ExLog.e(getActivity(), TAG,
-					"Failed to generate checkin JSON: " + e.getMessage());
+					"Failed to perform checkin, MalformedURLException: " + e.getMessage());
 			displayAPIErrorRecommendRetry();
 		}
 	}
@@ -670,7 +664,7 @@ public class HomeFragment extends BaseFragment implements
 		}
 	}
 
-	private class CheckinListener implements Listener<JSONObject> {
+	private class CheckinListener implements NetworkHelperSuccessListener {
 
 		public String leaderboardName;
 		public String eventId;
@@ -683,7 +677,7 @@ public class HomeFragment extends BaseFragment implements
 		}
 
 		@Override
-		public void onResponse(JSONObject response) {
+		public void performAction(JSONObject response) {
 			StartActivity startActivity = (StartActivity)getActivity();
 			startActivity.dismissProgressDialog();
 			
@@ -691,7 +685,7 @@ public class HomeFragment extends BaseFragment implements
 		}
 	}
 
-	private class CheckinErrorListener implements ErrorListener {
+	private class CheckinErrorListener implements NetworkHelperFailureListener {
 
 		public String leaderboardName;
 		public String eventId;
@@ -704,10 +698,10 @@ public class HomeFragment extends BaseFragment implements
 		}
 		
 		@Override
-		public void onErrorResponse(VolleyError error) {
-			if (error.getMessage() != null)
+		public void performAction(NetworkHelperError e) {
+			if (e.getMessage() != null)
 			{
-				ExLog.e(getActivity(), TAG, error.getMessage().toString());	
+				ExLog.e(getActivity(), TAG, e.getMessage().toString());	
 			}
 			else
 			{
