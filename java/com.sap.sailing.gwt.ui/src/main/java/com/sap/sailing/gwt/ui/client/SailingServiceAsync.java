@@ -510,6 +510,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
+    
+    void getStructureImportOperationProgress(AsyncCallback<Integer> asyncCallback);
 
     void getLeaderboardGroupNamesFromRemoteServer(String host, AsyncCallback<List<String>> leaderboardGroupNames);
 
@@ -649,4 +651,15 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 
     void createXYDiagramForBoatClass(String itemText, AsyncCallback<PolarSheetsXYDiagramData> asyncCallback);
+    
+    /**
+     * Imports regatta structure definitions from an ISAF XRR document
+     * 
+     * @param manage2SailJsonUrl the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
+     */
+    void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
+
+    void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
+			EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
+
 }

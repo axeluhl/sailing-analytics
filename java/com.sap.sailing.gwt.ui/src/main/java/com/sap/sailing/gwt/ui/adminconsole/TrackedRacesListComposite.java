@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
@@ -162,8 +163,8 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     }
 
     @Override
-    protected void makeControlsReactToFillRegattas(List<RegattaDTO> regattas) {
-        if (regattas.isEmpty()) {
+    protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas) {
+        if (Util.isEmpty(regattas)) {
             btnUntrack.setVisible(false);
             btnRemoveRace.setVisible(false);
             btnSetDelayToLive.setVisible(false);
