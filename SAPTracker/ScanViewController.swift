@@ -13,7 +13,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
-   
+    
     var activityIndicatorView: UIActivityIndicatorView!
     private var session: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
@@ -22,7 +22,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        activityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+        activityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.White)
         activityIndicatorView.hidesWhenStopped = true
         let barButton = UIBarButtonItem(customView: activityIndicatorView)
         self.navigationItem.rightBarButtonItem = barButton
@@ -54,6 +54,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
         if metadataObjects.count > 0 {
             targetImageView.image = UIImage(named: "scan_green")
             session.stopRunning()
+            activityIndicatorView.startAnimating()
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as AVMetadataMachineReadableCodeObject
             qrCodeManager!.parseUrl(metadataObject.stringValue)
         }
@@ -78,6 +79,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     
     func qrCodeCancel() {
         self.session.startRunning()
+        activityIndicatorView.stopAnimating()
         targetImageView.image = UIImage(named: "scan_white")
     }
     
