@@ -14,7 +14,7 @@ import com.sap.sailing.android.tracking.app.services.TransmittingService;
  */
 public class ServiceHelper {
 
-	private final static String TAG = ServiceHelper.class.getName();
+	//private final static String TAG = ServiceHelper.class.getName();
 
 	protected static ServiceHelper mInstance;
 

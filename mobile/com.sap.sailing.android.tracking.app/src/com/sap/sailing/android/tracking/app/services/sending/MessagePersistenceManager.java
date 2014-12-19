@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 
 public class MessagePersistenceManager {

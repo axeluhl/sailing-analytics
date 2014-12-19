@@ -62,7 +62,6 @@ public class HomeFragment extends BaseFragment implements
 		LoaderCallbacks<Cursor> {
 
 	private final static String TAG = HomeFragment.class.getName();
-	private final static String REQUEST_TAG = "request_homefragment";
 	private final static int REGATTA_LOADER = 1;
 
 	private AppPreferences prefs;

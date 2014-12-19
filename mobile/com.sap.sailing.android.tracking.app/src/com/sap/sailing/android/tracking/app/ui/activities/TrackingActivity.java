@@ -315,8 +315,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
 	@Override
 	public void magneticHeadingUpdated(float heading) {
-		// HudFragment hudFragment = (HudFragment)
-		// getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
 		if (prefs.getHeadingFromMagneticSensorPreferred()) {
 			if (mPager.getCurrentItem() == ScreenSlidePagerAdapter.VIEW_PAGER_FRAGMENT_COMPASS) {
 				
