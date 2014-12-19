@@ -307,7 +307,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                 currentLiveLeaderboard = null;
             }
             logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+e.getMessage());
-            logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
+            logger.log(Level.SEVERE, "exception during updating live leaderboard", e);
         }
     }
 
