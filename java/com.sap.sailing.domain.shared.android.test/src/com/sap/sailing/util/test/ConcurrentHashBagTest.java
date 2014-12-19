@@ -131,8 +131,65 @@ public class ConcurrentHashBagTest {
         t3.start();
         t4.start();
         t5.start();
-        Thread.sleep(10000);
+        Thread.sleep(1000);
         stopped[0] = true;
         assertFalse(sawNegativeSize[0]);
+    }
+
+    private static class BooleanHolder {
+        public volatile boolean b;
+    }
+    
+    @Test
+    public void testMassConcurrentInsertAndRemoveWithRandomizedReentrance() throws InterruptedException {
+        final ConcurrentHashBag<Thread> bag = new ConcurrentHashBag<>();
+
+        final int NUMBER_OF_THREADS = 500;
+        final boolean[] sawNegativeSize = new boolean[1];
+        final BooleanHolder stopped = new BooleanHolder();
+        final Runnable aAdderRemover = () -> {
+            final Thread currentThread = Thread.currentThread();
+            while (!stopped.b) {
+                bag.add(Thread.currentThread());
+                bag.remove(currentThread);
+                bag.remove(currentThread);
+            }
+        };
+        final Runnable randomAdderRemover = () -> {
+            final Thread currentThread = Thread.currentThread();
+            while (!stopped.b) {
+                final int reentranceLevel = 1+random.nextInt(2);
+                for (int i=0; i<reentranceLevel; i++) {
+                    bag.add(currentThread);
+                }
+                for (int i=0; i<reentranceLevel; i++) {
+                    bag.remove(currentThread);
+                }
+            }
+        };
+        final Thread[] threads = new Thread[NUMBER_OF_THREADS];
+        Thread t1 = new Thread(aAdderRemover);
+        t1.start();
+        for (int i=0; i<NUMBER_OF_THREADS; i++) {
+            Thread t2 = new Thread(randomAdderRemover);
+            threads[i] = t2;
+            t2.start();
+        }
+        Thread t5 = new Thread(() -> {
+            while (!stopped.b) {
+                if (bag.size() < 0) {
+                    sawNegativeSize[0] = true;
+                }
+            }
+        });
+        t5.start();
+        Thread.sleep(10000);
+        stopped.b = true;
+        assertFalse(sawNegativeSize[0]);
+        t1.join();
+        t5.join();
+        for (int i=0; i<NUMBER_OF_THREADS; i++) {
+            threads[i].join();
+        }
     }
 }
