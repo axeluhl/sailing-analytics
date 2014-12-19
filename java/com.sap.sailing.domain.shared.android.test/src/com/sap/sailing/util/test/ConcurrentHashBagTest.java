@@ -152,7 +152,6 @@ public class ConcurrentHashBagTest {
             while (!stopped.b) {
                 bag.add(Thread.currentThread());
                 bag.remove(currentThread);
-//                bag.remove(currentThread);
             }
         };
         final Runnable randomAdderRemover = () -> {
