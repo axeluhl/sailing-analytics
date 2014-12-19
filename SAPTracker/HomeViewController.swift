@@ -84,6 +84,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             tableView.removeConstraint(tableViewHeight)
             let layoutConstraint = NSLayoutConstraint(item: tableView, attribute: NSLayoutAttribute.Height, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.Height, multiplier: 1.0, constant: CGFloat(22 + 44 * rows))
             tableView.addConstraint(layoutConstraint)
+            tableView.scrollEnabled = false
         }
     }
     
