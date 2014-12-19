@@ -184,6 +184,10 @@ public class HomeFragment extends BaseFragment implements
 		} catch (UnsupportedEncodingException e) {
 			ExLog.e(getActivity(), TAG, "Failed to encode leaderboard name: " + e.getMessage());
 			leaderboardNameFromQR = "";
+		} catch (NullPointerException e) {
+			ExLog.e(getActivity(), TAG, "Invalid Barcode (no leaderboard-name set): " + e.getMessage());
+			Toast.makeText(this.getActivity(), "Invalid QR Code", Toast.LENGTH_LONG).show();
+			return;
 		}
 
 		final String competitorId = uri.getQueryParameter(CheckinHelper.COMPETITOR_ID);
