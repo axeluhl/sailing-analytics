@@ -15,6 +15,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         case NoCameraAvailable
     }
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView?
     var fetchedResultsController: NSFetchedResultsController?
     private var qrCodeManager: QRCodeManager?
@@ -76,9 +77,19 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     // MARK: - UITableViewDataSource
+    func resizeTable() {
+        let info = fetchedResultsController!.sections![0] as NSFetchedResultsSectionInfo
+        let rows = info.numberOfObjects
+        if rows < 3 {
+            tableView.removeConstraint(tableViewHeight)
+            let layoutConstraint = NSLayoutConstraint(item: tableView, attribute: NSLayoutAttribute.Height, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.Height, multiplier: 1.0, constant: CGFloat(22 + 44 * rows))
+            tableView.addConstraint(layoutConstraint)
+        }
+    }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let info = fetchedResultsController!.sections![section] as NSFetchedResultsSectionInfo
+        resizeTable()
         return info.numberOfObjects
     }
     
@@ -162,5 +173,6 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         alertView.tag = AlertView.NoCameraAvailable.rawValue;
         alertView.show()
     }
+    
 }
 

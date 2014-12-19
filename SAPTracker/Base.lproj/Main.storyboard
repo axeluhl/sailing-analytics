@@ -198,6 +198,7 @@
                     <connections>
                         <outlet property="activityIndicatorView" destination="3y9-Us-aIu" id="NSb-XJ-NZ9"/>
                         <outlet property="tableView" destination="OXU-ft-TXZ" id="1BA-dy-00A"/>
+                        <outlet property="tableViewHeight" destination="yuo-wx-0A1" id="pFK-q1-1DI"/>
                         <segue destination="G3a-SV-Maf" kind="show" identifier="Regatta" id="FMW-37-go1"/>
                         <segue destination="plm-Uw-c62" kind="show" identifier="Scan" id="U8l-If-CrF"/>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Xxn-jp-xEB"/>
@@ -861,7 +862,6 @@
                             <constraint firstItem="mUm-EE-6Is" firstAttribute="leading" secondItem="mP6-V4-QPK" secondAttribute="leading" constant="20" symbolic="YES" id="lbB-rJ-KNj"/>
                             <constraint firstItem="ULl-vy-5gb" firstAttribute="top" relation="greaterThanOrEqual" secondItem="mUm-EE-6Is" secondAttribute="bottom" constant="8" symbolic="YES" id="xXT-VC-dgn"/>
                         </constraints>
-                        <variation key="heightClass=compact"/>
                     </view>
                     <navigationItem key="navigationItem" title="Tracking" id="fyS-rY-bYp"/>
                     <connections>
@@ -1274,7 +1274,7 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
-        <segue reference="Irs-ey-Uhs"/>
+        <segue reference="QMa-LQ-D8c"/>
+        <segue reference="Xxn-jp-xEB"/>
     </inferredMetricsTieBreakers>
 </document>
