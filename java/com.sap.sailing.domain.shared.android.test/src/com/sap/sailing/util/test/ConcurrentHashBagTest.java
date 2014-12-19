@@ -183,7 +183,7 @@ public class ConcurrentHashBagTest {
             }
         });
         t5.start();
-        Thread.sleep(10000);
+        Thread.sleep(2000);
         stopped.b = true;
         assertFalse(sawNegativeSize[0]);
         t1.join();
