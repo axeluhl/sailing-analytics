@@ -7,7 +7,7 @@
         }
 
 		.slider .slick-track {
-			
+			overflow-y:hidden;
 		}
 		.slider  li {
 			width: 10px;

@@ -35,7 +35,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.AbstractReplicablesProvider;

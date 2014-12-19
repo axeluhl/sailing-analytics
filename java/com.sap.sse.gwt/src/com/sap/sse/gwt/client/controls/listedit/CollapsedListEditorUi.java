@@ -47,7 +47,7 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
         this.expandedUi = expandedUi;
     }
 
-    protected abstract String getCollapsedValueText(List<ValueType> value);
+    protected abstract String getCollapsedValueText(Iterable<ValueType> value);
 
     protected abstract ListEditorComposite<ValueType> createExpandedUi(Iterable<ValueType> initialValues,
             ExpandedListEditorUi<ValueType> ui);
@@ -101,7 +101,7 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
 
         private ListEditorComposite<ValueType> expandedComposite;
         
-        public PopupEditDialog(List<ValueType> initialValues, ExpandedListEditorUi<ValueType> ui, String dialogTitle,
+        public PopupEditDialog(Iterable<ValueType> initialValues, ExpandedListEditorUi<ValueType> ui, String dialogTitle,
                 DataEntryDialog.DialogCallback<List<ValueType>> callback) {
             super(dialogTitle, "", getStringMessages().save(), getStringMessages().cancel(), null, callback);
             expandedComposite = createExpandedUi(initialValues, ui);

@@ -13,7 +13,7 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
-import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.RegattaResults;
 
 public interface SwissTimingAdapter {
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port) throws InterruptedException, UnknownHostException, IOException, ParseException;
@@ -25,8 +25,6 @@ public interface SwissTimingAdapter {
      *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
      *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
-     * @param raceDescription
-     *            TODO
      */
     RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID,
             String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,

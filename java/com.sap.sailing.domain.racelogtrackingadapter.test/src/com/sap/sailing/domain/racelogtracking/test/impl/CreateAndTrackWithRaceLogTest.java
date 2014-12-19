@@ -189,7 +189,7 @@ public class CreateAndTrackWithRaceLogTest {
         addFixes2(race, comp1, dev1);
 
         // stop tracking, then no more fixes arrive at race
-        service.getRaceTrackerById(raceLog.getId()).stop();
+        service.getRaceTrackerById(raceLog.getId()).stop(false);
         addFixes3(race, comp1, dev1);
     }
 
@@ -225,7 +225,7 @@ public class CreateAndTrackWithRaceLogTest {
         addFixes2(race, comp1, dev1);
 
         // stop tracking, then no more fixes arrive at race
-        service.getRaceTrackerById(raceLog.getId()).stop();
+        service.getRaceTrackerById(raceLog.getId()).stop(/* preemptive */ false);
         addFixes3(race, comp1, dev1);
     }
 }

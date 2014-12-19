@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.Date;
 import java.util.HashSet;
@@ -32,11 +31,6 @@ public class PersonImpl extends NamedImpl implements DynamicPerson {
         listeners = new HashSet<NationalityChangeListener>();
     }
     
-    @Override
-    public InputStream getImage() {
-        throw new UnsupportedOperationException("Image for person not yet implemented");
-    }
-
     @Override
     public Nationality getNationality() {
         return nationality;

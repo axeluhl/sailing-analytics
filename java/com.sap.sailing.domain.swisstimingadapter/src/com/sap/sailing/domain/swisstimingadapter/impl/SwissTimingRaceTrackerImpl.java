@@ -150,7 +150,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
 
     @Override
-    public void stop() throws MalformedURLException, IOException, InterruptedException {
+    public void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
         if (isTrackedRaceStillReachable()) {
             TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
             trackedRace.setStatus(newStatus);

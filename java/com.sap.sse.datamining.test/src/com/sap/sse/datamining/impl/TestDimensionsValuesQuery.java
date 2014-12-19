@@ -44,7 +44,7 @@ public class TestDimensionsValuesQuery {
     private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     private static final Locale locale = Locale.ENGLISH;
     
-    private DataRetrieverChainDefinition<Collection<Test_Regatta>> dataRetrieverChainDefinition;
+    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition;
     private Collection<Test_Regatta> dataSource;
     
     //Test_HasRaceContext dimensions
@@ -66,7 +66,7 @@ public class TestDimensionsValuesQuery {
     }
 
     private Query<Set<Object>> createDimensionsValuesQuery() {
-        return new ProcessorQuery<Set<Object>, Collection<Test_Regatta>>(ConcurrencyTestsUtil.getExecutor(), dataSource) {
+        return new ProcessorQuery<Set<Object>, Collection<Test_Regatta>>(dataSource) {
             @Override
             protected Processor<Collection<Test_Regatta>, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> resultCollector = ComponentTestsUtil.getProcessorFactory().createGroupedDataCollectingAsSetProcessor(this); 
@@ -83,12 +83,14 @@ public class TestDimensionsValuesQuery {
                 raceDimensions.add(dimensionYear);
                 
                 DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
-                chainBuilder.stepDeeper();
+                chainBuilder.stepFurther(); //Initialization
+                
+                chainBuilder.stepFurther();
                 for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasRaceContext.class, resultCollector, raceDimensions, stringMessages, locale)) {
                     chainBuilder.addResultReceiver(resultReceiver);
                 }
                 
-                chainBuilder.stepDeeper();
+                chainBuilder.stepFurther();
                 for (Processor<?, ?> resultReceiver : ComponentTestsUtil.getProcessorFactory().createGroupingExtractorsForDimensions(Test_HasLegOfCompetitorContext.class, resultCollector, legDimensions, stringMessages, locale)) {
                     chainBuilder.addResultReceiver(resultReceiver);
                 }
@@ -143,21 +145,21 @@ public class TestDimensionsValuesQuery {
     @SuppressWarnings("unchecked")
     @Before
     public void initializeDataRetrieverChain() {
-        dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, "TestRetrieverChain");
+        dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
-        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class);
+        dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
         
         Class<Processor<Test_Regatta, Test_HasRaceContext>> raceRetrieverClass = 
                 (Class<Processor<Test_Regatta, Test_HasRaceContext>>)(Class<?>) TestRaceWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(regattaRetrieverClass,
+        dataRetrieverChainDefinition.addAfter(regattaRetrieverClass,
                                                raceRetrieverClass,
-                                               Test_HasRaceContext.class);
+                                               Test_HasRaceContext.class, "race");
         
         Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>> legRetrieverClass = 
                 (Class<Processor<Test_HasRaceContext, Test_HasLegOfCompetitorContext>>)(Class<?>) TestLegOfCompetitorWithContextRetrievalProcessor.class;
-        dataRetrieverChainDefinition.addAsLast(raceRetrieverClass,
+        dataRetrieverChainDefinition.endWith(raceRetrieverClass,
                                                legRetrieverClass,
-                                               Test_HasLegOfCompetitorContext.class);
+                                               Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
     }
 
     @Before

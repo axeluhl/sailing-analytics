@@ -1,18 +1,10 @@
 package com.sap.sse.datamining.impl;
 
-import java.util.Collection;
-import java.util.UUID;
-
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 
-public interface DataRetrieverChainDefinitionRegistry {
+public interface DataRetrieverChainDefinitionRegistry extends DataRetrieverChainDefinitionProvider {
 
-    public void add(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition);
-    public void remove(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition);
-
-    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType>> getDataRetrieverChainDefinitions(
-            Class<DataSourceType> dataSourceType, Class<?> retrievedDataType);
-
-    public <DataSourceType> DataRetrieverChainDefinition<DataSourceType> getDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, UUID id);
+    public void register(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    public void unregister(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
 
 }

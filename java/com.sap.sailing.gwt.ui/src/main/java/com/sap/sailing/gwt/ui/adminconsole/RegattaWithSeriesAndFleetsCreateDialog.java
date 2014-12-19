@@ -14,16 +14,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
-import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
-    
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-    
-    private ListEditorComposite<SeriesDTO> seriesEditor;
+    protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
-
         private StringMessages stringMessages;
         private ArrayList<RegattaDTO> existingRegattas;
 
@@ -50,15 +45,15 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             Date endDate = regattaToValidate.endDate;
             String datesErrorMessage = null;
             // remark: startDate == null and endDate == null is valid
-            if(startDate != null && endDate != null) {
-                if(startDate.after(endDate)) {
-                    datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate(); 
+            if (startDate != null && endDate != null) {
+                if (startDate.after(endDate)) {
+                    datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
                 }
-            } else if((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
+            } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
             }
             
-            if(datesErrorMessage != null) {
+            if (datesErrorMessage != null) {
                 errorMessage = datesErrorMessage;
             } else if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
@@ -111,16 +106,21 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
 
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(new RegattaDTO(), existingEvents, stringMessages.addRegatta(), stringMessages.ok(), stringMessages,
-                new RegattaParameterValidator(stringMessages, existingRegattas), callback);
-        this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO>emptyList(), stringMessages, resources.removeIcon(), /*enableFleetRemoval*/true);
+        super(new RegattaDTO(), Collections.<SeriesDTO>emptySet(), existingEvents, stringMessages.addRegatta(), stringMessages.ok(),
+                stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
+    }
+
+    @Override
+    protected boolean isEnableFleetRemoval() {
+        return true;
     }
 
     @Override
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
+        super.setupAdditionalWidgetsOnPanel(panel);
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
-        tabPanel.add(seriesEditor, stringMessages.series());
+        tabPanel.add(getSeriesEditor(), stringMessages.series());
         tabPanel.selectTab(0);
         panel.add(tabPanel);
     }
@@ -130,11 +130,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
         super.show();
         nameEntryField.setFocus(true);
     }
-    
+
     @Override
     protected RegattaDTO getResult() {
         RegattaDTO dto = super.getResult();
-        dto.series = seriesEditor.getValue();
         return dto;
     }
 

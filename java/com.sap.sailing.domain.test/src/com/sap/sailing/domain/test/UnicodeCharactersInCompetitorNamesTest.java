@@ -73,7 +73,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
         for (Competitor competitor : competitors) {
             System.out.println(competitor.getName());
         }
-        fourtyninerYellow_2.stop();
+        fourtyninerYellow_2.stop(/* preemptive */ false);
     }
     
     @Test

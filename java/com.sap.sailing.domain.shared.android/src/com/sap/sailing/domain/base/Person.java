@@ -4,6 +4,6 @@ import java.util.Date;
 
 import com.sap.sse.common.Named;
 
-public interface Person extends Named, WithImage, WithNationality, WithDescription {
+public interface Person extends Named, WithNationality, WithDescription {
     Date getDateOfBirth();
 }
