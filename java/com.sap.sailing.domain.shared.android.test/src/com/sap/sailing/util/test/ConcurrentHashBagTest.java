@@ -1,7 +1,11 @@
 package com.sap.sailing.util.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.util.Iterator;
 import java.util.Random;
 
 import org.junit.Before;
@@ -189,6 +193,81 @@ public class ConcurrentHashBagTest {
         t5.join();
         for (int i=0; i<NUMBER_OF_THREADS; i++) {
             threads[i].join();
+        }
+    }
+    
+    @Test
+    public void testIteratorRemove() {
+        bag.add("123");
+        bag.add("234");
+        bag.add("345");
+        bag.add("234");
+        bag.add("345");
+        bag.add("0");
+        final int sizeBeforeRemove = bag.size();
+        for (Iterator<String> i=bag.iterator(); i.hasNext(); ) {
+            String next = i.next();
+            if (next.equals("123")) {
+                i.remove();
+            }
+        }
+        assertFalse(bag.contains("123"));
+        assertEquals(sizeBeforeRemove-1, bag.size());
+    }
+
+    @Test
+    public void testIteratorRemoveFirstOfMultiple() {
+        bag.add("123");
+        bag.add("234");
+        bag.add("345");
+        bag.add("234");
+        bag.add("345");
+        bag.add("0");
+        final int sizeBeforeRemove = bag.size();
+        for (Iterator<String> i=bag.iterator(); i.hasNext(); ) {
+            String next = i.next();
+            if (next.equals("234")) {
+                i.remove();
+                break;
+            }
+        }
+        assertTrue(bag.contains("234"));
+        assertEquals(sizeBeforeRemove-1, bag.size());
+    }
+    
+    @Test
+    public void testIteratorRemoveThrowsExceptionBeforeNext() {
+        bag.add("123");
+        bag.add("234");
+        bag.add("345");
+        bag.add("234");
+        bag.add("345");
+        bag.add("0");
+        Iterator<String> i=bag.iterator();
+        try {
+            i.remove();
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalStateException e) {
+            // this is expected
+        }
+    }
+
+    @Test
+    public void testIteratorRemoveThrowsExceptionAfterRemoveWithoutNext() {
+        bag.add("123");
+        bag.add("234");
+        bag.add("345");
+        bag.add("234");
+        bag.add("345");
+        bag.add("0");
+        Iterator<String> i=bag.iterator();
+        i.next();
+        i.remove();
+        try {
+            i.remove();
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalStateException e) {
+            // this is expected
         }
     }
 }

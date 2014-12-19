@@ -66,6 +66,7 @@ public class ConcurrentHashBag<T> extends AbstractCollection<T> {
     private class Iterator implements java.util.Iterator<T> {
         private final java.util.Iterator<Entry<T, Integer>> iter = map.entrySet().iterator();
         private int howManyMore = 0;
+        private boolean canRemove;
         private T lastElementOfWhichWeHaveMore;
         
         @Override
@@ -85,13 +86,17 @@ public class ConcurrentHashBag<T> extends AbstractCollection<T> {
                 lastElementOfWhichWeHaveMore = next.getKey();
                 result = next.getKey();
             }
+            canRemove = true;
             return result;
         }
 
         @Override
         public void remove() {
-            // TODO Auto-generated method stub
-            
+            if (!canRemove) {
+                throw new IllegalStateException("Can't remove through iterator without calling next");
+            }
+            ConcurrentHashBag.this.remove(lastElementOfWhichWeHaveMore);
+            canRemove = false;
         }
     }
 }
