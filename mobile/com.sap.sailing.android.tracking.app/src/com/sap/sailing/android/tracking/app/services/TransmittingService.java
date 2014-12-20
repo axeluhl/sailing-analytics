@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -151,7 +152,6 @@ public class TransmittingService extends Service {
 
 		lastTransmissionFailed = false;
 		lastTransmissionTimestamp = System.nanoTime();
-
 		reportApiConnectivity(APIConnectivity.reachableTransmissionSuccess);
 	}
 
@@ -170,7 +170,6 @@ public class TransmittingService extends Service {
 		} else {
 			reportApiConnectivity(APIConnectivity.notReachable);
 		}
-
 	}
 
 	/**
@@ -320,7 +319,7 @@ public class TransmittingService extends Service {
 			if (host != null) {
 				if (currentlySending == true)
 				{
-					ExLog.w(this, TAG, "Warning, can't send fixes, currentlySending flag is set!");
+					ExLog.i(this, TAG, "Can't send fixes, currentlySending flag is set!");
 				}
 				else
 				{
@@ -333,6 +332,7 @@ public class TransmittingService extends Service {
 								+ prefs.getServerGpsFixesPostPath()), requestObject.toString(), this);
 					
 
+					ExLog.i(this, TAG, "transmitting..");
 					NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(
 							request,
 							new FixSubmitListener(ids.toArray(idsArr)),
@@ -454,8 +454,20 @@ public class TransmittingService extends Service {
 
 		@Override
 		public void performAction(JSONObject response) {
-			deleteSynced(ids);
-			markSuccessfulTransmission();
+			new AsyncTask<Void, Void, Void>() {
+
+				@Override
+				protected Void doInBackground(Void... params) {
+					deleteSynced(ids);
+					return null;
+				}
+				
+				@Override
+				protected void onPostExecute(Void result) {
+					super.onPostExecute(result);
+					markSuccessfulTransmission();
+				}
+			}.execute();
 		}
 	}
 
@@ -531,6 +543,7 @@ public class TransmittingService extends Service {
 
 	public class TransmittingBinder extends Binder {
 		public TransmittingService getService() {
+			ExLog.i(TransmittingService.this, TAG, "get Service..");
 			return TransmittingService.this;
 		}
 	}

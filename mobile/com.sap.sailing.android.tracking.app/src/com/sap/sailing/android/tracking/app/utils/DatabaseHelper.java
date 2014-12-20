@@ -11,8 +11,10 @@ import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
+import android.text.TextUtils;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
@@ -143,14 +145,15 @@ public class DatabaseHelper {
 	public int deleteGpsFixes(Context context, String[] fixIdStrings)
 	{
 		int numDeleted = 0;
-		for (String idStr: fixIdStrings)
-		{
-			ContentValues updateValues = new ContentValues();
-			updateValues.put(SensorGps.GPS_SYNCED, 1);
-			Uri uri = ContentUris.withAppendedId(SensorGps.CONTENT_URI, Long.parseLong(idStr));
-			numDeleted = context.getContentResolver().delete(uri, null, null);
-		}
 		
+		String idsJoined = TextUtils.join(", ", fixIdStrings);
+
+		ContentValues updateValues = new ContentValues();
+		updateValues.put(SensorGps.GPS_SYNCED, 1);
+
+		numDeleted = context.getContentResolver().delete(SensorGps.CONTENT_URI,
+				String.format("%s in (%s)", SensorGps._ID, idsJoined), null);
+
 		return numDeleted;
 	}
 	

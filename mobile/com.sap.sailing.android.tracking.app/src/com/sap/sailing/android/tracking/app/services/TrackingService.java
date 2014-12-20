@@ -165,14 +165,13 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	@Override
 	public void onLocationChanged(Location location) {
-		
 		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
 
 		DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
 				location.getLongitude(), location.getSpeed(),
 				location.getBearing(), location.getProvider(),
 				location.getTime(), eventRowId);
-
+		
 		ensureTransmittingServiceIsRunning();
 	}
 
