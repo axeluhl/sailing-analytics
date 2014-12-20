@@ -21,12 +21,22 @@
     <dependencyManagement>
         <dependencies>
         	<!-- needed on remote repository -->
+
+		<dependency>
+		  <groupId>com.google.android</groupId>
+		  <artifactId>android</artifactId>
+		  <version>4.1.1.4</version>
+		  <scope>provided</scope>
+		</dependency>
+
+<!--
         	<dependency>
             	<groupId>android</groupId>
             	<artifactId>android</artifactId>
             	<version>3.2_r1</version>
             	<scope>provided</scope>
         	</dependency>
+-->
 
        		<!-- needed on remote repository -->
         	<dependency>
@@ -43,7 +53,12 @@
                 <plugin>
                     <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                     <artifactId>android-maven-plugin</artifactId>
-                    <version>3.8.0</version>
+		    <version>3.9.0-rc.1</version>
+		    <configuration>
+			<sdk>
+			    <platform>19</platform>
+			</sdk>
+		    </configuration>
                     <extensions>true</extensions>
                 </plugin>
             </plugins>
