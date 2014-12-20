@@ -17,7 +17,6 @@ import com.sap.sailing.android.tracking.app.services.TrackingService;
 public class StartTrackingActivity extends BaseActivity {
     private static final String TAG = StartTrackingActivity.class.getName();
     private Button startTracking;
-    private Button nextActivity;
     private boolean tracking = false;
 
     @Override
@@ -37,20 +36,13 @@ public class StartTrackingActivity extends BaseActivity {
                 	Intent startTrackingIntent = new Intent(StartTrackingActivity.this, TrackingService.class);
                     getBaseContext().startService(startTrackingIntent);
                     startTracking.setText("Stop Tracking");
+                    tracking = true;
                 } else {
                 	Intent startTrackingIntent = new Intent(StartTrackingActivity.this, TrackingService.class);
                     getBaseContext().stopService(startTrackingIntent);
                     startTracking.setText("Start Tracking");
+                    tracking = false;
                 }
-            }
-        });
-
-        nextActivity = (Button) findViewById(R.id.btnNextActivity);
-        nextActivity.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(StartTrackingActivity.this, StopTrackingActivity.class);
-                fadeActivity(intent);
             }
         });
     }
