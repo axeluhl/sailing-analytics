@@ -232,22 +232,19 @@ public class TrackingFragment extends BaseFragment {
 	}
 	
 	public void setUnsentGPSFixesCount(final int count) {
-		if (isAdded()) {
-			getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					TextView unsentGpsFixesTextView = (TextView) getActivity()
-							.findViewById(R.id.tracking_unsent_fixes);
-					if (count == 0)
-					{
+		getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (isAdded()) {
+					TextView unsentGpsFixesTextView = (TextView) getActivity().findViewById(
+							R.id.tracking_unsent_fixes);
+					if (count == 0) {
 						unsentGpsFixesTextView.setText(getString(R.string.none));
-					}
-					else
-					{
-						unsentGpsFixesTextView.setText(String.valueOf(count));	
+					} else {
+						unsentGpsFixesTextView.setText(String.valueOf(count));
 					}
 				}
-			});
-		}
+			}
+		});
 	}
 }
