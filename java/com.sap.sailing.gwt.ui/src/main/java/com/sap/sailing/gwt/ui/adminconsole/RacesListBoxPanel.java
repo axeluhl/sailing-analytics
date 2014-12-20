@@ -68,7 +68,7 @@ public class RacesListBoxPanel extends FormPanel implements RegattasDisplayer, R
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> result) {
+    public void fillRegattas(Iterable<RegattaDTO> result) {
         raceList.clear();
         raceListBox.clear();
         for (RegattaDTO regatta : result) {

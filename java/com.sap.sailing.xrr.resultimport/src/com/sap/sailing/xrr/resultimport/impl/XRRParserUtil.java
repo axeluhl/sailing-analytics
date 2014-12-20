@@ -3,7 +3,7 @@ package com.sap.sailing.xrr.resultimport.impl;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

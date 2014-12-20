@@ -535,6 +535,17 @@ public interface SailingService extends RemoteService {
      * @return The RaceDTO of the modified race or <code>null</code>, if the given newStartTimeReceived was null.
      */
     RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
-    
+
     PolarSheetsXYDiagramData createXYDiagramForBoatClass(String itemText);
+
+    /**
+     * Imports regatta structure definitions from an ISAF XRR document
+     * 
+     * @param manage2SailJsonUrl the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
+     */
+    Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl);
+
+    void createRegattaStructure(Iterable<RegattaDTO> regattas, EventDTO newEvent) throws Exception;
+
+    Integer getStructureImportOperationProgress();
 }

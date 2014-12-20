@@ -75,7 +75,10 @@
 		<module>com.sap.sailing.resultimport</module>
 		<module>com.sap.sailing.kiworesultimport</module>
 		<module>com.sap.sailing.ess40.resultimport</module>
+		<module>com.sap.sailing.xrr.schema</module>
 		<module>com.sap.sailing.xrr.resultimport</module>
+		<module>com.sap.sailing.xrr.structureimport</module>
+		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>org.openqa.selenium.osgi</module>
 		<module>com.sap.sailing.monitoring</module>
@@ -103,7 +106,6 @@
 		<module>com.googlecode.java-diff-utils.test</module>
 		<module>com.sap.sailing.kiworesultimport.test</module>
 		<module>com.sap.sailing.ess40.resultimport.test</module>
-		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
 		<module>com.sap.sailing.barbados.resultimport</module>
 		<module>com.sap.sailing.barbados.resultimport.test</module>

@@ -323,7 +323,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     }
     
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         racesByIdentifier.clear();
         for (RegattaDTO regatta : regattas) {
             for (RaceDTO race : regatta.races) {
