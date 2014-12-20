@@ -18,6 +18,7 @@ public class StartTrackingActivity extends BaseActivity {
     private static final String TAG = StartTrackingActivity.class.getName();
     private Button startTracking;
     private Button nextActivity;
+    private boolean tracking = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +33,15 @@ public class StartTrackingActivity extends BaseActivity {
                     return;
                 }
                 
-                Intent startTracking = new Intent(StartTrackingActivity.this, TrackingService.class);
-                getBaseContext().startService(startTracking);
+                if (tracking == false){
+                	Intent startTrackingIntent = new Intent(StartTrackingActivity.this, TrackingService.class);
+                    getBaseContext().startService(startTrackingIntent);
+                    startTracking.setText("Stop Tracking");
+                } else {
+                	Intent startTrackingIntent = new Intent(StartTrackingActivity.this, TrackingService.class);
+                    getBaseContext().stopService(startTrackingIntent);
+                    startTracking.setText("Start Tracking");
+                }
             }
         });
 

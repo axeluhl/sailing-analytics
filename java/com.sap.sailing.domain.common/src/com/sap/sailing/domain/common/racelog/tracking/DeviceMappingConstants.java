@@ -16,7 +16,7 @@ public interface DeviceMappingConstants {
     static final String URL_BASE = "/tracking/checkin";
     static final String EVENT_ID = "event_id";
     static final String LEADERBOARD_NAME = "leaderboard_name";
-    static final String COMPETITOR_ID_AS_STRING = "competitor_id";
+    static final String COMPETITOR_ID_AS_STRING = "competitor";
     static final String MARK_ID_AS_STRING = "mark_id";
     
     @Deprecated
