@@ -24,7 +24,7 @@ public class OpenSansButton extends Button {
 		init();
 	}
 
-	@TargetApi(Build.VERSION_CODES.L)
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	public OpenSansButton(Context context, AttributeSet attrs,
 			int defStyleAttr, int defStyleRes) {
 		super(context, attrs, defStyleAttr, defStyleRes);
