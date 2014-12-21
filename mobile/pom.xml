@@ -21,30 +21,14 @@
     <dependencyManagement>
         <dependencies>
         	<!-- needed on remote repository -->
-
-		<dependency>
-		  <groupId>com.google.android</groupId>
-		  <artifactId>android</artifactId>
-		  <version>4.1.1.4</version>
-		  <scope>provided</scope>
-		</dependency>
-
-<!--
-        	<dependency>
-            	<groupId>android</groupId>
-            	<artifactId>android</artifactId>
-            	<version>3.2_r1</version>
-            	<scope>provided</scope>
-        	</dependency>
--->
-
-       		<!-- needed on remote repository -->
-        	<dependency>
-          		<groupId>android.support</groupId>
-          		<artifactId>compatibility-v4</artifactId>
-          		<version>19</version>
-        	</dependency>
-        	</dependencies>
+            <dependency>
+                <groupId>android</groupId>
+                <artifactId>android</artifactId>
+                <version>21</version>
+                <scope>system</scope>
+                <systemPath>${env.ANDROID_HOME}/platforms/android-21/android.jar</systemPath>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 
     <build>
@@ -64,5 +48,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
 </project>
