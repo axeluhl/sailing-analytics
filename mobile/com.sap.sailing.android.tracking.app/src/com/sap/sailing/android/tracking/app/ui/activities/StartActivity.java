@@ -1,10 +1,13 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
@@ -33,6 +36,18 @@ public class StartActivity extends BaseActivity {
         }
         
         replaceFragment(R.id.content_frame, new HomeFragment());
+    }
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	
+    	int googleServicesResultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+    	if (googleServicesResultCode != ConnectionResult.SUCCESS)
+    	{
+    		Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googleServicesResultCode, this, 0);
+    		dialog.show();
+    	}
     }
     
     
