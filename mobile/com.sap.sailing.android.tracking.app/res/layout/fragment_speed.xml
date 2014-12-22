@@ -10,8 +10,8 @@
     <com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView
         android:id="@+id/speed_header_text_view"
         android:layout_width="fill_parent"
-        android:layout_height="40dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
         android:gravity="center"
         android:text="@string/sog"
         android:textColor="@color/black"
