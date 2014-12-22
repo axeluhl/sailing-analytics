@@ -221,11 +221,11 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         Set<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(fromRaceLog).analyze();
 
         for (RaceLog toRaceLog : toRaceLogs) {
-            CourseBase to = new CourseDataImpl("Copy of \"" + course.getName());
-            TimePoint now = MillisecondsTimePoint.now();
             if (course == null || ! new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 continue;
             }
+            CourseBase to = new CourseDataImpl("Copy of \"" + course.getName());
+            TimePoint now = MillisecondsTimePoint.now();
             int i = 0;
             Map<ControlPoint, ControlPoint> controlPointDuplicationCache = new HashMap<ControlPoint, ControlPoint>();
             revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
