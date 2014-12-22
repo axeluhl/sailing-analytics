@@ -28,33 +28,34 @@
             <artifactId>android</artifactId>
         </dependency>
 
-        <!-- needed on remote repository -->
+<!--
         <dependency>
-          <groupId>android.support</groupId>
-          <artifactId>compatibility-v4</artifactId>
+            <groupId>com.android.support</groupId>
+            <artifactId>support-annotations</artifactId>
+            <version>21.0.3</version>
+            <type>aar</type>
         </dependency>
+-->
 
-        <!-- needed on remote repository -->
         <dependency>
-            <groupId>com.google.android.maps</groupId>
-            <artifactId>maps</artifactId>
-            <version>13_r1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- needed on remote repository -->
-        <dependency>
-          <groupId>com.google.android.gms</groupId>
-          <artifactId>google-play-services</artifactId>
-          <version>13</version>
-          <type>jar</type>
+            <groupId>com.android.support</groupId>
+            <artifactId>support-v4</artifactId>
+            <version>21.0.3</version>
+            <type>aar</type>
         </dependency>
 
         <dependency>
-          <groupId>com.google.android.gms</groupId>
-          <artifactId>google-play-services</artifactId>
-          <version>13</version>
-          <type>apklib</type>
+            <groupId>com.android.support</groupId>
+            <artifactId>appcompat-v7</artifactId>
+            <version>21.0.3</version>
+            <type>aar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.android.gms</groupId>
+            <artifactId>play-services</artifactId>
+            <version>6.5.87</version>
+            <type>aar</type>
         </dependency>
 
         <!-- needed on remote repository -->
@@ -90,7 +91,7 @@
                     <undeployBeforeDeploy>true</undeployBeforeDeploy>
                     <extractDuplicates>true</extractDuplicates>
                     <sdk>
-                        <platform>13</platform>
+                        <platform>21</platform>
                     </sdk>
                     <release>true</release>
                     <proguard>
