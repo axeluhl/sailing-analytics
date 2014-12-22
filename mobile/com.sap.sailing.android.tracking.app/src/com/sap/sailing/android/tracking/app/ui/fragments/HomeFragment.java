@@ -134,7 +134,7 @@ public class HomeFragment extends BaseFragment implements
 				startActivity(marketIntent);
 			} else {
 				Toast.makeText(getActivity(),
-						"PlayStore and Scanning not available.",
+						getString(R.string.error_play_store_and_scanning_not_available),
 						Toast.LENGTH_LONG).show();
 			}
 			return false;
@@ -151,11 +151,12 @@ public class HomeFragment extends BaseFragment implements
 			handleScannedOrUrlMatchedUri(uri);
 
 		} else if (resultCode == Activity.RESULT_CANCELED) {
-			Toast.makeText(getActivity(), "Scanning canceled",
+			Toast.makeText(getActivity(), getString(R.string.scanning_cancelled),
 					Toast.LENGTH_LONG).show();
 		} else {
+			String templateString = getString(R.string.error_scanning_qrcode);
 			Toast.makeText(getActivity(),
-					"Error scanning QRCode (" + resultCode + ")",
+					templateString.replace("{result-code}", String.valueOf(resultCode)),
 					Toast.LENGTH_LONG).show();
 		}
 	}
@@ -179,7 +180,7 @@ public class HomeFragment extends BaseFragment implements
 			leaderboardNameFromQR = "";
 		} catch (NullPointerException e) {
 			ExLog.e(getActivity(), TAG, "Invalid Barcode (no leaderboard-name set): " + e.getMessage());
-			Toast.makeText(this.getActivity(), "Invalid QR Code", Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getActivity(), getString(R.string.error_invalid_qr_code), Toast.LENGTH_LONG).show();
 			return;
 		}
 
@@ -713,7 +714,7 @@ public class HomeFragment extends BaseFragment implements
 			
 			DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), eventId, leaderboardName, competitorId);			
 			
-			Toast.makeText(getActivity(), "Error while receiving server data", Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity(), getString(R.string.error_while_receiving_server_data), Toast.LENGTH_LONG).show();
 		}
 	}
 

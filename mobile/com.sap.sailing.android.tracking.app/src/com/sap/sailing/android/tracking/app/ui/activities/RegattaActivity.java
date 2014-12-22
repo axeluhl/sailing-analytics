@@ -223,7 +223,6 @@ public class RegattaActivity extends BaseActivity {
             return;
         } 
         try {
-        	System.out.println("*** STORE IMAGE: " + image +", FILENAME: " + fileName);
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();

@@ -218,7 +218,6 @@ public class TrackingFragment extends BaseFragment {
 		if (isAdded())
 		{
 			Activity activity = getActivity();
-			System.out.println("ACTIVITY: " + activity);
 			SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) activity.findViewById(R.id.gps_quality_indicator);
 			indicatorView.setSignalQuality( quality.toInt() );
 			
