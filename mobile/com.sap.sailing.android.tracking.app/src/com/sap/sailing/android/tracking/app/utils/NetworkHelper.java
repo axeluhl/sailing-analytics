@@ -18,8 +18,8 @@ public class NetworkHelper {
 	
 	private final static String TAG = NetworkHelper.class.getName();
 	
-	static NetworkHelper mInstance;
-	static Context mContext;
+	protected static NetworkHelper mInstance;
+	protected static Context mContext;
 	
 	public static NetworkHelper getInstance(Context context) {
 		if (mInstance == null)
