@@ -90,4 +90,6 @@
 	<string name="error_scanning_qrcode">Fehler beim Scannen des QR-Codes {result-code}</string>
 	<string name="error_invalid_qr_code">Ungültiger QR-Code</string>
 	<string name="error_while_receiving_server_data">Fehler beim Empfang vom Server</string>
+	<string name="warning">Warnung</string>
+	<string name="gps_turned_off">GPS ist nicht aktiviert. Bitte aktivieren Sie den Standortzugriff (GPS) in Ihren Android-Einstellungen!</string>
 </resources>

@@ -5,13 +5,10 @@ import java.util.List;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
 import android.text.TextUtils;

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -229,6 +230,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
 		mPager.setAdapter(mPagerAdapter);
 		mPager.setCurrentItem(lastViewPagerItem);
+		
+		LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
+		boolean gpsEnabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		if (gpsEnabled == false)
+		{
+			showErrorPopup(R.string.warning, R.string.gps_turned_off);
+		}
 	}
 
 	@Override
