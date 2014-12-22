@@ -15,14 +15,14 @@ package com.sap.sailing.domain.common.racelog.tracking;
 public interface DeviceMappingConstants {
     static final String URL_BASE = "/tracking/checkin";
     static final String EVENT_ID = "event_id";
-    static final String LEADERBOARD_NAME = "leaderboard_name";
-    static final String COMPETITOR_ID_AS_STRING = "competitor";
-    static final String MARK_ID_AS_STRING = "mark_id";
-    
-    @Deprecated
-    static final String FROM_MILLIS = "from";
-    @Deprecated
-    static final String TO_MILLIS = "to";
+    static final String LEADERBOARD_NAME = "leaderboardName";
+    static final String COMPETITOR_ID_AS_STRING = "competitorId";
+    static final String MARK_ID_AS_STRING = "markId";
+    static final String DEVICE_UUID = "deviceUuid";
+    static final String DEVICE_TYPE = "deviceType";
+    static final String PUSH_DEVICE_ID = "pushDeviceId";
+    static final String FROM_MILLIS = "fromMillis";
+    static final String TO_MILLIS = "toMillis";
     @Deprecated
     static final String APK_PATH = "/apps/com.sap.sailing.android.tracking.app.apk";
 }

@@ -3,6 +3,9 @@ package com.sap.sailing.android.tracking.app.ui.activities;
 import java.net.URL;
 import java.util.UUID;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -15,27 +18,13 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.base.impl.MarkImpl;
-import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LaunchActivity extends BaseActivity {
-    private final JsonSerializer<RaceLogEvent> eventSerializer =
-            RaceLogEventSerializer.create(new CompetitorJsonSerializer());;
-    
     private static int requestCodeQRCode = 42471;
     private static final String TAG = LaunchActivity.class.getName();
     
@@ -84,70 +73,47 @@ public class LaunchActivity extends BaseActivity {
                 server += ":" + uri.getPort();
             }
             prefs.setServerURL(server);
-            String leaderboard = uri.getQueryParameter(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME);
-            String raceColumn = uri.getQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME);
-            String fleet = uri.getQueryParameter(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME);
+            String leaderboard = uri.getQueryParameter(DeviceMappingConstants.LEADERBOARD_NAME);
             String competitorIdAsString = uri.getQueryParameter(DeviceMappingConstants.COMPETITOR_ID_AS_STRING);
             String markIdAsString = uri.getQueryParameter(DeviceMappingConstants.MARK_ID_AS_STRING);
-            
-            @SuppressWarnings("deprecation")
-            Long fromMillis = Long.parseLong(uri.getQueryParameter(DeviceMappingConstants.FROM_MILLIS));
-            @SuppressWarnings("deprecation")
-            Long toMillis = Long.parseLong(uri.getQueryParameter(DeviceMappingConstants.TO_MILLIS));
-            
-            RaceLogEvent event = null;
-
-            DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(
-                    UUID.fromString(prefs.getDeviceIdentifier()));
-            TimePoint from = new MillisecondsTimePoint(fromMillis);
-            TimePoint to = new MillisecondsTimePoint(toMillis);
+            DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(prefs.getDeviceIdentifier()));
+            TimePoint from = MillisecondsTimePoint.now();
             String itemId = null;
             String itemType = null;
+            
+            JSONObject mappingStart = new JSONObject();
             try {
+                mappingStart.put(DeviceMappingConstants.DEVICE_UUID, device.getStringRepresentation());
+                mappingStart.put(DeviceMappingConstants.FROM_MILLIS, from.asMillis());
                 if (competitorIdAsString != null) {
-                    itemId = competitorIdAsString;
-                    itemType = "Competitor";
-                    UUID competitorId = UUID.fromString(competitorIdAsString);
-                    Competitor competitor = new CompetitorImpl(competitorId, null, null, null, null);
-                    event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(
-                            MillisecondsTimePoint.now(), AppPreferences.raceLogEventAuthor, device,
-                            competitor, 0, from, to);
+                    mappingStart.put(DeviceMappingConstants.COMPETITOR_ID_AS_STRING, competitorIdAsString);
                 } else if (markIdAsString != null) {
-                    itemId = markIdAsString;
-                    itemType = "Mark";
-                    UUID markId = UUID.fromString(markIdAsString);
-                    Mark mark = new MarkImpl(markId, null);
-                    event = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(
-                            MillisecondsTimePoint.now(), AppPreferences.raceLogEventAuthor, device,
-                            mark, 0, from, to);
+                    mappingStart.put(DeviceMappingConstants.MARK_ID_AS_STRING, markIdAsString);
                 }
             } catch (IllegalArgumentException e) {
                 //deserializing the competitor/mark on the server would fail if the idAsString were used
                 ExLog.e(this, TAG, "Found non-UUID as mapped item id - can only deal with UUIDs: " + itemId);
-                Toast.makeText(this, "Did not get a UUID as item ID: " + itemId, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Did not get a UUID as item ID: " + itemId, Toast.LENGTH_LONG).show(); // FIXME i18n
+            } catch (JSONException e) {
+                ExLog.e(this, TAG, "Internal error trying to register device: " + e.getMessage());
+                Toast.makeText(this, "Internal error trying to register device : " + e.getMessage(), Toast.LENGTH_LONG).show(); // FIXME i18n
             }
+            String postCheckinUrl = getPostCheckinUrl(server, leaderboard);
+            startService(MessageSendingService.createMessageIntent(this, postCheckinUrl, /* callbackPayload */ null,
+                    UUID.randomUUID(), mappingStart.toString(), /* callbackClass */ null));
+            ExLog.i(this, TAG, "Created mapping event");
+            Toast.makeText(this, "Successfully created mapping between device and " + itemType, Toast.LENGTH_LONG).show();
 
-            if (event == null) {
-                ExLog.e(this, TAG, "Could not find the necessary information in the QRCode URL: " + content);
-                Toast.makeText(this, "Could not find the necessary information in " + content,
-                        Toast.LENGTH_LONG).show();
-            } else {
-                String url = MessageSendingService.getRaceLogEventSendAndReceiveUrl(
-                        this, leaderboard, raceColumn, fleet);
-                String eventJson = eventSerializer.serialize(event).toString();
-                startService(MessageSendingService.createMessageIntent(this, url,
-                        null, event.getId(), eventJson, null));
-                ExLog.i(this, TAG, "Created mapping event");
-                Toast.makeText(this, "Successfully created mapping between device and " + itemType,
-                        Toast.LENGTH_LONG).show();
-                
-                startActivity(new Intent(this, StartTrackingActivity.class));
-            }
+            startActivity(new Intent(this, StartTrackingActivity.class));
         } else {
             Toast.makeText(this, "Error scanning QRCode (" + resultCode + ")", Toast.LENGTH_LONG).show();
         }
     }
     
+    private String getPostCheckinUrl(String serverBaseUrl, String leaderboardName) {
+        return serverBaseUrl+"/sailingserver/api/v1/leaderboards/"+leaderboardName+"/device_mappings/start";
+    }
+
     //FIXME: currently duplicate code with racecommitte app (GeneralPreferenceFragment), refactor once maven build is available and thus update mechanism can be created for tracking app see bugs 2398 2399
     protected String getServerUrl(URL apkUrl) {
         String protocol = apkUrl.getProtocol();

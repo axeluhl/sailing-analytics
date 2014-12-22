@@ -52,6 +52,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -339,24 +340,17 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     @Path("{name}/device_mappings/start")
     public Response postCheckin(String checkinJson, @PathParam("name") String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-
         if (!leaderboardIsValid(leaderboard)) {
             logger.warning("Leaderboard does not exist or does not hold a RegattaLog");
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Leaderboard does not exist or does not hold a RegattaLog").type(MediaType.TEXT_PLAIN)
                     .build();
         }
-        ;
-
         IsRegattaLike isRegattaLike = ((HasRegattaLike) leaderboard).getRegattaLike();
-
         DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
-
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
                 AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
-
         RegattaLogDeviceCompetitorMappingEventImpl event;
-
         JSONObject requestObject;
         try {
             logger.fine("Post issued to " + this.getClass().getName());
@@ -368,43 +362,34 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
-
-        String competitorId = (String) requestObject.get("competitorId");
-        String deviceUuid = (String) requestObject.get("deviceUuid");
-        Long fromMillis = (Long) requestObject.get("fromMillis");
-        String deviceType = (String) requestObject.get("deviceType");
-        String pushDeviceId = (String) requestObject.get("pushDeviceId");
-
+        String competitorId = (String) requestObject.get(DeviceMappingConstants.COMPETITOR_ID_AS_STRING);
+        String deviceUuid = (String) requestObject.get(DeviceMappingConstants.DEVICE_UUID);
+        Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.FROM_MILLIS);
+        String deviceType = (String) requestObject.get(DeviceMappingConstants.DEVICE_TYPE);
+        String pushDeviceId = (String) requestObject.get(DeviceMappingConstants.PUSH_DEVICE_ID);
         if (competitorId == null || deviceUuid == null || fromMillis == null || deviceType == null
                 || pushDeviceId == null) {
             logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        
-        //TODO: use device type and pushDeviceId
-
+        // TODO: use device type and pushDeviceId
         Competitor mappedTo = domainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
         if (mappedTo == null) {
             logger.warning("No competitor found for id " + competitorId);
             return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        
         //add registration if necessary
         Set<Competitor> registered = new RegisteredCompetitorsAnalyzer<>(isRegattaLike.getRegattaLog()).analyze();
         if (!registered.contains(mappedTo)) {
             isRegattaLike.getRegattaLog().add(
                     new RegattaLogRegisterCompetitorEventImpl(now, author, now, UUID.randomUUID(), mappedTo));
         }
-        
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
         TimePoint from = new MillisecondsTimePoint(fromMillis);
-
-        event = new RegattaLogDeviceCompetitorMappingEventImpl(now, author, now, UUID.randomUUID(), mappedTo, device,
-                from, null);
+        event = new RegattaLogDeviceCompetitorMappingEventImpl(now, author, now, UUID.randomUUID(), mappedTo, device, from, null);
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked in competitor " + mappedTo.getName());
         return Response.status(Status.OK).build();
