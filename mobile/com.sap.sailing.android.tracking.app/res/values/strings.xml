@@ -70,5 +70,10 @@
 	<string name="sog">SOG</string>
 	<string name="none">None</string>
 	<string name="show_leaderboard">Leader board</string>
+	<string name="error_play_store_and_scanning_not_available">"PlayStore and Scanning not available."</string>
+	<string name="scanning_cancelled">Scanning cancelled</string>
+	<string name="error_scanning_qrcode">Error scanning QR-Code {result-code}</string>
+	<string name="error_invalid_qr_code">Invalid QR-Code</string>
+	<string name="error_while_receiving_server_data">Error while receiving server data</string>
 	
 </resources>
