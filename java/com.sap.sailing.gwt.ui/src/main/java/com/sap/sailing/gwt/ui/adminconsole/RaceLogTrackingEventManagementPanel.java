@@ -170,7 +170,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> trackerStateColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
-                return doesTrackerExist(raceColumnAndFleetName) ? "Active" : "None";
+                return doesTrackerExist(raceColumnAndFleetName) ? stringMessages.active() : stringMessages.none();
             }
         };
 
