@@ -75,5 +75,6 @@
 	<string name="error_scanning_qrcode">Error scanning QR-Code {result-code}</string>
 	<string name="error_invalid_qr_code">Invalid QR-Code</string>
 	<string name="error_while_receiving_server_data">Error while receiving server data</string>
-	
+	<string name="warning">Warning</string>
+	<string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
 </resources>
