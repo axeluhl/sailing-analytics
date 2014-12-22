@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,6 +68,13 @@ public class LiveLeaderboardUpdater implements Runnable {
     private LeaderboardDTO currentLiveLeaderboard;
     
     /**
+     * When the evaluation of the live leaderboard has resulted in an exception, the exception will be passed on
+     * to callers of {@link #getLiveLeaderboard(Collection, boolean)}, wrapped by an {@link ExecutionException}.
+     * 
+     */
+    private Exception currentException;
+    
+    /**
      * Column names for which {@link #currentLiveLeaderboard} has the details
      */
     private final Set<String> columnNamesForWhichCurrentLiveLeaderboardHasTheDetails;
@@ -124,7 +132,15 @@ public class LiveLeaderboardUpdater implements Runnable {
         return leaderboard;
     }
     
-    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails) throws NoWindException {
+    /**
+     * If the calculation of the live leaderboard has terminated abnormally by throwing an exception during the last
+     * re-calculation attempt, another re-calculation is waited for. If that again terminates abnormally by throwing an
+     * exception, that exception will be thrown by this method, wrapped by an {@link ExecutionException}. Otherwise,
+     * this method will return the last live leaderboard calculated that has the columns and details requested. If the
+     * last live leaderboard calculated doesn't have the requested properties, the method waits for the next calculation
+     * to finish which is expected to provide the leaderboard for the details and columns requested.
+     */
+    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails) throws NoWindException, ExecutionException {
         LeaderboardDTO result = null;
         updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails);
         ensureRunning();
@@ -161,6 +177,9 @@ public class LiveLeaderboardUpdater implements Runnable {
                             this.wait();
                         } catch (InterruptedException e) {
                             logger.log(Level.INFO, "interrupted while waiting for LiveLeaderboardCache update", e);
+                        }
+                        if (currentException != null) {
+                            throw new ExecutionException(currentException);
                         }
                         if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails) &&
                                 (!addOverallDetails || currentLiveLeaderboardHasOverallDetails)) {
@@ -238,6 +257,7 @@ public class LiveLeaderboardUpdater implements Runnable {
      */
     private synchronized void updateCacheContents(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             boolean addOverallDetails, LeaderboardDTO result) {
+        currentException = null;
         columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.clear();
         columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.addAll(namesOfRaceColumnsForWhichToLoadLegDetails);
         currentLiveLeaderboard = result;
@@ -279,9 +299,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                             /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, newCacheValue);
                 } catch (NoWindException e) {
-                    logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboard.getName() + ": "
-                            + e.getMessage());
-                    logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
+                    logger.log(Level.SEVERE, "Exception during re-calculating the live leaderboard "+leaderboard.getName(), e);
                     try {
                         Thread.sleep(1000); // avoid running into the same NoWindException too quickly
                     } catch (InterruptedException e1) {
@@ -305,9 +323,10 @@ public class LiveLeaderboardUpdater implements Runnable {
             synchronized (this) {
                 running = false;
                 currentLiveLeaderboard = null;
+                currentException = e;
+                notifyAll();
             }
-            logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+e.getMessage());
-            logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
+            logger.log(Level.SEVERE, "exception updating live leaderboard "+leaderboard.getName(), e);
         }
     }
 
