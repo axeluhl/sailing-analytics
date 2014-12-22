@@ -52,7 +52,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter,
                 stringMessages, new MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
         
-        //add upload panel
+        // add upload panel
         CaptionPanel importPanel = new CaptionPanel(stringMessages.importFixes());
         VerticalPanel importContent = new VerticalPanel();
         mainPanel.add(importPanel);

@@ -459,13 +459,23 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     @Override
     public void racesRemoved(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
         for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
-            for (RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName : raceColumnTable.getDataProvider().getList()) {
-                if (Util.equalsWithNull(raceColumnAndFleetName.getA().getRaceIdentifier(raceColumnAndFleetName.getB()), regattaAndRaceIdentifier)) {
-                    raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(), null);
+            for (StrippedLeaderboardDTO leaderboard : leaderboardList.getList()) {
+                for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+                    for (FleetDTO fleet : raceColumn.getFleets()) {
+                        if (Util.equalsWithNull(raceColumn.getRaceIdentifier(fleet), regattaAndRaceIdentifier)) {
+                            raceColumn.setRaceIdentifier(fleet, null); // remove link from leaderboard to tracked race
+                            raceColumn.getRaceLogTrackingInfo(fleet).raceLogTrackerExists = false;
+                        }
+                    }
                 }
             }
-            raceColumnTable.getDataProvider().refresh();
         }
+        raceColumnTable.getDataProvider().refresh();
+    }
+
+    protected void onTrackedRaceForRaceInRaceColumnTableRemoved(
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
+        raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(), null);
     }
 
     @Override
