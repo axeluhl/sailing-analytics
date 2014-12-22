@@ -30,10 +30,6 @@ public class AppPreferences {
         return DeviceIdentifier;
     }
 
-    public String getServerURL() {
-        return PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default);
-    }
-    
     public String getServerGpsFixesPostPath() {
         return PrefUtils.getString(context, R.string.preference_server_gps_fixes_post_path, R.string.preference_server_gps_fixes_post_path);
     }
@@ -68,10 +64,6 @@ public class AppPreferences {
         //EditTextPreference saves value as string, even if android:inputType="number" is set
         String value = PrefUtils.getString(context, R.string.preference_gps_fix_fastest_interval_ms_key, R.string.preference_gps_fastest_fix_interval_ms_default);
         return value == null ? -1 : Integer.valueOf(value);
-    }
-    
-    public void setServerURL(String serverUrl) {
-        preferences.edit().putString(context.getString(R.string.preference_server_url_key), serverUrl).commit();
     }
     
     public String getEventId() {

@@ -386,7 +386,7 @@ public class RegattaActivity extends BaseActivity {
 	 */
 	public void checkout()
 	{
-		final String checkoutURLStr = prefs.getServerURL()
+		final String checkoutURLStr = event.server
 				+ prefs.getServerCheckoutPath().replace("{leaderboard-name}",
 						Uri.encode(leaderboard.name));
 		

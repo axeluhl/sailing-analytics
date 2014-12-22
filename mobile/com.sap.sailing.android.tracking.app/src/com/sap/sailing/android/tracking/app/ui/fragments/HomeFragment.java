@@ -171,8 +171,6 @@ public class HomeFragment extends BaseFragment implements
 		final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
 		final String hostWithPort = server + ":" + port;
 
-		prefs.setServerURL(hostWithPort);
-
 		String leaderboardNameFromQR;
 		try {
 			leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(CheckinHelper.LEADERBOARD_NAME),"UTF-8").replace("+", "%20");
@@ -186,7 +184,7 @@ public class HomeFragment extends BaseFragment implements
 		}
 
 		final String competitorId = uri.getQueryParameter(CheckinHelper.COMPETITOR_ID);
-		final String checkinURLStr = prefs.getServerURL()
+		final String checkinURLStr = hostWithPort
 				+ prefs.getServerCheckinPath().replace("{leaderboard-name}",
 						leaderboardNameFromQR);
 		final String eventId = uri.getQueryParameter(CheckinHelper.EVENT_ID);
@@ -204,9 +202,9 @@ public class HomeFragment extends BaseFragment implements
 		
 		final StartActivity startActivity = (StartActivity)getActivity();
 
-		final String getEventUrl = prefs.getServerURL() + prefs.getServerEventPath(eventId);
-		final String getLeaderboardUrl = prefs.getServerURL() + prefs.getServerLeaderboardPath(leaderboardName);
-		final String getCompetitorUrl = prefs.getServerURL() + prefs.getServerCompetitorPath(competitorId);
+		final String getEventUrl = hostWithPort + prefs.getServerEventPath(eventId);
+		final String getLeaderboardUrl = hostWithPort + prefs.getServerLeaderboardPath(leaderboardName);
+		final String getCompetitorUrl = hostWithPort + prefs.getServerCompetitorPath(competitorId);
 
 		startActivity.showProgressDialog(R.string.please_wait, R.string.getting_leaderboard);
 		
@@ -655,9 +653,6 @@ public class HomeFragment extends BaseFragment implements
 																		// a
 																		// header
 																		// row
-		
-			
-			prefs.setServerURL(cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER)));
 
 			String leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
 			String competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
