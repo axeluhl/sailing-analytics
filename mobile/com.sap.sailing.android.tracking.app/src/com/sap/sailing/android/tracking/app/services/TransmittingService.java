@@ -313,7 +313,7 @@ public class TransmittingService extends Service {
 			if (BuildConfig.DEBUG) {
 				ExLog.i(this, TAG, "sending gps fix json: " + requestObject.toString());
 				ExLog.i(this, TAG,
-						"url: " + prefs.getServerURL() + prefs.getServerGpsFixesPostPath());
+						"url: " + host + prefs.getServerGpsFixesPostPath());
 			}
 
 			if (host != null) {
