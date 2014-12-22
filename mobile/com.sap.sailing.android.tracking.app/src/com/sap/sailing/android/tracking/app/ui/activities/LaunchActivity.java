@@ -85,7 +85,9 @@ public class LaunchActivity extends BaseActivity {
             try {
                 mappingStart.put(DeviceMappingConstants.DEVICE_UUID, device.getStringRepresentation());
                 mappingStart.put(DeviceMappingConstants.FROM_MILLIS, from.asMillis());
+                mappingStart.put(DeviceMappingConstants.DEVICE_TYPE, "android");
                 if (competitorIdAsString != null) {
+                    mappingStart.put(DeviceMappingConstants.PUSH_DEVICE_ID, "<push_device_id_not_known_on_android>");
                     mappingStart.put(DeviceMappingConstants.COMPETITOR_ID_AS_STRING, competitorIdAsString);
                 } else if (markIdAsString != null) {
                     mappingStart.put(DeviceMappingConstants.MARK_ID_AS_STRING, markIdAsString);
