@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImportProgress;
@@ -34,7 +33,7 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
  * @author Frederik Petersen (D054528)
  * 
  */
-public class DataImportLockWithProgress extends ReentrantLock {
+public class DataImportLockWithProgress extends NamedReentrantReadWriteLock {
     /**
      * Defaults to 60s (60000ms).
      */
@@ -47,7 +46,7 @@ public class DataImportLockWithProgress extends ReentrantLock {
     private final NamedReentrantReadWriteLock mapLock;
 
     public DataImportLockWithProgress() {
-        super(true);
+        super(DataImportLockWithProgress.class.getName(), true);
         progressPerId = new HashMap<UUID, DataImportProgress>();
         mapLock = new NamedReentrantReadWriteLock("mapLock in "+getClass().getName(), /* fair */ false);
     }
@@ -61,11 +60,11 @@ public class DataImportLockWithProgress extends ReentrantLock {
         TimerTask deleteTask = new TimerTask() {
             @Override
             public void run() {
-                mapLock.writeLock().lock();
+                LockUtil.lockForWrite(mapLock);
                 try {
                     progressPerId.remove(progressIDToDelete);
                 } finally {
-                    mapLock.writeLock().unlock();
+                    LockUtil.unlockAfterWrite(mapLock);
                 }
             }
         };
@@ -89,11 +88,11 @@ public class DataImportLockWithProgress extends ReentrantLock {
     }
 
     public void addProgress(UUID operationId, DataImportProgress progress) {
-        mapLock.writeLock().lock();
+        LockUtil.lockForWrite(mapLock);
         try {
             progressPerId.put(operationId, progress);
         } finally {
-            mapLock.writeLock().unlock();
+            LockUtil.unlockAfterWrite(mapLock);
         }
     }
 
