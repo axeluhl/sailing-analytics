@@ -179,6 +179,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceLogTrackingInfoDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -398,7 +399,10 @@ import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
-import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sailing.xrr.structureimport.SeriesParameters;
+import com.sap.sailing.xrr.structureimport.StructureImporter;
+import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.BuildVersion;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -414,6 +418,7 @@ import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
 /**
  * The server side implementation of the RPC service.
@@ -3658,11 +3663,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+    public List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
+            List<String> columnNames) {
         List<RaceColumnInSeriesDTO> result = new ArrayList<RaceColumnInSeriesDTO>();
-        for(String columnName: columnNames) {
-            RaceColumnInSeries raceColumnInSeries = getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
-            if(raceColumnInSeries != null) {
+        for (String columnName : columnNames) {
+            RaceColumnInSeries raceColumnInSeries = getService().apply(
+                    new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+            if (raceColumnInSeries != null) {
                 result.add(convertToRaceColumnInSeriesDTO(raceColumnInSeries));
             }
         }
@@ -3725,7 +3732,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId, useStartTimeInference));
         return convertToRegattaDTO(regatta);
     }
-
+    
     @Override
     public RegattaScoreCorrectionDTO getScoreCorrections(String scoreCorrectionProviderName, String eventName,
             String boatClassName, Date timePointWhenResultPublished) throws Exception {
@@ -3983,6 +3990,107 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+    
+    private void createRegattaFromRegattaDTO(RegattaDTO regatta) {
+        this.createRegatta(regatta.getName(), regatta.boatClass.getName(), regatta.startDate, regatta.endDate,
+                        new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
+                        true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.useStartTimeInference);
+    }
+    
+    private SeriesParameters getSeriesParameters(SeriesDTO seriesDTO) {
+        SeriesParameters series = new SeriesParameters(false, false, false, null);
+            series
+                    .setFirstColumnIsNonDiscardableCarryForward(seriesDTO.isFirstColumnIsNonDiscardableCarryForward());
+            series.setHasSplitFleetContiguousScoring(seriesDTO.hasSplitFleetContiguousScoring());
+            series.setStartswithZeroScore(seriesDTO.isStartsWithZeroScore());
+            series.setDiscardingThresholds(seriesDTO.getDiscardThresholds());
+        return series;
+    }
+    
+    private LinkedHashMap<String, SeriesCreationParametersDTO> getSeriesCreationParameters(RegattaDTO regattaDTO) {
+        LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
+            for (SeriesDTO series : regattaDTO.series){
+                SeriesParameters seriesParameters = getSeriesParameters(series);
+                seriesCreationParams.put(series.getName(), new SeriesCreationParametersDTO(series.getFleets(),
+                false, seriesParameters.isStartswithZeroScore(), seriesParameters.isFirstColumnIsNonDiscardableCarryForward(),
+                        seriesParameters.getDiscardingThresholds(), seriesParameters.isHasSplitFleetContiguousScoring()));
+            }
+        return seriesCreationParams;
+    }
+
+    @Override
+    public Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl) { 
+        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), baseDomainFactory);
+        Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(manage2SailJsonUrl);
+        List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
+        Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
+        for (Regatta regatta : regattas) {
+            regattaDTOs.add(convertToRegattaDTO(regatta));
+        }
+        return regattaDTOs;
+    }
+
+    /**
+     * Uses {@link #addRaceColumnsToSeries} which also handles replication to update the regatta identified
+     * by <code>regatta</code>'s {@link RegattaDTO#getRegattaIdentifier() identifier} with the race columns
+     * as specified by <code>regatta</code>. The domain regatta object is assumed to have no races associated
+     * when this method is called.
+     */
+    private void addRaceColumnsToRegattaSeries(RegattaDTO regatta, String eventName) {
+        for (SeriesDTO series : regatta.series) {
+            List<String> raceNames = new ArrayList<String>();
+            for (RaceColumnDTO raceColumnInSeries : series.getRaceColumns()) {
+                raceNames.add(raceColumnInSeries.getName());
+            }
+            addRaceColumnsToSeries(regatta.getRegattaIdentifier(), series.getName(), raceNames);
+        }
+    }
+
+    @Override
+    public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent) throws MalformedURLException {
+        final List<String> leaderboardNames = new ArrayList<String>();
+        for (RegattaDTO regatta : regattas) {
+            createRegattaFromRegattaDTO(regatta);
+            addRaceColumnsToRegattaSeries(regatta, newEvent.getName());
+            if (getLeaderboard(regatta.getName()) == null) {
+                leaderboardNames.add(regatta.getName());
+                createRegattaLeaderboard(regatta.getRegattaIdentifier(), regatta.boatClass.toString(), new int[0]);
+            }
+        }
+        createAndAddLeaderboardGroup(newEvent, leaderboardNames);
+        // TODO find a way to import the competitors for the selected regattas. You'll need the regattas as Iterable<RegattaResults>
+        // structureImporter.setCompetitors(regattas, "");
+    }
+
+    private void createAndAddLeaderboardGroup(final EventDTO newEvent, List<String> leaderboardNames) throws MalformedURLException {
+        LeaderboardGroupDTO leaderboardGroupDTO = null;
+        String description = "";
+        if (newEvent.getDescription() != null) {
+            description = newEvent.getDescription();
+        }
+        String eventName = newEvent.getName();
+        List<UUID> eventLeaderboardGroupUUIDs = new ArrayList<>();
+
+        // create Leaderboard Group
+        if (getService().getLeaderboardGroupByName(eventName) == null) {
+            CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(eventName, description,
+                    eventName, false, leaderboardNames, null, null);
+            leaderboardGroupDTO = convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false,
+                    false);
+            eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
+        } else {
+            leaderboardNames.addAll(getLeaderboardNames());
+            updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null, null);
+            leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
+        }
+        for (LeaderboardGroupDTO lg : newEvent.getLeaderboardGroups()) {
+            eventLeaderboardGroupUUIDs.add(lg.getId());
+        }
+        updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
+                newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getLogoImageURL(),
+                newEvent.getOfficialWebsiteURL(), newEvent.getImageURLs(), newEvent.getVideoURLs(),
+                newEvent.getSponsorImageURLs());
     }
     
     @Override
@@ -4331,6 +4439,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     public DataImportProgress getImportOperationProgress(UUID id) {
         return getService().getDataImportLock().getProgress(id);
+    }
+
+    @Override
+    public Integer getStructureImportOperationProgress() {
+//        int parsedDocuments = 0;
+//        if (structureImporter != null) {
+//            parsedDocuments = structureImporter.getProgress();
+//            if (structureImporter.isFinished()) {
+//                parsedDocuments++;
+//            }
+//        }
+        return 0;
     }
 
     private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind)

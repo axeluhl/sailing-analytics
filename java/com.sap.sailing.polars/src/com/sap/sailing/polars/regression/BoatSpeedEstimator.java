@@ -2,9 +2,9 @@ package com.sap.sailing.polars.regression;
 
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.sap.sailing.polars.mining.IncrementalRegressionProcessor;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 /**
  * Supplies incremental arithmetic mean for confidence and speed.
@@ -24,21 +24,16 @@ public class BoatSpeedEstimator implements Serializable {
 
     private double speedSum = 0;
 
+    private transient NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(getClass().getName(), true);
     private double confidenceSum = 0;
     
     private int dataCount = 0;
-    
-    private transient ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
     /**
-     * 
-     * @param windSpeed
-     * @param angleToTheWind
-     * @return
-     * @throws NotEnoughDataHasBeenAddedException
+     * @param useLinearRegression if false mean of wind interval is used, otherwise linear regression
      */
     public double estimateSpeed(double windSpeed, double angleToTheWind) throws NotEnoughDataHasBeenAddedException {
-        lock.readLock().lock();
+        LockUtil.lockForRead(lock);
         if (dataCount < 1) {
             throw new NotEnoughDataHasBeenAddedException();
         }
@@ -46,19 +41,19 @@ public class BoatSpeedEstimator implements Serializable {
         try {
                 result = speedSum / dataCount;
         } finally {
-            lock.readLock().unlock();
+            LockUtil.unlockAfterRead(lock);
         }
         return result;
     }
 
     public void addData(double boatSpeed, double confidence) {
-        lock.writeLock().lock();
+        LockUtil.lockForWrite(lock);
         try {
             speedSum = speedSum + boatSpeed;
             dataCount++;
             confidenceSum  = confidenceSum + confidence;
         } finally {
-            lock.writeLock().unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 

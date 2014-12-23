@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.io.InputStream;
-
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.CountryCode;
@@ -28,11 +26,6 @@ public class NationalityImpl implements Nationality {
         return getCountryCode() == null ? getThreeLetterIOCAcronym() : getCountryCode().getName();
     }
     
-    @Override
-    public InputStream getImage() {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
     @Override
     public String getThreeLetterIOCAcronym() {
         return threeLetterIOCAcronym;

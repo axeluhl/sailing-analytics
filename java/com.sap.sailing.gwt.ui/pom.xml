@@ -110,7 +110,7 @@
           <!-- GWT version detected from dependencyManagement -->
           <execution>
 	        <configuration>
-		      <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2048m</extraJvmArgs>
+		  <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2048m</extraJvmArgs>
 		  <!--
 		  <userAgents>chrome</userAgents>
 		  -->

@@ -11,8 +11,8 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 public class EventCreateDialog extends EventDialog {
 
-    public EventCreateDialog(Collection<EventDTO> existingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups, StringMessages stringConstants, DialogCallback<EventDTO> callback) {
-        super(new EventParameterValidator(stringConstants, existingEvents), stringConstants,
+    public EventCreateDialog(Collection<EventDTO> existingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
+        super(new EventParameterValidator(stringMessages, existingEvents), stringMessages,
                 availableLeaderboardGroups, /* leaderboardGroups */ Collections.<LeaderboardGroupDTO>emptyList(), callback);
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(50);
