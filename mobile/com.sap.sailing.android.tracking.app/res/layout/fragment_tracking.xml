@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res/com.sap.sailing.android.tracking.app"
     android:layout_width="match_parent"
-    android:layout_height="400dp"
+    android:layout_height="402dp"
     android:background="@color/black" >
 
     <ScrollView
@@ -142,6 +142,12 @@
                 android:layout_width="fill_parent"
                 android:layout_height="1dp"
                 android:layout_below="@id/gps_quality"
+                android:background="@android:color/darker_gray" />
+            
+             <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/tracking_status_label"
                 android:background="@android:color/darker_gray" />
         </RelativeLayout>
     </ScrollView>
