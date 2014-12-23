@@ -26,14 +26,15 @@
         <com.sap.sailing.android.tracking.app.customviews.AutoResizeLightTextView
             android:id="@+id/tracking_time_label"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingBottom="0dp"
             android:layout_marginBottom="0dp"
             android:text="00:00:00"
-            android:layout_alignParentBottom="true"
-            android:textSize="128sp" />
+            android:gravity="bottom"
+            android:textSize="100sp" />
+        
     </RelativeLayout>
 
     <RelativeLayout
