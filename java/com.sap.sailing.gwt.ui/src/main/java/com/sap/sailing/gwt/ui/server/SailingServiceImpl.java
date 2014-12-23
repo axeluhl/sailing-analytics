@@ -216,6 +216,7 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -226,7 +227,6 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
-import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
@@ -2640,9 +2640,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private RegattaLogStore getRegattaLogStore() {
-        return EmptyRegattaLogStore.INSTANCE;
-//        TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
-//                mongoObjectFactory, domainObjectFactory);
+        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
+                mongoObjectFactory, domainObjectFactory);
     }
 
     @Override

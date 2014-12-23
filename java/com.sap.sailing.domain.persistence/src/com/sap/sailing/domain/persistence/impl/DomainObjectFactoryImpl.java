@@ -56,6 +56,19 @@ import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalSco
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
 import com.sap.sailing.domain.abstractlog.shared.events.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMarkMappingEvent;
@@ -139,14 +152,15 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
-import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -473,9 +487,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private RegattaLogStore getRegattaLogStore() {
-        return EmptyRegattaLogStore.INSTANCE;
-            //TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
-//                new MongoObjectFactoryImpl(database, serviceFinderFactory), this);
+        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
+                new MongoObjectFactoryImpl(database, serviceFinderFactory), this);
     }
 
     private FlexibleLeaderboard loadFlexibleLeaderboard(DBObject dbLeaderboard,
@@ -1583,7 +1596,123 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
         return raceLogEventFactory.createRaceStatusEvent(createdAt, author, logicalTimePoint, id, competitors, passId, nextStatus);
     }
+
+    @Override
+    public RegattaLog loadRegattaLog(RegattaLikeIdentifier identifier) {
+        RegattaLog result = new RegattaLogImpl(RegattaLogImpl.class.getSimpleName(), identifier);
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), identifier.getIdentifierType());
+            query.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), identifier.getName());
+            loadRegattaLogEvents(result, query);
+        } catch (Throwable t) {
+            // something went wrong during DB access; report, then use empty new regatta log
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded regatta log data. Check MongoDB settings.");
+            logger.log(Level.SEVERE, "loadRegattaLog", t);
+        }
+        return result;
+    }
+
+    private void loadRegattaLogEvents(RegattaLog targetRegattaLog, BasicDBObject query) {
+        DBCollection collection = database.getCollection(CollectionNames.REGATTA_LOGS.name());
+        for (DBObject o : collection.find(query)) {
+            try {
+                RegattaLogEvent event = loadRegattaLogEvent((DBObject) o.get(FieldNames.REGATTA_LOG_EVENT.name()));
+                if (event != null) {
+                    targetRegattaLog.load(event);
+                }
+            } catch (IllegalStateException e) {
+                logger.log(Level.SEVERE, "Couldn't load regatta log event "+o+": "+e.getMessage(), e);
+            }
+        }
+    }
+
+    public RegattaLogEvent loadRegattaLogEvent(DBObject dbObject) {
+        TimePoint logicalTimePoint = loadTimePoint(dbObject);
+        TimePoint createdAt = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
+        Serializable id = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_EVENT_ID.name());
+        final AbstractLogEventAuthor author;
+        String authorName = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name());
+        Number authorPriority = (Number) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name());
+        author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
+        //CloseOpenEnded, DeviceCompMapping, DeviceMarkMapping, RegisterComp, Revoke
+        String eventClass = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_CLASS.name());
+        if (eventClass.equals(RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName())) {
+            return loadRegattaLogDeviceCompetitorMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
+        } else if (eventClass.equals(RegattaLogDeviceMarkMappingEvent.class.getSimpleName())) {
+            return loadRegattaLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
+        } else if (eventClass.equals(RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
+            return loadRegattaLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
+        } else if (eventClass.equals(RegattaLogRegisterCompetitorEvent.class.getSimpleName())) {
+            return loadRegattaLogRegisterCompetitorEvent(createdAt, author, logicalTimePoint, id, dbObject);
+        } else if (eventClass.equals(RegattaLogRevokeEvent.class.getSimpleName())) {
+            return loadRegattaLogRevokeEvent(createdAt, author, logicalTimePoint, id, dbObject);
+        }
+
+        throw new IllegalStateException(String.format("Unknown RegattaLogEvent type %s", eventClass));
+    }
     
+    private RegattaLogRevokeEvent loadRegattaLogRevokeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
+        Serializable revokedEventId = Helpers.tryUuidConversion(
+                (Serializable) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_EVENT_ID.name()));
+        String revokedEventType = (String) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_EVENT_TYPE.name());
+        String revokedEventShortInfo = (String) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_EVENT_SHORT_INFO.name());
+        String reason = (String) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_REASON.name());
+        return new RegattaLogRevokeEventImpl(createdAt, author, logicalTimePoint, id,
+                revokedEventId, revokedEventType, revokedEventShortInfo, reason);
+    }
+
+    private RegattaLogRegisterCompetitorEvent loadRegattaLogRegisterCompetitorEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
+        Serializable competitorId = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name());
+        Competitor comp = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+        return new RegattaLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, comp);
+    }
+
+    private RegattaLogCloseOpenEndedDeviceMappingEvent loadRegattaLogCloseOpenEndedDeviceMappingEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
+        Serializable deviceMappingEventId = Helpers.tryUuidConversion((Serializable) dbObject.get(
+                FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name()));
+        TimePoint closingTimePoint = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
+        return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(createdAt, author, logicalTimePoint, id,
+                deviceMappingEventId, closingTimePoint);
+    }
+
+    private RegattaLogDeviceMarkMappingEvent loadRegattaLogDeviceMarkMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
+        DeviceIdentifier device = null;
+        try {
+            device = loadDeviceId(deviceIdentifierServiceFinder,
+                    (DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
+            e.printStackTrace();
+        }
+        //have to load complete mark, as no order is guaranteed for loading of racelog events
+        Mark mappedTo = loadMark((DBObject) dbObject.get(FieldNames.MARK.name()));
+        TimePoint from = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM);
+        TimePoint to = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_TO);
+        return new RegattaLogDeviceMarkMappingEventImpl(createdAt, author, logicalTimePoint, id, mappedTo, device, from, to);
+    }
+
+    private RegattaLogDeviceCompetitorMappingEvent loadRegattaLogDeviceCompetitorMappingEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
+        DeviceIdentifier device = null;
+        try {
+            device = loadDeviceId(deviceIdentifierServiceFinder,
+                    (DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
+            e.printStackTrace();
+        }
+        Competitor mappedTo = baseDomainFactory.getExistingCompetitorById(
+                (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
+        TimePoint from = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM);
+        TimePoint to = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_TO);
+        return new RegattaLogDeviceCompetitorMappingEventImpl(createdAt, author, logicalTimePoint, id, mappedTo, device, from, to);
+    }
+
     /**
      * The old field name WAYPOINT_PASSINGSIDE has been replaced by WAYPOINT_PASSINGINSTRUCTIONS. If a race with the old
      * field is loaded, the value of PASSINGSIDE is used and then migrated to PASSINGINSTRUCTION. If the first or last

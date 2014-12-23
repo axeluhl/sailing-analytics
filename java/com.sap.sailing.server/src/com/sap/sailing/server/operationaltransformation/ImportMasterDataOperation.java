@@ -14,6 +14,9 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -32,7 +35,11 @@ import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.regattalike.HasRegattaLike;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -198,6 +205,7 @@ public class ImportMasterDataOperation extends
             if (leaderboard != null) {
                 toState.addLeaderboard(leaderboard);
                 storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory());
+                storeRegattaLogEvents(leaderboard, toState.getMongoObjectFactory());
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
                 toState.updateStoredLeaderboard(leaderboard);
@@ -246,6 +254,29 @@ public class ImportMasterDataOperation extends
             }
         }
 
+    }
+
+    /**
+     * Ensures that the regatta log events are stored to the receiving instance's database. The {@code leaderboard}
+     * potentially {@link HasRegattaLike has} an attached RegattaLog, which then must be stored in the database.
+     * @see #storeRaceLogEvents(Leaderboard, MongoObjectFactory)
+     */
+    private void storeRegattaLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory) {
+        if (leaderboard instanceof HasRegattaLike) {
+            IsRegattaLike regattaLike = ((HasRegattaLike) leaderboard).getRegattaLike();
+            RegattaLog log = regattaLike.getRegattaLog();
+            RegattaLikeIdentifier identifier = regattaLike.getRegattaLikeIdentifier();
+            RegattaLogEventVisitor storeVisitor = MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStoreVisitor(
+                    identifier, mongoObjectFactory);
+            log.lockForRead();
+            try {
+                for (RegattaLogEvent event : log.getRawFixes()) {
+                    event.accept(storeVisitor);
+                }
+            } finally {
+                log.unlockAfterRead();
+            }
+        }
     }
 
     private void relinkTrackedRacesIfPossible(RacingEventService toState, Leaderboard newLeaderboard) {

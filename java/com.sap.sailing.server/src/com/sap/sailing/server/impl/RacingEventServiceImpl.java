@@ -112,6 +112,7 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -124,7 +125,6 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
-import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -914,7 +914,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mongoObjectFactory.removeLeaderboard(leaderboardName);
             syncGroupsAfterLeaderboardRemove(leaderboardName, true);
             if (leaderboard instanceof FlexibleLeaderboard) {
-                unregisterRegattaLike(((FlexibleLeaderboard) leaderboard).getRegattaLike());
+                FlexibleLeaderboard fLeaderboard = (FlexibleLeaderboard) leaderboard;
+                unregisterRegattaLike(fLeaderboard.getRegattaLike());
+                getRegattaLogStore().removeRegattaLog(fLeaderboard.getRegattaLikeIdentifier());
             }
             leaderboard.destroy();
         }
@@ -1091,8 +1093,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private RegattaLogStore getRegattaLogStore() {
-        return EmptyRegattaLogStore.INSTANCE;
-        //TODO MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
+        return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
     }
 
     @Override
@@ -1742,6 +1743,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
         unregisterRegattaLike(regatta);
+        getRegattaLogStore().removeRegattaLog(regatta.getRegattaLikeIdentifier());
     }
 
     @Override

@@ -43,6 +43,12 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorM
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
@@ -94,6 +100,7 @@ import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongo
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -1250,6 +1257,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
+    public void removeRegattaLog(RegattaLikeIdentifier identifier) {
+        DBObject query = new BasicDBObject();
+        addRegattaLikeIdentifier(identifier, query);
+        getRegattaLogCollection().remove(query);
+    }
+
+    @Override
     public void storeResultUrl(String resultProviderName, URL url) {
         DBCollection resultUrlsCollection = database.getCollection(CollectionNames.RESULT_URLS.name());
         DBObject query = new BasicDBObject(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName);
@@ -1264,5 +1278,75 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObjectBuilder().add(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName)
                 .add(FieldNames.RESULT_URL.name(), url.toString()).get();
         resultUrlsCollection.remove(query);
+    }
+    
+    public DBCollection getRegattaLogCollection() {
+        DBCollection result = database.getCollection(CollectionNames.REGATTA_LOGS.name());
+        DBObject index = new BasicDBObject(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), null);
+        index.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), null);
+        result.ensureIndex(index);
+        return result;
+    }
+    
+    private DBObject createBasicRegattaLogEventDBObject(RegattaLogEvent event) {
+        DBObject result = new BasicDBObject();
+        storeTimed(event, result);
+        storeTimePoint(event.getCreatedAt(), result, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
+        result.put(FieldNames.REGATTA_LOG_EVENT_ID.name(), event.getId());
+        result.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name(), event.getAuthor().getName());
+        result.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name(), event.getAuthor().getPriority());
+        return result;
+    }
+    
+    private void addRegattaLikeIdentifier(RegattaLikeIdentifier regattaLikeId, DBObject toObject) {
+        toObject.put(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), regattaLikeId.getIdentifierType());
+        toObject.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), regattaLikeId.getName());
+    }
+
+    private void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, DBObject innerObject) {
+        DBObject result = new BasicDBObject(FieldNames.REGATTA_LOG_EVENT.name(), innerObject);
+        addRegattaLikeIdentifier(regattaLikeId, result);
+        getRegattaLogCollection().insert(result);
+    }
+    
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceCompetitorMappingEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName());
+        storeDeviceMappingEvent(event, result);
+        result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceMarkMappingEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceMarkMappingEvent.class.getSimpleName());
+        storeDeviceMappingEvent(event, result);
+        result.put(FieldNames.MARK.name(), storeMark(event.getMappedTo()));
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRevokeEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRevokeEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_REVOKED_EVENT_ID.name(), event.getRevokedEventId());
+        result.put(FieldNames.REGATTA_LOG_REVOKED_EVENT_TYPE.name(), event.getRevokedEventType());
+        result.put(FieldNames.REGATTA_LOG_REVOKED_EVENT_SHORT_INFO.name(), event.getRevokedEventShortInfo());
+        result.put(FieldNames.REGATTA_LOG_REVOKED_REASON.name(), event.getReason());
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRegisterCompetitorEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRegisterCompetitorEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogCloseOpenEndedDeviceMappingEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
+        storeTimePoint(event.getClosingTimePoint(), result, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
+        storeRegattaLogEvent(regattaLikeId, result);
     }
 }

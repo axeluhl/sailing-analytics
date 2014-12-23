@@ -44,4 +44,9 @@ public class FlexibleLeaderboardAsRegattaLikeIdentifier implements RegattaLikeId
             return false;
         return true;
     }
+    
+    @Override
+    public String getIdentifierType() {
+        return FlexibleLeaderboard.class.getName();
+    }
 }
