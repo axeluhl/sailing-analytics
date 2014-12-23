@@ -23,6 +23,6 @@
     <string name="next_activity">Next Activity</string>
     <string name="tracker_started">SAP Sailing Tracker started</string>
     <string name="tracker_stopped">SAP Sailing Tracker stopped</string>
-    <string name="scan_race_barcode">Scan Race Barcode</string>
+    <string name="scan_qrcode">Scan QRCode</string>
     <string name="gps_fix_interval">GPS fix interval</string>
 </resources>
