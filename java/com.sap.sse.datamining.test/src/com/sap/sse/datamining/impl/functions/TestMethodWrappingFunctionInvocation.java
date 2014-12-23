@@ -4,6 +4,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,24 +37,14 @@ public class TestMethodWrappingFunctionInvocation {
     public void testInvocationWithParameters() {
         SimpleClassWithMarkedMethods instance = new SimpleClassWithMarkedMethods();
         final int valueToIncrement = 10;
-        ParameterProvider parameterProvider = new ParameterProvider() {
-            @Override
-            public Object[] getParameters() {
-                return new Object[] {valueToIncrement};
-            }
-        };
+        ParameterProvider parameterProvider = new SimpleParameterProvider(Collections.emptyList(), new Object[] {valueToIncrement});
         assertThat(increment.tryToInvoke(instance, parameterProvider), is(instance.increment(valueToIncrement)));
     }
     
     @Test
     public void testInvocationWithWrongParameters() {
         DataTypeWithContext dataEntry = new DataTypeWithContextImpl("Regatta Name", "Race Name", 7);
-        ParameterProvider parameterProvider = new ParameterProvider() {
-            @Override
-            public Object[] getParameters() {
-                return new Object[] {"Wrong Parameter"};
-            }
-        };
+        ParameterProvider parameterProvider = new SimpleParameterProvider(Collections.emptyList(), new Object[] {"Wrong Parameter"});
         assertThat(getRegattaName.tryToInvoke(dataEntry, parameterProvider), is(nullValue()));
 
         SimpleClassWithMarkedMethods instance = new SimpleClassWithMarkedMethods();

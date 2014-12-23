@@ -1,12 +1,11 @@
 package com.sap.sse.datamining.impl.functions;
 
-import com.sap.sse.datamining.functions.ParameterProvider;
+import java.util.Collections;
 
-public class NullParameterProvider implements ParameterProvider {
+public class NullParameterProvider extends SimpleParameterProvider {
 
-    @Override
-    public Object[] getParameters() {
-        return new Object[0];
+    public NullParameterProvider() {
+        super(Collections.emptyList(), new Object[0]);
     }
 
 }

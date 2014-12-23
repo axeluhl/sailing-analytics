@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.ProcessorQuery;
@@ -28,9 +29,11 @@ import com.sap.sse.datamining.shared.components.AggregatorType;
 public class ProcessorFactory {
     
     private final ExecutorService executor;
+    private final FunctionProvider functionProvider;
 
-    public ProcessorFactory(ExecutorService executor) {
+    public ProcessorFactory(ExecutorService executor, FunctionProvider functionProvider) {
         this.executor = executor;
+        this.functionProvider = functionProvider;
     }
     
     /**
@@ -85,8 +88,10 @@ public class ProcessorFactory {
 
     public <ElementType, ResultType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<ResultType>> createExtractionProcessor(
             Collection<Processor<GroupedDataEntry<ResultType>, ?>> resultReceivers, Function<ResultType> extractionFunction) {
+        ParameterProvider parameterProvider = functionProvider.getParameterProviderFor(extractionFunction);
+        throwExceptionIfParameterProviderIsNull(extractionFunction, parameterProvider);
         return new ParallelGroupedElementsValueExtractionProcessor<ElementType, ResultType>(executor,
-                resultReceivers, extractionFunction);
+                resultReceivers, extractionFunction, parameterProvider);
     }
 
     /**
@@ -101,9 +106,18 @@ public class ProcessorFactory {
     public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessor(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers, List<Function<?>> dimensionsToGroupBy) {
         Collection<Pair<Function<?>, ParameterProvider>> dimensionsToGroupByWithNullParameterProvider = new ArrayList<>();
         for (Function<?> dimension : dimensionsToGroupBy) {
-            dimensionsToGroupByWithNullParameterProvider.add(new Pair<Function<?>, ParameterProvider>(dimension, ParameterProvider.NULL));
+            ParameterProvider parameterProvider = functionProvider.getParameterProviderFor(dimension);
+            throwExceptionIfParameterProviderIsNull(dimension, parameterProvider);
+            dimensionsToGroupByWithNullParameterProvider.add(new Pair<Function<?>, ParameterProvider>(dimension, parameterProvider));
         }
         return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(dataType, executor, resultReceivers, dimensionsToGroupByWithNullParameterProvider);
+    }
+    
+    private void throwExceptionIfParameterProviderIsNull(Function<?> function, ParameterProvider parameterProvider) {
+        if (parameterProvider == null) {
+            throw new NullPointerException("There is no " + ParameterProvider.class.getSimpleName() + " available for the " +
+                                           Function.class.getSimpleName() + " '" + function.toString() + "'");
+        }
     }
 
     public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessorWithParameter(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers, List<Pair<Function<?>, ParameterProvider>> dimensionsToGroupByWithParameterProvider) {
@@ -122,7 +136,7 @@ public class ProcessorFactory {
 
         Collection<Processor<DataType, GroupedDataEntry<DataType>>> groupingExtractors = new ArrayList<>();
         for (Function<?> dimension : dimensions) {
-            Processor<GroupedDataEntry<DataType>, GroupedDataEntry<Object>> dimensionValueExtractor = new ParallelGroupedElementsValueExtractionProcessor<DataType, Object>(executor, extractionResultReceivers, (Function<Object>) dimension);
+            Processor<GroupedDataEntry<DataType>, GroupedDataEntry<Object>> dimensionValueExtractor = createExtractionProcessor(extractionResultReceivers, (Function<Object>) dimension);
             Collection<Processor<GroupedDataEntry<DataType>, ?>> groupingResultReceivers = new ArrayList<>();
             groupingResultReceivers.add(dimensionValueExtractor);
             

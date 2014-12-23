@@ -16,22 +16,24 @@ import com.sap.sse.datamining.QueryDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.FunctionProvider;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
-import com.sap.sse.datamining.impl.criterias.NullaryFunctionValuesFilterCriterion;
+import com.sap.sse.datamining.impl.criterias.FunctionValuesFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class QueryFactory {
 
     public <DataSourceType, DataType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, QueryDefinition<DataSourceType, DataType, ResultType> queryDefinition,
-                                                                            DataMiningStringMessages stringMessages, ExecutorService executor) {
+                                                                            DataMiningStringMessages stringMessages, ExecutorService executor, FunctionProvider functionProvider) {
         return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale()) {
             @Override
             protected Processor<DataSourceType, ?> createFirstProcessor() {
-                ProcessorFactory processorFactory = new ProcessorFactory(executor);
+                ProcessorFactory processorFactory = new ProcessorFactory(executor, functionProvider);
                 
                 Function<ResultType> extractionFunction = queryDefinition.getStatisticToCalculate();
                 Class<DataType> dataTypeToRetrieve = queryDefinition.getDataType();
@@ -42,7 +44,7 @@ public class QueryFactory {
                 Processor<DataType, GroupedDataEntry<DataType>> groupingProcessor = processorFactory.createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, queryDefinition.getDimensionsToGroupBy());
 
                 DataRetrieverChainBuilder<DataSourceType> chainBuilder = queryDefinition.getDataRetrieverChainDefinition().startBuilding(executor);
-                Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(queryDefinition.getFilterSelection());
+                Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(queryDefinition.getFilterSelection(), functionProvider);
                 while (chainBuilder.canStepFurther()) {
                     chainBuilder.stepFurther();
                     
@@ -59,11 +61,13 @@ public class QueryFactory {
     }
     
     @SuppressWarnings("unchecked")
-    private <DataType> Map<Integer, FilterCriterion<?>> createFilterCriteria(Map<Integer, Map<Function<?>, Collection<?>>> filterSelection) {
+    private <DataType> Map<Integer, FilterCriterion<?>> createFilterCriteria(Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, FunctionProvider functionProvider) {
         Map<Integer, CompoundFilterCriterion<?>> criteriaMappedByRetrieverLevel = new HashMap<>();
         for (Entry<Integer, Map<Function<?>, Collection<?>>> levelFilterSelection : filterSelection.entrySet()) {
             for (Entry<Function<?>, Collection<?>> levelFilterSelectionEntry : levelFilterSelection.getValue().entrySet()) {
                 Function<?> function = levelFilterSelectionEntry.getKey();
+                ParameterProvider parameterProvider = functionProvider.getParameterProviderFor(function);
+                throwExceptionIfParameterProviderIsNull(function, parameterProvider);
                 Class<DataType> dataType = (Class<DataType>) function.getDeclaringType();
                 
                 if (!criteriaMappedByRetrieverLevel.containsKey(levelFilterSelection.getKey())) {
@@ -71,20 +75,28 @@ public class QueryFactory {
                 }
 
                 Collection<Object> filterValues = new ArrayList<>(levelFilterSelectionEntry.getValue());
-                ((CompoundFilterCriterion<DataType>) criteriaMappedByRetrieverLevel.get(levelFilterSelection.getKey())).addCriteria(new NullaryFunctionValuesFilterCriterion<>(dataType, function, filterValues));
+                ((CompoundFilterCriterion<DataType>) criteriaMappedByRetrieverLevel.get(levelFilterSelection.getKey())).addCriteria(new FunctionValuesFilterCriterion<>(dataType, function, parameterProvider, filterValues));
             }
         }
         return (Map<Integer, FilterCriterion<?>>)(Map<Integer, ?>) criteriaMappedByRetrieverLevel;
+    }
+    
+    private void throwExceptionIfParameterProviderIsNull(Function<?> function, ParameterProvider parameterProvider) {
+        if (parameterProvider == null) {
+            throw new NullPointerException("There is no " + ParameterProvider.class.getSimpleName() + " available for the " +
+                                           Function.class.getSimpleName() + " '" + function.toString() + "'");
+        }
     }
 
     public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
             DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, int retrieverLevel,
             Iterable<Function<?>> dimensions, Locale locale,
-            DataMiningStringMessages stringMessages, ExecutorService executor) {
+            DataMiningStringMessages stringMessages, ExecutorService executor,
+            FunctionProvider functionProvider) {
         return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale) {
             @Override
             protected Processor<DataSource, ?> createFirstProcessor() {
-                ProcessorFactory processorFactory = new ProcessorFactory(executor);
+                ProcessorFactory processorFactory = new ProcessorFactory(executor, functionProvider);
                 
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
 

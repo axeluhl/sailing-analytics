@@ -16,8 +16,8 @@ import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
 import com.sap.sse.datamining.test.util.ComponentTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
@@ -26,7 +26,7 @@ import com.sap.sse.datamining.test.util.components.Number;
 
 public class TestParallelMultiDimensionalGroupingProcessor {
     
-    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
+    private final static ProcessorFactory processorFactory = ComponentTestsUtil.getProcessorFactory();
     
     private Processor<Number, GroupedDataEntry<Number>> processor;
     private Collection<Processor<GroupedDataEntry<Number>, ?>> receivers;

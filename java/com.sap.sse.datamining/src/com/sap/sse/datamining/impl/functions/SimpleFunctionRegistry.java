@@ -14,6 +14,7 @@ import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidExternalFunctionFilterCriterion;
@@ -33,6 +34,8 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     private final Map<Class<?>, Set<Function<?>>> externalFunctions;
     
     private final Collection<Map<Class<?>, Set<Function<?>>>> functionMaps;
+    
+    private final Collection<ParameterProvider> parameterProviders;
 
     public SimpleFunctionRegistry() {
         functionFactory = new FunctionFactory();
@@ -45,6 +48,8 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         functionMaps.add(statistics);
         functionMaps.add(dimensions);
         functionMaps.add(externalFunctions);
+        
+        parameterProviders = new HashSet<>();
     }
     
     @Override
@@ -127,6 +132,11 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         }
         externalFunctions.get(declaringType).add(function);
     }
+    
+    @Override
+    public void registerParameterProvider(ParameterProvider parameterProvider) {
+        parameterProviders.add(parameterProvider);
+    }
 
     @Override
     public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister) {
@@ -139,6 +149,11 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
             functionMap.remove(classToUnregister);
         }
+    }
+    
+    @Override
+    public void unregisterParameterProvider(ParameterProvider parameterProvider) {
+        parameterProviders.remove(parameterProvider);
     }
 
     @Override
@@ -198,6 +213,11 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             set.addAll(entry.getValue());
         }
         return set;
+    }
+    
+    @Override
+    public Iterable<ParameterProvider> getAllParameterProviders() {
+        return parameterProviders;
     }
 
 }

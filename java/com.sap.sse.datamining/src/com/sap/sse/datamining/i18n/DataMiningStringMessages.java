@@ -27,6 +27,10 @@ public interface DataMiningStringMessages {
             return locale != null ? locale : DEFAULT_LOCALE;
         }
         
+        public static Iterable<Locale> getSupportedLocales() {
+            return supportedLocalesMappedByLocaleInfo.values();
+        }
+        
         private static void initializeSupportedLocales() {
             supportedLocalesMappedByLocaleInfo.put(DEFAULT_LOCALE_NAME, DEFAULT_LOCALE);
             supportedLocalesMappedByLocaleInfo.put("en", Locale.ENGLISH);

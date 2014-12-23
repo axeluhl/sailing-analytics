@@ -73,7 +73,7 @@ public class TestFilterCriteria {
     public void testNullaryFunctionValuesFilterCriterion() {
         Function<String> getRegattaName = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         Collection<String> valuesToMatch = Arrays.asList("Regatta", "Other Regatta");
-        FilterCriterion<DataTypeWithContext> nullaryFunctionFilterCriterion = new NullaryFunctionValuesFilterCriterion<>(DataTypeWithContext.class, getRegattaName, valuesToMatch);
+        FilterCriterion<DataTypeWithContext> nullaryFunctionFilterCriterion = new FunctionValuesFilterCriterion<>(DataTypeWithContext.class, getRegattaName, valuesToMatch);
         
         DataTypeWithContext regatta = new DataTypeWithContextImpl("Regatta", "Race Name", 7);
         assertThat(nullaryFunctionFilterCriterion.matches(regatta), is(true));

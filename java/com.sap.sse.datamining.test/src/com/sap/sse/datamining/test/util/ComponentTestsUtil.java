@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import com.sap.sse.datamining.factories.ProcessorFactory;
+import com.sap.sse.datamining.functions.FunctionProvider;
+import com.sap.sse.datamining.impl.functions.RegistryFunctionProvider;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Boat;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_BoatClass;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Competitor;
@@ -22,7 +24,8 @@ import com.sap.sse.datamining.test.functions.registry.test_classes.impl.Test_Tea
 
 public final class ComponentTestsUtil {
     
-    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
+    private final static FunctionProvider emptyFunctionProvider = new RegistryFunctionProvider(new ArrayList<>());
+    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor(), emptyFunctionProvider);
     
     public static ProcessorFactory getProcessorFactory() {
         return processorFactory;

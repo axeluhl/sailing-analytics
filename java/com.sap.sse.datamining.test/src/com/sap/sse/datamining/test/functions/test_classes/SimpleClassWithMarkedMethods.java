@@ -1,5 +1,8 @@
 package com.sap.sse.datamining.test.functions.test_classes;
 
+import java.util.Locale;
+
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.annotations.Statistic;
 
@@ -30,8 +33,14 @@ public class SimpleClassWithMarkedMethods {
         
     }
     
+    //Methods with parameters
+    
     public int increment(int i) {
         return i + 1;
+    }
+    
+    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+        return "";
     }
 
 }

@@ -3,6 +3,7 @@ package com.sap.sse.datamining.impl.functions;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +13,7 @@ import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriterion;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -186,6 +188,43 @@ public class RegistryFunctionProvider implements FunctionProvider {
 
     private Function<?> getFunctionToReturn(Collection<Function<?>> functionsMatchingDTO) {
         return functionsMatchingDTO.isEmpty() ? null : functionsMatchingDTO.iterator().next();
+    }
+    
+    @Override
+    public ParameterProvider getParameterProviderFor(Function<?> function) {
+        Iterable<Class<?>> functionParameterTypes = function.getParameters();
+        if (!functionParameterTypes.iterator().hasNext()) {
+            return ParameterProvider.NULL;
+        }
+        
+        for (FunctionRegistry functionRegistry : functionRegistries) {
+            for (ParameterProvider parameterProvider : functionRegistry.getAllParameterProviders()) {
+                if (parametersAreMatching(function, parameterProvider)) {
+                    return parameterProvider;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    private boolean parametersAreMatching(Function<?> function, ParameterProvider parameterProvider) {
+        Iterator<Class<?>> functionParametersIterator = function.getParameters().iterator();
+        Iterator<Class<?>> parameterProviderIterator = parameterProvider.getParameterTypes().iterator();
+        
+        while (functionParametersIterator.hasNext() && parameterProviderIterator.hasNext()) {
+            Class<?> functionParameter = functionParametersIterator.next();
+            Class<?> parameterProviderParameter = parameterProviderIterator.next();
+            if (!functionParameter.isAssignableFrom(parameterProviderParameter)) {
+                return false;
+            }
+        }
+        
+        if (functionParametersIterator.hasNext() || parameterProviderIterator.hasNext()) {
+            return false;
+        }
+        
+        return true;
     }
 
 }

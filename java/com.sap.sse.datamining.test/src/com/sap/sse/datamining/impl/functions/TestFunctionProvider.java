@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -146,18 +148,70 @@ public class TestFunctionProvider {
     
     @Test
     public void testGetFunctionForUnregisteredDTO() {
-        Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
-        Function<Object> increment = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(incrementMethod);
-        FunctionDTO incrementDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(increment, stringMessages, Locale.ENGLISH);
+        Method illegalDimensionMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "illegalDimension");
+        Function<Object> illegalDimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(illegalDimensionMethod);
+        FunctionDTO illegalDimensionDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(illegalDimension, stringMessages, Locale.ENGLISH);
         
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        assertThat(functionProvider.getFunctionForDTO(incrementDTO), is(nullValue()));
+        assertThat(functionProvider.getFunctionForDTO(illegalDimensionDTO), is(nullValue()));
     }
     
     @Test
     public void testGetFunctionForNullDTO() {
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
         assertThat(functionProvider.getFunctionForDTO(null), is(nullValue()));
+    }
+    
+    @Test
+    public void testGetParameterProviderForNullaryFunction() {
+        Method nullaryDimensionMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "dimension");
+        Function<Object> nullaryDimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(nullaryDimensionMethod);
+        
+        FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
+        FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
+        assertThat(functionProvider.getParameterProviderFor(nullaryDimension), is(ParameterProvider.NULL));
+    }
+    
+    @Test
+    public void testGetPrameterProviderForFunctionsWithParameters() {
+        FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
+        ParameterProvider intParameterProvider = new ParameterProvider() {
+            @Override
+            public Object[] getParameters() {
+                return new Object[] {1};
+            }
+            
+            @Override
+            public Iterable<Class<?>> getParameterTypes() {
+                Collection<Class<?>> parameterTypes = new ArrayList<>();
+                parameterTypes.add(int.class);
+                return parameterTypes;
+            }
+        };
+        functionRegistry.registerParameterProvider(intParameterProvider);
+        LocalizationParameterProvider stringMessagesParameterProvider = new LocalizationParameterProvider(Locale.ENGLISH, stringMessages);
+        functionRegistry.registerParameterProvider(stringMessagesParameterProvider);
+        FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
+        
+        Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
+        Function<Object> increment = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(incrementMethod);
+        assertThat(functionProvider.getParameterProviderFor(increment), is(intParameterProvider));
+        
+        Method getLocalizedNameMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "getLocalizedName", Locale.class, DataMiningStringMessages.class);
+        Function<Object> getLocalizedName = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getLocalizedNameMethod);
+        assertThat(functionProvider.getParameterProviderFor(getLocalizedName), is(stringMessagesParameterProvider));
+    }
+    
+    @Test
+    public void testGetParameterProviderForFunctionWithoutAnAvailableParameterProvider() {
+        FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
+        //Adding a wrong ParameterProvider to increase code coverage
+        functionRegistry.registerParameterProvider(new LocalizationParameterProvider(Locale.ENGLISH, stringMessages));
+        FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
+        
+        Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
+        Function<Object> increment = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(incrementMethod);
+        assertThat(functionProvider.getParameterProviderFor(increment), nullValue());
     }
 
 }

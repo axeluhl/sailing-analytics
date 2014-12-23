@@ -8,6 +8,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.datamining.data.Cluster;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public class GPSFixWithContext implements HasGPSFixContext {
@@ -33,10 +34,10 @@ public class GPSFixWithContext implements HasGPSFixContext {
     }
     
     @Override
-    public ClusterDTO getWindStrengthAsBeaufortCluster() {
+    public ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, DataMiningStringMessages stringMessages) {
         Wind wind = getWind();
         Cluster<?> cluster = Activator.getDefault().getClusterGroups().getWindStrengthInBeaufortCluster().getClusterFor(wind);
-        return new ClusterDTO(cluster.getAsLocalizedString(Locale.ENGLISH, Activator.getDefault().getStringMessages()));
+        return new ClusterDTO(cluster.getAsLocalizedString(locale, stringMessages));
     }
 
     private Wind getWind() {
