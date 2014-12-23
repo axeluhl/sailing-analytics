@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/speed_text_view"
             android:gravity="top|center"
-            android:text="knots"
+            android:text="@string/knots"
             android:textColor="@color/white"
             android:layout_marginTop="-20dp"
             android:textSize="20sp"

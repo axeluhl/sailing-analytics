@@ -92,4 +92,5 @@
 	<string name="error_while_receiving_server_data">Fehler beim Empfang vom Server</string>
 	<string name="warning">Warnung</string>
 	<string name="gps_turned_off">GPS ist nicht aktiviert. Bitte aktivieren Sie den Standortzugriff (GPS) in Ihren Android-Einstellungen!</string>
+	<string name="knots">Knoten</string>
 </resources>
