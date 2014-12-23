@@ -41,7 +41,9 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
+import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sse.common.Util;
 
 public class ImportMasterDataOperation extends
@@ -72,9 +74,10 @@ public class ImportMasterDataOperation extends
 
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
-        this.progress = toState.getDataImportLock().getProgress(importOperationId);
+        final DataImportLockWithProgress dataImportLock = toState.getDataImportLock();
+        this.progress = dataImportLock.getProgress(importOperationId);
         progress.setNameOfCurrentSubProgress("Waiting for other data import operations to finish");
-        toState.getDataImportLock().lock();
+        LockUtil.lockForWrite(dataImportLock);
         try {
             progress.setNameOfCurrentSubProgress("Importing leaderboard groups");
             progress.setCurrentSubProgressPct(0);
@@ -100,13 +103,13 @@ public class ImportMasterDataOperation extends
             progress.setOverAllProgressPct(0.5);
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
-            toState.getDataImportLock().getProgress(importOperationId).setResult(creationCount);
+            dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
             logger.severe("Error during execution of ImportMasterDataOperation");
             throw new RuntimeException("Error during execution of ImportMasterDataOperation", e);
         } finally {
-            toState.getDataImportLock().unlock();
+            LockUtil.unlockAfterWrite(dataImportLock);
         }
     }
 

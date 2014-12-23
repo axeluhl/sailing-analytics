@@ -1,9 +1,9 @@
 package com.sap.sailing.polars.regression;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.sap.sailing.polars.mining.IncrementalRegressionProcessor;
 import com.sap.sailing.polars.regression.impl.IncrementalLeastSquaresProcessor;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 /**
  * Combines two linear regression processors. One with the angle to the wind as the x axis and the other with the wind
@@ -24,22 +24,17 @@ public class BoatSpeedEstimator {
 
     private IncrementalLinearRegressionProcessor windSpeedRegression = new IncrementalLeastSquaresProcessor();
 
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
+    private NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(getClass().getName(), true);
 
     private double confidenceSum = 0;
     
     private int dataCount = 0;
 
     /**
-     * 
-     * @param windSpeed
-     * @param angleToTheWind
-     * @param useLinearRegression if false mean of wind interval is used, otherwise lin. regression
-     * @return
-     * @throws NotEnoughDataHasBeenAddedException
+     * @param useLinearRegression if false mean of wind interval is used, otherwise linear regression
      */
     public double estimateSpeed(double windSpeed, double angleToTheWind, boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException {
-        lock.readLock().lock();
+        LockUtil.lockForRead(lock);
         double result;
         try {
             if (useLinearRegression) {
@@ -52,20 +47,20 @@ public class BoatSpeedEstimator {
                 result = windSpeedRegression.getMeanOfY();
             }
         } finally {
-            lock.readLock().unlock();
+            LockUtil.unlockAfterRead(lock);
         }
         return result;
     }
 
     public void addData(double windSpeed, double angleToTheWind, double boatSpeed, double confidence) {
-        lock.writeLock().lock();
+        LockUtil.lockForWrite(lock);
         try {
             angleRegression.addMeasuredPoint(angleToTheWind, boatSpeed);
             windSpeedRegression.addMeasuredPoint(windSpeed, boatSpeed);
             dataCount++;
             confidenceSum  = confidenceSum + confidence;
         } finally {
-            lock.writeLock().unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
