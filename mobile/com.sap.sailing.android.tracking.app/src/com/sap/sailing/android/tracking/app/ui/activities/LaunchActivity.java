@@ -7,6 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -31,14 +33,21 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class LaunchActivity extends BaseActivity {
     private static int requestCodeQRCode = 42471;
     private static final String TAG = LaunchActivity.class.getName();
-    private boolean isTrackingActive = false;
     private Button toggleTrackingBtn;
+    private boolean isTrackingActive = false;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.launch_activity);
         toggleTrackingBtn = (Button) findViewById(R.id.btnToggleTracking);
+        isTrackingActive = isTrackingServiceRunning();
+        updateToggleTrackingBtn();
+    }
+    
+    private void updateToggleTrackingBtn() {
+        toggleTrackingBtn.setText(getString(
+                isTrackingActive ? R.string.stop_tracking : R.string.start_tracking));
     }
     
     public void onScanQRCodeClicked(View view) {
@@ -102,18 +111,16 @@ public class LaunchActivity extends BaseActivity {
         if (!googlePLayServicesAvailable()) {
             return;
         }
-        
-        if (isTrackingActive == false){
-                Intent startTrackingIntent = new Intent(this, TrackingService.class);
+
+        if (! isTrackingActive){
+            Intent startTrackingIntent = new Intent(this, TrackingService.class);
             getBaseContext().startService(startTrackingIntent);
-            toggleTrackingBtn.setText(getString(R.string.stop_tracking));
-            isTrackingActive = true;
         } else {
-                Intent startTrackingIntent = new Intent(this, TrackingService.class);
+            Intent startTrackingIntent = new Intent(this, TrackingService.class);
             getBaseContext().stopService(startTrackingIntent);
-            toggleTrackingBtn.setText(getString(R.string.start_tracking));
-            isTrackingActive = false;
         }
+        isTrackingActive = ! isTrackingActive;
+        updateToggleTrackingBtn();
     }
     
     @Override
@@ -183,5 +190,17 @@ public class LaunchActivity extends BaseActivity {
         String host = apkUrl.getHost();
         String port = apkUrl.getPort() == -1 ? "" : ":" + apkUrl.getPort();
         return protocol + "://" + host + port;
+    }
+    
+    // approach with static member on TrackingService class did not work
+    // this is not a really good approach in my opinion either, but simple
+    private boolean isTrackingServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (TrackingService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
