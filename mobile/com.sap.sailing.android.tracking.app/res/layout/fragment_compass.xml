@@ -5,28 +5,28 @@
     xmlns:app="http://schemas.android.com/apk/res/com.sap.sailing.android.tracking.app"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/sap_yellow" >
+    android:background="@color/darker_gray" >
 
-    <com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView
+    <TextView
         android:id="@+id/compass_bearing_header_text_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:gravity="center"
+        android:paddingLeft="10dp"
+        android:layout_alignParentTop="true"
         android:text="@string/heading"
-        android:textColor="@color/black"
-        android:textSize="48sp"
-        android:textStyle="bold" />
+        android:textColor="@android:color/darker_gray"
+        android:textSize="15sp"
+        android:paddingTop="15dp" 
+        />
 
-    <com.sap.sailing.android.tracking.app.customviews.AutoResizeTextView
+    <com.sap.sailing.android.tracking.app.customviews.AutoResizeLightTextView
         android:id="@+id/compass_bearing_text_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_below="@id/compass_bearing_header_text_view"
         android:gravity="center"
         android:text=""
-        android:textColor="@color/black"
-        android:textSize="118sp"
-        android:textStyle="bold" />
+        android:layout_centerInParent="true"
+        android:textSize="124sp" /> 
 
 </RelativeLayout>

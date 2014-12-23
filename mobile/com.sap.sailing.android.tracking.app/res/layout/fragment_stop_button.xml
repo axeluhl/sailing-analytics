@@ -42,7 +42,6 @@
         android:layout_height="100dp"
         android:layout_alignParentBottom="true" >
 
-
         <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
             android:id="@+id/stop_tracking"
             android:layout_width="fill_parent"
