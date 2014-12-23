@@ -24,7 +24,8 @@ public class BoatSpeedEstimator implements Serializable {
 
     private double speedSum = 0;
 
-    private transient NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(getClass().getName(), true);
+    private transient NamedReentrantReadWriteLock lock = createLock();
+    
     private double confidenceSum = 0;
     
     private int dataCount = 0;
@@ -66,7 +67,11 @@ public class BoatSpeedEstimator implements Serializable {
     }
     
     private void readObject(ObjectInputStream ois) {
-        lock = new ReentrantReadWriteLock(true);
+        lock = createLock();
+    }
+    
+    private NamedReentrantReadWriteLock createLock() {
+        return new NamedReentrantReadWriteLock(getClass().getName(), true);
     }
 
 }
