@@ -23,7 +23,6 @@
         android:id="@+id/compass_bearing_text_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@id/compass_bearing_header_text_view"
         android:gravity="center"
         android:text=""
         android:layout_centerInParent="true"
