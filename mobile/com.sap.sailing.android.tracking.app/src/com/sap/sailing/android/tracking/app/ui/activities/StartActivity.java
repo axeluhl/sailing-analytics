@@ -12,7 +12,9 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
 public class StartActivity extends BaseActivity {
     
@@ -62,8 +64,7 @@ public class StartActivity extends BaseActivity {
         
 		if (urlStr != null) {
 			if (BuildConfig.DEBUG) {
-				ExLog.i(this, TAG,
-						"Matched URL, handling scanned or matched URL.");
+				ExLog.i(this, TAG, "Matched URL, handling scanned or matched URL.");
 			}
 			
 			Uri uri = Uri.parse(urlStr);
@@ -82,14 +83,16 @@ public class StartActivity extends BaseActivity {
         if (prefs.getTrackerIsTracking())
         {
         	String eventId = prefs.getTrackerIsTrackingEventId();
-        	startTrackingActivity(eventId);
+        	EventInfo event = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, eventId);
+        	startRegatta(event.leaderboardName, eventId, event.competitorId);
         }
     }
-    
-    private void startTrackingActivity(String eventId) {
-		Intent intent = new Intent(this, TrackingActivity.class);
-		intent.putExtra(getString(R.string.tracking_activity_event_id_parameter), eventId);
+
+    private void startRegatta(String leaderboardName, String eventId, String competitorId) {
+		Intent intent = new Intent(this, RegattaActivity.class);
+		intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
+		intent.putExtra(getString(R.string.event_id), eventId);
+		intent.putExtra(getString(R.string.competitor_id), competitorId);
 		startActivity(intent);
 	}
-
 }

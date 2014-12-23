@@ -89,6 +89,16 @@ public class RegattaActivity extends BaseActivity {
         
         replaceFragment(R.id.content_frame, new RegattaFragment());	
     }
+    
+    @Override
+    protected void onStart() {
+    	super.onStart();
+    	if (prefs.getTrackerIsTracking())
+        {
+        	String eventId = prefs.getTrackerIsTrackingEventId();
+        	startTrackingActivity(eventId);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -442,5 +452,11 @@ public class RegattaActivity extends BaseActivity {
 		{
 			super.onBackPressed();
 		}
+	}
+	
+	private void startTrackingActivity(String eventId) {
+		Intent intent = new Intent(this, TrackingActivity.class);
+		intent.putExtra(getString(R.string.tracking_activity_event_id_parameter), eventId);
+		startActivity(intent);
 	}
 }

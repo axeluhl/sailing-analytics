@@ -19,6 +19,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventLeaderboardCompetitorJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardsEventsJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
@@ -193,6 +194,24 @@ public class DatabaseHelper {
     	{
     		result.name = cursor.getString(cursor.getColumnIndex("event_name"));
     		result.leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
+    	}
+    	
+    	cursor.close();
+		return result;
+	}
+	
+	public EventInfo getEventInfoWithLeaderboardAndCompetitor(Context context, String eventId) {
+		EventInfo result = new EventInfo();
+		
+    	ContentResolver cr = context.getContentResolver();
+    	String projectionStr = "events._id,leaderboards.leaderboard_name,events.event_name, competitors.competitor_id";
+    	String[] projection = projectionStr.split(",");
+    	Cursor cursor = cr.query(EventLeaderboardCompetitorJoined.CONTENT_URI, projection, "events.event_id = \"" + eventId + "\"", null, null);
+    	if (cursor.moveToFirst())
+    	{
+    		result.name = cursor.getString(cursor.getColumnIndex("event_name"));
+    		result.leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
+    		result.competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
     	}
     	
     	cursor.close();

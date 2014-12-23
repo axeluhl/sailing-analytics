@@ -5,6 +5,7 @@ public class EventInfo {
 	public String id;
 	public String name;
 	public String leaderboardName; // when using join-query
+	public String competitorId; // when using join-query
 	public String imageUrl;
 	public long startMillis;
 	public long endMillis;
@@ -14,7 +15,8 @@ public class EventInfo {
 	@Override
 	public String toString() {
 		return "eventName: " + name + ", leaderboardName: "
-				+ leaderboardName + ", eventImageUrl: " + imageUrl
+				+ leaderboardName + ", competitorId: " + competitorId
+				+ ", eventImageUrl: " + imageUrl
 				+ ", eventStartMillis: " + startMillis
 				+ ", eventEndMillis: " + endMillis + ", eventRowId: "
 				+ rowId + ", server: " + server;
