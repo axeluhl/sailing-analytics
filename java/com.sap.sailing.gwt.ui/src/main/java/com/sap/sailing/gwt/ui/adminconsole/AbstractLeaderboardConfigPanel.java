@@ -441,11 +441,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     protected abstract void leaderboardSelectionChanged();
 
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         trackedRacesListComposite.fillRegattas(regattas);
-
         allRegattas.clear();
-        allRegattas.addAll(regattas);
+        Util.addAll(regattas, allRegattas);
     }
 
     @Override

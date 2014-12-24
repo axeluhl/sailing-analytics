@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class PolarSheetsTrackedRacesList extends AbstractFilteredTrackedRacesList {
@@ -73,8 +74,8 @@ public class PolarSheetsTrackedRacesList extends AbstractFilteredTrackedRacesLis
     }
 
     @Override
-    protected void makeControlsReactToFillRegattas(List<RegattaDTO> regattas) {
-        if (regattas.isEmpty()) {
+    protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas) {
+        if (Util.isEmpty(regattas)) {
             btnPolarSheetGeneration.setVisible(false);
         } else {
             btnPolarSheetGeneration.setVisible(true);

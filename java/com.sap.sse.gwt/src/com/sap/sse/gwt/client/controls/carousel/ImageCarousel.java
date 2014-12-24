@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.UriUtils;
@@ -118,7 +119,14 @@ public class ImageCarousel extends Widget {
 			    slidesToShow : 2
 
 			});
-
+	$wnd
+		.$(
+			'.'
+				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId)
+				+ '>.slick-list>.slick-track')
+		.height(
+			sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::imagesHeight
+				+ 'px');
     }-*/;
 
     /**
@@ -241,6 +249,14 @@ public class ImageCarousel extends Widget {
             public void execute() {
                 try {
                     setupSlider(reference);
+
+                    for (int childIndex = 0; childIndex < getElement().getChildCount(); childIndex++) {
+                        Element child = Element.as(getElement().getChild(childIndex));
+                        if (child.getClassName() != null && child.getClassName().contains("slick-track")) {
+
+                        }
+                    }
+
                 } catch (Exception e) {
                     GWT.log("Catched Exception on slider init", e);
                 }
