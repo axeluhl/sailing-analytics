@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.BaseChart;
 import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.events.PointSelectEventHandler;
@@ -19,7 +18,6 @@ import org.moxieapps.gwt.highcharts.client.events.SeriesHideEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.SeriesShowEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesShowEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
-import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.dom.client.Style.Unit;
