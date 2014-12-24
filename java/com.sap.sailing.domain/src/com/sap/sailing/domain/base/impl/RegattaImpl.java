@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -31,11 +32,15 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogOnRegattaIdentifier;
+import com.sap.sailing.domain.regattalike.BaseRegattaLikeImpl;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeListener;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -72,6 +77,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private TimePoint endDate;
     private final Serializable id;
     private transient RaceLogStore raceLogStore;
+    private final IsRegattaLike regattaLikeHelper;
     
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
@@ -94,8 +100,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     /**
      * Constructs a regatta with an empty {@link RaceLogStore}.
      */
-    public RegattaImpl(String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
-        this(EmptyRaceLogStore.INSTANCE, name, boatClass, startDate, endDate, series, persistent, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
+    public RegattaImpl(String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<? extends Series> series, boolean persistent,
+            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
+        this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, name, boatClass, startDate, endDate, series, persistent,
+                scoringScheme, id, courseArea, /* useStartTimeInference */ true);
     }
     
     /**
@@ -108,11 +116,14 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public RegattaImpl(RaceLogStore raceLogStore, String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
-        this(raceLogStore, name, boatClass, startDate, endDate, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
-                /* isMedal */false, Collections
-                .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), /* race column names */new ArrayList<String>(),
-                trackedRegattaRegistry)), /* persistent */false, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
+    public RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate,
+            TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id,
+            CourseArea courseArea) {
+        this(raceLogStore, regattaLogStore, name, boatClass, startDate, endDate, Collections.singletonList(
+                new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
+                /* isMedal */false, Collections.singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
+                /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
+                scoringScheme, id, courseArea, /* useStartTimeInference */ true);
     }
 
     /**
@@ -120,7 +131,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
      */
-    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, boolean useStartTimeInference) {
+    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme,
+            Serializable id, CourseArea courseArea, boolean useStartTimeInference) {
         super(name);
         this.useStartTimeInference = useStartTimeInference;
         this.id = id;
@@ -143,6 +156,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.scoringScheme = scoringScheme;
         this.defaultCourseArea = courseArea;
         this.configuration = null;
+        this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore);
     }
 
     private void registerRaceLogsOnRaceColumns(Series series) {
@@ -152,10 +166,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     private void setRaceLogInformationOnRaceColumn(RaceColumn raceColumn) {
-        raceColumn.setRaceLogInformation(
-                new RaceLogInformationImpl(
-                    raceLogStore,
-                    new RaceLogOnRegattaIdentifier(this, raceColumn.getName())));
+        raceColumn.setRaceLogInformation(raceLogStore, new RegattaAsRegattaLikeIdentifier(this));
     }
 
     @Override
@@ -201,8 +212,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             linkToRegattaAndConnectRaceLogsAndAddListeners(series);
             if (series.getRaceColumns() != null) {
                 for (RaceColumnInSeries column : series.getRaceColumns()) {
-                    column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore,
-                            new RaceLogOnRegattaIdentifier(this, column.getName())));
+                    column.setRaceLogInformation(raceLogStore, new RegattaAsRegattaLikeIdentifier(this));
                 }
             } else {
                 logger.warning("Race Columns were null during deserialization. This should not happen.");
@@ -522,4 +532,23 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return useStartTimeInference;
     }
 
+    @Override
+    public RegattaLog getRegattaLog() {
+        return regattaLikeHelper.getRegattaLog();
+    }
+
+    @Override
+    public RegattaLikeIdentifier getRegattaLikeIdentifier() {
+        return regattaLikeHelper.getRegattaLikeIdentifier();
+    }
+
+    @Override
+    public void addListener(RegattaLikeListener listener) {
+        regattaLikeHelper.addListener(listener);
+    }
+
+    @Override
+    public void removeListener(RegattaLikeListener listener) {
+        regattaLikeHelper.removeListener(listener);
+    }
 }

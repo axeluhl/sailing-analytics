@@ -31,9 +31,11 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -86,6 +88,7 @@ import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -242,6 +245,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     protected transient ConcurrentHashMap<Serializable, RaceLog> attachedRaceLogs;
 
+    protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
+
     /**
      * The time delay to the current point in time in milliseconds.
      */
@@ -296,6 +301,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
+        attachedRegattaLogs = new ConcurrentHashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
         this.loadingFromWindStoreLock = new NamedReentrantReadWriteLock("Loading from wind store lock for tracked race "
@@ -517,6 +523,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException {
         while (!attachedRaceLogs.containsKey(fromRaceLog.getId()) || loadingFromGPSFixStore) {
+            wait();
+        }
+    }
+
+    @Override
+    public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+        while (!attachedRegattaLogs.containsKey(fromRegattaLog.getId()) || loadingFromGPSFixStore) {
             wait();
         }
     }
@@ -2639,34 +2652,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
     }
-
-    /**
-     * This can trigger fixes to be loaded, if there are {@link DeviceMapping}s in the {@code RaceLog}.
-     * If multiple race logs are attached, the threads that are spawned to load fixes will do so one
-     * after another, as they acquire a write lock on the {@link #loadingFromGPSFixStoreLock}.
-     */
-    @Override
-    public void attachRaceLog(final RaceLog raceLog) {
-        if (raceLog != null) {
-            // Use the new race log, that possibly contains device mappings, to load GPSFix tracks from the DB
+    
+    private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(
+            final LogT log, ConcurrentHashMap<Serializable, LogT> addLogToMap) {
+        if (log != null) {
+            // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
-            new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", race log "
-                    + raceLog.getId()) {
+            new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", log "
+                    + log.getId()) {
                 @Override
                 public void run() {
                     LockUtil.lockForRead(getSerializationLock());
                     LockUtil.lockForWrite(getLoadingFromGPSFixStoreLock());
                     synchronized (TrackedRaceImpl.this) {
-                        TrackedRaceImpl.this.attachedRaceLogs.put(raceLog.getId(), raceLog);
                         loadingFromGPSFixStore = true; // indicates that the serialization lock is now safely held
+                        addLogToMap.put(log.getId(), log);
                         TrackedRaceImpl.this.notifyAll();
                     }
                     try {
-                        logger.info("Started loading competitor tracks for " + getRace().getName() + " for race log " + raceLog.getId());
+                        logger.info("Started loading competitor tracks for " + getRace().getName() + " for log " + log.getId());
                         for (Competitor competitor : race.getCompetitors()) {
                             try {
                                 gpsFixStore.loadCompetitorTrack(
-                                        (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog,
+                                        (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), log,
                                         competitor);
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.log(Level.WARNING, "Could not load track for " + competitor);
@@ -2676,7 +2684,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         logger.info("Started loading mark tracks for " + getRace().getName());
                         for (Mark mark : getMarks()) {
                             try {
-                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog,
+                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), log,
                                         mark);
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.log(Level.WARNING, "Could not load track for " + mark);
@@ -2694,8 +2702,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
             }.start();
         } else {
-            logger.severe("Got a request to attach race log for an empty race log!");
+            logger.severe("Got a request to attach log for an empty log!");
         }
+    }
+
+    /**
+     * This can trigger fixes to be loaded, if there are {@link DeviceMapping}s in the {@code RaceLog}.
+     * If multiple race logs are attached, the threads that are spawned to load fixes will do so one
+     * after another, as they acquire a write lock on the {@link #loadingFromGPSFixStoreLock}.
+     */
+    @Override
+    public void attachRaceLog(final RaceLog raceLog) {
+        loadFixesForLog(raceLog, attachedRaceLogs);
+    }
+    
+    @Override
+    public void attachRegattaLog(RegattaLog regattaLog) {
+        loadFixesForLog(regattaLog, attachedRegattaLogs);
     }
 
     @Override

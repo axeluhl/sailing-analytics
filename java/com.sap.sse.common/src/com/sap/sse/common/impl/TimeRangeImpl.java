@@ -6,8 +6,6 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 
 public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements TimeRange {
-    public static final TimePoint BeginningOfTime = new MillisecondsTimePoint(Long.MIN_VALUE);
-    public static final TimePoint EndOfTime = new MillisecondsTimePoint(Long.MAX_VALUE);
     private static final long serialVersionUID = 8710198176227507300L;
     
     public static TimeRange create(long fromMillis, long toMillis) {
@@ -15,7 +13,7 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     }
 
     public TimeRangeImpl(TimePoint from, TimePoint to) {
-        super(from == null ? BeginningOfTime : from, to == null ? EndOfTime : to);
+        super(from == null ? TimePoint.BeginningOfTime : from, to == null ? TimePoint.EndOfTime : to);
         if (from().after(to())) {
             throw new IllegalArgumentException("from " + from() + " must lie before to " + to() + " in a TimeRange");
         }
@@ -99,13 +97,13 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     }
 
     @Override
-    public boolean openBeginning() {
-        return from().equals(BeginningOfTime);
+    public boolean hasOpenBeginning() {
+        return from().equals(TimePoint.BeginningOfTime);
     }
 
     @Override
-    public boolean openEnd() {
-        return to().equals(EndOfTime);
+    public boolean hasOpenEnd() {
+        return to().equals(TimePoint.EndOfTime);
     }
 
     @Override

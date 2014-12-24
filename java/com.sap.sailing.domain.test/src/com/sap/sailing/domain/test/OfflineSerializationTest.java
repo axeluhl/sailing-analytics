@@ -129,7 +129,9 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     public void testSerializingOverallLeaderboardWithFactorOnColumn() throws ClassNotFoundException, IOException {
         Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 5 }), new HighPoint(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("LeaderboardGroup", "Test Leaderboard Group", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboard }));
-        final LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPoint(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
+        final LeaderboardGroupMetaLeaderboard overallLeaderboard =
+                new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPoint(),
+                        new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
         final double FACTOR = 2.0;
         overallLeaderboard.getRaceColumnByName("Test Leaderboard").setFactor(FACTOR);

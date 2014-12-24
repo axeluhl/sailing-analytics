@@ -1,10 +1,13 @@
 package com.sap.sailing.domain.abstractlog.impl;
 
 import java.io.Serializable;
+import java.util.UUID;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.RevokeEvent;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class RevokeEventImpl<VisitorT> extends AbstractLogEventImpl<VisitorT> implements RevokeEvent<VisitorT> {
     private static final long serialVersionUID = -30864810737555657L;
@@ -13,6 +16,11 @@ public abstract class RevokeEventImpl<VisitorT> extends AbstractLogEventImpl<Vis
     private final String reason;
     private final String revokedEventType;
     private final String revokedEventShortInfo;
+    
+    public RevokeEventImpl(AbstractLogEventAuthor author, AbstractLogEvent<?> toRevoke, String reason) {
+        this(MillisecondsTimePoint.now(), author, MillisecondsTimePoint.now(), UUID.randomUUID(),
+                toRevoke.getId(), toRevoke.getClass().getName(), toRevoke.getShortInfo(), reason);
+    }
     
     public RevokeEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, Serializable revokedEventId, String revokedEventType,

@@ -3,14 +3,9 @@ package com.sap.sse.common;
 import java.io.Serializable;
 
 public interface TimeRange extends Comparable<TimeRange>, Serializable {
-    /**
-     * @return {@code null}, if the timepoint is at the beginning of time
-     */
+    
     TimePoint from();
     
-    /**
-     * @return {@code null}, if the timepoint is at the beginning of time
-     */
     TimePoint to();
     
     /**
@@ -40,12 +35,12 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     /**
      * Is the time range open ended towards older timepoints?
      */
-    boolean openBeginning();
+    boolean hasOpenBeginning();
     
     /**
      * Is the time range open ended towards newer timepoints?
      */
-    boolean openEnd();
+    boolean hasOpenEnd();
     
     /**
      * Get time-difference between the timepoint and this timerange.

@@ -3,7 +3,12 @@ package com.sap.sse.common;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 public interface TimePoint extends Comparable<TimePoint>, Serializable {
+    TimePoint BeginningOfTime = new MillisecondsTimePoint(Long.MIN_VALUE);
+    TimePoint EndOfTime = new MillisecondsTimePoint(Long.MAX_VALUE);
+    
     long asMillis();
 
     Date asDate();
