@@ -296,7 +296,7 @@ public class ImportMasterDataOperation extends
         int i = 0;
         for (WindTrackMasterData windMasterData : masterData.getWindTrackMasterData()) {
             DummyTrackedRace trackedRaceWithNameAndId = new DummyTrackedRace(windMasterData.getRaceName(), windMasterData.getRaceId());
-            WindTrack windTrackToWriteTo = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
+            WindTrack windTrackToWriteTo = toState.getWindStore().getWindTrack(trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
             final WindTrack windTrackToReadFrom = windMasterData.getWindTrack();
             windTrackToReadFrom.lockForRead();
             try {

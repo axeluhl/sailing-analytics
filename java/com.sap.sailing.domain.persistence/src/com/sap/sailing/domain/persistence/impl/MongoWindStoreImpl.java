@@ -47,22 +47,24 @@ public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore
      * additions to the wind track will be written to the MongoDB.
      */
     @Override
-    public WindTrack getWindTrack(String regattaName, TrackedRace trackedRace, WindSource windSource,
+    public WindTrack getWindTrack(TrackedRace trackedRace, WindSource windSource,
             long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation) {
         WindTrack result;
+        String regattaName = trackedRace.getTrackedRegatta().getRegatta().getName();
         if (windSource.canBeStored()) {
             result = domainObjectFactory.loadWindTrack(regattaName, trackedRace.getRace(), windSource,
                     millisecondsOverWhichToAverage);
             result.addListener(new MongoWindListener(trackedRace, regattaName, windSource, mongoObjectFactory, db));
         } else {
-            result = super.getWindTrack(regattaName, trackedRace, windSource, millisecondsOverWhichToAverage, delayForWindEstimationCacheInvalidation);
+            result = super.getWindTrack(trackedRace, windSource, millisecondsOverWhichToAverage, delayForWindEstimationCacheInvalidation);
         }
         return result;
     }
 
     @Override
-    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(String regattaName,
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(
             TrackedRace trackedRace, long millisecondsOverWhichToAverageWind) {
+        String regattaName = trackedRace.getTrackedRegatta().getRegatta().getName();
         Map<? extends WindSource, ? extends WindTrack> result = domainObjectFactory.loadWindTracks(
                 regattaName, trackedRace.getRace(), millisecondsOverWhichToAverageWind);
         for (Entry<? extends WindSource, ? extends WindTrack> e : result.entrySet()) {
