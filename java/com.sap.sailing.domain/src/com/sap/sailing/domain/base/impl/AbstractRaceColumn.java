@@ -96,7 +96,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
         this.trackedRaces.remove(fleet);
         if (previouslyLinkedRace != null && regattaLikeParent != null) {
-            RaceLogIdentifierImpl identifier = new RaceLogIdentifierImpl(regattaLikeParent, getName(), fleet);
+            RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
             previouslyLinkedRace.detachRaceLog(identifier.getIdentifier());
             getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
         }
@@ -151,7 +151,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public void reloadRaceLog(Fleet fleet) {
         synchronized(raceLogs) {
-            RaceLogIdentifier identifier = new RaceLogIdentifierImpl(regattaLikeParent, getName(), fleet);
+            RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
             RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /*ignoreCache*/ true);
             RaceLog raceLogAvailable = raceLogs.get(fleet);
             if (raceLogAvailable == null) {
@@ -173,8 +173,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
-            raceLog.addListener(new RaceColumnRaceLogReplicator(this,
-                    new RaceLogIdentifierImpl(regattaLikeParent, getName(), fleet)));
+            raceLog.addListener(new RaceColumnRaceLogReplicator(this, getRaceLogIdentifier(fleet)));
             // now comes a little secrecy (see bug 2506) about how, after de-serialization, the connections
             // between race column, race log, tracked race and the listener pumping stuff from the race log
             // into the tracked race are re-established. The race log's listener structure is transient, and so
