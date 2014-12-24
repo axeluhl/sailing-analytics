@@ -20,7 +20,7 @@ import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryCl
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
 
 
-public class TestSimpleFunctionRegistry {
+public class TestFunctionManagerAsFunctionRegistry {
     
     private static ExpectedFunctionRegistryUtil expectedFunctionRegistryUtil;
     
@@ -45,7 +45,7 @@ public class TestSimpleFunctionRegistry {
     
     @Test
     public void testRegistration() throws NoSuchMethodException, SecurityException {
-        FunctionRegistry registry = new SimpleFunctionRegistry();
+        FunctionRegistry registry = new FunctionManager();
         registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         registry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
         
@@ -63,7 +63,7 @@ public class TestSimpleFunctionRegistry {
     
     @Test
     public void testUnregistration() {
-        FunctionRegistry registry = new SimpleFunctionRegistry();
+        FunctionRegistry registry = new FunctionManager();
         registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         
         Collection<Function<?>> expectedDimensions = new HashSet<>();

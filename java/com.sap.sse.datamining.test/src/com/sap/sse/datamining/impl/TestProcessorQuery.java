@@ -33,7 +33,7 @@ import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
-import com.sap.sse.datamining.impl.functions.RegistryFunctionProvider;
+import com.sap.sse.datamining.impl.functions.FunctionManager;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.Unit;
@@ -59,7 +59,7 @@ public class TestProcessorQuery {
     
     @Before
     public void initializeProcessorFactory() {
-        FunctionProvider emptyFunctionProvider = new RegistryFunctionProvider(new ArrayList<>());
+        FunctionProvider emptyFunctionProvider = new FunctionManager();
         processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor(), emptyFunctionProvider);
     }
 

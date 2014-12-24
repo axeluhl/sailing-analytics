@@ -24,7 +24,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
+import com.sap.sse.datamining.impl.functions.FunctionManager;
 
 public class TestSailingFunctionsRegistration {
 
@@ -34,7 +34,7 @@ public class TestSailingFunctionsRegistration {
     
     @Before
     public void setUpFunctionRegistryAndProvider() {
-        functionRegistry = new SimpleFunctionRegistry();
+        functionRegistry = new FunctionManager();
         functionRegistry.registerAllWithInternalFunctionPolicy(Activator.getDefault().getInternalClassesWithMarkedMethods());
     }
     
