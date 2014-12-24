@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DeviceMappingFinder;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.common.TimeRange;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.WithID;
 
 /**
