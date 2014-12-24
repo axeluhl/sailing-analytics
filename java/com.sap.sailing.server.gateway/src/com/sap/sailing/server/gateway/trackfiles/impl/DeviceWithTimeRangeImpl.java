@@ -2,8 +2,8 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceWithTimeRange;
-import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 
 public class DeviceWithTimeRangeImpl implements DeviceWithTimeRange {
     private static final long serialVersionUID = -4676108888517968890L;

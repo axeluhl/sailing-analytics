@@ -5,10 +5,10 @@ import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMapping;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sse.common.TimeRange;
 
 public enum EmptyGPSFixStore implements GPSFixStore {
     INSTANCE;
