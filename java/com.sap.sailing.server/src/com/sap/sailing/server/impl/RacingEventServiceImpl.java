@@ -914,9 +914,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mongoObjectFactory.removeLeaderboard(leaderboardName);
             syncGroupsAfterLeaderboardRemove(leaderboardName, true);
             if (leaderboard instanceof FlexibleLeaderboard) {
-                FlexibleLeaderboard fLeaderboard = (FlexibleLeaderboard) leaderboard;
-                onRegattaLikeRemoved(fLeaderboard.getRegattaLike());
-                getRegattaLogStore().removeRegattaLog(fLeaderboard.getRegattaLikeIdentifier());
+                onRegattaLikeRemoved(((FlexibleLeaderboard) leaderboard).getRegattaLike());
             }
             leaderboard.destroy();
         }
@@ -1059,6 +1057,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     private void onRegattaLikeRemoved(IsRegattaLike isRegattaLike) {
         isRegattaLike.removeListener(regattaLogReplicator);
+        getRegattaLogStore().removeRegattaLog(isRegattaLike.getRegattaLikeIdentifier());
     }
     
     @Override
@@ -1743,7 +1742,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
         onRegattaLikeRemoved(regatta);
-        getRegattaLogStore().removeRegattaLog(regatta.getRegattaLikeIdentifier());
     }
 
     @Override
