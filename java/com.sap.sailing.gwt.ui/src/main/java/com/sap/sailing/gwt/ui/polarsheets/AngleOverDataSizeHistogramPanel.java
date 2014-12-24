@@ -34,11 +34,14 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
     private final StringMessages stringMessages;
     
     private final Map<String, Set<Series>> seriesForId;
+    
+    private final Map<String, Series> seriesForName;
 
     public AngleOverDataSizeHistogramPanel(StringMessages stringMessages) {
         super(Unit.PX);
         
         this.seriesForId = new HashMap<>();
+        this.seriesForName = new HashMap<>();
         this.stringMessages = stringMessages;
         setSize("100%", "100%");
         
@@ -58,20 +61,22 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
         return histogramChart;
     }
 
-    public void addData(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle, String seriesId, String actualSeriesName) {
+    public void addData(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle, String seriesId, String actualSeriesName, boolean setVisible) {
         chart.setTitle("");
         Series series = chart.createSeries();
         
         Point[] points = toPoints(histogramDataPerAngle);
         series.setPoints(points);
         series.setName(actualSeriesName);
-        chart.addSeries(series);
+        chart.addSeries(series, false, false);
+        series.setVisible(setVisible, false);
         
         if (!seriesForId.containsKey(seriesId)) {
             seriesForId.put(seriesId, new HashSet<Series>());
         }
         Set<Series> seriesSet = seriesForId.get(seriesId);
         seriesSet.add(series);
+        seriesForName.put(actualSeriesName, series);
     }
 
     private Point[] toPoints(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle) {
@@ -115,6 +120,7 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
     public void removeSeries(String seriesId) {
         for (Series series : seriesForId.get(seriesId)) {
             chart.removeSeries(series);
+            seriesForName.remove(series.getName());
         }
         seriesForId.remove(seriesId);
     }
@@ -122,6 +128,22 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
     public void removeAllSeries() {
         chart.removeAllSeries();
         seriesForId.clear();
+    }
+
+    public void redrawChart() {
+        chart.redraw();
+    }
+
+    public void showSeries(String name) {
+        if (seriesForName.containsKey(name)) {
+            seriesForName.get(name).show();
+        }
+    }
+
+    public void hideSeries(String name) {
+        if (seriesForName.containsKey(name)) {
+            seriesForName.get(name).hide();
+        }
     }
     
     

@@ -14,6 +14,10 @@ import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.events.PointSelectEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.SeriesHideEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesHideEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.SeriesShowEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesShowEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
@@ -44,16 +48,48 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     private final Map<String,PolarSheetsData> polarSheetsDataMap;
     
     private final AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel;
+    private final SeriesPlotOptions seriesPlotOptions;
 
     public PolarSheetsChartPanel(StringMessages stringMessages, AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel) {
         super(Unit.PCT);
+        seriesPlotOptions = new SeriesPlotOptions();
         this.stringMessages = stringMessages;
         this.angleOverDataSizeHistogramPanel = angleOverDataSizeHistogramPanel;
         polarSheetsDataMap = new HashMap<String, PolarSheetsData>();
         setSize("100%", "100%");
         chart = createPolarSheetChart();
+        setSeriesShowHandler(createSeriesShowEventHandler());
+        setSeriesHideHandler(createSeriesHideEventHandler());
         seriesMap = new HashMap<String, Series[]>();
         add(chart);
+    }
+
+    private void setSeriesHideHandler(SeriesHideEventHandler seriesHideEventHandler) {
+        chart.setSeriesPlotOptions(seriesPlotOptions.setSeriesHideEventHandler(seriesHideEventHandler));
+    }
+
+    private SeriesShowEventHandler createSeriesShowEventHandler() {
+        return new SeriesShowEventHandler() {
+            
+            @Override
+            public boolean onShow(SeriesShowEvent seriesShowEvent) {
+                String name = seriesShowEvent.getSeriesName();
+                angleOverDataSizeHistogramPanel.showSeries(name);
+                return true;
+            }
+        };
+    }
+    
+    private SeriesHideEventHandler createSeriesHideEventHandler() {
+        return new SeriesHideEventHandler() {
+            
+            @Override
+            public boolean onHide(SeriesHideEvent seriesHideEvent) {
+                String name = seriesHideEvent.getSeriesName();
+                angleOverDataSizeHistogramPanel.hideSeries(name);
+                return true;
+            }
+        };
     }
 
     /**
@@ -116,6 +152,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
      */
     private void addValuesToSeries(String seriesId, PolarSheetsData result) {
         int stepCount = result.getStepping().getRawStepping().length;
+        boolean oneSeriesSetToVisible = false;
         if (seriesMap.containsKey(seriesId)) {
             for (int i = 0; i < stepCount; i++) {
                 if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i))) {
@@ -128,8 +165,19 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
                     Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result, i);
                     if (points != null) {
                         series.setPoints(points);
-                        angleOverDataSizeHistogramPanel.addData(result.getHistogramDataMap().get(i), seriesId, actualSeriesName);
+                        angleOverDataSizeHistogramPanel.addData(result.getHistogramDataMap().get(i), seriesId, actualSeriesName, !oneSeriesSetToVisible);
+                        angleOverDataSizeHistogramPanel.redrawChart();
+                        if(!oneSeriesSetToVisible) {
+                            oneSeriesSetToVisible = true;
+                        } else {
+                            series.setVisible(false, false);
+                        }
+                    } else {
+                        chart.removeSeries(series);
+                        seriesMap.get(seriesId)[i] = null;
+                        nameForSeries.remove(series);
                     }
+                    
                 }
             }
         }
@@ -224,7 +272,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     }
 
     /**
-     * Adds a the results of a polar sheet generation to the chart panel. Performs all necessary steps including adding
+     * Adds the results of a polar sheet generation to the chart panel. Performs all necessary steps including adding
      * the set of series to the map and redrawing the chart.
      * 
      * @param id Set of series identifier. 
@@ -248,8 +296,12 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
      * Allows setting the point select handler for the chart.
      */
     public void setPointSelectHandler(PointSelectEventHandler pointSelectEventHandler) {
-        chart.setSeriesPlotOptions(new SeriesPlotOptions().setAllowPointSelect(true).setPointSelectEventHandler(
+        chart.setSeriesPlotOptions(seriesPlotOptions.setAllowPointSelect(true).setPointSelectEventHandler(
                 pointSelectEventHandler));
+    }
+    
+    private void setSeriesShowHandler(SeriesShowEventHandler eventHandler) {
+        chart.setSeriesPlotOptions(seriesPlotOptions.setSeriesShowEventHandler(eventHandler));
     }
 
     public Series[] getSeriesPerWindspeedForName(String name) {
