@@ -13,7 +13,7 @@ public class EmptyWindStore implements WindStore {
     public static EmptyWindStore INSTANCE = new EmptyWindStore();
     
     @Override
-    public WindTrack getWindTrack(TrackedRace trackedRace, WindSource windSource,
+    public WindTrack getWindTrack(String regattaName, TrackedRace trackedRace, WindSource windSource,
             long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation) {
         switch (windSource.getType()) {
         case COURSE_BASED:
@@ -27,7 +27,7 @@ public class EmptyWindStore implements WindStore {
     }
 
     @Override
-    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(String regattaName,
             TrackedRace trackedRace, long millisecondsOverWhichToAverageWind) {
         return Collections.emptyMap();
     }

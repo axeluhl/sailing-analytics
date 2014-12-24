@@ -68,7 +68,7 @@ public class Simulator {
     private void startWindPlayer() {
         assert this.trackedRace != null;
         for (final Map.Entry<? extends WindSource, ? extends WindTrack> windSourceAndTrack : windStore.loadWindTracks(
-                trackedRace,
+                trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace,
                 /* millisecondsOverWhichToAverageWind doesn't matter because we only use raw fixes */ 10000).entrySet()) {
             new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
                 @Override

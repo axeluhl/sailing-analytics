@@ -48,7 +48,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -100,13 +99,12 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -377,7 +375,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 try {
                     logger.info("Started loading wind tracks for " + getRace().getName());
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
-                            TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
+                            trackedRegatta.getRegatta().getName(), TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
                     updateEventTimePoints(loadedWindTracks.values());
                     logger.info("Finished loading wind tracks for " + getRace().getName() + ". Found " + windTracks.size() + " wind tracks for this race.");
