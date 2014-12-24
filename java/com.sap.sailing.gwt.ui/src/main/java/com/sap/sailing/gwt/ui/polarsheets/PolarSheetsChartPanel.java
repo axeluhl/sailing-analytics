@@ -156,26 +156,24 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         if (seriesMap.containsKey(seriesId)) {
             for (int i = 0; i < stepCount; i++) {
                 if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i))) {
-                    String actualSeriesName = seriesId + "-" + result.getStepping().getRawStepping()[i];
-                    if (seriesMap.get(seriesId)[i] == null) {
-                        createSeriesForWindspeed(seriesId, i, actualSeriesName);
-                    }
-                    Series series = seriesMap.get(seriesId)[i];
-                    //series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
-                    Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result, i);
+                    Point[] points = createPoints(result, i);
                     if (points != null) {
-                        series.setPoints(points);
-                        angleOverDataSizeHistogramPanel.addData(result.getHistogramDataMap().get(i), seriesId, actualSeriesName, !oneSeriesSetToVisible);
+                        String actualSeriesName = seriesId + "-" + result.getStepping().getRawStepping()[i];
+                        if (seriesMap.get(seriesId)[i] == null) {
+                            createSeriesForWindspeed(seriesId, i, actualSeriesName);
+                        }
+                        Series series = seriesMap.get(seriesId)[i];
+                        // series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
+
+                        series.setPoints(points, false);
+                        angleOverDataSizeHistogramPanel.addData(result.getHistogramDataMap().get(i), seriesId,
+                                actualSeriesName, !oneSeriesSetToVisible);
                         angleOverDataSizeHistogramPanel.redrawChart();
-                        if(!oneSeriesSetToVisible) {
+                        if (!oneSeriesSetToVisible) {
                             oneSeriesSetToVisible = true;
                         } else {
                             series.setVisible(false, false);
                         }
-                    } else {
-                        chart.removeSeries(series);
-                        seriesMap.get(seriesId)[i] = null;
-                        nameForSeries.remove(series);
                     }
                     
                 }
@@ -202,7 +200,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
      * Points are created using the polar sheets generation results. Points color and alpha in the graph is calculated
      * using statistical measures.
      */
-    private Point[] createPointsWithMarkerAlphaAccordingToDataCount(PolarSheetsData result, int windspeed) {
+    private Point[] createPoints(PolarSheetsData result, int windspeed) {
         Point[] points = new Point[360];
         List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngleForWindspeed(windspeed));
         Integer max = Collections.max(dataCountList);
@@ -222,23 +220,6 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
             if (points[i] == null) {
                 points[i] = new Point(result.getAveragedPolarDataByWindSpeed()[windspeed][i]);
             }
-            double alpha = (double) dataCountList.get(i) / (double) max;
-            int blue;
-            int red;
-            int radius;
-            if (alpha > 0.2) {
-                red = (int) (alpha * 255);
-                blue = 0;
-                radius = 2;
-            } else {
-                blue = (int) ((1 - alpha) * 255);
-                red = 0;
-                radius = 2;
-            }
-
-            // Don't let the markers be invisible
-            alpha = 0.5 + 0.5 * alpha;
-            points[i].setMarker(new Marker().setFillColor(new Color(red, 0, blue, alpha)).setRadius(radius));
         }
 
         return points;

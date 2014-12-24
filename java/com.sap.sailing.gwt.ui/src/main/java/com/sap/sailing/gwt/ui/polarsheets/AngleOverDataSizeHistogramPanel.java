@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
@@ -56,8 +57,9 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
         histogramChart.getYAxis().setMin(0).setAxisTitle(new AxisTitle().setText(stringMessages.numberOfDataPoints()));
         histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(10))
                 .setAxisTitle(new AxisTitle().setText(stringMessages.beatAngle()));
-        histogramChart.setAreaPlotOptions(new AreaPlotOptions().setStacking(Stacking.NORMAL).setLineColor("#666666")
+        histogramChart.setAreaPlotOptions(new AreaPlotOptions().setLineColor("#666666")
                 .setLineWidth(1).setMarker(new Marker().setLineWidth(1).setLineColor("#666666")));
+        histogramChart.setLegend(new Legend().setEnabled(false));
         return histogramChart;
     }
 
@@ -66,7 +68,7 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
         Series series = chart.createSeries();
         
         Point[] points = toPoints(histogramDataPerAngle);
-        series.setPoints(points);
+        series.setPoints(points, false);
         series.setName(actualSeriesName);
         chart.addSeries(series, false, false);
         series.setVisible(setVisible, false);
