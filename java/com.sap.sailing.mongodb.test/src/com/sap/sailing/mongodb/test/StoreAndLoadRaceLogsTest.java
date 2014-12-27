@@ -32,8 +32,8 @@ import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.TripleSerializer;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -185,12 +185,11 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
     }
 
     private RaceLogIdentifier createIdentifier(String groupName, String raceColumnName, String fleetName) {
-        RaceLogIdentifierTemplate template = mock(RaceLogIdentifierTemplate.class);
-        when(template.getParentObjectName()).thenReturn(groupName);
-        when(template.getRaceColumnName()).thenReturn(raceColumnName);
+        RegattaLikeIdentifier regattaLike = mock(RegattaLikeIdentifier.class);
+        when(regattaLike.getName()).thenReturn(groupName);
         Fleet fleet = mock(Fleet.class);
         when(fleet.getName()).thenReturn(fleetName);
-        return new RaceLogIdentifierImpl(template, raceColumnName, fleet);
+        return new RaceLogIdentifierImpl(regattaLike, raceColumnName, fleet);
     }
 
     private RaceLogFlagEvent createRaceLogFlagEvent(Serializable id) {

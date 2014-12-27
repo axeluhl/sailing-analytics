@@ -1,35 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    
-    <parent>
-        <artifactId>root</artifactId>
-        <groupId>com.sap.sailing</groupId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
 
-    <artifactId>com.sap.sailing.www</artifactId>
-    <packaging>eclipse-plugin</packaging>
+	<parent>
+		<artifactId>root</artifactId>
+		<groupId>com.sap.sailing</groupId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
 
-    <!-- Optional depedency to delay build after apk has been deployed to apps/ folder -->
+	<artifactId>com.sap.sailing.www</artifactId>
+	<packaging>eclipse-plugin</packaging>
+
+	<!-- Optional depedency to delay build after apk has been deployed to apps/ 
+		folder -->
 	<profiles>
 		<profile>
-			<!-- deactivate with parameter '-P !with-mobile'-->
+			<!-- deactivate with parameter '-P !with-mobile' -->
 			<id>with-mobile</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<dependencies>
-			    <dependency>
-				<groupId>com.sap.sailing</groupId>
-				<artifactId>com.sap.sailing.racecommittee.app</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
-				<optional>true</optional> 
-			    </dependency>
+				<dependency>
+					<groupId>com.sap.sailing</groupId>
+					<artifactId>com.sap.sailing.racecommittee.app</artifactId>
+					<version>1.0.0-SNAPSHOT</version>
+					<optional>true</optional>
+				</dependency>
+				<dependency>
+					<groupId>com.sap.sailing</groupId>
+					<artifactId>com.sap.sailing.android.tracking.app</artifactId>
+					<version>1.0.0-SNAPSHOT</version>
+					<optional>true</optional>
+				</dependency>
 			</dependencies>
 		</profile>
 	</profiles>
 
-    
+
 </project>

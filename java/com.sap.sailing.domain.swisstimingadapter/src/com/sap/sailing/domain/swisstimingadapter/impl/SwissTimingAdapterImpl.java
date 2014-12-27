@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -66,13 +67,14 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
     }
 
     @Override
-    public RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
-            BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
+    public RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo,
+            String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
+            StartList startList, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds)
             throws Exception {
-        return trackerManager.addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port,
-                raceID, raceName, raceDescription, boatClass, startList, DEFAULT_SWISSTIMING_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
-                swissTimingDomainFactory, logStore),
-                timeoutInMilliseconds);
+        return trackerManager.addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(
+                hostname, port, raceID, raceName, raceDescription, boatClass, startList,
+                DEFAULT_SWISSTIMING_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory, swissTimingDomainFactory,
+                raceLogStore, regattaLogStore), timeoutInMilliseconds);
     }
 
     @Override

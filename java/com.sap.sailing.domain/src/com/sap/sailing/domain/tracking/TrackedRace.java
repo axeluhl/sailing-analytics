@@ -7,7 +7,8 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -568,6 +569,11 @@ public interface TrackedRace extends Serializable {
      * @param fromRaceLog Make sure that the fixes defined by the mappings in this racelog were loaded.
      */
     void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException;
+
+    /**
+     * @see #waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog)
+     */
+    void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 
@@ -598,6 +604,12 @@ public interface TrackedRace extends Serializable {
      * @param raceLog to be attached.
      */
     void attachRaceLog(RaceLog raceLog);
+    
+    /**
+     * Attaches the passed regatta log with this {@link TrackedRace}.
+     * This also causes fixes from the {@link GPSFixStore} to be loaded (see {@link #attachRaceLog} for details).
+     */
+    void attachRegattaLog(RegattaLog regattaLog);
     
     /**
      * Returns the attached race log event track for this race if any.

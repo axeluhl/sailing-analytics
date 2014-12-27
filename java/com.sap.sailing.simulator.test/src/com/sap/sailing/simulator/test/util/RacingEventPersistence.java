@@ -52,7 +52,7 @@ public class RacingEventPersistence {
         URI liveURI = new URI(liveURIStr);
         URI storedURI = new URI(storedURIStr);
 
-        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI, null,
+        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI, null, null,
                 60000);
 
         System.out.println("Done loading race.");

@@ -573,8 +573,19 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);
 
+    /**
+     * Set the competitor registrations in the racelog. Unregisters formerly registered competitors
+     * that are not listed in {@code competitors}.
+     */
     void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitors, AsyncCallback<Void> callback);
+
+    /**
+     * Set the competitor registrations in the leaderboard. Unregisters formerly registered competitors
+     * that are not listed in {@code competitors}.
+     */
+    void setCompetitorRegistrations(String leaderboardName,Set<CompetitorDTO> competitors,
+            AsyncCallback<Void> callback);
 
     void getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Collection<CompetitorDTO>> callback);
@@ -595,6 +606,12 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             PositionDTO position, AsyncCallback<Void> callback);
 
     void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
+
+    /**
+     * Do not only use the racelog, but also other logs (e.g. RegattaLogs) in the hierarchy of the race.
+     */
+    void getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<DeviceMappingDTO>> callback);
 
     void getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<List<DeviceMappingDTO>> callback);
@@ -650,7 +667,11 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 
+    void getCompetitorRegistrations(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> callback);
+
     void createXYDiagramForBoatClass(String itemText, AsyncCallback<PolarSheetsXYDiagramData> asyncCallback);
+
+    void getEventsForLeaderboard(String leaderboardName, AsyncCallback<Collection<EventDTO>> callback);
     
     /**
      * Imports regatta structure definitions from an ISAF XRR document

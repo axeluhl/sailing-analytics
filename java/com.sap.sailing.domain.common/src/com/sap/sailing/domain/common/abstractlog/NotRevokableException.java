@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.abstractlog;
 
-public class NotRevokableException extends Exception {
+import java.io.Serializable;
+
+public class NotRevokableException extends Exception implements Serializable {
     private static final long serialVersionUID = 6825451915706047105L;
 
     public NotRevokableException() {

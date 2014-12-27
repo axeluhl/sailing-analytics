@@ -8,6 +8,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
@@ -662,6 +663,18 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Position getCenterOfCourse(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void attachRegattaLog(RegattaLog regattaLog) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
     }
 
 }

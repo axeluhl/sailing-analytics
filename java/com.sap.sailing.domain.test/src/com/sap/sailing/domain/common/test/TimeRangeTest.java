@@ -94,8 +94,8 @@ public class TimeRangeTest {
     	
     	one = create(Long.MIN_VALUE, 10);
     	union = two.union(one);
-    	assertTrue(union.openBeginning());
-    	assertTrue(union.openEnd());
+    	assertTrue(union.hasOpenBeginning());
+    	assertTrue(union.hasOpenEnd());
     }
     
     @Test
