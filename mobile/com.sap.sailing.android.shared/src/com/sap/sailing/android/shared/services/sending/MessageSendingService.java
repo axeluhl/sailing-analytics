@@ -109,7 +109,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private Date lastSuccessfulSend;
     
-    public List<String> getDelayedIntensContent() {
+    public List<String> getDelayedIntentsContent() {
         return persistenceManager.getContent();
     }
 
