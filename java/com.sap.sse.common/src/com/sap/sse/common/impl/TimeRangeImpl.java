@@ -1,10 +1,9 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sse.common.impl;
 
-import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements TimeRange {
     private static final long serialVersionUID = 8710198176227507300L;

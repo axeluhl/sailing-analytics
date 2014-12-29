@@ -4,9 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceWithTimeRange;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.common.TimeRange;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.WithID;
 
 /**
@@ -15,11 +14,15 @@ import com.sap.sse.common.WithID;
  * 
  * @author Fredrik Teschke
  */
-public interface DeviceMapping<ItemType extends WithID> extends DeviceWithTimeRange {
+public interface DeviceMapping<ItemType extends WithID> extends Timed {
     ItemType getMappedTo();
     /**
      * List the ids of those race log events from which this mapping was generated.
      * In the simplest case this is a single event.
      */
     List<Serializable> getOriginalRaceLogEventIds();
+    
+    DeviceIdentifier getDevice();
+
+    TimeRange getTimeRange();
 }

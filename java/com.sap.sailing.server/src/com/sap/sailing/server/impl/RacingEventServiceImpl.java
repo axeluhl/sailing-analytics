@@ -592,7 +592,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         + ") into regattasByName");
                 regattasByName.put(regatta.getName(), regatta);
                 regatta.addRegattaListener(this);
-                registerRegattaLike(regatta);
+                onRegattaLikeAdded(regatta);
                 regatta.addRaceColumnListener(raceLogReplicator);
                 regatta.addRaceColumnListener(raceLogScoringReplicator);
             }
@@ -649,7 +649,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         // RaceColumns of RegattaLeaderboards are tracked via its Regatta!
         if (leaderboard instanceof FlexibleLeaderboard) {
-            registerRegattaLike(((FlexibleLeaderboard) leaderboard).getRegattaLike());
+            onRegattaLikeAdded(((FlexibleLeaderboard) leaderboard).getRegattaLike());
             leaderboard.addRaceColumnListener(raceLogReplicator);
             leaderboard.addRaceColumnListener(raceLogScoringReplicator);
         }
@@ -914,9 +914,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mongoObjectFactory.removeLeaderboard(leaderboardName);
             syncGroupsAfterLeaderboardRemove(leaderboardName, true);
             if (leaderboard instanceof FlexibleLeaderboard) {
-                FlexibleLeaderboard fLeaderboard = (FlexibleLeaderboard) leaderboard;
-                unregisterRegattaLike(fLeaderboard.getRegattaLike());
-                getRegattaLogStore().removeRegattaLog(fLeaderboard.getRegattaLikeIdentifier());
+                onRegattaLikeRemoved(((FlexibleLeaderboard) leaderboard).getRegattaLike());
             }
             leaderboard.destroy();
         }
@@ -1047,18 +1045,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     boatClassName), /*startDate*/ null, /*endDate*/ null, this, getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id,
                     null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
-            registerRegattaLike(result);
+            onRegattaLikeAdded(result);
             cacheAndReplicateDefaultRegatta(result);
         }
         return result;
     }
     
-    private void registerRegattaLike(IsRegattaLike isRegattaLike) {
+    private void onRegattaLikeAdded(IsRegattaLike isRegattaLike) {
         isRegattaLike.addListener(regattaLogReplicator);
     }
     
-    private void unregisterRegattaLike(IsRegattaLike isRegattaLike) {
+    private void onRegattaLikeRemoved(IsRegattaLike isRegattaLike) {
         isRegattaLike.removeListener(regattaLogReplicator);
+        getRegattaLogStore().removeRegattaLog(isRegattaLike.getRegattaLikeIdentifier());
     }
     
     @Override
@@ -1070,7 +1069,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 useStartTimeInference);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
-            registerRegattaLike(regatta);
+            onRegattaLikeAdded(regatta);
             replicateSpecificRegattaWithoutRaceColumns(regatta);
         }
         return regatta;
@@ -1742,8 +1741,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regatta.removeRegattaListener(this);
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
-        unregisterRegattaLike(regatta);
-        getRegattaLogStore().removeRegattaLog(regatta.getRegattaLikeIdentifier());
+        onRegattaLikeRemoved(regatta);
     }
 
     @Override

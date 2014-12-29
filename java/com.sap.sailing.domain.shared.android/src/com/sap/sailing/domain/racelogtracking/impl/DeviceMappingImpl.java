@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
-import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping<ItemType> {
     private static final long serialVersionUID = -4602948402371623654L;
