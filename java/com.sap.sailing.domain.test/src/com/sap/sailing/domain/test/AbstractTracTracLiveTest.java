@@ -55,8 +55,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     private IRaceSubscriber raceSubscriber;
     private final Collection<Receiver> receivers;
     
-    // FIXME uncomment again when done with testing
-//    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(3 * 60 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(3 * 60 * 1000);
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         receivers = new HashSet<Receiver>();

@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +10,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -67,9 +67,9 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
     @Test
     public void testDoublePenaltyForPhilippAndTobiasAndMaximAndDharmender() throws ParseException, NoWindException {
         assertTwoPenalties("Philipp Buhl",       "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:24", "06/21/2014-13:03:37");
-        assertTwoPenalties("Dharmender SINGH",   "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:52:01", "06/21/2014-12:52:19");
-        assertTwoPenalties("Tobias Schadewaldt", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:11", "06/21/2014-12:47:16");
-        assertTwoPenalties("Maxim NIKOLAEV",     "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:39", "06/21/2014-12:49:54");
+        assertTwoPenalties("Dharmender SINGH",   "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:51:55", "06/21/2014-12:52:12");
+        assertTwoPenalties("Tobias Schadewaldt", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:07", "06/21/2014-12:47:15");
+        assertTwoPenalties("Maxim NIKOLAEV",     "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:32", "06/21/2014-12:49:48");
     }
 
     private void assertTwoPenalties(String competitorName, final String from, final String to,
@@ -85,9 +85,6 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
         assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, new MillisecondsTimePoint(dateFormat.parse(firstPenalty)), 5000);
         assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, new MillisecondsTimePoint(dateFormat.parse(secondPenalty)), 5000);
-        for (Maneuver maneuver : maneuvers) {
-            // make sure there is no penalty detected in the time frame considered
-            assertNotSame("Found an unexpected penalty "+maneuver, ManeuverType.PENALTY_CIRCLE, maneuver.getType());
-        }
+        assertAllManeuversOfTypesDetected(Collections.singletonList(ManeuverType.PENALTY_CIRCLE), maneuversInvalid);
     }
 }
