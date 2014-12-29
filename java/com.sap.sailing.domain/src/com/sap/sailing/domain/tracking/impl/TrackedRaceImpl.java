@@ -77,6 +77,8 @@ import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sailing.domain.common.impl.CourseChangeImpl;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -2211,11 +2213,21 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             SpeedWithBearing speedWithBearingOnApproximationFromCurrentToNext; // will certainly be assigned because iter's collection's size > 2
             do {
                 GPSFixMoving next = approximationPointsIter.next();
+                // traveling on great circle segments from one approximation point to the next
                 speedWithBearingOnApproximationFromCurrentToNext = current.getSpeedAndBearingRequiredToReach(next);
                 // compute course change on "approximation track"
                 // FIXME bug 2009: when a maneuver (particularly a penalty circle) is executed at high turn rates, approximations may lead to turns >180deg, hence inferred to turn the wrong way; need to loop across the non-approximated fixes here!
                 CourseChange courseChange = speedWithBearingOnApproximationFromPreviousToCurrent
                         .getCourseChangeRequiredToReach(speedWithBearingOnApproximationFromCurrentToNext);
+                Bearing courseChangeOnOriginalFixes = getCourseChange(competitor, previous.getTimePoint(), next.getTimePoint());
+                // check for the case where the course change between the approximation fixes may have been >180deg by comparing the direction
+                // of the course change on the approximation points with the direction of the course change during the same time range on the
+                // original fixes (see also bug 2009):
+                if (Math.abs(courseChangeOnOriginalFixes.getDegrees()) > 180 &&
+                    Math.signum(courseChange.getCourseChangeInDegrees()) != Math.signum(courseChangeOnOriginalFixes.getDegrees())) {
+                    courseChange = new CourseChangeImpl(-Math.signum(courseChange.getCourseChangeInDegrees())*(360.0-Math.abs(courseChange.getCourseChangeInDegrees())),
+                            courseChange.getSpeedChangeInKnots());
+                }
                 com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange> courseChangeAtFix = new com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>(current,
                         courseChange);
                 if (!courseChangeSequenceInSameDirection.isEmpty()
@@ -2242,6 +2254,34 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
         return result;
+    }
+
+    /**
+     * On <code>competitor</code>'s track iterates the fixes starting after <code>startExclusive</code> until
+     * <code>endExclusive</code> or any later fix has been reached and sums up the direction change as a "bearing." A
+     * negative sign means a direction change to port, a positive sign means a direction change to starboard.
+     */
+    private Bearing getCourseChange(Competitor competitor, TimePoint startExclusive, TimePoint endExclusive) {
+        Bearing directionChangeInDegrees = new DegreeBearingImpl(0);
+        GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+        track.lockForRead();
+        try {
+            GPSFixMoving previous = null;
+            GPSFixMoving fix = null;
+            for (Iterator<GPSFixMoving> i=track.getFixesIterator(startExclusive, /* inclusive */ false);
+                 i.hasNext() && (previous == null || !previous.getTimePoint().after(endExclusive));
+                 previous = fix) {
+                fix = i.next();
+                if (previous != null) {
+                    directionChangeInDegrees = new DegreeBearingImpl(directionChangeInDegrees.getDegrees()
+                            + previous.getSpeed().getBearing().getDifferenceTo(fix.getSpeed().getBearing())
+                                    .getDegrees());
+                }
+            }
+        } finally {
+            track.unlockAfterRead();
+        }
+        return directionChangeInDegrees;
     }
 
     /**
@@ -2321,11 +2361,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         List<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> group = new ArrayList<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
             Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
-            SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing
-                                                                                                      // before group
-            SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing
-                                                                                                    // before current
-                                                                                                    // course change
+            SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing before group
+            SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing before current course change
             Iterator<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
             double totalCourseChangeInDegrees = 0.0;
             long totalMilliseconds = 0l;
