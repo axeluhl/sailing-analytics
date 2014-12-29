@@ -65,19 +65,26 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
      * Asserts that Philipp Buhl is having two penalty circles detected in the time between 13:03:18+0200 and 13:03:47+0200
      */
     @Test
-    public void testDoublePenaltyForPhilipp() throws ParseException, NoWindException {
-        Competitor competitor = getCompetitorByName("Philipp Buhl");
-        assertNotNull(competitor);
-        Date fromDate = dateFormat.parse("06/21/2014-13:03:18");
-        Date toDate = dateFormat.parse("06/21/2014-13:03:47");
+    public void testDoublePenaltyForPhilippAndTobiasAndMaximAndDharmender() throws ParseException, NoWindException {
+        assertTwoPenalties("Philipp Buhl",       "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:29", "06/21/2014-13:03:42");
+        assertTwoPenalties("Dharmender SINGH",   "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:52:01", "06/21/2014-12:52:19");
+        assertTwoPenalties("Tobias Schadewaldt", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:11", "06/21/2014-12:47:16");
+        assertTwoPenalties("Maxim NIKOLAEV",     "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:39", "06/21/2014-12:49:54");
+    }
+
+    private void assertTwoPenalties(String competitorName, final String from, final String to,
+            final String firstPenalty, final String secondPenalty) throws ParseException, NoWindException {
+        Competitor competitor = getCompetitorByName(competitorName);
+        Date fromDate = dateFormat.parse(from);
+        Date toDate = dateFormat.parse(to);
         assertNotNull(fromDate);
         assertNotNull(toDate);
+        assertNotNull(competitor);
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
-
-        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, new MillisecondsTimePoint(dateFormat.parse("06/21/2014-13:03:29")), 5000);
-        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, new MillisecondsTimePoint(dateFormat.parse("06/21/2014-13:03:42")), 5000);
+        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, new MillisecondsTimePoint(dateFormat.parse(firstPenalty)), 5000);
+        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, new MillisecondsTimePoint(dateFormat.parse(secondPenalty)), 5000);
         for (Maneuver maneuver : maneuvers) {
             // make sure there is no penalty detected in the time frame considered
             assertNotSame("Found an unexpected penalty "+maneuver, ManeuverType.PENALTY_CIRCLE, maneuver.getType());
