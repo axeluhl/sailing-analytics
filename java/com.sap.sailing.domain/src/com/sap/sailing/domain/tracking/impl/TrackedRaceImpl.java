@@ -2323,12 +2323,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Groups the {@link CourseChange} sequence into groups where the times of the fixes at which the course changes
      * took place are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds or
-     * where the distances of those course changes are less than two hull lengths apart. For those, a single
+     * where the distances of those course changes are less than three hull lengths apart. For those, a single
      * {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the direction changes of
      * the individual {@link CourseChange} objects. This can result in direction changes of more than 180 degrees in one
      * direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the maneuver's time point,
      * the average time point of the course changes that went into the maneuver construction is used.
      * <p>
+     * 
      * @param speedWithBearingOnApproximationAtBeginning
      *            the speed/bearing before the first approximating fix passed in
      *            <code>courseChangeSequenceInSameDirection</code>
@@ -2455,11 +2456,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
             final Bearing courseBeforeManeuver = estimatedSpeedBeforeManeuver.getBearing();
             final Bearing courseAfterManeuver = estimatedSpeedAfterManeuver.getBearing();
-            boolean jibed = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
+            int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
                     courseAfterManeuver, wind.getBearing());
-            boolean tacked = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
+            int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
                     courseAfterManeuver, wind.getFrom());
-            if (markPassingTimePoint != null && (tacked || jibed)) {
+            if (markPassingTimePoint != null && (numberOfTacks + numberOfJibes > 0)) {
                 // In case of a mark passing we need to split the maneuver analysis into the phase before and after
                 // the mark passing. First of all, this is important to identify the correct maneuver time point for
                 // each tack and jibe, second it is essential to call a penalty which is only the case if the tack and
@@ -2470,20 +2471,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 result.addAll(detectManeuvers(competitor, timePointBeforeManeuver, markPassingTimePoint.minus(1), /* ignoreMarkPassings */ true));
                 result.addAll(detectManeuvers(competitor, markPassingTimePoint.plus(1), timePointAfterManeuver, /* ignoreMarkPassings */ true));
             } else {
-                // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe
-                if (tacked && jibed && markPassingTimePoint == null) {
+                // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe.
+                // For each tack/jibe combination (they must alternate because course changes to in the same directiona and
+                // the wind is considered sufficiently stable to not allow for two successive tacks or two successive jibes)
+                // we create a PENALTY_CIRCLE maneuver. Should a tack or a jibe remain, create an additional tack or jibe maneuver,
+                // respectively. Only if there was neither a tack nor a jibe recognized, construct a HEAD_UP or BEAR_AWAY maneuver.
+                if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
                     maneuverType = ManeuverType.PENALTY_CIRCLE;
+                    // TODO bug 2009: could be several penalty circles in a row; find out how many tack/jibe combinations and group each pair into penalty circles
                     if (legBeforeManeuver != null) {
                         maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
                                 timePointAfterManeuver);
                     }
-                } else if (tacked) {
+                } else if (numberOfTacks > 0) {
                     maneuverType = ManeuverType.TACK;
                     if (legBeforeManeuver != null) {
                         maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
                                 timePointAfterManeuver);
                     }
-                } else if (jibed) {
+                } else if (numberOfJibes > 0) {
                     maneuverType = ManeuverType.JIBE;
                     if (legBeforeManeuver != null) {
                         maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
