@@ -2456,10 +2456,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
             final Bearing courseBeforeManeuver = estimatedSpeedBeforeManeuver.getBearing();
             final Bearing courseAfterManeuver = estimatedSpeedAfterManeuver.getBearing();
-            int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
-                    courseAfterManeuver, wind.getBearing());
-            int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
-                    courseAfterManeuver, wind.getFrom());
+            int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getBearing());
+            int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getFrom());
             if (markPassingTimePoint != null && (numberOfTacks + numberOfJibes > 0)) {
                 // In case of a mark passing we need to split the maneuver analysis into the phase before and after
                 // the mark passing. First of all, this is important to identify the correct maneuver time point for
@@ -2472,43 +2470,75 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 result.addAll(detectManeuvers(competitor, markPassingTimePoint.plus(1), timePointAfterManeuver, /* ignoreMarkPassings */ true));
             } else {
                 // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe.
-                // For each tack/jibe combination (they must alternate because course changes to in the same directiona and
+                // For the first tack/jibe combination (they must alternate because course changes to in the same direction and
                 // the wind is considered sufficiently stable to not allow for two successive tacks or two successive jibes)
-                // we create a PENALTY_CIRCLE maneuver. Should a tack or a jibe remain, create an additional tack or jibe maneuver,
-                // respectively. Only if there was neither a tack nor a jibe recognized, construct a HEAD_UP or BEAR_AWAY maneuver.
+                // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has completed.
                 if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
+                    TimePoint firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(courseBeforeManeuver, group, wind);
                     maneuverType = ManeuverType.PENALTY_CIRCLE;
-                    // TODO bug 2009: could be several penalty circles in a row; find out how many tack/jibe combinations and group each pair into penalty circles
                     if (legBeforeManeuver != null) {
-                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                                timePointAfterManeuver);
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt);
                     }
-                } else if (numberOfTacks > 0) {
-                    maneuverType = ManeuverType.TACK;
-                    if (legBeforeManeuver != null) {
-                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                                timePointAfterManeuver);
-                    }
-                } else if (numberOfJibes > 0) {
-                    maneuverType = ManeuverType.JIBE;
-                    if (legBeforeManeuver != null) {
-                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                                timePointAfterManeuver);
+                    TimePoint penaltyTimePoint = new MillisecondsTimePoint((timePointBeforeManeuver.asMillis() + firstPenaltyCircleCompletedAt.asMillis()) / 2);
+                    Position penaltyPosition = competitorTrack.getEstimatedPosition(penaltyTimePoint, /* extrapolate */ false);
+                    final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, penaltyPosition,
+                            penaltyTimePoint, speedWithBearingOnApproximationAtBeginning,
+                            competitorTrack.getEstimatedSpeed(penaltyTimePoint), totalCourseChangeInDegrees, maneuverLoss);
+                    result.add(maneuver);
+                    // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes remain
+                    if (numberOfTacks>1 || numberOfJibes>1) {
+                        result.addAll(detectManeuvers(competitor, firstPenaltyCircleCompletedAt.plus(1), timePointAfterManeuver, /* ignoreMarkPassings */ true));
                     }
                 } else {
-                    // heading up or bearing away
-                    Bearing windBearing = wind.getBearing();
-                    Bearing toWindBeforeManeuver = windBearing
-                            .getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
-                    Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd
-                            .getBearing());
-                    maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver
-                            .getDegrees()) ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                    if (numberOfTacks > 0) {
+                        maneuverType = ManeuverType.TACK;
+                        if (legBeforeManeuver != null) {
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
+                                    maneuverTimePoint, timePointAfterManeuver);
+                        }
+                    } else if (numberOfJibes > 0) {
+                        maneuverType = ManeuverType.JIBE;
+                        if (legBeforeManeuver != null) {
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
+                                    maneuverTimePoint, timePointAfterManeuver);
+                        }
+                    } else {
+                        // heading up or bearing away
+                        Bearing windBearing = wind.getBearing();
+                        Bearing toWindBeforeManeuver = windBearing
+                                .getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
+                        Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
+                        maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver
+                                .getDegrees()) ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                    }
+                    final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                            maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+                            speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
+                    result.add(maneuver);
                 }
-                final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                        maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
-                        speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
-                result.add(maneuver);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Starting at <code>timePointBeforeManeuver</code>, and assuming that the group of <code>approximatedFixesAndCourseChanges</code>
+     * contains at least a tack and a jibe, finds the earliest approximated fix's time point at which a tack and a jibe have been
+     * completed.
+     */
+    private TimePoint getTimePointOfCompletionOfFirstPenaltyCircle(Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
+        double totalCourseChangeInDegrees = 0;
+        TimePoint result = null;
+        BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
+        Bearing newCourse = courseBeforeManeuver;
+        for (Pair<GPSFixMoving, CourseChange> fixAndCourseChange : approximatedFixesAndCourseChanges) {
+            totalCourseChangeInDegrees += fixAndCourseChange.getB().getCourseChangeInDegrees();
+            newCourse = newCourse.add(new DegreeBearingImpl(fixAndCourseChange.getB().getCourseChangeInDegrees()));
+            int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getBearing());
+            int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getFrom());
+            if (numberOfJibes > 0 && numberOfTacks > 0) {
+                result = fixAndCourseChange.getA().getTimePoint();
+                break;
             }
         }
         return result;

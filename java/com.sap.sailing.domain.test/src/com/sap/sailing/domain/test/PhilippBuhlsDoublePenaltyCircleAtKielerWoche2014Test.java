@@ -66,7 +66,7 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
      */
     @Test
     public void testDoublePenaltyForPhilippAndTobiasAndMaximAndDharmender() throws ParseException, NoWindException {
-        assertTwoPenalties("Philipp Buhl",       "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:29", "06/21/2014-13:03:42");
+        assertTwoPenalties("Philipp Buhl",       "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:24", "06/21/2014-13:03:37");
         assertTwoPenalties("Dharmender SINGH",   "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:52:01", "06/21/2014-12:52:19");
         assertTwoPenalties("Tobias Schadewaldt", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:11", "06/21/2014-12:47:16");
         assertTwoPenalties("Maxim NIKOLAEV",     "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:39", "06/21/2014-12:49:54");
