@@ -2419,8 +2419,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         TimePoint maneuverTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver, timePointAfterManeuver);
         final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
         Position maneuverPosition = competitorTrack.getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
-        Tack tackAfterManeuver = getTack(maneuverPosition, timePointAfterManeuver,
-                speedWithBearingOnApproximationAtEnd.getBearing());
+        final Wind wind = getWind(maneuverPosition, maneuverTimePoint);
+        final Tack tackAfterManeuver = wind == null ? null : getTack(maneuverPosition, timePointAfterManeuver, speedWithBearingOnApproximationAtEnd.getBearing());
         ManeuverType maneuverType;
         Distance maneuverLoss = null;
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
@@ -2449,7 +2449,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } else {
             markPassingTimePoint = null;
         }
-        final Wind wind = getWind(maneuverPosition, maneuverTimePoint);
         final SpeedWithBearing estimatedSpeedBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver);
         final SpeedWithBearing estimatedSpeedAfterManeuver = competitorTrack.getEstimatedSpeed(timePointAfterManeuver);
         if (wind != null && estimatedSpeedBeforeManeuver != null && estimatedSpeedAfterManeuver != null) {
