@@ -21,7 +21,6 @@ import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
-import com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterFactoryImpl;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
@@ -175,7 +174,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
             BundleContext context) {
         @SuppressWarnings("unchecked")
         ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> result = mock(ServiceTracker.class);
-        RaceLogTrackingAdapterFactory factory = RaceLogTrackingAdapterFactoryImpl.INSTANCE;
+        RaceLogTrackingAdapterFactory factory = RaceLogTrackingAdapterFactory.INSTANCE;
         when(result.getService()).thenReturn(factory);
         return result;
     }
