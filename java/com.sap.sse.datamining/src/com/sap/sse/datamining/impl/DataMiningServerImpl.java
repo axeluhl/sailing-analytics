@@ -48,10 +48,14 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     private void initializeStringMessagesParameterProvider() {
-        for (Locale locale : DataMiningStringMessages.Util.getSupportedLocales()) {
-            ParameterProvider stringMessagesParameterProvider = new LocalizationParameterProvider(locale, getStringMessages());
-            registerParameterProvider(stringMessagesParameterProvider);
-        }
+        //TODO enable after improved ParameterProvider handling
+//        for (Locale locale : DataMiningStringMessages.Util.getSupportedLocales()) {
+//            ParameterProvider stringMessagesParameterProvider = new LocalizationParameterProvider(locale, getStringMessages());
+//            registerParameterProvider(stringMessagesParameterProvider);
+//        }
+        //TODO remove after improved ParameterProvider handling
+        ParameterProvider stringMessagesParameterProvider = new LocalizationParameterProvider(Locale.ENGLISH, getStringMessages());
+        registerParameterProvider(stringMessagesParameterProvider);
     }
 
     @Override

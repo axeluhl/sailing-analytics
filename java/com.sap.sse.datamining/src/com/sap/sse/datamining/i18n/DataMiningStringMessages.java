@@ -14,25 +14,27 @@ public interface DataMiningStringMessages {
     public static final class Util {
 
         private static boolean supportedLocalesHaveBeenInitialized = false;
-        private static final String DEFAULT_LOCALE_NAME = "default";
         private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
         private static final Map<String, Locale> supportedLocalesMappedByLocaleInfo = new HashMap<>();
 
         public static Locale getLocaleFor(String localeInfoName) {
-            if (!supportedLocalesHaveBeenInitialized) {
-                initializeSupportedLocales();
-            }
-            
-            Locale locale = Util.supportedLocalesMappedByLocaleInfo.get(localeInfoName);
+            Locale locale = getSupportedLocalesMap().get(localeInfoName);
             return locale != null ? locale : DEFAULT_LOCALE;
         }
         
         public static Iterable<Locale> getSupportedLocales() {
-            return supportedLocalesMappedByLocaleInfo.values();
+            return getSupportedLocalesMap().values();
+        }
+        
+        private static Map<String, Locale> getSupportedLocalesMap() {
+            if (!supportedLocalesHaveBeenInitialized) {
+                initializeSupportedLocales();
+            }
+            
+            return supportedLocalesMappedByLocaleInfo;
         }
         
         private static void initializeSupportedLocales() {
-            supportedLocalesMappedByLocaleInfo.put(DEFAULT_LOCALE_NAME, DEFAULT_LOCALE);
             supportedLocalesMappedByLocaleInfo.put("en", Locale.ENGLISH);
             supportedLocalesMappedByLocaleInfo.put("de", Locale.GERMAN);
             
