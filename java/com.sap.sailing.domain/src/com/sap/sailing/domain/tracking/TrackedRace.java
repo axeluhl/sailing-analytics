@@ -416,7 +416,7 @@ public interface TrackedRace extends Serializable {
      * the approximation is at most <code>maxDistance</code>. The approximation's fixes are original fixes from
      * the competitor's {@link GPSFixTrack track}.
      */
-    List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
+    Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
     /**
      * @return a non-<code>null</code> but perhaps empty list of the maneuvers that <code>competitor</code> performed in

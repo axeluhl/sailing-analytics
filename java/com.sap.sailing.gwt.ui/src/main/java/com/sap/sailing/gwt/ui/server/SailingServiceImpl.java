@@ -3009,28 +3009,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     // Distance for DouglasPeucker
                     TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDTO));
                     TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDTO));
-                    List<GPSFixMoving> gpsFixApproximation = trackedRace.approximate(competitor, maxDistance,
+                    Iterable<GPSFixMoving> gpsFixApproximation = trackedRace.approximate(competitor, maxDistance,
                             timePointFrom, timePointTo);
                     List<GPSFixDTO> gpsFixDouglasList = new ArrayList<GPSFixDTO>();
-                    for (int i = 0; i < gpsFixApproximation.size(); i++) {
-                        GPSFix fix = gpsFixApproximation.get(i);
-                        SpeedWithBearing speedWithBearing;
-                        if (i < gpsFixApproximation.size() - 1) {
-                            GPSFix next = gpsFixApproximation.get(i + 1);
+                    GPSFix fix = null;
+                    for (GPSFix next : gpsFixApproximation) {
+                        if (fix != null) {
                             Bearing bearing = fix.getPosition().getBearingGreatCircle(next.getPosition());
                             Speed speed = fix.getPosition().getDistance(next.getPosition())
                                     .inTime(next.getTimePoint().asMillis() - fix.getTimePoint().asMillis());
-                            speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
-                        } else {
-                            speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
+                            final SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
+                            GPSFixDTO fixDTO = createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing);
+                            gpsFixDouglasList.add(fixDTO);
                         }
-                        Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                        TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, fix.getTimePoint());
-                        LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
-                                trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
-                        Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
-                        WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, fix.getTimePoint());
-                        GPSFixDTO fixDTO = createGPSFixDTO(fix, speedWithBearing,  windDTO, tack, legType, /* extrapolated */false);
+                        fix = next;
+                    }
+                    if (fix != null) {
+                        // add one last GPSFixDTO with no successor to calculate speed/bearing to:
+                        final SpeedWithBearing speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
+                        GPSFixDTO fixDTO = createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing);
                         gpsFixDouglasList.add(fixDTO);
                     }
                     result.put(competitorDTO, gpsFixDouglasList);
@@ -3038,6 +3035,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    private GPSFixDTO createDouglasPeuckerGPSFixDTO(TrackedRace trackedRace, Competitor competitor, GPSFix fix,
+            SpeedWithBearing speedWithBearing) throws NoWindException {
+        Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+        TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
+                fix.getTimePoint());
+        LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
+                trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
+        Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
+        WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, fix.getTimePoint());
+        GPSFixDTO fixDTO = createGPSFixDTO(fix, speedWithBearing, windDTO, tack, legType, /* extrapolated */
+                false);
+        return fixDTO;
     }
 
     @Override

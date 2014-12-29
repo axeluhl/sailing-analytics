@@ -2066,7 +2066,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
+    public Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
         DouglasPeucker<Competitor, GPSFixMoving> douglasPeucker = new DouglasPeucker<Competitor, GPSFixMoving>(
                 getTrack(competitor));
         return douglasPeucker.approximate(maxDistance, from, to);
@@ -2195,11 +2195,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuvers detected.
      */
-    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatingFixesToAnalyze,
+    private List<Maneuver> detectManeuvers(Competitor competitor, Iterable<GPSFixMoving> approximatingFixesToAnalyze,
             boolean ignoreMarkPassings, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
             throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
-        if (approximatingFixesToAnalyze.size() > 2) {
+        if (Util.size(approximatingFixesToAnalyze) > 2) {
             List<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection = new ArrayList<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>>();
             Iterator<GPSFixMoving> approximationPointsIter = approximatingFixesToAnalyze.iterator();
             GPSFixMoving previous = approximationPointsIter.next();
@@ -2208,8 +2208,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             SpeedWithBearing speedWithBearingOnApproximationFromPreviousToCurrent = previous
                     .getSpeedAndBearingRequiredToReach(current);
             SpeedWithBearing speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges = speedWithBearingOnApproximationFromPreviousToCurrent;
-            SpeedWithBearing speedWithBearingOnApproximationFromCurrentToNext; // will certainly be assigned because
-            // iter's collection's size > 2
+            SpeedWithBearing speedWithBearingOnApproximationFromCurrentToNext; // will certainly be assigned because iter's collection's size > 2
             do {
                 GPSFixMoving next = approximationPointsIter.next();
                 speedWithBearingOnApproximationFromCurrentToNext = current.getSpeedAndBearingRequiredToReach(next);
