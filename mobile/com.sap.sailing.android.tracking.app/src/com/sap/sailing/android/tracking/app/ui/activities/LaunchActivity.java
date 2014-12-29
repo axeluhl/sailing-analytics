@@ -108,19 +108,17 @@ public class LaunchActivity extends BaseActivity {
     }
     
     public void onToggleTrackingClicked(View view) {
-        if (!googlePLayServicesAvailable()) {
-            return;
+        if (googlePLayServicesAvailable()) {
+            if (!isTrackingActive) {
+                Intent startTrackingIntent = new Intent(this, TrackingService.class);
+                getBaseContext().startService(startTrackingIntent);
+            } else {
+                Intent startTrackingIntent = new Intent(this, TrackingService.class);
+                getBaseContext().stopService(startTrackingIntent);
+            }
+            isTrackingActive = !isTrackingActive;
+            updateToggleTrackingBtn();
         }
-
-        if (! isTrackingActive){
-            Intent startTrackingIntent = new Intent(this, TrackingService.class);
-            getBaseContext().startService(startTrackingIntent);
-        } else {
-            Intent startTrackingIntent = new Intent(this, TrackingService.class);
-            getBaseContext().stopService(startTrackingIntent);
-        }
-        isTrackingActive = ! isTrackingActive;
-        updateToggleTrackingBtn();
     }
     
     @Override
