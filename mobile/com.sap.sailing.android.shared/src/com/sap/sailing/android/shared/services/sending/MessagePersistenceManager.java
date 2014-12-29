@@ -163,7 +163,7 @@ public class MessagePersistenceManager {
             fileContent = FileHandlerUtils.convertStreamToString(inputStream, context);
             inputStream.close();
         } catch (IOException e) {
-            ExLog.w(context, TAG, "In Method getFileContent(): " + e.getMessage() + " fileContent is empty");
+            ExLog.w(context, TAG, "In Method getFileContent(): " + e.getClass().getName()+" / "+e.getMessage() + " fileContent is empty");
         }
         return fileContent;
     }
