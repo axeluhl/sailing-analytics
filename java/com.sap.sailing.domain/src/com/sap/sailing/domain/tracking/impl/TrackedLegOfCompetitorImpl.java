@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -244,9 +243,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 } else {
                     wind = getTrackedRace().getWind(
                             getTrackedLeg().getEffectiveWindPosition(
-                                    new Callable<Position>() { @Override public Position call() {
-                                        return getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
-                                    }}, at, windPositionMode), at);
+                                    () -> getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false),
+                                    at, windPositionMode), at);
                 }
                 if (wind == null) {
                     throw new NoWindException("Need at least wind direction to determine windward speed");
