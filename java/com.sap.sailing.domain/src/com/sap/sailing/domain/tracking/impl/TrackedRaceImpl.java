@@ -2451,12 +2451,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         final SpeedWithBearing estimatedSpeedBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver);
         final SpeedWithBearing estimatedSpeedAfterManeuver = competitorTrack.getEstimatedSpeed(timePointAfterManeuver);
-        if (wind != null && estimatedSpeedBeforeManeuver != null && estimatedSpeedAfterManeuver != null) {
+        if (estimatedSpeedBeforeManeuver != null && estimatedSpeedAfterManeuver != null) {
             BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
             final Bearing courseBeforeManeuver = estimatedSpeedBeforeManeuver.getBearing();
             final Bearing courseAfterManeuver = estimatedSpeedAfterManeuver.getBearing();
-            int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getBearing());
-            int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getFrom());
+            int numberOfJibes = wind == null ? 0 : bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getBearing());
+            int numberOfTacks = wind == null ? 0 : bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getFrom());
             if (markPassingTimePoint != null && (numberOfTacks + numberOfJibes > 0)) {
                 // In case of a mark passing we need to split the maneuver analysis into the phase before and after
                 // the mark passing. First of all, this is important to identify the correct maneuver time point for
@@ -2502,13 +2502,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                     maneuverTimePoint, timePointAfterManeuver);
                         }
                     } else {
-                        // heading up or bearing away
-                        Bearing windBearing = wind.getBearing();
-                        Bearing toWindBeforeManeuver = windBearing
-                                .getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
-                        Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
-                        maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver
-                                .getDegrees()) ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                        if (wind != null) {
+                            // heading up or bearing away
+                            Bearing windBearing = wind.getBearing();
+                            Bearing toWindBeforeManeuver = windBearing
+                                    .getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
+                            Bearing toWindAfterManeuver = windBearing
+                                    .getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
+                            maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver
+                                    .getDegrees()) ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                        } else {
+                            // no wind information; marking as UNKNOWN
+                            maneuverType = ManeuverType.UNKNOWN;
+                        }
                     }
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                             maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
