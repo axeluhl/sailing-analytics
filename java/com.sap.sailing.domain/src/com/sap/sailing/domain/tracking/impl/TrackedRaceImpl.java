@@ -2478,7 +2478,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     if (legBeforeManeuver != null) {
                         maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt);
                     }
-                    TimePoint penaltyTimePoint = new MillisecondsTimePoint((timePointBeforeManeuver.asMillis() + firstPenaltyCircleCompletedAt.asMillis()) / 2);
+                    TimePoint penaltyTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver, firstPenaltyCircleCompletedAt);
                     Position penaltyPosition = competitorTrack.getEstimatedPosition(penaltyTimePoint, /* extrapolate */ false);
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, penaltyPosition,
                             penaltyTimePoint, speedWithBearingOnApproximationAtBeginning,
@@ -2547,8 +2547,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Computes the maneuver time point as the time point along between maneuver start and end where the competitor's
      * track has greatest change in course.
      */
-    private TimePoint computeManeuverTimepoint(Competitor competitor, TimePoint timePointBeforeManeuver,
-            TimePoint timePointAfterManeuver) {
+    private TimePoint computeManeuverTimepoint(Competitor competitor, TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver) {
         TimePoint result = timePointBeforeManeuver;
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         GPSFixMoving lastFix = null;

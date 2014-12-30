@@ -343,7 +343,7 @@ public class TrackedLegImpl implements TrackedLeg {
     
     Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache) throws NoWindException {
-        LegType legType = cache.getLegType(this, at);
+        final LegType legType = cache.getLegType(this, at);
         if (legType != LegType.REACHING) { // upwind or downwind
             final Position effectivePosition = getEffectiveWindPosition(
                     new Callable<Position>() { @Override public Position call() {
