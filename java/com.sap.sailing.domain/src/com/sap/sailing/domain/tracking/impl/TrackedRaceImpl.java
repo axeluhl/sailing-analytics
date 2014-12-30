@@ -3008,63 +3008,59 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         LineMarksWithPositions marksAndPositions = getLineMarksAndPositions(timePoint, waypoint);
         LineDetails result = null;
         if (marksAndPositions != null) {
-            try {
-                final TrackedLeg legDeterminingDirection = getLegDeterminingDirectionInWhichToPassWaypoint(waypoint);
-                final Mark portMarkWhileApproachingLine = marksAndPositions.getPortMarkWhileApproachingLine();
-                final Mark starboardMarkWhileApproachingLine = marksAndPositions.getStarboardMarkWhileApproachingLine();
-                final Position portMarkPositionWhileApproachingLine = marksAndPositions
-                        .getPortMarkPositionWhileApproachingLine();
-                final Position starboardMarkPositionWhileApproachingLine = marksAndPositions
-                        .getStarboardMarkPositionWhileApproachingLine();
-                final Bearing differenceToCombinedWind;
-                final NauticalSide advantageousSideWhileApproachingLine;
-                final Distance distanceAdvantage;
-                Wind combinedWind = getWind(starboardMarkPositionWhileApproachingLine, timePoint);
-                if (combinedWind != null) {
-                    differenceToCombinedWind = portMarkPositionWhileApproachingLine.getBearingGreatCircle(
-                            starboardMarkPositionWhileApproachingLine).getDifferenceTo(combinedWind.getFrom());
-                    Distance windwardDistanceFromFirstToSecondMark;
-                    windwardDistanceFromFirstToSecondMark = legDeterminingDirection.getWindwardDistance(
-                            portMarkPositionWhileApproachingLine, starboardMarkPositionWhileApproachingLine, timePoint,
-                            WindPositionMode.EXACT);
-                    final Position worseMarkPosition;
-                    final Position betterMarkPosition;
-                    final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(waypoint);
-                    final boolean isStartLine = indexOfWaypoint == 0;
-                    if ((isStartLine && windwardDistanceFromFirstToSecondMark.getMeters() > 0)
-                            || (!isStartLine && windwardDistanceFromFirstToSecondMark.getMeters() < 0)) {
-                        // first mark is worse than second mark
-                        worseMarkPosition = portMarkPositionWhileApproachingLine;
-                        betterMarkPosition = starboardMarkPositionWhileApproachingLine;
-                    } else {
-                        // second mark is worse than first mark
-                        worseMarkPosition = starboardMarkPositionWhileApproachingLine;
-                        betterMarkPosition = portMarkPositionWhileApproachingLine;
-                    }
-                    if (windwardDistanceFromFirstToSecondMark.getMeters() >= 0) {
-                        distanceAdvantage = windwardDistanceFromFirstToSecondMark;
-                    } else {
-                        distanceAdvantage = new CentralAngleDistance(
-                                -windwardDistanceFromFirstToSecondMark.getCentralAngleRad());
-                    }
-                    if (betterMarkPosition.crossTrackError(worseMarkPosition,
-                            legDeterminingDirection.getLegBearing(timePoint)).getCentralAngleRad() > 0) {
-                        advantageousSideWhileApproachingLine = NauticalSide.STARBOARD;
-                    } else {
-                        advantageousSideWhileApproachingLine = NauticalSide.PORT;
-                    }
-                } else { // no wind information
-                    differenceToCombinedWind = null;
-                    advantageousSideWhileApproachingLine = null;
-                    distanceAdvantage = null;
+            final TrackedLeg legDeterminingDirection = getLegDeterminingDirectionInWhichToPassWaypoint(waypoint);
+            final Mark portMarkWhileApproachingLine = marksAndPositions.getPortMarkWhileApproachingLine();
+            final Mark starboardMarkWhileApproachingLine = marksAndPositions.getStarboardMarkWhileApproachingLine();
+            final Position portMarkPositionWhileApproachingLine = marksAndPositions
+                    .getPortMarkPositionWhileApproachingLine();
+            final Position starboardMarkPositionWhileApproachingLine = marksAndPositions
+                    .getStarboardMarkPositionWhileApproachingLine();
+            final Bearing differenceToCombinedWind;
+            final NauticalSide advantageousSideWhileApproachingLine;
+            final Distance distanceAdvantage;
+            Wind combinedWind = getWind(starboardMarkPositionWhileApproachingLine, timePoint);
+            if (combinedWind != null) {
+                differenceToCombinedWind = portMarkPositionWhileApproachingLine.getBearingGreatCircle(
+                        starboardMarkPositionWhileApproachingLine).getDifferenceTo(combinedWind.getFrom());
+                Distance windwardDistanceFromFirstToSecondMark;
+                windwardDistanceFromFirstToSecondMark = legDeterminingDirection.getWindwardDistance(
+                        portMarkPositionWhileApproachingLine, starboardMarkPositionWhileApproachingLine, timePoint,
+                        WindPositionMode.EXACT);
+                final Position worseMarkPosition;
+                final Position betterMarkPosition;
+                final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(waypoint);
+                final boolean isStartLine = indexOfWaypoint == 0;
+                if ((isStartLine && windwardDistanceFromFirstToSecondMark.getMeters() > 0)
+                        || (!isStartLine && windwardDistanceFromFirstToSecondMark.getMeters() < 0)) {
+                    // first mark is worse than second mark
+                    worseMarkPosition = portMarkPositionWhileApproachingLine;
+                    betterMarkPosition = starboardMarkPositionWhileApproachingLine;
+                } else {
+                    // second mark is worse than first mark
+                    worseMarkPosition = starboardMarkPositionWhileApproachingLine;
+                    betterMarkPosition = portMarkPositionWhileApproachingLine;
                 }
-                result = new LineDetailsImpl(timePoint, waypoint,
-                        portMarkPositionWhileApproachingLine.getDistance(starboardMarkPositionWhileApproachingLine),
-                        differenceToCombinedWind, advantageousSideWhileApproachingLine, distanceAdvantage,
-                        portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
-            } catch (NoWindException e) {
-                // result remains null;
+                if (windwardDistanceFromFirstToSecondMark.getMeters() >= 0) {
+                    distanceAdvantage = windwardDistanceFromFirstToSecondMark;
+                } else {
+                    distanceAdvantage = new CentralAngleDistance(
+                            -windwardDistanceFromFirstToSecondMark.getCentralAngleRad());
+                }
+                if (betterMarkPosition.crossTrackError(worseMarkPosition,
+                        legDeterminingDirection.getLegBearing(timePoint)).getCentralAngleRad() > 0) {
+                    advantageousSideWhileApproachingLine = NauticalSide.STARBOARD;
+                } else {
+                    advantageousSideWhileApproachingLine = NauticalSide.PORT;
+                }
+            } else { // no wind information
+                differenceToCombinedWind = null;
+                advantageousSideWhileApproachingLine = null;
+                distanceAdvantage = null;
             }
+            result = new LineDetailsImpl(timePoint, waypoint,
+                    portMarkPositionWhileApproachingLine.getDistance(starboardMarkPositionWhileApproachingLine),
+                    differenceToCombinedWind, advantageousSideWhileApproachingLine, distanceAdvantage,
+                    portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
         }
         return result;
     }
