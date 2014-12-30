@@ -1199,12 +1199,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race);
             }
-            FutureTask<List<CompetitorDTO>> task = new FutureTask<List<CompetitorDTO>>(new Callable<List<CompetitorDTO>>() {
-                @Override
-                public List<CompetitorDTO> call() throws Exception {
-                    return baseDomainFactory.getCompetitorDTOList(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint));
-                }
-            });
+            FutureTask<List<CompetitorDTO>> task = new FutureTask<List<CompetitorDTO>>(
+                    () -> baseDomainFactory.getCompetitorDTOList(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             executor.execute(task);
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
@@ -1273,10 +1269,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
             final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
-                RunnableFuture<LeaderboardEntryDTO> future = new FutureTask<LeaderboardEntryDTO>(
-                        new Callable<LeaderboardEntryDTO>() {
-                            @Override
-                            public LeaderboardEntryDTO call() {
+                RunnableFuture<LeaderboardEntryDTO> future = new FutureTask<LeaderboardEntryDTO>(() -> {
                                 try {
                                     Entry entry = AbstractSimpleLeaderboardImpl.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
                                     return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
@@ -1292,16 +1285,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                             "computeLeaderboardByName.future.call()", e);
                                     throw new NoWindError(e);
                                 }
-                            }
-                        });
+                            });
                 executor.execute(future);
                 futuresForColumnName.put(raceColumn.getName(), future);
             }
-            for (Map.Entry<String, Future<LeaderboardEntryDTO>> raceColumnNameAndFuture : futuresForColumnName
-                    .entrySet()) {
+            for (Map.Entry<String, Future<LeaderboardEntryDTO>> raceColumnNameAndFuture : futuresForColumnName.entrySet()) {
                 try {
-                    row.fieldsByRaceColumnName.put(raceColumnNameAndFuture.getKey(), raceColumnNameAndFuture.getValue()
-                            .get());
+                    row.fieldsByRaceColumnName.put(raceColumnNameAndFuture.getKey(), raceColumnNameAndFuture.getValue().get());
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 } catch (ExecutionException e) {
