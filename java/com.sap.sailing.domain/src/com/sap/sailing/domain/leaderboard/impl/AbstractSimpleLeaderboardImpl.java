@@ -1597,12 +1597,28 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result = null;
         } else {
             result = new LegEntryDTO();
-            result.legType = trackedLeg.getTrackedLeg().getLegType(timePoint);
+            try {
+                result.legType = trackedLeg.getTrackedLeg().getLegType(timePoint);
+            } catch (NoWindException nwe) {
+                result.legType = null; // can't determine leg type without wind data
+            }
             final Speed averageSpeedOverGround = trackedLeg.getAverageSpeedOverGround(timePoint);
             result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
-            final Distance averageAbsoluteCrossTrackError = trackedLeg.getAverageAbsoluteCrossTrackError(timePoint, waitForLatestAnalyses);
+            Distance averageAbsoluteCrossTrackError;
+            try {
+                averageAbsoluteCrossTrackError = trackedLeg.getAverageAbsoluteCrossTrackError(timePoint, waitForLatestAnalyses);
+            } catch (NoWindException nwe) {
+                // leave averageAbsoluteCrossTrackError as null, meaning "unknown"
+                averageAbsoluteCrossTrackError = null;
+            }
             result.averageAbsoluteCrossTrackErrorInMeters = averageAbsoluteCrossTrackError == null ? null : averageAbsoluteCrossTrackError.getMeters();
-            final Distance averageSignedCrossTrackError = trackedLeg.getAverageSignedCrossTrackError(timePoint, waitForLatestAnalyses);
+            Distance averageSignedCrossTrackError;
+            try {
+                averageSignedCrossTrackError = trackedLeg.getAverageSignedCrossTrackError(timePoint, waitForLatestAnalyses);
+            } catch (NoWindException nwe) {
+                // leave averageSignedCrossTrackError as null, meaning "unknown"
+                averageSignedCrossTrackError = null;
+            }
             result.averageSignedCrossTrackErrorInMeters = averageSignedCrossTrackError == null ? null : averageSignedCrossTrackError.getMeters();
             Double speedOverGroundInKnots;
             if (trackedLeg.hasFinishedLeg(timePoint))  {
