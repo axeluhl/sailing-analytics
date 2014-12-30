@@ -1302,13 +1302,15 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
                     int lastLegIndex = fieldsForRace.legDetails.size() - 1;
-                    LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
-                    // competitor may be in leg prior to the one the leader is in; find competitors current leg
-                    while (lastLegDetail == null && lastLegIndex > 0) {
-                        lastLegDetail = fieldsForRace.legDetails.get(--lastLegIndex);
-                    }
-                    if (lastLegDetail != null) {
-                        result = lastLegDetail.currentSpeedOverGroundInKnots;
+                    if (lastLegIndex >= 0) {
+                        LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
+                        // competitor may be in leg prior to the one the leader is in; find competitors current leg
+                        while (lastLegDetail == null && lastLegIndex > 0) {
+                            lastLegDetail = fieldsForRace.legDetails.get(--lastLegIndex);
+                        }
+                        if (lastLegDetail != null) {
+                            result = lastLegDetail.currentSpeedOverGroundInKnots;
+                        }
                     }
                 }
                 return result;
@@ -2247,7 +2249,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 leaderboardTable.sortColumn(columnToSortFor, columnToSortFor.getPreferredSortingOrder().isAscending());
             }
             
-            if(!isEmbedded) {
+            if (!isEmbedded) {
                 scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
                 if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                     Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
