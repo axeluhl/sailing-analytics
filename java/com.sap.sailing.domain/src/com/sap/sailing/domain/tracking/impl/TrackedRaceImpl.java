@@ -2473,20 +2473,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 // the wind is considered sufficiently stable to not allow for two successive tacks or two successive jibes)
                 // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has completed.
                 if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
-                    TimePoint firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(courseBeforeManeuver, group, wind);
+                    TimePointAndTotalCourseChangeInDegrees firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(courseBeforeManeuver, group, wind);
                     maneuverType = ManeuverType.PENALTY_CIRCLE;
                     if (legBeforeManeuver != null) {
-                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt);
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt.getTimePoint());
                     }
-                    TimePoint penaltyTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver, firstPenaltyCircleCompletedAt);
+                    TimePoint penaltyTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver, firstPenaltyCircleCompletedAt.getTimePoint());
                     Position penaltyPosition = competitorTrack.getEstimatedPosition(penaltyTimePoint, /* extrapolate */ false);
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, penaltyPosition,
                             penaltyTimePoint, speedWithBearingOnApproximationAtBeginning,
-                            competitorTrack.getEstimatedSpeed(penaltyTimePoint), totalCourseChangeInDegrees, maneuverLoss);
+                            competitorTrack.getEstimatedSpeed(penaltyTimePoint), firstPenaltyCircleCompletedAt.getTotalCourseChangeInDegrees(), maneuverLoss);
                     result.add(maneuver);
                     // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes remain
                     if (numberOfTacks>1 || numberOfJibes>1) {
-                        result.addAll(detectManeuvers(competitor, firstPenaltyCircleCompletedAt.plus(1), timePointAfterManeuver, /* ignoreMarkPassings */ true));
+                        result.addAll(detectManeuvers(competitor, firstPenaltyCircleCompletedAt.getTimePoint(), timePointAfterManeuver, /* ignoreMarkPassings */ true));
                     }
                 } else {
                     if (numberOfTacks > 0) {
@@ -2520,14 +2520,30 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
+    private static class TimePointAndTotalCourseChangeInDegrees {
+        private final TimePoint timePoint;
+        private final double totalCourseChangeInDegrees;
+        protected TimePointAndTotalCourseChangeInDegrees(TimePoint timePoint, double totalCourseChangeInDegrees) {
+            super();
+            this.timePoint = timePoint;
+            this.totalCourseChangeInDegrees = totalCourseChangeInDegrees;
+        }
+        public TimePoint getTimePoint() {
+            return timePoint;
+        }
+        public double getTotalCourseChangeInDegrees() {
+            return totalCourseChangeInDegrees;
+        }
+    }
+    
     /**
      * Starting at <code>timePointBeforeManeuver</code>, and assuming that the group of <code>approximatedFixesAndCourseChanges</code>
      * contains at least a tack and a jibe, finds the earliest approximated fix's time point at which a tack and a jibe have been
      * completed.
      */
-    private TimePoint getTimePointOfCompletionOfFirstPenaltyCircle(Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
+    private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
         double totalCourseChangeInDegrees = 0;
-        TimePoint result = null;
+        TimePoint timePoint = null;
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
         Bearing newCourse = courseBeforeManeuver;
         for (Pair<GPSFixMoving, CourseChange> fixAndCourseChange : approximatedFixesAndCourseChanges) {
@@ -2536,11 +2552,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getBearing());
             int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getFrom());
             if (numberOfJibes > 0 && numberOfTacks > 0) {
-                result = fixAndCourseChange.getA().getTimePoint();
+                timePoint = fixAndCourseChange.getA().getTimePoint();
                 break;
             }
         }
-        return result;
+        return new TimePointAndTotalCourseChangeInDegrees(timePoint, totalCourseChangeInDegrees);
     }
 
     /**
