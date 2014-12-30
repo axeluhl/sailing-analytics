@@ -38,8 +38,9 @@ public class RaceMapImageManager {
     }
 
     /**
-     * Loads the map overlay icons
-     * The method can only be called after the map is loaded  
+     * Loads the map overlay icons The method can only be called after the map is loaded. The {@link #maneuverIconsForTypeAndTargetTack} map
+     * is filled for all combinations of {@link ManeuverType maneuver types} and {@link Tack tacks} including the value <code>null</code> representing
+     * the unknown tack.
      */
     public void loadMapIcons(MapWidget map) {
         if (map != null) {
