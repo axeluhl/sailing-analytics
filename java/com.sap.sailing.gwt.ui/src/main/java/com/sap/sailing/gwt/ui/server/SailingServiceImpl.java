@@ -1746,15 +1746,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     fix.getTimePoint());
                             LegType legType;
                             if (trackedLegOfCompetitor != null && trackedLegOfCompetitor.getLeg() != null) {
-                                TimePoint quantifiedTimePoint = quantifyTimePointWithResolution(fix.getTimePoint(), /* resolutionInMilliseconds */
-                                        60000);
-                                Pair<Leg, TimePoint> cacheKey = new Pair<Leg, TimePoint>(
-                                        trackedLegOfCompetitor.getLeg(), quantifiedTimePoint);
+                                TimePoint quantifiedTimePoint = quantifyTimePointWithResolution(fix.getTimePoint(), /* resolutionInMilliseconds */60000);
+                                Pair<Leg, TimePoint> cacheKey = new Pair<Leg, TimePoint>(trackedLegOfCompetitor.getLeg(), quantifiedTimePoint);
                                 legType = legTypeCache.get(cacheKey);
                                 if (legType == null) {
-                                    legType = trackedRace.getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
-                                            fix.getTimePoint());
-                                    legTypeCache.put(cacheKey, legType);
+                                    try {
+                                        legType = trackedRace.getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
+                                        legTypeCache.put(cacheKey, legType);
+                                    } catch (NoWindException nwe) {
+                                        // without wind, leave the leg type null, meaning "unknown"
+                                        legType = null;
+                                    }
                                 }
                             } else {
                                 legType = null;
@@ -1781,10 +1783,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                                 trackedLegOfCompetitor.getLeg(), quantifiedTimePoint);
                                         legType2 = legTypeCache.get(cacheKey);
                                         if (legType2 == null) {
-                                            legType2 = trackedRace.getTrackedLeg(trackedLegOfCompetitor.getLeg())
-                                                    .getLegType(
-                                                    fix.getTimePoint());
-                                            legTypeCache.put(cacheKey, legType2);
+                                            try {
+                                                legType2 = trackedRace.getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
+                                                legTypeCache.put(cacheKey, legType2);
+                                            } catch (NoWindException nwe) {
+                                                // no wind information; leave leg type null, meaning "unknown"
+                                                legType2 = null;
+                                            }
                                         }
                                     } else {
                                         legType2 = null;
