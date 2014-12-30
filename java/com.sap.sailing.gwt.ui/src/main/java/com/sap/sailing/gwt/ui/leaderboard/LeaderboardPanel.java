@@ -2664,7 +2664,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private boolean shallExpandRaceColumn(RaceColumnDTO raceColumnDTO) {
-        return showRaceDetails && raceColumnDTO.hasTrackedRaces() && raceColumnDTO.hasGPSData() && raceColumnDTO.hasWindData();
+        return showRaceDetails && raceColumnDTO.hasTrackedRaces() && raceColumnDTO.hasGPSData()
+                /* TODO bug 1561: can we live without wind and still allow the user to expand the race column? && raceColumnDTO.hasWindData() */;
     }
 
     private void removeUnusedRaceColumns(LeaderboardDTO leaderboard) {
