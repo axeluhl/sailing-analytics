@@ -2514,6 +2514,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         } else {
                             // no wind information; marking as UNKNOWN
                             maneuverType = ManeuverType.UNKNOWN;
+                            if (legBeforeManeuver != null) {
+                                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
+                                        maneuverTimePoint, timePointAfterManeuver);
+                            }
                         }
                     }
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
