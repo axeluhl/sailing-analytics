@@ -375,7 +375,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               // simplify road display
               mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
               // set water color
-              mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), -35, -34);
+              // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
+              // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
+              // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
+              mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), 0, -70);
               
               MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
               mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
