@@ -2663,9 +2663,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return textRaceColumn;
     }
 
+    /**
+     * To be expandable, a race column needs to have one or more tracked races associated and needs to have at least
+     * some GPS data available. Wind data is not required for expandability because several metrics can reasonably be
+     * determined even without reliable wind information.
+     */
     private boolean shallExpandRaceColumn(RaceColumnDTO raceColumnDTO) {
-        return showRaceDetails && raceColumnDTO.hasTrackedRaces() && raceColumnDTO.hasGPSData()
-                /* TODO bug 1561: can we live without wind and still allow the user to expand the race column? && raceColumnDTO.hasWindData() */;
+        return showRaceDetails && raceColumnDTO.hasTrackedRaces() && raceColumnDTO.hasGPSData();
     }
 
     private void removeUnusedRaceColumns(LeaderboardDTO leaderboard) {

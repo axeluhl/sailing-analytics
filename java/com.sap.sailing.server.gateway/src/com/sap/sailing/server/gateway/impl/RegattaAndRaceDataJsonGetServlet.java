@@ -330,12 +330,8 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                             } catch (NoWindException e) {
                                 // well, we don't know the wind direction... then no windward distance will be shown...
                             }
-                            try {
-                                jsonCompetitorInLeg.put("windwardDistanceToGoInMeters", trackedLegOfCompetitor
-                                        .getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE).getMeters());
-                            } catch (NoWindException e) {
-                                // well, we don't know the wind direction... then no windward distance will be shown...
-                            }
+                            jsonCompetitorInLeg.put("windwardDistanceToGoInMeters", trackedLegOfCompetitor
+                                    .getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE).getMeters());
                             jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
                             jsonCompetitorInLeg.put("finished", trackedLegOfCompetitor.hasFinishedLeg(timePoint));
                             jsonCompetitors.add(jsonCompetitorInLeg);

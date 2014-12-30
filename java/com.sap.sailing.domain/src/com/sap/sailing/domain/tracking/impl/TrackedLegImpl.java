@@ -325,7 +325,7 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at,
-            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         final Distance preResult = getWindwardDistance(pos1, pos2, at, windPositionMode);
         final Distance result;
         if (preResult.getMeters() >= 0) {
@@ -337,12 +337,11 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
+    public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) {
         return getWindwardDistance(pos1, pos2, at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
-    Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException {
+    Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         Distance result;
         try {
             final LegType legType = cache.getLegType(this, at);

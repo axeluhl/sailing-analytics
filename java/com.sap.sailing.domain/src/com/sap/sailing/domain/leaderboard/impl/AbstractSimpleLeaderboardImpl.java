@@ -1417,7 +1417,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                         .getEstimatedSpeed(competitorStartTime);
                                 entryDTO.speedOverGroundAtPassingStartWaypointInKnots = competitorSpeedWhenPassingStart == null ? null
                                         : competitorSpeedWhenPassingStart.getKnots();
-                                entryDTO.startTack = trackedRace.getTack(competitor, competitorStartTime);
+                                try {
+                                    entryDTO.startTack = trackedRace.getTack(competitor, competitorStartTime);
+                                } catch (NoWindException nwe) {
+                                    entryDTO.startTack = null; // leave empty in case no wind information is available
+                                }
                                 Distance distanceFromStarboardSideOfStartLineWhenPassingStart = trackedRace
                                         .getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor);
                                 entryDTO.distanceToStarboardSideOfStartLineInMeters = distanceFromStarboardSideOfStartLineWhenPassingStart == null ? null
