@@ -130,9 +130,9 @@ public interface PolarDataService {
      * @param windSpeed
      * @param startAngleInclusive between 0 and 359; smaller than (or equal to) endAngleExclusive
      * @param endAngleExclusive between 0 and 359; bigger than startAngleInclusive
-     * @return array with datacount for all angles in the given area, else null
+     * @return array with datacount for all angles in the given area, else -1
      */
-    Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
+    int[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
 
     SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
             LegType legType, Tack tack, boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException;

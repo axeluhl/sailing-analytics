@@ -93,10 +93,25 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         return null;
     }
 
-    public Pair<SpeedWithConfidence<Void>, Integer> estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
+    public static class SpeedWithConfidenceAndDataCount {
+        private final SpeedWithConfidence<Void> speedWithConfidence;
+        private final int dataCount;
+        protected SpeedWithConfidenceAndDataCount(SpeedWithConfidence<Void> speedWithConfidence, int dataCount) {
+            super();
+            this.speedWithConfidence = speedWithConfidence;
+            this.dataCount = dataCount;
+        }
+        public SpeedWithConfidence<Void> getSpeedWithConfidence() {
+            return speedWithConfidence;
+        }
+        public int getDataCount() {
+            return dataCount;
+        }
+    }
+    
+    public SpeedWithConfidenceAndDataCount estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
             final Bearing angleToTheWind, boolean useLinearRegression)
             throws NotEnoughDataHasBeenAddedException {
-        int dataCount = 0;
         PolarClusterKey key = new PolarClusterKey() {
             @Override
             public RoundedAngleToTheWind getRoundedAngleToTheWind() {
@@ -127,9 +142,9 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         }
         KnotSpeedImpl speedWithoutConfidence = new KnotSpeedImpl(boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(),
                 angleToTheWind.getDegrees(), useLinearRegression));
-        dataCount = boatSpeedEstimator.getDataCount();
+        final int dataCount = boatSpeedEstimator.getDataCount();
         double confidence = boatSpeedEstimator.getConfidence();
-        return new Pair<SpeedWithConfidence<Void>, Integer>(new SpeedWithConfidenceImpl<Void>(
+        return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(
                 speedWithoutConfidence, confidence, null), dataCount);
     }
 

@@ -27,8 +27,8 @@ import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.mining.IncrementalRegressionProcessor.SpeedWithConfidenceAndDataCount;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
@@ -120,7 +120,7 @@ public class PolarDataMiner {
     public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind,
             boolean useLinearRegression)
             throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind, useLinearRegression).getA();
+        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind, useLinearRegression).getSpeedWithConfidence();
     }
 
 
@@ -140,19 +140,19 @@ public class PolarDataMiner {
             Integer[] perAngle = new Integer[360];
             Map<Integer, PolarSheetsHistogramData> perWindSpeed = new HashMap<>();
             for (int angle = 0; angle < 360; angle++) {
-                Pair<SpeedWithConfidence<Void>, Integer> speedWithConfidenceAndDataCount;
+                SpeedWithConfidenceAndDataCount speedWithConfidenceAndDataCount;
                 try {
                     int convertedAngle = convertAngleIfNecessary(angle);
                     speedWithConfidenceAndDataCount = incrementalRegressionProcessor.estimateBoatSpeed(boatClass,
                             new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle), true);
                 } catch (NotEnoughDataHasBeenAddedException e) {
                     // No data so put in a 0 speed with 0 confidence
-                    speedWithConfidenceAndDataCount = new Pair<SpeedWithConfidence<Void>, Integer>(
+                    speedWithConfidenceAndDataCount = new SpeedWithConfidenceAndDataCount(
                             new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(0), 0, null), 0);
                 }
                             
-                averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidenceAndDataCount.getA().getObject().getKnots();
-                int dataCount = speedWithConfidenceAndDataCount.getB();
+                averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidenceAndDataCount.getSpeedWithConfidence().getObject().getKnots();
+                int dataCount = speedWithConfidenceAndDataCount.getDataCount();
                 
                 totalDataCount = totalDataCount + dataCount;
                 //FIXME hard coded
@@ -210,18 +210,18 @@ public class PolarDataMiner {
 
 
 
-    public Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive) {
-        Integer[] dataCounts = new Integer[360];
+    public int[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive) {
+        int[] dataCounts = new int[360];
         for (int angle = 0; angle < 360; angle++) {
             if (angle >= startAngleInclusive && angle < endAngleExclusive) {
                 try {
                     dataCounts[angle] = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed,
-                            new DegreeBearingImpl(convertAngleIfNecessary(angle)), true).getB();
+                            new DegreeBearingImpl(convertAngleIfNecessary(angle)), true).getDataCount();
                 } catch (NotEnoughDataHasBeenAddedException e) {
                     dataCounts[angle] = 0;
                 }
             } else {
-                dataCounts[angle] = null;
+                dataCounts[angle] = -1;
             }
         }
         return dataCounts;

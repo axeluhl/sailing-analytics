@@ -57,7 +57,7 @@ public class PolarSheetAnalyzerTest {
 
     private PolarDataService createMockedPolarDataService() throws NotEnoughDataHasBeenAddedException {
         PolarDataService mockedPolarDataService = mock(PolarDataService.class);
-        Integer[] data = createCounts();
+        int[] data = createCounts();
         when(mockedPolarDataService.getDataCountsForWindSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
                         any(Integer.class), any(Integer.class))).thenReturn(data);
 
@@ -116,8 +116,8 @@ public class PolarSheetAnalyzerTest {
      * 
      * @return
      */
-    private Integer[] createCounts() {
-        Integer[] dataCountsPerAngle = { 0, 0, 2, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 1, 2, 1, 6, 2, 2, 2, 1, 6, 6, 17,
+    private int[] createCounts() {
+        int[] dataCountsPerAngle = { 0, 0, 2, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 1, 2, 1, 6, 2, 2, 2, 1, 6, 6, 17,
                 13, 19, 30, 43, 32, 50, 48, 57, 70, 76, 107, 129, 177, 186, 222, 237, 275, 285, 321, 322, 401, 451,
                 466, 413, 468, 479, 459, 429, 360, 345, 317, 288, 278, 202, 175, 130, 113, 104, 100, 73, 45, 51, 52,
                 37, 40, 36, 26, 23, 32, 33, 29, 29, 22, 24, 27, 23, 22, 23, 22, 21, 15, 18, 20, 14, 15, 21, 20, 19, 6,
