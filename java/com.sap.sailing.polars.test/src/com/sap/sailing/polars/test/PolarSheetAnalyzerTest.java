@@ -3,6 +3,7 @@ package com.sap.sailing.polars.test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -63,46 +64,46 @@ public class PolarSheetAnalyzerTest {
 
         //Starboard Upwind
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                        argThat(new BearingMatcher(49)), true)).thenReturn(
+                        argThat(new BearingMatcher(49)), eq(true))).thenReturn(
                 new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(8.478048671702888), 0.5, null));
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(50)), true)).thenReturn(
+                argThat(new BearingMatcher(50)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(8.466303997538812), 0.5, null));
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(51)), true)).thenReturn(
+                argThat(new BearingMatcher(51)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(8.583383077026435), 0.5, null));
         
         //Starboard Downwind
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(141)), true)).thenReturn(
+                argThat(new BearingMatcher(141)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(13.794354053931528), 0.5, null));
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(142)), true)).thenReturn(
+                argThat(new BearingMatcher(142)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(13.665782579628802), 0.5, null));
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(143)), true)).thenReturn(
+                argThat(new BearingMatcher(143)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(14.169301888320263), 0.5, null));
         
         //Port Upwind
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(-48)), true)).thenReturn(
+                argThat(new BearingMatcher(-48)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(8.445599410456111), 0.5, null));
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(-50)), true)).thenReturn(
+                argThat(new BearingMatcher(-50)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(8.553274292235153), 0.5, null));
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(-49)), true)).thenReturn(
+                argThat(new BearingMatcher(-49)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(8.614582090896583), 0.5, null));
         
         //Port Downwind
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(-145)), true)).thenReturn(
+                argThat(new BearingMatcher(-145)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(13.78894715705271), 0.5, null));
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(-144)), true)).thenReturn(
+                argThat(new BearingMatcher(-144)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(13.420656294986587), 0.5, null));
         when(mockedPolarDataService.getSpeed(any(BoatClass.class), argThat(new SpeedMatcher(14)),
-                argThat(new BearingMatcher(-143)), true)).thenReturn(
+                argThat(new BearingMatcher(-143)), eq(true))).thenReturn(
         new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(13.268607457651942), 0.5, null));
         
         return mockedPolarDataService;
