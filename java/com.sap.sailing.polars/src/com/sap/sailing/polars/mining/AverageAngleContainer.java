@@ -16,11 +16,11 @@ public class AverageAngleContainer {
         private int dataCount;
         private double angleSumDeg;
         private double averageAngleDeg;
-        protected DataCountAngleSumAndAverage(int dataCount, double angleSumDeg, double averageAngleDeg) {
+        protected DataCountAngleSumAndAverage() {
             super();
-            this.dataCount = dataCount;
-            this.angleSumDeg = angleSumDeg;
-            this.averageAngleDeg = averageAngleDeg;
+            this.dataCount = 0;
+            this.angleSumDeg = 0.0;
+            this.averageAngleDeg = 0.0;
         }
         public double getAverageAngleDeg() {
             return averageAngleDeg;
@@ -47,16 +47,12 @@ public class AverageAngleContainer {
         Map<Cluster<Speed>, DataCountAngleSumAndAverage> boatClassMap = dataCountAndAngleSumMap.get(boatClassMasterdata);
         DataCountAngleSumAndAverage triple = boatClassMap.get(windCluster);
         if (triple == null) {
-            triple = createInitialTriple();
+            triple = new DataCountAngleSumAndAverage();
             boatClassMap.put(windCluster, triple);
         }
         triple.add(roundedAngleDeg);
     }
 
-    private DataCountAngleSumAndAverage createInitialTriple() {
-        return new DataCountAngleSumAndAverage(0, 0.0, 0.0);
-    }
-    
     double getAverageAngleDeg(BoatClassMasterdata boatClassMasterdata, Speed windSpeed) {
         Double result = null;
         if (dataCountAndAngleSumMap.containsKey(boatClassMasterdata)) {
