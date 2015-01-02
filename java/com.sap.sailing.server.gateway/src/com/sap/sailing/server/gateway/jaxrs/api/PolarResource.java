@@ -35,7 +35,7 @@ public class PolarResource extends AbstractSailingServerResource {
     @Produces("text/plain;charset=UTF-8")
     @Path("{boatClassName}")
     public Response getSpeed(@PathParam("boatClassName") String boatClassName, @QueryParam("angle") double angle,
-            @QueryParam("windspeed") double windSpeed) {
+            @QueryParam("windspeedInKnots") double windSpeed) {
         BoatClass boatClass = getService().getDomainObjectFactory().getBaseDomainFactory()
                 .getOrCreateBoatClass(boatClassName);
         SpeedWithConfidence<Void> speedWithConfidence;
@@ -57,7 +57,7 @@ public class PolarResource extends AbstractSailingServerResource {
     @Produces("text/plain;charset=UTF-8")
     @Path("average/{boatClassName}")
     public Response getAverageSpeedAndBearing(@PathParam("boatClassName") String boatClassName,
-            @QueryParam("windspeed") double wSpeed, @QueryParam("legtype") LegType legType, @QueryParam("tack") Tack tack) {
+            @QueryParam("windspeedInKnots") double wSpeed, @QueryParam("legtype") LegType legType, @QueryParam("tack") Tack tack) {
         BoatClass boatClass = getService().getDomainObjectFactory().getBaseDomainFactory()
                 .getOrCreateBoatClass(boatClassName);
         ResponseBuilder responseBuilder;
@@ -67,7 +67,7 @@ public class PolarResource extends AbstractSailingServerResource {
             SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithBearing(boatClass,
                     windSpeed, legType, tack);
             String resultString = "Speed: " + speedWithBearing.getObject().getKnots() + "kn; Angle: "
-                    + speedWithBearing.getObject().getBearing().getDegrees() + "°; Confidence: "
+                    + speedWithBearing.getObject().getBearing().getDegrees() + "Â°; Confidence: "
                     + speedWithBearing.getConfidence();
             responseBuilder = Response.ok(resultString, MediaType.TEXT_PLAIN);
         } catch (NotEnoughDataHasBeenAddedException e) {
