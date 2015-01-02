@@ -18,7 +18,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
@@ -63,31 +62,26 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         GroupKey key = element.getKey();
         BoatSpeedEstimator boatSpeedEstimator;
         synchronized (boatSpeedEstimators) {
-            if (!boatSpeedEstimators.containsKey(key)) {
-                boatSpeedEstimators.put(key, new BoatSpeedEstimator());
+            boatSpeedEstimator = boatSpeedEstimators.get(key);
+            if (boatSpeedEstimator == null) {
+                boatSpeedEstimator = new BoatSpeedEstimator();
+                boatSpeedEstimators.put(key, boatSpeedEstimator);
                 availableBoatClasses.add(element.getDataEntry().getBoatClassMasterData());
             }
-
-            boatSpeedEstimator = boatSpeedEstimators.get(key);
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
-
         BearingWithConfidence<Integer> angleToTheWind = fix.getAngleToTheWind();
-
         WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWindSpeed();
-
         SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
-
         // Only add GPS data if speeds and angles are not null, else do nothing!
         if (angleToTheWind != null && windSpeed != null && boatSpeedWithConfidence != null) {
             fillAverageAngleContainer(fix, element, windSpeed);
             WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;
-
             double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
             double confidenceForWindBearing = angleToTheWind.getConfidence();
             double confidenceForBoatSpeed = boatSpeedWithConfidence.getConfidence();
             double averagedConfidence = (confidenceForBoatSpeed + confidenceForWindBearing + confidenceForWindSpeed) / 3;
-            boatSpeedEstimator.addData(boatSpeedWithConfidence.getObject().getKnots(), averagedConfidence);
+            boatSpeedEstimator.addData(boatSpeedWithConfidence.getObject(), averagedConfidence);
         }
     }
 
@@ -172,8 +166,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         if (boatSpeedEstimator == null) {
             throw new NotEnoughDataHasBeenAddedException();
         }
-        KnotSpeedImpl speedWithoutConfidence = new KnotSpeedImpl(boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(),
-                trueWindAngle.getDegrees()));
+        Speed speedWithoutConfidence = boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(), trueWindAngle.getDegrees());
         final int dataCount = boatSpeedEstimator.getDataCount();
         double confidence = boatSpeedEstimator.getConfidence();
         return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(speedWithoutConfidence, confidence, null), dataCount);

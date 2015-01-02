@@ -2,14 +2,19 @@ package com.sap.sailing.polars.regression;
 
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.polars.mining.IncrementalRegressionProcessor;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 /**
  * Supplies incremental arithmetic mean for confidence and speed.
+ * <p>
  * 
- * {@link #estimateSpeed(double, double)} returns the average of the speed
+ * {@link #estimateSpeed(double, double)} returns the average of the speed.
+ * <p>
  * 
  * Note that this class should only be used for a small wind interval on a polar sheet. The
  * {@link IncrementalRegressionProcessor} is one example for that. It has one instance of the {@link BoatSpeedEstimator}
@@ -22,7 +27,7 @@ public class BoatSpeedEstimator implements Serializable {
 
     private static final long serialVersionUID = -254184914347332658L;
 
-    private double speedSum = 0;
+    private double speedSumInKnots = 0;
 
     private transient NamedReentrantReadWriteLock lock = createLock();
     
@@ -33,24 +38,22 @@ public class BoatSpeedEstimator implements Serializable {
     /**
      * @param useLinearRegression if false mean of wind interval is used, otherwise linear regression
      */
-    public double estimateSpeed(double windSpeed, double angleToTheWind) throws NotEnoughDataHasBeenAddedException {
+    public Speed estimateSpeed(double windSpeed, double angleToTheWind) throws NotEnoughDataHasBeenAddedException {
         LockUtil.lockForRead(lock);
         if (dataCount < 1) {
             throw new NotEnoughDataHasBeenAddedException();
         }
-        double result;
         try {
-                result = speedSum / dataCount;
+            return new KnotSpeedImpl(speedSumInKnots / dataCount);
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
-        return result;
     }
 
-    public void addData(double boatSpeed, double confidence) {
+    public void addData(Speed boatSpeed, double confidence) {
         LockUtil.lockForWrite(lock);
         try {
-            speedSum = speedSum + boatSpeed;
+            speedSumInKnots = speedSumInKnots + boatSpeed.getKnots();
             dataCount++;
             confidenceSum  = confidenceSum + confidence;
         } finally {
