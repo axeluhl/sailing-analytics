@@ -142,9 +142,8 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         }
     }
     
-    public Pair<SpeedWithConfidence<Void>, Integer> estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
+    SpeedWithConfidenceAndDataCount estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
             final Bearing angleToTheWind) throws NotEnoughDataHasBeenAddedException {
-        int dataCount = 0;
         PolarClusterKey key = new PolarClusterKey() {
             @Override
             public RoundedAngleToTheWind getRoundedAngleToTheWind() {
@@ -177,8 +176,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
                 angleToTheWind.getDegrees()));
         final int dataCount = boatSpeedEstimator.getDataCount();
         double confidence = boatSpeedEstimator.getConfidence();
-        return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(
-                speedWithoutConfidence, confidence, null), dataCount);
+        return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(speedWithoutConfidence, confidence, null), dataCount);
     }
 
     @Override
@@ -217,7 +215,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             throw new NotEnoughDataHasBeenAddedException();
         }
         DegreeBearingImpl angleToTheWind = new DegreeBearingImpl(averageAngle);
-        SpeedWithConfidence<Void> estimatedSpeed = estimateBoatSpeed(boatClass, windSpeed, angleToTheWind).getA();
+        SpeedWithConfidence<Void> estimatedSpeed = estimateBoatSpeed(boatClass, windSpeed, angleToTheWind).getSpeedWithConfidence();
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed.getObject().getKnots(),
                 angleToTheWind);
         return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, estimatedSpeed.getConfidence(), null);

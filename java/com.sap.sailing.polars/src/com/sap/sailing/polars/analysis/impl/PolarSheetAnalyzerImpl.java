@@ -64,8 +64,7 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         throws NotEnoughDataHasBeenAddedException {
         int startAngleInclusive = 271;
         int endAngleExclusive = 360;
-        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed,
-                    endAngleExclusive);
+        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
         return speedWithBearing;
     }
 
@@ -74,8 +73,7 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         int[] dataCountPerAngle = getDataCountArray(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
         double estimatedPeak = estimatePeak(boatClass, windSpeed, startAngleInclusive, endAngleExclusive, dataCountPerAngle);
         double convertedAngleIfOver180 = convertAngleIfNecessary(estimatedPeak);
-        SpeedWithConfidence<Void> averagedSpeedWithConfidence = estimateSpeed(boatClass, windSpeed, convertedAngleIfOver180, useLinearRegression);
-                convertedAngleIfOver180);
+        SpeedWithConfidence<Void> averagedSpeedWithConfidence = estimateSpeed(boatClass, windSpeed, convertedAngleIfOver180);
         double originConfidence = averagedSpeedWithConfidence.getConfidence();
         double overallConfidence = (originConfidence + calcDataCountConfidence(dataCountPerAngle, estimatedPeak)) / 2;
         Bearing bearing = new DegreeBearingImpl(convertedAngleIfOver180);
