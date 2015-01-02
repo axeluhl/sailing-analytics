@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -75,22 +78,25 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
     }
 
     private Point[] toPoints(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle) {
-        Number[] xValues = new Number[360];
-        Number[] yValues = new Number[360];
+        List<Number> xValues = new ArrayList<>();
+        List<Number> yValues = new ArrayList<>();
         for (int i = 0; i < 360; i++) {
-            xValues[i] = i;
-            yValues[i] = histogramDataPerAngle.get(i).getDataCount();
+            if (histogramDataPerAngle.get(i) != null) {
+                xValues.add(i);
+                yValues.add(histogramDataPerAngle.get(i).getDataCount());
+            }
         }
-        
         return toPoints(xValues, yValues);
     }
 
-    public Point[] toPoints(Number[] xValues, Number[] yValues) {
-        Point[] points = new Point[xValues.length];
-        for (int i = 0; i < xValues.length; i++) {
-            points[i] = new Point(xValues[i], yValues[i]);
+    private Point[] toPoints(Iterable<Number> xValues, Iterable<Number> yValues) {
+        List<Point> points = new ArrayList<>();
+        Iterator<Number> x=xValues.iterator();
+        Iterator<Number> y=yValues.iterator();
+        while (x.hasNext()) {
+            points.add(new Point(x.next(), y.next()));
         }
-        return points;
+        return points.toArray(new Point[points.size()]);
     }
     
     @Override
