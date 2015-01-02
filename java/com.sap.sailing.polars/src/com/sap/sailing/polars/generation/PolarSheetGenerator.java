@@ -46,16 +46,16 @@ public class PolarSheetGenerator {
 
 
     private void addPolarFix(PolarFix polarFix) {
-        long roundedAngle = Math.round(polarFix.getTrueWindAngle());
+        long roundedAngleDeg = Math.round(polarFix.getTrueWindAngleDeg());
         Speed boatSpeed = polarFix.getBoatSpeed();
         Speed windSpeed = polarFix.getWindSpeed();
-        int angle = (int) roundedAngle;
-        if (angle < 0) {
-            angle = (360 + angle);
+        int angleDeg = (int) roundedAngleDeg;
+        if (angleDeg < 0) {
+            angleDeg = (360 + angleDeg);
         }
         BoatAndWindSpeedWithOriginInfo speeds = new BoatAndWindSpeedWithOriginInfoImpl(boatSpeed, windSpeed,
                 polarFix.getGaugeIdString(), polarFix.getDayString());
-        polarData.get(angle).add(speeds);
+        polarData.get(angleDeg).add(speeds);
     }
 
     /**
