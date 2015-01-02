@@ -1,8 +1,9 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
 import java.io.IOException;
+import java.io.Serializable;
 
-public class TransformationException extends IOException {
+public class TransformationException extends IOException implements Serializable {
     private static final long serialVersionUID = -7795777645371428971L;
 
     public TransformationException() {

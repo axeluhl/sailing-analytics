@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifierStringSerializationHandler;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 
 public class PingDeviceIdentifierStringSerializationHandler extends PingDeviceIdentifierSerializationHandler
 implements DeviceIdentifierStringSerializationHandler {

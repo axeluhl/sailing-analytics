@@ -605,8 +605,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived) {
-        if ((getStartOfTracking() == null) != (startOfTrackingReceived == null)
-                || (startOfTrackingReceived != null && !getStartOfTracking().equals(startOfTrackingReceived))) {
+        if (!Util.equalsWithNull(startOfTrackingReceived, getStartOfTracking())) {
             super.setStartOfTrackingReceived(startOfTrackingReceived);
             notifyListenersStartOfTrackingChanged(getStartOfTracking());
         }
@@ -614,8 +613,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setEndOfTrackingReceived(TimePoint endOfTrackingReceived) {
-        if ((getEndOfTracking() == null) != (endOfTrackingReceived == null)
-                || (endOfTrackingReceived != null && !getEndOfTracking().equals(endOfTrackingReceived))) {
+        if (!Util.equalsWithNull(endOfTrackingReceived, getEndOfTracking())) {
             super.setEndOfTrackingReceived(endOfTrackingReceived);
             notifyListenersEndOfTrackingChanged(getEndOfTracking());
         }

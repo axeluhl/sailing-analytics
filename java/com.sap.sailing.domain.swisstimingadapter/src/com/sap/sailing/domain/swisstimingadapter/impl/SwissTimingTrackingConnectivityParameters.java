@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -23,12 +24,13 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     private final SwissTimingFactory swissTimingFactory;
     private final DomainFactory domainFactory;
     private final RaceLogStore raceLogStore;
+    private final RegattaLogStore regattaLogStore;
     private final long delayToLiveInMillis;
     private final StartList startList;
     
-    public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName, String raceDescription, BoatClass boatClass,
-    		StartList startList, long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
-            RaceLogStore raceLogStore) {
+    public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
+            String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) {
         super();
         this.hostname = hostname;
         this.port = port;
@@ -41,11 +43,14 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
         this.swissTimingFactory = swissTimingFactory;
         this.domainFactory = domainFactory;
         this.raceLogStore = raceLogStore;
+        this.regattaLogStore = regattaLogStore;
     }
     
     @Override
-    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore) throws Exception {
-        return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, raceLogStore, windStore, gpsFixStore, domainFactory,
+    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
+            GPSFixStore gpsFixStore) throws Exception {
+        return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port,
+                startList, delayToLiveInMillis, raceLogStore, regattaLogStore, windStore, gpsFixStore, domainFactory,
                 trackedRegattaRegistry);
     }
 

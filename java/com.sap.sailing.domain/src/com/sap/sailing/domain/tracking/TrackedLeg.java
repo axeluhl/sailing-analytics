@@ -92,15 +92,14 @@ public interface TrackedLeg extends Serializable {
      * for leg types, wind data and leg bearings can be passed to save the effort of redundant calculations of these
      * values.
      */
-    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Same as {@link #getAbsoluteWindwardDistance(Position, Position, TimePoint, WindPositionMode)}, but this method considers the leg's
      * direction and will return a negative distance if <code>pos1</code> is already "ahead" of <code>pos2</code> in the
      * leg's direction, or a positive distance otherwise.
      */
-    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException;
+    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode);
 
     /**
      * The middle (traveling half the length) of the course middle line, connecting the center of gravity of the leg's start

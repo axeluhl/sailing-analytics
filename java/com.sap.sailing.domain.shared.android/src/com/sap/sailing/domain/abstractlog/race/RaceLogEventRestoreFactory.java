@@ -5,16 +5,15 @@ import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventRestoreFactoryImpl;
-import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
-import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -22,6 +21,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.common.TimePoint;
 
@@ -70,32 +70,32 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, Integer passId, Wind wind);
 
-    DeviceCompetitorMappingEvent createDeviceCompetitorMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+    RaceLogDeviceCompetitorMappingEvent createDeviceCompetitorMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, DeviceIdentifier device, Competitor mappedTo, int passId, TimePoint from, TimePoint to);
 
-    DeviceMarkMappingEvent createDeviceMarkMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+    RaceLogDeviceMarkMappingEvent createDeviceMarkMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, DeviceIdentifier device, Mark mappedTo, int passId, TimePoint from, TimePoint to);
 
-    DenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+    RaceLogDenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, int passId, String raceName, BoatClass boatClass, Serializable raceId);
 
-    StartTrackingEvent createStartTrackingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+    RaceLogStartTrackingEvent createStartTrackingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, int passId);
     
     RaceLogRevokeEvent createRevokeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, int passId, Serializable revokedEventId,
     		String revokedEventType, String revokedEventShortInfo, String reason);
     
-    RegisterCompetitorEvent createRegisterCompetitorEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+    RaceLogRegisterCompetitorEvent createRegisterCompetitorEvent(TimePoint createdAt, AbstractLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, int passId, Competitor competitor);
     
-    DefineMarkEvent createDefineMarkEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+    RaceLogDefineMarkEvent createDefineMarkEvent(TimePoint createdAt, AbstractLogEventAuthor author,
                 TimePoint logicalTimePoint, Serializable pId, int passId, Mark mark);
     
-    CloseOpenEndedDeviceMappingEvent createCloseOpenEndedDeviceMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+    RaceLogCloseOpenEndedDeviceMappingEvent createCloseOpenEndedDeviceMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable pId, int passId, Serializable deviceMappingEventId, TimePoint closingTimePoint);
 
-    AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+    RaceLogAdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable pId, List<Competitor> competitors, int passId,
             AdditionalScoringInformationType informationType);
 }

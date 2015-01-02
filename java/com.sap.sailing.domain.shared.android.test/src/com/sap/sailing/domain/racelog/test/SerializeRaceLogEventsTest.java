@@ -16,7 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sse.common.Util;
@@ -79,7 +79,7 @@ public class SerializeRaceLogEventsTest {
 
     @Test
     public void testRaceLogSerializationWithEventContainingDeviceIdentifier() throws IOException, ClassNotFoundException {
-    	DeviceCompetitorMappingEvent mappingEvent = eventFactory.createDeviceCompetitorMappingEvent(
+        RaceLogDeviceCompetitorMappingEvent mappingEvent = eventFactory.createDeviceCompetitorMappingEvent(
         		MillisecondsTimePoint.now(), new LogEventAuthorImpl("Author Name", /* priority */0), new SmartphoneImeiIdentifier("1948364938463903"),
         		AbstractLeaderboardTest.createCompetitor("Test Competitor"), 0, new MillisecondsTimePoint(0), new MillisecondsTimePoint(10));
         raceLog.add(mappingEvent);
@@ -89,8 +89,8 @@ public class SerializeRaceLogEventsTest {
         raceLog.lockForRead();
         rl.lockForRead();
         try {
-        	DeviceCompetitorMappingEvent expected = ((DeviceCompetitorMappingEvent) raceLog.getFirstRawFix());
-        	DeviceCompetitorMappingEvent actual = ((DeviceCompetitorMappingEvent) rl.getFirstRawFix());
+            RaceLogDeviceCompetitorMappingEvent expected = ((RaceLogDeviceCompetitorMappingEvent) raceLog.getFirstRawFix());
+            RaceLogDeviceCompetitorMappingEvent actual = ((RaceLogDeviceCompetitorMappingEvent) rl.getFirstRawFix());
         	
             assertEquals(Util.size(raceLog.getRawFixes()), Util.size(rl.getRawFixes()));
             assertEquals(expected.getDevice().getIdentifierType(), actual.getDevice().getIdentifierType());
