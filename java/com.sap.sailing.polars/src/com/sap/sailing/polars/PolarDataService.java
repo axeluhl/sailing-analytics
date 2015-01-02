@@ -25,7 +25,7 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
  * (sometimes also referred to as a "VPP" (velocity prediction program)) makes a prediction how fast the boat will
  * sail at a given true wind angle and a given true wind speed.<p>
  * 
- * This service uses a {@link PolarSheetAnalyzer} for more advanced analysis. It's methods are facaded in this interface for
+ * This service uses a {@link PolarSheetAnalyzer} for more advanced analysis. Its methods are facaded in this interface for
  * central access.<p>
  * 
  * The interesting methods for a client are {@link #getSpeed(BoatClass, Speed, Bearing, boolean)} if data for a specific angle is
