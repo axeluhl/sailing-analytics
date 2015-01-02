@@ -7,11 +7,13 @@ import java.util.Map.Entry;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.polars.PolarDataService;
+import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -34,7 +36,8 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
     private final TrackedRace trackedRace;
 
-    public ManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, TrackedRace trackedRace, long millisecondsOverWhichToAverage) {
+    public ManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, TrackedRace trackedRace, long millisecondsOverWhichToAverage)
+            throws NotEnoughDataHasBeenAddedException {
         super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, /* useSpeed */ false,
                 /* nameForReadWriteLock */ ManeuverBasedWindEstimationTrackImpl.class.getName());
         this.polarService = polarService;
@@ -46,12 +49,19 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * Fetches all the race's maneuvers and tries to find the tacks and jibes. For each such maneuver identified, a wind fix
      * will be created based on the average COG into and out of the maneuver.
      */
-    private void analyzeRace() {
+    private void analyzeRace() throws NotEnoughDataHasBeenAddedException {
         final Map<Maneuver, BoatClass> maneuvers = getAllManeuvers();
         for (final Entry<Maneuver, BoatClass> maneuverAndBoatClass : maneuvers.entrySet()) {
             // Now for each maneuver's starting speed (speed into the maneuver) get the approximated
             // wind speed and direction assuming average upwind / downwind performance based on the polar service.
-            PolarSheetsData polarSheet = polarService.getPolarSheetForBoatClass(maneuverAndBoatClass.getValue());
+            // TODO continue here, asking the polarService for the wind speed based on boat speed, leg type and tack
+            for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
+                for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
+                    polarService.getAverageSpeedWithBearing(maneuverAndBoatClass.getValue(),
+                            maneuverAndBoatClass.getKey().getSpeedWithBearingBefore(),
+                            legType, tack);
+                }
+            }
         }
     }
 

@@ -97,7 +97,7 @@ public class PolarResource extends AbstractSailingServerResource {
     @GET
     @Produces("text/plain;charset=UTF-8")
     @Path("windestimation/{regattaname}/races/{racename}")
-    public Response getCompetitorPositions(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+    public Response getCompetitorPositions(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) throws NotEnoughDataHasBeenAddedException {
         Regatta regatta = findRegattaByName(regattaName);
         Response response;
         if (regatta == null) {
