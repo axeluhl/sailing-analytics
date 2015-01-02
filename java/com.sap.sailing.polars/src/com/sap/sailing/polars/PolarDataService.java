@@ -83,7 +83,7 @@ public interface PolarDataService {
 
 
     /**
-     * Generates a polar sheet for geven races and settings using the provided executor for the worker threads. This
+     * Generates a polar sheet for given races and settings using the provided executor for the worker threads. This
      * method does not access a cache for now.
      * 
      * @param trackedRaces
@@ -135,7 +135,7 @@ public interface PolarDataService {
     Integer[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
 
     SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
-            LegType legType, Tack tack, boolean useLinReg) throws NotEnoughDataHasBeenAddedException;
+            LegType legType, Tack tack, boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException;
     
 
 }

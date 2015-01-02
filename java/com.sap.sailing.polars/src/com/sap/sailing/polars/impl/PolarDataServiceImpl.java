@@ -35,7 +35,7 @@ import com.sap.sailing.util.SmartFutureCache;
 
 /**
  * Uses two chained {@link SmartFutureCache}s. One to store {@link PolarFix}es extracted from {@link TrackedRace}s and
- * the other one for storing one polar sheet per boat class. This allows quick access to desired measures like optimal
+ * the other one for storing one polar sheet per boat class. This enables quick access to desired measures like optimal
  * beat angles.
  * 
  * @author Frederik Petersen (D054528)
@@ -67,24 +67,24 @@ public class PolarDataServiceImpl implements PolarDataService {
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
             LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        return getAverageSpeedWithBearing(boatClass, windSpeed, legType, tack, true);
+        return getAverageSpeedWithBearing(boatClass, windSpeed, legType, tack, /* useLinearRegression */ true);
     }
     
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack, boolean useLinReg) throws NotEnoughDataHasBeenAddedException {
+            Speed windSpeed, LegType legType, Tack tack, boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException {
         SpeedWithBearingWithConfidence<Void> speedWithBearing = null;
         if (tack.equals(Tack.STARBOARD)) {
             if (legType.equals(LegType.UPWIND)) {
-                speedWithBearing = polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed, useLinReg);
+                speedWithBearing = polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed, useLinearRegression);
             } else if (legType.equals(LegType.DOWNWIND)) {
-                speedWithBearing = polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed, useLinReg);
+                speedWithBearing = polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed, useLinearRegression);
             }
         } else if (tack.equals(Tack.PORT)) {
             if (legType.equals(LegType.UPWIND)) {
-                return polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed, useLinReg);
+                return polarSheetAnalyzer.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed, useLinearRegression);
             } else if (legType.equals(LegType.DOWNWIND)) {
-                return polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed, useLinReg);
+                return polarSheetAnalyzer.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed, useLinearRegression);
             }
         }
         return speedWithBearing;
