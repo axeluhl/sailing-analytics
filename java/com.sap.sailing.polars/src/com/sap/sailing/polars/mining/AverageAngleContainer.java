@@ -20,14 +20,13 @@ public class AverageAngleContainer {
         dataCountAndAngleSumMap = new HashMap<>();
     }
 
-    public void addFix(BoatClassMasterdata boatClassMasterdata, Speed windSpeed,
-            int roundedAngle) {
+    public void addFix(BoatClassMasterdata boatClassMasterdata, Speed windSpeed, int roundedAngle) {
         Cluster<Speed> windCluster = speedClusterGroup.getClusterFor(windSpeed);
         if (!dataCountAndAngleSumMap.containsKey(boatClassMasterdata)) {
             dataCountAndAngleSumMap.put(boatClassMasterdata, new HashMap<>());
         }
         Map<Cluster<Speed>, Triple<Integer, Double, Double>> boatClassMap = dataCountAndAngleSumMap.get(boatClassMasterdata);
-        if(!boatClassMap.containsKey(windCluster)) {
+        if (!boatClassMap.containsKey(windCluster)) {
             boatClassMap.put(windCluster, createInitialTriple());
         }
         Triple<Integer, Double, Double> triple = boatClassMap.get(windCluster);
@@ -36,7 +35,6 @@ public class AverageAngleContainer {
         dataCount = dataCount + 1;
         sum = sum + roundedAngle;
         double average = sum / (double) dataCount;
-        
         boatClassMap.put(windCluster, new Triple<Integer, Double, Double>(dataCount, sum, average));
     }
 

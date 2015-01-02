@@ -2,11 +2,11 @@ package com.sap.sailing.polars.mining;
 
 import com.sap.sailing.domain.common.Bearing;
 
-public class RoundedAngleToTheWind {
+public class RoundedTrueWindAngle {
 
     private final int angle;
 
-    public RoundedAngleToTheWind(Bearing angleToTheWind) {
+    public RoundedTrueWindAngle(Bearing angleToTheWind) {
         this.angle = (int) Math.round(angleToTheWind.getDegrees());
     }
 
@@ -31,7 +31,7 @@ public class RoundedAngleToTheWind {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        RoundedAngleToTheWind other = (RoundedAngleToTheWind) obj;
+        RoundedTrueWindAngle other = (RoundedTrueWindAngle) obj;
         if (getAngle() != other.getAngle())
             return false;
         return true;

@@ -94,7 +94,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     private void fillAverageAngleContainer(GPSFixMovingWithPolarContext fix,
             GroupedDataEntry<GPSFixMovingWithPolarContext> element,
             WindWithConfidence<Pair<Position, TimePoint>> windSpeed) {
-        int roundedAngle = fix.getRoundedAngleToTheWind().getAngle();
+        int roundedAngle = fix.getRoundedTrueWindAngle().getAngle();
         if (roundedAngle < -90) {
             downwindPortAverageAngleContainer.addFix(element.getDataEntry().getBoatClassMasterData(),
                     windSpeed.getObject(), roundedAngle);
@@ -143,11 +143,11 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     }
     
     SpeedWithConfidenceAndDataCount estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
-            final Bearing angleToTheWind) throws NotEnoughDataHasBeenAddedException {
+            final Bearing trueWindAngle) throws NotEnoughDataHasBeenAddedException {
         PolarClusterKey key = new PolarClusterKey() {
             @Override
-            public RoundedAngleToTheWind getRoundedAngleToTheWind() {
-                return new RoundedAngleToTheWind(angleToTheWind);
+            public RoundedTrueWindAngle getRoundedTrueWindAngle() {
+                return new RoundedTrueWindAngle(trueWindAngle);
             }
 
             @Override
@@ -173,7 +173,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             throw new NotEnoughDataHasBeenAddedException();
         }
         KnotSpeedImpl speedWithoutConfidence = new KnotSpeedImpl(boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(),
-                angleToTheWind.getDegrees()));
+                trueWindAngle.getDegrees()));
         final int dataCount = boatSpeedEstimator.getDataCount();
         double confidence = boatSpeedEstimator.getConfidence();
         return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(speedWithoutConfidence, confidence, null), dataCount);

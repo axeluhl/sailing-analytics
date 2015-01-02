@@ -56,9 +56,9 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     }
 
     @Override
-    public RoundedAngleToTheWind getRoundedAngleToTheWind() {
+    public RoundedTrueWindAngle getRoundedTrueWindAngle() {
         final BearingWithConfidence<Integer> angleToTheWind = getAngleToTheWind();
-        return angleToTheWind == null ? null : new RoundedAngleToTheWind(angleToTheWind.getObject());
+        return angleToTheWind == null ? null : new RoundedTrueWindAngle(angleToTheWind.getObject());
     }
 
     public BearingWithConfidence<Integer> getAngleToTheWind() {

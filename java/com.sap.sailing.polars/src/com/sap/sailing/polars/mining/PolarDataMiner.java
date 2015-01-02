@@ -26,7 +26,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
-import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.mining.IncrementalRegressionProcessor.SpeedWithConfidenceAndDataCount;
@@ -68,7 +68,7 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
 
     private void setUpWorkflow() throws ClassCastException, NoSuchMethodException,
             SecurityException {
-        WindSteppingWithMaxDistance stepping = backendPolarSheetGenerationSettings.getWindStepping();
+        WindSpeedSteppingWithMaxDistance stepping = backendPolarSheetGenerationSettings.getWindSpeedStepping();
         final ClusterGroup<Speed> speedClusterGroup = SpeedClusterGroupFromWindSteppingCreator
                 .createSpeedClusterGroupFrom(stepping);
         incrementalRegressionProcessor = new IncrementalRegressionProcessor(speedClusterGroup);
@@ -112,23 +112,20 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
     }
 
     /**
-     * 
      * @param boatClass
      * @param windSpeed
-     * @param angleToTheWind
+     * @param trueWindAngle
      * @param useLinearRegression if true uses lin. regression in the wind interval, otherwise arithm. mean
      * @return
      * @throws NotEnoughDataHasBeenAddedException
      */
-    public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind)
+    public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle)
             throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind).getSpeedWithConfidence();
+        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle).getSpeedWithConfidence();
     }
 
-
-
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
-        double[] defaultWindSpeeds = backendPolarSheetGenerationSettings.getWindStepping().getRawStepping();
+        double[] defaultWindSpeeds = backendPolarSheetGenerationSettings.getWindSpeedStepping().getRawStepping();
         Number[][] averagedPolarDataByWindSpeed = new Number[defaultWindSpeeds.length][360];
         
         Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<>();
@@ -171,7 +168,7 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         
         
         PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, totalDataCount,
-                dataCountPerAngleForWindspeed, backendPolarSheetGenerationSettings.getWindStepping(), histogramDataMap);
+                dataCountPerAngleForWindspeed, backendPolarSheetGenerationSettings.getWindSpeedStepping(), histogramDataMap);
         return data;
     }
 

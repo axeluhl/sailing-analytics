@@ -39,12 +39,12 @@ public interface PolarDataService {
      * 
      * @param boatClass
      * @param windSpeed
-     * @param bearingToTheWind
+     * @param trueWindAngle
      *            Boat's direction relative to the wind. either in -180 -> +180 or 0 -> 359 degrees interval. The true wind!
      * @return The speed the boat is moving at for the specified wind and bearing according to the polar diagram.
      * @throws NotEnoughDataHasBeenAddedException
      */
-    SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
+    SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle)
             throws NotEnoughDataHasBeenAddedException;
     
     /**

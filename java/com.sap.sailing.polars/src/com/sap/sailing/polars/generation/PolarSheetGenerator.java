@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
-import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.polars.data.BoatAndWindSpeedWithOriginInfo;
 import com.sap.sailing.polars.data.DataPointWithOriginInfo;
 import com.sap.sailing.polars.data.PolarFix;
@@ -23,7 +23,7 @@ public class PolarSheetGenerator {
 
     private final List<List<BoatAndWindSpeedWithOriginInfo>> polarData;
 
-    private WindSteppingWithMaxDistance stepping;
+    private WindSpeedSteppingWithMaxDistance stepping;
 
     private PolarSheetGenerationSettings settings;
 
@@ -32,7 +32,7 @@ public class PolarSheetGenerator {
     public PolarSheetGenerator(Set<PolarFix> fixes, PolarSheetGenerationSettings settings) {
         this.settings = settings;
         this.fixes = fixes;
-        stepping = settings.getWindStepping();
+        stepping = settings.getWindSpeedStepping();
         polarData = initializePolarDataContainer();
     }
 
@@ -46,7 +46,7 @@ public class PolarSheetGenerator {
 
 
     private void addPolarFix(PolarFix polarFix) {
-        long roundedAngle = Math.round(polarFix.getAngleToWind());
+        long roundedAngle = Math.round(polarFix.getTrueWindAngle());
         Speed boatSpeed = polarFix.getBoatSpeed();
         Speed windSpeed = polarFix.getWindSpeed();
         int angle = (int) roundedAngle;
@@ -270,7 +270,7 @@ public class PolarSheetGenerator {
         return polarData;
     }
 
-    public WindSteppingWithMaxDistance getStepping() {
+    public WindSpeedSteppingWithMaxDistance getStepping() {
         return stepping;
     }
 

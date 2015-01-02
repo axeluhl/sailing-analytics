@@ -12,7 +12,7 @@ public interface PolarClusterKey {
      * @return degrees boat to windDirection in DEG
      */
     @Dimension(messageKey = "angleToWind")
-    RoundedAngleToTheWind getRoundedAngleToTheWind();
+    RoundedTrueWindAngle getRoundedTrueWindAngle();
 
     /**
      * 

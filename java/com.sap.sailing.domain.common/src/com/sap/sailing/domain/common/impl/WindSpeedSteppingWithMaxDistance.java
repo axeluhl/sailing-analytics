@@ -1,17 +1,17 @@
 package com.sap.sailing.domain.common.impl;
 
 
-public class WindSteppingWithMaxDistance extends WindSpeedSteppingImpl {
+public class WindSpeedSteppingWithMaxDistance extends WindSpeedSteppingImpl {
     
     private static final long serialVersionUID = -2207840179212727591L;
     private double maxDistance;
 
     //For GWT Serialization
-    WindSteppingWithMaxDistance() {
+    WindSpeedSteppingWithMaxDistance() {
         super();
     };
 
-    public WindSteppingWithMaxDistance(double[] levels, double maxDistance) {
+    public WindSpeedSteppingWithMaxDistance(double[] levels, double maxDistance) {
         super(levels);
         this.maxDistance = maxDistance;
     }
@@ -58,7 +58,7 @@ public class WindSteppingWithMaxDistance extends WindSpeedSteppingImpl {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        WindSteppingWithMaxDistance other = (WindSteppingWithMaxDistance) obj;
+        WindSpeedSteppingWithMaxDistance other = (WindSpeedSteppingWithMaxDistance) obj;
         if (Double.doubleToLongBits(maxDistance) != Double.doubleToLongBits(other.maxDistance))
             return false;
         return true;
