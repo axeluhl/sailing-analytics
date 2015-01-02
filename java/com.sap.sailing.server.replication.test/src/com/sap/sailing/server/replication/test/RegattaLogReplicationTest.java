@@ -11,10 +11,12 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -37,7 +39,8 @@ public class RegattaLogReplicationTest extends
     @Before
     @Override
     public void setUp() throws Exception {
-        regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), author, t(0), 0, null);
+        final Competitor competitor = TrackBasedTest.createCompetitor("Test Competitor");
+        regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), author, t(0), 0, competitor);
 //        anotherRegattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(1), author, t(1), 1, null);
         try {
             replicationDescriptorPair = basicSetUp(/* dropDB */ true, null, null);
