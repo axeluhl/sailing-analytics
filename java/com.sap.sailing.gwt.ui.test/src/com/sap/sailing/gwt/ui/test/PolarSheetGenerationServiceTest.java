@@ -66,7 +66,7 @@ public class PolarSheetGenerationServiceTest {
          
         SailingService service = new MockSailingServiceForPolarSheetGeneration();
 
-        Double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
+        double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
                 0.05, false, windStepping, false);

@@ -10,11 +10,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.WindStepping;
+import com.sap.sailing.domain.common.WindSpeedStepping;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 
 /**
- * A Panel which allows the user to configure a {@link WindStepping}.
+ * A Panel which allows the user to configure a {@link WindSpeedStepping}.
  * 
  * @author d054528 Frederik Petersen
  *
@@ -27,7 +27,7 @@ public class WindSteppingConfiguratorPanel extends HorizontalPanel {
 
     public WindSteppingConfiguratorPanel(WindSteppingWithMaxDistance windStepping) {
         setupPlusAndMinusButtons();
-        Double[] levels = windStepping.getRawStepping();
+        double[] levels = windStepping.getRawStepping();
         for (int i = 0; i < levels.length; i++) {
             TextBox textBox = createSingleBox((int) Math.round(levels[i]));
             textBoxes.add(textBox);
@@ -74,7 +74,11 @@ public class WindSteppingConfiguratorPanel extends HorizontalPanel {
             levelList.add(new Double(Integer.parseInt(box.getValue())));
         }
         Collections.sort(levelList);
-        Double[] levels = levelList.toArray(new Double[levelList.size()]);
+        double[] levels = new double[levelList.size()];
+        int i=0;
+        for (Double level : levelList) {
+            levels[i++] = level;
+        }
         return new WindSteppingWithMaxDistance(levels, maxDistance);
     }
     

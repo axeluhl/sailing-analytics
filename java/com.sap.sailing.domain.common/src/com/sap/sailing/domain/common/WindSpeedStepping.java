@@ -2,13 +2,13 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
-public interface WindStepping extends Serializable{
+public interface WindSpeedStepping extends Serializable {
 
     public abstract int getLevelIndexForValue(double speed);
 
     public abstract Double getSteppedValueForValue(double speed);
 
-    Double[] getRawStepping();
+    double[] getRawStepping();
 
     public abstract int getLevelIndexFloorForValue(double speed);
 

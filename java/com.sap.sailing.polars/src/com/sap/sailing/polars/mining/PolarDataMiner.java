@@ -128,7 +128,7 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
 
 
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
-        Double[] defaultWindSpeeds = backendPolarSheetGenerationSettings.getWindStepping().getRawStepping();
+        double[] defaultWindSpeeds = backendPolarSheetGenerationSettings.getWindStepping().getRawStepping();
         Number[][] averagedPolarDataByWindSpeed = new Number[defaultWindSpeeds.length][360];
         
         Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<>();

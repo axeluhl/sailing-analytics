@@ -136,7 +136,6 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
@@ -3074,14 +3073,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 @Override
                                 public List<ManeuverDTO> call() {
                                     List<Maneuver> maneuversForCompetitor;
-                                    try {
-                                        maneuversForCompetitor = trackedRace.getManeuvers(competitor, timePointFrom,
-                                                timePointTo, /* waitForLatest */ true);
-                                    } catch (NoWindException e) {
-                                        throw new NoWindError(e);
-                                    }
-                                    return createManeuverDTOsForCompetitor(maneuversForCompetitor, trackedRace,
-                                            competitor);
+                                    maneuversForCompetitor = trackedRace.getManeuvers(competitor, timePointFrom,
+                                            timePointTo, /* waitForLatest */ true);
+                                    return createManeuverDTOsForCompetitor(maneuversForCompetitor, trackedRace, competitor);
                                 }
                             });
                     executor.execute(future);

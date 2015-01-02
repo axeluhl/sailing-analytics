@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.impl;
 
 
-public class WindSteppingWithMaxDistance extends WindSteppingImpl {
+public class WindSteppingWithMaxDistance extends WindSpeedSteppingImpl {
     
     private static final long serialVersionUID = -2207840179212727591L;
     private double maxDistance;
@@ -11,7 +11,7 @@ public class WindSteppingWithMaxDistance extends WindSteppingImpl {
         super();
     };
 
-    public WindSteppingWithMaxDistance(Double[] levels, double maxDistance) {
+    public WindSteppingWithMaxDistance(double[] levels, double maxDistance) {
         super(levels);
         this.maxDistance = maxDistance;
     }

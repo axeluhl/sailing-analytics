@@ -2,18 +2,18 @@ package com.sap.sailing.domain.common.impl;
 
 import java.util.Arrays;
 
-import com.sap.sailing.domain.common.WindStepping;
+import com.sap.sailing.domain.common.WindSpeedStepping;
 
-public class WindSteppingImpl implements WindStepping {
+public class WindSpeedSteppingImpl implements WindSpeedStepping {
     
 
     //For GWT Serialization
-    protected WindSteppingImpl() {};
+    protected WindSpeedSteppingImpl() {};
 
     private static final long serialVersionUID = 2215693490331489508L;
-    protected Double[] levels;
+    protected double[] levels;
 
-    public WindSteppingImpl(Double[] levels) {
+    public WindSpeedSteppingImpl(double[] levels) {
         this.levels = levels;
     }
     
@@ -32,7 +32,7 @@ public class WindSteppingImpl implements WindStepping {
     }
 
     @Override
-    public Double[] getRawStepping() {
+    public double[] getRawStepping() {
         return levels;
     }
 
@@ -62,7 +62,7 @@ public class WindSteppingImpl implements WindStepping {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        WindSteppingImpl other = (WindSteppingImpl) obj;
+        WindSpeedSteppingImpl other = (WindSpeedSteppingImpl) obj;
         if (!Arrays.equals(levels, other.levels))
             return false;
         return true;

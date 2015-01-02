@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSettings {
     
     public static PolarSheetGenerationSettings createStandardPolarSettings() {
-        Double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
+        double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.5);
         return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
                 false);
@@ -19,8 +19,11 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
         for (double levelValue = 0.5; levelValue < 35; levelValue = levelValue + 0.5) {
             levelList.add(levelValue);
         }
-        Double[] levels = levelList.toArray(new Double[levelList.size()]);
-        
+        double[] levels = new double[levelList.size()];
+        int i=0;
+        for (Double level : levelList) {
+            levels[i++] = level;
+        }
         WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 0.5);
         return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
                 false);

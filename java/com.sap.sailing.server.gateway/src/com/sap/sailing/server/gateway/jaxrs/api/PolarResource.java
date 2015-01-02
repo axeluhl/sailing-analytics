@@ -8,8 +8,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+
+import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.LegType;
@@ -17,9 +22,14 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 
 /**
  * Right now this service is only used for quick debugging and testing of the polar api. It used plain text responses.
@@ -73,8 +83,48 @@ public class PolarResource extends AbstractSailingServerResource {
         } catch (NotEnoughDataHasBeenAddedException e) {
             responseBuilder = Response.noContent();
         }
-
         return responseBuilder.build();
     }
 
+    private Response getBadRegattaErrorResponse(String regattaName) {
+        return  Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getBadRaceErrorResponse(String regattaName, String raceName) {
+        return Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "' in regatta '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+    }
+
+    @GET
+    @Produces("text/plain;charset=UTF-8")
+    @Path("windestimation/{regattaname}/races/{racename}")
+    public Response getCompetitorPositions(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Regatta regatta = findRegattaByName(regattaName);
+        Response response;
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {     
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                JSONArray resultAsJson = new JSONArray();
+                WindJsonSerializer serializer = new WindJsonSerializer(new PositionJsonSerializer());
+                PolarDataService service = getService().getPolarDataService();
+                ManeuverBasedWindEstimationTrackImpl maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
+                        service, trackedRace, /* millisecondsOverWhichToAverage */ 30000);
+                maneuverBasedWindEstimationTrackImpl.lockForRead();
+                try {
+                    for (Wind wind : maneuverBasedWindEstimationTrackImpl.getFixes()) {
+                        resultAsJson.add(serializer.serialize(wind));
+                    }
+                } finally {
+                    maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
+                }
+                ResponseBuilder responseBuilder = Response.ok(resultAsJson.toJSONString(), MediaType.TEXT_PLAIN);
+                response = responseBuilder.build();
+            }
+        }
+        return response;
+    }
 }

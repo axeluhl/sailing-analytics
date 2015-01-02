@@ -424,8 +424,7 @@ public interface TrackedRace extends Serializable {
      *         result is taken from the cache straight away (<code>waitForLatest==false</code>) or, if a re-calculation
      *         for the <code>key</code> is still ongoing, the result of that ongoing re-calculation is returned.
      */
-    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest)
-            throws NoWindException;
+    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest);
 
     /**
      * @return <code>true</code> if this race is known to start with an {@link LegType#UPWIND upwind} leg. If this is
