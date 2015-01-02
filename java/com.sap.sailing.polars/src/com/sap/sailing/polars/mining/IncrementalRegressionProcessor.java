@@ -204,7 +204,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass,
             Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        Double averageAngle = upwindStarboardAverageAngleContainer.getAverageAngle(
+        Double averageAngle = upwindStarboardAverageAngleContainer.getAverageAngleDeg(
                 BoatClassMasterdata.resolveBoatClass(boatClass.getName()), windSpeed);
         return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
     }
@@ -224,7 +224,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(
             BoatClass boatClass, Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        Double averageAngle = downwindStarboardAverageAngleContainer.getAverageAngle(
+        Double averageAngle = downwindStarboardAverageAngleContainer.getAverageAngleDeg(
                 BoatClassMasterdata.resolveBoatClass(boatClass.getName()), windSpeed);
         return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
     }
@@ -232,7 +232,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
             Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        Double averageAngle = upwindPortAverageAngleContainer.getAverageAngle(
+        Double averageAngle = upwindPortAverageAngleContainer.getAverageAngleDeg(
                 BoatClassMasterdata.resolveBoatClass(boatClass.getName()), windSpeed);
         return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
     }
@@ -240,7 +240,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
             Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        Double averageAngle = downwindPortAverageAngleContainer.getAverageAngle(
+        Double averageAngle = downwindPortAverageAngleContainer.getAverageAngleDeg(
                 BoatClassMasterdata.resolveBoatClass(boatClass.getName()), windSpeed);
         return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
     }

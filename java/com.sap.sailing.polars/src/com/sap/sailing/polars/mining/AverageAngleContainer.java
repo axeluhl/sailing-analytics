@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 
@@ -13,7 +12,27 @@ public class AverageAngleContainer {
 
     private ClusterGroup<Speed> speedClusterGroup;
     
-    private Map<BoatClassMasterdata, Map<Cluster<Speed>, Triple<Integer, Double, Double>>> dataCountAndAngleSumMap;
+    private static class DataCountAngleSumAndAverage {
+        private int dataCount;
+        private double angleSumDeg;
+        private double averageAngleDeg;
+        protected DataCountAngleSumAndAverage(int dataCount, double angleSumDeg, double averageAngleDeg) {
+            super();
+            this.dataCount = dataCount;
+            this.angleSumDeg = angleSumDeg;
+            this.averageAngleDeg = averageAngleDeg;
+        }
+        public double getAverageAngleDeg() {
+            return averageAngleDeg;
+        }
+        public synchronized void add(double angleRad) {
+            dataCount++;
+            angleSumDeg += angleRad;
+            averageAngleDeg = angleSumDeg / (double) dataCount;
+        }
+    }
+    
+    private Map<BoatClassMasterdata, Map<Cluster<Speed>, DataCountAngleSumAndAverage>> dataCountAndAngleSumMap;
 
     public AverageAngleContainer(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
@@ -25,31 +44,27 @@ public class AverageAngleContainer {
         if (!dataCountAndAngleSumMap.containsKey(boatClassMasterdata)) {
             dataCountAndAngleSumMap.put(boatClassMasterdata, new HashMap<>());
         }
-        Map<Cluster<Speed>, Triple<Integer, Double, Double>> boatClassMap = dataCountAndAngleSumMap.get(boatClassMasterdata);
-        if (!boatClassMap.containsKey(windCluster)) {
-            boatClassMap.put(windCluster, createInitialTriple());
+        Map<Cluster<Speed>, DataCountAngleSumAndAverage> boatClassMap = dataCountAndAngleSumMap.get(boatClassMasterdata);
+        DataCountAngleSumAndAverage triple = boatClassMap.get(windCluster);
+        if (triple == null) {
+            triple = createInitialTriple();
+            boatClassMap.put(windCluster, triple);
         }
-        Triple<Integer, Double, Double> triple = boatClassMap.get(windCluster);
-        Integer dataCount = triple.getA();
-        Double sum = triple.getB();
-        dataCount = dataCount + 1;
-        sum = sum + roundedAngleDeg;
-        double average = sum / (double) dataCount;
-        boatClassMap.put(windCluster, new Triple<Integer, Double, Double>(dataCount, sum, average));
+        triple.add(roundedAngleDeg);
     }
 
-    private Triple<Integer, Double, Double> createInitialTriple() {
-        return new Triple<Integer, Double, Double>(0, 0.0, 0.0);
+    private DataCountAngleSumAndAverage createInitialTriple() {
+        return new DataCountAngleSumAndAverage(0, 0.0, 0.0);
     }
     
-    Double getAverageAngle(BoatClassMasterdata boatClassMasterdata, Speed windSpeed) {
+    double getAverageAngleDeg(BoatClassMasterdata boatClassMasterdata, Speed windSpeed) {
         Double result = null;
         if (dataCountAndAngleSumMap.containsKey(boatClassMasterdata)) {
-            Map<Cluster<Speed>, Triple<Integer, Double, Double>> boatClassMap = dataCountAndAngleSumMap.get(boatClassMasterdata);
+            Map<Cluster<Speed>, DataCountAngleSumAndAverage> boatClassMap = dataCountAndAngleSumMap.get(boatClassMasterdata);
             Cluster<Speed> windCluster = speedClusterGroup.getClusterFor(windSpeed);
             if(boatClassMap.containsKey(windCluster)) {
-                Triple<Integer, Double, Double> triple = boatClassMap.get(windCluster);
-                result = triple.getC();
+                DataCountAngleSumAndAverage triple = boatClassMap.get(windCluster);
+                result = triple.getAverageAngleDeg();
             }
         }
         return result;

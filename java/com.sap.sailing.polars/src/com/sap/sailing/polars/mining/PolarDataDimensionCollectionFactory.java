@@ -13,7 +13,7 @@ public class PolarDataDimensionCollectionFactory {
         Collection<Function<?>> dimensions = new ArrayList<>();
         FunctionFactory functionFactory = new FunctionFactory();
         Function<RoundedTrueWindAngle> angleFunction = functionFactory
-                .createMethodWrappingFunction(PolarClusterKey.class.getMethod("getRoundedAngleToTheWind",
+                .createMethodWrappingFunction(PolarClusterKey.class.getMethod("getRoundedTrueWindAngle",
                         new Class<?>[0]));
         Function<WindSpeedLevel> windSpeedFunction = functionFactory.createMethodWrappingFunction(PolarClusterKey.class
                 .getMethod("getWindSpeedCluster", new Class<?>[0]));
