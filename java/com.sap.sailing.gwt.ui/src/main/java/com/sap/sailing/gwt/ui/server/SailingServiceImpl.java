@@ -126,6 +126,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -3948,10 +3949,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<String> getBoatClassNamesWithPolarSheetsAvailable() {
-        Set<BoatClass> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
+        Set<BoatClassMasterdata> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
         List<String> names = new ArrayList<String>();
-        for (BoatClass boatClass : boatClasses) {
-            names.add(boatClass.getName());
+        for (BoatClassMasterdata boatClass : boatClasses) {
+            names.add(boatClass.getDisplayName());
         }
         return names;
     }
@@ -5351,39 +5352,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public PolarSheetsXYDiagramData createXYDiagramForBoatClass(String boatClassName) {
         BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
-        List<Pair<Double, Double>> pointsForUpwindStarboardAverageSpeed = new ArrayList<Pair<Double, Double>>();
-        List<Pair<Double, Double>> pointsForUpwindStarboardAverageAngle = new ArrayList<Pair<Double, Double>>();
         List<Pair<Double, Double>> pointsForUpwindStarboardAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
-        List<Pair<Double, Double>> pointsForUpwindStarboardAverageAngleMovingAverage = new ArrayList<Pair<Double, Double>>();
         List<Pair<Double, Double>> pointsForUpwindStarboardAverageConfidence = new ArrayList<Pair<Double, Double>>();
         for (double windInKnots = 0.1; windInKnots < 30; windInKnots = windInKnots + 0.1) {
             try {
-                SpeedWithBearingWithConfidence<Void> averageUpwindStarboard = getService().getPolarDataService()
-                        .getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots), LegType.UPWIND,
-                                Tack.STARBOARD, true);
-                pointsForUpwindStarboardAverageSpeed.add(new Pair<Double, Double>(windInKnots, averageUpwindStarboard
-                        .getObject().getKnots()));
-                pointsForUpwindStarboardAverageAngle.add(new Pair<Double, Double>(windInKnots, averageUpwindStarboard
-                        .getObject().getBearing().getDegrees()));
 
-                pointsForUpwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
-                        averageUpwindStarboard.getConfidence()));
-                
                 SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService().getPolarDataService()
                         .getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots), LegType.UPWIND,
-                                Tack.STARBOARD, false);
+                                Tack.STARBOARD);
                 pointsForUpwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
                         averageUpwindStarboardMovingAverage.getObject().getKnots()));
-                pointsForUpwindStarboardAverageAngleMovingAverage.add(new Pair<Double, Double>(windInKnots,
-                        averageUpwindStarboardMovingAverage.getObject().getBearing().getDegrees()));
+                
+                pointsForUpwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
+                        averageUpwindStarboardMovingAverage.getConfidence()));
 
             } catch (NotEnoughDataHasBeenAddedException e) {
                 // Do not add a point to the result
             }
         }
-        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(pointsForUpwindStarboardAverageAngle,
-                pointsForUpwindStarboardAverageSpeed, pointsForUpwindStarboardAverageAngleMovingAverage,
-                pointsForUpwindStarboardAverageSpeedMovingAverage, pointsForUpwindStarboardAverageConfidence);
+        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(pointsForUpwindStarboardAverageSpeedMovingAverage, pointsForUpwindStarboardAverageConfidence);
 
         return data;
     }

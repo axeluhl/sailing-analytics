@@ -1,31 +1,31 @@
 package com.sap.sailing.polars.regression;
 
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import com.sap.sailing.polars.mining.IncrementalRegressionProcessor;
-import com.sap.sailing.polars.regression.impl.IncrementalLeastSquaresProcessor;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 /**
- * Combines two linear regression processors. One with the angle to the wind as the x axis and the other with the wind
- * speed on the x axis. Both y axis represent the boat speed.
+ * Supplies incremental arithmetic mean for confidence and speed.
  * 
- * {@link #estimateSpeed(double, double)} returns the average of the estimation of both regressions.
+ * {@link #estimateSpeed(double, double)} returns the average of the speed
  * 
- * Note that this class should only be used for a small interval on a polar sheet. The
+ * Note that this class should only be used for a small wind interval on a polar sheet. The
  * {@link IncrementalRegressionProcessor} is one example for that. It has one instance of the {@link BoatSpeedEstimator}
- * for each wind speed level and rounded angle combination.
+ * for each wind boatclass, speed level and rounded angle combination.
  * 
  * @author Frederik Petersen (D054528)
  * 
  */
-public class BoatSpeedEstimator {
+public class BoatSpeedEstimator implements Serializable {
 
-    private IncrementalLinearRegressionProcessor angleRegression = new IncrementalLeastSquaresProcessor();
+    private static final long serialVersionUID = -254184914347332658L;
 
-    private IncrementalLinearRegressionProcessor windSpeedRegression = new IncrementalLeastSquaresProcessor();
+    private double speedSum = 0;
 
-    private NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(getClass().getName(), true);
-
+    private transient NamedReentrantReadWriteLock lock = createLock();
+    
     private double confidenceSum = 0;
     
     private int dataCount = 0;
@@ -33,30 +33,24 @@ public class BoatSpeedEstimator {
     /**
      * @param useLinearRegression if false mean of wind interval is used, otherwise linear regression
      */
-    public double estimateSpeed(double windSpeed, double angleToTheWind, boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException {
+    public double estimateSpeed(double windSpeed, double angleToTheWind) throws NotEnoughDataHasBeenAddedException {
         LockUtil.lockForRead(lock);
+        if (dataCount < 1) {
+            throw new NotEnoughDataHasBeenAddedException();
+        }
         double result;
         try {
-            if (useLinearRegression) {
-                double angleEstimated = angleRegression.getEstimatedY(angleToTheWind);
-                double windSpeedEstimated = windSpeedRegression.getEstimatedY(windSpeed);
-
-                result = (angleEstimated + windSpeedEstimated) / 2.0;
-            } else {
-                //Return average for that wind interval
-                result = windSpeedRegression.getMeanOfY();
-            }
+                result = speedSum / dataCount;
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
         return result;
     }
 
-    public void addData(double windSpeed, double angleToTheWind, double boatSpeed, double confidence) {
+    public void addData(double boatSpeed, double confidence) {
         LockUtil.lockForWrite(lock);
         try {
-            angleRegression.addMeasuredPoint(angleToTheWind, boatSpeed);
-            windSpeedRegression.addMeasuredPoint(windSpeed, boatSpeed);
+            speedSum = speedSum + boatSpeed;
             dataCount++;
             confidenceSum  = confidenceSum + confidence;
         } finally {
@@ -70,6 +64,14 @@ public class BoatSpeedEstimator {
 
     public double getConfidence() {
         return confidenceSum / dataCount;
+    }
+    
+    private void readObject(ObjectInputStream ois) {
+        lock = createLock();
+    }
+    
+    private NamedReentrantReadWriteLock createLock() {
+        return new NamedReentrantReadWriteLock(getClass().getName(), true);
     }
 
 }

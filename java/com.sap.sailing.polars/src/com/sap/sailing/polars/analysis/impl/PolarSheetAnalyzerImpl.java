@@ -29,52 +29,53 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
     }
 
     @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed, boolean useLinReg)
+    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException {
         int startAngleInclusive = 1;
         int endAngleExclusive = 90;
         SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
-                endAngleExclusive, useLinReg);
+                endAngleExclusive);
         return speedWithBearing;
     }
 
     
     @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed, boolean useLinReg)
+    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException {
         int startAngleInclusive = 91;
         int endAngleExclusive = 180;
         SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
-                endAngleExclusive, useLinReg);
+                endAngleExclusive);
         return speedWithBearing;
     }
     
     @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed, boolean useLinReg)
+    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException {
         int startAngleInclusive = 181;
         int endAngleExclusive = 270;
         SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
-                endAngleExclusive, useLinReg);
+                endAngleExclusive);
         return speedWithBearing;
     }
 
     @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
-            Speed windSpeed, boolean useLinReg) throws NotEnoughDataHasBeenAddedException {
+    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
+        throws NotEnoughDataHasBeenAddedException {
         int startAngleInclusive = 271;
         int endAngleExclusive = 360;
         SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed,
-                startAngleInclusive, endAngleExclusive, useLinReg);
+                    endAngleExclusive);
         return speedWithBearing;
     }
 
     private SpeedWithBearingWithConfidence<Void> estimateAnglePeakAndAverageSpeed(BoatClass boatClass, Speed windSpeed,
-            int startAngleInclusive, int endAngleExclusive, boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException {
+            int startAngleInclusive, int endAngleExclusive) throws NotEnoughDataHasBeenAddedException {
         int[] dataCountPerAngle = getDataCountArray(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
         double estimatedPeak = estimatePeak(boatClass, windSpeed, startAngleInclusive, endAngleExclusive, dataCountPerAngle);
         double convertedAngleIfOver180 = convertAngleIfNecessary(estimatedPeak);
         SpeedWithConfidence<Void> averagedSpeedWithConfidence = estimateSpeed(boatClass, windSpeed, convertedAngleIfOver180, useLinearRegression);
+                convertedAngleIfOver180);
         double originConfidence = averagedSpeedWithConfidence.getConfidence();
         double overallConfidence = (originConfidence + calcDataCountConfidence(dataCountPerAngle, estimatedPeak)) / 2;
         Bearing bearing = new DegreeBearingImpl(convertedAngleIfOver180);
@@ -110,10 +111,9 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         return convertedAngleIfOver180;
     }
 
-    private SpeedWithConfidence<Void> estimateSpeed(BoatClass boatClass, Speed windSpeed, double estimatedPeak,
-            boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException {
+    private SpeedWithConfidence<Void> estimateSpeed(BoatClass boatClass, Speed windSpeed, double estimatedPeak) throws NotEnoughDataHasBeenAddedException {
         SpeedWithConfidence<Void> speed = polarDataService.getSpeed(boatClass, windSpeed, new DegreeBearingImpl(
-                estimatedPeak), useLinearRegression);
+                estimatedPeak));
         return speed;
     }
 

@@ -10,13 +10,13 @@ import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.AreaPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
-import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions.Stacking;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Timer;
@@ -37,11 +37,14 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
     private final StringMessages stringMessages;
     
     private final Map<String, Set<Series>> seriesForId;
+    
+    private final Map<String, Series> seriesForName;
 
     public AngleOverDataSizeHistogramPanel(StringMessages stringMessages) {
         super(Unit.PX);
         
         this.seriesForId = new HashMap<>();
+        this.seriesForName = new HashMap<>();
         this.stringMessages = stringMessages;
         setSize("100%", "100%");
         
@@ -56,25 +59,28 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
         histogramChart.getYAxis().setMin(0).setAxisTitle(new AxisTitle().setText(stringMessages.numberOfDataPoints()));
         histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(10))
                 .setAxisTitle(new AxisTitle().setText(stringMessages.beatAngle()));
-        histogramChart.setAreaPlotOptions(new AreaPlotOptions().setStacking(Stacking.NORMAL).setLineColor("#666666")
+        histogramChart.setAreaPlotOptions(new AreaPlotOptions().setLineColor("#666666")
                 .setLineWidth(1).setMarker(new Marker().setLineWidth(1).setLineColor("#666666")));
+        histogramChart.setLegend(new Legend().setEnabled(false));
         return histogramChart;
     }
 
-    public void addData(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle, String seriesId, String actualSeriesName) {
+    public void addData(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle, String seriesId, String actualSeriesName, boolean setVisible) {
         chart.setTitle("");
         Series series = chart.createSeries();
         
         Point[] points = toPoints(histogramDataPerAngle);
-        series.setPoints(points);
+        series.setPoints(points, false);
         series.setName(actualSeriesName);
-        chart.addSeries(series);
+        chart.addSeries(series, false, false);
+        series.setVisible(setVisible, false);
         
         if (!seriesForId.containsKey(seriesId)) {
             seriesForId.put(seriesId, new HashSet<Series>());
         }
         Set<Series> seriesSet = seriesForId.get(seriesId);
         seriesSet.add(series);
+        seriesForName.put(actualSeriesName, series);
     }
 
     private Point[] toPoints(Map<Integer, PolarSheetsHistogramData> histogramDataPerAngle) {
@@ -121,6 +127,7 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
     public void removeSeries(String seriesId) {
         for (Series series : seriesForId.get(seriesId)) {
             chart.removeSeries(series);
+            seriesForName.remove(series.getName());
         }
         seriesForId.remove(seriesId);
     }
@@ -128,6 +135,22 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
     public void removeAllSeries() {
         chart.removeAllSeries();
         seriesForId.clear();
+    }
+
+    public void redrawChart() {
+        chart.redraw();
+    }
+
+    public void showSeries(String name) {
+        if (seriesForName.containsKey(name)) {
+            seriesForName.get(name).show();
+        }
+    }
+
+    public void hideSeries(String name) {
+        if (seriesForName.containsKey(name)) {
+            seriesForName.get(name).hide();
+        }
     }
     
     
