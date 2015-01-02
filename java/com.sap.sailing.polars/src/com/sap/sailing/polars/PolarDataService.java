@@ -17,15 +17,10 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
-import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 
 /**
  * Public Facade interface allowing access to the polars of {@link BoatClass}es.
- * 
- * It uses a {@link PolarSheetAnalyzer} for more advanced analysis. It's methods are facaded in this interface for
- * central access.
  * 
  * The interesting methods for a user are {@link #getSpeed(BoatClass, Speed, Bearing, boolean)} if data for a specific angle is
  * needed and {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)} 
@@ -41,7 +36,7 @@ public interface PolarDataService {
      * @param boatClass
      * @param windSpeed
      * @param bearingToTheWind
-     *            Boat's direction relative to the wind. either in -180 -> +180 or 0 -> 359 degrees interval
+     *            Boat's direction relative to the wind. either in -180 -> +180 or 0 -> 359 degrees interval. The true wind!
      * @return The speed the boat is moving at for the specified wind and bearing according to the polar diagram.
      * @throws NotEnoughDataHasBeenAddedException
      */
@@ -58,7 +53,7 @@ public interface PolarDataService {
      * @param tack
      *            Polar data can vary depending on the tack the boat is on.
      * @return The estimated average speed of a boat for the supplied parameters with the estimated average bearing to
-     *         the wind and a confidence which consists of the confidences of the wind speed, and boat speed sources (50%)
+     *         the true wind and a confidence which consists of the confidences of the wind speed, and boat speed sources (50%)
      *         and a confidence calculated using the amount of underlying fixes (50%). 0 <= confidence < 1<br/>
      *         A value with zero confidence doesn't have any significance!<br/><br/>
      *         
@@ -90,16 +85,6 @@ public interface PolarDataService {
     PolarSheetsData generatePolarSheet(Set<TrackedRace> trackedRaces, PolarSheetGenerationSettings settings,
             Executor executor) throws InterruptedException, ExecutionException;
 
-    void newRaceFinishedTracking(TrackedRace trackedRace);
-
-    /**
-     * @param key
-     *            The {@link BoatClass} to obtain fixes for.
-     * @return All raw polar fixes for the {@link BoatClass}. The implementation is responsible for deciding wether a
-     *         cache is used or not.
-     */
-    Set<PolarFix> getPolarFixesForBoatClass(BoatClass key);
-
     /**
      * 
      * @param boatClass
@@ -115,6 +100,14 @@ public interface PolarDataService {
      */
     Set<BoatClassMasterdata> getAllBoatClassesWithPolarSheetsAvailable();
 
+    /**
+     * To be called in an appropriate listener. 
+     * Starting point for fixes entering the backend polar data mining pipeline.
+     * 
+     * @param fix
+     * @param competitor
+     * @param createdTrackedRace
+     */
     void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, TrackedRace createdTrackedRace);
 
     /**

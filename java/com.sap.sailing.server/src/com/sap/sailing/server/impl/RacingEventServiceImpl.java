@@ -89,7 +89,6 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -201,8 +200,8 @@ import com.sap.sse.common.search.ResultImpl;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.util.ClearStateTestSupport;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener, LeaderboardRegistry,
         Replicator {
@@ -1924,34 +1923,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 replicate(new TrackRegatta(regatta.getRegattaIdentifier()));
                 regattaTrackingCache.put(regatta, result);
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
-                addRaceTrackingFinishedListenerForPolarFixCache(result);
             }
             return result;
         } finally {
             LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
         }
-    }
-
-    private void addRaceTrackingFinishedListenerForPolarFixCache(DynamicTrackedRegatta result) {
-        RaceListener raceListenerForPolarFixCacheUpdate = new RaceListener() {
-            @Override
-            public void raceRemoved(TrackedRace trackedRace) {
-                // TODO remove fixes from polar fix cache
-            }
-
-            @Override
-            public void raceAdded(final TrackedRace trackedRace) {
-                trackedRace.addListener(new AbstractRaceChangeListener() {
-                    @Override
-                    public void statusChanged(TrackedRaceStatus newStatus) {
-                        if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
-                            polarDataService.newRaceFinishedTracking(trackedRace);
-                        }
-                    }
-                });
-            }
-        };
-        result.addRaceListener(raceListenerForPolarFixCacheUpdate);
     }
 
     @Override
