@@ -4,22 +4,22 @@ import com.sap.sailing.domain.common.Bearing;
 
 public class RoundedTrueWindAngle {
 
-    private final int angle;
+    private final int angleDeg;
 
     public RoundedTrueWindAngle(Bearing angleToTheWind) {
-        this.angle = (int) Math.round(angleToTheWind.getDegrees());
+        this.angleDeg = (int) Math.round(angleToTheWind.getDegrees());
     }
 
     @Override
     public String toString() {
-        return "" + getAngle();
+        return "" + getAngleDeg();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + getAngle();
+        result = prime * result + getAngleDeg();
         return result;
     }
 
@@ -32,13 +32,13 @@ public class RoundedTrueWindAngle {
         if (getClass() != obj.getClass())
             return false;
         RoundedTrueWindAngle other = (RoundedTrueWindAngle) obj;
-        if (getAngle() != other.getAngle())
+        if (getAngleDeg() != other.getAngleDeg())
             return false;
         return true;
     }
 
-    public int getAngle() {
-        return angle;
+    public int getAngleDeg() {
+        return angleDeg;
     }
 
 }

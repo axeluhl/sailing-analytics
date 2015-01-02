@@ -94,19 +94,19 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     private void fillAverageAngleContainer(GPSFixMovingWithPolarContext fix,
             GroupedDataEntry<GPSFixMovingWithPolarContext> element,
             WindWithConfidence<Pair<Position, TimePoint>> windSpeed) {
-        int roundedAngle = fix.getRoundedTrueWindAngle().getAngle();
-        if (roundedAngle < -90) {
+        int roundedAngleDeg = fix.getRoundedTrueWindAngle().getAngleDeg();
+        if (roundedAngleDeg < -90) {
             downwindPortAverageAngleContainer.addFix(element.getDataEntry().getBoatClassMasterData(),
-                    windSpeed.getObject(), roundedAngle);
-        } else if (roundedAngle < 0) {
+                    windSpeed.getObject(), roundedAngleDeg);
+        } else if (roundedAngleDeg < 0) {
             upwindPortAverageAngleContainer.addFix(element.getDataEntry().getBoatClassMasterData(),
-                    windSpeed.getObject(), roundedAngle);
-        } else if (roundedAngle > 0) {
+                    windSpeed.getObject(), roundedAngleDeg);
+        } else if (roundedAngleDeg > 0) {
             upwindStarboardAverageAngleContainer.addFix(element.getDataEntry().getBoatClassMasterData(),
-                    windSpeed.getObject(), roundedAngle);
-        } else if (roundedAngle > 90) {
+                    windSpeed.getObject(), roundedAngleDeg);
+        } else if (roundedAngleDeg > 90) {
             downwindStarboardAverageAngleContainer.addFix(element.getDataEntry().getBoatClassMasterData(),
-                    windSpeed.getObject(), roundedAngle);
+                    windSpeed.getObject(), roundedAngleDeg);
         }
     }
 
