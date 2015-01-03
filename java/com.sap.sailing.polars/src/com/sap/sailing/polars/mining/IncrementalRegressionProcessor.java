@@ -178,6 +178,14 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(speedWithoutConfidence, confidence, null), dataCount);
     }
 
+    SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass,
+            Speed speedOverGround, LegType legType, Tack tack) {
+        AverageAngleContainer averageAngleContainer = averageAngleContainers.get(new Pair<>(legType, tack));
+        /* TODO use */ averageAngleContainer.toString(); /* to calculate the most likely true wind speed/angle
+         * assuming the boat was going at a reasonable VMG in the legType on its tack */
+        return null;
+    }
+
     @Override
     public void onFailure(Throwable failure) {
         logger.severe("Polar Data Mining Pipe failed.");
@@ -219,4 +227,5 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
                 angleToTheWind);
         return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, estimatedSpeed.getConfidence(), null);
     }
+
 }

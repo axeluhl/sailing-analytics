@@ -124,6 +124,11 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle).getSpeedWithConfidence();
     }
 
+    public SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround,
+            LegType legType, Tack tack) {
+        return incrementalRegressionProcessor.estimateTrueWindSpeedAndAngle(boatClass, speedOverGround, legType, tack);
+    }
+
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
         double[] defaultWindSpeeds = backendPolarSheetGenerationSettings.getWindSpeedStepping().getRawStepping();
         Number[][] averagedPolarDataByWindSpeed = new Number[defaultWindSpeeds.length][360];
@@ -216,11 +221,5 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
             Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
         return incrementalRegressionProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
-    }
-
-    public SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround,
-            LegType legType, Tack tack) {
-        // TODO Auto-generated method stub
-        return null;
     }
 }
