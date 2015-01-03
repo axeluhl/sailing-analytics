@@ -1131,4 +1131,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String createNewEvent();
     String noFleetsDefined();
     String successfullyCreatedRegattas();
+    String active();
 }

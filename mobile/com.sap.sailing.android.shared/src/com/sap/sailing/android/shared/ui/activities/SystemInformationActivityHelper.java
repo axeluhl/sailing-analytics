@@ -39,7 +39,7 @@ public class SystemInformationActivityHelper {
             
             waitingView.setAdapter(new ArrayAdapter<String>(activity, 
                     android.R.layout.simple_list_item_1, 
-                    activity.sendingService.getDelayedIntensContent()));
+                    activity.sendingService.getDelayedIntentsContent()));
         } else {
             statusView.setText(activity.getString(R.string.generic_error));
         }

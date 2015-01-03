@@ -40,9 +40,12 @@ public class RGBColor extends AbstractColor {
             b = Integer.parseInt(htmlColor.substring(4, 6), 16);
             break;
         case 3:
-            r = Integer.parseInt(htmlColor.substring(0, 1), 16);
-            g = Integer.parseInt(htmlColor.substring(1, 2), 16);
-            b = Integer.parseInt(htmlColor.substring(2, 3), 16);
+            final int r0 = Integer.parseInt(htmlColor.substring(0, 1), 16);
+            r = 16*r0 + r0;
+            final int g0 = Integer.parseInt(htmlColor.substring(1, 2), 16);
+            g = 16*g0 + g0;
+            final int b0 = Integer.parseInt(htmlColor.substring(2, 3), 16);
+            b = 16*b0 + b0;
             break;
         case 1:
             r = g = b = Integer.parseInt(htmlColor.substring(0, 1), 16);

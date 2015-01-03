@@ -1,14 +1,14 @@
 package com.sap.sailing.polars.mining;
 
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.WindStepping;
+import com.sap.sailing.domain.common.WindSpeedStepping;
 
 public class WindSpeedLevel {
 
     private final int level;
-    private final WindStepping stepping;
+    private final WindSpeedStepping stepping;
 
-    public WindSpeedLevel(Speed windSpeed, WindStepping stepping) {
+    public WindSpeedLevel(Speed windSpeed, WindSpeedStepping stepping) {
         this.level = stepping.getLevelIndexForValue(windSpeed.getKnots());
         this.stepping = stepping;
     }

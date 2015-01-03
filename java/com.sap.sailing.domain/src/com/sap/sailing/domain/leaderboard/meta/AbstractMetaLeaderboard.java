@@ -90,7 +90,8 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         }
     }
     
-    public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(resultDiscardingRule);
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
@@ -223,5 +224,4 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     public String getName() {
         return name;
     }
-
 }

@@ -18,17 +18,17 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
-import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.SmartphoneUUIDIdentifier;
-import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
@@ -236,21 +236,21 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     }
 
     @Override
-    public void visit(DeviceCompetitorMappingEvent event) {
+    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
         chosenSerializer = deviceCompetitorMappingSerializer;
     }
 
     @Override
-    public void visit(DeviceMarkMappingEvent event) {
+    public void visit(RaceLogDeviceMarkMappingEvent event) {
         chosenSerializer = deviceMarkMappingSerializer;
     }
 
     @Override
-    public void visit(DenoteForTrackingEvent event) {
+    public void visit(RaceLogDenoteForTrackingEvent event) {
         chosenSerializer = denoteForTrackingSerializer;
     }
     @Override
-    public void visit(StartTrackingEvent event) {
+    public void visit(RaceLogStartTrackingEvent event) {
         chosenSerializer = startTrackingSerializer;
     }
     @Override
@@ -258,22 +258,22 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         chosenSerializer = revokeSerializer;
     }
     @Override
-    public void visit(RegisterCompetitorEvent event) {
+    public void visit(RaceLogRegisterCompetitorEvent event) {
         chosenSerializer = registerCompetitorSerializer;
     }
 
     @Override
-    public void visit(DefineMarkEvent event) {
+    public void visit(RaceLogDefineMarkEvent event) {
         chosenSerializer = defineMarkSerializer;
     }
     
     @Override
-    public void visit(CloseOpenEndedDeviceMappingEvent event) {
+    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event) {
         chosenSerializer = closeOpenEndedDeviceMappingEventSerializer;
     }
 
     @Override
-    public void visit(AdditionalScoringInformationEvent additionalScoringInformation) {
+    public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation) {
         chosenSerializer = additionalScoringInformationSerializer;
     }
 }

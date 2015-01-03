@@ -1,6 +1,6 @@
 package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
-import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 

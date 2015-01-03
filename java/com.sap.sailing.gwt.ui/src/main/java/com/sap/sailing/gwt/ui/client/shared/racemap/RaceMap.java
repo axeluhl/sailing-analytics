@@ -375,7 +375,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               // simplify road display
               mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
               // set water color
-              mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), -35, -34);
+              // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
+              // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
+              // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
+              mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), 0, -70);
               
               MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
               mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
@@ -735,22 +738,26 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         showAdvantageLine(competitorsToShow, newTime);
                             
                         // Rezoom the map
-                        // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
+                        Bounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
-                            Bounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
-                            zoomMapToNewBounds(bounds);
-                            mapFirstZoomDone = true;
-                        } else if (!mapFirstZoomDone) { // Zoom once to the marks
-                            zoomMapToNewBounds(new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this));
-                            mapFirstZoomDone = true;
+                            zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
+                            if (zoomToBounds == null && !mapFirstZoomDone) {
+                                zoomToBounds = getDefaultZoomBounds(); // the user-specified zoom couldn't find what it was looking for; try defaults once
+                            }
+                        } else if (!mapFirstZoomDone) { // Zoom once to the marks if marks exist
+                            zoomToBounds = new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this);
+                            if (zoomToBounds == null) {
+                                zoomToBounds = getDefaultZoomBounds(); // use default zoom, e.g., 
+                            }
                             /*
                              * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
                              * the map was just zoomed to the bounds of the marks, it was not a zoom or pan
                              * triggered by the user. As a consequence the
                              * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
                              */
-                            // TODO bug 494: consider initial user-specific zoom settings
                         }
+                        zoomMapToNewBounds(zoomToBounds);
+                        mapFirstZoomDone = true;
                     }
                 } else {
                     lastTimeChangeBeforeInitialization = newTime;
@@ -2203,5 +2210,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public String getDependentCssClassName() {
         return "raceMap";
+    }
+
+    /**
+     * The default zoom bounds are defined by the boats
+     */
+    private Bounds getDefaultZoomBounds() {
+        return new BoatsBoundsCalculator().calculateNewBounds(RaceMap.this);
     }
 }
