@@ -41,10 +41,10 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         } else if (legType == LegType.DOWNWIND && tack == Tack.STARBOARD) {
             startAngleInclusive = 90;
             endAngleExclusive = 180;
-        } else if (legType == LegType.UPWIND && tack == Tack.PORT) {
+        } else if (legType == LegType.DOWNWIND && tack == Tack.PORT) {
             startAngleInclusive = 180;
             endAngleExclusive = 270;
-        } else if (legType == LegType.DOWNWIND && tack == Tack.STARBOARD) {
+        } else if (legType == LegType.UPWIND && tack == Tack.PORT) {
             startAngleInclusive = 270;
             endAngleExclusive = 360;
         } else {
