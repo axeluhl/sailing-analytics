@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -106,7 +105,7 @@ public interface PolarDataService {
      * @return The {@link BoatClass}es for which there are polar sheets available via
      *         {@link PolarDataService#getPolarSheetForBoatClass(BoatClass)}
      */
-    Set<BoatClassMasterdata> getAllBoatClassesWithPolarSheetsAvailable();
+    Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable();
 
     /**
      * To be called in an appropriate listener. 

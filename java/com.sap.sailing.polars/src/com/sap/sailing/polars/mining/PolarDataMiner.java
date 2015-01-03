@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -31,8 +30,8 @@ import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.polars.mining.IncrementalRegressionProcessor.SpeedWithConfidenceAndDataCount;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
+import com.sap.sailing.polars.mining.IncrementalRegressionProcessor.SpeedWithConfidenceAndDataCount;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -196,7 +195,7 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         return polarSheetsHistogramDataImpl;
     }
 
-    public Set<BoatClassMasterdata> getAvailableBoatClasses() {
+    public Set<BoatClass> getAvailableBoatClasses() {
         return incrementalRegressionProcessor.getAvailableBoatClasses();
     }
 
