@@ -103,8 +103,8 @@ public enum BoatClassMasterdata {
         return null;
     }
 
-    private static String unifyBoatClassName(String boatClassName) {
-        return boatClassName.toUpperCase().replaceAll("\\s+","");
+    public static String unifyBoatClassName(String boatClassName) {
+        return boatClassName == null ? null : boatClassName.toUpperCase().replaceAll("\\s+","");
     }
     
     public Distance getHullLength() {

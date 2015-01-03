@@ -270,18 +270,24 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
+        final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassName(name);
         synchronized (boatClassCache) {
-            BoatClass result = boatClassCache.get(name);
-            if (result == null && name != null) {
+            BoatClass result = boatClassCache.get(unifiedBoatClassName);
+            if (result == null && unifiedBoatClassName != null) {
                 BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
                 if (boatClassMasterdata != null) {
                     result = new BoatClassImpl(name, boatClassMasterdata);
                     boatClassCache.put(name, result);
+                    boatClassCache.put(unifiedBoatClassName, result);
+                    boatClassCache.put(boatClassMasterdata.getDisplayName(), result);
+                    for (String alternativeName : boatClassMasterdata.getAlternativeNames()) {
+                        boatClassCache.put(alternativeName, result);
+                    }
                 }
             }
             if (result == null) {
-                result = new BoatClassImpl(name, typicallyStartsUpwind);
-                boatClassCache.put(name, result);
+                result = new BoatClassImpl(unifiedBoatClassName, typicallyStartsUpwind);
+                boatClassCache.put(unifiedBoatClassName, result);
             }
             return result;
         }
