@@ -53,12 +53,16 @@ public class AverageAngleContainer {
         triple.add(roundedAngleDeg);
     }
 
-    double getAverageAngleDeg(BoatClassMasterdata boatClassMasterdata, Speed windSpeed) {
+    /**
+     * @return <code>null</code> if no entry exists for the <code>windSpeed</code> requested; a valid angle in degrees
+     *         otherwise, representing the average angle of this cluster
+     */
+    Double getAverageAngleDeg(BoatClassMasterdata boatClassMasterdata, Speed windSpeed) {
         Double result = null;
         if (dataCountAndAngleSumMap.containsKey(boatClassMasterdata)) {
             Map<Cluster<Speed>, DataCountAngleSumAndAverage> boatClassMap = dataCountAndAngleSumMap.get(boatClassMasterdata);
             Cluster<Speed> windCluster = speedClusterGroup.getClusterFor(windSpeed);
-            if(boatClassMap.containsKey(windCluster)) {
+            if (boatClassMap.containsKey(windCluster)) {
                 DataCountAngleSumAndAverage triple = boatClassMap.get(windCluster);
                 result = triple.getAverageAngleDeg();
             }

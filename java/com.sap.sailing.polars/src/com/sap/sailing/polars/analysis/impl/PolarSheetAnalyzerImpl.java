@@ -5,8 +5,10 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.polars.PolarDataService;
@@ -29,45 +31,31 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
     }
 
     @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
+    public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass, Speed windSpeed, LegType legType, Tack tack)
             throws NotEnoughDataHasBeenAddedException {
-        int startAngleInclusive = 1;
-        int endAngleExclusive = 90;
+        final int startAngleInclusive;
+        final int endAngleExclusive;
+        if (legType == LegType.UPWIND && tack == Tack.STARBOARD) {
+            startAngleInclusive = 1;
+            endAngleExclusive = 90;
+        } else if (legType == LegType.DOWNWIND && tack == Tack.STARBOARD) {
+            startAngleInclusive = 91;
+            endAngleExclusive = 180;
+        } else if (legType == LegType.UPWIND && tack == Tack.PORT) {
+            startAngleInclusive = 181;
+            endAngleExclusive = 270;
+        } else if (legType == LegType.DOWNWIND && tack == Tack.STARBOARD) {
+            startAngleInclusive = 271;
+            endAngleExclusive = 360;
+        } else {
+            throw new IllegalArgumentException("Leg type must be "+LegType.UPWIND.name()+
+                    " or "+LegType.DOWNWIND.name()+" but was "+legType.name());
+        }
         SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
                 endAngleExclusive);
         return speedWithBearing;
     }
-
     
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException {
-        int startAngleInclusive = 91;
-        int endAngleExclusive = 180;
-        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
-                endAngleExclusive);
-        return speedWithBearing;
-    }
-    
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
-            throws NotEnoughDataHasBeenAddedException {
-        int startAngleInclusive = 181;
-        int endAngleExclusive = 270;
-        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
-                endAngleExclusive);
-        return speedWithBearing;
-    }
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass, Speed windSpeed)
-        throws NotEnoughDataHasBeenAddedException {
-        int startAngleInclusive = 271;
-        int endAngleExclusive = 360;
-        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
-        return speedWithBearing;
-    }
-
     private SpeedWithBearingWithConfidence<Void> estimateAnglePeakAndAverageSpeed(BoatClass boatClass, Speed windSpeed,
             int startAngleInclusive, int endAngleExclusive) throws NotEnoughDataHasBeenAddedException {
         int[] dataCountPerAngle = getDataCountArray(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);

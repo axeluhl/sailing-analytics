@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 
 /**
@@ -126,6 +127,11 @@ public interface PolarDataService {
      * @return array with datacount for all angles in the given area, else -1
      */
     int[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
-    
 
+    /**
+     * From a boat's speed over ground and assuming values for <code>boatClass</code>, the <code>tack</code>
+     * the boat is currently sailing on, and the <code>legType</code>, this method estimates the
+     * true wind speed at which the boat may most likely have been sailing under these conditions.
+     */
+    SpeedWithBearingWithConfidence<Void> getAverageTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround, LegType legType, Tack tack);
 }

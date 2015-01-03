@@ -13,9 +13,11 @@ import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -44,17 +46,17 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
 
     private final Set<BoatClassMasterdata> availableBoatClasses = new HashSet<>();
 
-    private final AverageAngleContainer upwindStarboardAverageAngleContainer;
-    private final AverageAngleContainer downwindStarboardAverageAngleContainer;
-    private final AverageAngleContainer upwindPortAverageAngleContainer;
-    private final AverageAngleContainer downwindPortAverageAngleContainer;
+    private final Map<Pair<LegType, Tack>, AverageAngleContainer> averageAngleContainers;
 
     public IncrementalRegressionProcessor(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
-        this.upwindStarboardAverageAngleContainer = new AverageAngleContainer(speedClusterGroup);
-        this.downwindStarboardAverageAngleContainer = new AverageAngleContainer(speedClusterGroup);
-        this.upwindPortAverageAngleContainer = new AverageAngleContainer(speedClusterGroup);
-        this.downwindPortAverageAngleContainer = new AverageAngleContainer(speedClusterGroup);
+        averageAngleContainers = new HashMap<>();
+        for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
+            for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
+                averageAngleContainers.put(new Pair<LegType, Tack>(legType, tack),
+                        new AverageAngleContainer(speedClusterGroup));
+            }
+        }
     }
 
     @Override
@@ -88,20 +90,24 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     private void fillAverageAngleContainer(GPSFixMovingWithPolarContext fix,
             GroupedDataEntry<GPSFixMovingWithPolarContext> element,
             WindWithConfidence<Pair<Position, TimePoint>> windSpeed) {
-        int roundedAngleDeg = fix.getRoundedTrueWindAngle().getAngleDeg();
+        final int roundedAngleDeg = fix.getRoundedTrueWindAngle().getAngleDeg();
+        final LegType legType;
+        final Tack tack;
         if (roundedAngleDeg < -90) {
-            downwindPortAverageAngleContainer.addFix(element.getDataEntry().getBoatClassMasterData(),
-                    windSpeed.getObject(), roundedAngleDeg);
+            legType = LegType.DOWNWIND;
+            tack = Tack.PORT;
         } else if (roundedAngleDeg < 0) {
-            upwindPortAverageAngleContainer.addFix(element.getDataEntry().getBoatClassMasterData(),
-                    windSpeed.getObject(), roundedAngleDeg);
-        } else if (roundedAngleDeg > 0) {
-            upwindStarboardAverageAngleContainer.addFix(element.getDataEntry().getBoatClassMasterData(),
-                    windSpeed.getObject(), roundedAngleDeg);
+            legType = LegType.UPWIND;
+            tack = Tack.PORT;
         } else if (roundedAngleDeg > 90) {
-            downwindStarboardAverageAngleContainer.addFix(element.getDataEntry().getBoatClassMasterData(),
-                    windSpeed.getObject(), roundedAngleDeg);
+            legType = LegType.DOWNWIND;
+            tack = Tack.STARBOARD;
+        } else { // roundedAngleDeg > 0 && roundedAngleDeg <= 90
+            legType = LegType.UPWIND;
+            tack = Tack.STARBOARD;
         }
+        averageAngleContainers.get(new Pair<>(legType, tack)).addFix(element.getDataEntry().getBoatClassMasterData(),
+                windSpeed.getObject(), roundedAngleDeg);
     }
 
     @Override
@@ -195,9 +201,9 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     }
 
     @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass,
-            Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        Double averageAngle = upwindStarboardAverageAngleContainer.getAverageAngleDeg(
+    public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
+            Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
+        Double averageAngle = averageAngleContainers.get(new Pair<>(legType, tack)).getAverageAngleDeg(
                 BoatClassMasterdata.resolveBoatClass(boatClass.getName()), windSpeed);
         return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
     }
@@ -213,29 +219,4 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
                 angleToTheWind);
         return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, estimatedSpeed.getConfidence(), null);
     }
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(
-            BoatClass boatClass, Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        Double averageAngle = downwindStarboardAverageAngleContainer.getAverageAngleDeg(
-                BoatClassMasterdata.resolveBoatClass(boatClass.getName()), windSpeed);
-        return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
-    }
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
-            Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        Double averageAngle = upwindPortAverageAngleContainer.getAverageAngleDeg(
-                BoatClassMasterdata.resolveBoatClass(boatClass.getName()), windSpeed);
-        return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
-    }
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
-            Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        Double averageAngle = downwindPortAverageAngleContainer.getAverageAngleDeg(
-                BoatClassMasterdata.resolveBoatClass(boatClass.getName()), windSpeed);
-        return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
-    }
-
 }

@@ -48,23 +48,14 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
     
     @Override
+    public SpeedWithBearingWithConfidence<Void> getAverageTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround, LegType legType, Tack tack) {
+        return polarDataMiner.estimateTrueWindSpeedAndAngle(boatClass, speedOverGround, legType, tack);
+    }
+
+    @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass,
             Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        SpeedWithBearingWithConfidence<Void> speedWithBearing = null;
-        if (tack.equals(Tack.STARBOARD)) {
-            if (legType.equals(LegType.UPWIND)) {
-                speedWithBearing = polarDataMiner.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
-            } else if (legType.equals(LegType.DOWNWIND)) {
-                speedWithBearing = polarDataMiner.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
-            }
-        } else if (tack.equals(Tack.PORT)) {
-            if (legType.equals(LegType.UPWIND)) {
-                return polarDataMiner.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
-            } else if (legType.equals(LegType.DOWNWIND)) {
-                return polarDataMiner.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
-            }
-        }
-        return speedWithBearing;
+        return polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
     }
 
 

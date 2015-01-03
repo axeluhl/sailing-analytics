@@ -14,7 +14,9 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
@@ -29,26 +31,26 @@ public class PolarSheetAnalyzerTest {
         PolarSheetAnalyzer analyzer = new PolarSheetAnalyzerImpl(createMockedPolarDataService());
         BoatClass boatClass = mock(BoatClass.class);
         
-        SpeedWithBearingWithConfidence<Void> result = analyzer.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass,
-                new KnotSpeedImpl(14));
+        SpeedWithBearingWithConfidence<Void> result = analyzer.getAverageSpeedAndCourseOverGround(boatClass,
+                new KnotSpeedImpl(14), LegType.UPWIND, Tack.STARBOARD);
         assertThat(result.getObject().getKnots(), closeTo(8.5, 0.1));
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(50, 0.1));
         assertThat(result.getConfidence(), closeTo(0.7, 0.1));
         
-        SpeedWithBearingWithConfidence<Void> result2 = analyzer.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass,
-                new KnotSpeedImpl(14));
+        SpeedWithBearingWithConfidence<Void> result2 = analyzer.getAverageSpeedAndCourseOverGround(boatClass,
+                new KnotSpeedImpl(14), LegType.DOWNWIND, Tack.STARBOARD);
         assertThat(result2.getObject().getKnots(), closeTo(14.2, 0.1));
         assertThat(result2.getObject().getBearing().getDegrees(), closeTo(142.8, 0.1));
         assertThat(result2.getConfidence(), closeTo(0.6, 0.1));
         
-        SpeedWithBearingWithConfidence<Void> result3 = analyzer.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass,
-                new KnotSpeedImpl(14));
+        SpeedWithBearingWithConfidence<Void> result3 = analyzer.getAverageSpeedAndCourseOverGround(boatClass,
+                new KnotSpeedImpl(14), LegType.UPWIND, Tack.PORT);
         assertThat(result3.getObject().getKnots(), closeTo(8.6, 0.1));
         assertThat(result3.getObject().getBearing().getDegrees(), closeTo(-49.5, 0.1));
         assertThat(result3.getConfidence(), closeTo(0.7, 0.1));
         
-        SpeedWithBearingWithConfidence<Void> result4 = analyzer.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass,
-                new KnotSpeedImpl(14));
+        SpeedWithBearingWithConfidence<Void> result4 = analyzer.getAverageSpeedAndCourseOverGround(boatClass,
+                new KnotSpeedImpl(14), LegType.DOWNWIND, Tack.PORT);
         assertThat(result4.getObject().getKnots(), closeTo(13.5, 0.1));
         assertThat(result4.getObject().getBearing().getDegrees(), closeTo(-143.6, 0.1));
         assertThat(result4.getConfidence(), closeTo(0.25, 0.1));

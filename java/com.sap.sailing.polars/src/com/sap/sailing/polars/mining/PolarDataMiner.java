@@ -17,10 +17,12 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
@@ -63,8 +65,6 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
             throw new RuntimeException(e);
         }
     }
-
-
 
     private void setUpWorkflow() throws ClassCastException, NoSuchMethodException,
             SecurityException {
@@ -135,7 +135,6 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         
         for (int windIndex = 0; windIndex < defaultWindSpeeds.length; windIndex++) {
             Double windSpeed = defaultWindSpeeds[windIndex];
-            
             Integer[] perAngle = new Integer[360];
             Map<Integer, PolarSheetsHistogramData> perWindSpeed = new HashMap<>();
             for (int angle = 0; angle < 360; angle++) {
@@ -154,7 +153,7 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
                 int dataCount = speedWithConfidenceAndDataCount.getDataCount();
                 
                 totalDataCount = totalDataCount + dataCount;
-                //FIXME hard coded
+                // FIXME hard coded
                 double coefficiantOfVariation = 0.8;
                 double confidenceMeasure = 0.5;
                 
@@ -165,14 +164,10 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
             histogramDataMap.put(windIndex, perWindSpeed);
             dataCountPerAngleForWindspeed.put(windIndex, perAngle);
         }
-        
-        
         PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, totalDataCount,
                 dataCountPerAngleForWindspeed, backendPolarSheetGenerationSettings.getWindSpeedStepping(), histogramDataMap);
         return data;
     }
-
-
 
     private int convertAngleIfNecessary(int angle) {
         int convertedAngle = angle;
@@ -182,8 +177,6 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         return convertedAngle;
     }
 
-
-
     private PolarSheetsHistogramDataImpl createEmptyHistogramData(Integer[] perAngle, int angle, int dataCount,
             double coefficiantOfVariation, double confidenceMeasure) {
         perAngle[angle] = dataCount;
@@ -192,22 +185,15 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         Map<String, Integer[]> yValuesByGaugeIds = new HashMap<>();
         Map<String, Integer[]> yValuesByDay = new HashMap<>();
         Map<String, Integer[]> yValuesByDayAndGaugeId = new HashMap<>();
-        
-        
         PolarSheetsHistogramDataImpl polarSheetsHistogramDataImpl = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, yValuesByGaugeIds,
                 yValuesByDay, yValuesByDayAndGaugeId, dataCount, coefficiantOfVariation);
-        
         polarSheetsHistogramDataImpl.setConfidenceMeasure(confidenceMeasure);
         return polarSheetsHistogramDataImpl;
     }
 
-
-
     public Set<BoatClassMasterdata> getAvailableBoatClasses() {
         return incrementalRegressionProcessor.getAvailableBoatClasses();
     }
-
-
 
     public int[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive) {
         int[] dataCounts = new int[360];
@@ -226,36 +212,15 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         return dataCounts;
     }
 
-
-
     @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnStarboardTackFor(BoatClass boatClass,
-            Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.getAverageUpwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+    public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
+            Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
+        return incrementalRegressionProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
     }
 
-
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnStarboardTackFor(
-            BoatClass boatClass, Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.getAverageDownwindSpeedWithBearingOnStarboardTackFor(boatClass, windSpeed);
+    public SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround,
+            LegType legType, Tack tack) {
+        // TODO Auto-generated method stub
+        return null;
     }
-
-
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageUpwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
-            Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.getAverageUpwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
-    }
-
-
-
-    @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageDownwindSpeedWithBearingOnPortTackFor(BoatClass boatClass,
-            Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.getAverageDownwindSpeedWithBearingOnPortTackFor(boatClass, windSpeed);
-    }
-
 }
