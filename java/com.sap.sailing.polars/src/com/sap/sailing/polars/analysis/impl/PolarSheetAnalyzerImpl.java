@@ -36,16 +36,16 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
         final int startAngleInclusive;
         final int endAngleExclusive;
         if (legType == LegType.UPWIND && tack == Tack.STARBOARD) {
-            startAngleInclusive = 1;
+            startAngleInclusive = 0;
             endAngleExclusive = 90;
         } else if (legType == LegType.DOWNWIND && tack == Tack.STARBOARD) {
-            startAngleInclusive = 91;
+            startAngleInclusive = 90;
             endAngleExclusive = 180;
         } else if (legType == LegType.UPWIND && tack == Tack.PORT) {
-            startAngleInclusive = 181;
+            startAngleInclusive = 180;
             endAngleExclusive = 270;
         } else if (legType == LegType.DOWNWIND && tack == Tack.STARBOARD) {
-            startAngleInclusive = 271;
+            startAngleInclusive = 270;
             endAngleExclusive = 360;
         } else {
             throw new IllegalArgumentException("Leg type must be "+LegType.UPWIND.name()+
