@@ -181,9 +181,9 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
         AverageAngleContainer averageAngleContainer = averageAngleContainers.get(new Pair<>(legType, tack));
-        /* TODO use */ averageAngleContainer.toString(); /* to calculate the most likely true wind speed/angle
-         * assuming the boat was going at a reasonable VMG in the legType on its tack */
-        return null;
+        return new SpeedWithBearingWithConfidenceImpl<Void>(
+                averageAngleContainer.getAverageTrueWindSpeedAndAngle(BoatClassMasterdata.resolveBoatClass(boatClass.getName()), speedOverGround),
+                /* confidence */ 0.5, /* relative to */ null); // TODO how to determine a good measure for the confidence?
     }
 
     @Override
