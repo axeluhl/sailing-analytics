@@ -97,7 +97,7 @@ public class MultipleClassesInRegattaTest {
                         new DummyTrackedRegattaRegistry());
 
         assertEquals("STG", kiwotest1.getRegatta().getBoatClass().getName());
-        assertEquals("505", kiwotest2.getRegatta().getBoatClass().getName());
+        assertEquals("5O5", kiwotest2.getRegatta().getBoatClass().getName());
         assertEquals("49er", kiwotest3.getRegatta().getBoatClass().getName());
         assertEquals("STG", weym470may112014_2.getRegatta().getBoatClass().getName());
         assertNotSame(kiwotest1.getRegatta(), kiwotest2.getRegatta());

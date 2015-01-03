@@ -276,7 +276,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
             if (result == null && unifiedBoatClassName != null) {
                 BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
                 if (boatClassMasterdata != null) {
-                    result = new BoatClassImpl(name, boatClassMasterdata);
+                    result = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
                     boatClassCache.put(name, result);
                     boatClassCache.put(unifiedBoatClassName, result);
                     boatClassCache.put(boatClassMasterdata.getDisplayName(), result);
