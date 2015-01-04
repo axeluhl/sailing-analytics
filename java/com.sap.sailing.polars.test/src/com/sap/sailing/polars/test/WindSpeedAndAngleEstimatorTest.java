@@ -1,6 +1,7 @@
 package com.sap.sailing.polars.test;
 
 import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
@@ -125,6 +126,28 @@ public class WindSpeedAndAngleEstimatorTest {
         assertThat(result.getObject().getKnots(), closeTo(5, ERROR));
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.5, ERROR));
         assertThat(result.getConfidence(), closeTo(0.25, ERROR));
+             
+    }
+    
+    @Test
+    public void testAverageTrueWindSpeedAndAngleEstimationNegative() {
+        List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = new ArrayList<>();
+        averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(
+                new KnotSpeedImpl(5), new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(3,
+                        new DegreeBearingImpl(46)), 0.4, null)));
+        averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(
+                new KnotSpeedImpl(6), new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(4,
+                        new DegreeBearingImpl(47)), 0.6, null)));
+        averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(
+                new KnotSpeedImpl(7), new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(4.5,
+                        new DegreeBearingImpl(47.5)), 0.5, null)));
+        WindSpeedAndAngleEstimator estimator = new WindSpeedAndAngleEstimator(averageBoatSpeedAndCourseForWindSpeed);
+        
+        SpeedWithBearingWithConfidence<Void> result = estimator.getAverageTrueWindSpeedAndAngle(new KnotSpeedImpl(2));
+        assertThat(result, nullValue());
+        
+        result = estimator.getAverageTrueWindSpeedAndAngle(new KnotSpeedImpl(5.5));
+        assertThat(result, nullValue());
              
     }
     
