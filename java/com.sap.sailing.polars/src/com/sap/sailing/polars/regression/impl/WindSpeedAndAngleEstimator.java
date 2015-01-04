@@ -113,8 +113,14 @@ public class WindSpeedAndAngleEstimator {
             SpeedWithBearingWithConfidence<Void> averageBoatSpeedWithCourse, double lastBoatSpeedInKnots,
             double currentBoatSpeedInKnots) {
         double differenceBetweenBothSpeedsInKnots = lastBoatSpeedInKnots - currentBoatSpeedInKnots;
-        double differenceBetweenRequestedAndLower = requestedBoatSpeedInKnots - currentBoatSpeedInKnots;
-        double ratio = differenceBetweenRequestedAndLower / differenceBetweenBothSpeedsInKnots;
+        double ratio;
+        if (differenceBetweenBothSpeedsInKnots < 0.00001) {
+            //Both sampling points have the same ratio. Use confidence to determine the ratio
+            ratio = last.getB().getConfidence() / (averageBoatSpeedWithCourse.getConfidence() + last.getB().getConfidence());
+        } else {
+            double differenceBetweenRequestedAndLower = requestedBoatSpeedInKnots - currentBoatSpeedInKnots;
+            ratio = differenceBetweenRequestedAndLower / differenceBetweenBothSpeedsInKnots;
+        }
         double weightedAverageWindSpeedInKnots = (( 1 - ratio) * windSpeed.getKnots())
                 + (ratio * last.getA().getKnots());
         double currentCourseInDeg = averageBoatSpeedWithCourse.getObject().getBearing()
@@ -123,9 +129,9 @@ public class WindSpeedAndAngleEstimator {
         double weightedAverageAngleInDeg = (( 1 - ratio) * currentCourseInDeg) + (ratio * lastCourseInDeg);
         double weightedAverageConfidence = (( 1 - ratio) * averageBoatSpeedWithCourse.getConfidence())
                 + (ratio * last.getB().getConfidence());
-        SpeedWithBearingWithConfidenceImpl<Void> resultCandidate = new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
-                weightedAverageWindSpeedInKnots, new DegreeBearingImpl(weightedAverageAngleInDeg)),
-                weightedAverageConfidence, null);
+        SpeedWithBearingWithConfidenceImpl<Void> resultCandidate = new SpeedWithBearingWithConfidenceImpl<Void>(
+                new KnotSpeedWithBearingImpl(weightedAverageWindSpeedInKnots, new DegreeBearingImpl(
+                        weightedAverageAngleInDeg)), weightedAverageConfidence, null);
         return resultCandidate;
     }
 
@@ -134,8 +140,15 @@ public class WindSpeedAndAngleEstimator {
             SpeedWithBearingWithConfidence<Void> averageBoatSpeedWithCourse, double lastBoatSpeedInKnots,
             double currentBoatSpeedInKnots) {
         double differenceBetweenBothSpeedsInKnots = currentBoatSpeedInKnots - lastBoatSpeedInKnots;
-        double differenceBetweenRequestedAndLower = requestedBoatSpeedInKnots - lastBoatSpeedInKnots;
-        double ratio = differenceBetweenRequestedAndLower / differenceBetweenBothSpeedsInKnots;
+        double ratio;
+        if (differenceBetweenBothSpeedsInKnots < 0.00001) {
+            // Both sampling points have the same ratio. Use confidence to determine the ratio
+            ratio = averageBoatSpeedWithCourse.getConfidence()
+                    / (averageBoatSpeedWithCourse.getConfidence() + last.getB().getConfidence());
+        } else {
+            double differenceBetweenRequestedAndLower = requestedBoatSpeedInKnots - lastBoatSpeedInKnots;
+            ratio = differenceBetweenRequestedAndLower / differenceBetweenBothSpeedsInKnots;
+        }
         double weightedAverageWindSpeedInKnots = (ratio * windSpeed.getKnots())
                 + ((1 - ratio) * last.getA().getKnots());
         double currentCourseInDeg = averageBoatSpeedWithCourse.getObject().getBearing()
@@ -144,9 +157,9 @@ public class WindSpeedAndAngleEstimator {
         double weightedAverageAngleInDeg = (ratio * currentCourseInDeg) + ((1 - ratio) * lastCourseInDeg);
         double weightedAverageConfidence = (ratio * averageBoatSpeedWithCourse.getConfidence())
                 + ((1 - ratio) * last.getB().getConfidence());
-        SpeedWithBearingWithConfidenceImpl<Void> resultCandidate = new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
-                weightedAverageWindSpeedInKnots, new DegreeBearingImpl(weightedAverageAngleInDeg)),
-                weightedAverageConfidence, null);
+        SpeedWithBearingWithConfidenceImpl<Void> resultCandidate = new SpeedWithBearingWithConfidenceImpl<Void>(
+                new KnotSpeedWithBearingImpl(weightedAverageWindSpeedInKnots, new DegreeBearingImpl(
+                        weightedAverageAngleInDeg)), weightedAverageConfidence, null);
         return resultCandidate;
     }
 

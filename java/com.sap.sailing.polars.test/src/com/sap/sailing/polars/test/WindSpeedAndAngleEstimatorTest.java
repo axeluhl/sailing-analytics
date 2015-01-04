@@ -177,4 +177,35 @@ public class WindSpeedAndAngleEstimatorTest {
              
     }
     
+    @Test
+    public void testAverageTrueWindSpeedAndAngleEstimationForTwoSamplingPointsWithSameBoatSpeed() {
+        List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = new ArrayList<>();
+        averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(
+                new KnotSpeedImpl(7), new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(4.5,
+                        new DegreeBearingImpl(47.5)), 0.5, null)));
+        averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(
+                new KnotSpeedImpl(8), new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(4.5,
+                        new DegreeBearingImpl(47.5)), 0.4, null)));
+        averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(
+                new KnotSpeedImpl(9), new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(5.5,
+                        new DegreeBearingImpl(47.5)), 0.4, null)));
+        averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(
+                new KnotSpeedImpl(10), new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(5.5,
+                        new DegreeBearingImpl(47.5)), 0.5, null)));
+        WindSpeedAndAngleEstimator estimator = new WindSpeedAndAngleEstimator(averageBoatSpeedAndCourseForWindSpeed);
+        
+        SpeedWithBearingWithConfidence<Void> result = estimator.getAverageTrueWindSpeedAndAngle(new KnotSpeedImpl(4.5));
+        assertThat(result.getObject().getKnots(), closeTo(7.44444, ERROR));
+        assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.5, ERROR));
+        assertThat(result.getConfidence(), closeTo(0.455555, ERROR));
+        
+        result = estimator.getAverageTrueWindSpeedAndAngle(new KnotSpeedImpl(5.5));
+        assertThat(result.getObject().getKnots(), closeTo(9.555555, ERROR));
+        assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.5, ERROR));
+        assertThat(result.getConfidence(), closeTo(0.455555, ERROR));
+        
+        
+             
+    }
+    
 }
