@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -77,7 +76,7 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     @Override
-    public Set<BoatClassMasterdata> getAllBoatClassesWithPolarSheetsAvailable() {
+    public Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable() {
         return polarDataMiner.getAvailableBoatClasses();
     }
 

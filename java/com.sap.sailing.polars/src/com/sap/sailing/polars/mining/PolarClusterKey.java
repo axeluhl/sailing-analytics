@@ -1,6 +1,6 @@
 package com.sap.sailing.polars.mining;
 
-import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.annotations.Dimension;
@@ -22,6 +22,6 @@ public interface PolarClusterKey {
     Cluster<Speed> getWindSpeedCluster();
 
     @Dimension(messageKey = "boatClass")
-    BoatClassMasterdata getBoatClassMasterData();
+    BoatClass getBoatClass();
 
 }
