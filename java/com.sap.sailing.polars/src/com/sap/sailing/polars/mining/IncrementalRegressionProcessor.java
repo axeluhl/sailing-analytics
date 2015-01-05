@@ -183,6 +183,24 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
 
     SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
+        List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = obtainPolarSamplingPoints(
+                boatClass, legType, tack);
+        
+        WindSpeedAndAngleEstimator windSpeedAndAngleEstimator = new WindSpeedAndAngleEstimator(averageBoatSpeedAndCourseForWindSpeed);
+        return windSpeedAndAngleEstimator.getAverageTrueWindSpeedAndAngle(speedOverGround);
+    }
+    
+    Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
+            Speed speedOverGround, LegType legType, Tack tack) {
+        List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = obtainPolarSamplingPoints(
+                boatClass, legType, tack);
+        
+        WindSpeedAndAngleEstimator windSpeedAndAngleEstimator = new WindSpeedAndAngleEstimator(averageBoatSpeedAndCourseForWindSpeed);
+        return windSpeedAndAngleEstimator.getAverageTrueWindSpeedAndAngleCandidates(speedOverGround);
+    }
+
+    public List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> obtainPolarSamplingPoints(BoatClass boatClass,
+            LegType legType, Tack tack) {
         List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = new ArrayList<>();
         for (int i = 0; i < 60; i++) {
             Speed windSpeed = new KnotSpeedImpl(i * 0.5);
@@ -197,9 +215,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             }
             
         }
-        
-        WindSpeedAndAngleEstimator windSpeedAndAngleEstimator = new WindSpeedAndAngleEstimator(averageBoatSpeedAndCourseForWindSpeed);
-        return windSpeedAndAngleEstimator.getAverageTrueWindSpeedAndAngle(speedOverGround);
+        return averageBoatSpeedAndCourseForWindSpeed;
     }
 
     @Override

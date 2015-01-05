@@ -50,6 +50,12 @@ public class PolarDataServiceImpl implements PolarDataService {
     public SpeedWithBearingWithConfidence<Void> getAverageTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround, LegType legType, Tack tack) {
         return polarDataMiner.estimateTrueWindSpeedAndAngle(boatClass, speedOverGround, legType, tack);
     }
+    
+    @Override
+    public Set<SpeedWithBearingWithConfidence<Void>> getAverageTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
+            Speed speedOverGround, LegType legType, Tack tack) {
+        return polarDataMiner.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
+    }
 
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass,

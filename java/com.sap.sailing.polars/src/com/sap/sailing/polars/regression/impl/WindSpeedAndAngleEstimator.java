@@ -1,7 +1,8 @@
 package com.sap.sailing.polars.regression.impl;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
@@ -45,11 +46,36 @@ public class WindSpeedAndAngleEstimator {
     /**
      * Looks at all entries in {@link #dataCountAndAngleSumMap} and determines the wind speed and true wind angle at
      * which the boat has most likely been sailing to achieve the <code>boatSpeed</code> provided.
+     * 
+     * @return null if none was found, otherwise candidate with highest confidence, found in the list returned by
+     *         {@link #getAverageTrueWindSpeedAndAngleCandidates(Speed)}
      */
     public SpeedWithBearingWithConfidence<Void> getAverageTrueWindSpeedAndAngle(Speed boatSpeed) {
+        Set<SpeedWithBearingWithConfidence<Void>> resultCandidates = getAverageTrueWindSpeedAndAngleCandidates(boatSpeed);
+        
+        SpeedWithBearingWithConfidence<Void> resultCandidateWithHighestConfidence = null;
+        for (SpeedWithBearingWithConfidence<Void> resultCandidate : resultCandidates) {
+            if (resultCandidateWithHighestConfidence == null
+                    || resultCandidate.getConfidence() > resultCandidateWithHighestConfidence.getConfidence()) {
+                resultCandidateWithHighestConfidence = resultCandidate;
+            }
+        }
+        return resultCandidateWithHighestConfidence;
+    }
+
+
+    /**
+     * Uses the constructor-supplied sampling points to find wind and course candidates for the supplied boatSpeed.
+     * 
+     * @return empty set if the underlying data was not sufficient to estimate wind. Otherwise a set of candidates
+     *         with windspeed course of the boat relative to the wind and a confidence which was derived from the
+     *         confidences of underlying fixes, the amount of underlying fixes and the distance between the input
+     *         boatSpeed and the sampling points supplied by the gathered polar data.
+     */
+    public Set<SpeedWithBearingWithConfidence<Void>> getAverageTrueWindSpeedAndAngleCandidates(Speed boatSpeed) {
         double requestedBoatSpeedInKnots = boatSpeed.getKnots();
         Pair<Speed, SpeedWithBearingWithConfidence<Void>> last = null;
-        List<SpeedWithBearingWithConfidence<Void>> resultCandidates = new ArrayList<>();
+        Set<SpeedWithBearingWithConfidence<Void>> resultCandidates = new HashSet<>();
         for (Pair<Speed, SpeedWithBearingWithConfidence<Void>> averageSpeedForWindSpeed : averageBoatSpeedAndCourseForWindSpeed) {
             Speed windSpeed = averageSpeedForWindSpeed.getA();
             SpeedWithBearingWithConfidence<Void> averageBoatSpeedWithCourse = averageSpeedForWindSpeed.getB();
@@ -80,15 +106,7 @@ public class WindSpeedAndAngleEstimator {
         // This will be run when there is no higher sampling point windspeed wise
         addResultCandidateForOneSideSamplingPointSituationIfDistanceValid(requestedBoatSpeedInKnots, resultCandidates,
                 last.getA(), last.getB(), last.getB().getObject().getKnots());
-        
-        SpeedWithBearingWithConfidence<Void> resultCandidateWithHighestConfidence = null;
-        for (SpeedWithBearingWithConfidence<Void> resultCandidate : resultCandidates) {
-            if (resultCandidateWithHighestConfidence == null
-                    || resultCandidate.getConfidence() > resultCandidateWithHighestConfidence.getConfidence()) {
-                resultCandidateWithHighestConfidence = resultCandidate;
-            }
-        }
-        return resultCandidateWithHighestConfidence;
+        return resultCandidates;
     }
 
 
@@ -97,7 +115,7 @@ public class WindSpeedAndAngleEstimator {
      * the regarded windspeed
      */
     private void addResultCandidateForOneSideSamplingPointSituationIfDistanceValid(double requestedBoatSpeedInKnots,
-            List<SpeedWithBearingWithConfidence<Void>> resultCandidates, Speed windSpeed,
+            Set<SpeedWithBearingWithConfidence<Void>> resultCandidates, Speed windSpeed,
             SpeedWithBearingWithConfidence<Void> averageBoatSpeedWithCourse, double currentBoatSpeedInKnots) {
         if (Math.abs(currentBoatSpeedInKnots - requestedBoatSpeedInKnots) <= maxDistanceToSamplingPointIfOnlyOnOneSideInKnots) {
             SpeedWithBearingWithConfidence<Void> resultCandidate = new SpeedWithBearingWithConfidenceImpl<Void>(
