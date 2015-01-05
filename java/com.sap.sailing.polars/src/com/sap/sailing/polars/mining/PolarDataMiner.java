@@ -127,6 +127,11 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
             LegType legType, Tack tack) {
         return incrementalRegressionProcessor.estimateTrueWindSpeedAndAngle(boatClass, speedOverGround, legType, tack);
     }
+    
+    public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
+            Speed speedOverGround, LegType legType, Tack tack) {
+        return incrementalRegressionProcessor.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
+    }
 
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
         double[] defaultWindSpeeds = backendPolarSheetGenerationSettings.getWindSpeedStepping().getRawStepping();
