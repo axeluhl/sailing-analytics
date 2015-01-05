@@ -245,6 +245,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
                             }
                             pw.close();
                             s.close();
+                            logger.info("Request handled successfully.");
                         }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
