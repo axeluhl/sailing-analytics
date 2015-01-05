@@ -2,11 +2,14 @@ package com.sap.sailing.polars.windestimation;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -15,6 +18,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -46,22 +50,51 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     }
 
     /**
+     * Collects data about a maneuver that will be used to assign probabilities for maneuver types such as tack or
+     * jibe, looking at a larger set of such objects and finding the most probable overall solution.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private static class ManeuverClassification {
+        private final Maneuver maneuver;
+        private final Map<Pair<LegType, Tack>, SpeedWithBearingWithConfidence<Void>> estimatedTrueWindSpeedAndAngles;
+        protected ManeuverClassification(Maneuver maneuver,
+                Map<Pair<LegType, Tack>, SpeedWithBearingWithConfidence<Void>> estimatedTrueWindSpeedAndAngles) {
+            super();
+            this.maneuver = maneuver;
+            this.estimatedTrueWindSpeedAndAngles = estimatedTrueWindSpeedAndAngles;
+        }
+        public Maneuver getManeuver() {
+            return maneuver;
+        }
+        public Map<Pair<LegType, Tack>, SpeedWithBearingWithConfidence<Void>> getEstimatedTrueWindSpeedAndAngles() {
+            return estimatedTrueWindSpeedAndAngles;
+        }
+    }
+    
+    /**
      * Fetches all the race's maneuvers and tries to find the tacks and jibes. For each such maneuver identified, a wind fix
      * will be created based on the average COG into and out of the maneuver.
      */
     private void analyzeRace() throws NotEnoughDataHasBeenAddedException {
         final Map<Maneuver, BoatClass> maneuvers = getAllManeuvers();
+        Set<ManeuverClassification> maneuverClassifications = new HashSet<>();
         for (final Entry<Maneuver, BoatClass> maneuverAndBoatClass : maneuvers.entrySet()) {
             // Now for each maneuver's starting speed (speed into the maneuver) get the approximated
             // wind speed and direction assuming average upwind / downwind performance based on the polar service.
             // TODO continue here, asking the polarService for the wind speed based on boat speed, leg type and tack
+            Map<Pair<LegType, Tack>, SpeedWithBearingWithConfidence<Void>> estimatedTrueWindSpeedAndAngles = new HashMap<>();
             for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
                 for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
-                    polarService.getAverageTrueWindSpeedAndAngle(maneuverAndBoatClass.getValue(),
-                            maneuverAndBoatClass.getKey().getSpeedWithBearingBefore(),
-                            legType, tack);
+                    SpeedWithBearingWithConfidence<Void> trueWindSpeedAndAngle = polarService
+                            .getAverageTrueWindSpeedAndAngle(maneuverAndBoatClass.getValue(), maneuverAndBoatClass
+                                    .getKey().getSpeedWithBearingBefore(), legType, tack);
+                    estimatedTrueWindSpeedAndAngles.put(new Pair<>(legType, tack), trueWindSpeedAndAngle);
                 }
             }
+            ManeuverClassification maneuverClassification = new ManeuverClassification(maneuverAndBoatClass.getKey(), estimatedTrueWindSpeedAndAngles);
+            maneuverClassifications.add(maneuverClassification);
         }
     }
 
