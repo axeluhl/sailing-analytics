@@ -138,7 +138,7 @@
                     If so the IP of the host would be the same for all profiles.
 		-->
         <parameters.common>
-		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest -DspatialWind=true
+		  -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
         </parameters.common>
 		<parameters.vm-settings>
           -ea -Xmx1024m -XX:PermSize=256m -XX:+UseG1GC

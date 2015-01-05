@@ -96,6 +96,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
      */
     protected Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> basicSetUp(boolean dropDB,
             ReplicableImpl master, ReplicableImpl replica) throws Exception {
+        logger.info("basicSetUp for test class "+getClass().getName());
         persistenceSetUp(dropDB);
         String exchangeName = "test-sapsailinganalytics-exchange";
         String exchangeHost = "localhost";
@@ -123,8 +124,10 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,
                 this.replica, this.master, masterReplicator, masterDescriptor);
         Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
+        logger.info("starting initial load transmission servlet for "+getClass().getName());
         initialLoadTestServerThread = replicaReplicator.startInitialLoadTransmissionServlet();
         this.replicaReplicator = replicaReplicator; 
+        logger.info("basicSetUp for test class "+getClass().getName()+" finished");
         return result;
     }
 
