@@ -144,18 +144,24 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
 
     @After
     public void tearDown() throws Exception {
+        logger.info("starting to tearDown() test");
         persistenceTearDown();
         if (masterReplicator != null) {
+            logger.info("before unregisterReplica...");
             masterReplicator.unregisterReplica(replicaDescriptor);
         }
         if (masterDescriptor != null) {
+            logger.info("before stopConnection...");
             masterDescriptor.stopConnection();
         }
         try {
             if (initialLoadTestServerThread != null) {
+                logger.info("found non-null initialLoadTestServerThread that we'll now try to stop...");
                 URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
                 urlConnection.getInputStream().close();
+                logger.info("sent and closed STOP request");
                 initialLoadTestServerThread.join(10000 /* wait 10s */);
+                logger.info("joined servlet thread");
                 assertFalse("Expected initial load test server thread to die", initialLoadTestServerThread.isAlive());
             }
         } catch (ConnectException ex) {
@@ -209,6 +215,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
                         while (!stop) {
                             Socket s = ss.accept();
                             String request = new BufferedReader(new InputStreamReader(s.getInputStream())).readLine();
+                            logger.info("received request "+request);
                             PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
                             pw.println("HTTP/1.1 200 OK");
                             pw.println("Content-Type: text/plain");
