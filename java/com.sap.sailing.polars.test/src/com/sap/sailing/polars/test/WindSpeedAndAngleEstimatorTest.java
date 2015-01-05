@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -203,7 +204,8 @@ public class WindSpeedAndAngleEstimatorTest {
                 .getAverageTrueWindSpeedAndAngleCandidates(new KnotSpeedImpl(4.3));
         assertThat(result.size(), is(2));
         for (SpeedWithBearingWithConfidence<Void> candidate : result) {
-            assertThat(candidate.getConfidence(), anyOf(closeTo(0.2999999, ERROR), closeTo(0.54, ERROR)));
+            assertTrue(Math.abs(candidate.getConfidence()-0.2999999)<=ERROR ||
+                    Math.abs(candidate.getConfidence()-0.54)<=ERROR);
             if (Math.abs(candidate.getConfidence() - 0.2999999) < ERROR) {
                 assertThat(candidate.getObject().getKnots(), closeTo(7.8, ERROR));
                 assertThat(candidate.getObject().getBearing().getDegrees(), closeTo(47.5, ERROR));
