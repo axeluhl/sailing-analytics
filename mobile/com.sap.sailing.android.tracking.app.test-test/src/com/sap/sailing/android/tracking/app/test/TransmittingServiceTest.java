@@ -44,8 +44,8 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
         
         if (networkHelperSpy == null)
         {
-        	networkHelperSpy = Mockito.spy(new NetworkHelperTestable(getContext()));
-        	NetworkHelperTestable.injectInstance(networkHelperSpy);
+        	networkHelperSpy = Mockito.spy(new NetworkHelperTestable());
+        	NetworkHelperTestable.injectInstance(getContext(), networkHelperSpy);
         }
         
         if (databaseHelperMock == null)

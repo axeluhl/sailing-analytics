@@ -45,8 +45,7 @@ public class AnalyticsContract {
 
 	public static final String CONTENT_AUTHORITY = "com.sap.sailing.android.tracking.app.provider.db";
 
-	public static final Uri BASE_CONTENT_URI = Uri.parse("content://"
-			+ CONTENT_AUTHORITY);
+	public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
 	private static final String PATH_COMPETITOR = "competitors";
 	private static final String PATH_EVENT = "events";
