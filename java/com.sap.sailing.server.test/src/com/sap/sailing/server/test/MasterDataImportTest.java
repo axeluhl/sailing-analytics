@@ -294,12 +294,10 @@ public class MasterDataImportTest {
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             DB db = destService.getMongoObjectFactory().getDatabase();
-            WriteConcern writeConcern = db.getWriteConcern();
+            db.setWriteConcern(WriteConcern.SAFE);
             inputStream = new ByteArrayInputStream(os.toByteArray());
-
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
             importer.importFromStream(inputStream, randomUUID, false);
-            writeConcern.callGetLastError(); // wait for all writes to actually have been written
         } finally {
             os.close();
             inputStream.close();
