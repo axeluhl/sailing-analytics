@@ -15,7 +15,7 @@ public class WindSpeedAndAngleEstimator {
 
     private static final double DEFAULT_MAX_DISTANCE_TO_SAMPLING_POINT = 0.5;
     private final List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed;
-    private final double maxDistanceToSamplingPointIfOnlyOnOneSideInKnots;
+    private final double maxDistanceToSamplingPointFunctionInKnots;
 
     /**
      * 
@@ -32,15 +32,15 @@ public class WindSpeedAndAngleEstimator {
      * 
      * @param averageBoatSpeedAndCourseForWindSpeed
      *            List of sampling points. Needs to be sorted by windspeed (A of the Pair object) low to high
-     * @param maxDistanceToSamplingPointIfOnlyOnOneSideInKnots
+     * @param maxDistanceToSamplingPointFunctionInKnots
      *            If there is only a sampling point on one side, what's the maximal distance to consider valid when
      *            comparing?
      */
     public WindSpeedAndAngleEstimator(
             List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed,
-            double maxDistanceToSamplingPointIfOnlyOnOneSideInKnots) {
+            double maxDistanceToSamplingPointFunctionInKnots) {
         this.averageBoatSpeedAndCourseForWindSpeed = averageBoatSpeedAndCourseForWindSpeed;
-        this.maxDistanceToSamplingPointIfOnlyOnOneSideInKnots = maxDistanceToSamplingPointIfOnlyOnOneSideInKnots;
+        this.maxDistanceToSamplingPointFunctionInKnots = maxDistanceToSamplingPointFunctionInKnots;
     }
 
     /**
@@ -76,6 +76,7 @@ public class WindSpeedAndAngleEstimator {
         double requestedBoatSpeedInKnots = boatSpeed.getKnots();
         Pair<Speed, SpeedWithBearingWithConfidence<Void>> last = null;
         Set<SpeedWithBearingWithConfidence<Void>> resultCandidates = new HashSet<>();
+        Set<SpeedWithBearingWithConfidence<Void>> resultCandidatesWithDistance = new HashSet<>();
         for (Pair<Speed, SpeedWithBearingWithConfidence<Void>> averageSpeedForWindSpeed : averageBoatSpeedAndCourseForWindSpeed) {
             Speed windSpeed = averageSpeedForWindSpeed.getA();
             SpeedWithBearingWithConfidence<Void> averageBoatSpeedWithCourse = averageSpeedForWindSpeed.getB();
@@ -96,28 +97,38 @@ public class WindSpeedAndAngleEstimator {
                             lastBoatSpeedInKnots, currentBoatSpeedInKnots);
                     resultCandidates.add(resultCandidate);
                 }
-            } else {
-                //This will be run when there is no lower sampling point windspeed wise
-                addResultCandidateForOneSideSamplingPointSituationIfDistanceValid(requestedBoatSpeedInKnots,
-                        resultCandidates, windSpeed, averageBoatSpeedWithCourse, currentBoatSpeedInKnots);
+            }
+            /*
+             * This will be run when there was no candidate found in between the two sampling points (or we are at the
+             * beginning) and add a Candidate if the requested point was maxDistanceToSamplingPointFunctionInKnots or
+             * less away from the last regarded sampling point. The candidate (if valid) is then added to the
+             * resultCandidatesWithDistance set. Confidences are halved and the set is only used if the standard result
+             * set is empty in the end
+             */
+            if (resultCandidates.size() == 0 && last != null) {
+                addResultCandidateIfDistanceValid(requestedBoatSpeedInKnots, resultCandidatesWithDistance, last.getA(),
+                        last.getB());
             }
             last = averageSpeedForWindSpeed;
         }
-        // This will be run when there is no higher sampling point windspeed wise
-        addResultCandidateForOneSideSamplingPointSituationIfDistanceValid(requestedBoatSpeedInKnots, resultCandidates,
-                last.getA(), last.getB(), last.getB().getObject().getKnots());
+        // check last sampling point for distance match and return withDistance set if standard set is empty
+        if (resultCandidates.size() == 0) {
+            addResultCandidateIfDistanceValid(requestedBoatSpeedInKnots, resultCandidatesWithDistance, last.getA(),
+                    last.getB());
+            resultCandidates = resultCandidatesWithDistance;
+        }
         return resultCandidates;
     }
 
 
     /**
-     * Confidence will be halved in situations where there is only one sampling point either to the left or the right of
-     * the regarded windspeed
+     * Confidence will be halved in situations where there the requested speed does not lie between any sampling points.
+     * The speed and angle values are equal to the sampling point values.
      */
-    private void addResultCandidateForOneSideSamplingPointSituationIfDistanceValid(double requestedBoatSpeedInKnots,
+    private void addResultCandidateIfDistanceValid(double requestedBoatSpeedInKnots,
             Set<SpeedWithBearingWithConfidence<Void>> resultCandidates, Speed windSpeed,
-            SpeedWithBearingWithConfidence<Void> averageBoatSpeedWithCourse, double currentBoatSpeedInKnots) {
-        if (Math.abs(currentBoatSpeedInKnots - requestedBoatSpeedInKnots) <= maxDistanceToSamplingPointIfOnlyOnOneSideInKnots) {
+            SpeedWithBearingWithConfidence<Void> averageBoatSpeedWithCourse) {
+        if (Math.abs(averageBoatSpeedWithCourse.getObject().getKnots() - requestedBoatSpeedInKnots) <= maxDistanceToSamplingPointFunctionInKnots) {
             SpeedWithBearingWithConfidence<Void> resultCandidate = new SpeedWithBearingWithConfidenceImpl<Void>(
                     new KnotSpeedWithBearingImpl(windSpeed.getKnots(), new DegreeBearingImpl(averageBoatSpeedWithCourse
                             .getObject().getBearing().getDegrees())), averageBoatSpeedWithCourse.getConfidence() * 0.5,
