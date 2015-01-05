@@ -241,6 +241,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
                                 ros.close();
                             } else if (request.contains("STOP")) {
                                 stop = true;
+                                logger.info("received STOP request");
                             }
                             pw.close();
                             s.close();
