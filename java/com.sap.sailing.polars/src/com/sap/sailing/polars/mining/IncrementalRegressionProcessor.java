@@ -195,9 +195,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             } catch (NotEnoughDataHasBeenAddedException e) {
                 // ignore this, since there is not enough data for this windspeed.
             }
-            
         }
-        
         WindSpeedAndAngleEstimator windSpeedAndAngleEstimator = new WindSpeedAndAngleEstimator(averageBoatSpeedAndCourseForWindSpeed);
         return windSpeedAndAngleEstimator.getAverageTrueWindSpeedAndAngle(speedOverGround);
     }
@@ -239,8 +237,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         }
         DegreeBearingImpl angleToTheWind = new DegreeBearingImpl(averageAngle);
         SpeedWithConfidence<Void> estimatedSpeed = estimateBoatSpeed(boatClass, windSpeed, angleToTheWind).getSpeedWithConfidence();
-        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed.getObject().getKnots(),
-                angleToTheWind);
+        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed.getObject().getKnots(), angleToTheWind);
         return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, estimatedSpeed.getConfidence(), null);
     }
 

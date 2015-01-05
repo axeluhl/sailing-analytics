@@ -26,7 +26,6 @@ public class WindSpeedAndAngleEstimator {
         this(averageBoatSpeedAndCourseForWindSpeed, DEFAULT_MAX_DISTANCE_TO_SAMPLING_POINT);
     }
 
-
     /**
      * 
      * @param averageBoatSpeedAndCourseForWindSpeed
@@ -90,7 +89,6 @@ public class WindSpeedAndAngleEstimator {
         }
         return resultCandidateWithHighestConfidence;
     }
-
 
     /**
      * Confidence will be halved in situations where there is only one sampling point either to the left or the right of
