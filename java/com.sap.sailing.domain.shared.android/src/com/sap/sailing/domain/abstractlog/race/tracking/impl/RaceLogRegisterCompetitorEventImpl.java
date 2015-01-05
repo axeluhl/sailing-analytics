@@ -12,17 +12,22 @@ import com.sap.sailing.domain.abstractlog.shared.events.impl.BaseRegisterCompeti
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEventImpl<RaceLogEventVisitor>
-implements RaceLogRegisterCompetitorEvent {
+public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEventImpl<RaceLogEventVisitor> implements
+        RaceLogRegisterCompetitorEvent {
     private static final long serialVersionUID = -5114645637316367845L;
     private final RaceLogEventData raceLogEventData;
-    
+
+    /**
+     * @throws IllegalArgumentException
+     *             if {@code competitor} is null
+     */
     public RaceLogRegisterCompetitorEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, int passId, Competitor competitor) {
+            TimePoint logicalTimePoint, Serializable id, int passId, Competitor competitor)
+            throws IllegalArgumentException {
         super(createdAt, author, logicalTimePoint, id, competitor);
         this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
     }
-    
+
     @Override
     public int getPassId() {
         return raceLogEventData.getPassId();
