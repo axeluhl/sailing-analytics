@@ -10,8 +10,10 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
@@ -106,6 +108,47 @@ public class DatabaseTestHelper {
 		cv.put(Event.EVENT_ID, eventId);
 		cv.put(Event.EVENT_SERVER, "127.0.0.1");
 		Uri uri = cr.insert(Event.CONTENT_URI, cv);
+		return ContentUris.parseId(uri);
+	}
+	
+	public static long createNewRegattaInDBAndReturnEventRowId(Context context, String eventName,
+			String eventId, String leaderboardName, String competitorName) {
+		
+		long leaderboardRowId = createNewLeaderboardInDBAndReturnItsId(context, leaderboardName);
+		long eventRowId = createNewEventInDBAndReturnItsId(context, eventName, eventId, leaderboardRowId);
+		createNewCompetitorInDBAndReturnItsId(context, competitorName, leaderboardRowId);
+		
+		return eventRowId;
+	}
+	
+	private static long createNewEventInDBAndReturnItsId(Context context, String eventName, String eventId, long leaderboardRowId)
+	{
+		ContentResolver cr = context.getContentResolver();
+		ContentValues cv = new ContentValues();
+		cv.put(Event.EVENT_NAME, eventName);
+		cv.put(Event.EVENT_ID, eventId);
+		cv.put(Event.EVENT_SERVER, "127.0.0.1");
+		cv.put(Event.EVENT_LEADERBOARD_FK, leaderboardRowId);
+		Uri uri = cr.insert(Event.CONTENT_URI, cv);
+		return ContentUris.parseId(uri);
+	}
+	
+	private static long createNewLeaderboardInDBAndReturnItsId(Context context, String leaderboardName)
+	{
+		ContentResolver cr = context.getContentResolver();
+		ContentValues cv = new ContentValues();
+		cv.put(Leaderboard.LEADERBOARD_NAME, leaderboardName);
+		Uri uri = cr.insert(Leaderboard.CONTENT_URI, cv);
+		return ContentUris.parseId(uri);
+	}
+
+	private static long createNewCompetitorInDBAndReturnItsId(Context context,
+			String competitorDisplayName, long leaderboardRowId) {
+		ContentResolver cr = context.getContentResolver();
+		ContentValues cv = new ContentValues();
+		cv.put(Competitor.COMPETITOR_DISPLAY_NAME, competitorDisplayName);
+		cv.put(Competitor.COMPETITOR_LEADERBOARD_FK, leaderboardRowId);
+		Uri uri = cr.insert(Competitor.CONTENT_URI, cv);
 		return ContentUris.parseId(uri);
 	}
 }
