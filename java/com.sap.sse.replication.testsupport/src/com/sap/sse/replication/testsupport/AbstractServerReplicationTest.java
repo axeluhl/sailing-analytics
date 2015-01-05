@@ -18,6 +18,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 import org.junit.After;
@@ -36,11 +38,13 @@ import com.sap.sse.replication.impl.RabbitOutputStream;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
-import com.sap.sse.replication.impl.ReplicationServiceImpl;
 import com.sap.sse.replication.impl.ReplicationReceiver;
+import com.sap.sse.replication.impl.ReplicationServiceImpl;
 import com.sap.sse.replication.impl.SingletonReplicablesProvider;
 
 public abstract class AbstractServerReplicationTest<ReplicableInterface extends Replicable<?, ?>, ReplicableImpl extends ReplicableInterface> {
+    private static final Logger logger = Logger.getLogger(AbstractServerReplicationTest.class.getName());
+    
     protected static final int SERVLET_PORT = 9990;
     protected ReplicableImpl replica;
     protected ReplicableImpl master;
@@ -158,7 +162,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
             /* do not make tests fail because of a server that has been shut down
              * or when an exception occured (see setUp()) - let the
              * original exception propagate */
-            ex.printStackTrace();
+            logger.log(Level.SEVERE, "Exception trying to connect to initial load test servlet to STOP it", ex);
         }
     }
     
