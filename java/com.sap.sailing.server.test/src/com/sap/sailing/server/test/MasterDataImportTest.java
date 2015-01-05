@@ -33,6 +33,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.mongodb.DB;
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -291,17 +293,17 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
+            DB db = destService.getMongoObjectFactory().getDatabase();
+            WriteConcern writeConcern = db.getWriteConcern();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
             importer.importFromStream(inputStream, randomUUID, false);
+            writeConcern.callGetLastError(); // wait for all writes to actually have been written
         } finally {
             os.close();
             inputStream.close();
         }
-
-
-
 
         MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
                 .getResult();
