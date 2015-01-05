@@ -37,7 +37,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     
     private static final String REGATTA = "IDM 2013"; //$NON-NLS-1$
     
-    private static final String LEADERBOARD = "IDM 2013 (505)"; //$NON-NLS-1$
+    private static final String LEADERBOARD = "IDM 2013 (5O5)"; //$NON-NLS-1$
     
     private static final String EVENT = "IDM 5O5 2013"; //$NON-NLS-1$
     private static final String BOAT_CLASS = "5O5"; //$NON-NLS-1$

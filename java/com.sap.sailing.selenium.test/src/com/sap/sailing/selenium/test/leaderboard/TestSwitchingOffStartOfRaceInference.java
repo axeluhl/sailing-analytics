@@ -39,7 +39,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     private static final String REGATTA = "The BMW Cup"; //$NON-NLS-1$
     private static final String LEADERBOARD = "The BMW Cup (J80)"; //$NON-NLS-1$
     private static final String EVENT = "BMW Cup"; //$NON-NLS-1$
-    private static final String BOAT_CLASS = "J/80"; //$NON-NLS-1$
+    private static final String BOAT_CLASS = "J80"; //$NON-NLS-1$
     private static final String RACE = "BMW Cup Race 3"; //$NON-NLS-1$
     
     private RegattaDescriptor regatta;
