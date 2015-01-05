@@ -10,11 +10,15 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
 public class RegattaLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEventImpl<RegattaLogEventVisitor>
-implements RegattaLogRegisterCompetitorEvent {
+        implements RegattaLogRegisterCompetitorEvent {
     private static final long serialVersionUID = -5114645637316367845L;
-    
+
+    /**
+     * @throws IllegalArgumentException
+     *             if {@code competitor} is null
+     */
     public RegattaLogRegisterCompetitorEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, Competitor competitor) {
+            TimePoint logicalTimePoint, Serializable id, Competitor competitor) throws IllegalArgumentException {
         super(createdAt, author, logicalTimePoint, id, competitor);
     }
 
