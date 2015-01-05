@@ -58,9 +58,9 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      */
     private static class ManeuverClassification {
         private final Maneuver maneuver;
-        private final Map<Pair<LegType, Tack>, SpeedWithBearingWithConfidence<Void>> estimatedTrueWindSpeedAndAngles;
+        private final Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> estimatedTrueWindSpeedAndAngles;
         protected ManeuverClassification(Maneuver maneuver,
-                Map<Pair<LegType, Tack>, SpeedWithBearingWithConfidence<Void>> estimatedTrueWindSpeedAndAngles) {
+                Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> estimatedTrueWindSpeedAndAngles) {
             super();
             this.maneuver = maneuver;
             this.estimatedTrueWindSpeedAndAngles = estimatedTrueWindSpeedAndAngles;
@@ -68,7 +68,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         public Maneuver getManeuver() {
             return maneuver;
         }
-        public Map<Pair<LegType, Tack>, SpeedWithBearingWithConfidence<Void>> getEstimatedTrueWindSpeedAndAngles() {
+        public Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> getEstimatedTrueWindSpeedAndAngles() {
             return estimatedTrueWindSpeedAndAngles;
         }
     }
@@ -84,13 +84,13 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             // Now for each maneuver's starting speed (speed into the maneuver) get the approximated
             // wind speed and direction assuming average upwind / downwind performance based on the polar service.
             // TODO continue here, asking the polarService for the wind speed based on boat speed, leg type and tack
-            Map<Pair<LegType, Tack>, SpeedWithBearingWithConfidence<Void>> estimatedTrueWindSpeedAndAngles = new HashMap<>();
+            Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> estimatedTrueWindSpeedAndAngles = new HashMap<>();
             for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
                 for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
-                    SpeedWithBearingWithConfidence<Void> trueWindSpeedAndAngle = polarService
-                            .getAverageTrueWindSpeedAndAngle(maneuverAndBoatClass.getValue(), maneuverAndBoatClass
+                    Set<SpeedWithBearingWithConfidence<Void>> trueWindSpeedsAndAngles = polarService
+                            .getAverageTrueWindSpeedAndAngleCandidates(maneuverAndBoatClass.getValue(), maneuverAndBoatClass
                                     .getKey().getSpeedWithBearingBefore(), legType, tack);
-                    estimatedTrueWindSpeedAndAngles.put(new Pair<>(legType, tack), trueWindSpeedAndAngle);
+                    estimatedTrueWindSpeedAndAngles.put(new Pair<>(legType, tack), trueWindSpeedsAndAngles);
                 }
             }
             ManeuverClassification maneuverClassification = new ManeuverClassification(maneuverAndBoatClass.getKey(), estimatedTrueWindSpeedAndAngles);
