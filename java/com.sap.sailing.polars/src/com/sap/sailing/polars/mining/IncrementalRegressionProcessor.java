@@ -199,7 +199,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         return windSpeedAndAngleEstimator.getAverageTrueWindSpeedAndAngleCandidates(speedOverGround);
     }
 
-    public List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> obtainPolarSamplingPoints(BoatClass boatClass,
+    private List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> obtainPolarSamplingPoints(BoatClass boatClass,
             LegType legType, Tack tack) {
         List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = new ArrayList<>();
         for (int i = 0; i < 60; i++) {
