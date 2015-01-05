@@ -78,18 +78,17 @@ public class OfflineDataManager extends DataManager {
         cal.set(2012, 12, 5);
         final TimePoint endDate = new MillisecondsTimePoint(cal.getTimeInMillis());
 
-        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Cardiff)", startDate, endDate, "Cardiff", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet()));
-        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Nice)", startDate, endDate, "Nice", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet()));
-        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Rio)", startDate, endDate, "Rio", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet()));
-        EventBase newEvent = new StrippedEventImpl("Extreme Sailing Series 2013 (Muscat)", startDate, endDate, "Muscat", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet());
+        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Cardiff)", startDate, endDate, "Cardiff", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet()));
+        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Nice)", startDate, endDate, "Nice", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet()));
+        dataStore.addEvent(new StrippedEventImpl("Extreme Sailing Series 2012 (Rio)", startDate, endDate, "Rio", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet()));
+        EventBase newEvent = new StrippedEventImpl("Extreme Sailing Series 2013 (Muscat)", startDate, endDate, "Muscat", true, UUID.randomUUID(), Collections.<LeaderboardGroupBase> emptySet());
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", UUID.randomUUID()));
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", UUID.randomUUID()));
         dataStore.addEvent(newEvent);
 
         SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
         SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
-        RaceGroup raceGroup = new RaceGroupImpl("ESS", new BoatClassImpl("X40", false), null, Arrays.asList(qualifying,
-                medal), new EmptyRegattaConfiguration());
+        RaceGroup raceGroup = new RaceGroupImpl("ESS", new BoatClassImpl("X40", false), null, Arrays.asList(qualifying, medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.BLUE, null, null));
@@ -101,18 +100,17 @@ public class OfflineDataManager extends DataManager {
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
         final RaceLogEventAuthor author = AppPreferences.on(context).getAuthor();
-        ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader.loadFromPreferences(preferences);
-        
-        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author,
-                1, new MillisecondsTimePoint(new Date().getTime() - 1000)));
+        ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader
+                .loadFromPreferences(preferences);
+
+        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author, 1,
+                new MillisecondsTimePoint(new Date().getTime() - 1000)));
 
         log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()),
-                AppPreferences.on(context).getAuthor(),
-                1, RaceLogRaceStatus.FINISHING));
+                AppPreferences.on(context).getAuthor(), 1, RaceLogRaceStatus.FINISHING));
 
-        ManagedRace q1 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
-                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
+        ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying,
+                raceGroup), RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -120,18 +118,16 @@ public class OfflineDataManager extends DataManager {
          * new MillisecondsTimePoint(new Date().getTime() + 100000)));
          */
 
-        ManagedRace q2 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup), 
-                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
+        ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying,
+                raceGroup), RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
          * log.add(factory.createRaceStatusEvent( new MillisecondsTimePoint(new Date()), 5,
          * RaceLogRaceStatus.FINISHED));
          */
-        ManagedRace q3 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup), 
-                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
+        ManagedRace q3 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying,
+                raceGroup), RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);
@@ -174,19 +170,19 @@ public class OfflineDataManager extends DataManager {
                 });
     }
 
-	@Override
-	public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
-			final EventBase parentEvent, LoadClient<Collection<CourseArea>> callback) {
-		// TODO Auto-generated method stub
-		return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
+            final EventBase parentEvent, LoadClient<Collection<CourseArea>> callback) {
+        // TODO Auto-generated method stub
+        return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
                 new Callable<Collection<CourseArea>>() {
                     @Override
                     public Collection<CourseArea> call() throws Exception {
-                            return dataStore.getCourseAreas(parentEvent);
+                        return dataStore.getCourseAreas(parentEvent);
                     }
                 });
-	}
-    
+    }
+
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(Serializable courseAreaId,
             LoadClient<Collection<ManagedRace>> callback) {
@@ -234,21 +230,22 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
-            LoadClient<DeviceConfiguration> callback) {
-        return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback, new Callable<DeviceConfiguration>() {
-            @Override
-            public DeviceConfiguration call() throws Exception {
-                throw new IllegalStateException("No remote configuration in offline mode.");
-            }
-        });
+    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
+            DeviceConfigurationIdentifier identifier, LoadClient<DeviceConfiguration> callback) {
+        return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback,
+                new Callable<DeviceConfiguration>() {
+                    @Override
+                    public DeviceConfiguration call() throws Exception {
+                        throw new IllegalStateException("No remote configuration in offline mode.");
+                    }
+                });
     }
 
-	@Override
-	public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
-			PositionListFragment positionListFragment) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
+            PositionListFragment positionListFragment) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

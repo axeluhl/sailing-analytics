@@ -6,14 +6,15 @@
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="false" >
 
         <LinearLayout
             android:id="@+id/racingLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/white"
             android:baselineAligned="false"
+            android:fitsSystemWindows="true"
             android:orientation="vertical" >
 
             <include layout="@layout/toolbar" />

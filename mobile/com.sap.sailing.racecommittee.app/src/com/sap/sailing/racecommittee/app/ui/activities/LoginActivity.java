@@ -86,7 +86,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void addAreaPositionListFragment() {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.login_view_bottom_container, mPositionListFragment, AreaPositionListFragmentTag);
         transaction.commitAllowingStateLoss();
         ExLog.i(this, "LoginActivity", "PositionFragment created.");
@@ -100,17 +99,15 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         Fragment fragment = new CourseAreaListFragment();
         fragment.setArguments(args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.login_view_right_container, fragment, CourseAreaListFragmentTag);
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
         ExLog.i(this, "LoginActivity", "CourseFragment created.");
     }
 
     private void addEventListFragment() {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.login_view_left_container, new EventListFragment());
-        transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
     }
 
     public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
@@ -123,7 +120,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void hideAreaPositionListFragment() {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.login_view_bottom_container, new Fragment(), AreaPositionListFragmentTag);
         transaction.commitAllowingStateLoss();
         ExLog.i(this, "LoginActivity", "PositionFragment created.");
@@ -194,7 +190,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     protected boolean onReset() {
         Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
         if (courseAreaFragment != null) {
-            getFragmentManager().beginTransaction().remove(courseAreaFragment).commit();
+            getFragmentManager().beginTransaction().remove(courseAreaFragment).commitAllowingStateLoss();
         }
         recreate();
         return true;

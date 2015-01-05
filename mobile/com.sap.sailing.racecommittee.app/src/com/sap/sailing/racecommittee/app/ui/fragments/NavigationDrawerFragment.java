@@ -158,7 +158,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
                 break;
 
             default:
-                mCurrent.setTextColor(getResources().getColor(R.color.white));
+                mCurrent.setTextColor(getResources().getColor(R.color.orange));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     mCurrent.setBackground(drawable);
                 } else {
@@ -339,6 +339,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
 
     public void setUp(DrawerLayout drawerLayout, SpannableString header) {
         mDrawerLayout = drawerLayout;
+        mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, (Toolbar) getActivity().findViewById(
                 R.id.toolbar), R.string.nav_drawer_open, R.string.nav_drawer_close) {
             @Override

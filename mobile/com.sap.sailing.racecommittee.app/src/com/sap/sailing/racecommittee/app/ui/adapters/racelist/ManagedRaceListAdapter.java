@@ -22,10 +22,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.internal.mc;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -61,7 +59,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private LayoutInflater mInflater;
     private Resources mResources;
     private List<RaceListDataType> mShownViewItems;
-    
+
     private ImageView update_badge;
     private LinearLayout race_flag;
     private TextView time;
@@ -134,7 +132,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             dates = days + ":";
         }
 
-        dates += fill2((int) hrs) + ":";
+        dates += (days != 0 || hrs != 0) ? fill2((int) hrs) + ":" : "";
         dates += fill2((int) min) + ":";
         dates += fill2((int) sec);
 
@@ -321,9 +319,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             flag_timer.setText(text.replace("-", ""));
             Drawable arrow;
             if (changePole.isDisplayed()) {
-                arrow = getContext().getResources().getDrawable(R.drawable.ic_expand_less_grey600_18dp);
+                arrow = getContext().getResources().getDrawable(R.drawable.arrow_up_small);
             } else {
-                arrow = getContext().getResources().getDrawable(R.drawable.ic_expand_more_black_18dp);
+                arrow = getContext().getResources().getDrawable(R.drawable.arrow_down_small);
             }
             arrow_direction.setImageBitmap(((BitmapDrawable) arrow).getBitmap());
             race_flag.setVisibility(View.VISIBLE);

@@ -3,7 +3,7 @@
     android:id="@+id/welcomeFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black_light"
+    android:background="@color/colorPrimaryDark"
     android:orientation="vertical" >
 
     <RelativeLayout
@@ -31,6 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
+            android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
@@ -39,6 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/area_name"
             android:layout_centerHorizontal="true"
+            android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
@@ -47,6 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/area_name"
             android:layout_centerHorizontal="true"
+            android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceLarge" />
     </RelativeLayout>
 
