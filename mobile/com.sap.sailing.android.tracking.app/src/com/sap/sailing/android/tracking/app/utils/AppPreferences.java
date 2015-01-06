@@ -120,14 +120,14 @@ public class AppPreferences {
     	return preferences.getBoolean(context.getString(R.string.preference_tracker_is_tracking), false);
     }
     
-    public void setTrackerIsTrackingEventId(String eventId)
+    public void setTrackerIsTrackingCheckinDigest(String checkinDigest)
     {
-    	preferences.edit().putString(context.getString(R.string.preference_tracker_is_tracking_event_id), eventId).commit();
+    	preferences.edit().putString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), checkinDigest).commit();
     }
     
-    public String getTrackerIsTrackingEventId()
+    public String getTrackerIsTrackingCheckinDigest()
     {
-    	return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_event_id), null);
+    	return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), null);
     }
     
     public static boolean getPrintDatabaseOperationDebugMessages()

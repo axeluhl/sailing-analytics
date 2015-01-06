@@ -26,7 +26,7 @@
     <string name="preference_battery_is_charging">batteryIsCharging</string>
     <string name="preference_tracking_timer_started">trackingTimerStarted</string>
     <string name="preference_tracker_is_tracking">trackerIsTracking</string>
-    <string name="preference_tracker_is_tracking_event_id">trackerIsTrackingEventId</string>
+    <string name="preference_tracker_is_tracking_checkin_digest">trackerIsTrackingCheckinDigest</string>
     
     <string name="preference_heading_from_magnetic_key_is_enabled">magn.</string>
     <string name="preference_heading_from_magnetic_key_is_disabled">GPS</string>

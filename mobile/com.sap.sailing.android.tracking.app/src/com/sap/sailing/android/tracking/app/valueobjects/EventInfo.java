@@ -10,6 +10,7 @@ public class EventInfo {
 	public long startMillis;
 	public long endMillis;
 	public int rowId;
+	public String checkinDigest;
 	public String server;
 
 	@Override
@@ -19,6 +20,7 @@ public class EventInfo {
 				+ ", eventImageUrl: " + imageUrl
 				+ ", eventStartMillis: " + startMillis
 				+ ", eventEndMillis: " + endMillis + ", eventRowId: "
+				+ ", checkinDigest: " + checkinDigest
 				+ rowId + ", server: " + server;
 	}
 }

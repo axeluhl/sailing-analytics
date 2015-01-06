@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +43,6 @@ import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -88,7 +88,6 @@ public class HomeFragment extends BaseFragment implements
 		if (noQrCodeButton != null) {
 			noQrCodeButton.setOnClickListener(new ClickListener());
 		}
-		
 
 		ListView listView = (ListView) view.findViewById(R.id.listRegatta);
 		if (listView != null) {
@@ -168,6 +167,7 @@ public class HomeFragment extends BaseFragment implements
 			scheme = "http";
 		}
 
+		final String uriStr = uri.toString();
 		final String server = scheme + "://" + uri.getHost();
 		final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
 		final String hostWithPort = server + ":" + port;
@@ -348,6 +348,27 @@ public class HomeFragment extends BaseFragment implements
 																					data.leaderboardName = leaderboardName;
 																					data.deviceUid = deviceUuid
 																							.getStringRepresentation();
+																					try {
+																						data.setCheckinDigestFromString(uriStr);
+																					} catch (UnsupportedEncodingException e) {
+																						ExLog.e(getActivity(),
+																								TAG,
+																								"Failed to get generate digest of qr-code string (" 
+																								+ uriStr + "). "
+																										+ e.getMessage());
+																						startActivity.dismissProgressDialog();
+																						displayAPIErrorRecommendRetry();
+																						return;
+																					} catch (NoSuchAlgorithmException e) {
+																						ExLog.e(getActivity(),
+																								TAG,
+																								"Failed to get generate digest of qr-code string (" 
+																								+ uriStr + "). "
+																										+ e.getMessage());
+																						startActivity.dismissProgressDialog();
+																						displayAPIErrorRecommendRetry();
+																						return;
+																					} 
 
 																					displayUserConfirmationScreen(data);
 
@@ -461,12 +482,15 @@ public class HomeFragment extends BaseFragment implements
 	 */
 	private void checkInWithAPIAndDisplayTrackingActivity(
 			CheckinData checkinData) {
-		if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(
-				getActivity(), checkinData.eventId, checkinData.leaderboardName, checkinData.competitorId)) {
+		if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(getActivity(), checkinData.checkinDigest)) {
 
 			try {
-				DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.getEvent(),
-						checkinData.getCompetitor(), checkinData.getLeaderboard());
+				DatabaseHelper.getInstance().storeCheckinRow(
+						getActivity(),
+						checkinData.getEvent(),
+						checkinData.getCompetitor(), 
+						checkinData.getLeaderboard());
+				
 				adapter.notifyDataSetChanged();
 			} catch (GeneralDatabaseHelperException e) {
 				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
@@ -505,10 +529,8 @@ public class HomeFragment extends BaseFragment implements
 
 			NetworkHelper.getInstance(getActivity()).executeHttpJsonRequestAsnchronously(
 					request,
-					new CheckinListener(checkinData.leaderboardName, checkinData.eventId,
-							checkinData.competitorId),
-					new CheckinErrorListener(checkinData.leaderboardName, checkinData.eventId,
-							checkinData.competitorId));
+					new CheckinListener(checkinData.checkinDigest),
+					new CheckinErrorListener(checkinData.checkinDigest));
 
 		} catch (JSONException e) {
 			ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
@@ -565,14 +587,11 @@ public class HomeFragment extends BaseFragment implements
 	/**
 	 * Start regatta activity.
 	 * 
-	 * @param regattaName
-	 * @param eventName
+	 * @param checkinDigest
 	 */
-	private void startRegatta(String leaderboardName, String eventId, String competitorId) {
+	private void startRegatta(String checkinDigest) {
 		Intent intent = new Intent(getActivity(), RegattaActivity.class);
-		intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
-		intent.putExtra(getString(R.string.event_id), eventId);
-		intent.putExtra(getString(R.string.competitor_id), competitorId);
+		intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
 		getActivity().startActivity(intent);
 	}
 
@@ -581,6 +600,7 @@ public class HomeFragment extends BaseFragment implements
 		switch (loaderId) {
 		case REGATTA_LOADER:
 			String[] projection = new String[] { 
+					"events.event_checkin_digest",
 					"events.event_id",
 					"events._id", "events.event_name", "events.event_server",
 					"competitors.competitor_display_name",
@@ -648,52 +668,36 @@ public class HomeFragment extends BaseFragment implements
 				return;
 			}
 
-			Cursor cursor = (Cursor) adapter.getItem(position - 1); // -1,
-																		// because
-																		// there's
-																		// a
-																		// header
-																		// row
+			// -1, because there's a header row
+			Cursor cursor = (Cursor) adapter.getItem(position - 1);
 
-			String leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
-			String competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
-			String eventId = cursor.getString(cursor.getColumnIndex("event_id"));
-
-			startRegatta(leaderboardName, eventId, competitorId);
+			String checkinDigest = cursor.getString(cursor.getColumnIndex("event_checkin_digest"));
+			startRegatta(checkinDigest);
 		}
 	}
 
 	private class CheckinListener implements NetworkHelperSuccessListener {
 
-		public String leaderboardName;
-		public String eventId;
-		public String competitorId;
+		public String checkinDigest;
 
-		public CheckinListener(String leaderboardName, String eventId, String competitorId) {
-			this.leaderboardName = leaderboardName;
-			this.eventId = eventId;
-			this.competitorId = competitorId;
+		public CheckinListener(String checkinDigest) {
+			this.checkinDigest = checkinDigest;
 		}
 
 		@Override
 		public void performAction(JSONObject response) {
 			StartActivity startActivity = (StartActivity)getActivity();
 			startActivity.dismissProgressDialog();
-			
-			startRegatta(leaderboardName, eventId, competitorId);
+			startRegatta(checkinDigest);
 		}
 	}
 
 	private class CheckinErrorListener implements NetworkHelperFailureListener {
 
-		public String leaderboardName;
-		public String eventId;
-		public String competitorId;
+		public String checkinDigest;
 		
-		public CheckinErrorListener(String leaderboardName, String eventId, String competitorId) {
-			this.leaderboardName = leaderboardName;
-			this.eventId = eventId;
-			this.competitorId = competitorId;
+		public CheckinErrorListener(String checkinDigest) {
+			this.checkinDigest = checkinDigest;
 		}
 		
 		@Override
@@ -707,13 +711,11 @@ public class HomeFragment extends BaseFragment implements
 				ExLog.e(getActivity(), TAG, "Unknown Error");
 			}
 			
-			
 			StartActivity startActivity = (StartActivity)getActivity();
 			startActivity.dismissProgressDialog();
 			startActivity.showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
 			
-			DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), eventId, leaderboardName, competitorId);			
-			
+			DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);			
 			Toast.makeText(getActivity(), getString(R.string.error_while_receiving_server_data), Toast.LENGTH_LONG).show();
 		}
 	}

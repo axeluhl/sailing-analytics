@@ -37,6 +37,7 @@
     <string name="competitor_id">CompetitorId</string>
 	<string name="event_id">EventId</string>
 	<string name="leaderboard_name">LeaderboardName</string>
+	<string name="checkin_digest">CheckinDigest</string>
 	<string name="add_team_photo">Add Team Photo</string>
 	<string name="do_you_want_to_choose_existing_img_or_take_a_new_one">Do you want to use an existing image or take a new one?</string>
 	<string name="existing_image">Existing</string>

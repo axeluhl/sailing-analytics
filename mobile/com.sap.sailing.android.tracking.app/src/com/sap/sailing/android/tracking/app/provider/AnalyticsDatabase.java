@@ -44,6 +44,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) { 
     	db.execSQL("CREATE TABLE " + Tables.LEADERBOARDS + " ("
     			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+    			+ LeaderboardColumns.LEADERBOARD_CHECKIN_DIGEST + " TEXT, "
     			+ LeaderboardColumns.LEADERBOARD_NAME + " TEXT );");
     	
         db.execSQL("CREATE TABLE " + Tables.COMPETITORS + " ("
@@ -53,6 +54,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + CompetitorColumns.COMPETITOR_COUNTRY_CODE + " TEXT, "
                 + CompetitorColumns.COMPETITOR_NATIONALITY + " TEXT, "
                 + CompetitorColumns.COMPETITOR_SAIL_ID + " TEXT, "
+                + CompetitorColumns.COMPETITOR_CHECKIN_DIGEST + " TEXT, "
                 + CompetitorColumns.COMPETITOR_LEADERBOARD_FK + " INTEGER, "
                 + "FOREIGN KEY (" + CompetitorColumns.COMPETITOR_LEADERBOARD_FK + ") " 
                 + "REFERENCES " + Tables.LEADERBOARDS + "( " + BaseColumns._ID + " ))");
@@ -65,6 +67,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + EventColumns.EVENT_DATE_END + " INTEGER, "
                 + EventColumns.EVENT_SERVER + " TEXT, "
                 + EventColumns.EVENT_IMAGE_URL + " TEXT, "
+                + EventColumns.EVENT_CHECKIN_DIGEST + " TEXT, "
                 + EventColumns.EVENT_LEADERBOARD_FK + " INTEGER, "
                 + "FOREIGN KEY (" + EventColumns.EVENT_LEADERBOARD_FK + ") " 
                 + "REFERENCES " + Tables.LEADERBOARDS + "( " + BaseColumns._ID + " ))");

@@ -43,7 +43,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	
 	private final String CAMERA_TEMP_FILE = "cameraTempFile";
 	
-	
 	private boolean showingThankYouNote;
 
 	private TimerRunnable timer;
@@ -322,9 +321,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	private void startTrackingActivity() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
-		intent.putExtra(
-				getString(R.string.tracking_activity_event_id_parameter),
-				regattaActivity.event.id);
+		intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), regattaActivity.event.checkinDigest);
 		getActivity().startActivity(intent);
 	}
 

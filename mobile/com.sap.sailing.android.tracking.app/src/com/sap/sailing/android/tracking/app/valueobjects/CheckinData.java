@@ -1,5 +1,9 @@
 package com.sap.sailing.android.tracking.app.valueobjects;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class CheckinData {
 	// public String gcmId;
 	public String leaderboardName;
@@ -16,6 +20,17 @@ public class CheckinData {
 	public String competitorNationality;
 	public String competitorCountryCode;
 	public String deviceUid;
+	public String checkinDigest;
+	
+	public void setCheckinDigestFromString(String checkinString) throws UnsupportedEncodingException, NoSuchAlgorithmException
+	{
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		md.update(checkinString.getBytes("UTF-8"));
+		byte[] digest = md.digest();
+		StringBuffer buf = new StringBuffer();
+		for (byte byt : digest) buf.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
+		checkinDigest = buf.toString();
+	}
 	
 	public EventInfo getEvent()
 	{
@@ -26,6 +41,7 @@ public class CheckinData {
 		event.endMillis = Long.parseLong(eventEndDateStr);
 		event.imageUrl = eventFirstImageUrl;
 		event.server = eventServerUrl;
+		event.checkinDigest = checkinDigest;
 		return event;
 	}
 	
@@ -33,6 +49,7 @@ public class CheckinData {
 	{
 		LeaderboardInfo leaderboard = new LeaderboardInfo();
 		leaderboard.name = leaderboardName;
+		leaderboard.checkinDigest = checkinDigest;
 		return leaderboard;
 	}
 	
@@ -44,6 +61,7 @@ public class CheckinData {
 		competitor.sailId = competitorSailId;
 		competitor.nationality = competitorNationality;
 		competitor.countryCode = competitorCountryCode;
+		competitor.checkinDigest = checkinDigest;
 		return competitor;
 	}
 }
