@@ -5,7 +5,8 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Named;
@@ -32,9 +33,7 @@ public interface RaceColumn extends Named {
     /**
      * Sets the information object used to access the race column's race logs.
      */
-    void setRaceLogInformation(RaceLogInformation information);
-    
-    RaceLogInformation getRaceLogInformation();
+    void setRaceLogInformation(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent);
     
     /**
      * Gets the race column's race log associated to the passed fleet. Note that the result may be <code>null</code>
@@ -186,9 +185,9 @@ public interface RaceColumn extends Named {
     RaceLogIdentifier getRaceLogIdentifier(Fleet fleet);
 
     /**
-     * Sets (or reloads) {@link RaceLog} for this column with the given fleet
+     * Reload the {@link RaceLog} for this column with the given fleet
      */
-    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleet);
+    void reloadRaceLog(Fleet fleet);
 
     /**
      * Remove the association between a race and a column. This is different from

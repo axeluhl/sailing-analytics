@@ -51,7 +51,7 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
-    public void removeListener(RaceLogEventVisitor listener) {
+    public void removeListener(Object listener) {
         innerRaceLog.removeListener(listener);
     }
 

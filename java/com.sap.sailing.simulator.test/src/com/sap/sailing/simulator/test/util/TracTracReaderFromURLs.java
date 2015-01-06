@@ -64,7 +64,7 @@ public class TracTracReaderFromURLs implements TracTracReader {
         for (String paramURLStr : tracTracParamURLs) {
             URL paramURL = new URL(paramURLStr);
             RaceHandle raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI,
-                    null, 60000);
+                    null, null, 60000);
             String regatta = raceHandle.getRegatta().getName();
             RaceDefinition r = raceHandle.getRace();
             RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, r.getName());

@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
@@ -37,50 +38,30 @@ public class RaceMapImageManager {
     }
 
     /**
-     * Loads the map overlay icons
-     * The method can only be called after the map is loaded  
+     * Loads the map overlay icons The method can only be called after the map is loaded. The {@link #maneuverIconsForTypeAndTargetTack} map
+     * is filled for all combinations of {@link ManeuverType maneuver types} and {@link Tack tacks} including the value <code>null</code> representing
+     * the unknown tack.
      */
     public void loadMapIcons(MapWidget map) {
-        if(map != null) {
-            Marker tackToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|71bf44|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.TACK, Tack.STARBOARD), tackToStarboardIcon);
-
-            Marker tackToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|d95252|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.TACK, Tack.PORT), tackToPortIcon);
-
-            Marker jibeToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|71bf44|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.JIBE, Tack.STARBOARD), jibeToStarboardIcon);
-
-            Marker jibeToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|d95252|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.JIBE, Tack.PORT), jibeToPortIcon);
-
-            Marker headUpOnStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|71bf44|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.HEAD_UP, Tack.STARBOARD), headUpOnStarboardIcon);
-
-            Marker headUpOnPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|d95252|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.HEAD_UP, Tack.PORT), headUpOnPortIcon);
-
-            Marker bearAwayOnStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|71bf44|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.BEAR_AWAY, Tack.STARBOARD), bearAwayOnStarboardIcon);
-          
-            Marker bearAwayOnPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|d95252|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.BEAR_AWAY, Tack.PORT), bearAwayOnPortIcon);
-
-            Marker markPassingToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|71bf44|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.MARK_PASSING, Tack.STARBOARD), markPassingToStarboardIcon);
-            
-            Marker markPassingToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|d95252|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.MARK_PASSING, Tack.PORT), markPassingToPortIcon);
-
-            Marker unknownManeuverIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=?|FFFFFF|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.STARBOARD), unknownManeuverIcon);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.PORT), unknownManeuverIcon);
-
-            Marker penaltyCircleToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|71bf44|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.PENALTY_CIRCLE, Tack.STARBOARD), penaltyCircleToStarboardIcon);
-            
-            Marker penaltyCircleToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|d95252|000000", 10, 33);
-            maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(ManeuverType.PENALTY_CIRCLE, Tack.PORT), penaltyCircleToPortIcon);
+        if (map != null) {
+            final Map<ManeuverType, Character> maneuverLetter = new HashMap<>();
+            maneuverLetter.put(ManeuverType.TACK, 'T');
+            maneuverLetter.put(ManeuverType.JIBE, 'J');
+            maneuverLetter.put(ManeuverType.HEAD_UP, 'H');
+            maneuverLetter.put(ManeuverType.BEAR_AWAY, 'B');
+            maneuverLetter.put(ManeuverType.MARK_PASSING, 'M');
+            maneuverLetter.put(ManeuverType.PENALTY_CIRCLE, 'P');
+            maneuverLetter.put(ManeuverType.UNKNOWN, '?');
+            final Map<Tack, String> tackColor = new HashMap<>();
+            tackColor.put(Tack.STARBOARD, "71bf44");
+            tackColor.put(Tack.PORT, "d95252");
+            tackColor.put(null, "FFFFFF");
+            for (Entry<ManeuverType, Character> m : maneuverLetter.entrySet()) {
+                for (Entry<Tack, String> t : tackColor.entrySet()) {
+                    final Marker icon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld="+m.getValue()+"|"+t.getValue()+"|000000", 10, 33);
+                    maneuverIconsForTypeAndTargetTack.put(new Util.Pair<ManeuverType, Tack>(m.getKey(), t.getKey()), icon);
+                }
+            }
         }
     }
     

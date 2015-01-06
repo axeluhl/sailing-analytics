@@ -596,8 +596,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         PATH=$PATH:$ANDROID_HOME/platform-tools
 
         RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
-        echo "RC_APPVERSION=$RC_APP_VERSION"
-        extra="$extra -Drc-app-api-version=$RC_APP_VERSION"
+        echo "RC_APP_VERSION=$RC_APP_VERSION"
+        extra="$extra -Drc-app-version=$RC_APP_VERSION"
+
+        TRACKING_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/AndroidManifest.xml | cut -d "\"" -f 2`
+        echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
+        extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
+
         
     else
         echo "INFO: Deactivating mobile modules"

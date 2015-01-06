@@ -59,6 +59,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             final ErrorReporter errorReporter, final String leaderboardName,
             final String raceColumnName, final String fleetName) {
         super(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, false);
+        setupUi();
         
         deviceMappingTable = new DeviceMappingTableWrapper(sailingService, stringMessages, errorReporter);
         
@@ -173,7 +174,6 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
                     "<b>" + stringMessages.to() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.to);
             }
         }));
-        
 
         panel.add(chart);
         panel.add(deviceMappingTable);
@@ -256,7 +256,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     }
     
     private void refresh() {
-        sailingService.getDeviceMappingsFromRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<List<DeviceMappingDTO>>() {
+        sailingService.getDeviceMappingsFromLogHierarchy(leaderboardName, raceColumnName, fleetName, new AsyncCallback<List<DeviceMappingDTO>>() {
             @Override
             public void onSuccess(List<DeviceMappingDTO> result) {
                 mappings = result;
@@ -273,7 +273,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     }
     
     private void showAddMappingDialog(DeviceMappingDTO mapping) {
-        new AddDeviceMappingDialog(sailingService, errorReporter, stringMessages,
+        new AddDeviceMappingToRaceLogDialog(sailingService, errorReporter, stringMessages,
                 leaderboardName, raceColumnName, fleetName, new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
             @Override
             public void ok(final DeviceMappingDTO mapping) {
