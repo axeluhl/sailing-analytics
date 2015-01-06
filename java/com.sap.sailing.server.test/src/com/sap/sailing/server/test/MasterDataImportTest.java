@@ -391,10 +391,12 @@ public class MasterDataImportTest {
         RaceLog raceLog2 = raceColumn2.getRaceLog(raceColumn2.getFleetByName(fleet1OnTarget.getName()));
         Assert.assertEquals(logEvent.getId(), raceLog2.getFirstRawFixAtOrAfter(logTimePoint).getId());
         
-        // Check for persisting of regatta log events:
+        // Check for persisting of regatta log events
         Regatta regattaOnTarget2 = dest2.getRegattaByName(TEST_LEADERBOARD_NAME);
-        Assert.assertEquals(registerEvent.getId(),
-                regattaOnTarget2.getRegattaLog().getFirstRawFixAtOrAfter(regattaLogTimepoint).getId());
+        RegattaLogRegisterCompetitorEvent registerEventOnTarget2 = (RegattaLogRegisterCompetitorEvent)
+                regattaOnTarget2.getRegattaLog().getFirstFixAtOrAfter(regattaLogTimepoint);
+        Assert.assertNotNull(registerEventOnTarget2);
+        Assert.assertEquals(registerEvent.getId(), registerEventOnTarget2.getId());
     }
 
     @Test
