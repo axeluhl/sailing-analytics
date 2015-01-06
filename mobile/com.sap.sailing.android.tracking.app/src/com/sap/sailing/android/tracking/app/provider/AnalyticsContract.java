@@ -13,10 +13,12 @@ public class AnalyticsContract {
 		String COMPETITOR_NATIONALITY = "competitor_nationality";
 		String COMPETITOR_SAIL_ID = "competitor_sail_id";
 		String COMPETITOR_LEADERBOARD_FK = "leaderboard_id";
+		String COMPETITOR_CHECKIN_DIGEST = "competitor_checkin_digest";
 	}
 
 	interface LeaderboardColumns {
 		String LEADERBOARD_NAME = "leaderboard_name";
+		String LEADERBOARD_CHECKIN_DIGEST = "leaderboard_checkin_digest";
 	}
 
 	interface EventColumns {
@@ -27,6 +29,7 @@ public class AnalyticsContract {
 		String EVENT_IMAGE_URL = "image_url";
 		String EVENT_NAME = "event_name";
 		String EVENT_LEADERBOARD_FK = "leaderboard_id";
+		String EVENT_CHECKIN_DIGEST = "event_checkin_digest";
 	}
 
 	interface SensorGpsColumns {

@@ -57,9 +57,10 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
 	private ViewPager mPager;
 	private ScreenSlidePagerAdapter mPagerAdapter;
-
-	private String eventId;
 	private AppPreferences prefs;
+	
+	private String checkinDigest;
+	
 
 	private TrackingFragment trackingFragment;	
 	private TimerRunnable timer;
@@ -81,10 +82,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		super.onCreate(savedInstanceState);
 
 		prefs = new AppPreferences(this);
-
-		Intent intent = getIntent();
-		eventId = intent.getExtras().getString(
-				getString(R.string.tracking_activity_event_id_parameter));
+		
+		checkinDigest = getIntent().getExtras().getString(getString(R.string.tracking_activity_checkin_digest_parameter));
 
 		setContentView(R.layout.fragment_hud_container);
 
@@ -97,7 +96,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		}
 
 		if (getSupportActionBar() != null) {
-			EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboard(this, eventId);
+			EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, checkinDigest);
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 			getSupportActionBar().setHomeButtonEnabled(true);
 			toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
@@ -151,7 +150,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		});
 
 		replaceFragment(R.id.tracking_linear_layout, trackingFragment);
-		ServiceHelper.getInstance().startTrackingService(this, eventId);
+		ServiceHelper.getInstance().startTrackingService(this, checkinDigest);
 	}
 
 	@Override

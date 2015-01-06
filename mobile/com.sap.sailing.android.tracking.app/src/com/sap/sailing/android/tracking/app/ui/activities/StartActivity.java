@@ -12,9 +12,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
-import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
-import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
 public class StartActivity extends BaseActivity {
     
@@ -82,17 +80,14 @@ public class StartActivity extends BaseActivity {
         
         if (prefs.getTrackerIsTracking())
         {
-        	String eventId = prefs.getTrackerIsTrackingEventId();
-        	EventInfo event = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, eventId);
-        	startRegatta(event.leaderboardName, eventId, event.competitorId);
+        	String checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
+        	startRegatta(checkinDigest);
         }
     }
 
-    private void startRegatta(String leaderboardName, String eventId, String competitorId) {
+    private void startRegatta(String checkinDigest) {
 		Intent intent = new Intent(this, RegattaActivity.class);
-		intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
-		intent.putExtra(getString(R.string.event_id), eventId);
-		intent.putExtra(getString(R.string.competitor_id), competitorId);
+		intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
 		startActivity(intent);
 	}
 }

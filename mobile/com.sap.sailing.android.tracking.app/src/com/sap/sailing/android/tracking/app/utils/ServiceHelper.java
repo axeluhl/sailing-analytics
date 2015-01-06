@@ -37,15 +37,15 @@ public class ServiceHelper {
 	}
 	
 	/**
-	 * Start tracking service with a given eventId. The eventId is used to determine
+	 * Start tracking service with a given checkinDigest. The checkinDigest is used to determine
 	 * the event from the database in order to set the host-address correctly.
-	 * @param eventId id of the event (not the row-id)
+	 * @param checkinDigest of the event
 	 */
-	public void startTrackingService(Context context, String eventId)
+	public void startTrackingService(Context context, String checkinDigest)
 	{
 		Intent intent = new Intent(context, TrackingService.class);
 		intent.setAction(context.getString(R.string.tracking_service_start));
-		intent.putExtra(context.getString(R.string.tracking_service_event_id_parameter), eventId);
+		intent.putExtra(context.getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
 		context.startService(intent);
 	}
 	

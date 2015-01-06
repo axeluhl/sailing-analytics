@@ -46,7 +46,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	// We use it on Notification start, and to cancel it.
 	private int NOTIFICATION_ID = R.string.tracker_started;
 
-	private String eventId;
+	private String checkinDigest;
 	private long eventRowId;
 
 	@Override
@@ -69,8 +69,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 
 		if (intent != null) {
 			if (BuildConfig.DEBUG) {
-				ExLog.i(this, TAG, "Starting Tracking Service with eventId: "
-						+ eventId);
+				ExLog.i(this, TAG, "Starting Tracking Service with checkinDigest: " + checkinDigest);
 			}
 
 			if (intent.getAction() != null) {
@@ -79,15 +78,14 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 					stopTracking();
 				} else {
 					if (intent.getExtras() != null) {
-						eventId = intent
+						checkinDigest = intent
 								.getExtras()
-								.getString(getString(R.string.tracking_service_event_id_parameter));
+								.getString(getString(R.string.tracking_service_checkin_digest_parameter));
 						
-						eventRowId = DatabaseHelper.getInstance().getRowIdForEventId(this, eventId);
+						eventRowId = DatabaseHelper.getInstance().getEventRowIdForCheckinDigest(this, checkinDigest);
 						
 						if (BuildConfig.DEBUG) {
-							ExLog.i(this, TAG, "Starting Tracking Service with eventId: "+ eventId);
-							ExLog.i(this, TAG, "And with event._id: " + eventRowId);
+							ExLog.i(this, TAG, "Starting Tracking Service with checkinDigest: "+ checkinDigest);
 						}
 						
 						startTracking();
@@ -108,7 +106,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		// showNotification();
 
 		prefs.setTrackerIsTracking(true);
-		prefs.setTrackerIsTrackingEventId(eventId);
+		prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
 	}
 
 	public void stopTracking() {
@@ -123,7 +121,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		}
 
 		prefs.setTrackerIsTracking(false);
-		prefs.setTrackerIsTrackingEventId(null);
+		prefs.setTrackerIsTrackingCheckinDigest(null);
 
 		stopSelf();
 		ExLog.i(this, TAG, "Stopped Tracking");

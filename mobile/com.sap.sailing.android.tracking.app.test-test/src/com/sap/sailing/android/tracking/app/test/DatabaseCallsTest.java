@@ -13,13 +13,12 @@ public class DatabaseCallsTest extends ActivityUnitTestCase<Activity> {
 	public void testDeleteRegatta()
 	{
 		DatabaseTestHelper.createNewRegattaInDBAndReturnEventRowId(getActivity(), "TEST-EVENT",
-				"123-456-789", "TEST-LEADERBOARD", "TEST-COMPETITOR");
+				"123-456-789", "TEST-LEADERBOARD", "TEST-COMPETITOR", "TEST-DIGEST1");
 		
 		DatabaseTestHelper.createNewRegattaInDBAndReturnEventRowId(getActivity(), "TEST-EVENT 2",
-				"234-567-890", "TEST-LEADERBOARD 2", "TEST-COMPETITOR 2");
+				"234-567-890", "TEST-LEADERBOARD 2", "TEST-COMPETITOR 2", "TEST-DIGEST2");
 
-		DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), "TEST-EVENT",
-				"TEST-COMPETITOR", "TEST-LEADERBOARD");
+		DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), "TEST-DIGEST1");
 		
 		assertEquals(1, DatabaseTestHelper.getNumberOfEventsFromDB(getActivity()));
 		
