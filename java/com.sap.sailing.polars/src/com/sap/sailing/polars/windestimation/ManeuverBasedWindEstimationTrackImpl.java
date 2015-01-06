@@ -57,7 +57,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             // TODO continue here, asking the polarService for the wind speed based on boat speed, leg type and tack
             for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
                 for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
-                    polarService.getAverageTrueWindSpeedAndAngle(maneuverAndBoatClass.getValue(),
+                    polarService.getAverageTrueWindSpeedAndAngleCandidates(maneuverAndBoatClass.getValue(),
                             maneuverAndBoatClass.getKey().getSpeedWithBearingBefore(),
                             legType, tack);
                 }

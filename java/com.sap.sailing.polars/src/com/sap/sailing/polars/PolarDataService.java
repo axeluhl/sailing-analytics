@@ -129,20 +129,6 @@ public interface PolarDataService {
 
     /**
      * From a boat's speed over ground and assuming values for <code>boatClass</code>, the <code>tack</code> the boat is
-     * currently sailing on, and the <code>legType</code>, this method estimates the true wind speed at which the boat
-     * may most likely have been sailing under these conditions.
-     * 
-     * As opposed to {@link #getAverageTrueWindSpeedAndAngleCandidates(BoatClass, Speed, LegType, Tack)} it only returns
-     * the candidate with the highest confidence, which is derived from the average confidence of the underlying fixes,
-     * distance measures and the amount of underlying data.
-     * 
-     * @return wind candidate with highest confidence of all candidates (if function is non-reversible), null if none
-     *         was found (due to insufficient underlying data)
-     */
-    SpeedWithBearingWithConfidence<Void> getAverageTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround, LegType legType, Tack tack);
-
-    /**
-     * From a boat's speed over ground and assuming values for <code>boatClass</code>, the <code>tack</code> the boat is
      * currently sailing on, and the <code>legType</code>, this method estimates the true wind speed candidates at which
      * the boat may most likely have been sailing under these conditions.
      * 

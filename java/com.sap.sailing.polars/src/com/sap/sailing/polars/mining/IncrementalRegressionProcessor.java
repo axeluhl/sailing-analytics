@@ -180,15 +180,6 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         double confidence = boatSpeedEstimator.getConfidence();
         return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(speedWithoutConfidence, confidence, null), dataCount);
     }
-
-    SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass,
-            Speed speedOverGround, LegType legType, Tack tack) {
-        List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = obtainPolarSamplingPoints(
-                boatClass, legType, tack);
-        
-        WindSpeedAndAngleEstimator windSpeedAndAngleEstimator = new WindSpeedAndAngleEstimator(averageBoatSpeedAndCourseForWindSpeed);
-        return windSpeedAndAngleEstimator.getAverageTrueWindSpeedAndAngle(speedOverGround);
-    }
     
     Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {

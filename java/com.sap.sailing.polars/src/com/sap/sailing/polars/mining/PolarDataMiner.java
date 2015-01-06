@@ -122,11 +122,6 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
             throws NotEnoughDataHasBeenAddedException {
         return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle).getSpeedWithConfidence();
     }
-
-    public SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround,
-            LegType legType, Tack tack) {
-        return incrementalRegressionProcessor.estimateTrueWindSpeedAndAngle(boatClass, speedOverGround, legType, tack);
-    }
     
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
