@@ -46,6 +46,12 @@ public class WindSpeedAndAngleEstimator {
      * Looks at all entries in {@link #dataCountAndAngleSumMap} and determines the wind speed and true wind angle at
      * which the boat has most likely been sailing to achieve the <code>boatSpeed</code> provided.
      * 
+     * BE ADVISED: The result candidate with the highest confidence, which is returned here, is not necessarily the
+     * candidate which is the most likely to be correct. It really depends on the quality and quantity of gathered polar
+     * data.
+     * 
+     * Use {@link #getAverageTrueWindSpeedAndAngleCandidates(Speed)} to get all candidates.
+     * 
      * @return null if none was found, otherwise candidate with highest confidence, found in the list returned by
      *         {@link #getAverageTrueWindSpeedAndAngleCandidates(Speed)}
      */
