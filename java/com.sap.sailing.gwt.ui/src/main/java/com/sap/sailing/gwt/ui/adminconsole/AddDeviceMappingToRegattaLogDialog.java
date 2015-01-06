@@ -73,13 +73,13 @@ public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog
                 new SelectionChangedHandler() {
                     @Override
                     public void onSelectionChange(MarkDTO mark) {
-                        qrWidget.setMappedItem(DeviceMappingConstants.MARK_ID_AS_STRING, mark.getIdAsString());
+                        qrWidget.setMappedItem(DeviceMappingConstants.URL_MARK_ID_AS_STRING, mark.getIdAsString());
                         qrWidget.generateQRCode();
                     }
 
                     @Override
                     public void onSelectionChange(CompetitorDTO competitor) {
-                        qrWidget.setMappedItem(DeviceMappingConstants.COMPETITOR_ID_AS_STRING,
+                        qrWidget.setMappedItem(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                                 competitor.getIdAsString());
                         qrWidget.generateQRCode();
                     }
@@ -98,8 +98,8 @@ public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog
                 }
                 String eventIdAsString = events.getValue().id.toString();
                 return baseUrlWithoutTrailingSlash + DeviceMappingConstants.URL_BASE
-                        + "?" + DeviceMappingConstants.EVENT_ID + "=" + DeviceMappingQRCodeWidget.encode(eventIdAsString)
-                        + "&" + DeviceMappingConstants.LEADERBOARD_NAME + "=" + DeviceMappingQRCodeWidget.encode(leaderboardName)
+                        + "?" + DeviceMappingConstants.URL_EVENT_ID + "=" + DeviceMappingQRCodeWidget.encode(eventIdAsString)
+                        + "&" + DeviceMappingConstants.URL_LEADERBOARD_NAME + "=" + DeviceMappingQRCodeWidget.encode(leaderboardName)
                         + "&" + mappedItemQueryParam;
             }
         });
