@@ -294,12 +294,11 @@ public class MasterDataImportTest {
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             DB db = destService.getMongoObjectFactory().getDatabase();
-            WriteConcern writeConcern = db.getWriteConcern();
+            db.setWriteConcern(WriteConcern.SAFE);
             inputStream = new ByteArrayInputStream(os.toByteArray());
-
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
             importer.importFromStream(inputStream, randomUUID, false);
-            writeConcern.callGetLastError(); // wait for all writes to actually have been written
+            db.getLastError(); // make sure the write has finished before reads are used
         } finally {
             os.close();
             inputStream.close();
@@ -392,10 +391,12 @@ public class MasterDataImportTest {
         RaceLog raceLog2 = raceColumn2.getRaceLog(raceColumn2.getFleetByName(fleet1OnTarget.getName()));
         Assert.assertEquals(logEvent.getId(), raceLog2.getFirstRawFixAtOrAfter(logTimePoint).getId());
         
-        // Check for persisting of regatta log events:
+        // Check for persisting of regatta log events
         Regatta regattaOnTarget2 = dest2.getRegattaByName(TEST_LEADERBOARD_NAME);
-        Assert.assertEquals(registerEvent.getId(),
-                regattaOnTarget2.getRegattaLog().getFirstRawFixAtOrAfter(regattaLogTimepoint).getId());
+        RegattaLogRegisterCompetitorEvent registerEventOnTarget2 = (RegattaLogRegisterCompetitorEvent)
+                regattaOnTarget2.getRegattaLog().getFirstFixAtOrAfter(regattaLogTimepoint);
+        Assert.assertNotNull(registerEventOnTarget2);
+        Assert.assertEquals(registerEvent.getId(), registerEventOnTarget2.getId());
     }
 
     @Test
