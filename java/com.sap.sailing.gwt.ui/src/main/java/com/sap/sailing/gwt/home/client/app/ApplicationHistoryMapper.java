@@ -10,12 +10,12 @@ import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
-import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 
 @WithTokenizers({ AboutUsPlace.Tokenizer.class, ContactPlace.Tokenizer.class, EventPlace.Tokenizer.class, EventsPlace.Tokenizer.class, 
-    SolutionsPlace.Tokenizer.class, SailingAnalyticsPlace.Tokenizer.class, SponsoringPlace.Tokenizer.class, SearchResultPlace.Tokenizer.class, StartPlace.Tokenizer.class,
+    SolutionsPlace.Tokenizer.class, WhatsNewPlace.Tokenizer.class, SponsoringPlace.Tokenizer.class, SearchResultPlace.Tokenizer.class, StartPlace.Tokenizer.class,
     RegattaPlace.Tokenizer.class, SeriesPlace.Tokenizer.class })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {
 }

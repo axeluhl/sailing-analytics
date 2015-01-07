@@ -24,12 +24,12 @@ import com.sap.sailing.gwt.home.client.place.series.TabletAndDesktopSeriesView;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsView;
 import com.sap.sailing.gwt.home.client.place.solutions.TabletAndDesktopSolutionsView;
-import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsView;
-import com.sap.sailing.gwt.home.client.place.solutions.analytics.TabletAndDesktopSailingAnalyticsView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsoringView;
 import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.client.place.whatsnew.TabletAndDesktopWhatsNewView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -98,7 +98,7 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     }
     
     @Override
-    public SailingAnalyticsView createSailingAnalyticsView() {
-        return new TabletAndDesktopSailingAnalyticsView();
+    public WhatsNewView createSailingAnalyticsView() {
+        return new TabletAndDesktopWhatsNewView();
     }
 }

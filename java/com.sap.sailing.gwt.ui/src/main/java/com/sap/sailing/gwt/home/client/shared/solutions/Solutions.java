@@ -20,7 +20,7 @@ import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
-import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsPlace;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 
 public class Solutions extends Composite {
     interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
@@ -52,7 +52,7 @@ public class Solutions extends Composite {
     
     private final SolutionsNavigationTabs navigationTab;
     
-    private final PlaceNavigation<SailingAnalyticsPlace> sailingAnalyticsDetailsNavigation;
+    private final PlaceNavigation<WhatsNewPlace> sailingAnalyticsDetailsNavigation;
     private final HomePlacesNavigator placesNavigator;
     
     public Solutions(SolutionsNavigationTabs navigationTab, HomePlacesNavigator placesNavigator) {

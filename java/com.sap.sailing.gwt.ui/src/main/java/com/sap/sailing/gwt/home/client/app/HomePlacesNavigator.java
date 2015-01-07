@@ -12,10 +12,10 @@ import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
-import com.sap.sailing.gwt.home.client.place.solutions.analytics.SailingAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 
 public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -35,8 +35,8 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createLocalPlaceNavigation(new SolutionsPlace(navigationTab), new SolutionsPlace.Tokenizer());
     }
 
-    public PlaceNavigation<SailingAnalyticsPlace> getSailingAnalyticsNavigation() {
-        return createLocalPlaceNavigation(new SailingAnalyticsPlace(), new SailingAnalyticsPlace.Tokenizer());
+    public PlaceNavigation<WhatsNewPlace> getSailingAnalyticsNavigation() {
+        return createLocalPlaceNavigation(new WhatsNewPlace(), new WhatsNewPlace.Tokenizer());
     }
 
     public PlaceNavigation<SponsoringPlace> getSponsoringNavigation() {
