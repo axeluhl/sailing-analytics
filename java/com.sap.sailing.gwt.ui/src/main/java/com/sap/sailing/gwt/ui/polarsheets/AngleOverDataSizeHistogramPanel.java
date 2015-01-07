@@ -88,7 +88,8 @@ public class AngleOverDataSizeHistogramPanel extends DockLayoutPanel {
         List<Number> yValues = new ArrayList<>();
         for (int i = 0; i < 360; i++) {
             if (histogramDataPerAngle.get(i) != null) {
-                xValues.add(i);
+                int convertedAngle = i > 180 ? i - 360 : i;
+                xValues.add(convertedAngle);
                 yValues.add(histogramDataPerAngle.get(i).getDataCount());
             }
         }
