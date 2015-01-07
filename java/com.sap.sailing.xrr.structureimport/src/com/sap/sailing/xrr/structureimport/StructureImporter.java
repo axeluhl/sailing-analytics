@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
@@ -94,12 +93,11 @@ public class StructureImporter {
             BuildStructure buildStructure = new BuildStructure(races);
             final TimePoint startDate = null; // TODO can regatta start time be inferred from XRR document?
             final TimePoint endDate = null; // TODO can regatta end time be inferred from XRR document?
-            RegattaImpl regatta = new RegattaImpl(
-                    RegattaImpl.getDefaultName(event.getTitle(), ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
-                    new BoatClassImpl(((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), true),
-                    startDate, endDate,
-                    getSeries(buildStructure), false, this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(),
-                    null);
+            RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
+                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
+                    baseDomainFactory.getOrCreateBoatClass(((Division) event.getRaceOrDivisionOrRegattaSeriesResult()
+                            .get(0)).getTitle()), startDate, endDate, getSeries(buildStructure), false,
+                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null);
             addSpecificRegattas.add(regatta);
         }
         return addSpecificRegattas;
