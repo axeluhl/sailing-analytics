@@ -321,7 +321,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	private void startTrackingActivity() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
-		intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), regattaActivity.event.checkinDigest);
+		String checkinDigest = regattaActivity.event.checkinDigest;
+		intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
 		getActivity().startActivity(intent);
 	}
 
