@@ -12,7 +12,6 @@ public class AnalyticsContract {
 		String COMPETITOR_COUNTRY_CODE = "competitor_country_code";
 		String COMPETITOR_NATIONALITY = "competitor_nationality";
 		String COMPETITOR_SAIL_ID = "competitor_sail_id";
-		String COMPETITOR_LEADERBOARD_FK = "leaderboard_id";
 		String COMPETITOR_CHECKIN_DIGEST = "competitor_checkin_digest";
 	}
 
@@ -28,7 +27,6 @@ public class AnalyticsContract {
 		String EVENT_SERVER = "event_server";
 		String EVENT_IMAGE_URL = "image_url";
 		String EVENT_NAME = "event_name";
-		String EVENT_LEADERBOARD_FK = "leaderboard_id";
 		String EVENT_CHECKIN_DIGEST = "event_checkin_digest";
 	}
 

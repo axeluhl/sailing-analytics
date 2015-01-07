@@ -45,7 +45,7 @@ public class ServiceHelper {
 	{
 		Intent intent = new Intent(context, TrackingService.class);
 		intent.setAction(context.getString(R.string.tracking_service_start));
-		intent.putExtra(context.getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
+		intent.putExtra(context.getString(R.string.tracking_service_checkin_digest_parameter), checkinDigest);
 		context.startService(intent);
 	}
 	

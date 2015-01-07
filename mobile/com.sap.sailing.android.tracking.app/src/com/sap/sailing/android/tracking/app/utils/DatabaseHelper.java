@@ -379,9 +379,7 @@ public class DatabaseHelper {
 	public void storeCheckinRow(Context context, EventInfo event, CompetitorInfo competitor,
 			LeaderboardInfo leaderboard) throws GeneralDatabaseHelperException {
 
-		// inserting leaderboard first in order to get the ID.
-		// This should be atomic, but couldn't get withValueBackReference to
-		// work yet.
+		// inserting leaderboard first
 
 		ContentResolver cr = context.getContentResolver();
 
@@ -389,18 +387,8 @@ public class DatabaseHelper {
 		clv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
 		clv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
 		cr.insert(Leaderboard.CONTENT_URI, clv);
-
-		Cursor cur = cr.query(Leaderboard.CONTENT_URI, null, null, null, null);
-		long lastLeaderboardId = 0;
-
-		if (cur.moveToLast()) {
-			lastLeaderboardId = cur.getLong(cur.getColumnIndex(BaseColumns._ID));
-		}
-
-		cur.close();
-
-		// now, with the leaderboard id, insert event and competitor
-		// todo: fix this so its atomic.
+		
+		// now insert event
 
 		ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
 
@@ -412,9 +400,10 @@ public class DatabaseHelper {
 		cev.put(Event.EVENT_SERVER, event.server);
 		cev.put(Event.EVENT_IMAGE_URL, event.imageUrl);
 		cev.put(Event.EVENT_CHECKIN_DIGEST, event.checkinDigest);
-		cev.put(Event.EVENT_LEADERBOARD_FK, lastLeaderboardId);
 
 		opList.add(ContentProviderOperation.newInsert(Event.CONTENT_URI).withValues(cev).build());
+		
+		// competitor
 
 		ContentValues ccv = new ContentValues();
 
@@ -424,7 +413,6 @@ public class DatabaseHelper {
 		ccv.put(Competitor.COMPETITOR_NATIONALITY, competitor.nationality);
 		ccv.put(Competitor.COMPETITOR_SAIL_ID, competitor.sailId);
 		ccv.put(Competitor.COMPETITOR_CHECKIN_DIGEST, competitor.checkinDigest);
-		ccv.put(Competitor.COMPETITOR_LEADERBOARD_FK, lastLeaderboardId);
 
 		opList.add(ContentProviderOperation.newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
 
