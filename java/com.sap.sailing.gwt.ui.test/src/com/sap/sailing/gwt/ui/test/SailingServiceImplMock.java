@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
-import com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterFactoryImpl;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
@@ -34,7 +34,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.AbstractReplicablesProvider;
@@ -115,10 +115,10 @@ public class SailingServiceImplMock extends SailingServiceImpl {
 
                     @Override
                     public RaceHandle addSwissTimingRace(TrackerManager trackerManager,
-                            RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname,
-                            int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
-                            throws InterruptedException, UnknownHostException, IOException, ParseException,
-                            Exception {
+                            RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
+                            BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore,
+                            RegattaLogStore regattaLogStore, long timeoutInMilliseconds) throws InterruptedException,
+                            UnknownHostException, IOException, ParseException, Exception {
                         // TODO Auto-generated method stub
                         return null;
                     }
@@ -174,7 +174,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
             BundleContext context) {
         @SuppressWarnings("unchecked")
         ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> result = mock(ServiceTracker.class);
-        RaceLogTrackingAdapterFactory factory = RaceLogTrackingAdapterFactoryImpl.INSTANCE;
+        RaceLogTrackingAdapterFactory factory = RaceLogTrackingAdapterFactory.INSTANCE;
         when(result.getService()).thenReturn(factory);
         return result;
     }

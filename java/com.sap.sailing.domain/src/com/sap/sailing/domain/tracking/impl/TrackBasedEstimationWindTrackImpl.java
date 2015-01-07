@@ -28,7 +28,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
@@ -74,7 +73,7 @@ import com.sap.sse.common.impl.SerializableComparator;
  * @author Axel Uhl (d043530)
  * 
  */
-public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl implements RaceChangeListener {
+public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
     private static final long serialVersionUID = -4397496421917807499L;
 
     private static final SpeedWithBearing defaultSpeedWithBearing = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
@@ -222,6 +221,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      */
     private final InvalidationInterval scheduledRefreshInterval;
 
+    private final CacheInvalidationRaceChangeListener listener;
+
     /**
      * @param delayForCacheInvalidationInMilliseconds
      *            When mark and boat position changes are received, they cause the cache to be invalidated a certain
@@ -257,7 +258,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
         weigher = new PositionAndTimePointWeigher(
         /* halfConfidenceAfterMilliseconds */WindTrack.WIND_HALF_CONFIDENCE_TIME_MILLIS, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
-        trackedRace.addListener(this); // in particular, race status changes will be notified, unblocking waiting computations after LOADING phase
+        listener = new CacheInvalidationRaceChangeListener();
+        trackedRace.addListener(listener); // in particular, race status changes will be notified, unblocking waiting computations after LOADING phase
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(
                 AbstractTimePoint.TIMEPOINT_COMPARATOR);
         this.timePointsWithCachedNullResultFastContains = new HashSet<TimePoint>();
@@ -573,134 +575,140 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
     }
 
-    @Override
-    public void windDataReceived(Wind wind, WindSource windSource) {
-        invalidateForNewWind(wind, windSource);
-    }
-    
-    @Override
-    public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-    }
+    /**
+     * The default action of this listener is to call {@link #clearCache} on the wind track. Some changes don't require this
+     * and therefore some methods are overridden to do nothing or to react in a more specific way than simply clearing the
+     * cache.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class CacheInvalidationRaceChangeListener extends AbstractRaceChangeListener implements Serializable {
+        private static final long serialVersionUID = -6623310087193133466L;
 
-    @Override
-    public void delayToLiveChanged(long delayToLiveInMillis) {
-    }
-
-    private void invalidateForNewWind(Wind wind, WindSource windSource) {
-        WindTrack windTrack = getTrackedRace().getOrCreateWindTrack(windSource);
-        // check what the next fixes before and after the one affected are; if they are further than the averagingInterval
-        // away, extend the invalidation interval accordingly because the entire span up to the next fix may be influenced
-        // by adding/removing a fix in a sparsely occupied track. See WindTrackImpl.getAveragedWindUnsynchronized(Position p, TimePoint at)
-        long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
-        final TimePoint timePoint = wind.getTimePoint();
-        // See WindComparator; if time is equal, position is compared; for dummy fixes this will create arbitrary order, so ensure time point cannot
-        // accidentally be equal
-        Wind lastFixBefore = windTrack.getLastFixBefore(timePoint.minus(1)); // subtract one millisecond to be sure to be before a fix just inserted
-        Wind firstFixAfter = windTrack.getFirstFixAfter(timePoint.plus(1)); // add one millisecond to be sure to be after a fix just inserted
-        final WindWithConfidence<TimePoint> startOfInvalidation;
-        if (lastFixBefore == null) {
-            startOfInvalidation = getTrackedRace().getStartOfTracking() == null ? getDummyFixWithConfidence(new MillisecondsTimePoint(0l))
-                    : getDummyFixWithConfidence(getTrackedRace().getStartOfTracking());
-        } else if (lastFixBefore.getTimePoint().before(timePoint.minus(averagingInterval))) {
-            startOfInvalidation = new WindWithConfidenceImpl<TimePoint>(lastFixBefore, 1.0, timePoint, windSource.getType().useSpeed());
-        } else {
-            startOfInvalidation = getDummyFixWithConfidence(timePoint.minus(averagingInterval));
+        @Override
+        protected void defaultAction() {
+            clearCache();
         }
-        final TimePoint endOfInvalidation;
-        if (firstFixAfter == null) {
-            endOfInvalidation = getTrackedRace().getEndOfTracking() == null ? new MillisecondsTimePoint(Long.MAX_VALUE) : getTrackedRace().getEndOfTracking();
-        } else if (firstFixAfter.getTimePoint().after(timePoint.plus(averagingInterval))) {
-            endOfInvalidation = firstFixAfter.getTimePoint();
-        } else {
-            endOfInvalidation = timePoint.plus(averagingInterval);
+        
+        @Override
+        public void windDataReceived(Wind wind, WindSource windSource) {
+            invalidateForNewWind(wind, windSource);
         }
-        scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
-    }
 
-    @Override
-    public void windDataRemoved(Wind wind, WindSource windSource) {
-        invalidateForNewWind(wind, windSource);
-    }
+        @Override
+        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+            // no action required; we're calculating based on each competitor's individual start time, not the start of
+            // race
+        }
 
-    @Override
-    public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-        clearCache();
-    }
+        @Override
+        public void startTimeReceivedChanged(TimePoint startTimeReceived) {
+        }
 
-    @Override
-    public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        clearCache();
-    }
+        @Override
+        public void delayToLiveChanged(long delayToLiveInMillis) {
+        }
 
-    @Override
-    public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-        long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-        WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
-                .getTimePoint().asMillis() - averagingInterval));
-        TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
-        scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
-    }
-    
-    @Override
-    public void statusChanged(TrackedRaceStatus newStatus) {
-        // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the cache
-        // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
-    }
+        private void invalidateForNewWind(Wind wind, WindSource windSource) {
+            WindTrack windTrack = getTrackedRace().getOrCreateWindTrack(windSource);
+            // check what the next fixes before and after the one affected are; if they are further than the
+            // averagingInterval
+            // away, extend the invalidation interval accordingly because the entire span up to the next fix may be
+            // influenced
+            // by adding/removing a fix in a sparsely occupied track. See
+            // WindTrackImpl.getAveragedWindUnsynchronized(Position p, TimePoint at)
+            long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
+            final TimePoint timePoint = wind.getTimePoint();
+            // See WindComparator; if time is equal, position is compared; for dummy fixes this will create arbitrary
+            // order, so ensure time point cannot
+            // accidentally be equal
+            Wind lastFixBefore = windTrack.getLastFixBefore(timePoint.minus(1)); // subtract one millisecond to be sure
+                                                                                 // to be before a fix just inserted
+            Wind firstFixAfter = windTrack.getFirstFixAfter(timePoint.plus(1)); // add one millisecond to be sure to be
+                                                                                // after a fix just inserted
+            final WindWithConfidence<TimePoint> startOfInvalidation;
+            if (lastFixBefore == null) {
+                startOfInvalidation = getTrackedRace().getStartOfTracking() == null ? getDummyFixWithConfidence(new MillisecondsTimePoint(
+                        0l)) : getDummyFixWithConfidence(getTrackedRace().getStartOfTracking());
+            } else if (lastFixBefore.getTimePoint().before(timePoint.minus(averagingInterval))) {
+                startOfInvalidation = new WindWithConfidenceImpl<TimePoint>(lastFixBefore, 1.0, timePoint, windSource
+                        .getType().useSpeed());
+            } else {
+                startOfInvalidation = getDummyFixWithConfidence(timePoint.minus(averagingInterval));
+            }
+            final TimePoint endOfInvalidation;
+            if (firstFixAfter == null) {
+                endOfInvalidation = getTrackedRace().getEndOfTracking() == null ? new MillisecondsTimePoint(
+                        Long.MAX_VALUE) : getTrackedRace().getEndOfTracking();
+            } else if (firstFixAfter.getTimePoint().after(timePoint.plus(averagingInterval))) {
+                endOfInvalidation = firstFixAfter.getTimePoint();
+            } else {
+                endOfInvalidation = timePoint.plus(averagingInterval);
+            }
+            scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+        }
 
-    @Override
-    public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
-        long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-        WindWithConfidence<TimePoint> startOfInvalidation;
-        TimePoint endOfInvalidation;
-        for (MarkPassing markPassing : markPassings) {
-            MarkPassing oldMarkPassing = oldMarkPassings.get(markPassing.getWaypoint());
-            if (oldMarkPassing != markPassing) {
-                if (oldMarkPassing == null) {
-                    startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(markPassing
-                            .getTimePoint().asMillis() - averagingInterval));
-                    endOfInvalidation = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()
-                            + averagingInterval);
-                } else {
-                    TimePoint[] interval = new TimePoint[] { oldMarkPassing.getTimePoint(), markPassing.getTimePoint() };
-                    Arrays.sort(interval);
-                    startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(interval[0].asMillis()
-                            - averagingInterval));
-                    endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis() + averagingInterval);
+        @Override
+        public void windDataRemoved(Wind wind, WindSource windSource) {
+            invalidateForNewWind(wind, windSource);
+        }
+
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+            long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
+            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
+                    .getTimePoint().asMillis() - averagingInterval));
+            TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
+            scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+        }
+
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus) {
+            // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the
+            // cache
+            // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
+        }
+
+        @Override
+        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
+                Iterable<MarkPassing> markPassings) {
+            long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
+            WindWithConfidence<TimePoint> startOfInvalidation;
+            TimePoint endOfInvalidation;
+            for (MarkPassing markPassing : markPassings) {
+                MarkPassing oldMarkPassing = oldMarkPassings.get(markPassing.getWaypoint());
+                if (oldMarkPassing != markPassing) {
+                    if (oldMarkPassing == null) {
+                        startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(markPassing
+                                .getTimePoint().asMillis() - averagingInterval));
+                        endOfInvalidation = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()
+                                + averagingInterval);
+                    } else {
+                        TimePoint[] interval = new TimePoint[] { oldMarkPassing.getTimePoint(),
+                                markPassing.getTimePoint() };
+                        Arrays.sort(interval);
+                        startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(
+                                interval[0].asMillis() - averagingInterval));
+                        endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis() + averagingInterval);
+                    }
+                    scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
                 }
-                scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
             }
         }
-    }
-    
-    @Override
-    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-        // no action required; we're calculating based on each competitor's individual start time, not the start of race
-    }
 
-    @Override
-    public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        clearCache();
-    }
-
-    @Override
-    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-        clearCache();
-    }
-
-    @Override
-    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-        clearCache();
-    }
-
-    @Override
-    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
-        assert fix != null && fix.getTimePoint() != null;
-        // A mark position change can mean a leg type change. The interval over which the wind estimation is affected
-        // depends on how the GPS track computes the estimated mark position. Ask it:
-        Util.Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
-        WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
-        TimePoint endOfInvalidation = interval.getB();
-        scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+        @Override
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+            assert fix != null && fix.getTimePoint() != null;
+            // A mark position change can mean a leg type change. The interval over which the wind estimation is
+            // affected
+            // depends on how the GPS track computes the estimated mark position. Ask it:
+            Util.Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark)
+                    .getEstimatedPositionTimePeriodAffectedBy(fix);
+            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
+            TimePoint endOfInvalidation = interval.getB();
+            scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+        }
     }
 
     /**
@@ -783,6 +791,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             super(TrackBasedEstimationWindTrackImpl.this, trackedRace, from, to, /* resolution in milliseconds */ 1000l);
         }
 
+        @Override
         protected Wind getWind(Position p, TimePoint timePoint) {
             final WindWithConfidence<TimePoint> estimatedWindDirectionWithConfidence = getWindWithConfidence(timePoint);
             return estimatedWindDirectionWithConfidence == null ? null : estimatedWindDirectionWithConfidence.getObject();
@@ -797,5 +806,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             return new EstimatedWindFixesAsNavigableSet(trackedRace, from, to);
         }
 
+    }
+
+    /**
+     * Forwards the information about the wind fix received to the {@link #listener} which will then adjust this
+     * track's cache.
+     */
+    public void windDataReceived(WindImpl wind, WindSource realWindSource) {
+        listener.windDataReceived(wind, realWindSource);
     }
 }

@@ -2,9 +2,10 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.RevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceLogRevokeEventSerializer extends BaseRaceLogEventSerializer {
@@ -26,8 +27,7 @@ public class RaceLogRevokeEventSerializer extends BaseRaceLogEventSerializer {
 
     @Override
     public JSONObject serialize(RaceLogEvent object) {
-        RevokeEvent event = (RevokeEvent) object;
-
+        RaceLogRevokeEvent event = (RaceLogRevokeEvent) object;
         JSONObject result = super.serialize(event);
         result.put(FIELD_REVOKED_EVENT_ID, event.getRevokedEventId().toString());
         result.put(FIELD_REVOKED_EVENT_TYPE, event.getRevokedEventType());

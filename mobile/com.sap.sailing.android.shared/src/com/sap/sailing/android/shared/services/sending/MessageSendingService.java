@@ -109,7 +109,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private Date lastSuccessfulSend;
     
-    public List<String> getDelayedIntensContent() {
+    public List<String> getDelayedIntentsContent() {
         return persistenceManager.getContent();
     }
 
@@ -159,16 +159,25 @@ public class MessageSendingService extends Service implements MessageSendingList
         MessageRestorer restorer = null;
         try {
             Bundle data = getPackageManager().getServiceInfo(thisService, PackageManager.GET_META_DATA).metaData;
-            String className = data.getString("com.sap.sailing.android.shared.services.sending.messageRestorer");
-            Class<?> clazz = Class.forName(className);
-            if (! MessageRestorer.class.isAssignableFrom(clazz)) {
-                throw new Exception("Class does not conform to expected type.");
+            if (data == null) {
+                ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService "
+                        + "on how to register the restorer through the manifest.");
+            } else {
+                String className = data.getString("com.sap.sailing.android.shared.services.sending.messageRestorer");
+                Class<?> clazz = Class.forName(className);
+                if (!MessageRestorer.class.isAssignableFrom(clazz)) {
+                    ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService "
+                            + "on how to register the restorer through the manifest. Class " + clazz
+                            + " does not conform to expected type " + MessageRestorer.class.getName());
+                } else {
+                    @SuppressWarnings("unchecked")
+                    // checked above
+                    Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
+                    restorer = castedClass.getConstructor().newInstance();
+                }
             }
-            @SuppressWarnings("unchecked") //checked above
-            Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
-            restorer = castedClass.getConstructor().newInstance();
         } catch (Exception e) {
-            ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService"
+            ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService "
                     + "on how to register the restorer through the manifest. Error Message: " + e.getMessage());
         }
         return new MessagePersistenceManager(this, restorer);

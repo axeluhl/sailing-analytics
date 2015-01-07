@@ -190,14 +190,22 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, getStringMessages());
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ResultImportUrlsManagementPanel>(resultImportUrlsManagementPanel),
                 getStringMessages().resultImportUrls(), SailingAdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
+        
+        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(sailingService, this, getStringMessages(), this, eventManagementPanel);
+        panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
+                getStringMessages().structureImportUrls(), SailingAdminConsoleFeatures.MANAGE_STRUCTURE_IMPORT_URLS);
 
         /* ADVANCED */
         
         final TabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(),
                 "AdvancedPanel", SailingAdminConsoleFeatures.MANAGE_REPLICATION);
         final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, getStringMessages());
-        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanel),
-                getStringMessages().replication(), SailingAdminConsoleFeatures.MANAGE_REPLICATION);
+        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanel) {
+            @Override
+            public void refreshAfterBecomingVisible() {
+                replicationPanel.updateReplicaList();
+            }
+        }, getStringMessages().replication(), SailingAdminConsoleFeatures.MANAGE_REPLICATION);
 
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), sailingService,
                 this, eventManagementPanel, this, this);

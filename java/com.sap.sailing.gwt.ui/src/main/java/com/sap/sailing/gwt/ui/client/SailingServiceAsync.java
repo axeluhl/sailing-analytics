@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -383,7 +384,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
     void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void createRegatta(String regattaName, String boatClassName,
+    void createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference, AsyncCallback<RegattaDTO> callback);
 
@@ -459,7 +460,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             PolarSheetGenerationSettings settings, String name, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
 
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid,
+    void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
             RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference, AsyncCallback<Void> callback);
 
     /**
@@ -509,6 +510,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
+    
+    void getStructureImportOperationProgress(AsyncCallback<Integer> asyncCallback);
 
     void getLeaderboardGroupNamesFromRemoteServer(String host, AsyncCallback<List<String>> leaderboardGroupNames);
 
@@ -552,8 +555,13 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
+    void getBoatClassNamesWithPolarSheetsAvailable(AsyncCallback<List<String>> asyncCallback);
+    
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
+    
 
+    void showCachedPolarSheetForBoatClass(String boatClassName,
+            AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void denoteForRaceLogTracking(String leaderboardName,
@@ -565,8 +573,19 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);
 
+    /**
+     * Set the competitor registrations in the racelog. Unregisters formerly registered competitors
+     * that are not listed in {@code competitors}.
+     */
     void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitors, AsyncCallback<Void> callback);
+
+    /**
+     * Set the competitor registrations in the leaderboard. Unregisters formerly registered competitors
+     * that are not listed in {@code competitors}.
+     */
+    void setCompetitorRegistrations(String leaderboardName,Set<CompetitorDTO> competitors,
+            AsyncCallback<Void> callback);
 
     void getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Collection<CompetitorDTO>> callback);
@@ -587,6 +606,12 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             PositionDTO position, AsyncCallback<Void> callback);
 
     void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
+
+    /**
+     * Do not only use the racelog, but also other logs (e.g. RegattaLogs) in the hierarchy of the race.
+     */
+    void getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<DeviceMappingDTO>> callback);
 
     void getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<List<DeviceMappingDTO>> callback);
@@ -641,4 +666,21 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
             AsyncCallback<Iterable<LeaderboardSearchResultDTO>> callback);
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
+
+    void getCompetitorRegistrations(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> callback);
+
+    void createXYDiagramForBoatClass(String itemText, AsyncCallback<PolarSheetsXYDiagramData> asyncCallback);
+
+    void getEventsForLeaderboard(String leaderboardName, AsyncCallback<Collection<EventDTO>> callback);
+    
+    /**
+     * Imports regatta structure definitions from an ISAF XRR document
+     * 
+     * @param manage2SailJsonUrl the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
+     */
+    void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
+
+    void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
+			EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
+
 }

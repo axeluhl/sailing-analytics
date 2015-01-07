@@ -2,9 +2,9 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 
-public interface PolarSheetGenerationSettings extends Serializable{
+public interface PolarSheetGenerationSettings extends Serializable {
 
     Integer getMinimumDataCountPerGraph();
 
@@ -26,8 +26,10 @@ public interface PolarSheetGenerationSettings extends Serializable{
 
     boolean useOnlyEstimatedForWindDirection();
 
-    WindSteppingWithMaxDistance getWindStepping();
+    WindSpeedSteppingWithMaxDistance getWindSpeedStepping();
 
     boolean splitByWindgauges();
+
+    boolean areDefault();
 
 }

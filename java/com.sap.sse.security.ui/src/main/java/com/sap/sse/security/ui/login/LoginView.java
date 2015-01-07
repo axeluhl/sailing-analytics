@@ -21,12 +21,12 @@ import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
 import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.ForgotPasswordDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class LoginView extends Composite {
     private static LoginViewUiBinder uiBinder = GWT.create(LoginViewUiBinder.class);
@@ -50,23 +50,13 @@ public class LoginView extends Composite {
         this.userManagementService = userManagementService;
         this.userService = userService;
         this.stringMessages = stringMessages;
-
         LoginViewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-
         appNameLabel.setText(appName);
         userNameTextBox.setWatermark(stringMessages.username());
         userNameTextBox.setWatermarkStyleName(LoginViewResources.INSTANCE.css().textInput_watermark());
         passwordTextBox.setWatermark(stringMessages.password());
         passwordTextBox.setWatermarkStyleName(LoginViewResources.INSTANCE.css().passwordTextInput_watermark());
-        String registrationLink = EntryPointLinkFactory.createRegistrationLink(Collections.<String, String> emptyMap());
-        
-        
-//        signUpAnchor.setHref(registrationLink);
-//        
-//        String x = "javascript:window.open('" + registrationLink + "','_blank');";
-//        signUpAnchor.setHref(x);
-        
         oAuthPanel.add(new OAuthLogin(userManagementService));
         userNameTextBox.setFocus(true);
         

@@ -2,17 +2,19 @@ package com.sap.sse.datamining.impl.data;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 
 public class FixClusterGroup<ElementType> implements ClusterGroup<ElementType> {
 
-    private final String name;
+    private final String messageKey;
     private final Collection<Cluster<ElementType>> clusters;
 
-    public FixClusterGroup(String name, Collection<Cluster<ElementType>> clusters) {
-        this.name = name;
+    public FixClusterGroup(String messageKey, Collection<Cluster<ElementType>> clusters) {
+        this.messageKey = messageKey;
         this.clusters = new HashSet<>(clusters);
     }
 
@@ -30,15 +32,15 @@ public class FixClusterGroup<ElementType> implements ClusterGroup<ElementType> {
     public Class<ElementType> getClusterElementsType() {
         return clusters.iterator().next().getClusterElementsType();
     }
-
+    
     @Override
-    public String getName() {
-        return name;
+    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+        return stringMessages.get(locale, messageKey);
     }
     
     @Override
     public String toString() {
-        return getName() + clusters;
+        return messageKey + " " + clusters;
     }
 
 }

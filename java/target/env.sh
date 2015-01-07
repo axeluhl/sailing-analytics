@@ -9,7 +9,16 @@
 
 SERVER_NAME=MASTER
 
-MEMORY="1024m"
+# This is a default heap size only; the boot script of an instance (see
+# configuration/sailing) will add a MEMORY assignment to this file in the
+# server's directory that has a default value computed from the total
+# memory installed in the machine and the number of server instances to
+# start on that machine. This default can be overwritten by manually appending
+# another MEMORY assignment at the end of the file or by defining an environment
+# file with a MEMORY assignment which is then used in conjunction with refreshInstance.sh
+# or by setting the MEMORY variable in the EC2 Instance Details section which will be appended
+# at the end of the file.
+MEMORY="6000m"
 
 # Message Queue hostname where to
 # send messages for replicas (this server is master)
@@ -32,7 +41,7 @@ EXPEDITION_PORT=2010
 # set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
 # same channel the master is using in its REPLICATION_CHANNEL variable
 
-# REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl
+# REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl
 
 # Host where the master Java instance is running
 # Make sure firewall configurations allow access

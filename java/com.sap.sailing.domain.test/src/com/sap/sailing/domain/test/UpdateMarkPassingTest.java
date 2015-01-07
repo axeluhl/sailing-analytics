@@ -43,7 +43,7 @@ public class UpdateMarkPassingTest {
         when(race.getBoatClass()).thenReturn(new BoatClassImpl("49er", /* typicallyStartsUpwind */ true));
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
-        /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, new HashSet<Series>(), false, null,
+        /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null,
                 "test", null)), race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
         /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,
         /* millisecondsOverWhichToAverageSpeed */30000);

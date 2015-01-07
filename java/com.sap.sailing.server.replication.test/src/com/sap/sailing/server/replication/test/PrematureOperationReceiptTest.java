@@ -10,14 +10,14 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.Replicator;
+import com.sap.sse.replication.impl.ReplicationReceiver;
 
 public class PrematureOperationReceiptTest extends AbstractServerReplicationTest {
-    private Replicator replicator;
-    private ReplicationServiceTestImpl replicationService;
+    private ReplicationReceiver replicator;
 
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
@@ -25,10 +25,9 @@ public class PrematureOperationReceiptTest extends AbstractServerReplicationTest
     @Before
     @Override
     public void setUp() throws Exception {
-        Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(true, /* master=null means create a new one */ null,
-                /* replica=null means create a new one */ null);
-        replicationService = result.getA();
-        replicator = replicationService.startToReplicateFromButDontYetFetchInitialLoad(result.getB(), /* startReplicatorSuspended */ true);
+        Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result =
+                basicSetUp(/* dropDB */ true, /* master=null means create a new one */ null, /* replica=null means create a new one */ null);
+        replicator = replicaReplicator.startToReplicateFromButDontYetFetchInitialLoad(result.getB(), /* startReplicatorSuspended */ true);
     }
 
     /**
@@ -40,26 +39,34 @@ public class PrematureOperationReceiptTest extends AbstractServerReplicationTest
      * started in suspended mode and resumed only after the initial load was successfully installed.
      */
     @Test
-    public void testRaceColumnInLeaderboardReplicationAfterInitialLoad() throws InterruptedException, ClassNotFoundException, IOException {
+    public void testRaceColumnInLeaderboardReplicationAfterInitialLoad() throws InterruptedException, ClassNotFoundException, IOException, IllegalAccessException {
         final String leaderboardName = "My new leaderboard";
         final int[] discardThresholds = new int[] { 17, 23 };
         CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint(), null);
         assertNull(master.getLeaderboardByName(leaderboardName));
+        replicaReplicator.initialLoad(); // serialize the master state before the operation has been applied
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
         assertNotNull(masterLeaderboard);
         Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
-        final Leaderboard nonExistingReplicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
-        assertNull(nonExistingReplicaLeaderboard); // because replicator is still suspended
-        replicationService.initialLoad();
+        {
+            final Leaderboard nonExistingReplicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+            assertNull(nonExistingReplicaLeaderboard); // because replicator is still suspended
+        }
+        {
+            final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+            assertNull(replicaLeaderboard); // because replicator is still suspended
+        }
         replicator.setSuspended(false);
         synchronized (replicator) {
             while (!replicator.isQueueEmpty()) {
                 replicator.wait();
             }
         }
-        final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
-        assertNotNull(replicaLeaderboard);
+        {
+            final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+            assertNotNull(replicaLeaderboard);
+        }
     }
 
 }

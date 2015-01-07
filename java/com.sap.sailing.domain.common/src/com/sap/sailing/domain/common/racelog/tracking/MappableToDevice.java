@@ -9,5 +9,5 @@ package com.sap.sailing.domain.common.racelog.tracking;
  *
  */
 public interface MappableToDevice {
-
+    String getIdAsString();
 }

@@ -9,12 +9,12 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.racelog.CompetitorResults;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.ConfirmedFinishPositioningListFinder;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 
 public class ConfirmedFinishPositioningListFinderTest extends
         PassAwareRaceLogAnalyzerTest<ConfirmedFinishPositioningListFinder, CompetitorResults> {
@@ -25,7 +25,7 @@ public class ConfirmedFinishPositioningListFinderTest extends
     }
 
     @Override
-    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
+    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogFinishPositioningConfirmedEvent event = createEvent(RaceLogFinishPositioningConfirmedEvent.class, 1, passId, author);
         when(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(mock(CompetitorResults.class));
         return new TargetPair(Arrays.asList(event), event.getPositionedCompetitorsIDsNamesMaxPointsReasons());

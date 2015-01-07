@@ -4,6 +4,11 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -12,12 +17,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.analyzing.impl.ConfirmedFinishPositioningListFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -99,7 +99,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     private void handleFinishPositioningList(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
-        Leaderboard leaderboard = service.getLeaderboardByName(raceLogIdentifier.getTemplate().getParentObjectName());
+        Leaderboard leaderboard = service.getLeaderboardByName(raceLogIdentifier.getRegattaLikeParent().getName());
         if (leaderboard != null) {
             Fleet fleet = raceColumn.getFleetByName(raceLogIdentifier.getFleetName());
             RaceLog raceLog = raceColumn.getRaceLog(fleet);

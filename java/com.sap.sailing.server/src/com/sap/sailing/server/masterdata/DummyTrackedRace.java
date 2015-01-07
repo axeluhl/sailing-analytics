@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
@@ -25,7 +27,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -315,8 +316,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest)
-            throws NoWindException {
+    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -615,6 +615,18 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Position getCenterOfCourse(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void attachRegattaLog(RegattaLog regattaLog) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
     }
 
 }

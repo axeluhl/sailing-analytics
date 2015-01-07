@@ -102,7 +102,8 @@ public class RaceDataAccessEval {
         service = new RacingEventServiceImpl();
         tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
         logger.info("Calling service.addTracTracRace");
-        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramUrl, liveUri, storedUri, null, 60000);
+        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramUrl, liveUri, storedUri, null, null,
+                60000);
         logger.info("Calling raceHandle.getRaces(): " + raceHandle);
         RaceDefinition race = raceHandle.getRace(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained race: " + race);

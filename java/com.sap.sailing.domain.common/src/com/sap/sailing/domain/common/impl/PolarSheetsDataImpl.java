@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
-import com.sap.sailing.domain.common.WindStepping;
+import com.sap.sailing.domain.common.WindSpeedStepping;
 
 public class PolarSheetsDataImpl implements PolarSheetsData {
 
@@ -12,11 +12,9 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
 
     private Number[][] averagedPolarDataByWindSpeed;
     
-    private boolean complete;
-    
     private int dataCount;
     
-    private WindStepping stepping;
+    private WindSpeedStepping stepping;
 
     private Map<Integer,Integer[]> dataCountPerAngleForWindspeed;
 
@@ -25,9 +23,10 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
     //For GWT Serialization
     PolarSheetsDataImpl() {};
    
-    public PolarSheetsDataImpl(Number[][] averagedPolarDataByWindSpeed, boolean complete, int dataCount, Map<Integer,Integer[]> dataCountPerAngleForWindspeed, WindStepping stepping, Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap) {
+    public PolarSheetsDataImpl(Number[][] averagedPolarDataByWindSpeed, int dataCount,
+            Map<Integer, Integer[]> dataCountPerAngleForWindspeed, WindSpeedStepping stepping,
+            Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap) {
         this.averagedPolarDataByWindSpeed = averagedPolarDataByWindSpeed;
-        this.complete = complete;
         this.dataCount = dataCount;
         this.dataCountPerAngleForWindspeed = dataCountPerAngleForWindspeed;
         this.stepping = stepping;
@@ -38,11 +37,6 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
     @Override
     public Number[][] getAveragedPolarDataByWindSpeed() {
         return averagedPolarDataByWindSpeed;
-    }
-
-    @Override
-    public boolean isComplete() {
-        return complete;
     }
 
     @Override
@@ -57,7 +51,7 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
     }
     
     @Override
-    public WindStepping getStepping() {
+    public WindSpeedStepping getStepping() {
         return stepping;
     }
     

@@ -14,15 +14,21 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.controls.listedit.ExpandedListEditorUi;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorUiStrategy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
-    
-    public SeriesWithFleetsListEditor(Iterable<SeriesDTO> initialValues, StringMessages stringMessages, ImageResource removeImage, boolean enableFleetRemoval) {
-        super(initialValues, new ExpandedUi(stringMessages, removeImage, enableFleetRemoval));
+
+    public SeriesWithFleetsListEditor(Iterable<SeriesDTO> initialValues, StringMessages stringMessages,
+            ImageResource removeImage, boolean enableFleetRemoval) {
+        this(initialValues, new ExpandedUi(stringMessages, removeImage, enableFleetRemoval));
     }
-    
-    private static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {
+
+    protected SeriesWithFleetsListEditor(Iterable<SeriesDTO> initialValues, ListEditorUiStrategy<SeriesDTO> activeUi) {
+        super(initialValues, activeUi);
+    }
+
+    protected static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, boolean canRemoveItems) {
             super(stringMessages, removeImage, canRemoveItems);
         }
@@ -40,16 +46,17 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
                 @Override
                 public void onClick(ClickEvent event) {
                     SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections
-                            .unmodifiableCollection(context.getValue()), getStringMessages(), new DialogCallback<SeriesDTO>() {
-                        @Override
-                        public void cancel() {
-                        }
+                            .unmodifiableCollection(context.getValue()), getStringMessages(),
+                            new DialogCallback<SeriesDTO>() {
+                                @Override
+                                public void cancel() {
+                                }
 
-                        @Override
-                        public void ok(SeriesDTO newSeries) {
-                            addValue(newSeries);
-                        }
-                    });
+                                @Override
+                                public void ok(SeriesDTO newSeries) {
+                                    addValue(newSeries);
+                                }
+                            });
                     dialog.ensureDebugId("SeriesCreateDialog");
                     dialog.show();
                 }
@@ -65,11 +72,9 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
             seriesLabel.setWordWrap(false);
             seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             hPanel.add(seriesLabel);
-            
             String fleetText = seriesDTO.getFleets().size() + " ";
-            
             if (seriesDTO.getFleets() != null && seriesDTO.getFleets().size() > 0) {
-                if(seriesDTO.getFleets().size() == 1) {
+                if (seriesDTO.getFleets().size() == 1) {
                     fleetText = "1 " + getStringMessages().fleet();
                 } else {
                     fleetText = seriesDTO.getFleets().size() + " " + getStringMessages().fleets();
@@ -79,7 +84,6 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
                 fleetText = "No fleets defined.";
             }
             hPanel.add(new Label(fleetText));
-            
             return hPanel;
         }
     }

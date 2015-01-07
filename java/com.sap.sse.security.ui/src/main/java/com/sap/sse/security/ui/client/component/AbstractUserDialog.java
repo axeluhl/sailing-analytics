@@ -6,10 +6,10 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 /**
  * Produces username, e-mail and password as the dialog's result. This class's default implementation of
@@ -98,9 +98,11 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
         super(title, message, stringMessages.ok(), stringMessages.cancel(),
                 validator, callback);
         nameBox = createTextBox("", 30);
+        nameBox.setName("username");
         emailBox = createTextBox("", 30);
         oldPwBox = createPasswordTextBox("", 30);
         pwBox = createPasswordTextBox("", 30);
+        nameBox.setName("password");
         pwRepeat = createPasswordTextBox("", 30);
         if (user != null) {
             nameBox.setText(user.getName());

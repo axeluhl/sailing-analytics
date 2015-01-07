@@ -18,9 +18,11 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
  *   D049941
  */
 public class TestLeaderboardCreation extends AbstractSeleniumTest {
+    @Override
     @Before
-    public void clearDatabase() {
+    public void setUp() {
         clearState(getContextRoot());
+        super.setUp();
     }
     
     @Test

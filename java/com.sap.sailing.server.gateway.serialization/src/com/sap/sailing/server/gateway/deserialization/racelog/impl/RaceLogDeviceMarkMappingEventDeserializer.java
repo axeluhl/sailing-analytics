@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sse.common.TimePoint;
@@ -27,7 +27,7 @@ public class RaceLogDeviceMarkMappingEventDeserializer extends
 	@Override
 	protected RaceLogEvent furtherDeserialize(JSONObject itemObject, TimePoint from, TimePoint to,
 			DeviceIdentifier device, Serializable id, TimePoint createdAt,
-			RaceLogEventAuthor author, TimePoint timePoint, int passId) throws JsonDeserializationException {
+			AbstractLogEventAuthor author, TimePoint timePoint, int passId) throws JsonDeserializationException {
 		Mark mappedTo = (Mark) markDeserializer.deserialize(itemObject);
 		return factory.createDeviceMarkMappingEvent(createdAt, author, timePoint, id, device,
 				mappedTo, passId, from, to);

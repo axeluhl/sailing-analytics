@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -489,9 +490,9 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         makeControlsReactToFillRegattas(regattas);
-        if (regattas.isEmpty()) {
+        if (Util.isEmpty(regattas)) {
             raceTable.setVisible(false);
             noTrackedRacesLabel.setVisible(true);
         } else {
@@ -529,6 +530,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         return true;
     }
 
-    abstract protected void makeControlsReactToFillRegattas(List<RegattaDTO> regattas);
+    abstract protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas);
 
 }

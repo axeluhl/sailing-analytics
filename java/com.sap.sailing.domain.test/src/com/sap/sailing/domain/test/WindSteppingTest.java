@@ -4,34 +4,34 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.WindStepping;
-import com.sap.sailing.domain.common.impl.WindSteppingImpl;
-import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
+import com.sap.sailing.domain.common.WindSpeedStepping;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingImpl;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 
 public class WindSteppingTest {
     
     @Test
     public void testStepping() {
-        Integer[] levels = {2,4};
-        WindStepping stepping = new WindSteppingImpl(levels);
+        double[] levels = {2.,4.};
+        WindSpeedStepping stepping = new WindSpeedSteppingImpl(levels);
         Assert.assertEquals(0, stepping.getLevelIndexForValue(1));
         Assert.assertEquals(1, stepping.getLevelIndexForValue(5));
         Assert.assertEquals(1, stepping.getLevelIndexForValue(3));
-        Assert.assertEquals(2, stepping.getSteppedValueForValue(1.064));
-        Assert.assertEquals(4, stepping.getSteppedValueForValue(7.8365));
+        Assert.assertEquals(2., stepping.getSteppedValueForValue(1.064), 0.005);
+        Assert.assertEquals(4., stepping.getSteppedValueForValue(7.8365), 0.005);
     }
     
     @Test
     public void testSteppingWithMaxDistance() {
-        Integer[] levels = {2,4};
-        WindStepping stepping = new WindSteppingWithMaxDistance(levels, 1.0);
+        double[] levels = {2.,4.};
+        WindSpeedStepping stepping = new WindSpeedSteppingWithMaxDistance(levels, 1.0);
         Assert.assertEquals(0, stepping.getLevelIndexForValue(1));
         Assert.assertEquals(1, stepping.getLevelIndexForValue(5));
         Assert.assertEquals(-1, stepping.getLevelIndexForValue(5.01));
         Assert.assertEquals(-1, stepping.getLevelIndexForValue(0.5));
         Assert.assertEquals(-1, stepping.getLevelIndexForValue(8));
-        Assert.assertEquals(2, stepping.getSteppedValueForValue(1.064));
-        Assert.assertEquals(-1, stepping.getSteppedValueForValue(7.8365));
+        Assert.assertEquals(2.0, stepping.getSteppedValueForValue(1.064), 0.005);
+        Assert.assertEquals(-1.0, stepping.getSteppedValueForValue(7.8365), 0.005);
     }
 
 }

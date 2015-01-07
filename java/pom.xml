@@ -24,12 +24,15 @@
 		<module>com.sap.sse.datamining.shared</module>
 		<module>com.sap.sse.datamining.test</module>
 		<module>com.sap.sse.security</module>
+		<module>com.sap.sse.security.replication.test</module>
 		<module>com.sap.sse.security.test</module>
+		<module>com.sap.sse.security.common</module>
 		<module>com.sap.sse.security.ui</module>
 		<module>com.sap.sse.security.userstore.mongodb</module>
 		<module>com.sap.sse.operationaltransformation</module>
 		<module>com.sap.sse.operationaltransformation.test</module>
 		<module>com.sap.sse.replication</module>
+		<module>com.sap.sse.replication.testsupport</module>
 		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
@@ -72,7 +75,10 @@
 		<module>com.sap.sailing.resultimport</module>
 		<module>com.sap.sailing.kiworesultimport</module>
 		<module>com.sap.sailing.ess40.resultimport</module>
+		<module>com.sap.sailing.xrr.schema</module>
 		<module>com.sap.sailing.xrr.resultimport</module>
+		<module>com.sap.sailing.xrr.structureimport</module>
+		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>org.openqa.selenium.osgi</module>
 		<module>com.sap.sailing.monitoring</module>
@@ -100,7 +106,6 @@
 		<module>com.googlecode.java-diff-utils.test</module>
 		<module>com.sap.sailing.kiworesultimport.test</module>
 		<module>com.sap.sailing.ess40.resultimport.test</module>
-		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
 		<module>com.sap.sailing.barbados.resultimport</module>
 		<module>com.sap.sailing.barbados.resultimport.test</module>
@@ -117,12 +122,15 @@
 		<module>com.sap.sailing.selenium.test</module>
 		<module>com.sap.sailing.autoload</module>
 		<module>com.sap.sailing.feature.p2build</module>
+		<module>com.sap.sailing.polars</module>
+		<module>com.sap.sailing.polars.test</module>
+		<!-- com.sap.sailing.targetplatform.base left out on purpose: only invoke maven manually to build target platform -->
 	</modules>
 	
 	<properties>
-      		<gwt.version>2.6.1</gwt.version>
 		<tycho-version>0.21.0</tycho-version>
        		<gwt.version>2.6.1</gwt.version> 
+		<p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile-->
 		<!--
           QUESTION: Which properties or settings are system dependent and differ across
                     different machines/environments?
@@ -190,6 +198,19 @@
 		</tycho.build.argLine>
             </properties>
         </profile>
+        <profile>
+            <id>p2-target.local</id>
+            <properties>
+                <p2-target>
+		  race-analysis-p2-local
+		</p2-target>
+            </properties>
+            <activation>
+		<property>
+                     <name>p2-local</name><!-- activiated by ``mvn -Dp2-local``-->
+                </property>
+            </activation>
+        </profile>
     </profiles>
 
 	<build>
@@ -234,7 +255,7 @@
 					<groupId>${project.groupId}</groupId>
 					<artifactId>${project.artifactId}</artifactId>
 					<version>${project.version}</version>
-					<classifier>../com.sap.sailing.targetplatform/definitions/race-analysis-p2-maven-central</classifier>
+					<classifier>../com.sap.sailing.targetplatform/definitions/${p2-target}</classifier>
                 </artifact>
               </target>
 				<environments>

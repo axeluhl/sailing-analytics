@@ -2,9 +2,10 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.shared.events.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogCloseOpenEndedDeviceMappingEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
@@ -22,7 +23,7 @@ public class RaceLogCloseOpenEndedDeviceMappingEventSerializer extends BaseRaceL
 
     @Override
     public JSONObject serialize(RaceLogEvent object) {
-        CloseOpenEndedDeviceMappingEvent event = (CloseOpenEndedDeviceMappingEvent) object;
+        RaceLogCloseOpenEndedDeviceMappingEvent event = (RaceLogCloseOpenEndedDeviceMappingEvent) object;
 
         JSONObject result = super.serialize(event);
         result.put(RaceLogCloseOpenEndedDeviceMappingEventDeserializer.FIELD_DEVICE_MAPPING_EVENT_ID, event.getDeviceMappingEventId());

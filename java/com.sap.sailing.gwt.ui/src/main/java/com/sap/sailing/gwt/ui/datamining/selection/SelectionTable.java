@@ -26,7 +26,7 @@ public class SelectionTable<ContentType extends Serializable> extends FlowPanel 
     private MultiSelectionModel<ContentType> selectionModel;
     private ListDataProvider<ContentType> dataProvider;
     
-    public SelectionTable(FunctionDTO dimension) {
+    public SelectionTable(FunctionDTO dimension, boolean withHeader) {
         this.dimension = dimension;
         allData = new ArrayList<ContentType>();
         
@@ -34,12 +34,17 @@ public class SelectionTable<ContentType extends Serializable> extends FlowPanel 
         table.setAutoHeaderRefreshDisabled(true);
         table.setAutoFooterRefreshDisabled(true);
         
-        table.addColumn(new TextColumn<ContentType>() {
+        TextColumn<ContentType> contentColumn = new TextColumn<ContentType>() {
             @Override
             public String getValue(ContentType content) {
                 return SelectionTable.this.getElementAsString(content);
             }
-        }, dimension.getDisplayName());
+        };
+        if (withHeader) {
+            table.addColumn(contentColumn, dimension.getDisplayName());
+        } else {
+            table.addColumn(contentColumn);
+        }
         selectionModel = new MultiSelectionModel<ContentType>();
         table.setSelectionModel(selectionModel);
         

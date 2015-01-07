@@ -1,7 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.RacingEventService;
 
 public class RecordRaceLogEventOnRegatta extends AbstractRaceLogOnRegattaOperation<RaceLogEvent> {
@@ -14,6 +14,14 @@ public class RecordRaceLogEventOnRegatta extends AbstractRaceLogOnRegattaOperati
         this.event = event;
     }
 
+    /**
+     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+    
     @Override
     public RaceLogEvent internalApplyTo(RacingEventService toState) throws Exception {
         RaceColumn raceColumn = getRaceColumn(toState);

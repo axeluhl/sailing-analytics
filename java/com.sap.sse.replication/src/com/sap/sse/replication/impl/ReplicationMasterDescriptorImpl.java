@@ -80,7 +80,12 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
             map(r->r.getId().toString()).collect(Collectors.joining(","));
         return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.INITIAL_LOAD.name() +
-                "&"+ReplicationServlet.REPLICA_IDS_AS_STRINGS_COMMA_SEPARATED+"="+replicablesIdsAsStringSeparatedByCommas);
+                "&"+ReplicationServlet.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED+"="+replicablesIdsAsStringSeparatedByCommas);
+    }
+    
+    @Override
+    public URL getSendReplicaInitiatedOperationToMasterURL(String replicableIdAsString) throws MalformedURLException {
+        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET);
     }
 
     @Override

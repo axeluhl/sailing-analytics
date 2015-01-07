@@ -2,10 +2,10 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.WithID;
 
@@ -27,8 +27,8 @@ public abstract class RaceLogDeviceMappingEventSerializer<ItemT extends WithID> 
     @Override
     public JSONObject serialize(RaceLogEvent object) {
         @SuppressWarnings("unchecked")
-        DeviceMappingEvent<ItemT> event = (DeviceMappingEvent<ItemT>) object;
-        JSONObject result = super.serialize(event);
+        DeviceMappingEvent<?, ItemT> event = (DeviceMappingEvent<?, ItemT>) object;
+        JSONObject result = super.serialize(object);
         result.put(FIELD_FROM_MILLIS, event.getFrom().asMillis());
         result.put(FIELD_TO_MILLIS, event.getTo().asMillis());
         result.put(FIELD_ITEM, serializeItem(event.getMappedTo()));

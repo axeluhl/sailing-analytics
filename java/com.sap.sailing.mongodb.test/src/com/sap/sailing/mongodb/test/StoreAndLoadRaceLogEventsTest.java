@@ -18,6 +18,22 @@ import org.junit.Test;
 
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -28,26 +44,10 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.RevokeEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -67,7 +67,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     protected Serializable expectedId = UUID.randomUUID();
     protected List<Competitor> expectedInvolvedBoats = Collections.emptyList();
     protected int expectedPassId = 42;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
     public StoreAndLoadRaceLogEventsTest() throws UnknownHostException, MongoException {
         super();
@@ -98,8 +98,8 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         
         assertNull(expectedEvent.getAuthor());
         assertNotNull(actualEvent.getAuthor());
-        assertEquals(RaceLogEventAuthor.PRIORITY_COMPATIBILITY, actualEvent.getAuthor().getPriority());
-        assertEquals(RaceLogEventAuthor.NAME_COMPATIBILITY, actualEvent.getAuthor().getName());
+        assertEquals(AbstractLogEventAuthor.PRIORITY_COMPATIBILITY, actualEvent.getAuthor().getPriority());
+        assertEquals(AbstractLogEventAuthor.NAME_COMPATIBILITY, actualEvent.getAuthor().getName());
     }
 
     @Test
@@ -177,11 +177,11 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         Competitor mappedTo = DomainFactory.INSTANCE.getOrCreateCompetitor("abc", "abc", null, null, null);
         TimePoint from = new MillisecondsTimePoint(20);
         TimePoint to = new MillisecondsTimePoint(30);
-        DeviceCompetitorMappingEvent expectedEvent = eventFactory.createDeviceCompetitorMappingEvent(
+        RaceLogDeviceCompetitorMappingEvent expectedEvent = eventFactory.createDeviceCompetitorMappingEvent(
         		expectedEventTime, author, expectedEventTime, expectedId, device, mappedTo, expectedPassId, from, to);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        DeviceCompetitorMappingEvent actualEvent = loadEvent(dbObject);
+        RaceLogDeviceCompetitorMappingEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(device, actualEvent.getDevice());
@@ -196,11 +196,11 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         Mark mappedTo = DomainFactory.INSTANCE.getOrCreateMark("abc", "abc");
         TimePoint from = new MillisecondsTimePoint(20);
         TimePoint to = new MillisecondsTimePoint(30);
-        DeviceMarkMappingEvent expectedEvent = eventFactory.createDeviceMarkMappingEvent(
+        RaceLogDeviceMarkMappingEvent expectedEvent = eventFactory.createDeviceMarkMappingEvent(
         		expectedEventTime, author, expectedEventTime, expectedId, device, mappedTo, expectedPassId, from, to);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        DeviceMarkMappingEvent actualEvent = loadEvent(dbObject);
+        RaceLogDeviceMarkMappingEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(device, actualEvent.getDevice());
@@ -214,12 +214,12 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     	String raceName = "race";
     	BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     	UUID raceId = UUID.randomUUID();
-        DenoteForTrackingEvent expectedEvent = eventFactory.createDenoteForTrackingEvent(
+        RaceLogDenoteForTrackingEvent expectedEvent = eventFactory.createDenoteForTrackingEvent(
         		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId, raceName, boatClass,
         		raceId);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        DenoteForTrackingEvent actualEvent = loadEvent(dbObject);
+        RaceLogDenoteForTrackingEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(boatClass, actualEvent.getBoatClass());
@@ -233,12 +233,12 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         String revokedEventType = "type";
         String revokedEventShortInfo = "short info";
         String reason = "reason";
-        RevokeEvent expectedEvent = eventFactory.createRevokeEvent(
+        RaceLogRevokeEvent expectedEvent = eventFactory.createRevokeEvent(
         		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId, revokedEventId,
         		revokedEventType, revokedEventShortInfo, reason);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RevokeEvent actualEvent = loadEvent(dbObject);
+        RaceLogRevokeEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(revokedEventId, actualEvent.getRevokedEventId());
@@ -249,12 +249,12 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
     @Test
     public void testStoreAndLoadRegisterCompetitorEvent() {
-        RegisterCompetitorEvent expectedEvent = eventFactory.createRegisterCompetitorEvent(
+        RaceLogRegisterCompetitorEvent expectedEvent = eventFactory.createRegisterCompetitorEvent(
         		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId,
         		DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null));
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RegisterCompetitorEvent actualEvent = loadEvent(dbObject);
+        RaceLogRegisterCompetitorEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getCompetitor(), actualEvent.getCompetitor());
@@ -262,12 +262,12 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
     @Test
     public void testStoreAndLoadDefineMarkEvent() {
-        DefineMarkEvent expectedEvent = eventFactory.createDefineMarkEvent(
+        RaceLogDefineMarkEvent expectedEvent = eventFactory.createDefineMarkEvent(
                         expectedEventTime, author, expectedEventTime, expectedId, expectedPassId,
                         DomainFactory.INSTANCE.getOrCreateMark("mytestmark"));
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        DefineMarkEvent actualEvent = loadEvent(dbObject);
+        RaceLogDefineMarkEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getMark(), actualEvent.getMark());
@@ -275,12 +275,12 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
     @Test
     public void testStoreAndLoadCloseOpenDeviceMappingEvent() {
-        CloseOpenEndedDeviceMappingEvent expectedEvent = eventFactory.createCloseOpenEndedDeviceMappingEvent(
+        RaceLogCloseOpenEndedDeviceMappingEvent expectedEvent = eventFactory.createCloseOpenEndedDeviceMappingEvent(
                         expectedEventTime, author, expectedEventTime, expectedId, expectedPassId,
                         UUID.randomUUID(), new MillisecondsTimePoint(49));
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        CloseOpenEndedDeviceMappingEvent actualEvent = loadEvent(dbObject);
+        RaceLogCloseOpenEndedDeviceMappingEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getDeviceMappingEventId(), actualEvent.getDeviceMappingEventId());

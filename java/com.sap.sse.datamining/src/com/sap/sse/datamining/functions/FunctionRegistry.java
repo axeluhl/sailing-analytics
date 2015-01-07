@@ -4,10 +4,10 @@ import java.util.Collection;
 
 public interface FunctionRegistry {
 
-    public void registerAllWithInternalFunctionPolicy(Collection<Class<?>> classesToScan);
-    public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan);
+    public void registerAllWithInternalFunctionPolicy(Iterable<Class<?>> classesToScan);
+    public void registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan);
 
-    public void unregisterAllFunctionsOf(Collection<Class<?>> classesToUnregister);
+    public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister);
 
     public Collection<Function<?>> getAllFunctions();
     public Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType);

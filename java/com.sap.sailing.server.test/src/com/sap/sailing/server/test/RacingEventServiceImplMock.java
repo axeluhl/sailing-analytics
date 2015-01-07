@@ -14,7 +14,7 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl {
     private DataImportLockWithProgress lock;
 
     public RacingEventServiceImplMock() {
-        super();
+        super(false, null);
     }
 
     public RacingEventServiceImplMock(DataImportProgressImpl dataImportProgressImpl) {

@@ -2,107 +2,114 @@ package com.sap.sse.datamining.impl;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.sap.sse.datamining.ClassesWithFunctionsRegistrationService;
+import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistrationService;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.functions.RegistryFunctionProvider;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
+import com.sap.sse.datamining.impl.i18n.DataMiningStringMessagesImpl;
 
-public class DataMiningActivator implements BundleActivator, ClassesWithFunctionsRegistrationService, DataRetrieverChainDefinitionRegistrationService {
+public class DataMiningActivator implements BundleActivator {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
-
-    private static BundleContext context;
     
-    private static DataMiningServer dataMiningServer;
-    private static DataMiningStringMessages stringMessages;
-    private static ThreadPoolExecutor executor;
-    
-    private static Collection<ServiceRegistration<?>> serviceRegistrations;
+    private static DataMiningActivator INSTANCE;
 
-    @Override
-    public void start(BundleContext context) throws Exception {
-        DataMiningActivator.context = context;
-        stringMessages = DataMiningStringMessages.Util.getInstanceFor(STRING_MESSAGES_BASE_NAME);
-        executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
-                                          new LinkedBlockingQueue<Runnable>());
+    private ServiceTracker<DataMiningBundleService, DataMiningBundleService> dataMiningBundleServiceTracker;
+    private final Collection<ServiceRegistration<?>> serviceRegistrations;
+    
+    private final ModifiableDataMiningServer dataMiningServer;
+    
+    public DataMiningActivator() {
+        ExecutorService executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>());
 
         FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
-        dataMiningServer = new DataMiningServerImpl(stringMessages, functionRegistry, functionProvider, dataRetrieverChainDefinitionRegistry);
+        dataMiningServer = new DataMiningServerImpl(executor, functionRegistry, functionProvider, dataRetrieverChainDefinitionRegistry);
+        dataMiningServer.addStringMessages(new DataMiningStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningActivator.class.getClassLoader()));
         
         serviceRegistrations = new HashSet<>();
-        registerDataMiningServer();
-        registerRegistrationServices();
     }
 
-    private void registerRegistrationServices() {
-        serviceRegistrations.add(context.registerService(ClassesWithFunctionsRegistrationService.class, this, null));
-        serviceRegistrations.add(context.registerService(DataRetrieverChainDefinitionRegistrationService.class, this, null));
-    }
+    @Override
+    public void start(BundleContext context) throws Exception {
+        INSTANCE = this;
+        
+        dataMiningBundleServiceTracker = new ServiceTracker<>(context, DataMiningBundleService.class, new ServiceTrackerCustomizer<DataMiningBundleService, DataMiningBundleService>() {
+            @Override
+            public DataMiningBundleService addingService(ServiceReference<DataMiningBundleService> reference) {
+                DataMiningBundleService dataMiningBundleService = context.getService(reference);
+                registerDataMiningBundle(dataMiningBundleService);
+                return dataMiningBundleService;
+            }
+            @Override
+            public void modifiedService(ServiceReference<DataMiningBundleService> reference,
+                    DataMiningBundleService service) { }
+            @Override
+            public void removedService(ServiceReference<DataMiningBundleService> reference,
+                    DataMiningBundleService dataMiningBundleService) {
+                unregisterDataMiningBundle(dataMiningBundleService);
+            }
+        });
+        dataMiningBundleServiceTracker.open();
 
-    private void registerDataMiningServer() {
         serviceRegistrations.add(context.registerService(DataMiningServer.class, dataMiningServer, null));
     }
 
-    @Override
-    public void registerInternalClassesWithMarkedMethods(Set<Class<?>> classesToScan) {
-        dataMiningServer.getFunctionRegistry().registerAllWithInternalFunctionPolicy(classesToScan);
-    }
-
-    @Override
-    public void registerExternalLibraryClasses(Set<Class<?>> externalClassesToScan) {
-        dataMiningServer.getFunctionRegistry().registerAllWithExternalFunctionPolicy(externalClassesToScan);
-    }
-
-    @Override
-    public void unregisterAllFunctionsOf(Set<Class<?>> classesToUnregister) {
-        dataMiningServer.getFunctionRegistry().unregisterAllFunctionsOf(classesToUnregister);
-    }
-    
-    @Override
-    public void addDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
-        dataMiningServer.getDataRetrieverChainDefinitionRegistry().add(dataRetrieverChainDefinition);
-    }
-    
-    @Override
-    public void removeDataRetrieverChainDefinition(DataRetrieverChainDefinition<?> dataRetrieverChainDefinition) {
-        dataMiningServer.getDataRetrieverChainDefinitionRegistry().remove(dataRetrieverChainDefinition);
+    private void registerDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
+        dataMiningServer.addStringMessages(dataMiningBundleService.getStringMessages());
         
+        dataMiningServer.registerAllWithInternalFunctionPolicy(dataMiningBundleService.getInternalClassesWithMarkedMethods());
+        dataMiningServer.registerAllWithExternalFunctionPolicy(dataMiningBundleService.getExternalLibraryClasses());
+        
+        for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
+            dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
+        }
+    }
+
+    private void unregisterDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
+        dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
+        
+        dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getInternalClassesWithMarkedMethods());
+        dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getExternalLibraryClasses());
+        
+        for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
+            dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);
+        }
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        dataMiningBundleServiceTracker.close();
+        
         for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
             context.ungetService(serviceRegistration.getReference());
         }
     }
-
-    public static ThreadPoolExecutor getExecutor() {
-        return executor;
-    }
     
-    public static DataMiningStringMessages getStringMessages() {
-        return stringMessages;
-    }
-    
-    public static BundleContext getContext() {
-        return context;
+    public static DataMiningActivator getDefault() {
+        if (INSTANCE == null) {
+            INSTANCE = new DataMiningActivator(); // probably non-OSGi case, as in test execution
+        }
+        return INSTANCE;
     }
 
 }

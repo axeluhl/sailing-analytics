@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -51,9 +54,6 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -62,6 +62,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -138,7 +139,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * <p>
      * 
      * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable
-     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop() stopped}.
+     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop(boolean) stopped}.
      * 
      * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
      * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
@@ -283,11 +284,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * @param series the series must not have any {@link RaceColumn}s yet
      */
-    Regatta createRegatta(String regattaName, String boatClassName, Serializable id, Iterable<? extends Series> series,
+    Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId,
             boolean useStartTimeInference);
     
-    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration, Iterable<? extends Series> series, boolean useStartTimeInference);
+    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration, Iterable<? extends Series> series, boolean useStartTimeInference);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -426,7 +427,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
      */
-    Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, Serializable id,
+    Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
+            TimePoint startDate, TimePoint endDate, Serializable id, 
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, boolean useStartTimeInference);
 
@@ -476,7 +478,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param leaderboardName name of the RaceLog's leaderboard.
      * @param raceColumnName name of the RaceLog's column
      * @param fleetName name of the RaceLog's fleet
-     * @param authorName name of the {@link RaceLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
+     * @param authorName name of the {@link AbstractLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
      * @param authorPriority priority of the author.
      * @param passId Pass identifier of the new start time event.
      * @param logicalTimePoint logical {@link TimePoint} of the new event.
@@ -497,11 +499,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     WindStore getWindStore();
 
+    PolarDataService getPolarDataService();
+    
     GPSFixStore getGPSFixStore();
     
     RaceTracker getRaceTrackerById(Object id);
     
-    RaceLogEventAuthor getServerAuthor();
+    AbstractLogEventAuthor getServerAuthor();
     
     CompetitorStore getCompetitorStore();
     
