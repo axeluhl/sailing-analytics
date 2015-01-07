@@ -79,6 +79,7 @@
         <activity
             android:name=".ui.activities.SettingsActivity"
             android:screenOrientation="unspecified" />
+        <activity android:name="net.hockeyapp.android.UpdateActivity" />
         <service
             android:name=".services.TrackingService"
             android:exported="false"

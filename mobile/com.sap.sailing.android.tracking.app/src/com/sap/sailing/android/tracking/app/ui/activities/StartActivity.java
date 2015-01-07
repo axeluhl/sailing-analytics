@@ -1,5 +1,7 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.UpdateManager;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -41,7 +43,9 @@ public class StartActivity extends BaseActivity {
     @Override
     protected void onResume() {
     	super.onResume();
-    	
+    	checkForCrashes();
+        //checkForUpdates();
+        
     	int googleServicesResultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
     	if (googleServicesResultCode != ConnectionResult.SUCCESS)
     	{
@@ -84,6 +88,21 @@ public class StartActivity extends BaseActivity {
         	startRegatta(checkinDigest);
         }
     }
+
+    /**
+     * Hockeyapp integration method.
+     */
+	private void checkForCrashes() {
+		CrashManager.register(this, "060ff0c8a907638e3b31d3146091c87b");
+	}
+
+//	/**
+//     * Hockeyapp integration method.
+//     */
+//	private void checkForUpdates() {
+//		// TODO: Remove this for store builds!
+//		UpdateManager.register(this, "060ff0c8a907638e3b31d3146091c87b");
+//	}
 
     private void startRegatta(String checkinDigest) {
 		Intent intent = new Intent(this, RegattaActivity.class);
