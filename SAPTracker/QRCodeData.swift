@@ -12,8 +12,8 @@ public class QRCodeData {
     
     struct Keys {
         static let eventId = "event_id"
-        static let leaderBoardName = "leaderboard_name"
-        static let competitorId = "competitor_id"        
+        static let leaderBoardName = "leaderboardName"
+        static let competitorId = "competitorId"        
     }
     
     public var serverUrl: String?
