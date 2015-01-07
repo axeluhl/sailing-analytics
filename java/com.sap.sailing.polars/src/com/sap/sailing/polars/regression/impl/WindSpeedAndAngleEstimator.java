@@ -118,7 +118,7 @@ public class WindSpeedAndAngleEstimator {
             last = averageSpeedForWindSpeed;
         }
         // check last sampling point for distance match and return withDistance set if standard set is empty
-        if (resultCandidates.size() == 0) {
+        if (last != null && resultCandidates.size() == 0) {
             addResultCandidateIfDistanceValid(requestedBoatSpeedInKnots, resultCandidatesWithDistance, last.getA(),
                     last.getB());
             resultCandidates = resultCandidatesWithDistance;
