@@ -504,6 +504,7 @@ public class HomeFragment extends BaseFragment implements
 		} else {
 			ExLog.w(getActivity(), TAG,
 					"Combination of eventId, leaderboardName and competitorId already exists!");
+			Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG).show();
 		}
 
 		performAPICheckin(checkinData);
