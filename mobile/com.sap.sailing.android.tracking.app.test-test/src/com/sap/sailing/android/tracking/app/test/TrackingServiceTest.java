@@ -37,7 +37,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 		System.setProperty("dexmaker.dexcache", getContext().getCacheDir().toString());
 		DatabaseTestHelper.deleteAllGpsFixesFromDB(getContext());
 		DatabaseTestHelper.deleteAllEventsFromDB(getContext());
-		eventRowId = DatabaseTestHelper.createNewEventInDBAndReturnItsId(getContext(), "test123", checkinDigest);
+		eventRowId = DatabaseTestHelper.createNewEventInDBAndReturnItsId(getContext(), "test123", "123-456", checkinDigest);
 
 		serviceHelperSpy = Mockito.mock(ServiceHelperTestable.class);
 		ServiceHelperTestable.injectInstance(serviceHelperSpy);

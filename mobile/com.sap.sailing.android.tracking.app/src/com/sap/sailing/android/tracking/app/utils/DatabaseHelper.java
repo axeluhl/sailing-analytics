@@ -351,9 +351,9 @@ public class DatabaseHelper {
 	{
 		ContentResolver cr = context.getContentResolver();
 		
-		int d1 = cr.delete(Event.CONTENT_URI, Event.EVENT_CHECKIN_DIGEST + " = " + checkinDigest, null);
-		int d2 = cr.delete(Competitor.CONTENT_URI, Competitor.COMPETITOR_CHECKIN_DIGEST + " = " + checkinDigest, null);
-		int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + checkinDigest, null);
+		int d1 = cr.delete(Event.CONTENT_URI, Event.EVENT_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null);
+		int d2 = cr.delete(Competitor.CONTENT_URI, Competitor.COMPETITOR_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null);
+		int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null);
 		
 		if (BuildConfig.DEBUG)
 		{
