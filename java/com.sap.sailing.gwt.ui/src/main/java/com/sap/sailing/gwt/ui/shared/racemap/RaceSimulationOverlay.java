@@ -65,21 +65,21 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     }
     
     public void updateLeg(int newLeg, Date newTime, boolean clearCanvas) {
-    	if ((newLeg != raceLeg)&&(this.isVisible())) {
-    		raceLeg = newLeg;
-    		if (clearCanvas) {
-    			this.clearCanvas();
-    		}
-    		this.simulate(newTime);
-    	}
+        if ((newLeg != raceLeg) && (this.isVisible())) {
+            raceLeg = newLeg;
+            if (clearCanvas) {
+                this.clearCanvas();
+            }
+            this.simulate(newTime);
+        }
     }
 
     @Override
     public void setVisible(boolean isVisible) {
-    	super.setVisible(isVisible);
-    	if (simulationLegend != null) {
-    		simulationLegend.setVisible(isVisible);
-    	}
+        super.setVisible(isVisible);
+        if (simulationLegend != null) {
+            simulationLegend.setVisible(isVisible);
+        }
     }
 
     @Override
@@ -140,7 +140,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             createSimulationLegend(map);
         }
         drawLegend(simulationLegend);
-        
         // calibrate canvas
         super.draw();
         // draw paths
@@ -148,14 +147,15 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         PathDTO[] paths = simulationResult.getPaths();
         boolean first = true;
         int colorIdx = paths.length - 1;
-        for(PathDTO path : paths) {
+        for (PathDTO path : paths) {
             List<SimulatorWindDTO> points = path.getPoints();
             ctxt.setLineWidth(3.0);
             ctxt.setGlobalAlpha(0.7);
             ctxt.setStrokeStyle(this.colors.getColor(colorIdx));
             ctxt.beginPath();
-            for(SimulatorWindDTO point : points) {
-                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg, point.position.lngDeg));
+            for (SimulatorWindDTO point : points) {
+                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg,
+                        point.position.lngDeg));
                 if (first) {
                     ctxt.moveTo(px.getX(), px.getY());
                     first = false;
@@ -165,24 +165,23 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             }
             ctxt.stroke();
             SimulatorWindDTO start = points.get(0);
-        	long timeStep = simulationResult.getTimeStep();
-            for(SimulatorWindDTO point : points) {
-            	if ((point.timepoint - start.timepoint) % (timeStep) != 0) {
-            		continue;
-            	}
+            long timeStep = simulationResult.getTimeStep();
+            for (SimulatorWindDTO point : points) {
+                if ((point.timepoint - start.timepoint) % (timeStep) != 0) {
+                    continue;
+                }
 
-
-                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg, point.position.lngDeg));
-            	ctxt.beginPath();
-            	ctxt.arc(px.getX(), px.getY(), 1.5, 0, 2*Math.PI);
-            	ctxt.closePath();
+                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg,
+                        point.position.lngDeg));
+                ctxt.beginPath();
+                ctxt.arc(px.getX(), px.getY(), 1.5, 0, 2 * Math.PI);
+                ctxt.closePath();
                 ctxt.stroke();
             }
             colorIdx--;
         }
-        
     }
-    
+
     public void drawLegend(Canvas canvas) {
         if (this.simulationResult == null) {
             return;
@@ -279,6 +278,5 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                         }
                     }
                 }));
-
     }
 }

@@ -311,8 +311,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
     private final boolean showViewSimulation;
-    public static final String GET_POLAR_CATEGORY = "getPolar";
+    
+    private static final String GET_POLAR_CATEGORY = "getPolar";
+    
+    /**
+     * Tells about the availability of polar / VPP data for this race. If available, the simulation feature can be
+     * offered to the user.
+     */
     private boolean hasPolar;
+    
     private final RegattaAndRaceIdentifier raceIdentifier;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -479,7 +486,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
               if (showViewSimulation) {
             	  // determine availability of polar diagram
-            	  hasPolar();
+            	  setHasPolar();
                   // initialize simulation canvas
                   simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
                   simulationOverlay.addToMap();
@@ -498,15 +505,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
     }
     
-    public void hasPolar() {
+    private void setHasPolar() {
         GetPolarAction getPolar = new GetPolarAction(sailingService, raceIdentifier);
         asyncActionsExecutor.execute(getPolar, GET_POLAR_CATEGORY,
                 new MarkedAsyncCallback<>(new AsyncCallback<Boolean>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        // TODO: add corresponding message to string-messages
-                        // Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
-                        Window.setStatus(GET_POLAR_CATEGORY);
+                        errorReporter.reportError(stringMessages.errorDeterminingPolarAvailability(
+                                raceIdentifier.getRaceName(), caught.getMessage()), /* silent */ true);
                     }
 
                     @Override
@@ -742,7 +748,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if (map != null && raceMapDataDTO != null) {
                     quickRanks = raceMapDataDTO.quickRanks;
                     if (showViewSimulation && settings.isShowSimulationOverlay()) {
-                    	simulationOverlay.updateLeg(getCurrentLeg(), newTime, false);
+                    	simulationOverlay.updateLeg(getCurrentLeg(), newTime, /* clearCanvas */ false);
                     }
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
@@ -2019,7 +2025,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
-        	simulationOverlay.updateLeg(getCurrentLeg(), timer.getTime(), true);
+            simulationOverlay.updateLeg(getCurrentLeg(), timer.getTime(), true);
         }
         if (requiredRedraw) {
             redraw();
@@ -2226,12 +2232,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     public int getCurrentLeg() {
-    	com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leaderWithLeg = this.getLeadingVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
-    	if (leaderWithLeg == null) {
-    		return 0;
-    	} else {
-    		return leaderWithLeg.getA();
-    	}
+        com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leaderWithLeg = this
+                .getLeadingVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
+        if (leaderWithLeg == null) {
+            return 0;
+        } else {
+            return leaderWithLeg.getA();
+        }
     }
 
     private Image createSAPLogo() {

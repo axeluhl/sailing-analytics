@@ -13,7 +13,7 @@ Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sse.common,
  org.apache.httpcomponents.httpclient;bundle-version="4.2.6",
  org.json.simple;bundle-version="1.1.0",
- com.sap.sailing.polars;bundle-version="1.0.0"
+ com.sap.sailing.polars
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osgi.framework;version="1.6.0"
 Bundle-ClassPath: .,
