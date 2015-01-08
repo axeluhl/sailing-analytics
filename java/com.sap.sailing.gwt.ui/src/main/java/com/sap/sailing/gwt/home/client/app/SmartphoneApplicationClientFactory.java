@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsoringView;
 import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.client.place.whatsnew.TabletAndDesktopWhatsNewView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -98,7 +99,7 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     }
     
     @Override
-    public WhatsNewView createSailingAnalyticsView() {
-        return new TabletAndDesktopWhatsNewView();
+    public WhatsNewView createWhatsNewView(WhatsNewNavigationTabs navigationTab) {
+        return new TabletAndDesktopWhatsNewView(navigationTab, getHomePlacesNavigator());
     }
 }

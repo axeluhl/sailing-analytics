@@ -8,10 +8,16 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 
 public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewView {
     private static SailingAnalyticsPageViewUiBinder uiBinder = GWT.create(SailingAnalyticsPageViewUiBinder.class);
@@ -19,49 +25,77 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
     interface SailingAnalyticsPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopWhatsNewView> {
     }
 
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
+
     @UiField HTML sailingAnalyticsNotes;
-    @UiField HTML sailingSimulatorNotes;
+//    @UiField HTML sailingSimulatorNotes;
     @UiField HTML raceCommitteeAppNotes;
     
     @UiField Anchor sailingAnalyticsNotesAnchor;
-    @UiField Anchor sailingSimulatorNotesAnchor;
+//    @UiField Anchor sailingSimulatorNotesAnchor;
     @UiField Anchor raceCommitteeAppNotesAnchor;
 
+    private final PlaceNavigation<WhatsNewPlace> sailingAnalyticNotesNavigation; 
+//    private final PlaceNavigation<WhatsNewPlace> sailingSimulatorNoteNavigation; 
+    private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppNotesNavigation; 
+    
     private final List<Anchor> links;
     private final List<HTML> contentWidgets;
-
-    public TabletAndDesktopWhatsNewView() {
+    
+    public TabletAndDesktopWhatsNewView(WhatsNewNavigationTabs navigationTab, HomePlacesNavigator placesNavigator) {
         super();
-
+    
         WhatsNewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
+    
         sailingAnalyticsNotes.setHTML(WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml().getText());
-        sailingSimulatorNotes.setHTML(WhatsNewResources.INSTANCE.getSailingSimulatorNotesHtml().getText());
+//        sailingSimulatorNotes.setHTML(WhatsNewResources.INSTANCE.getSailingSimulatorNotesHtml().getText());
         raceCommitteeAppNotes.setHTML(WhatsNewResources.INSTANCE.getRaceCommitteeAppNotesHtml().getText());
+  
+        sailingAnalyticNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics); 
+//        sailingSimulatorNoteNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator); 
+        raceCommitteeAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceCommiteeApp);
         
-        sailingSimulatorNotes.setVisible(false);
-        raceCommitteeAppNotes.setVisible(false);
+        sailingAnalyticsNotesAnchor.setHref(sailingAnalyticNotesNavigation.getTargetUrl());
+//      sailingSimulatorNotesAnchor.setHref(sailingSimulatorNoteNavigation.getTargetUrl());
+        raceCommitteeAppNotesAnchor.setHref(raceCommitteeAppNotesNavigation.getTargetUrl());
         
-        links = Arrays.asList(new Anchor[] { sailingAnalyticsNotesAnchor, sailingSimulatorNotesAnchor, raceCommitteeAppNotesAnchor });
-        contentWidgets = Arrays.asList(new HTML[] { sailingAnalyticsNotes, sailingSimulatorNotes, raceCommitteeAppNotes });
-        
-        setActiveContent(sailingAnalyticsNotes, sailingAnalyticsNotesAnchor);
+        links = Arrays.asList(new Anchor[] { sailingAnalyticsNotesAnchor, /*sailingSimulatorNotesAnchor,*/ raceCommitteeAppNotesAnchor });
+        contentWidgets = Arrays.asList(new HTML[] { sailingAnalyticsNotes, /*sailingSimulatorNotes,*/ raceCommitteeAppNotes });
+
+        switch(navigationTab) {
+            case PostRaceAnalytics:
+                break;
+            case RaceCommiteeApp:
+                setActiveContent(raceCommitteeAppNotes, raceCommitteeAppNotesAnchor);
+                break;
+            case SailingAnalytics:
+                setActiveContent(sailingAnalyticsNotes, sailingAnalyticsNotesAnchor);
+                break;
+            case SailingSimulator:
+//                setActiveContent(sailingSimulatorNotes, sailingSimulatorNotesAnchor);
+                break;
+            case TrainingDiary:
+                break;
+        }
     }
 
     @UiHandler("sailingAnalyticsNotesAnchor")
     void overviewClicked(ClickEvent event) {
         setActiveContent(sailingAnalyticsNotes, sailingAnalyticsNotesAnchor);
+        handleClickEventWithLocalNavigation(event, sailingAnalyticNotesNavigation);
     }
-
+/*
     @UiHandler("sailingSimulatorNotesAnchor")
     void featuresClicked(ClickEvent event) {
         setActiveContent(sailingSimulatorNotes, sailingSimulatorNotesAnchor);
+        handleClickEventWithLocalNavigation(event, sailingSimulatorNoteNavigation);
     }
-
+*/
     @UiHandler("raceCommitteeAppNotesAnchor")
     void releaseNotesClicked(ClickEvent event) {
         setActiveContent(raceCommitteeAppNotes, raceCommitteeAppNotesAnchor);
+        handleClickEventWithLocalNavigation(event, raceCommitteeAppNotesNavigation);
     }
     
     private void setActiveContent(HTML activeHTML, Anchor activeLink) {
@@ -76,4 +110,13 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
             }
         }
     }
+    
+    private void handleClickEventWithLocalNavigation(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            // don't use the placecontroller for navigation here as we want to avoid a page reload
+            History.newItem(placeNavigation.getHistoryUrl(), false);
+            e.preventDefault();
+         }
+    }
+
 }

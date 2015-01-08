@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 
 public class Solutions extends Composite {
     interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
@@ -43,6 +44,7 @@ public class Solutions extends Composite {
     @UiField DivElement simulatorDiv;
 
     @UiField Anchor sailingAnalyticsDetailsAnchor;
+    @UiField Anchor raceCommitteeAppDetailsAnchor;
 
     private final PlaceNavigation<SolutionsPlace> sailingAnalyticsNavigation; 
     private final PlaceNavigation<SolutionsPlace> raceCommitteeAppNavigation; 
@@ -53,6 +55,7 @@ public class Solutions extends Composite {
     private final SolutionsNavigationTabs navigationTab;
     
     private final PlaceNavigation<WhatsNewPlace> sailingAnalyticsDetailsNavigation;
+    private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppDetailsNavigation;
     private final HomePlacesNavigator placesNavigator;
     
     public Solutions(SolutionsNavigationTabs navigationTab, HomePlacesNavigator placesNavigator) {
@@ -66,8 +69,11 @@ public class Solutions extends Composite {
 
         initWidget(uiBinder.createAndBindUi(this));
         
-        sailingAnalyticsDetailsNavigation = placesNavigator.getSailingAnalyticsNavigation();
+        sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
+        raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceCommiteeApp);
+        
         sailingAnalyticsDetailsAnchor.setHref(sailingAnalyticsDetailsNavigation.getTargetUrl());
+        raceCommitteeAppDetailsAnchor.setHref(raceCommitteeAppDetailsNavigation.getTargetUrl());
 
         sailingAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
         raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceCommiteeApp);

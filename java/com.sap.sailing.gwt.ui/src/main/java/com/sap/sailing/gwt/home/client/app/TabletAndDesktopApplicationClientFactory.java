@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.client.place.whatsnew.TabletAndDesktopWhatsNewView;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -99,7 +100,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public WhatsNewView createSailingAnalyticsView() {
-        return new TabletAndDesktopWhatsNewView();
+    public WhatsNewView createWhatsNewView(WhatsNewNavigationTabs navigationTab) {
+        return new TabletAndDesktopWhatsNewView(navigationTab, getHomePlacesNavigator());
     }
 }

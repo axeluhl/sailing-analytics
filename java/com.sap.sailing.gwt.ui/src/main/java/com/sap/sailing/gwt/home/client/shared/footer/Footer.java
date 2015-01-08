@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 
 public class Footer extends Composite {
@@ -55,7 +56,7 @@ public class Footer extends Composite {
 
         initWidget(uiBinder.createAndBindUi(this));
         
-        releaseNotesNavigation = navigator.getSailingAnalyticsNavigation();
+        releaseNotesNavigation = navigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         releaseNotesLink.setHref(releaseNotesNavigation.getTargetUrl());
         
         languageSelectionDiv.getStyle().setDisplay(Display.NONE);

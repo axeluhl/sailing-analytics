@@ -26,7 +26,7 @@
         <h2><ui:text from='{i18n.solutionsSAPHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsSAPText1}'/></p>
         <p><ui:text from='{i18n.solutionsSAPText2}'/></p>
-        <g:Anchor ui:field="sailingAnalyticsDetailsAnchor" styleName="{res.mainCss.button}">Read More</g:Anchor>
+        <g:Anchor ui:field="sailingAnalyticsDetailsAnchor" styleName="{res.mainCss.button}"><ui:text from='{i18n.whatsNew}'/></g:Anchor>
       </div>
     </div>
   </div>
@@ -38,7 +38,7 @@
       <div class="{res.mediaCss.small8} {res.mediaCss.large5} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsRaceHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsRaceText}'/></p>
-        <!--  <a href="#" class="{res.mainCss.button}">Start Tour</a>  -->
+        <g:Anchor ui:field="raceCommitteeAppDetailsAnchor" styleName="{res.mainCss.button}"><ui:text from='{i18n.whatsNew}'/></g:Anchor>
       </div>
     </div>
   </div>
