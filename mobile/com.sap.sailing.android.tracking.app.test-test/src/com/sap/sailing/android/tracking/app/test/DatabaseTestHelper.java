@@ -100,13 +100,14 @@ public class DatabaseTestHelper {
 		cr.insert(SensorGps.CONTENT_URI, cv);
 	}
 	
-	public static long createNewEventInDBAndReturnItsId(Context context, String eventName, String eventId)
+	public static long createNewEventInDBAndReturnItsId(Context context, String eventName, String eventId, String checkinDigest)
 	{
 		ContentResolver cr = context.getContentResolver();
 		ContentValues cv = new ContentValues();
 		cv.put(Event.EVENT_NAME, eventName);
 		cv.put(Event.EVENT_ID, eventId);
 		cv.put(Event.EVENT_SERVER, "127.0.0.1");
+		cv.put(Event.EVENT_CHECKIN_DIGEST, checkinDigest);
 		Uri uri = cr.insert(Event.CONTENT_URI, cv);
 		return ContentUris.parseId(uri);
 	}
@@ -128,7 +129,6 @@ public class DatabaseTestHelper {
 		cv.put(Event.EVENT_NAME, eventName);
 		cv.put(Event.EVENT_ID, eventId);
 		cv.put(Event.EVENT_SERVER, "127.0.0.1");
-		cv.put(Event.EVENT_LEADERBOARD_FK, leaderboardRowId);
 		cv.put(Event.EVENT_CHECKIN_DIGEST, checkinDigest);
 		Uri uri = cr.insert(Event.CONTENT_URI, cv);
 		return ContentUris.parseId(uri);
@@ -149,7 +149,6 @@ public class DatabaseTestHelper {
 		ContentResolver cr = context.getContentResolver();
 		ContentValues cv = new ContentValues();
 		cv.put(Competitor.COMPETITOR_DISPLAY_NAME, competitorDisplayName);
-		cv.put(Competitor.COMPETITOR_LEADERBOARD_FK, leaderboardRowId);
 		cv.put(Competitor.COMPETITOR_CHECKIN_DIGEST, checkinDigest);
 		Uri uri = cr.insert(Competitor.CONTENT_URI, cv);
 		return ContentUris.parseId(uri);

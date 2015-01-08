@@ -183,9 +183,9 @@ public class AnalyticsProvider extends ContentProvider {
         
         switch (sUriMatcher.match(uri)) {
         case COMPETITOR:
-            db.insertOrThrow(Tables.COMPETITORS, null, values);
+            long competitorId = db.insertOrThrow(Tables.COMPETITORS, null, values);
             notifyChange(uri);
-            return Competitor.buildCompetitorUri(values.getAsString(Competitor.COMPETITOR_ID));
+            return Competitor.buildCompetitorUri(String.valueOf(competitorId));
             
         case EVENT:
             long eventId = db.insertOrThrow(Tables.EVENTS, null, values);
@@ -193,9 +193,9 @@ public class AnalyticsProvider extends ContentProvider {
             return Event.buildEventUri(String.valueOf(eventId));
             
         case LEADERBOARD:
-        	db.insertOrThrow(Tables.LEADERBOARDS, null, values);
+        	long leaderboardId = db.insertOrThrow(Tables.LEADERBOARDS, null, values);
         	notifyChange(uri);
-        	return Leaderboard.buildLeaderboardUri(values.getAsString(BaseColumns._ID));
+        	return Leaderboard.buildLeaderboardUri(String.valueOf(leaderboardId));
             
         case SENSOR_GPS:
             db.insertOrThrow(Tables.SENSOR_GPS, null, values);

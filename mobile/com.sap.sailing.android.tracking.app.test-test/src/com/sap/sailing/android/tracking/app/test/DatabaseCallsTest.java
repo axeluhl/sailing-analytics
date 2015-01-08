@@ -1,14 +1,29 @@
 package com.sap.sailing.android.tracking.app.test;
 
+import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.support.v4.app.FragmentManager;
+import android.view.ContextThemeWrapper;
 
 public class DatabaseCallsTest extends ActivityUnitTestCase<Activity> {
 
+	private Intent mStartIntent;
+
+	
 	public DatabaseCallsTest() {
 		super(Activity.class);
 	}
+	
+	@Override
+    protected void setUp() throws Exception {
+        super.setUp();        
+		mStartIntent = new Intent(Intent.ACTION_MAIN);
+		startActivity(mStartIntent, null, null);
+		DatabaseTestHelper.deleteAllEventsFromDB(getActivity());
+    }
 	
 	public void testDeleteRegatta()
 	{
