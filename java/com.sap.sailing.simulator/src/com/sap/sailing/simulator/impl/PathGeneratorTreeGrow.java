@@ -26,7 +26,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
+public class PathGeneratorTreeGrow extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     private boolean debugMsgOn = false;
@@ -42,7 +42,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
     ArrayList<List<PathCandidate>> isocPositions = null;
     String gridFile = null;
 
-    public PathGeneratorTreeGrowWind(SimulationParameters params) {
+    public PathGeneratorTreeGrow(SimulationParameters params) {
         this.parameters = params;
     }
 
@@ -104,13 +104,11 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
     // generate step in one of the possible directions
     // default: L - left, R - right
     // extended: M - wide left, S - wide right
-    TimedPosition getStep(TimedPosition pos, long timeStep, long turnLoss, boolean sameBaseDirection, char nextDirection) {
+    TimedPosition getStep(TimedPosition pos, Wind posWind, long timeStep, long turnLoss, boolean sameBaseDirection, char nextDirection) {
 
         double offDeg = 3.0;
-        WindFieldGenerator wf = this.parameters.getWindField();
         TimePoint curTime = pos.getTimePoint();
         Position curPosition = pos.getPosition();
-        Wind posWind = wf.getWind(new TimedPositionImpl(curTime, curPosition));
 
         PolarDiagram pd = this.parameters.getBoatPolarDiagram();
         pd.setWind(posWind);
@@ -163,27 +161,9 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         return new TimedPositionImpl(nextTime, nextPosition);
     }
 
-    // use base direction to distinguish direction changes that do or don't require a turn
-    char getBaseDirection(char direction) {
-        char baseDirection = direction;
-
-        if (direction == 'M') {
-            baseDirection = 'L';
-        }
-        if (direction == 'S') {
-            baseDirection = 'R';
-        }
-
-        return baseDirection;
-    }
-
     // check whether nextDirection is same base direction as previous direction, i.e. no turn
     boolean isSameDirection(char prevDirection, char nextDirection) {
-
-        char prevBaseDirection = this.getBaseDirection(prevDirection);
-        char nextBaseDirection = this.getBaseDirection(nextDirection);
-
-        return ((nextBaseDirection == prevBaseDirection)||(prevBaseDirection == '0'));
+        return ((nextDirection == prevDirection)||(prevDirection == '0'));
     }
 
     // get path candidate measuring height towards (local, current-apparent) wind
@@ -198,7 +178,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         }
 
         // calculate next path position (taking turn-loss into account)
-        TimedPosition pathPos = this.getStep(path.pos, timeStep, turnLoss, sameBaseDirection, nextDirection);
+        TimedPosition pathPos = this.getStep(path.pos, path.wind, timeStep, turnLoss, sameBaseDirection, nextDirection);
         
         // determine apparent wind at next path position & time
         Wind posWind = this.parameters.getWindField().getWind(pathPos);
@@ -248,9 +228,8 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
         // extend path-string by step-direction
         String pathStr = path.path + nextDirection;
-        char nextBaseDirection = this.getBaseDirection(nextDirection);
 
-        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextBaseDirection, appWind));
+        return (new PathCandidate(pathPos, reachedEnd, vrtDist, hrzDist, turnCount, pathStr, nextDirection, posWind));
     }
 
 
@@ -279,17 +258,9 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             newPathCand = getPathCandWind(path, 'L', timeStep, turnLoss, posStart, posEnd, tgtHeight);
             result.add(newPathCand);
 
-            // step wide left
-            //newPathCand = getPathCandWind(path, 'M', timeStep, turnLoss, posStart, posEnd, tgtHeight);
-            //result.add(newPathCand);
-
             // step right
             newPathCand = getPathCandWind(path, 'R', timeStep, turnLoss, posStart, posEnd, tgtHeight);
             result.add(newPathCand);
-
-            // step wide right
-            //newPathCand = getPathCandWind(path, 'S', timeStep, turnLoss, posStart, posEnd, tgtHeight);
-            //result.add(newPathCand);
 
         }
 
@@ -550,9 +521,9 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         allPaths.add(initPath);
 
 
-        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), usedTimeStep, turnLoss, true, 'L');
+        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, usedTimeStep, turnLoss, true, 'L');
         double tstDist1 = startPos.getDistance(tstPosition.getPosition()).getMeters();
-        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), usedTimeStep, turnLoss, true, 'R');
+        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), wndStart, usedTimeStep, turnLoss, true, 'R');
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
 
         double hrzBinSize = (tstDist1 + tstDist2)/6.0; // horizontal bin size in meters
@@ -714,6 +685,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
         // generate intermediate steps
         bestCand = trgPaths.get(0); // target-path ending closest to target
+        long endTime = bestCand.pos.getTimePoint().asMillis();
         TimedPositionWithSpeed curPosition = null;
         char nextDirection = '0';
         char prevDirection = '0';
@@ -729,10 +701,12 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             } else {
 
                 boolean sameBaseDirection = this.isSameDirection(prevDirection, nextDirection);
-                TimedPosition newPosition = this.getStep(curPosition, usedTimeStep, turnLoss, sameBaseDirection, nextDirection);
-                curPosition = new TimedPositionWithSpeedImpl(newPosition.getTimePoint(), newPosition.getPosition(), null);
-                path.add(curPosition);
-
+                Wind curWind = wf.getWind(curPosition);
+                TimedPosition newPosition = this.getStep(curPosition, curWind, usedTimeStep, turnLoss, sameBaseDirection, nextDirection);
+                if (newPosition.getTimePoint().asMillis() < endTime) {
+                	curPosition = new TimedPositionWithSpeedImpl(newPosition.getTimePoint(), newPosition.getPosition(), null);
+                	path.add(curPosition);
+                }
             }
 
             prevDirection = nextDirection;
