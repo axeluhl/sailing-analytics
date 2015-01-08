@@ -74,8 +74,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	 * Thus they are cached here and the fragments can pick
 	 * them up.
 	 */
-	public String lastSpeedIndicatorText = "";
-	public String lastCompassIndicatorText = "";
+	public String lastSpeedIndicatorText = "-";
+	public String lastCompassIndicatorText = "-°";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -124,8 +124,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			}
 			
 			lastViewPagerItem = savedInstanceState.getInt(SIS_LAST_VIEWPAGER_ITEM);
-			lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT);
-			lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT);
+			lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, "-");
+			lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, "-°");
 		} else {
 			trackingFragment = new TrackingFragment();
 		}

@@ -53,7 +53,7 @@ public class SpeedFragment extends BaseFragment {
 		if (activity != null) {
 			speedText.setText(activity.lastSpeedIndicatorText);
 		} else {
-			speedText.setText("-");
+			speedText.setText("0");
 		}
 
 	}
