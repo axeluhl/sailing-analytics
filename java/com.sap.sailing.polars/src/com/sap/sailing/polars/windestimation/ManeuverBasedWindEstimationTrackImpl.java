@@ -66,8 +66,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
          */
         private final double maneuverAngleDeg;
         private final SpeedWithBearing speedAtManeuverStart;
-        private final Bearing windEstimationIfTack;
-        private final Bearing windEstimationIfJibe;
+        private final Bearing middleManeuverCourse;
         private final Distance maneuverLoss;
         private final Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> estimatedTrueWindSpeedAndAngles;
         
@@ -77,8 +76,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             this.estimatedTrueWindSpeedAndAngles = estimatedTrueWindSpeedAndAngles;
             this.maneuverAngleDeg = maneuver.getDirectionChangeInDegrees();
             this.speedAtManeuverStart = maneuver.getSpeedWithBearingBefore();
-            this.windEstimationIfJibe = maneuver.getSpeedWithBearingBefore().getBearing().middle(maneuver.getSpeedWithBearingAfter().getBearing());
-            this.windEstimationIfTack = windEstimationIfJibe.reverse();
+            this.middleManeuverCourse = maneuver.getSpeedWithBearingBefore().getBearing().middle(maneuver.getSpeedWithBearingAfter().getBearing());
             this.maneuverLoss = maneuver.getManeuverLoss();
         }
         
@@ -90,12 +88,8 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             return speedAtManeuverStart;
         }
 
-        public Bearing getWindEstimationIfTack() {
-            return windEstimationIfTack;
-        }
-
-        public Bearing getWindEstimationIfJibe() {
-            return windEstimationIfJibe;
+        public Bearing getMiddleManeuverCourse() {
+            return middleManeuverCourse;
         }
 
         public Distance getManeuverLoss() {
@@ -107,17 +101,24 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         }
         
         public static String getToStringColumnHeaders() {
-            return "angleDeg, boatSpeedKn, cogDeg, windEstimationIfTack, windEstimationIfJibe, lossM, assumedLegType, assumedTack, estimatedTrueWindSpeedKn, estimatedTrueWindAngleDeg";
+            return "angleDeg, boatSpeedKn, cogDeg, windEstimation, lossM, assumedLegType, assumedTack, estimatedTrueWindSpeedKn, estimatedTrueWindAngleDeg";
         }
         
         @Override
         public String toString() {
-            final String prefix = "" + getManeuverAngleDeg() + ", " + getSpeedAtManeuverStart().getKnots()+", "+getSpeedAtManeuverStart().getBearing().getDegrees() +
-                    ", " + getWindEstimationIfTack().getDegrees() + ", " + getWindEstimationIfJibe().getDegrees() + ", " + (getManeuverLoss()==null?0.0:getManeuverLoss().getMeters());
+            final String prefix = "" + getManeuverAngleDeg() + ", " + getSpeedAtManeuverStart().getKnots()+", "+getSpeedAtManeuverStart().getBearing().getDegrees();
             final StringBuilder result = new StringBuilder();
             for (Entry<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> i : getEstimatedTrueWindSpeedAndAngles().entrySet()) {
                 for (SpeedWithBearingWithConfidence<Void> s : i.getValue()) {
                     result.append(prefix);
+                    result.append(", ");
+                    if (i.getKey().getA() == LegType.DOWNWIND) {
+                        result.append(getMiddleManeuverCourse().getDegrees());
+                    } else {
+                        result.append(getMiddleManeuverCourse().reverse().getDegrees());
+                    }
+                    result.append(", ");
+                    result.append(getManeuverLoss()==null?0.0:getManeuverLoss().getMeters());
                     result.append(", ");
                     result.append(i.getKey().getA());
                     result.append(", ");
