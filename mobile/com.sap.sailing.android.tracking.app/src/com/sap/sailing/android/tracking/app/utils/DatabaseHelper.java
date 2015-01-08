@@ -442,10 +442,13 @@ public class DatabaseHelper {
 				+ "\" AND competitors.competitor_checkin_digest = \"" + checkinDigest
 				+ "\" AND events.event_checkin_digest = \"" + checkinDigest + "\"";
 
-		int count = cr.query(
+		Cursor cursor = cr.query(
 				AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI,
-				null, sel, null, null).getCount();
-
+				null, sel, null, null);
+		
+		int count = cursor.getCount();
+		
+		cursor.close();
 		return count == 0;
 	}
 	
