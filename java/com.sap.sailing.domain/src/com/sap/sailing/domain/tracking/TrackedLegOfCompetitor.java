@@ -42,22 +42,17 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Estimates how much the competitor still has to go to the end waypoint of this leg, projected onto the wind
      * direction. If the competitor already finished this leg, a zero, non-<code>null</code> distance will result.
-     * If the competitor hasn't started the leg yet, the full leg distance is returned.
-     * 
-     * @throws NoWindException
-     *             thrown in case no wind direction is known
+     * If the competitor hasn't started the leg yet, the full leg distance is returned. For reaching legs or when
+     * no wind information is available, the projection onto the leg's direction will be used instead of wind
+     * projection.
      */
-    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode);
 
     /**
      * Same as {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode)}, only that a cache for wind and leg
      * type / bearing can be passed.
-     * 
-     * @throws NoWindException
-     *             thrown in case no wind direction is known
      */
-    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode legMiddle,
-            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode legMiddle, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Computes an approximation for the average velocity made good (windward / leeward speed) of this leg's competitor at
@@ -188,8 +183,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getVelocityMadeGood(TimePoint, WindPositionMode)}, only that a cache for wind data and leg type and bearing
      * is passed.
      */
-    Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache)
-            throws NoWindException;
+    Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
 
     /**

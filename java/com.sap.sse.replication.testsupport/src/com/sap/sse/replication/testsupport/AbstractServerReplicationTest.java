@@ -194,7 +194,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
             final boolean[] listening = new boolean[] { false };
             Thread initialLoadTestServerThread = new Thread("Replication initial load test server") {
                 public void run() {
-                    ServerSocket ss;
+                    ServerSocket ss = null;
                     try {
                         ss = new ServerSocket(SERVLET_PORT);
                         synchronized (listening) {
@@ -234,9 +234,16 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
                             pw.close();
                             s.close();
                         }
-                        ss.close();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
+                    } finally {
+                        try {
+                            if (ss != null) {
+                                ss.close();
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             };

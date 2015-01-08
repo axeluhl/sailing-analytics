@@ -98,25 +98,25 @@ public class PolarDiagram49STG extends PolarDiagramBase {
         beatSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(9.30 * beatScale));
         beatSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(10.00 * beatScale));
 
-        gybeAngles = new TreeMap<Speed, Bearing>();
-        gybeAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(135.0));
-        gybeAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(135.0));
-        gybeAngles.put(new KnotSpeedImpl(8), new DegreeBearingImpl(140.0));
-        gybeAngles.put(new KnotSpeedImpl(10), new DegreeBearingImpl(145.0));
-        gybeAngles.put(new KnotSpeedImpl(12), new DegreeBearingImpl(150.0));
-        gybeAngles.put(new KnotSpeedImpl(14), new DegreeBearingImpl(155.0));
-        gybeAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(157.0));
-        gybeAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(160.0));
+        jibeAngles = new TreeMap<Speed, Bearing>();
+        jibeAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(135.0));
+        jibeAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(135.0));
+        jibeAngles.put(new KnotSpeedImpl(8), new DegreeBearingImpl(140.0));
+        jibeAngles.put(new KnotSpeedImpl(10), new DegreeBearingImpl(145.0));
+        jibeAngles.put(new KnotSpeedImpl(12), new DegreeBearingImpl(150.0));
+        jibeAngles.put(new KnotSpeedImpl(14), new DegreeBearingImpl(155.0));
+        jibeAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(157.0));
+        jibeAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(160.0));
 
-        gybeSOG = new TreeMap<Speed, Speed>();
-        gybeSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
-        gybeSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(8.00));
-        gybeSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(11.00));
-        gybeSOG.put(new KnotSpeedImpl(10), new KnotSpeedImpl(14.00));
-        gybeSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(15.00));
-        gybeSOG.put(new KnotSpeedImpl(14), new KnotSpeedImpl(16.00));
-        gybeSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(17.00));
-        gybeSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(19.00));
+        jibeSOG = new TreeMap<Speed, Speed>();
+        jibeSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
+        jibeSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(8.00));
+        jibeSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(11.00));
+        jibeSOG.put(new KnotSpeedImpl(10), new KnotSpeedImpl(14.00));
+        jibeSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(15.00));
+        jibeSOG.put(new KnotSpeedImpl(14), new KnotSpeedImpl(16.00));
+        jibeSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(17.00));
+        jibeSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(19.00));
 
         for (Speed s : speedTable.keySet()) {
 
@@ -124,8 +124,8 @@ public class PolarDiagram49STG extends PolarDiagramBase {
                 speedTable.get(s).put(beatAngles.get(s), beatSOG.get(s));
             }
 
-            if (gybeAngles.containsKey(s) && !speedTable.get(s).containsKey(gybeAngles.get(s))) {
-                speedTable.get(s).put(gybeAngles.get(s), gybeSOG.get(s));
+            if (jibeAngles.containsKey(s) && !speedTable.get(s).containsKey(jibeAngles.get(s))) {
+                speedTable.get(s).put(jibeAngles.get(s), jibeSOG.get(s));
             }
 
         }

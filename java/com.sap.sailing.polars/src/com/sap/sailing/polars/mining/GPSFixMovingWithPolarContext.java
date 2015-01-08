@@ -56,9 +56,9 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     }
 
     @Override
-    public RoundedAngleToTheWind getRoundedAngleToTheWind() {
+    public RoundedTrueWindAngle getRoundedTrueWindAngle() {
         final BearingWithConfidence<Integer> angleToTheWind = getAngleToTheWind();
-        return angleToTheWind == null ? null : new RoundedAngleToTheWind(angleToTheWind.getObject());
+        return angleToTheWind == null ? null : new RoundedTrueWindAngle(angleToTheWind.getObject());
     }
 
     public BearingWithConfidence<Integer> getAngleToTheWind() {
@@ -90,11 +90,6 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
         return track.getEstimatedSpeed(fix.getTimePoint(), ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                 // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 track.getMillisecondsOverWhichToAverageSpeed()/2, /* minimumConfidence */ 0.00000001));
-    }
-
-    @Override
-    public BoatClass getBoatClass() {
-        return race.getRace().getBoatClass();
     }
     
     private Set<WindSource> collectWindSourcesToIgnoreForBearing() {
@@ -146,6 +141,11 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
             windSourcesToExclude.add(webSource);
         }
         return windSourcesToExclude;
+    }
+
+    @Override
+    public BoatClass getBoatClass() {
+        return race.getRace().getBoatClass();
     }
 
 }
