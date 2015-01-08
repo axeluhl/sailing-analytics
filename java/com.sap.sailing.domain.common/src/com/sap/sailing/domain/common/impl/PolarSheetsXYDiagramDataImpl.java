@@ -16,9 +16,9 @@ public class PolarSheetsXYDiagramDataImpl implements PolarSheetsXYDiagramData {
     PolarSheetsXYDiagramDataImpl() {
     }
 
-    private final Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> pointsForAverageSpeedMovingAverage = new HashMap<Pair<LegType, Tack>, List<Pair<Double, Double>>>();
+    private Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> pointsForAverageSpeedMovingAverage;
 
-    private final Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> pointsForAverageConfidence = new HashMap<Pair<LegType, Tack>, List<Pair<Double, Double>>>();
+    private Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> pointsForAverageConfidence;
 
     public PolarSheetsXYDiagramDataImpl(List<Pair<Double, Double>> pointsForUpwindStarboardAverageSpeedMovingAverage,
             List<Pair<Double, Double>> pointsForUpwindStarboardAverageConfidence,
@@ -28,6 +28,8 @@ public class PolarSheetsXYDiagramDataImpl implements PolarSheetsXYDiagramData {
             List<Pair<Double, Double>> pointsForDownwindStarboardAverageConfidence,
             List<Pair<Double, Double>> pointsForDownwindPortAverageSpeedMovingAverage,
             List<Pair<Double, Double>> pointsForDownwindPortAverageConfidence) {
+        pointsForAverageSpeedMovingAverage = new HashMap<Pair<LegType, Tack>, List<Pair<Double, Double>>>();
+        pointsForAverageConfidence = new HashMap<Pair<LegType, Tack>, List<Pair<Double, Double>>>();
         pointsForAverageSpeedMovingAverage.put(new Pair<LegType, Tack>(LegType.UPWIND, Tack.STARBOARD),
                 pointsForUpwindStarboardAverageSpeedMovingAverage);
         pointsForAverageConfidence.put(new Pair<LegType, Tack>(LegType.UPWIND, Tack.STARBOARD),

@@ -99,6 +99,8 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
                 .setPolar(true).setHeight100().setWidth100();
         polarSheetChart.setChartTitleText(stringMessages.polarSheetChart());
         polarSheetChart.getYAxis().setMin(0);
+        polarSheetChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
+        polarSheetChart.setOption("/pane/startAngle", 180);
         return polarSheetChart;
     }
 
@@ -129,19 +131,10 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
      */
     private void createSeriesForWindspeed(String name, int windSpeedLevel, String seriesName) {
         Series[] seriesPerWindSpeed = seriesMap.get(name);
-        Number[] forEachDeg = initializeDataForNewSeries();
-        seriesPerWindSpeed[windSpeedLevel] = chart.createSeries().setPoints(forEachDeg);
+        seriesPerWindSpeed[windSpeedLevel] = chart.createSeries();
         seriesPerWindSpeed[windSpeedLevel].setName(seriesName);
         nameForSeries.put(seriesPerWindSpeed[windSpeedLevel],seriesName);
         chart.addSeries(seriesPerWindSpeed[windSpeedLevel]);
-    }
-
-    /**
-     * @return An array of 360 numbers. One for each angle.
-     */
-    private Number[] initializeDataForNewSeries() {
-        Number[] forEachDeg = new Number[360];
-        return forEachDeg;
     }
 
     /**
@@ -206,17 +199,18 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
             return null;
         }
         for (int i = 0; i < 360; i++) {
+            int convertedAngle = i > 180 ? i - 360 : i;
             if (result.getHistogramDataMap().get(windspeed) == null
                     || result.getHistogramDataMap().get(windspeed).get(i) == null
                     || result.getHistogramDataMap().get(windspeed).get(i).getConfidenceMeasure() < settings
                             .getMinimumConfidenceMeasure()
                     || result.getHistogramDataMap().get(windspeed).get(i).getDataCount() < settings
                             .getMinimumDataCountPerAngle()) {
-                points[i] = new Point(0);
+                points[i] = new Point(convertedAngle, 0);
                 continue;
             }
             if (points[i] == null) {
-                points[i] = new Point(result.getAveragedPolarDataByWindSpeed()[windspeed][i]);
+                points[i] = new Point(convertedAngle, result.getAveragedPolarDataByWindSpeed()[windspeed][i]);
             }
         }
 
