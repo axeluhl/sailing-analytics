@@ -5350,23 +5350,71 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
         List<Pair<Double, Double>> pointsForUpwindStarboardAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
         List<Pair<Double, Double>> pointsForUpwindStarboardAverageConfidence = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForUpwindPortAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForUpwindPortAverageConfidence = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForDownwindStarboardAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForDownwindStarboardAverageConfidence = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForDownwindPortAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForDownwindPortAverageConfidence = new ArrayList<Pair<Double, Double>>();
         for (double windInKnots = 0.1; windInKnots < 30; windInKnots = windInKnots + 0.1) {
             try {
-
-                SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService().getPolarDataService()
-                        .getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots), LegType.UPWIND,
-                                Tack.STARBOARD);
+                SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService()
+                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
+                                LegType.UPWIND, Tack.STARBOARD);
                 pointsForUpwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
                         averageUpwindStarboardMovingAverage.getObject().getKnots()));
-                
+
                 pointsForUpwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
                         averageUpwindStarboardMovingAverage.getConfidence()));
-
             } catch (NotEnoughDataHasBeenAddedException e) {
                 // Do not add a point to the result
             }
+
+            try {
+                SpeedWithBearingWithConfidence<Void> averageUpwindPortMovingAverage = getService()
+                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
+                                LegType.UPWIND, Tack.PORT);
+                pointsForUpwindPortAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
+                        averageUpwindPortMovingAverage.getObject().getKnots()));
+
+                pointsForUpwindPortAverageConfidence.add(new Pair<Double, Double>(windInKnots,
+                        averageUpwindPortMovingAverage.getConfidence()));
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                // Do not add a point to the result
+            }
+
+            try {
+                SpeedWithBearingWithConfidence<Void> averageDownwindStarboardMovingAverage = getService()
+                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
+                                LegType.DOWNWIND, Tack.STARBOARD);
+                pointsForDownwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
+                        averageDownwindStarboardMovingAverage.getObject().getKnots()));
+
+                pointsForDownwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
+                        averageDownwindStarboardMovingAverage.getConfidence()));
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                // Do not add a point to the result
+            }
+
+            try {
+                SpeedWithBearingWithConfidence<Void> averageDownwindPortMovingAverage = getService()
+                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
+                                LegType.DOWNWIND, Tack.PORT);
+                pointsForDownwindPortAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
+                        averageDownwindPortMovingAverage.getObject().getKnots()));
+
+                pointsForDownwindPortAverageConfidence.add(new Pair<Double, Double>(windInKnots,
+                        averageDownwindPortMovingAverage.getConfidence()));
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                // Do not add a point to the result
+            }
+
         }
-        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(pointsForUpwindStarboardAverageSpeedMovingAverage, pointsForUpwindStarboardAverageConfidence);
+        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(
+                pointsForUpwindStarboardAverageSpeedMovingAverage, pointsForUpwindStarboardAverageConfidence,
+                pointsForUpwindPortAverageSpeedMovingAverage, pointsForUpwindPortAverageConfidence,
+                pointsForDownwindStarboardAverageSpeedMovingAverage, pointsForDownwindStarboardAverageConfidence,
+                pointsForDownwindPortAverageSpeedMovingAverage, pointsForDownwindPortAverageConfidence);
 
         return data;
     }
