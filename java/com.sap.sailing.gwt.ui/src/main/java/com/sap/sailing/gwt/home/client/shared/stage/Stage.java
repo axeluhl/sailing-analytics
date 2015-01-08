@@ -61,9 +61,4 @@ public class Stage extends Composite {
         }
 
     }
-
-    public void adjustSize() {
-
-    }
-
 }

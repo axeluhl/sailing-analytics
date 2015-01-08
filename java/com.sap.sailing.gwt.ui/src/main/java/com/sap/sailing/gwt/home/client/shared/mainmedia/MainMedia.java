@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.home.client.shared.mainmedia;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -65,9 +67,38 @@ public class MainMedia extends Composite {
             String url;
             int height;
             int width;
+            @Override
+            public int hashCode() {
+                final int prime = 31;
+                int result = 1;
+                result = prime * result + height;
+                result = prime * result + ((url == null) ? 0 : url.hashCode());
+                result = prime * result + width;
+                return result;
+            }
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj)
+                    return true;
+                if (obj == null)
+                    return false;
+                if (getClass() != obj.getClass())
+                    return false;
+                Holder other = (Holder) obj;
+                if (height != other.height)
+                    return false;
+                if (url == null) {
+                    if (other.url != null)
+                        return false;
+                } else if (!url.equals(other.url))
+                    return false;
+                if (width != other.width)
+                    return false;
+                return true;
+            }
         }
 
-        final List<Holder> photoGalleryUrls = new LinkedList<>();
+        final Set<Holder> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable amount of shuffling
         final List<Pair<String, EventBaseDTO>> videoCandidates = new LinkedList<>();
 
         for (EventBaseDTO event : recentEvents) {
@@ -99,14 +130,13 @@ public class MainMedia extends Composite {
                 }
             }
         }
-
-        // shuffle the image url list (Remark: Collections.shuffle() is not implemented in GWT)
+        Random random = new Random();
+        List<Holder> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
         final int gallerySize = photoGalleryUrls.size();
-        Random random = new Random(gallerySize);
         for (int i = 0; i < gallerySize; i++) {
-            Collections.swap(photoGalleryUrls, i, random.nextInt(gallerySize));
+            Collections.swap(shuffledPhotoGallery, i, random.nextInt(gallerySize));
         }
-        for (Holder holder : photoGalleryUrls) {
+        for (Holder holder : shuffledPhotoGallery) {
             imageCarousel.addImage(holder.url, holder.height, holder.width);
         }
     }

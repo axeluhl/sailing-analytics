@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -34,6 +35,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -467,6 +470,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
+                    public RegattaLog getRegattaLog() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
                     public TimePoint getStartDate() {
                         // TODO Auto-generated method stub
                         return null;
@@ -486,6 +495,24 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void setEndDate(TimePoint startDate) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public RegattaLikeIdentifier getRegattaLikeIdentifier() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void addListener(RegattaLikeListener listener) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void removeListener(RegattaLikeListener listener) {
                         // TODO Auto-generated method stub
                         
                     }
@@ -554,6 +581,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                 // TODO Auto-generated method stub
                 return null;
             }
+
+			@Override
+			public DynamicTrackedRace createTrackedRace(
+					RaceDefinition raceDefinition,
+					Iterable<Sideline> sidelines, WindStore windStore,
+					GPSFixStore gpsFixStore, long delayToLiveInMillis,
+					long millisecondsOverWhichToAverageWind,
+					DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+					boolean useMarkPassingCalculator) {
+				// TODO Auto-generated method stub
+				return null;
+			}
         };
     }
 
@@ -1030,6 +1069,19 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public boolean isUsingMarkPassingCalculator() {
         // TODO Auto-generated method stub
         return false;
+    }
+    
+    @Override
+    public void attachRegattaLog(RegattaLog regattaLog) {
+        // TODO Auto-generated method stub
+        
+    }
+
+
+    @Override
+    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
     }
 
 }

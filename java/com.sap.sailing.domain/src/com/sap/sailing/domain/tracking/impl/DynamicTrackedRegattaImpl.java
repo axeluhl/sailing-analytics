@@ -40,4 +40,14 @@ public class DynamicTrackedRegattaImpl extends TrackedRegattaImpl implements Dyn
                 millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate, useMarkPassingCalculator);
     }
 
+	@Override
+	public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition,
+			Iterable<Sideline> sidelines, WindStore windStore,
+			GPSFixStore gpsFixStore, long delayToLiveInMillis,
+			long millisecondsOverWhichToAverageWind,
+			DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+			boolean useMarkPassingCalculator) {
+		return null;
+	}
+
 }

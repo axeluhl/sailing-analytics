@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -25,14 +26,14 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.schema.Boat;
-import com.sap.sailing.xrr.resultimport.schema.Crew;
-import com.sap.sailing.xrr.resultimport.schema.Division;
-import com.sap.sailing.xrr.resultimport.schema.Event;
-import com.sap.sailing.xrr.resultimport.schema.Person;
-import com.sap.sailing.xrr.resultimport.schema.RaceResult;
-import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
-import com.sap.sailing.xrr.resultimport.schema.Team;
+import com.sap.sailing.xrr.schema.Boat;
+import com.sap.sailing.xrr.schema.Crew;
+import com.sap.sailing.xrr.schema.Division;
+import com.sap.sailing.xrr.schema.Event;
+import com.sap.sailing.xrr.schema.Person;
+import com.sap.sailing.xrr.schema.RaceResult;
+import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.Team;
 
 public class SwissTimingAdapterImpl implements SwissTimingAdapter {
     private final SwissTimingFactory swissTimingFactory;
@@ -66,13 +67,14 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
     }
 
     @Override
-    public RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
-            BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
+    public RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo,
+            String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
+            StartList startList, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds)
             throws Exception {
-        return trackerManager.addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port,
-                raceID, raceName, raceDescription, boatClass, startList, DEFAULT_SWISSTIMING_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
-                swissTimingDomainFactory, logStore),
-                timeoutInMilliseconds);
+        return trackerManager.addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(
+                hostname, port, raceID, raceName, raceDescription, boatClass, startList,
+                DEFAULT_SWISSTIMING_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory, swissTimingDomainFactory,
+                raceLogStore, regattaLogStore), timeoutInMilliseconds);
     }
 
     @Override

@@ -576,8 +576,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     tractracPassword, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            reportError("Error trying to register races " + selectedRaces + " for tracking: "
-                                    + caught.getMessage() + ". Check live/stored URI syntax.");
+                            reportError(stringMessages.errorTryingToRegisterRacesForTracking(selectedRaces.toString(), caught.getMessage()));
                         }
 
                         @Override

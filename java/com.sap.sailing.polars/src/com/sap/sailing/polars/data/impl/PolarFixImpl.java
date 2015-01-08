@@ -23,7 +23,7 @@ public class PolarFixImpl implements PolarFix {
 
     private SpeedWithBearing boatSpeed;
     private Speed windSpeed;
-    private double angleToWind;
+    private double trueWindAngleDeg;
     private String gaugeIdString;
     private String dayString;
 
@@ -53,7 +53,7 @@ public class PolarFixImpl implements PolarFix {
             windEstimated = windSpeed; // maybe no upwind start; need to default to measured wind speed/direction
         }
         Bearing windBearing = windEstimated.getFrom();
-        angleToWind = bearing.getDifferenceTo(windBearing).getDegrees();
+        trueWindAngleDeg = bearing.getDifferenceTo(windBearing).getDegrees();
     }
 
     private String createDayString(TrackedRace race) {
@@ -105,8 +105,8 @@ public class PolarFixImpl implements PolarFix {
     }
 
     @Override
-    public double getAngleToWind() {
-        return angleToWind;
+    public double getTrueWindAngleDeg() {
+        return trueWindAngleDeg;
     }
 
     @Override

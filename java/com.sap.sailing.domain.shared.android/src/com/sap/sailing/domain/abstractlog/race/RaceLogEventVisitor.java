@@ -1,13 +1,13 @@
 package com.sap.sailing.domain.abstractlog.race;
 
-import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.CloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.DeviceMarkMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 
 
 public interface RaceLogEventVisitor {
@@ -39,23 +39,24 @@ public interface RaceLogEventVisitor {
     
     public void visit(RaceLogWindFixEvent event);
     
-    public void visit(DeviceCompetitorMappingEvent event);
+    public void visit(RaceLogDeviceCompetitorMappingEvent event);
     
-    public void visit(DeviceMarkMappingEvent event);
+    public void visit(RaceLogDeviceMarkMappingEvent event);
     
-    public void visit(DenoteForTrackingEvent event);
+    public void visit(RaceLogDenoteForTrackingEvent event);
     
-    public void visit(StartTrackingEvent event);
+    public void visit(RaceLogStartTrackingEvent event);
     
-    public void visit(RegisterCompetitorEvent event);
+    public void visit(RaceLogRegisterCompetitorEvent event);
     
-    public void visit(DefineMarkEvent event);
+    public void visit(RaceLogDefineMarkEvent event);
     
-    public void visit(CloseOpenEndedDeviceMappingEvent event);
+    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event);
 
+    public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);
+    
     public void visit(FixedMarkPassingEvent event);
     
-    public void visit(AdditionalScoringInformationEvent additionalScoringInformation);
 
     public void visit(SuppressedMarkPassingsEvent event);
 }

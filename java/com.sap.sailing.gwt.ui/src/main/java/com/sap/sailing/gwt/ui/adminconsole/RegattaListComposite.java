@@ -9,6 +9,7 @@ import java.util.List;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -36,6 +37,7 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -48,9 +50,9 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  */
 public class RegattaListComposite extends Composite implements RegattasDisplayer {
 
-    private final MultiSelectionModel<RegattaDTO> regattaSelectionModel;
-    private final CellTable<RegattaDTO> regattaTable;
-    private ListDataProvider<RegattaDTO> regattaListDataProvider;
+    protected final MultiSelectionModel<RegattaDTO> regattaSelectionModel;
+    protected final CellTable<RegattaDTO> regattaTable;
+    protected final ListDataProvider<RegattaDTO> regattaListDataProvider;
     private List<RegattaDTO> allRegattas;
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
@@ -58,14 +60,14 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private final Label noRegattasLabel;
 
     private final SailingServiceAsync sailingService;
-    private final RegattaSelectionProvider regattaSelectionProvider;
+    protected final RegattaSelectionProvider regattaSelectionProvider;
     private final ErrorReporter errorReporter;
     private final RegattaRefresher regattaRefresher;
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
 
     private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
 
-    private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -93,7 +95,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         noRegattasLabel.ensureDebugId("NoRegattasLabel");
         noRegattasLabel.setWordWrap(false);
         panel.add(noRegattasLabel);
-        
+
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         regattaTable = createRegattaTable();
         regattaTable.ensureDebugId("RegattasCellTable");
@@ -113,7 +115,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         };
         filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
         panel.add(filterablePanelRegattas);
-        
+
         @SuppressWarnings("unchecked")
         MultiSelectionModel<RegattaDTO> multiSelectionModel = (MultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
         regattaSelectionModel = multiSelectionModel;
@@ -129,13 +131,15 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 RegattaListComposite.this.regattaSelectionProvider.setSelection(selectedRaceIdentifiers);
             }
         });
-
         panel.add(regattaTable);
-
         initWidget(mainPanel);
     }
+    
+    public HandlerRegistration addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
+        return regattaSelectionModel.addSelectionChangeHandler(handler);
+    }
 
-    private CellTable<RegattaDTO> createRegattaTable() {
+    protected CellTable<RegattaDTO> createRegattaTable() {
         CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
@@ -235,34 +239,33 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private void removeRegatta(final RegattaDTO regatta) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
-        sailingService.removeRegatta(regattaIdentifier,new MarkedAsyncCallback<Void>(
-                new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to remove regatta " + regatta.getName() + ": " + caught.getMessage());
-                    }
-        
-                    @Override
-                    public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
-                    }
-                }));
+        sailingService.removeRegatta(regattaIdentifier, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to remove regatta " + regatta.getName() + ": "
+                        + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                regattaRefresher.fillRegattas();
+            }
+        }));
     }
 
     private void editRegatta(final RegattaDTO toBeEdited) {
         final Collection<RegattaDTO> existingRegattas = getAllRegattas();
-        sailingService.getEvents(new MarkedAsyncCallback<List<EventDTO>>(
-                new AsyncCallback<List<EventDTO>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        openEditRegattaDialog(toBeEdited, existingRegattas, Collections.<EventDTO> emptyList());
-                    }
-        
-                    @Override
-                    public void onSuccess(List<EventDTO> events) {
-                        openEditRegattaDialog(toBeEdited, existingRegattas, Collections.unmodifiableList(events));
-                    }
-                }));
+        sailingService.getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                openEditRegattaDialog(toBeEdited, existingRegattas, Collections.<EventDTO> emptyList());
+            }
+
+            @Override
+            public void onSuccess(List<EventDTO> events) {
+                openEditRegattaDialog(toBeEdited, existingRegattas, Collections.unmodifiableList(events));
+            }
+        }));
     }
 
     private void openEditRegattaDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
@@ -270,7 +273,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         RegattaWithSeriesAndFleetsDialog dialog = new RegattaWithSeriesAndFleetsEditDialog(regatta, existingRegattas,
                 existingEvents, stringMessages, new DialogCallback<RegattaDTO>() {
                     @Override
-                    public void cancel() { }
+                    public void cancel() {
+                    }
 
                     @Override
                     public void ok(RegattaDTO editedRegatta) {
@@ -282,42 +286,41 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
-        
+
         sailingService.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate, editedRegatta.defaultCourseAreaUuid,
-                editedRegatta.configuration, editedRegatta.useStartTimeInference, new MarkedAsyncCallback<Void>(
-                        new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() +
-                                        ": " + caught.getMessage());
-                            }
-                            
-                            @Override
-                            public void onSuccess(Void result) {
-                                regattaRefresher.fillRegattas();
-                            }
-                        }));
-        
+                editedRegatta.configuration, editedRegatta.useStartTimeInference, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": "
+                                + caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        regattaRefresher.fillRegattas();
+                    }
+                }));
+
         for (SeriesDTO series : editedRegatta.series) {
-            sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(), 
-                    series.getDiscardThresholds(), series.isStartsWithZeroScore(), 
+            sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
+                    series.getDiscardThresholds(), series.isStartsWithZeroScore(),
                     series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
-                    series.getFleets(), new MarkedAsyncCallback<Void>(
-                            new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": " + caught.getMessage());
-                                }
-                                
-                                @Override
-                                public void onSuccess(Void result) {
-                                    regattaRefresher.fillRegattas();
-                                }
-                            }));
+                    series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName()
+                                    + ": " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            regattaRefresher.fillRegattas();
+                        }
+                    }));
         }
     }
 
-    private List<RegattaDTO> getSelectedRegattas() {
+    protected List<RegattaDTO> getSelectedRegattas() {
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         if (regattaListDataProvider != null) {
             for (RegattaDTO regatta : regattaListDataProvider.getList()) {
@@ -330,15 +333,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
-        if (regattas.isEmpty()) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
+        if (Util.isEmpty(regattas)) {
             regattaTable.setVisible(false);
             noRegattasLabel.setVisible(true);
         } else {
             regattaTable.setVisible(true);
             noRegattasLabel.setVisible(false);
         }
-        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>(regattas);
+        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
+        Util.addAll(regattas, newAllRegattas);
         List<RegattaIdentifier> newAllRegattaIdentifiers = new ArrayList<RegattaIdentifier>();
         for (RegattaDTO regatta : regattas) {
             newAllRegattaIdentifiers.add(regatta.getRegattaIdentifier());
@@ -351,4 +355,5 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     public List<RegattaDTO> getAllRegattas() {
         return allRegattas;
     }
+
 }

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -17,11 +18,15 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogOnLeaderboardIdentifier;
+import com.sap.sailing.domain.regattalike.BaseRegattaLikeImpl;
+import com.sap.sailing.domain.regattalike.FlexibleLeaderboardAsRegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeListener;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -44,13 +49,20 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private String name;
     private transient RaceLogStore raceLogStore;
     private CourseArea courseArea;
+    
+    /**
+     * @see RegattaLog for the reason why the leaderboard manages a {@code RegattaLog}
+     */
+    private final IsRegattaLike regattaLikeHelper;
 
     public FlexibleLeaderboardImpl(String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
             ScoringScheme scoringScheme, CourseArea courseArea) {
-        this(EmptyRaceLogStore.INSTANCE, name, resultDiscardingRule, scoringScheme, courseArea);
+        this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
+                name, resultDiscardingRule, scoringScheme, courseArea);
     }
 
-    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
+    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
             ScoringScheme scoringScheme, CourseArea courseArea) {
         super(resultDiscardingRule);
         this.scoringScheme = scoringScheme;
@@ -61,6 +73,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.races = new ArrayList<FlexibleRaceColumn>();
         this.raceLogStore = raceLogStore;
         this.courseArea = courseArea;
+        this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore);
     }
 
     /**
@@ -73,8 +86,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         ois.defaultReadObject();
         raceLogStore = EmptyRaceLogStore.INSTANCE;
         for (RaceColumn column : getRaceColumns()) {
-            column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore, new RaceLogOnLeaderboardIdentifier(
-                    this, column.getName())));
+            column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
         }
     }
 
@@ -115,10 +127,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             column = createRaceColumn(name, medalRace);
             column.addRaceColumnListener(this);
             races.add(column);
-            column.setRaceLogInformation(
-                    new RaceLogInformationImpl(
-                            raceLogStore,
-                            new RaceLogOnLeaderboardIdentifier(this, column.getName())));
+            column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
             getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
         }
         return column;
@@ -241,5 +250,29 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public void setDefaultCourseArea(CourseArea newCourseArea) {
         this.courseArea = newCourseArea;
     }
+    
+    @Override
+    public IsRegattaLike getRegattaLike() {
+        return regattaLikeHelper;
+    }
 
+    @Override
+    public RegattaLog getRegattaLog() {
+        return regattaLikeHelper.getRegattaLog();
+    }
+
+    @Override
+    public RegattaLikeIdentifier getRegattaLikeIdentifier() {
+        return regattaLikeHelper.getRegattaLikeIdentifier();
+    }
+
+    @Override
+    public void addListener(RegattaLikeListener listener) {
+        regattaLikeHelper.addListener(listener);
+    }
+
+    @Override
+    public void removeListener(RegattaLikeListener listener) {
+        regattaLikeHelper.removeListener(listener);
+    }
 }

@@ -52,13 +52,13 @@ public class StringConstantsListEditorComposite extends ListEditorComposite<Stri
         }
 
         @Override
-        protected String getCollapsedValueText(List<String> value) {
+        protected String getCollapsedValueText(Iterable<String> value) {
             StringBuilder valuesText = new StringBuilder();
-            for (int i = 0; i < value.size(); i++) {
+            for (int i = 0; i < Util.size(value); i++) {
                 if (i > 0) {
                     valuesText.append(',');
                 }
-                valuesText.append(value.get(i));
+                valuesText.append(Util.get(value, i));
             }
             String condensedValue = valuesText.toString();
             return condensedValue;

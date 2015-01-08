@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="qualified" elementFormDefault="qualified">
+	<xsd:include schemaLocation="http://datafeed.sailing.org/sailingXRR_isafextend.xsd" />
+	<xsd:simpleType name="CrewPosition">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="S">
+				<xsd:annotation>
+					<xsd:documentation>Skipper</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="C">
+				<xsd:annotation>
+					<xsd:documentation>Crew</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="EventType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Regatta" />
+			<xsd:enumeration value="RegattaSeries" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="DivisionType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="FleetRace" />
+			<xsd:enumeration value="TeamRace" />
+			<xsd:enumeration value="MatchRace" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="MatchRaceEntry">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Port" />
+			<xsd:enumeration value="Starboard" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="PersonGender">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Male">
+				<xsd:annotation>
+					<xsd:documentation>Male</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>						
+			<xsd:enumeration value="Female">
+				<xsd:annotation>
+					<xsd:documentation>Female</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="EventGender">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Men">
+				<xsd:annotation>
+					<xsd:documentation>Men</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="Women">
+				<xsd:annotation>
+					<xsd:documentation>Women</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>			
+			<xsd:enumeration value="Open">
+				<xsd:annotation>
+					<xsd:documentation>Open</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="Mixed">
+				<xsd:annotation>
+					<xsd:documentation>Mixed</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>			
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="Person">
+		<xsd:attribute name="PersonID" type="xsd:string" use="required" />
+		<xsd:attribute name="IFPersonID" type="xsd:string" use="required" />
+		<xsd:attribute name="FamilyName" type="xsd:string" use="required" />
+		<xsd:attribute name="GivenName" type="xsd:string" use="optional" />
+		<xsd:attribute name="NOC" type="IFNationCode" use="optional" />
+		<xsd:attribute name="Gender" type="PersonGender" use="optional" />
+		<xsd:attribute name="ClassificationGroup" type="IFCfcnGroup" use="optional" />
+		<xsd:attribute name="ClassificationStatus" type="IFCfcnStatus" use="optional" />
+		<xsd:attribute name="ClassificationExpiry" type="xsd:date" use="optional" />
+	</xsd:complexType>
+	<xsd:complexType name="Crew">
+		<xsd:attribute name="PersonID" type="xsd:string" use="required" />
+		<xsd:attribute name="Position" type="CrewPosition" use="required" />
+	</xsd:complexType>
+	<xsd:complexType name="Boat">
+		<xsd:attribute name="BoatID" type="xsd:string" use="required" />
+		<xsd:attribute name="BoatName" type="xsd:string" use="optional" />
+		<xsd:attribute name="SailNumber" type="xsd:string" use="required" />
+	</xsd:complexType>
+	<xsd:complexType name="Division">
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="SeriesResult" type="SeriesResult" minOccurs="0" maxOccurs="unbounded" />
+			<xsd:element name="RaceResult" type="RaceResult" minOccurs="0" maxOccurs="unbounded" />
+			<xsd:element name="TRResult" type="TRResult" minOccurs="0" maxOccurs="unbounded" />			
+		</xsd:choice>
+		<xsd:attribute name="Type" type="DivisionType" use="optional" default="FleetRace" />
+		<xsd:attribute name="DivisionID" type="xsd:string" use="required" />
+		<xsd:attribute name="IFDivisionID" type="xsd:string" use="optional" />
+		<xsd:attribute name="Title" type="xsd:string" use="required" />
+		<xsd:attribute name="IFClassID" type="IFClassCode" use="optional" />
+		<xsd:attribute name="Gender" type="EventGender" use="optional" />
+		<xsd:attribute name="Disabled" type="xsd:boolean" use="optional" />
+	</xsd:complexType>
+	<xsd:complexType name="Team">
+		<xsd:sequence>
+			<xsd:element name="Crew" type="Crew" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="TeamID" type="xsd:string" use="required" />
+		<xsd:attribute name="BoatID" type="xsd:string" use="optional" />		
+		<xsd:attribute name="NOC" type="IFNationCode" use="optional" />
+		<xsd:attribute name="TeamName" type="xsd:string" use="optional" />
+		<xsd:attribute name="Gender" type="EventGender" use="optional" />
+	</xsd:complexType>
+	
+	<xsd:complexType name="Race">
+		<xsd:annotation>
+			<xsd:documentation>
+				very preliminary, info about a single race within a regatta
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="RaceID" type="xsd:string" use="required" />
+		<xsd:attribute name="RaceNumber" type="xsd:integer" use="required" />
+		<xsd:attribute name="RaceName" type="xsd:string" use="optional" />
+		<xsd:attribute name="RaceStartDate" type="xsd:date" use="optional"  />
+		<xsd:attribute name="RaceStartTime" type="xsd:time" use="optional" />
+		<xsd:attribute name="RaceStatus" type="IFRaceStatus" use="optional" />
+		<xsd:attribute name="Stage" type="xsd:string" use="optional" />
+		<xsd:attribute name="Flight" type="xsd:string" use="optional" />
+		<xsd:attribute name="Match" type="xsd:string" use="optional" />
+	</xsd:complexType>
+	<xsd:complexType name="RaceResult">
+		<xsd:choice>
+			<xsd:element name="Crew" type="Crew" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:choice>
+		<xsd:attribute name="RaceID" type="xsd:string" use="required" />
+		<xsd:attribute name="TeamID" type="xsd:string" use="optional" />
+		<xsd:attribute name="BoatID" type="xsd:string" use="optional" />
+		<xsd:attribute name="RacePoints" type="xsd:decimal" use="required" />
+		<xsd:attribute name="RaceRank" type="xsd:positiveInteger" use="optional" />
+		<xsd:attribute name="Discard" type="xsd:boolean" use="optional" default="false" />
+		<xsd:attribute name="ScoreCode" type="IFBoatStatus" use="optional"/>
+		<xsd:attribute name="Entry" type="MatchRaceEntry" use="optional" />
+	</xsd:complexType>		
+	<xsd:complexType name="SeriesResult">
+		<xsd:attribute name="TeamID" type="xsd:string" use="required" />
+		<xsd:attribute name="NetPoints" type="xsd:decimal" use="optional" />
+		<xsd:attribute name="TotalPoints" type="xsd:decimal" use="optional" />
+		<xsd:attribute name="Tied" type="xsd:boolean" use="optional" default="false" />
+		<xsd:attribute name="Rank" type="xsd:positiveInteger" use="required" />
+	</xsd:complexType>
+	<xsd:complexType name="TRResult">
+		<xsd:attribute name="RaceID" type="xsd:string" use="required" />
+		<xsd:attribute name="TeamID" type="xsd:string" use="required" />
+		<xsd:attribute name="NetPoints" type="xsd:decimal" use="required" />
+		<xsd:attribute name="TeamPoints" type="xsd:decimal" use="required" />
+		<xsd:attribute name="Rank" type="xsd:decimal" use="required" />
+	</xsd:complexType>	
+
+	<xsd:complexType name="EventRef">
+		<xsd:attribute name="Value" type="xsd:string" use="required" />
+	</xsd:complexType>
+	<xsd:complexType name="RegattaSeriesResult">
+		<xsd:choice minOccurs="1" maxOccurs="unbounded">
+			<xsd:element name="EventID" type="EventRef" />
+		</xsd:choice>
+		<xsd:attribute name="TeamID" type="xsd:string" use="required" />		
+		<xsd:attribute name="TotalPoints" type="xsd:decimal" use="required" />
+		<xsd:attribute name="Rank" type="xsd:positiveInteger" use="required" />
+	</xsd:complexType>
+	<xsd:complexType name="Event">
+		<xsd:choice maxOccurs="unbounded" minOccurs="1">
+			<xsd:element name="Race" type="Race" minOccurs="0" maxOccurs="unbounded" />
+			<xsd:element name="Division" type="Division" maxOccurs="unbounded" minOccurs="0" />
+			<xsd:element name="RegattaSeriesResult" type="RegattaSeriesResult" maxOccurs="unbounded" minOccurs="0" />
+		</xsd:choice>
+		<xsd:attribute name="EventID" type="xsd:string" use="required" />
+		<xsd:attribute name="IFEventID" type="xsd:string" use="optional" />
+		<xsd:attribute name="Type" type="EventType" use="optional" default="Regatta" />
+		<xsd:attribute name="Title" type="xsd:string" use="optional" />
+	</xsd:complexType>	
+	
+	<xsd:complexType name="RegattaResults">
+		<xsd:choice maxOccurs="unbounded" minOccurs="1">
+			<xsd:element name="Person" type="Person" maxOccurs="unbounded" minOccurs="1" />
+			<xsd:element name="Boat" type="Boat" maxOccurs="unbounded" minOccurs="1" />
+			<xsd:element name="Team" type="Team" maxOccurs="unbounded" minOccurs="1" />
+			<xsd:element name="Event" type="Event" maxOccurs="unbounded" minOccurs="1" />			
+		</xsd:choice>
+		<xsd:attribute name="Date" type="xsd:date" use="required" />
+		<xsd:attribute name="Time" type="xsd:time" use="required" />
+		<xsd:attribute name="Type" type="xsd:string" use="required" />
+		<xsd:attribute name="Version" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:element name="SailingXRR" type="RegattaResults">
+	</xsd:element>
+</xsd:schema>

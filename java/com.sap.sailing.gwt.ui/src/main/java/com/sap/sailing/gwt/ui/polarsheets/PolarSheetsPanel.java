@@ -28,7 +28,7 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.WindStepping;
+import com.sap.sailing.domain.common.WindSpeedStepping;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -214,7 +214,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                 String polarSheetName = split[0];
                 int windSpeed = Integer.parseInt(split[1]); 
                 PolarSheetsData currentPolarSheetsData = chartPanel.getPolarSheetsDataMap().get(polarSheetName);
-                WindStepping stepping = currentPolarSheetsData.getStepping();
+                WindSpeedStepping stepping = currentPolarSheetsData.getStepping();
                 PolarSheetsHistogramData histogramData = currentPolarSheetsData.getHistogramDataMap()
                         .get(stepping.getLevelIndexForValue(windSpeed)).get(angle);
                 histogramPanel.setData(histogramData);
@@ -312,7 +312,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         polarSheetsTrackedRacesList.fillRegattas(regattas);
     }
 

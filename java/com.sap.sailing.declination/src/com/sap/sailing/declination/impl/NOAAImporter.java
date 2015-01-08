@@ -71,9 +71,9 @@ public class NOAAImporter {
         String declinationAnnualChangeInMinutes = resultNode.getElementsByTagName("declination_sv").item(0).getTextContent().trim();
         inputStream.close();
         double declinationAsDouble = declination.equals("nan") ? Double.NaN : Double.valueOf(declination);
-        double declinationAnnualChangeInMinutesAsDouble = declinationAnnualChangeInMinutes.equals("nan") ? Double.NaN : Double.valueOf(declinationAnnualChangeInMinutes);
+        double declinationAnnualChangeInDegreesAsDouble = declinationAnnualChangeInMinutes.equals("nan") ? Double.NaN : Double.valueOf(declinationAnnualChangeInMinutes);
         result = new DeclinationRecordImpl(position, timePoint, new DegreeBearingImpl(declinationAsDouble),
-                new DegreeBearingImpl(declinationAnnualChangeInMinutesAsDouble/60.));
+                new DegreeBearingImpl(declinationAnnualChangeInDegreesAsDouble));
         return result;
     }
 

@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
@@ -92,7 +93,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         receivers.add(receiver);
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
                 new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateDefaultRegatta(
-                        EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */null)),
+                        EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */null)),
                         getTracTracEvent().getRaces().iterator().next(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* simulator */null,
                 new DynamicRaceDefinitionSet() {

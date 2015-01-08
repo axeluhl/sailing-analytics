@@ -16,6 +16,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
  * @author Fredrik Teschke
  *
  */
-public interface Revokable extends RaceLogEvent {
+public interface Revokable {
 
 }

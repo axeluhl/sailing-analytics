@@ -9,7 +9,7 @@ public interface PolarFix {
 
     public abstract Speed getWindSpeed();
 
-    public abstract double getAngleToWind();
+    public abstract double getTrueWindAngleDeg();
 
     public abstract String getGaugeIdString();
 

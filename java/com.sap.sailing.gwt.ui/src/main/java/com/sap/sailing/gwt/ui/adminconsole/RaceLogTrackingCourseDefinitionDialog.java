@@ -144,7 +144,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
     public RaceLogTrackingCourseDefinitionDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final String leaderboardName, final String raceColumnName, final String fleetName) {
         super(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName);
-
+        setupUi();
         courseManagementWidget.refresh();
     }
     

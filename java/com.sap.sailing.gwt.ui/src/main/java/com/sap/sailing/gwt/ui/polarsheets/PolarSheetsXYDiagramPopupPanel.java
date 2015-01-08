@@ -16,7 +16,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
 
@@ -44,34 +46,40 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
         });
         containerPanel.add(closeButton);
         
-        Point[] pointsForUpwindStarboardAverageAngle = toPointArray(result.getPointsForUpwindStarboardAverageAngle());
-        Series angleSeries = chart.createSeries();
-        angleSeries.setPoints(pointsForUpwindStarboardAverageAngle);
-        //chart.addSeries(angleSeries);
         
-        Point[] pointsForUpwindStarboardAverageSpeed = toPointArray(result.getPointsForUpwindStarboardAverageSpeed());
-        Series speedSeries = chart.createSeries();
-        speedSeries.setName("Upwind Starboard Speed - LinearRegressions");
-        speedSeries.setPoints(pointsForUpwindStarboardAverageSpeed);
-        chart.addSeries(speedSeries);
+        addSpeedAndConfidenceSeriesForTackAndLegType(result, Tack.STARBOARD, LegType.UPWIND, true);
+        addSpeedAndConfidenceSeriesForTackAndLegType(result, Tack.PORT, LegType.UPWIND, false);
+        addSpeedAndConfidenceSeriesForTackAndLegType(result, Tack.STARBOARD, LegType.DOWNWIND, false);
+        addSpeedAndConfidenceSeriesForTackAndLegType(result, Tack.PORT, LegType.DOWNWIND, false);
         
-        Point[] pointsForUpwindStarboardAverageSpeedMovingAverage = toPointArray(result.getPointsForUpwindStarboardAverageSpeedMovingAverage());
+        chart.redraw();
+        
+        
+    }
+
+    private void addSpeedAndConfidenceSeriesForTackAndLegType(PolarSheetsXYDiagramData result, Tack tack, LegType legType, boolean showByDefault) {
+        Point[] pointsForUpwindStarboardAverageSpeedMovingAverage = toPointArray(result.getPointsForAverageSpeedMovingAverage(tack, legType));
         Series speedSeriesMovingAverage = chart.createSeries();
-        speedSeriesMovingAverage.setName("Upwind Starboard Speed - MovingAverage");
+        speedSeriesMovingAverage.setName(tack + " " + legType + " Speed - MovingAverage");
         speedSeriesMovingAverage.setPoints(pointsForUpwindStarboardAverageSpeedMovingAverage);
-        chart.addSeries(speedSeriesMovingAverage);
+        chart.addSeries(speedSeriesMovingAverage, false, false);
         
-        Point[] pointsForUpwindStarboardAverageConfidence = toPointArray(result.getPointsForUpwindStarboardAverageConfidence());
-        Series confidenceSeriesMovingAverage = chart
+        Point[] pointsForUpwindStarboardAverageConfidence = toPointArray(result.getPointsForAverageConfidence(tack, legType));
+        Series confidenceSeries = chart
                 .createSeries()
                 .setYAxis(1)
                 .setType(Series.Type.SPLINE)
                 .setPlotOptions(
                         new SplinePlotOptions().setColor("#AA4643").setMarker(new Marker().setEnabled(false))
                                 .setDashStyle(PlotLine.DashStyle.SHORT_DOT));
-        confidenceSeriesMovingAverage.setName("Upwind Starboard Confidence");
-        confidenceSeriesMovingAverage.setPoints(pointsForUpwindStarboardAverageConfidence);
-        chart.addSeries(confidenceSeriesMovingAverage);
+        confidenceSeries.setName(tack + " " + legType + " Confidence");
+        confidenceSeries.setPoints(pointsForUpwindStarboardAverageConfidence);
+        chart.addSeries(confidenceSeries, false, false);
+        
+        if (!showByDefault) {
+            speedSeriesMovingAverage.setVisible(false, false);
+            confidenceSeries.setVisible(false, false);
+        }
     }
     
     private Point[] toPointArray(List<Pair<Double, Double>> pointsForUpwindStarboardAverageAngle) {

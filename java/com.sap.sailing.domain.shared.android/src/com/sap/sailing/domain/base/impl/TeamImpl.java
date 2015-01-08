@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,8 +19,9 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
     private final DynamicPerson coach;
     private final NationalityChangeListener personNationalityChangeForwarder;
     private transient Set<NationalityChangeListener> listeners;
-    
-    public TeamImpl(String name, Iterable<? extends DynamicPerson> sailors, DynamicPerson coach) {
+	private URI image;
+
+	public TeamImpl(String name, Iterable<? extends DynamicPerson> sailors, DynamicPerson coach) {
         super(name);
         listeners = new HashSet<NationalityChangeListener>();
         this.sailors = sailors;
@@ -37,6 +39,12 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
         };
         setTransitiveListeners();
     }
+	
+	
+	public TeamImpl(String name, Iterable<? extends DynamicPerson> sailors, DynamicPerson coach, URI image) {
+		this(name, sailors, coach);
+		this.image = image;
+	}
 
     /**
      * The listeners on {@link DynamicPerson} are transient. Our {@link #personNationalityChangeForwarder} needs to
@@ -119,5 +127,15 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
             }
         }
     }
+
+	@Override
+	public URI getImage() {
+		return image;
+	}
+	
+    
+    public void setImage(URI teamImage) {
+		this.image = teamImage;
+	}
     
 }
