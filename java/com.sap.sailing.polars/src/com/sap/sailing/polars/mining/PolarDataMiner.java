@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 import com.sap.sailing.polars.mining.IncrementalRegressionProcessor.SpeedWithConfidenceAndDataCount;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
