@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -31,8 +30,8 @@ import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.polars.mining.IncrementalRegressionProcessor.SpeedWithConfidenceAndDataCount;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
+import com.sap.sailing.polars.mining.IncrementalRegressionProcessor.SpeedWithConfidenceAndDataCount;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -43,7 +42,7 @@ import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestin
 
 public class PolarDataMiner implements PolarSheetAnalyzer {
 
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+    private static final int THREAD_POOL_SIZE = Math.min(Runtime.getRuntime().availableProcessors(), 3);
     private static final ThreadPoolExecutor executor = createExecutor();
     private final PolarSheetGenerationSettings backendPolarSheetGenerationSettings;
 
@@ -123,10 +122,10 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
             throws NotEnoughDataHasBeenAddedException {
         return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle).getSpeedWithConfidence();
     }
-
-    public SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround,
-            LegType legType, Tack tack) {
-        return incrementalRegressionProcessor.estimateTrueWindSpeedAndAngle(boatClass, speedOverGround, legType, tack);
+    
+    public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
+            Speed speedOverGround, LegType legType, Tack tack) {
+        return incrementalRegressionProcessor.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
     }
 
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
@@ -196,7 +195,7 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         return polarSheetsHistogramDataImpl;
     }
 
-    public Set<BoatClassMasterdata> getAvailableBoatClasses() {
+    public Set<BoatClass> getAvailableBoatClasses() {
         return incrementalRegressionProcessor.getAvailableBoatClasses();
     }
 

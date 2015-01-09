@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -106,7 +105,7 @@ public interface PolarDataService {
      * @return The {@link BoatClass}es for which there are polar sheets available via
      *         {@link PolarDataService#getPolarSheetForBoatClass(BoatClass)}
      */
-    Set<BoatClassMasterdata> getAllBoatClassesWithPolarSheetsAvailable();
+    Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable();
 
     /**
      * To be called in an appropriate listener. 
@@ -129,9 +128,17 @@ public interface PolarDataService {
     int[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
 
     /**
-     * From a boat's speed over ground and assuming values for <code>boatClass</code>, the <code>tack</code>
-     * the boat is currently sailing on, and the <code>legType</code>, this method estimates the
-     * true wind speed at which the boat may most likely have been sailing under these conditions.
+     * From a boat's speed over ground and assuming values for <code>boatClass</code>, the <code>tack</code> the boat is
+     * currently sailing on, and the <code>legType</code>, this method estimates the true wind speed candidates at which
+     * the boat may most likely have been sailing under these conditions.
+     * 
+     * The confidence of the returned candidates is derived from the average confidence of the underlying fixes,
+     * distance measures and the amount of underlying data.
+     * 
+     * Multiple candidates are possible, because we cannot guarantee a reversible function (boatspeed over windspeed).
+     * 
+     * @return set of wind candidates with confidence, empty set if no were found (due to insufficient underlying data)
      */
-    SpeedWithBearingWithConfidence<Void> getAverageTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround, LegType legType, Tack tack);
+    Set<SpeedWithBearingWithConfidence<Void>> getAverageTrueWindSpeedAndAngleCandidates(BoatClass boatClass, Speed speedOverGround, LegType legType, Tack tack);
+
 }

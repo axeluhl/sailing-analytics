@@ -1,7 +1,9 @@
 package com.sap.sailing.polars.mining;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -12,7 +14,6 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -20,11 +21,13 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 import com.sap.sailing.polars.regression.BoatSpeedEstimator;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.polars.regression.impl.WindSpeedAndAngleEstimator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
@@ -44,7 +47,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
 
     private final ClusterGroup<Speed> speedClusterGroup;
 
-    private final Set<BoatClassMasterdata> availableBoatClasses = new HashSet<>();
+    private final Set<BoatClass> availableBoatClasses = new HashSet<>();
 
     private final Map<Pair<LegType, Tack>, AverageAngleContainer> averageAngleContainers;
 
@@ -68,7 +71,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             if (boatSpeedEstimator == null) {
                 boatSpeedEstimator = new BoatSpeedEstimator();
                 boatSpeedEstimators.put(key, boatSpeedEstimator);
-                availableBoatClasses.add(element.getDataEntry().getBoatClassMasterData());
+                availableBoatClasses.add(element.getDataEntry().getBoatClass());
             }
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
@@ -106,7 +109,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             legType = LegType.UPWIND;
             tack = Tack.STARBOARD;
         }
-        averageAngleContainers.get(new Pair<>(legType, tack)).addFix(element.getDataEntry().getBoatClassMasterData(),
+        averageAngleContainers.get(new Pair<>(legType, tack)).addFix(element.getDataEntry().getBoatClass(),
                 windSpeed.getObject(), roundedAngleDeg);
     }
 
@@ -151,8 +154,8 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             }
 
             @Override
-            public BoatClassMasterdata getBoatClassMasterData() {
-                return BoatClassMasterdata.resolveBoatClass(boatClass.getName());
+            public BoatClass getBoatClass() {
+                return boatClass;
             }
 
             @Override
@@ -177,13 +180,33 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         double confidence = boatSpeedEstimator.getConfidence();
         return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(speedWithoutConfidence, confidence, null), dataCount);
     }
-
-    SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass,
+    
+    Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
-        AverageAngleContainer averageAngleContainer = averageAngleContainers.get(new Pair<>(legType, tack));
-        return new SpeedWithBearingWithConfidenceImpl<Void>(
-                averageAngleContainer.getAverageTrueWindSpeedAndAngle(BoatClassMasterdata.resolveBoatClass(boatClass.getName()), speedOverGround),
-                /* confidence */ 0.5, /* relative to */ null); // TODO how to determine a good measure for the confidence?
+        List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = obtainPolarSamplingPoints(
+                boatClass, legType, tack);
+        
+        WindSpeedAndAngleEstimator windSpeedAndAngleEstimator = new WindSpeedAndAngleEstimator(averageBoatSpeedAndCourseForWindSpeed);
+        return windSpeedAndAngleEstimator.getAverageTrueWindSpeedAndAngleCandidates(speedOverGround);
+    }
+
+    private List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> obtainPolarSamplingPoints(BoatClass boatClass,
+            LegType legType, Tack tack) {
+        List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = new ArrayList<>();
+        for (int i = 0; i < 60; i++) {
+            Speed windSpeed = new KnotSpeedImpl(i * 0.5);
+            SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround;
+            try {
+                averageSpeedAndCourseOverGround = getAverageSpeedAndCourseOverGround(
+                        boatClass, windSpeed, legType, tack);
+                averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(windSpeed,
+                        averageSpeedAndCourseOverGround));
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                // ignore this, since there is not enough data for this windspeed.
+            }
+            
+        }
+        return averageBoatSpeedAndCourseForWindSpeed;
     }
 
     @Override
@@ -192,7 +215,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
 
-    public Set<BoatClassMasterdata> getAvailableBoatClasses() {
+    public Set<BoatClass> getAvailableBoatClasses() {
         return availableBoatClasses;
     }
 
@@ -212,7 +235,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
             Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
         Double averageAngle = averageAngleContainers.get(new Pair<>(legType, tack)).getAverageAngleDeg(
-                BoatClassMasterdata.resolveBoatClass(boatClass.getName()), windSpeed);
+                boatClass, windSpeed);
         return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
     }
 
