@@ -6,9 +6,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
@@ -21,6 +23,8 @@ public class SearchResultItem extends Composite {
     }
     
     private static SearchResultUiBinder uiBinder = GWT.create(SearchResultUiBinder.class);
+
+    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
     @UiField Anchor regattaLink;
     @UiField SpanElement resultRegattaDetails;
@@ -62,13 +66,18 @@ public class SearchResultItem extends Composite {
 
     @UiHandler("regattaLink")
     public void goToRegatta(ClickEvent e) {
-        placeNavigator.goToPlace(regattaNavigation);
-        e.preventDefault();
+        handleClickEvent(e, regattaNavigation);
     }
 
     @UiHandler("eventOverviewLink")
     public void goToEventPlace(ClickEvent e) {
-        placeNavigator.goToPlace(eventNavigation);
-        e.preventDefault();
+        handleClickEvent(e, eventNavigation);
+    }
+    
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            placeNavigator.goToPlace(placeNavigation);
+            e.preventDefault();
+         }
     }
 }
