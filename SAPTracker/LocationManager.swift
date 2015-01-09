@@ -16,7 +16,6 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         static let trackingStarted = "trackingStarted"
         static let trackingStopped = "trackingStopped"
         static let newLocation = "newLocation"
-        static let newHeading = "newHeading"
         static let locationManagerFailed = "locationManagerFailed"
     }
     
@@ -68,39 +67,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         let notification = NSNotification(name: NotificationType.newLocation, object: self, userInfo:LocationManager.dictionaryForLocation(location))
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
-    
-    func locationManager(manager: CLLocationManager!, didUpdateHeading newHeading: CLHeading!) {
-        let notification = NSNotification(name: NotificationType.newHeading, object: self, userInfo:LocationManager.dictionaryForHeading(newHeading))
-        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
-    }
 
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
         let notification = NSNotification(name: NotificationType.locationManagerFailed, object: self, userInfo: ["error": error])
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
-    }
-    
-    /* User preference for heading type. */
-    private let HeadingDefaultsKey = "heading"
-    
-    enum Heading: Int {
-        case Magnetic = 1, True
-    }
-    
-    var headingPreference: Int {
-        get {
-            let preferences = NSUserDefaults.standardUserDefaults()
-            var heading = preferences.integerForKey(HeadingDefaultsKey)
-            if heading == 0 {
-                heading = Heading.Magnetic.rawValue
-                self.headingPreference = heading
-            }
-            return heading
-        }
-        set {
-            let preferences = NSUserDefaults.standardUserDefaults()
-            preferences.setInteger(newValue, forKey: HeadingDefaultsKey)
-            preferences.synchronize()
-        }
     }
 
     // MARK: -
@@ -113,17 +83,6 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             "speed": location.speed,
             "course": location.course,
             "horizontalAccuracy": location.horizontalAccuracy,
-        ]
-    }
-    
-    /* Create dictionary for heading. */
-    class func dictionaryForHeading(heading: CLHeading) -> [String: AnyObject] {
-        return [
-            "timestamp": heading.timestamp,
-            "magneticHeading": heading.magneticHeading,
-            "trueHeading": heading.trueHeading,
-            "description": heading.description,
-            "headingAccuracy": heading.headingAccuracy,
         ]
     }
 }
