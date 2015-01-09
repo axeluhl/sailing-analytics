@@ -1135,4 +1135,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String successfullyCreatedRegattas();
     String active();
     String errorTryingToRegisterRacesForTracking(String raceNames, String message);
+    String errorDeterminingPolarAvailability(String raceName, String message);
     }
