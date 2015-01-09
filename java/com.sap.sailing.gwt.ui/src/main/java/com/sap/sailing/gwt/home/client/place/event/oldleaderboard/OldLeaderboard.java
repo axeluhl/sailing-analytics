@@ -52,6 +52,9 @@ public class OldLeaderboard extends Composite {
         OldLeaderboardResources.INSTANCE.css().ensureInjected();
         
         initWidget(uiBinder.createAndBindUi(this));
+        
+        settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
+        autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
     }
     
     @UiHandler("autoRefreshAnchor")
