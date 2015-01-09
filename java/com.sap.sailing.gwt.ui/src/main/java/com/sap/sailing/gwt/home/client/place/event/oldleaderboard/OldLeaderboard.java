@@ -62,7 +62,7 @@ public class OldLeaderboard extends Composite {
         if(autoRefreshTimer != null) {
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
-                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#f0ab00");
+                autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
             } else {
                 // playing the standalone leaderboard means putting it into live mode
                 autoRefreshTimer.setPlayMode(PlayModes.Live);
