@@ -20,6 +20,7 @@
           <a href="mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback" target="_blank" class="{local_res.css.sitefooter_links_link}">
               <ui:text from='{i18n.footerFeedback}'/>
           </a>
+          <g:Anchor ui:field="releaseNotesLink" styleName="{local_res.css.sitefooter_links_link}" text="{i18n.whatsNew}" />
        </div>
     </div>
     <div class="{res.mediaCss.small12} {res.mediaCss.medium4} {res.mediaCss.columns} {local_res.css.sitefooter_language}">

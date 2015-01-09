@@ -23,6 +23,8 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartActivityProxy;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewActivityProxy;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 
 public class ApplicationActivityMapper implements ActivityMapper {
     private final ApplicationClientFactory clientFactory;
@@ -48,6 +50,8 @@ public class ApplicationActivityMapper implements ActivityMapper {
             return new SponsoringActivityProxy((SponsoringPlace) place, clientFactory);
         } else if (place instanceof SolutionsPlace) {
             return new SolutionsActivityProxy((SolutionsPlace) place, clientFactory);
+        } else if (place instanceof WhatsNewPlace) {
+            return new WhatsNewActivityProxy((WhatsNewPlace) place, clientFactory);
         } else if (place instanceof RegattaPlace) {
             return new RegattaActivityProxy((RegattaPlace) place, clientFactory);
         } else if (place instanceof SeriesPlace) {

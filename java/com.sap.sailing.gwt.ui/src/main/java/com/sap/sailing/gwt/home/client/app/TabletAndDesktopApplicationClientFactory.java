@@ -28,6 +28,9 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsoringView;
 import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.client.place.whatsnew.TabletAndDesktopWhatsNewView;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -80,7 +83,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     public SolutionsView createSolutionsView(SolutionsNavigationTabs navigationTab) {
         return new TabletAndDesktopSolutionsView(navigationTab, getHomePlacesNavigator());
     }
-
+    
     @Override
     public RegattaAnalyticsView createRegattaAnalyticsView(EventDTO event, String leaderboardName, RegattaNavigationTabs navigationTab, Timer timerForClientServerOffset) {
         return new TabletAndDesktopRegattaView(event, leaderboardName, navigationTab, timerForClientServerOffset, getHomePlacesNavigator());
@@ -94,5 +97,10 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public SearchResultView createSearchResultView() {
         return new TabletAndDesktopSearchResultView(getHomePlacesNavigator());
+    }
+
+    @Override
+    public WhatsNewView createWhatsNewView(WhatsNewNavigationTabs navigationTab) {
+        return new TabletAndDesktopWhatsNewView(navigationTab, getHomePlacesNavigator());
     }
 }
