@@ -18,7 +18,7 @@ class LeaderBoardViewController: UIViewController, UIWebViewDelegate, UIAlertVie
         let serverUrl = DataManager.sharedManager.selectedEvent!.serverUrl
         let eventId = DataManager.sharedManager.selectedEvent!.eventId
         let leaderBoardName = DataManager.sharedManager.selectedEvent!.leaderBoard!.name.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
-        let url = "\(serverUrl)/gwt/Home.html#LeaderboardPlace:eventId=\(eventId)&leaderboardName=\(leaderBoardName)&showRaceDetails=true&showSettings=true"
+        let url = "\(serverUrl)/gwt/Leaderboard.html?name=\(leaderBoardName)&showRaceDetails=true&embedded=true"
         webView!.loadRequest(NSURLRequest(URL: NSURL(string: url)!))
     }
     
