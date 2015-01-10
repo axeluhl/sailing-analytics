@@ -144,11 +144,17 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
 
     private void showNotification() {
         CharSequence text = getText(R.string.tracker_started);
-        Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
         Intent i = new Intent(this, LaunchActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
-        notification.setLatestEventInfo(this, getText(R.string.app_name), text, pi);
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(R.drawable.icon)
+                .setTicker(text)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(getText(R.string.app_name))
+                .setContentText(text)
+                .setContentIntent(pi)
+                .build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
         startForeground(NOTIFICATION_ID, notification);
     }
