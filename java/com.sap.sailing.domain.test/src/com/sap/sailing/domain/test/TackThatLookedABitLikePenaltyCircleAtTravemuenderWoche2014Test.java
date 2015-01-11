@@ -39,8 +39,8 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
  * @author Axel Uhl (D043530)
  *
  */
-public class UndetectedPenaltyCircleAtTravemuenderWoche2014Test extends AbstractManeuverDetectionTestCase {
-    public UndetectedPenaltyCircleAtTravemuenderWoche2014Test() throws MalformedURLException, URISyntaxException {
+public class TackThatLookedABitLikePenaltyCircleAtTravemuenderWoche2014Test extends AbstractManeuverDetectionTestCase {
+    public TackThatLookedABitLikePenaltyCircleAtTravemuenderWoche2014Test() throws MalformedURLException, URISyntaxException {
         super();
     }
 
@@ -69,10 +69,10 @@ public class UndetectedPenaltyCircleAtTravemuenderWoche2014Test extends Abstract
      */
     @Test
     public void testDoublePenaltyForPhilippAndTobiasAndMaximAndDharmender() throws ParseException, NoWindException {
-        assertPenalty("Truswell/Pascoe", "07/25/2014-13:08:00", "07/25/2014-13:09:00", "07/25/2014-13:08:10");
+        assertTack("Truswell/Pascoe", "07/25/2014-13:08:00", "07/25/2014-13:09:00", "07/25/2014-13:08:10");
     }
 
-    private void assertPenalty(String competitorName, final String from, final String to,
+    private void assertTack(String competitorName, final String from, final String to,
             final String penaltyTimePoint) throws ParseException, NoWindException {
         Competitor competitor = getCompetitorByName(competitorName);
         Date fromDate = dateFormat.parse(from);
@@ -84,11 +84,11 @@ public class UndetectedPenaltyCircleAtTravemuenderWoche2014Test extends Abstract
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
         for (Maneuver maneuver : maneuvers) {
-            if (maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
+            if (maneuver.getType() == ManeuverType.TACK) {
                 assertTrue(Math.abs(maneuver.getDirectionChangeInDegrees()) < 700); // the second penalty has to count for its own
             }
         }
-        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, new MillisecondsTimePoint(dateFormat.parse(penaltyTimePoint)), 5000);
-        assertAllManeuversOfTypesDetected(Collections.singletonList(ManeuverType.PENALTY_CIRCLE), maneuversInvalid);
+        assertManeuver(maneuvers, ManeuverType.TACK, new MillisecondsTimePoint(dateFormat.parse(penaltyTimePoint)), 5000);
+        assertAllManeuversOfTypesDetected(Collections.singletonList(ManeuverType.TACK), maneuversInvalid);
     }
 }
