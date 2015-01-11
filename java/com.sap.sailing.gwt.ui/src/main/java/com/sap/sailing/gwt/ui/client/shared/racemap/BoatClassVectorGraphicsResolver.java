@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.Extreme40VectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.LaserVectorGraphics;
@@ -14,42 +15,34 @@ import com.sap.sailing.gwt.ui.shared.racemap._49erVectorGraphics;
  * @author Frank Mittag (C5163874)
  */
 public class BoatClassVectorGraphicsResolver {
-    private static Map<String, BoatClassVectorGraphics> boatVectorGraphicsMap;
-    private static Map<String, BoatClassVectorGraphics> compatibleBoatVectorGraphicsMap;
+    private static Map<BoatClassMasterdata, BoatClassVectorGraphics> compatibleBoatVectorGraphicsMap;
     private static BoatClassVectorGraphics defaultBoatVectorGraphics;
 	
     static {
-    	boatVectorGraphicsMap = new HashMap<String, BoatClassVectorGraphics>();
-    	compatibleBoatVectorGraphicsMap = new HashMap<String, BoatClassVectorGraphics>();
+    	compatibleBoatVectorGraphicsMap = new HashMap<>();
     	
-    	BoatClassVectorGraphics laser = new LaserVectorGraphics("470", "470er");
-    	BoatClassVectorGraphics _49er = new _49erVectorGraphics("49erFX", "49FX", "29er");
-    	BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics("Extreme", "D35");
-        BoatClassVectorGraphics smallMultihull = new SmallMultihullVectorGraphics("Nacra 17", "Formula 16", "Formula 18", 
-                "Hobie Wild Cat", "Hobie Tiger", "A-Catamaran", "Tornado");
-    	
-    	defaultBoatVectorGraphics = laser;
-    	boatVectorGraphicsMap.put(laser.getMainBoatClassName(), laser);
-    	boatVectorGraphicsMap.put(_49er.getMainBoatClassName(), _49er);
-    	boatVectorGraphicsMap.put(extreme40.getMainBoatClassName(), extreme40);
-        boatVectorGraphicsMap.put(smallMultihull.getMainBoatClassName(), smallMultihull);
+    	BoatClassVectorGraphics laser = new LaserVectorGraphics(BoatClassMasterdata.LASER_INT, BoatClassMasterdata.LASER_RADIAL);
+    	BoatClassVectorGraphics _49er = new _49erVectorGraphics(BoatClassMasterdata._49ER, BoatClassMasterdata._49ERFX, BoatClassMasterdata._29ER);
+    	BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics(BoatClassMasterdata.EXTREME_40, BoatClassMasterdata.D_35);
+        BoatClassVectorGraphics smallMultihull = new SmallMultihullVectorGraphics(BoatClassMasterdata.NACRA_17,
+                BoatClassMasterdata.F_16, BoatClassMasterdata.F_18, BoatClassMasterdata.HOBIE_WILD_CAT,
+                BoatClassMasterdata.HOBIE_TIGER, BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO);
+
+        defaultBoatVectorGraphics = laser; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.
+        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull }) {
+            for (BoatClassMasterdata b : g.getCompatibleBoatClasses()) {
+                compatibleBoatVectorGraphicsMap.put(b, g);
+            }
+        }
     }
 	
     public static BoatClassVectorGraphics resolveBoatClassVectorGraphics(String boatClassName) {
-        BoatClassVectorGraphics result = defaultBoatVectorGraphics;
-        if (boatVectorGraphicsMap.containsKey(boatClassName)) {
-            result = boatVectorGraphicsMap.get(boatClassName);
-        } else if (compatibleBoatVectorGraphicsMap.containsKey(boatClassName)) {
+        BoatClassMasterdata resolvedBoatClass = BoatClassMasterdata.resolveBoatClass(boatClassName);
+        final BoatClassVectorGraphics result;
+        if (resolvedBoatClass != null && compatibleBoatVectorGraphicsMap.containsKey(boatClassName)) {
             result = compatibleBoatVectorGraphicsMap.get(boatClassName);
         } else {
-            // now try to find compatible boat class images
-            for (BoatClassVectorGraphics boatClassImageData : boatVectorGraphicsMap.values()) {
-                if (boatClassImageData.isBoatClassNameCompatible(boatClassName)) {
-                    result = boatClassImageData;
-                    compatibleBoatVectorGraphicsMap.put(boatClassName, boatClassImageData);
-                    break;
-                }
-            }
+            result = defaultBoatVectorGraphics;
         }
         return result;
     }

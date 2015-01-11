@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
@@ -33,19 +35,21 @@ public abstract class BoatClassVectorGraphics {
     private final double hullLengthInPx;
     private final double beamInPx;
     
-    private final String mainBoatClassName;
-    private final List<String> compatibleBoatClassNames;
+    private final Set<BoatClassMasterdata> compatibleBoatClasses;
     
-    BoatClassVectorGraphics(String mainBoatClassName, double boatOverallLengthInPx, double boatBeamInPx, double boatHullLengthInPx, 
-            String...compatibleBoatClassNames) {
-        this.mainBoatClassName = mainBoatClassName;
+    BoatClassVectorGraphics(double boatOverallLengthInPx, double boatBeamInPx, double boatHullLengthInPx, 
+            BoatClassMasterdata... compatibleBoatClasses) {
         this.overallLengthInPx = boatOverallLengthInPx;
         this.beamInPx = boatBeamInPx;
         this.hullLengthInPx = boatHullLengthInPx;
-        this.compatibleBoatClassNames = new ArrayList<String>();
-        for (String compatibleBoatClass : compatibleBoatClassNames) {
-            this.compatibleBoatClassNames.add(compatibleBoatClass);
+        this.compatibleBoatClasses = new HashSet<>();
+        for (BoatClassMasterdata compatibleBoatClass : compatibleBoatClasses) {
+            this.compatibleBoatClasses.add(compatibleBoatClass);
         }
+    }
+    
+    public Set<BoatClassMasterdata> getCompatibleBoatClasses() {
+        return Collections.unmodifiableSet(compatibleBoatClasses);
     }
 
     protected abstract void drawBoat(Context2d ctx, boolean isSelected, String color);
@@ -128,31 +132,8 @@ public abstract class BoatClassVectorGraphics {
         return beamInPx;
     }
 
-    public boolean isBoatClassNameCompatible(String boatClass) {
-        boolean result = false;
-        // remove all white space characters
-        String boatClassToCheck = boatClass.replaceAll("\\s","");
-        // remove all '-' characters
-        boatClassToCheck = boatClass.replaceAll("-","");
-        if (mainBoatClassName.equalsIgnoreCase(boatClassToCheck)) {
-            result = true;
-        } else {
-            for (String compatibleName : compatibleBoatClassNames) {
-                if (compatibleName.equalsIgnoreCase(boatClassToCheck)) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    public String getMainBoatClassName() {
-        return mainBoatClassName;
-    }
-
-    public List<String> getCompatibleBoatClassNames() {
-        return compatibleBoatClassNames;
+    public boolean isBoatClassNameCompatible(String boatClassName) {
+        return compatibleBoatClasses.contains(BoatClassMasterdata.resolveBoatClass(boatClassName));
     }
 
     public double getMinHullLengthInPx() {
