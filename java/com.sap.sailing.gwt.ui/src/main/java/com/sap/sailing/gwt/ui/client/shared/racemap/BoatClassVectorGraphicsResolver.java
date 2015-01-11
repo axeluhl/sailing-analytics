@@ -39,8 +39,8 @@ public class BoatClassVectorGraphicsResolver {
     public static BoatClassVectorGraphics resolveBoatClassVectorGraphics(String boatClassName) {
         BoatClassMasterdata resolvedBoatClass = BoatClassMasterdata.resolveBoatClass(boatClassName);
         final BoatClassVectorGraphics result;
-        if (resolvedBoatClass != null && compatibleBoatVectorGraphicsMap.containsKey(boatClassName)) {
-            result = compatibleBoatVectorGraphicsMap.get(boatClassName);
+        if (resolvedBoatClass != null && compatibleBoatVectorGraphicsMap.containsKey(resolvedBoatClass)) {
+            result = compatibleBoatVectorGraphicsMap.get(resolvedBoatClass);
         } else {
             result = defaultBoatVectorGraphics;
         }
