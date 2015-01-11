@@ -37,14 +37,14 @@ public class BoatClassVectorGraphicsResolver {
 	
     public static BoatClassVectorGraphics resolveBoatClassVectorGraphics(String boatClassName) {
         BoatClassVectorGraphics result = defaultBoatVectorGraphics;
-        if(boatVectorGraphicsMap.containsKey(boatClassName)) {
+        if (boatVectorGraphicsMap.containsKey(boatClassName)) {
             result = boatVectorGraphicsMap.get(boatClassName);
         } else if (compatibleBoatVectorGraphicsMap.containsKey(boatClassName)) {
             result = compatibleBoatVectorGraphicsMap.get(boatClassName);
         } else {
             // now try to find compatible boat class images
-            for(BoatClassVectorGraphics boatClassImageData: boatVectorGraphicsMap.values()) {
-                if(boatClassImageData.isBoatClassNameCompatible(boatClassName)) {
+            for (BoatClassVectorGraphics boatClassImageData : boatVectorGraphicsMap.values()) {
+                if (boatClassImageData.isBoatClassNameCompatible(boatClassName)) {
                     result = boatClassImageData;
                     compatibleBoatVectorGraphicsMap.put(boatClassName, boatClassImageData);
                     break;

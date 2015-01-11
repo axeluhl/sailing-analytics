@@ -13,7 +13,11 @@ import com.sap.sailing.domain.common.Tack;
  * The drawing of the graphics is implemented as a list of graphics command on the Context2D,
  * We created the drawing commands not manually but used a SVG graphics with a well defined scale as a basis in combination
  * with a tool which translates this SVG graphics into the list of drawing commands. 
- * See http://wiki.sapsailing.com/wiki/boatgraphicssvg for further details.
+ * See http://wiki.sapsailing.com/wiki/boatgraphicssvg for further details.<p>
+ * 
+ * The {@link #drawBoat(Context2d, boolean, String)} implementations are expected to draw a pixel
+ * size such that one pixel corresponds to one centimeter in reality. This assumption will be
+ * used when scaling the boats according to hull length and zoom factor.
  * 
  * @author Frank
  *
@@ -32,18 +36,14 @@ public abstract class BoatClassVectorGraphics {
     private final String mainBoatClassName;
     private final List<String> compatibleBoatClassNames;
     
-    BoatClassVectorGraphics(String mainBoatClassName, double overallLengthInPx, double beamInPx, double hullLengthInPx) {
-        this.mainBoatClassName = mainBoatClassName;
-        this.overallLengthInPx = overallLengthInPx;
-        this.beamInPx = beamInPx;
-        this.hullLengthInPx = hullLengthInPx;
-        this.compatibleBoatClassNames = new ArrayList<String>();
-    }
-    
-    BoatClassVectorGraphics(String mainBoatClassName, double boatOverallLengthInMeters, double boatBeamInMeters, double boatHullLengthInMeters, 
+    BoatClassVectorGraphics(String mainBoatClassName, double boatOverallLengthInPx, double boatBeamInPx, double boatHullLengthInPx, 
             String...compatibleBoatClassNames) {
-        this(mainBoatClassName, boatOverallLengthInMeters, boatBeamInMeters, boatHullLengthInMeters);
-        for(String compatibleBoatClass: compatibleBoatClassNames) {
+        this.mainBoatClassName = mainBoatClassName;
+        this.overallLengthInPx = boatOverallLengthInPx;
+        this.beamInPx = boatBeamInPx;
+        this.hullLengthInPx = boatHullLengthInPx;
+        this.compatibleBoatClassNames = new ArrayList<String>();
+        for (String compatibleBoatClass : compatibleBoatClassNames) {
             this.compatibleBoatClassNames.add(compatibleBoatClass);
         }
     }
@@ -134,12 +134,11 @@ public abstract class BoatClassVectorGraphics {
         String boatClassToCheck = boatClass.replaceAll("\\s","");
         // remove all '-' characters
         boatClassToCheck = boatClass.replaceAll("-","");
-        
-        if(mainBoatClassName.equalsIgnoreCase(boatClassToCheck)) {
+        if (mainBoatClassName.equalsIgnoreCase(boatClassToCheck)) {
             result = true;
         } else {
-            for(String compatibleName: compatibleBoatClassNames) {
-                if(compatibleName.equalsIgnoreCase(boatClassToCheck)) {
+            for (String compatibleName : compatibleBoatClassNames) {
+                if (compatibleName.equalsIgnoreCase(boatClassToCheck)) {
                     result = true;
                     break;
                 }
