@@ -47,9 +47,8 @@
             <scope>compile</scope>
         </dependency>
 
-		<!-- needed on remote repository -->
         <dependency>
-            <groupId>android</groupId>
+            <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
         </dependency>
 

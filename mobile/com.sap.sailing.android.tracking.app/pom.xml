@@ -21,9 +21,8 @@
     </properties>
 
     <dependencies>
-        <!-- needed on remote repository -->
         <dependency>
-            <groupId>android</groupId>
+            <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
         </dependency>
 
@@ -75,7 +74,7 @@
                     <undeployBeforeDeploy>true</undeployBeforeDeploy>
                     <extractDuplicates>true</extractDuplicates>
                     <sdk>
-                        <platform>13</platform>
+                        <platform>19</platform>
                     </sdk>
                     <release>true</release>
                     <proguard>
