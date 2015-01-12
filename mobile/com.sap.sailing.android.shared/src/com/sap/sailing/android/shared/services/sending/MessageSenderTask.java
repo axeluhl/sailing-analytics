@@ -1,4 +1,4 @@
-package com.sap.sailing.android.tracking.app.services.sending;
+package com.sap.sailing.android.shared.services.sending;
 
 import java.io.IOException;
 import java.io.InputStream;
