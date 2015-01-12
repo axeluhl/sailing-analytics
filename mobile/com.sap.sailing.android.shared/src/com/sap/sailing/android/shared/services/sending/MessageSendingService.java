@@ -1,4 +1,4 @@
-package com.sap.sailing.android.tracking.app.services.sending;
+package com.sap.sailing.android.shared.services.sending;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -24,9 +24,9 @@ import android.os.IBinder;
 
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
+import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.android.shared.util.PrefUtils;
-import com.sap.sailing.android.tracking.app.services.sending.MessagePersistenceManager.MessageRestorer;
-import com.sap.sailing.android.tracking.app.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
 /**
@@ -34,17 +34,16 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
  * by buffering the messages in a file, so that they can be sent when the connection is
  * re-established.<br>
  * 
- * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml}, and also specify
- * your class implementing the {@link MessagePersistenceManager.MessageRestorer} as a meta-data tag with the key
- * {@code com.sap.sailing.android.tracking.app..services.sending.messageRestorer}. Also refer to
- * {@link ConnectivityChangedReceiver}, which has to be registered as well. For example:
- * 
- * <pre>
- * {@code
+ * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml},
+ * and also specify your class implementing the {@link MessagePersistenceManager.MessageRestorer}
+ * as a meta-data tag with the key {@code com.sap.sailing.android.shared.services.sending.messageRestorer}.
+ * Also refer to {@link ConnectivityChangedReceiver}, which has to be registered as well.
+ * For example:
+ * <pre>{@code
  * <service
- *   android:name="com.sap.sailing.android.tracking.app.services.sending.MessageSendingService"
+ *   android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
  *   android:exported="false" >
- *   <meta-data android:name="com.sap.sailing.android.tracking.app.services.sending.messageRestorer"
+ *   <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
  *     android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
  * </service>
  * }</pre>
@@ -55,8 +54,6 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
  * context.startService(MessageSendingService.createMessageIntent(
  *      context, url, race.getId(), eventId, serializedEventAsJson, callbackClass));
  * }</pre>
- * 
- * NOTE: Started using TransmittingService.java, perhaps this class can be dismissed? -LZ
  */
 public class MessageSendingService extends Service implements MessageSendingListener {
     public final static String URL = "url";
@@ -112,7 +109,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private Date lastSuccessfulSend;
     
-    public List<String> getDelayedIntensContent() {
+    public List<String> getDelayedIntentsContent() {
         return persistenceManager.getContent();
     }
 
@@ -130,7 +127,8 @@ public class MessageSendingService extends Service implements MessageSendingList
         serviceLogger.onMessageSentSuccessful();
     }
 
-    public static Intent createMessageIntent(Context context, String url, Serializable callbackPayload, Serializable messageId, String payload,
+    public static Intent createMessageIntent(Context context, String url, 
+    		Serializable callbackPayload, Serializable messageId, String payload,
             Class<? extends ServerReplyCallback> callbackClass) {
         Intent messageIntent = new Intent(context, MessageSendingService.class);
         messageIntent.setAction(context.getString(R.string.intent_send_message));
@@ -162,16 +160,25 @@ public class MessageSendingService extends Service implements MessageSendingList
         MessageRestorer restorer = null;
         try {
             Bundle data = getPackageManager().getServiceInfo(thisService, PackageManager.GET_META_DATA).metaData;
-            String className = data.getString("com.sap.sailing.android.tracking.app.services.sending.messageRestorer");
-            Class<?> clazz = Class.forName(className);
-            if (! MessageRestorer.class.isAssignableFrom(clazz)) {
-                throw new Exception("Class does not conform to expected type.");
+            if (data == null) {
+                ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService "
+                        + "on how to register the restorer through the manifest.");
+            } else {
+                String className = data.getString("com.sap.sailing.android.shared.services.sending.messageRestorer");
+                Class<?> clazz = Class.forName(className);
+                if (!MessageRestorer.class.isAssignableFrom(clazz)) {
+                    ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService "
+                            + "on how to register the restorer through the manifest. Class " + clazz
+                            + " does not conform to expected type " + MessageRestorer.class.getName());
+                } else {
+                    @SuppressWarnings("unchecked")
+                    // checked above
+                    Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
+                    restorer = castedClass.getConstructor().newInstance();
+                }
             }
-            @SuppressWarnings("unchecked") //checked above
-            Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
-            restorer = castedClass.getConstructor().newInstance();
         } catch (Exception e) {
-            ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService"
+            ExLog.w(this, TAG, "Could not find MessageRestorer. See documentation of MessageSendingService "
                     + "on how to register the restorer through the manifest. Error Message: " + e.getMessage());
         }
         return new MessagePersistenceManager(this, restorer);
