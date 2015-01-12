@@ -56,7 +56,7 @@ public class StartActivity extends BaseActivity {
     
     
     @Override
-    protected void onStart() {
+	public void onStart() {
     	super.onStart();
 
     	// get url if launched via url intent-filter

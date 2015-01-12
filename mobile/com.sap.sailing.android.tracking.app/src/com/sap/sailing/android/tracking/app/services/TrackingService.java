@@ -1,6 +1,10 @@
 package com.sap.sailing.android.tracking.app.services;
 
+import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.annotation.TargetApi;
 import android.app.NotificationManager;
@@ -20,11 +24,13 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
 public class TrackingService extends Service implements ConnectionCallbacks,
 		OnConnectionFailedListener, LocationListener {
@@ -47,7 +53,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	private int NOTIFICATION_ID = R.string.tracker_started;
 
 	private String checkinDigest;
-	private long eventRowId;
+	private EventInfo event;
 
 	@Override
 	public void onCreate() {
@@ -82,7 +88,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 								.getExtras()
 								.getString(getString(R.string.tracking_service_checkin_digest_parameter));
 						
-						eventRowId = DatabaseHelper.getInstance().getEventRowIdForCheckinDigest(this, checkinDigest);
+						event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);						
 						
 						if (BuildConfig.DEBUG) {
 							ExLog.i(this, TAG, "Starting Tracking Service with checkinDigest: "+ checkinDigest);
@@ -163,28 +169,48 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	@Override
 	public void onLocationChanged(Location location) {
-		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
-
-		DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
-				location.getLongitude(), location.getSpeed(),
-				location.getBearing(), location.getProvider(),
-				location.getTime(), eventRowId);
+		ExLog.e(this, "DEBUG", "onLocationChanged");
 		
-		ensureTransmittingServiceIsRunning();
+		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
+		
+		JSONObject json = new JSONObject();
+		try {
+			json.put("course", location.getBearing());
+			json.put("timestamp", location.getTime());
+			json.put("speed", location.getSpeed());
+			json.put("longitude", location.getLongitude());
+			json.put("latitude", location.getLatitude());
+			json.put("deviceUuid", prefs.getDeviceIdentifier());
+			
+			String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
+			
+			ExLog.e(this, "DEBUG", "calling start service");
+			startService(MessageSendingService.createMessageIntent(this, postUrlStr,
+	                null, UUID.randomUUID(), json.toString(), null));
+			
+		} catch (JSONException ex) {
+			ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
+		}
+		
+//		DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
+//				location.getLongitude(), location.getSpeed(),
+//				location.getBearing(), location.getProvider(),
+//				location.getTime(), eventRowId);
+//		ensureTransmittingServiceIsRunning();
 	}
 
 	/**
 	 * start transmitting service when a new fix arrives, because it ends
 	 * itself, if there's no data to send.
 	 */
-	private void ensureTransmittingServiceIsRunning() {
-		if (BuildConfig.DEBUG) {
-			ExLog.i(this, TAG,
-					"ensureTransmittingServiceIsRunning, starting TransmittingService");
-		}
-
-		ServiceHelper.getInstance().startTransmittingService(this);
-	}
+//	private void ensureTransmittingServiceIsRunning() {
+//		if (BuildConfig.DEBUG) {
+//			ExLog.i(this, TAG,
+//					"ensureTransmittingServiceIsRunning, starting TransmittingService");
+//		}
+//
+//		ServiceHelper.getInstance().startTransmittingService(this);
+//	}
 
 	@Override
 	public IBinder onBind(Intent intent) {

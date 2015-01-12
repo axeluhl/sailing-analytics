@@ -22,9 +22,9 @@ import android.os.IBinder;
 
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
@@ -130,7 +130,6 @@ public class TransmittingService extends Service {
 		if (BuildConfig.DEBUG) {
 			ExLog.i(this, "TIMER", "Background update-timer start");
 		}
-
 	}
 
 	private void stopTimer() {
@@ -256,6 +255,12 @@ public class TransmittingService extends Service {
 	}
 
 	private void sendFixesToAPI(List<String> failedHosts) {
+		
+		ExLog.e(this, "REFACTORING", "Not sending any fixes here anymore.");
+		if (true) {
+			return;
+		}
+		
 		// first, lets fetch all unsent fixes
 		List<GpsFix> fixes = DatabaseHelper.getInstance().getUnsentFixes(getBaseContext(),
 				failedHosts, UPDATE_BATCH_SIZE);

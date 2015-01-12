@@ -89,7 +89,7 @@ public class RegattaActivity extends BaseActivity {
     }
     
     @Override
-    protected void onStart() {
+	public void onStart() {
     	super.onStart();
     	if (prefs.getTrackerIsTracking())
         {
