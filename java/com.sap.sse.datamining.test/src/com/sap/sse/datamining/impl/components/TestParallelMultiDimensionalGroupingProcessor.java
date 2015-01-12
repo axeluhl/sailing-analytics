@@ -11,9 +11,11 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
@@ -46,9 +48,9 @@ public class TestParallelMultiDimensionalGroupingProcessor {
         receivers = new ArrayList<>();
         receivers.add(receiver);
         
-        List<Function<?>> dimensions = new ArrayList<Function<?>>();
-        dimensions.add(new MethodWrappingFunction<>(Number.class.getMethod("getLength", new Class<?>[0]), int.class));
-        dimensions.add(new MethodWrappingFunction<>(Number.class.getMethod("getCrossSum", new Class<?>[0]), int.class));
+        List<Pair<Function<?>, ParameterProvider>> dimensions = new ArrayList<>();
+        dimensions.add(new Pair<>(new MethodWrappingFunction<>(Number.class.getMethod("getLength", new Class<?>[0]), int.class), ParameterProvider.NULL));
+        dimensions.add(new Pair<>(new MethodWrappingFunction<>(Number.class.getMethod("getCrossSum", new Class<?>[0]), int.class), ParameterProvider.NULL));
         
         processor = ComponentTestsUtil.getProcessorFactory().createGroupingProcessor(Number.class, receivers, dimensions);
     }
@@ -60,15 +62,15 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructionWithEmptyDimensions() {
-        List<Function<?>> dimensions = new ArrayList<>();
+        List<Pair<Function<?>, ParameterProvider>> dimensions = new ArrayList<>();
         processorFactory.createGroupingProcessor(Number.class, receivers, dimensions);
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructionWithFunctionsInsteadOfDimensions() {
-        List<Function<?>> functions = new ArrayList<>();
+        List<Pair<Function<?>, ParameterProvider>> functions = new ArrayList<>();
         Method method = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
-        functions.add(FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(method));
+        functions.add(new Pair<>(FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(method), ParameterProvider.NULL));
         processorFactory.createGroupingProcessor(Number.class, receivers, functions);
     }
 

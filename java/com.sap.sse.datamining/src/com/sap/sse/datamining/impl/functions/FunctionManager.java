@@ -6,11 +6,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +20,6 @@ import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
@@ -71,8 +69,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private final Map<Class<?>, Set<Function<?>>> externalFunctions;
     
     private final Collection<Map<Class<?>, Set<Function<?>>>> functionMaps;
-    
-    private final Collection<ParameterProvider> parameterProviders;
 
     public FunctionManager() {
         functionDTOFactory = new FunctionDTOFactory();
@@ -86,8 +82,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         functionMaps.add(statistics);
         functionMaps.add(dimensions);
         functionMaps.add(externalFunctions);
-        
-        parameterProviders = new HashSet<>();
     }
     
     @Override
@@ -170,11 +164,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         }
         externalFunctions.get(declaringType).add(function);
     }
-    
-    @Override
-    public void registerParameterProvider(ParameterProvider parameterProvider) {
-        parameterProviders.add(parameterProvider);
-    }
 
     @Override
     public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister) {
@@ -187,11 +176,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
             functionMap.remove(classToUnregister);
         }
-    }
-    
-    @Override
-    public void unregisterParameterProvider(ParameterProvider parameterProvider) {
-        parameterProviders.remove(parameterProvider);
     }
 
     @Override
@@ -251,11 +235,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             set.addAll(entry.getValue());
         }
         return set;
-    }
-    
-    @Override
-    public Iterable<ParameterProvider> getAllParameterProviders() {
-        return parameterProviders;
     }
     
     @Override
@@ -380,41 +359,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
 
     private Function<?> getFunctionToReturn(Collection<Function<?>> functionsMatchingDTO) {
         return functionsMatchingDTO.isEmpty() ? null : functionsMatchingDTO.iterator().next();
-    }
-    
-    @Override
-    public ParameterProvider getParameterProviderFor(Function<?> function) {
-        Iterable<Class<?>> functionParameterTypes = function.getParameters();
-        if (!functionParameterTypes.iterator().hasNext()) {
-            return ParameterProvider.NULL;
-        }
-        
-        for (ParameterProvider parameterProvider : getAllParameterProviders()) {
-            if (parametersAreMatching(function, parameterProvider)) {
-                return parameterProvider;
-            }
-        }
-        
-        return null;
-    }
-
-    private boolean parametersAreMatching(Function<?> function, ParameterProvider parameterProvider) {
-        Iterator<Class<?>> functionParametersIterator = function.getParameters().iterator();
-        Iterator<Class<?>> parameterProviderIterator = parameterProvider.getParameterTypes().iterator();
-        
-        while (functionParametersIterator.hasNext() && parameterProviderIterator.hasNext()) {
-            Class<?> functionParameter = functionParametersIterator.next();
-            Class<?> parameterProviderParameter = parameterProviderIterator.next();
-            if (!functionParameter.isAssignableFrom(parameterProviderParameter)) {
-                return false;
-            }
-        }
-        
-        if (functionParametersIterator.hasNext() || parameterProviderIterator.hasNext()) {
-            return false;
-        }
-        
-        return true;
     }
 
 }

@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,8 +16,6 @@ import org.junit.Test;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.FunctionProvider;
-import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -150,55 +147,6 @@ public class TestFunctionManagerAsFunctionProvider {
     @Test
     public void testGetFunctionForNullDTO() {
         assertThat(functionManager.getFunctionForDTO(null), is(nullValue()));
-    }
-    
-    @Test
-    public void testGetParameterProviderForNullaryFunction() {
-        Method nullaryDimensionMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "dimension");
-        Function<Object> nullaryDimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(nullaryDimensionMethod);
-        
-        FunctionProvider functionProvider = new FunctionManager();
-        assertThat(functionProvider.getParameterProviderFor(nullaryDimension), is(ParameterProvider.NULL));
-    }
-    
-    @Test
-    public void testGetPrameterProviderForFunctionsWithParameters() {
-        FunctionManager functionManager = new FunctionManager();
-        ParameterProvider intParameterProvider = new ParameterProvider() {
-            @Override
-            public Object[] getParameters() {
-                return new Object[] {1};
-            }
-            
-            @Override
-            public Iterable<Class<?>> getParameterTypes() {
-                Collection<Class<?>> parameterTypes = new ArrayList<>();
-                parameterTypes.add(int.class);
-                return parameterTypes;
-            }
-        };
-        functionManager.registerParameterProvider(intParameterProvider);
-        LocalizationParameterProvider stringMessagesParameterProvider = new LocalizationParameterProvider(Locale.ENGLISH, stringMessages);
-        functionManager.registerParameterProvider(stringMessagesParameterProvider);
-        
-        Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
-        Function<Object> increment = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(incrementMethod);
-        assertThat(functionManager.getParameterProviderFor(increment), is(intParameterProvider));
-        
-        Method getLocalizedNameMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "getLocalizedName", Locale.class, DataMiningStringMessages.class);
-        Function<Object> getLocalizedName = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getLocalizedNameMethod);
-        assertThat(functionManager.getParameterProviderFor(getLocalizedName), is(stringMessagesParameterProvider));
-    }
-    
-    @Test
-    public void testGetParameterProviderForFunctionWithoutAnAvailableParameterProvider() {
-        FunctionManager functionManager = new FunctionManager();
-        //Adding a wrong ParameterProvider to increase code coverage
-        functionManager.registerParameterProvider(new LocalizationParameterProvider(Locale.ENGLISH, stringMessages));
-        
-        Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
-        Function<Object> increment = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(incrementMethod);
-        assertThat(functionManager.getParameterProviderFor(increment), nullValue());
     }
 
 }

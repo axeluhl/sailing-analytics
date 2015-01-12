@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
-import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
@@ -35,8 +34,6 @@ public interface DataMiningServer {
      * @return The first function, that matches the given DTO or <code>null</code>
      */
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO);
-    
-    public ParameterProvider getParameterProviderFor(Function<?> function);
 
     public DataRetrieverChainDefinitionProvider getDataRetrieverChainDefinitionProvider();
 

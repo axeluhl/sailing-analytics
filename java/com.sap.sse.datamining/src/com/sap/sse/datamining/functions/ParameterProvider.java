@@ -6,8 +6,6 @@ public interface ParameterProvider {
     
     public static final ParameterProvider NULL = new NullParameterProvider();
     
-    public Iterable<Class<?>> getParameterTypes();
-    
     public Object[] getParameters();
     
 

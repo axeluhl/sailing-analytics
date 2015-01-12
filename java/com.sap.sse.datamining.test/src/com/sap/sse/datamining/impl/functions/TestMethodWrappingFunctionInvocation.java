@@ -4,13 +4,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
-import java.util.Collections;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
 import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
@@ -37,15 +34,13 @@ public class TestMethodWrappingFunctionInvocation {
     public void testInvocationWithParameters() {
         SimpleClassWithMarkedMethods instance = new SimpleClassWithMarkedMethods();
         final int valueToIncrement = 10;
-        ParameterProvider parameterProvider = new SimpleParameterProvider(Collections.emptyList(), new Object[] {valueToIncrement});
-        assertThat(increment.tryToInvoke(instance, parameterProvider), is(instance.increment(valueToIncrement)));
+        assertThat(increment.tryToInvoke(instance, () -> {return new Object[] {valueToIncrement};} ), is(instance.increment(valueToIncrement)));
     }
     
     @Test
     public void testInvocationWithWrongParameters() {
         DataTypeWithContext dataEntry = new DataTypeWithContextImpl("Regatta Name", "Race Name", 7);
-        ParameterProvider parameterProvider = new SimpleParameterProvider(Collections.emptyList(), new Object[] {"Wrong Parameter"});
-        assertThat(getRegattaName.tryToInvoke(dataEntry, parameterProvider), is(nullValue()));
+        assertThat(getRegattaName.tryToInvoke(dataEntry, () -> {return new Object[] {"Wrong Parameter"};} ), is(nullValue()));
 
         SimpleClassWithMarkedMethods instance = new SimpleClassWithMarkedMethods();
         assertThat(increment.tryToInvoke(instance), is(nullValue()));

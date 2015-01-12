@@ -21,7 +21,5 @@ public interface FunctionProvider {
      * @return The first function, that matches the given DTO or <code>null</code>
      */
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO);
-    
-    public ParameterProvider getParameterProviderFor(Function<?> function);
 
 }
