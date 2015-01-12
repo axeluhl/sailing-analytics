@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
@@ -61,6 +60,8 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      *
      */
     private static class ManeuverClassification {
+        private final Competitor competitor;
+        private final TimePoint timePoint;
         /**
          * Course change implied by the maneuver
          */
@@ -68,18 +69,32 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         private final SpeedWithBearing speedAtManeuverStart;
         private final Bearing middleManeuverCourse;
         private final Distance maneuverLoss;
-        private final Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> estimatedTrueWindSpeedAndAngles;
+        private final LegType legType;
+        private final Tack tack;
+        private final SpeedWithBearingWithConfidence<Void> estimatedTrueWindSpeedAndAngle;
         
-        protected ManeuverClassification(Maneuver maneuver,
-                Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> estimatedTrueWindSpeedAndAngles) {
+        protected ManeuverClassification(Competitor competitor,
+                Maneuver maneuver, LegType legType, Tack tack, SpeedWithBearingWithConfidence<Void> estimatedTrueWindSpeedAndAngle) {
             super();
-            this.estimatedTrueWindSpeedAndAngles = estimatedTrueWindSpeedAndAngles;
+            this.competitor = competitor;
+            this.timePoint = maneuver.getTimePoint();
+            this.legType = legType;
+            this.tack = tack;
+            this.estimatedTrueWindSpeedAndAngle = estimatedTrueWindSpeedAndAngle;
             this.maneuverAngleDeg = maneuver.getDirectionChangeInDegrees();
             this.speedAtManeuverStart = maneuver.getSpeedWithBearingBefore();
             this.middleManeuverCourse = maneuver.getSpeedWithBearingBefore().getBearing().middle(maneuver.getSpeedWithBearingAfter().getBearing());
             this.maneuverLoss = maneuver.getManeuverLoss();
         }
         
+        public Competitor getCompetitor() {
+            return competitor;
+        }
+
+        public TimePoint getTimePoint() {
+            return timePoint;
+        }
+
         public double getManeuverAngleDeg() {
             return maneuverAngleDeg;
         }
@@ -96,40 +111,46 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             return maneuverLoss;
         }
 
-        public Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> getEstimatedTrueWindSpeedAndAngles() {
-            return estimatedTrueWindSpeedAndAngles;
+        public LegType getLegType() {
+            return legType;
+        }
+
+        public Tack getTack() {
+            return tack;
+        }
+
+        public SpeedWithBearingWithConfidence<Void> getEstimatedTrueWindSpeedAndAngle() {
+            return estimatedTrueWindSpeedAndAngle;
         }
         
         public static String getToStringColumnHeaders() {
-            return "angleDeg, boatSpeedKn, cogDeg, windEstimation, lossM, assumedLegType, assumedTack, estimatedTrueWindSpeedKn, estimatedTrueWindAngleDeg";
+            return "competitor, timePoint, angleDeg, boatSpeedKn, cogDeg, windEstimation, lossM, assumedLegType, assumedTack, estimatedTrueWindSpeedKn, estimatedTrueWindAngleDeg";
         }
         
         @Override
         public String toString() {
-            final String prefix = "" + getManeuverAngleDeg() + ", " + getSpeedAtManeuverStart().getKnots()+", "+getSpeedAtManeuverStart().getBearing().getDegrees();
+            final String prefix = "" + getCompetitor().getName() + ", " + getTimePoint() + ", " + getManeuverAngleDeg()
+                    + ", " + getSpeedAtManeuverStart().getKnots() + ", "
+                    + getSpeedAtManeuverStart().getBearing().getDegrees();
             final StringBuilder result = new StringBuilder();
-            for (Entry<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> i : getEstimatedTrueWindSpeedAndAngles().entrySet()) {
-                for (SpeedWithBearingWithConfidence<Void> s : i.getValue()) {
-                    result.append(prefix);
-                    result.append(", ");
-                    if (i.getKey().getA() == LegType.DOWNWIND) {
-                        result.append(getMiddleManeuverCourse().getDegrees());
-                    } else {
-                        result.append(getMiddleManeuverCourse().reverse().getDegrees());
-                    }
-                    result.append(", ");
-                    result.append(getManeuverLoss()==null?0.0:getManeuverLoss().getMeters());
-                    result.append(", ");
-                    result.append(i.getKey().getA());
-                    result.append(", ");
-                    result.append(i.getKey().getB());
-                    result.append(", ");
-                    result.append(s.getObject().getKnots());
-                    result.append(", ");
-                    result.append(s.getObject().getBearing().getDegrees());
-                    result.append("\n");
-                }
+            result.append(prefix);
+            result.append(", ");
+            if (getLegType() == LegType.DOWNWIND) {
+                result.append(getMiddleManeuverCourse().getDegrees());
+            } else {
+                result.append(getMiddleManeuverCourse().reverse().getDegrees());
             }
+            result.append(", ");
+            result.append(getManeuverLoss() == null ? 0.0 : getManeuverLoss().getMeters());
+            result.append(", ");
+            result.append(getLegType());
+            result.append(", ");
+            result.append(getTack());
+            result.append(", ");
+            result.append(getEstimatedTrueWindSpeedAndAngle().getObject().getKnots());
+            result.append(", ");
+            result.append(getEstimatedTrueWindSpeedAndAngle().getObject().getBearing().getDegrees());
+            result.append("\n");
             return result.toString();
         }
     }
@@ -139,25 +160,31 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * will be created based on the average COG into and out of the maneuver.
      */
     private void analyzeRace() throws NotEnoughDataHasBeenAddedException {
-        final Map<Maneuver, BoatClass> maneuvers = getAllManeuvers();
+        final Map<Maneuver, Competitor> maneuvers = getAllManeuvers();
         Set<ManeuverClassification> maneuverClassifications = new HashSet<>();
-        for (final Entry<Maneuver, BoatClass> maneuverAndBoatClass : maneuvers.entrySet()) {
+        for (final Entry<Maneuver, Competitor> maneuverAndCompetitor : maneuvers.entrySet()) {
             // Now for each maneuver's starting speed (speed into the maneuver) get the approximated
             // wind speed and direction assuming average upwind / downwind performance based on the polar service.
             // TODO continue here, asking the polarService for the wind speed based on boat speed, leg type and tack
             Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> estimatedTrueWindSpeedAndAngles = new HashMap<>();
             // for course changes to PORT use only UPWIND/PORT and DOWNWIND/STARBOARD and analogously for course changes to STARBOARD
-            for (Pair<LegType, Tack> i : maneuverAndBoatClass.getKey().getDirectionChangeInDegrees() > 0 ? Arrays
+            for (Pair<LegType, Tack> i : maneuverAndCompetitor.getKey().getDirectionChangeInDegrees() > 0 ? Arrays
                     .asList(new Pair<LegType, Tack>(LegType.UPWIND, Tack.STARBOARD), new Pair<LegType, Tack>(
                             LegType.DOWNWIND, Tack.PORT)) : Arrays.asList(new Pair<LegType, Tack>(LegType.UPWIND,
                     Tack.PORT), new Pair<LegType, Tack>(LegType.DOWNWIND, Tack.STARBOARD))) {
                 Set<SpeedWithBearingWithConfidence<Void>> trueWindSpeedsAndAngles = polarService
-                        .getAverageTrueWindSpeedAndAngleCandidates(maneuverAndBoatClass.getValue(),
-                                maneuverAndBoatClass.getKey().getSpeedWithBearingBefore(), i.getA(), i.getB());
+                        .getAverageTrueWindSpeedAndAngleCandidates(maneuverAndCompetitor.getValue().getBoat().getBoatClass(),
+                                maneuverAndCompetitor.getKey().getSpeedWithBearingBefore(), i.getA(), i.getB());
                 estimatedTrueWindSpeedAndAngles.put(new Pair<>(i.getA(), i.getB()), trueWindSpeedsAndAngles);
             }
-            ManeuverClassification maneuverClassification = new ManeuverClassification(maneuverAndBoatClass.getKey(), estimatedTrueWindSpeedAndAngles);
-            maneuverClassifications.add(maneuverClassification);
+            for (Entry<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> i : estimatedTrueWindSpeedAndAngles.entrySet()) {
+                for (SpeedWithBearingWithConfidence<Void> s : i.getValue()) {
+                    ManeuverClassification maneuverClassification = new ManeuverClassification(
+                            maneuverAndCompetitor.getValue(), maneuverAndCompetitor.getKey(),
+                            i.getKey().getA(), i.getKey().getB(), s);
+                    maneuverClassifications.add(maneuverClassification);
+                }
+            }
         }
         // FIXME remove again when done with debugging
         System.out.println(ManeuverClassification.getToStringColumnHeaders());
@@ -166,16 +193,15 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         }
     }
 
-    private Map<Maneuver, BoatClass> getAllManeuvers() {
-        Map<Maneuver, BoatClass> maneuvers = new HashMap<>();
+    private Map<Maneuver, Competitor> getAllManeuvers() {
+        Map<Maneuver, Competitor> maneuvers = new HashMap<>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            final BoatClass boatClass = competitor.getBoat().getBoatClass();
             final TimePoint from = trackedRace.getStartOfRace() == null ? trackedRace.getStartOfTracking()
                     : trackedRace.getStartOfRace();
             final TimePoint to = trackedRace.getEndOfRace() == null ? trackedRace.getEndOfTracking() == null ?
                     MillisecondsTimePoint.now() : trackedRace.getEndOfTracking() : trackedRace.getEndOfRace();
             for (Maneuver maneuver : trackedRace.getManeuvers(competitor, from, to, /* waitForLatest */ false)) {
-                maneuvers.put(maneuver, boatClass);
+                maneuvers.put(maneuver, competitor);
             }
         }
         return Collections.unmodifiableMap(maneuvers);
