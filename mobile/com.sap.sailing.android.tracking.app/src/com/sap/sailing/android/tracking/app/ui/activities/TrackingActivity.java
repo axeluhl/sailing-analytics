@@ -61,7 +61,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	
 	private String checkinDigest;
 	
-
 	private TrackingFragment trackingFragment;	
 	private TimerRunnable timer;
 	
@@ -167,7 +166,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	}
 
 	@Override
-	protected void onStart() {
+	public void onStart() {
 		super.onStart();
 		Intent transmittingServiceIntent = new Intent(this, TransmittingService.class);
 		bindService(transmittingServiceIntent, transmittingServiceConnection,
@@ -177,7 +176,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	}
 
 	@Override
-	protected void onStop() {
+	public void onStop() {
 		super.onStop();
 		if (trackingServiceBound) {
 			trackingService.unregisterGPSQualityListener();
