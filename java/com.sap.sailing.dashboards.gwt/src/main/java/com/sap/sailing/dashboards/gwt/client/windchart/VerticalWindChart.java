@@ -127,7 +127,6 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         verticalWindChart
                 .getXAxis()
                 .setType(Type.DATE_TIME)
-                .setMaxPadding(0)
                 .setReversed(false)
                 .setLabels(
                         new XAxisLabels().setStyle(new Style().setFontFamily("Arial").setFontSize("12")
@@ -144,7 +143,10 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                 .setTickColor("grey")
                 .setAxisTitleText(null)
                 .setGridLineWidth(0)
+                .setAlternateGridColor("#d4d4d4")
                 .setLineWidth(1)
+                .setEndOnTick(true)
+                .setStartOnTick(true)
                 .setOffset(0)
                 .setMaxPadding(0)
                 .setLabels(
