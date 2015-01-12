@@ -185,6 +185,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 			String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
 			
 			ExLog.e(this, "DEBUG", "calling start service");
+						
 			startService(MessageSendingService.createMessageIntent(this, postUrlStr,
 	                null, UUID.randomUUID(), json.toString(), null));
 			
