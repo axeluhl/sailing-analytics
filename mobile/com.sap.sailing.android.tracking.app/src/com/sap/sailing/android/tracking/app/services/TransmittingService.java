@@ -257,7 +257,7 @@ public class TransmittingService extends Service {
 	private void sendFixesToAPI(List<String> failedHosts) {
 		
 		ExLog.e(this, "REFACTORING", "Not sending any fixes here anymore.");
-		if (true) {
+		if (2 == 1) {
 			return;
 		}
 		
@@ -570,7 +570,6 @@ public class TransmittingService extends Service {
 
 	public interface APIConnectivityListener {
 		public void apiConnectivityUpdated(APIConnectivity apiConnectivity);
-
 		public void setUnsentGPSFixesCount(int count);
 	}
 

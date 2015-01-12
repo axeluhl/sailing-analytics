@@ -18,6 +18,10 @@ import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivityListener;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.sensors.CompassManager;
@@ -26,10 +30,6 @@ import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
 import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingBinder;
-import com.sap.sailing.android.tracking.app.services.TransmittingService;
-import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
-import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivityListener;
-import com.sap.sailing.android.tracking.app.services.TransmittingService.TransmittingBinder;
 import com.sap.sailing.android.tracking.app.ui.fragments.CompassFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.SpeedFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.StopTrackingButtonFragment;
@@ -46,8 +46,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	TrackingService trackingService;
 	boolean trackingServiceBound;
 
-	TransmittingService transmittingService;
-	boolean transmittingServiceBound;
+	MessageSendingService messageSendingService;
+	boolean messageSendingServiceBound;
 
 	private final static String TAG = TrackingActivity.class.getName();
 	private final static String SIS_TRACKING_FRAGMENT = "savedInstanceTrackingFragment";
@@ -61,7 +61,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	
 	private String checkinDigest;
 	
-	private TrackingFragment trackingFragment;	
+	private TrackingFragment trackingFragment;
 	private TimerRunnable timer;
 	
 	private int lastViewPagerItem;
@@ -168,9 +168,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	@Override
 	public void onStart() {
 		super.onStart();
-		Intent transmittingServiceIntent = new Intent(this, TransmittingService.class);
-		bindService(transmittingServiceIntent, transmittingServiceConnection,
-				Context.BIND_AUTO_CREATE);
+		Intent messageSendingServiceIntent = new Intent(this, MessageSendingService.class);
+		bindService(messageSendingServiceIntent, messageSendingServiceConnection, Context.BIND_AUTO_CREATE);
 		Intent trackingServiceIntent = new Intent(this, TrackingService.class);
 		bindService(trackingServiceIntent, trackingServiceConnection, Context.BIND_AUTO_CREATE);
 	}
@@ -188,11 +187,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			}
 		}
 
-		if (transmittingServiceBound) {
-			transmittingService.unregisterAPIConnectivityListener();
-			unbindService(transmittingServiceConnection);
+		if (messageSendingServiceBound) {
+			messageSendingService.unregisterAPIConnectivityListener();
+			unbindService(messageSendingServiceConnection);
 
-			transmittingServiceBound = false;
+			messageSendingServiceBound = false;
 
 			if (BuildConfig.DEBUG) {
 				ExLog.i(this, TAG, "Unbound transmitting Service");
@@ -276,24 +275,24 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	}
 
 	/** Defines callbacks for service binding, passed to bindService() */
-	private ServiceConnection transmittingServiceConnection = new ServiceConnection() {
+	private ServiceConnection messageSendingServiceConnection = new ServiceConnection() {
 
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			// We've bound to LocalService, cast the IBinder and get
 			// LocalService instance
-			TransmittingBinder binder = (TransmittingBinder) service;
-			transmittingService = binder.getService();
-			transmittingServiceBound = true;
-			transmittingService.registerAPIConnectivityListener(TrackingActivity.this);
+			MessageSendingBinder binder = (MessageSendingBinder) service;
+			messageSendingService = binder.getService();
+			messageSendingServiceBound = true;
+			messageSendingService.registerAPIConnectivityListener(TrackingActivity.this);
 			if (BuildConfig.DEBUG) {
-				ExLog.i(TrackingActivity.this, TAG, "connected to transmitting service");
+				ExLog.i(TrackingActivity.this, TAG, "connected to message sending service");
 			}
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) {
-			transmittingServiceBound = false;
+			messageSendingServiceBound = false;
 		}
 	};
 
