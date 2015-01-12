@@ -1,11 +1,12 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 
 public class LaserVectorGraphics extends BoatClassVectorGraphics {
     
-    public LaserVectorGraphics(String... compatibleBoatClassNames) {
-        super("LASER", 423, 137, 423, compatibleBoatClassNames);
+    public LaserVectorGraphics(BoatClassMasterdata... compatibleBoatClasses) {
+        super(423, 137, 423, compatibleBoatClasses);
     }
 
     @Override
