@@ -9,9 +9,9 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayAppHistoryMapper;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
-import com.sap.sse.gwt.client.mvp.AbstractEntryPoint;
+import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
-public class AutoPlayEntryPoint extends AbstractEntryPoint {
+public class AutoPlayEntryPoint extends AbstractMvpEntryPoint {
 
     public void onModuleLoad() {
         AutoPlayAppClientFactory clientFactory = GWT.create(AutoPlayAppClientFactory.class);

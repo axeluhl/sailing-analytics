@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.mvp.impl.ActivityMapperRegistry;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class AbstractEntryPoint implements EntryPoint {
+public abstract class AbstractMvpEntryPoint implements EntryPoint {
 
     /**
      * Initializes the application with a {@link PlaceHistoryHandler} using as a {@link PlaceHistoryMapper} what it gets

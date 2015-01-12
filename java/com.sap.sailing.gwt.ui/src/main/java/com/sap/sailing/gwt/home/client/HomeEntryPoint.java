@@ -9,9 +9,9 @@ import com.sap.sailing.gwt.home.client.app.ApplicationClientFactory;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
-import com.sap.sse.gwt.client.mvp.AbstractEntryPoint;
+import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
-public class HomeEntryPoint extends AbstractEntryPoint {
+public class HomeEntryPoint extends AbstractMvpEntryPoint {
 
     public void onModuleLoad() {
         ApplicationClientFactory clientFactory = GWT.create(ApplicationClientFactory.class);
