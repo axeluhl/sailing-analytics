@@ -1,23 +1,28 @@
 package com.sap.sailing.polars.windestimation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
@@ -44,6 +49,12 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * default and should be superseded by other wind sources easily.
      */
     private static final double DEFAULT_BASE_CONFIDENCE = 0.01;
+
+    /**
+     * Maneuvers are only considered if their actual course change differs less than these many degrees from
+     * the prediction made by the polar diagram (VPP).
+     */
+    private static final double MANEUVER_ANGLE_DEVIATION_IN_DEGREES_THRESHOLD = 20;
     
     private final PolarDataService polarService;
 
@@ -78,6 +89,13 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         private final LegType legType;
         private final Tack tack;
         private final SpeedWithBearingWithConfidence<Void> estimatedTrueWindSpeedAndAngle;
+        
+        /**
+         * Each maneuver classification will usually have an "opposite" that has {@link #legType} {@link LegType#UPWIND} when
+         * this one has {@link #legType} {@link LegType#DOWNWIND} and vice versa. Since this is a cyclic relationship it is not
+         * set up during object construction, but a {@link #setOpposite(ManeuverClassification) setter} is offered for it.
+         */
+        private ManeuverClassification opposite;
         
         protected ManeuverClassification(Competitor competitor,
                 Maneuver maneuver, LegType legType, Tack tack, SpeedWithBearingWithConfidence<Void> estimatedTrueWindSpeedAndAngle) {
@@ -158,6 +176,14 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             result.append(getEstimatedTrueWindSpeedAndAngle().getObject().getBearing().getDegrees());
             return result.toString();
         }
+
+        public void setOpposite(ManeuverClassification maneuverClassification) {
+            this.opposite = maneuverClassification;
+        }
+
+        public ManeuverClassification getOpposite() {
+            return opposite;
+        }
     }
     
     /**
@@ -170,33 +196,61 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         for (final Entry<Maneuver, Competitor> maneuverAndCompetitor : maneuvers.entrySet()) {
             // Now for each maneuver's starting speed (speed into the maneuver) get the approximated
             // wind speed and direction assuming average upwind / downwind performance based on the polar service.
-            Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> estimatedTrueWindSpeedAndAngles = new HashMap<>();
             // for course changes to PORT use only UPWIND/PORT and DOWNWIND/STARBOARD and analogously for course changes to STARBOARD
-            for (Pair<LegType, Tack> i : maneuverAndCompetitor.getKey().getDirectionChangeInDegrees() > 0 ? Arrays
-                    .asList(new Pair<LegType, Tack>(LegType.UPWIND, Tack.STARBOARD), new Pair<LegType, Tack>(
-                            LegType.DOWNWIND, Tack.PORT)) : Arrays.asList(new Pair<LegType, Tack>(LegType.UPWIND,
-                    Tack.PORT), new Pair<LegType, Tack>(LegType.DOWNWIND, Tack.STARBOARD))) {
-                Set<SpeedWithBearingWithConfidence<Void>> trueWindSpeedsAndAngles = polarService
-                        .getAverageTrueWindSpeedAndAngleCandidates(maneuverAndCompetitor.getValue().getBoat().getBoatClass(),
-                                maneuverAndCompetitor.getKey().getSpeedWithBearingBefore(), i.getA(), i.getB());
-                estimatedTrueWindSpeedAndAngles.put(new Pair<>(i.getA(), i.getB()), trueWindSpeedsAndAngles);
-            }
-            for (Entry<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> i : estimatedTrueWindSpeedAndAngles.entrySet()) {
-                for (SpeedWithBearingWithConfidence<Void> s : i.getValue()) {
+            List<ManeuverClassification> currentManeuverClassifications = new ArrayList<>();
+            List<ManeuverClassification> oppositeManeuverClassifications = null;
+            // the following loop is executed exactly twice
+            for (Pair<LegType, Tack> i : maneuverAndCompetitor.getKey().getDirectionChangeInDegrees() > 0 ?
+                    Arrays.asList(new Pair<LegType, Tack>(LegType.UPWIND, Tack.STARBOARD), new Pair<LegType, Tack>(LegType.DOWNWIND, Tack.PORT)) :
+                    Arrays.asList(new Pair<LegType, Tack>(LegType.UPWIND, Tack.PORT), new Pair<LegType, Tack>(LegType.DOWNWIND, Tack.STARBOARD))) {
+                for (SpeedWithBearingWithConfidence<Void> s : polarService.getAverageTrueWindSpeedAndAngleCandidates(
+                        maneuverAndCompetitor.getValue().getBoat().getBoatClass(),
+                        maneuverAndCompetitor.getKey().getSpeedWithBearingBefore(), i.getA(), i.getB())) {
                     ManeuverClassification maneuverClassification = new ManeuverClassification(
-                            maneuverAndCompetitor.getValue(), maneuverAndCompetitor.getKey(),
-                            i.getKey().getA(), i.getKey().getB(), s);
+                            maneuverAndCompetitor.getValue(), maneuverAndCompetitor.getKey(), i.getA(), i.getB(), s);
+                    // note that for different leg types the polar service may return a different number of inverse TWA/TWS lookup results
+                    if (oppositeManeuverClassifications != null && oppositeManeuverClassifications.size() > currentManeuverClassifications.size()) {
+                        oppositeManeuverClassifications.get(currentManeuverClassifications.size()).setOpposite(maneuverClassification);
+                        maneuverClassification.setOpposite(oppositeManeuverClassifications.get(currentManeuverClassifications.size()));
+                    }
+                    currentManeuverClassifications.add(maneuverClassification);
                     maneuverClassifications.add(maneuverClassification);
                 }
+                oppositeManeuverClassifications = currentManeuverClassifications;
+                currentManeuverClassifications = new ArrayList<>();
             }
         }
         // Now cluster the maneuvers by estimated maneuver angle
-        KMeansMappingClusterer<ManeuverClassification, Double, Double, ScalableDouble> clusterer =
-                new KMeansMappingClusterer<>(4, maneuverClassifications, (m)->new ScalableDouble(m.getManeuverAngleDeg()));
-        final Set<Cluster<ManeuverClassification, Double, Double, ScalableDouble>> clusters = clusterer.getClusters();
-        Cluster<ManeuverClassification, Double, Double, ScalableDouble> dominantCluster = clusters.stream().max((a, b)->a.size()-b.size()).get();
-        Cluster<ManeuverClassification, Double, Double, ScalableDouble> oppositeCluster = clusters.stream().min((a, b)->
-                    (int) Math.signum(Math.abs(a.getMean()-dominantCluster.getMean())-Math.abs(b.getMean()-dominantCluster.getMean()))).get();
+        // constrain the clustering to those maneuvers that are sufficiently close to the expected maneuver angle
+        KMeansMappingClusterer<ManeuverClassification, DoublePair, Bearing, ScalableBearing> clusterer =
+                new KMeansMappingClusterer<>(4,
+                        maneuverClassifications.stream().filter(
+                                (mc)->Math.abs(mc.getEstimatedTrueWindSpeedAndAngle().getObject().getBearing().getDegrees()*2)-Math.abs(mc.getManeuverAngleDeg())<
+                                    MANEUVER_ANGLE_DEVIATION_IN_DEGREES_THRESHOLD),
+                                (m)->new ScalableBearing(m.getMiddleManeuverCourse()),
+                                // use an evenly distributed set of cluster seeds for clustering wind direction estimations
+                                Arrays.<Bearing>asList(new DegreeBearingImpl(0), new DegreeBearingImpl(90), new DegreeBearingImpl(180), new DegreeBearingImpl(270)).stream());
+        final Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusters = clusterer.getClusters();
+        Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> dominantCluster = clusters.stream().max((a, b)->a.size()-b.size()).get();
+        Pair<Set<SpeedWithConfidence<Void>>, Set<SpeedWithConfidence<Void>>> averageSpeedsIntoTacksAndJibes = dominantCluster.stream().collect(
+                ()->new Pair<Set<SpeedWithConfidence<Void>>, Set<SpeedWithConfidence<Void>>>(new HashSet<>(), new HashSet<>()),
+                (resultSoFar, mc)->{
+                    if (mc.getLegType() == LegType.UPWIND) {
+                        resultSoFar.getA().add(new SpeedWithConfidenceImpl<Void>(mc.getSpeedAtManeuverStart(), /* TODO confidence */ 1.0, /* relative to */ null));
+                    } else { // DOWNWIND
+                        resultSoFar.getB().add(new SpeedWithConfidenceImpl<Void>(mc.getSpeedAtManeuverStart(), /* TODO confidence */ 1.0, /* relative to */ null));
+                    }
+                },
+                (s1, s2)->{ s1.getA().addAll(s2.getA()); s1.getB().addAll(s2.getB()); });
+        Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> potentiallyFlippedCluster = clusters.stream().max((a, b)->
+                    (int) Math.signum(Math.abs(a.getMean().getDifferenceTo(dominantCluster.getMean()).getDegrees())-
+                          Math.abs(b.getMean().getDifferenceTo(dominantCluster.getMean()).getDegrees()))).get();
+        Bearing mostLikelyCandidateForWindBearingSoFar = dominantCluster.getMean();
+        for (ManeuverClassification potentiallyFlippedManeuverClassification : potentiallyFlippedCluster) {
+            
+            // TODO the oppositeCluster holds candidates for wind direction flipping; however, if tacking and jibing angles are similar, we may have gotten it the wrong way around and need to swap clusters altogether
+            // TODO decide this based on speed comparison: the boat should approach a jibe faster than a tack, assuming they were in similar wind conditions...
+        }
         // FIXME remove again when done with debugging
         System.out.println(ManeuverClassification.getToStringColumnHeaders());
         for (ManeuverClassification i : maneuverClassifications) {

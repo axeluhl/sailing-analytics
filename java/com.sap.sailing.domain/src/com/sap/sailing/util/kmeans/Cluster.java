@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
 
@@ -89,6 +90,10 @@ public class Cluster<E, ValueType, AveragesTo, T extends ScalableValueWithDistan
         return elements.size();
     }
 
+    public boolean isEmpty() {
+        return elements.isEmpty();
+    }
+
     @Override
     public Iterator<E> iterator() {
         return elements.iterator();
@@ -107,5 +112,9 @@ public class Cluster<E, ValueType, AveragesTo, T extends ScalableValueWithDistan
     @Override
     public String toString() {
         return "{mean: "+getMean()+", centroid: "+getCentroid()+", elements: "+elements+"}";
+    }
+
+    public Stream<E> stream() {
+        return elements.stream();
     }
 }

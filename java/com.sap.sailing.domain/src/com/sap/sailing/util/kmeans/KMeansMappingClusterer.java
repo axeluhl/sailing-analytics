@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
 
@@ -49,13 +50,31 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
     public KMeansMappingClusterer(int numberOfClusters, Iterable<E> elements, Function<E, T> mapper) {
         this(numberOfClusters, elements, mapper, randomizedSeeds(numberOfClusters, elements, mapper));
     }
+    
+    /**
+     * Same as {@link #KMeansMappingClusterer(int, Iterable, Function)}, only that a stream instead of an iterable
+     * is used to provide the elements.
+     * 
+     * @param elements the stream must not be {@link Stream#isParallel() a parallel stream}
+     */
+    public KMeansMappingClusterer(int numberOfClusters, Stream<E> elements, Function<E, T> mapper) {
+        this(numberOfClusters, streamToList(elements), mapper);
+    }
+
+    private static <E> Iterable<E> streamToList(Stream<E> elements) {
+        assert !elements.isParallel();
+        final List<E> result = new ArrayList<>();
+        elements.forEach((e)->result.add(e));
+        return result;
+    }
 
     /**
      * Constructs <code>numberOfClusters</code> (or as many as <code>elements</code> are provided if those are fewer
      * than <code>numberOfClusters</code>) clusters and randomly assigns the <code>elements</code> to them. The
      * {@link Cluster#getCentroid() centroids} of those clusters are returned as initial means.
      */
-    private static <E, ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> Iterator<AveragesTo> randomizedSeeds(int numberOfClusters, Iterable<E> elements, Function<E, T> mapper) {
+    private static <E, ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> Iterator<AveragesTo> randomizedSeeds(
+            int numberOfClusters, Iterable<E> elements, Function<E, T> mapper) {
         ArrayList<Cluster<E, ValueType, AveragesTo, T>> clusters = new ArrayList<>(numberOfClusters);
         Random random = new Random();
         int i=0;
@@ -72,6 +91,14 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
         return clusters.stream().map((c)->c.getCentroid()).iterator();
     }
 
+    /**
+     * Same as {@link #KMeansMappingClusterer(int, Iterable, Function, Iterator)}, only that the elements and the seeds are
+     * provided by streams instead of iterables and iterators.
+     */
+    public KMeansMappingClusterer(int numberOfClusters, Stream<E> elements, Function<E, T> mapper, Stream<AveragesTo> seeds) {
+        this(numberOfClusters, streamToList(elements), mapper, seeds.iterator());
+    }
+    
     /**
      * Like {@link #KMeansMappingClusterer(int, Iterable)}, additionally providing the seeds to use for the cluster centroids
      * during the first iteration.
@@ -144,7 +171,9 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
     public Set<Cluster<E, ValueType, AveragesTo, T>> getClusters() {
         Set<Cluster<E, ValueType, AveragesTo, T>> result = new HashSet<>();
         for (Cluster<E, ValueType, AveragesTo, T> i : clusters) {
-            result.add(i);
+            if (!i.isEmpty()) {
+                result.add(i);
+            }
         }
         return result;
     }
