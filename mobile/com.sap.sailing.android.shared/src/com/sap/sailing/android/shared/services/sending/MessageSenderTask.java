@@ -68,5 +68,4 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
         super.onPostExecute(resultTriple);
         listener.onMessageSent(resultTriple.getA(), resultTriple.getB(), resultTriple.getC());
     }
-
 }

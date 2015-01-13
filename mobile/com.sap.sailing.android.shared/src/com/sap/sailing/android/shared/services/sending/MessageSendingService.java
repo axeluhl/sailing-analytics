@@ -2,6 +2,7 @@ package com.sap.sailing.android.shared.services.sending;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
@@ -231,6 +232,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             persistenceManager.persistIntent(intent);
             ConnectivityChangedReceiver.enable(this);
             serviceLogger.onMessageSentFailed();
+            reportApiConnectivity(APIConnectivity.notReachable);
         } else {
             sendMessage(intent);
         }
@@ -339,27 +341,44 @@ public class MessageSendingService extends Service implements MessageSendingList
     
     public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
             final String raceName, final String fleetName) {
-        String url = String.format("%s/sailingserver/rc/racelog?"+
-                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
-                PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
-                URLEncoder.encode(raceGroupName),
-                URLEncoder.encode(raceName), URLEncoder.encode(fleetName), uuid);
+        String url = null;
+		try {
+			url = String.format("%s/sailingserver/rc/racelog?"+
+			        RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
+			        RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
+			        RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
+			        RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
+			        PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
+			        URLEncoder.encode(raceGroupName, "UTF-8"),
+			        URLEncoder.encode(raceName,"UTF-8"), 
+			        URLEncoder.encode(fleetName, "UTF-8"), uuid);
+		} catch (UnsupportedEncodingException e) {
+			ExLog.e(context, TAG, "UnsupportedEncodingException: " + e.getLocalizedMessage());
+		}
         return url;
     }
     
+    /**
+	 * Register listener for API-connectivity
+	 * 
+	 * @param listener class that wants to be notified of api-connectivity changes
+	 */
 	public void registerAPIConnectivityListener(APIConnectivityListener listener) {
 		apiConnectivityListener = listener;
 	}
 
+	/**
+	 * Unregister listener for API-connectivity
+	 */
 	public void unregisterAPIConnectivityListener() {
 		apiConnectivityListener = null;
 	}
 	
+	/**
+	 * Enum for reporting of network connectivity.
+	 */
 	public enum APIConnectivity {
-		notReachable(0), 
+		notReachable(0),
 		transmissionSuccess(1), 
 		transmissionError(2), 
 		noAttempt(4);
@@ -375,6 +394,10 @@ public class MessageSendingService extends Service implements MessageSendingList
 		}
 	}
 
+	/**
+	 * Listener interface for reporting of connectivity and number of 
+	 * unsent GPS-fixes.
+	 */
 	public interface APIConnectivityListener {
 		public void apiConnectivityUpdated(APIConnectivity apiConnectivity);
 		public void setUnsentGPSFixesCount(int count);

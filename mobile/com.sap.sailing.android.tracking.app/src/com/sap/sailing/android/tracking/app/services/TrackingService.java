@@ -30,7 +30,6 @@ import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
-import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
 public class TrackingService extends Service implements ConnectionCallbacks,
@@ -176,22 +175,22 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		try {
 			JSONArray jsonArray = new JSONArray();
 			JSONObject fixJson = new JSONObject();
-			
+
 			fixJson.put("course", location.getBearing());
 			fixJson.put("timestamp", location.getTime());
 			fixJson.put("speed", location.getSpeed());
 			fixJson.put("longitude", location.getLongitude());
 			fixJson.put("latitude", location.getLatitude());
-			
+
 			jsonArray.put(fixJson);
-			
+
 			json.put("fixes", jsonArray);
 			json.put("deviceUuid", prefs.getDeviceIdentifier());
-			
+
 			String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
-						
+
 			startService(MessageSendingService.createMessageIntent(this, postUrlStr,
-	                null, UUID.randomUUID(), json.toString(), null));
+					null, UUID.randomUUID(), json.toString(), null));
 			
 		} catch (JSONException ex) {
 			ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
