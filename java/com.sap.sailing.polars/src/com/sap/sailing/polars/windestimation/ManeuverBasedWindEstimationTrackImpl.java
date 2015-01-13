@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -16,11 +17,14 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.util.kmeans.Cluster;
+import com.sap.sailing.util.kmeans.KMeansMappingClusterer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -186,6 +190,13 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                 }
             }
         }
+        // Now cluster the maneuvers by estimated maneuver angle
+        KMeansMappingClusterer<ManeuverClassification, Double, Double, ScalableDouble> clusterer =
+                new KMeansMappingClusterer<>(4, maneuverClassifications, (m)->new ScalableDouble(m.getManeuverAngleDeg()));
+        final Set<Cluster<ManeuverClassification, Double, Double, ScalableDouble>> clusters = clusterer.getClusters();
+        Cluster<ManeuverClassification, Double, Double, ScalableDouble> dominantCluster = clusters.stream().max((a, b)->a.size()-b.size()).get();
+        Cluster<ManeuverClassification, Double, Double, ScalableDouble> oppositeCluster = clusters.stream().min((a, b)->
+                    (int) Math.signum(Math.abs(a.getMean()-dominantCluster.getMean())-Math.abs(b.getMean()-dominantCluster.getMean()))).get();
         // FIXME remove again when done with debugging
         System.out.println(ManeuverClassification.getToStringColumnHeaders());
         for (ManeuverClassification i : maneuverClassifications) {
