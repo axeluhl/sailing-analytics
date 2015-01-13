@@ -3,6 +3,7 @@ package com.sap.sailing.android.tracking.app.services;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -168,23 +169,26 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	@Override
-	public void onLocationChanged(Location location) {
-		ExLog.e(this, "DEBUG", "onLocationChanged");
-		
+	public void onLocationChanged(Location location) {		
 		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
 		
 		JSONObject json = new JSONObject();
 		try {
-			json.put("course", location.getBearing());
-			json.put("timestamp", location.getTime());
-			json.put("speed", location.getSpeed());
-			json.put("longitude", location.getLongitude());
-			json.put("latitude", location.getLatitude());
+			JSONArray jsonArray = new JSONArray();
+			JSONObject fixJson = new JSONObject();
+			
+			fixJson.put("course", location.getBearing());
+			fixJson.put("timestamp", location.getTime());
+			fixJson.put("speed", location.getSpeed());
+			fixJson.put("longitude", location.getLongitude());
+			fixJson.put("latitude", location.getLatitude());
+			
+			jsonArray.put(fixJson);
+			
+			json.put("fixes", jsonArray);
 			json.put("deviceUuid", prefs.getDeviceIdentifier());
 			
 			String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
-			
-			ExLog.e(this, "DEBUG", "calling start service");
 						
 			startService(MessageSendingService.createMessageIntent(this, postUrlStr,
 	                null, UUID.randomUUID(), json.toString(), null));
