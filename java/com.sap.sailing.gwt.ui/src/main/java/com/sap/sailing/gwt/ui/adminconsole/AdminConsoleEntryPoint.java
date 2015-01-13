@@ -52,7 +52,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     }
      
     private void createUI() {
-        AdminConsolePanel panel = new AdminConsolePanel(getUserService(), sailingService, persistentAlertLabel,
+        AdminConsolePanel panel = new AdminConsolePanel(getUserService(), sailingService, 
                 getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this, SecurityStylesheetResources.INSTANCE.css());
         BetterDateTimeBox.initialize();
         regattasDisplayers = new HashSet<>();

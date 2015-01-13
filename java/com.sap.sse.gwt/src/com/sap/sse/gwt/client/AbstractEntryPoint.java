@@ -8,6 +8,7 @@ import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.async.PendingAjaxCallMarker;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -22,6 +23,7 @@ public abstract class AbstractEntryPoint<S extends StringMessages> implements En
     public final void onModuleLoad() {
         this.stringMessages = createStringMessages();
         this.errorReporter = new DefaultErrorReporter<StringMessages>(stringMessages);
+        this.userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
         
         if (DebugInfo.isDebugIdEnabled()) {
             PendingAjaxCallBundle bundle = GWT.create(PendingAjaxCallBundle.class);
@@ -42,9 +44,7 @@ public abstract class AbstractEntryPoint<S extends StringMessages> implements En
      */
     protected abstract S createStringMessages();
     
-    protected void doOnModuleLoad() {
-        userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
-    }
+    protected abstract void doOnModuleLoad();
     
     /**
      * Sets the size of the tab panel when the tab panel is attached to the DOM
@@ -72,6 +72,11 @@ public abstract class AbstractEntryPoint<S extends StringMessages> implements En
     @Override
     public void reportPersistentInformation(String message) {
         errorReporter.reportPersistentInformation(message);
+    }
+
+    @Override
+    public Widget getPersistentInformationWidget() {
+        return errorReporter.getPersistentInformationWidget();
     }
     
     @Override

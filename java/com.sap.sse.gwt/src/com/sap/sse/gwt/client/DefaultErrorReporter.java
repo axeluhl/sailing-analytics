@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class DefaultErrorReporter<S extends StringMessages> implements ErrorReporter {
     private DialogBox errorDialogBox;
@@ -48,6 +49,11 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
         persistentAlertLabel.setText(message);
     }
 
+    @Override
+    public Widget getPersistentInformationWidget() {
+        return persistentAlertLabel;
+    }
+
     private DialogBox createErrorDialog() {
         // Create the popup dialog box
         final DialogBox myErrorDialogBox = new DialogBox();
@@ -74,4 +80,5 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
         });
         return myErrorDialogBox;
     }
+
 }

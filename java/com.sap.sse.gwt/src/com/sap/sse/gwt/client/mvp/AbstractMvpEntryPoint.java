@@ -8,6 +8,8 @@ import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.gwt.client.AbstractEntryPoint;
+import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.impl.ActivityMapperRegistry;
 
 /**
@@ -18,8 +20,9 @@ import com.sap.sse.gwt.client.mvp.impl.ActivityMapperRegistry;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class AbstractMvpEntryPoint implements EntryPoint {
+public abstract class AbstractMvpEntryPoint<S extends StringMessages> extends AbstractEntryPoint<S> {
 
+    
     /**
      * Initializes the application with a {@link PlaceHistoryHandler} using as a {@link PlaceHistoryMapper} what it gets
      * by passing <code>placeHistoryMapperClass</code> to a {@link GWT#create(Class)} call. An {@link ActivityManager}
@@ -36,7 +39,7 @@ public abstract class AbstractMvpEntryPoint implements EntryPoint {
      * @param activityMappers
      *            used for a composite activity mapper; the first mapper to provide an activity for a place gets its way
      */
-    public void onModuleLoad(ClientFactory clientFactory, PlaceHistoryMapper historyMapper, ActivityMapper... activityMappers) {
+    public void initMvp(ClientFactory clientFactory, PlaceHistoryMapper historyMapper, ActivityMapper... activityMappers) { 
         // Start ActivityManager for the main widget with our ActivityMapper
         ActivityMapperRegistry activityMapperRegistry = new ActivityMapperRegistry();
         for (ActivityMapper activityMapper : activityMappers) {

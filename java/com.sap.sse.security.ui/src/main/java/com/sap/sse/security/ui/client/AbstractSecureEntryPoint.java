@@ -20,17 +20,16 @@ public abstract class AbstractSecureEntryPoint<S extends StringMessages> extends
     private UserManagementServiceAsync userManagementService;
 
     protected void doOnModuleLoad() {
-        super.doOnModuleLoad();
         userManagementService = GWT.create(UserManagementService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath);
         userService = new UserService(userManagementService);
     }
     
-    protected UserManagementServiceAsync getUserManagementService() {
+    public UserManagementServiceAsync getUserManagementService() {
         return userManagementService;
     }
     
-    protected UserService getUserService() {
+    public UserService getUserService() {
         return userService;
     }
 
