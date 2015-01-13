@@ -12,12 +12,12 @@ public class ScalableInteger implements AbstractScalarValue<Integer> {
     }
 
     @Override
-    public ScalableValue<Integer, Integer> multiply(double factor) {
+    public ScalableInteger multiply(double factor) {
         return new ScalableInteger((int) (getValue() * factor));
     }
 
     @Override
-    public ScalableValue<Integer, Integer> add(ScalableValue<Integer, Integer> t) {
+    public ScalableInteger add(ScalableValue<Integer, Integer> t) {
         return new ScalableInteger(getValue() + t.getValue());
     }
 
@@ -31,4 +31,18 @@ public class ScalableInteger implements AbstractScalarValue<Integer> {
         return value;
     }
 
+    @Override
+    public double getDistance(Integer other) {
+        return Math.abs(value-other);
+    }
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
+
+    @Override
+    public int compareTo(Integer o) {
+        return new Integer(value).compareTo(o);
+    }
 }

@@ -1,9 +1,13 @@
 package com.sap.sailing.util.kmeans;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.StreamSupport;
 
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
-import com.sap.sse.common.Util;
+import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
 
 /**
  * Clusters elements of type <code>T</code> into a pre-defined number of clusters such that after clustering the sum of
@@ -14,8 +18,8 @@ import com.sap.sse.common.Util;
  *
  * @param <T>
  */
-public class KMeansClusterer<ValueType, AveragesTo, T extends ScalableValue<ValueType, AveragesTo>> {
-    private final Cluster<ValueType, AveragesTo, T>[] clusters;
+public class KMeansClusterer<ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> {
+    private List<Cluster<ValueType, AveragesTo, T>> clusters;
     
     /**
      * Clusters the <code>elements</code> into <code>numberOfClusters</code> clusters such that
@@ -31,7 +35,7 @@ public class KMeansClusterer<ValueType, AveragesTo, T extends ScalableValue<Valu
      *            the elements to cluster
      */
     public KMeansClusterer(int numberOfClusters, Iterable<T> elements) {
-        this(numberOfClusters, elements, elements);
+        this(numberOfClusters, elements, StreamSupport.stream(elements.spliterator(),  /* parallel */ false).map((e)->e.divide(1)).iterator());
     }
 
     /**
@@ -39,40 +43,74 @@ public class KMeansClusterer<ValueType, AveragesTo, T extends ScalableValue<Valu
      * during the first iteration.
      * 
      * @param seeds
-     *            elements to use as the seeds; if fewer than <coode>numberOfClusters</code> seeds are provided, the
+     *            elements to use as the seeds; if fewer than <code>numberOfClusters</code> seeds are provided, the
      *            number of clusters is reduced to the number of seeds provided.
      */
-    public KMeansClusterer(int numberOfClusters, Iterable<T> elements, Iterable<T> seeds) {
-        final int k = Math.min(numberOfClusters, Util.size(seeds));
-        @SuppressWarnings("unchecked")
-        Cluster<ValueType, AveragesTo, T>[] myClusters = (Cluster<ValueType, AveragesTo, T>[]) new Cluster<?, ?, ?>[k];
-        clusters = myClusters;
-        initClusters(seeds);
-        cluster(elements);
+    public KMeansClusterer(int numberOfClusters, Iterable<T> elements, Iterator<AveragesTo> seeds) {
+        clusters = new ArrayList<>();
+        initClusters(elements, seeds);
+        if (!clusters.isEmpty()) {
+            addElementsToNearestCluster(elements);
+            iterate(elements);
+        }
     }
 
-    private void initClusters(Iterable<T> seeds) {
-        Iterator<T> seedIter = seeds.iterator();
-        for (int i=0; i<clusters.length; i++) {
-            clusters[i] = new Cluster<ValueType, AveragesTo, T>(seedIter.next());
+    /**
+     * Creates the clusters using the <code>seeds</code> as their initial mean. Won't create more clusters than
+     * <code>elements</code> provided; in case fewer elements are provided, only a prefix of the <code>seeds</code>
+     * iterator will be used.
+     */
+    private void initClusters(Iterable<T> elements, Iterator<AveragesTo> seeds) {
+        Iterator<T> elementsIter = elements.iterator();
+        while (elementsIter.hasNext() && seeds.hasNext()) {
+            elementsIter.next();
+            clusters.add(new Cluster<ValueType, AveragesTo, T>(seeds.next()));
         }
     }
     
-    private void cluster(Iterable<T> elements) {
-        if (clusters.length > 0) {
-            for (T t : elements) {
-                Cluster<ValueType, AveragesTo, T> nearestCluster = clusters[0];
-                AveragesTo leastDistance = nearestCluster.getDistanceFromMean(t);
-                for (int i=1; i<clusters.length; i++) {
-                    
+    private void iterate(Iterable<T> elements) {
+        List<Cluster<ValueType, AveragesTo, T>> oldClusters;
+        do {
+            List<Cluster<ValueType, AveragesTo, T>> newClusters = new ArrayList<>(clusters.size());
+            for (Cluster<ValueType, AveragesTo, T> c : clusters) {
+                AveragesTo newMean = c.getCentroid();
+                if (newMean == null) {
+                    newMean = c.getMean(); // use old mean instead
+                }
+                newClusters.add(new Cluster<ValueType, AveragesTo, T>(newMean));
+            }
+            oldClusters = clusters;
+            clusters = newClusters;
+            addElementsToNearestCluster(elements);
+        } while (!clusters.equals(oldClusters));
+    }
+
+    /**
+     * adds all <code>elements</code> to their nearest cluster
+     */
+    private void addElementsToNearestCluster(Iterable<T> elements) {
+        assert !clusters.isEmpty();
+        for (T t : elements) {
+            Iterator<Cluster<ValueType, AveragesTo, T>> clusterIter = clusters.iterator();
+            Cluster<ValueType, AveragesTo, T> nearestCluster = clusterIter.next();
+            double leastDistance = nearestCluster.getDistanceFromMean(t);
+            while (clusterIter.hasNext()) {
+                Cluster<ValueType, AveragesTo, T> nextCluster = clusterIter.next();
+                double distance = nextCluster.getDistanceFromMean(t);
+                if (distance < leastDistance) {
+                    leastDistance = distance;
+                    nearestCluster = nextCluster;
                 }
             }
+            nearestCluster.add(t);
         }
-        // TODO Auto-generated method stub
-        
     }
     
-    public Cluster<ValueType, AveragesTo, T>[] getClusters() {
-        return clusters;
+    public Set<Cluster<ValueType, AveragesTo, T>> getClusters() {
+        Set<Cluster<ValueType, AveragesTo, T>> result = new HashSet<>();
+        for (Cluster<ValueType, AveragesTo, T> i : clusters) {
+            result.add(i);
+        }
+        return result;
     }
 }

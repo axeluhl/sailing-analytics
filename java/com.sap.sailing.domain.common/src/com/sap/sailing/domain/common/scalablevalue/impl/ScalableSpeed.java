@@ -3,8 +3,9 @@ package com.sap.sailing.domain.common.scalablevalue.impl;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
+import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
 
-public class ScalableSpeed implements ScalableValue<Double, Speed> {
+public class ScalableSpeed implements ScalableValueWithDistance<Double, Speed> {
     private final double knots;
     
     public ScalableSpeed(Speed speed) {
@@ -16,12 +17,12 @@ public class ScalableSpeed implements ScalableValue<Double, Speed> {
     }
 
     @Override
-    public ScalableValue<Double, Speed> multiply(double factor) {
+    public ScalableSpeed multiply(double factor) {
         return new ScalableSpeed(factor*knots);
     }
 
     @Override
-    public ScalableValue<Double, Speed> add(ScalableValue<Double, Speed> t) {
+    public ScalableSpeed add(ScalableValue<Double, Speed> t) {
         return new ScalableSpeed(knots+t.getValue());
     }
 
@@ -34,4 +35,10 @@ public class ScalableSpeed implements ScalableValue<Double, Speed> {
     public Double getValue() {
         return knots;
     }
+
+    @Override
+    public double getDistance(Speed other) {
+        return Math.abs(knots-other.getKnots());
+    }
+    
 }

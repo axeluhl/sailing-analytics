@@ -3,8 +3,9 @@ package com.sap.sailing.domain.common.scalablevalue.impl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
+import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
 
-public class ScalablePosition implements ScalableValue<ScalablePosition, Position> {
+public class ScalablePosition implements ScalableValueWithDistance<ScalablePosition, Position> {
     private final double x, y, z;
     
     public ScalablePosition(Position position) {
@@ -58,5 +59,9 @@ public class ScalablePosition implements ScalableValue<ScalablePosition, Positio
     public ScalablePosition getValue() {
         return this;
     }
-    
+
+    @Override
+    public double getDistance(Position other) {
+        return divide(1).getDistance(other).getCentralAngleDeg();
+    }
 }

@@ -11,7 +11,7 @@ public class ScalableDouble implements AbstractScalarValue<Double> {
     }
     
     @Override
-    public ScalableValue<Double, Double> multiply(double factor) {
+    public ScalableDouble multiply(double factor) {
         return new ScalableDouble(factor*getValue());
     }
 
@@ -30,4 +30,18 @@ public class ScalableDouble implements AbstractScalarValue<Double> {
         return value;
     }
 
+    @Override
+    public double getDistance(Double other) {
+        return Math.abs(value-other);
+    }
+
+    @Override
+    public String toString() {
+        return new Double(value).toString();
+    }
+
+    @Override
+    public int compareTo(Double o) {
+        return new Double(value).compareTo(o);
+    }
 }

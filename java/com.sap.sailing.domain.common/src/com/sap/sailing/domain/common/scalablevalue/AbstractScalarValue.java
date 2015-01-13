@@ -8,5 +8,6 @@ package com.sap.sailing.domain.common.scalablevalue;
  * @author Axel Uhl (d043530)
  *
  */
-public interface AbstractScalarValue<T> extends ScalableValue<T, T> {
+public interface AbstractScalarValue<T extends Comparable<T>> extends ComparableScalableValueWithDistance<T, T> {
+    
 }
