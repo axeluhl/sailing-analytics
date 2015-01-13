@@ -28,7 +28,7 @@ import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
  *            be scaled and a distance between them can be computed which enables the clustering process
  */
 public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> {
-    private List<Cluster<ValueType, AveragesTo, T>> clusters;
+    private List<Cluster<E, ValueType, AveragesTo, T>> clusters;
     private final Function<E, T> mapper;
     
     /**
@@ -56,16 +56,16 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
      * {@link Cluster#getCentroid() centroids} of those clusters are returned as initial means.
      */
     private static <E, ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> Iterator<AveragesTo> randomizedSeeds(int numberOfClusters, Iterable<E> elements, Function<E, T> mapper) {
-        ArrayList<Cluster<ValueType, AveragesTo, T>> clusters = new ArrayList<>(numberOfClusters);
+        ArrayList<Cluster<E, ValueType, AveragesTo, T>> clusters = new ArrayList<>(numberOfClusters);
         Random random = new Random();
         int i=0;
         for (E e : elements) {
             if (i < numberOfClusters) {
-                Cluster<ValueType, AveragesTo, T> cluster = new Cluster<>(null);
+                Cluster<E, ValueType, AveragesTo, T> cluster = new Cluster<>(null, mapper);
                 clusters.add(cluster);
-                cluster.add(mapper.apply(e));
+                cluster.add(e);
             } else {
-                clusters.get(random.nextInt(numberOfClusters)).add(mapper.apply(e));
+                clusters.get(random.nextInt(numberOfClusters)).add(e);
             }
             i++;
         };
@@ -99,20 +99,20 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
         Iterator<E> elementsIter = elements.iterator();
         while (elementsIter.hasNext() && seeds.hasNext()) {
             elementsIter.next();
-            clusters.add(new Cluster<ValueType, AveragesTo, T>(seeds.next()));
+            clusters.add(new Cluster<E, ValueType, AveragesTo, T>(seeds.next(), mapper));
         }
     }
     
     private void iterate(Iterable<E> elements) {
-        List<Cluster<ValueType, AveragesTo, T>> oldClusters;
+        List<Cluster<E, ValueType, AveragesTo, T>> oldClusters;
         do {
-            List<Cluster<ValueType, AveragesTo, T>> newClusters = new ArrayList<>(clusters.size());
-            for (Cluster<ValueType, AveragesTo, T> c : clusters) {
+            List<Cluster<E, ValueType, AveragesTo, T>> newClusters = new ArrayList<>(clusters.size());
+            for (Cluster<E, ValueType, AveragesTo, T> c : clusters) {
                 AveragesTo newMean = c.getCentroid();
                 if (newMean == null) {
                     newMean = c.getMean(); // use old mean instead
                 }
-                newClusters.add(new Cluster<ValueType, AveragesTo, T>(newMean));
+                newClusters.add(new Cluster<E, ValueType, AveragesTo, T>(newMean, mapper));
             }
             oldClusters = clusters;
             clusters = newClusters;
@@ -126,25 +126,24 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
     private void addElementsToNearestCluster(Iterable<E> elements) {
         assert !clusters.isEmpty();
         for (E e : elements) {
-            Iterator<Cluster<ValueType, AveragesTo, T>> clusterIter = clusters.iterator();
-            Cluster<ValueType, AveragesTo, T> nearestCluster = clusterIter.next();
-            final T t = mapper.apply(e);
-            double leastDistance = nearestCluster.getDistanceFromMean(t);
+            Iterator<Cluster<E, ValueType, AveragesTo, T>> clusterIter = clusters.iterator();
+            Cluster<E, ValueType, AveragesTo, T> nearestCluster = clusterIter.next();
+            double leastDistance = nearestCluster.getDistanceFromMean(e);
             while (clusterIter.hasNext()) {
-                Cluster<ValueType, AveragesTo, T> nextCluster = clusterIter.next();
-                double distance = nextCluster.getDistanceFromMean(t);
+                Cluster<E, ValueType, AveragesTo, T> nextCluster = clusterIter.next();
+                double distance = nextCluster.getDistanceFromMean(e);
                 if (distance < leastDistance) {
                     leastDistance = distance;
                     nearestCluster = nextCluster;
                 }
             }
-            nearestCluster.add(t);
+            nearestCluster.add(e);
         }
     }
     
-    public Set<Cluster<ValueType, AveragesTo, T>> getClusters() {
-        Set<Cluster<ValueType, AveragesTo, T>> result = new HashSet<>();
-        for (Cluster<ValueType, AveragesTo, T> i : clusters) {
+    public Set<Cluster<E, ValueType, AveragesTo, T>> getClusters() {
+        Set<Cluster<E, ValueType, AveragesTo, T>> result = new HashSet<>();
+        for (Cluster<E, ValueType, AveragesTo, T> i : clusters) {
             result.add(i);
         }
         return result;

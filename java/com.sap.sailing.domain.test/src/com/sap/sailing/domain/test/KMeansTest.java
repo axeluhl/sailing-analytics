@@ -17,13 +17,14 @@ import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.util.kmeans.Cluster;
 import com.sap.sailing.util.kmeans.KMeansClusterer;
 import com.sap.sailing.util.kmeans.KMeansClustererWithEquidistantInitialization;
+import com.sap.sailing.util.kmeans.KMeansMappingClusterer;
 
 public class KMeansTest {
     @Test
     public void simpleIntegerTestWithEquidistantInitialization() {
         KMeansClustererWithEquidistantInitialization<Integer, Integer, ScalableInteger> clusterer = new KMeansClustererWithEquidistantInitialization<>(4,
                 Arrays.asList(new ScalableInteger(1), new ScalableInteger(1), new ScalableInteger(11), new ScalableInteger(11), new ScalableInteger(21), new ScalableInteger(21), new ScalableInteger(31), new ScalableInteger(31)));
-        Set<Cluster<Integer, Integer, ScalableInteger>> clusters = clusterer.getClusters();
+        Set<Cluster<ScalableInteger, Integer, Integer, ScalableInteger>> clusters = clusterer.getClusters();
         assertEquals(4, clusters.size());
         Set<Integer> clusterCentroids = new HashSet<>();
         clusters.stream().map((c)->c.getCentroid()).forEach((e)->clusterCentroids.add(e));
@@ -38,15 +39,46 @@ public class KMeansTest {
             elements.add(new ScalableDouble(random.nextDouble()));
         }
         KMeansClusterer<Double, Double, ScalableDouble> clusterer = new KMeansClusterer<>(4, elements);
-        Set<Cluster<Double, Double, ScalableDouble>> clusters = clusterer.getClusters();
-        for (Cluster<Double, Double, ScalableDouble> cluster : clusters) {
+        Set<Cluster<ScalableDouble, Double, Double, ScalableDouble>> clusters = clusterer.getClusters();
+        for (Cluster<ScalableDouble, Double, Double, ScalableDouble> cluster : clusters) {
             for (ScalableDouble element : cluster) {
                 final Double elementVal = element.divide(1);
-                double actualDistanceFromMean = Math.abs(cluster.getMean() - elementVal);
-                for (Cluster<Double, Double, ScalableDouble> otherCluster : clusters) {
+                final double actualDistanceFromMean = Math.abs(cluster.getMean() - elementVal);
+                for (Cluster<ScalableDouble, Double, Double, ScalableDouble> otherCluster : clusters) {
                     if (otherCluster != cluster) {
                         Double otherClusterMean = otherCluster.getMean();
-                        double distanceToOtherClusterMean = Math.abs(otherClusterMean - elementVal);
+                        final double distanceToOtherClusterMean = Math.abs(otherClusterMean - elementVal);
+                        // assert that all elements are in the cluster where they are closest to the cluster's mean
+                        assertTrue(distanceToOtherClusterMean >= actualDistanceFromMean);
+                    }
+                }
+            }
+        }
+    }
+    
+    @Test
+    public void testMappingClusterer() {
+        List<String> strings = new ArrayList<>();
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<100000; i++) {
+            for (int j=random.nextInt(100); j>=0; j--) {
+                sb.append((char) ('A'+random.nextInt(26)));
+            }
+            strings.add(sb.toString());
+            sb.delete(0, sb.length());
+        }
+        KMeansMappingClusterer<String, Integer, Integer, ScalableInteger> clusterer = new KMeansMappingClusterer<>(5, strings, (s)->new ScalableInteger(s.length()));
+        Set<Cluster<String, Integer, Integer, ScalableInteger>> clusters = clusterer.getClusters();
+        assertEquals(5, clusters.size());
+        for (Cluster<String, Integer, Integer, ScalableInteger> cluster : clusters) {
+            for (String element : cluster) {
+                final int elementLength = element.length();
+                double actualDistanceFromMean = Math.abs(cluster.getMean() - elementLength);
+                for (Cluster<String, Integer, Integer, ScalableInteger> otherCluster : clusters) {
+                    if (otherCluster != cluster) {
+                        final int otherClusterMean = otherCluster.getMean();
+                        final double distanceToOtherClusterMean = Math.abs(otherClusterMean - elementLength);
                         // assert that all elements are in the cluster where they are closest to the cluster's mean
                         assertTrue(distanceToOtherClusterMean >= actualDistanceFromMean);
                     }

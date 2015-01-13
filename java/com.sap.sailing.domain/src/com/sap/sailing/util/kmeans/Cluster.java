@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
 
@@ -20,12 +21,14 @@ import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
  *
  * @param <T>
  */
-public class Cluster<ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> implements Iterable<T> {
-    private final Set<T> elements;
+public class Cluster<E, ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> implements Iterable<E> {
+    private final Set<E> elements;
+    private final Function<E, T> mapper;
     private final AveragesTo mean;
     private ScalableValueWithDistance<ValueType, AveragesTo> sum;
     
-    public Cluster(final AveragesTo mean) {
+    public Cluster(final AveragesTo mean, Function<E, T> mapper) {
+        this.mapper = mapper;
         elements = new HashSet<>();
         this.mean = mean;
     }
@@ -46,7 +49,7 @@ public class Cluster<ValueType, AveragesTo, T extends ScalableValueWithDistance<
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Cluster<?, ?, ?> other = (Cluster<?, ?, ?>) obj;
+        Cluster<?, ?, ?, ?> other = (Cluster<?, ?, ?, ?>) obj;
         if (elements == null) {
             if (other.elements != null)
                 return false;
@@ -55,8 +58,9 @@ public class Cluster<ValueType, AveragesTo, T extends ScalableValueWithDistance<
         return true;
     }
 
-    public void add(final T t) {
-        elements.add(t);
+    public void add(final E e) {
+        elements.add(e);
+        final T t = mapper.apply(e);
         if (sum == null) {
             sum = t;
         } else {
@@ -64,8 +68,8 @@ public class Cluster<ValueType, AveragesTo, T extends ScalableValueWithDistance<
         }
     }
     
-    public double getDistanceFromMean(final T t) {
-        return t.getDistance(mean);
+    public double getDistanceFromMean(final E e) {
+        return mapper.apply(e).getDistance(mean);
     }
     
     /**
@@ -86,17 +90,17 @@ public class Cluster<ValueType, AveragesTo, T extends ScalableValueWithDistance<
     }
 
     @Override
-    public Iterator<T> iterator() {
+    public Iterator<E> iterator() {
         return elements.iterator();
     }
     
     @Override
-    public Spliterator<T> spliterator() {
+    public Spliterator<E> spliterator() {
         return elements.spliterator();
     }
     
     @Override
-    public void forEach(Consumer<? super T> action) {
+    public void forEach(Consumer<? super E> action) {
         elements.forEach(action);
     }
     
