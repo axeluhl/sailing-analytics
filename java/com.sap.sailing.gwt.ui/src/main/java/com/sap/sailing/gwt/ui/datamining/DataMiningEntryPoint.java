@@ -18,8 +18,6 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
@@ -30,8 +28,6 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
-    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
-
     private static DataMiningResources resources = GWT.create(DataMiningResources.class);
     
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
@@ -40,7 +36,6 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
