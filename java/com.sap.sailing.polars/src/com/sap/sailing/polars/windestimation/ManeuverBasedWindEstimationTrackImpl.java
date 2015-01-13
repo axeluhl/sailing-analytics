@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -124,7 +126,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         }
         
         public static String getToStringColumnHeaders() {
-            return "competitor, timePoint, angleDeg, boatSpeedKn, cogDeg, windEstimation, lossM, assumedLegType, assumedTack, estimatedTrueWindSpeedKn, estimatedTrueWindAngleDeg";
+            return "competitor, timePoint, angleDeg, boatSpeedKn, cogDeg, windEstimationFromDeg, lossM, assumedLegType, assumedTack, estimatedTrueWindSpeedKn, estimatedTrueWindAngleDeg";
         }
         
         @Override
@@ -135,7 +137,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             final StringBuilder result = new StringBuilder();
             result.append(prefix);
             result.append(", ");
-            if (getLegType() == LegType.DOWNWIND) {
+            if (getLegType() == LegType.UPWIND) {
                 result.append(getMiddleManeuverCourse().getDegrees());
             } else {
                 result.append(getMiddleManeuverCourse().reverse().getDegrees());
@@ -150,7 +152,6 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             result.append(getEstimatedTrueWindSpeedAndAngle().getObject().getKnots());
             result.append(", ");
             result.append(getEstimatedTrueWindSpeedAndAngle().getObject().getBearing().getDegrees());
-            result.append("\n");
             return result.toString();
         }
     }
@@ -195,11 +196,16 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
     private Map<Maneuver, Competitor> getAllManeuvers() {
         Map<Maneuver, Competitor> maneuvers = new HashMap<>();
+        final Waypoint firstWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
+        final Waypoint lastWaypoint = trackedRace.getRace().getCourse().getLastWaypoint();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            final TimePoint from = trackedRace.getStartOfRace() == null ? trackedRace.getStartOfTracking()
-                    : trackedRace.getStartOfRace();
-            final TimePoint to = trackedRace.getEndOfRace() == null ? trackedRace.getEndOfTracking() == null ?
-                    MillisecondsTimePoint.now() : trackedRace.getEndOfTracking() : trackedRace.getEndOfRace();
+            final TimePoint from = Util.getFirstNonNull(
+                    firstWaypoint == null ? null : trackedRace.getMarkPassing(competitor, firstWaypoint) == null ? null : trackedRace.getMarkPassing(competitor, firstWaypoint).getTimePoint(),
+                    trackedRace.getStartOfRace(), trackedRace.getStartOfTracking());
+            final TimePoint to = Util.getFirstNonNull(
+                    lastWaypoint == null ? null : trackedRace.getMarkPassing(competitor, lastWaypoint) == null ? null : trackedRace.getMarkPassing(competitor, lastWaypoint).getTimePoint(),
+                    trackedRace.getEndOfRace() , trackedRace.getEndOfTracking(),
+                    MillisecondsTimePoint.now());
             for (Maneuver maneuver : trackedRace.getManeuvers(competitor, from, to, /* waitForLatest */ false)) {
                 maneuvers.put(maneuver, competitor);
             }
