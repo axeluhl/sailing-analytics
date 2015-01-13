@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
-import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
 
@@ -35,7 +35,29 @@ public class KMeansClusterer<ValueType, AveragesTo, T extends ScalableValueWithD
      *            the elements to cluster
      */
     public KMeansClusterer(int numberOfClusters, Iterable<T> elements) {
-        this(numberOfClusters, elements, StreamSupport.stream(elements.spliterator(),  /* parallel */ false).map((e)->e.divide(1)).iterator());
+        this(numberOfClusters, elements, randomizedSeeds(numberOfClusters, elements));
+    }
+
+    /**
+     * Constructs <code>numberOfClusters</code> (or as many as <code>elements</code> are provided if those are fewer
+     * than <code>numberOfClusters</code>) clusters and randomly assigns the <code>elements</code> to them. The
+     * {@link Cluster#getCentroid() centroids} of those clusters are returned as initial means.
+     */
+    private static <ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> Iterator<AveragesTo> randomizedSeeds(int numberOfClusters, Iterable<T> elements) {
+        ArrayList<Cluster<ValueType, AveragesTo, T>> clusters = new ArrayList<>(numberOfClusters);
+        Random random = new Random();
+        int i=0;
+        for (T t : elements) {
+            if (i < numberOfClusters) {
+                Cluster<ValueType, AveragesTo, T> cluster = new Cluster<>(null);
+                clusters.add(cluster);
+                cluster.add(t);
+            } else {
+                clusters.get(random.nextInt(numberOfClusters)).add(t);
+            }
+            i++;
+        }
+        return clusters.stream().map((c)->c.getCentroid()).iterator();
     }
 
     /**

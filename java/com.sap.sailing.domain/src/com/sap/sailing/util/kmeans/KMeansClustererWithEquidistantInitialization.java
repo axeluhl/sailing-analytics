@@ -7,10 +7,21 @@ import java.util.List;
 import com.sap.sailing.domain.common.scalablevalue.ComparableScalableValueWithDistance;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
 
-public class KMeansClustererForComparables<ValueType, AveragesTo extends Comparable<AveragesTo>, T extends ComparableScalableValueWithDistance<ValueType, AveragesTo>>
+/**
+ * Requires {@link ComparableScalableValueWithDistance comparable scalable values} as elements for which then
+ * the minimum and maximum elements are calculated. The given number of clusters is then initialized with mean values
+ * that are equidistantly distributed between the minimum and maximum value.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <ValueType>
+ * @param <AveragesTo>
+ * @param <T>
+ */
+public class KMeansClustererWithEquidistantInitialization<ValueType, AveragesTo extends Comparable<AveragesTo>, T extends ComparableScalableValueWithDistance<ValueType, AveragesTo>>
         extends KMeansClusterer<ValueType, AveragesTo, T> {
 
-    public KMeansClustererForComparables(int numberOfClusters, Iterable<T> elements) {
+    public KMeansClustererWithEquidistantInitialization(int numberOfClusters, Iterable<T> elements) {
         super(numberOfClusters, elements, getEquiDistantSeeds(numberOfClusters, elements));
     }
 
