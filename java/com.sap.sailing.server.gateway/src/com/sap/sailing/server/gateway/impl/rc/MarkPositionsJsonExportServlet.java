@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -24,6 +23,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSeri
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionedMarkJsonSerializer;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class MarkPositionsJsonExportServlet extends AbstractJsonHttpServlet {
 

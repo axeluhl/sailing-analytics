@@ -59,7 +59,7 @@ public class DiscardThresholdBoxes {
     public Widget getWidget() {
         return widget;
     }
-
+    
     public int[] getDiscardThresholds() {
         List<Integer> discardThresholds = new ArrayList<Integer>();
         // go backwards; starting from first non-zero element, add them; take over leading zeroes which validator shall discard

@@ -22,6 +22,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.LaunchActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
@@ -248,4 +249,14 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float gpsBearing, float gpsSpeed);
 	}
 
+    private void showNotification() {
+        CharSequence text = getText(R.string.tracker_started);
+        Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
+        Intent i = new Intent(this, LaunchActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
+        notification.setLatestEventInfo(this, getText(R.string.app_name), text, pi);
+        notification.flags |= Notification.FLAG_NO_CLEAR;
+        startForeground(NOTIFICATION_ID, notification);
+    }
 }

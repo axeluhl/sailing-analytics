@@ -7,10 +7,10 @@ import static org.mockito.Mockito.when;
 import org.json.simple.JSONObject;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
 

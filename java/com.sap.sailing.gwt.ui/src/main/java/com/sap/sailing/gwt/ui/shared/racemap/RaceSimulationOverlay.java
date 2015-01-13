@@ -28,8 +28,6 @@ import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.player.TimeListener;
-import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * A Google Maps overlay based on an HTML5 canvas for drawing simulation results on the {@link RaceMap}.
@@ -37,7 +35,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Christopher Ronnewinkel (D036654)
  * 
  */
-public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeListener {
+public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     public static final String GET_SIMULATION_CATEGORY = "getSimulation";
     private final String textColor = "Black";
@@ -47,21 +45,18 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
     private double rectWidth = 20;
     private double rectHeight = 20;
     private final StringMessages stringMessages;
-    private final Timer timer;
-    private Date lastSimulationTime;
-    private final long deltaSimulationTime = 15000;
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final SailingServiceAsync sailingService;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ColorPalette colors;
     private SimulatorResultsDTO simulationResult;
     private PathDTO racePath;
+    private int raceLeg = 0;
     private Date prevStartTime;
     private Canvas simulationLegend;
     
-    public RaceSimulationOverlay(MapWidget map, int zIndex, final Timer timer, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor) {
+    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor) {
         super(map, zIndex);
-        this.timer = timer;
         this.raceIdentifier = raceIdentifier;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -69,30 +64,22 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
         this.colors = new ColorPaletteGenerator();
     }
     
-    @Override
-    public void timeChanged(final Date newTime, final Date oldTime) {
-        if (lastSimulationTime == null) {
-            lastSimulationTime = new Date(newTime.getTime() - deltaSimulationTime);
-        }
-        if (Math.abs(newTime.getTime() - lastSimulationTime.getTime()) >= deltaSimulationTime) {
-            lastSimulationTime = newTime;
+    public void updateLeg(int newLeg, Date newTime, boolean clearCanvas) {
+        if ((newLeg != raceLeg) && (this.isVisible())) {
+            raceLeg = newLeg;
+            if (clearCanvas) {
+                this.clearCanvas();
+            }
             this.simulate(newTime);
-        }
-    }
-    
-    @Override
-    public void addToMap() {
-        if (timer != null) {
-            timer.addTimeListener(this);
         }
     }
 
     @Override
-    public void removeFromMap() {
-        if (timer != null) {
-            timer.removeTimeListener(this);
+    public void setVisible(boolean isVisible) {
+        super.setVisible(isVisible);
+        if (simulationLegend != null) {
+            simulationLegend.setVisible(isVisible);
         }
-        this.setVisible(false);
     }
 
     @Override
@@ -153,7 +140,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
             createSimulationLegend(map);
         }
         drawLegend(simulationLegend);
-        
         // calibrate canvas
         super.draw();
         // draw paths
@@ -161,14 +147,15 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
         PathDTO[] paths = simulationResult.getPaths();
         boolean first = true;
         int colorIdx = paths.length - 1;
-        for(PathDTO path : paths) {
+        for (PathDTO path : paths) {
             List<SimulatorWindDTO> points = path.getPoints();
             ctxt.setLineWidth(3.0);
             ctxt.setGlobalAlpha(0.7);
             ctxt.setStrokeStyle(this.colors.getColor(colorIdx));
             ctxt.beginPath();
-            for(SimulatorWindDTO point : points) {
-                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg, point.position.lngDeg));
+            for (SimulatorWindDTO point : points) {
+                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg,
+                        point.position.lngDeg));
                 if (first) {
                     ctxt.moveTo(px.getX(), px.getY());
                     first = false;
@@ -177,12 +164,24 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
                 }
             }
             ctxt.stroke();
-            ctxt.setGlobalAlpha(1.0);
+            SimulatorWindDTO start = points.get(0);
+            long timeStep = simulationResult.getTimeStep();
+            for (SimulatorWindDTO point : points) {
+                if ((point.timepoint - start.timepoint) % (timeStep) != 0) {
+                    continue;
+                }
+
+                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg,
+                        point.position.lngDeg));
+                ctxt.beginPath();
+                ctxt.arc(px.getX(), px.getY(), 1.5, 0, 2 * Math.PI);
+                ctxt.closePath();
+                ctxt.stroke();
+            }
             colorIdx--;
         }
-        
     }
-    
+
     public void drawLegend(Canvas canvas) {
         if (this.simulationResult == null) {
             return;
@@ -279,6 +278,5 @@ public class RaceSimulationOverlay extends FullCanvasOverlay  implements TimeLis
                         }
                     }
                 }));
-
     }
 }

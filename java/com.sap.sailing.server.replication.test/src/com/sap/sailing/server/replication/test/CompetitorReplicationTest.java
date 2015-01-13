@@ -32,7 +32,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -43,6 +42,7 @@ import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDe
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Tests replication of competitors in conjunction with the {@link CompetitorStore} concepts, particularly the
@@ -70,7 +70,8 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         String boatClassName = "Kielzugvogel";
         Integer regattaId = 12345;
         Iterable<Series> series = Collections.emptyList();
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, regattaId, series,
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
+                /*startDate*/ null, /*endDate*/ null, regattaId, series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";

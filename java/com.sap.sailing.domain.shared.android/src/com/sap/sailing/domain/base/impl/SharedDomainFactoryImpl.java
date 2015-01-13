@@ -32,8 +32,8 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
+import com.sap.sse.common.WithID;
 
 public class SharedDomainFactoryImpl implements SharedDomainFactory {
     private static final Logger logger = Logger.getLogger(SharedDomainFactoryImpl.class.getName());
@@ -270,18 +270,27 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
+        final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassName(name);
         synchronized (boatClassCache) {
             BoatClass result = boatClassCache.get(name);
-            if (result == null && name != null) {
+            if (result == null) {
+                result = boatClassCache.get(unifiedBoatClassName);
+            }
+            if (result == null && unifiedBoatClassName != null) {
                 BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
                 if (boatClassMasterdata != null) {
-                    result = new BoatClassImpl(name, boatClassMasterdata);
+                    result = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
                     boatClassCache.put(name, result);
+                    boatClassCache.put(unifiedBoatClassName, result);
+                    boatClassCache.put(result.getName(), result);
+                    for (String alternativeName : boatClassMasterdata.getAlternativeNames()) {
+                        boatClassCache.put(alternativeName, result);
+                    }
                 }
             }
             if (result == null) {
-                result = new BoatClassImpl(name, typicallyStartsUpwind);
-                boatClassCache.put(name, result);
+                result = new BoatClassImpl(unifiedBoatClassName, typicallyStartsUpwind);
+                boatClassCache.put(unifiedBoatClassName, result);
             }
             return result;
         }

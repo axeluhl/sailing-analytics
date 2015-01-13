@@ -13,10 +13,10 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneUUIDIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -69,7 +69,7 @@ public class Activator implements BundleActivator {
         registerGPSFixJsonService(context, new GPSFixNmeaDTOJsonDeserializer(), new GPSFixNmeaDTOJsonSerializer(), GPSFixNmeaDTOJsonDeserializer.TYPE);
         registerGPSFixJsonService(context, new GPSFixMovingNmeaDTOJsonDeserializer(), new GPSFixMovingNmeaDTOJsonSerializer(), GPSFixMovingNmeaDTOJsonDeserializer.TYPE);
         
-        registrations.add(context.registerService(RaceLogTrackingAdapterFactory.class, RaceLogTrackingAdapterFactoryImpl.INSTANCE, null));
+        registrations.add(context.registerService(RaceLogTrackingAdapterFactory.class, RaceLogTrackingAdapterFactory.INSTANCE, null));
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
 

@@ -1,5 +1,6 @@
 package com.sap.sse.security;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,10 +11,13 @@ import java.util.Set;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
+import com.sap.sse.common.Named;
+import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 
-public class User {
+public class User implements Named, WithID {
+    private static final long serialVersionUID = 1788215575606546042L;
 
     private String name;
 
@@ -39,6 +43,7 @@ public class User {
     private boolean emailValidated;
 
     private final Set<String> roles;
+    private final Set<String> permissions;
     private final Map<AccountType, Account> accounts;
 
     public User(String name, String email, Account... accounts) {
@@ -54,6 +59,7 @@ public class User {
         super();
         this.name = name;
         this.roles = new HashSet<>();
+        this.permissions = new HashSet<>();
         this.email = email;
         this.passwordResetSecret = passwordResetSecret;
         this.validationSecret = validationSecret;
@@ -64,6 +70,14 @@ public class User {
         }
     }
 
+    /**
+     * For the time being, the user {@link #getName() name} is used as ID
+     */
+    @Override
+    public Serializable getId() {
+        return getName();
+    }
+
     public String getName() {
         return name;
     }
@@ -72,7 +86,7 @@ public class User {
         this.name = name;
     }
 
-    public Set<String> getRoles() {
+    public Iterable<String> getRoles() {
         return roles;
     }
 
@@ -88,6 +102,22 @@ public class User {
         roles.remove(role);
     }
 
+    public Iterable<String> getPermissions() {
+        return permissions;
+    }
+
+    public void addPermission(String permission) {
+        permissions.add(permission);
+    }
+    
+    public boolean hasPermission(String permission) {
+        return permissions.contains(permission);
+    }
+    
+    public void removePermission(String permission) {
+        permissions.remove(permission);
+    }
+    
     public Account getAccount(AccountType type) {
         return accounts.get(type);
     }

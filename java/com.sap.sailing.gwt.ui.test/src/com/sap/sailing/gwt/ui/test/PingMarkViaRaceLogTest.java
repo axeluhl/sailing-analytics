@@ -35,7 +35,8 @@ public class PingMarkViaRaceLogTest {
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         Series series = new SeriesImpl("series", false, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
-        Regatta regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", UUID.randomUUID(), Collections.<Series>singletonList(series),
+        Regatta regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", /*startDate*/ null, /*endDate*/ null, 
+                UUID.randomUUID(), Collections.<Series>singletonList(series),
                 false, new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */ true);
         RegattaLeaderboard leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         

@@ -8,6 +8,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
@@ -16,10 +20,6 @@ import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.state.RaceState;
-import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
@@ -34,9 +34,9 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 
     private final JsonDeserializer<RaceGroup> deserializer;
     private final ConfigurationLoader<RegattaConfiguration> globalConfigurationLoader;
-    private final RaceLogEventAuthor author;
+    private final AbstractLogEventAuthor author;
 
-    public ManagedRacesDataParser(RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> globalConfiguration,
+    public ManagedRacesDataParser(AbstractLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> globalConfiguration,
             JsonDeserializer<RaceGroup> deserializer) {
         this.author = author;
         this.globalConfigurationLoader = globalConfiguration;

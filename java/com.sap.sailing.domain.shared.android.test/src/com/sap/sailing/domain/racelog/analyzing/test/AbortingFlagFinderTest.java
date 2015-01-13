@@ -8,10 +8,10 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 
 public class AbortingFlagFinderTest extends RaceLogAnalyzerTest<AbortingFlagFinder> {
 

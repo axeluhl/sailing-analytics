@@ -3,11 +3,11 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sse.common.TimePoint;
 
 public class ResourceImpl implements Resource {
     private final long id;

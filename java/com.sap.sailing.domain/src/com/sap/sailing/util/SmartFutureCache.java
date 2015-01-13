@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
-import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * A cache for which a background update can be triggered. Readers can decide whether they want to wait for any ongoing

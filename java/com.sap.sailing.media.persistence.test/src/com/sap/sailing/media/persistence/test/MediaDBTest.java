@@ -10,16 +10,16 @@ import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.*;

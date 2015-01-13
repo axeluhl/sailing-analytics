@@ -48,8 +48,8 @@ public interface PolarDiagram extends Serializable {
     NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(Double bearingStep);
     NavigableMap<Speed, NavigableMap<Bearing, Speed>> getSpeedTable();
     NavigableMap<Speed, Bearing> getBeatAngles();
-    NavigableMap<Speed, Bearing> getGybeAngles();
+    NavigableMap<Speed, Bearing> getJibeAngles();
     NavigableMap<Speed, Speed> getBeatSOG();
-    NavigableMap<Speed, Speed> getGybeSOG();
+    NavigableMap<Speed, Speed> getJibeSOG();
 
 }

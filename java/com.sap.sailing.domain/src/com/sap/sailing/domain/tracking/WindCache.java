@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * When comprehensive calculations are prone to query wind several times for the same competitor in the same race for

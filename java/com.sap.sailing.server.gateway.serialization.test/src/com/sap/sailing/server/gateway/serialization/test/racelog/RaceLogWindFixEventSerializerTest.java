@@ -7,20 +7,18 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -35,7 +33,9 @@ import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogWindFixEventSerializer;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogWindFixEventSerializerTest {
 
@@ -43,7 +43,7 @@ public class RaceLogWindFixEventSerializerTest {
     private RaceLogWindFixEventDeserializer deserializer;
     private RaceLogWindFixEvent event;
     private TimePoint now;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
     
     @Before
     public void setUp() {

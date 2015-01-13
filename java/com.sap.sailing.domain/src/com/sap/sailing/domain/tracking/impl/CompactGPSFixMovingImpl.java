@@ -7,10 +7,10 @@ import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.AbstractSpeedWithAbstractBearingImpl;
 import com.sap.sailing.domain.common.impl.AbstractSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sse.common.TimePoint;
 
 /**
  * A memory-conserving representation of a {@link GPSFixMoving} object that produces the fine-grained

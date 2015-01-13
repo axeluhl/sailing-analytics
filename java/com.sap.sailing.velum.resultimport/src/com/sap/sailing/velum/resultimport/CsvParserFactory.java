@@ -2,8 +2,8 @@ package com.sap.sailing.velum.resultimport;
 
 import java.io.InputStream;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.velum.resultimport.impl.CsvParserFactoryImpl;
+import com.sap.sse.common.TimePoint;
 
 public interface CsvParserFactory {
     CsvParserFactory INSTANCE = new CsvParserFactoryImpl();

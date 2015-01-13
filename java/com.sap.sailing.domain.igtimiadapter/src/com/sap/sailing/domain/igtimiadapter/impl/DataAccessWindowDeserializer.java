@@ -4,10 +4,10 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.SecurityEntity;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DataAccessWindowDeserializer extends HasPermissionsDeserializer {
     private static final Logger logger = Logger.getLogger(DataAccessWindowDeserializer.class.getName());

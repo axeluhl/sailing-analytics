@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -39,6 +38,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class SailMasterConnectivityTest {

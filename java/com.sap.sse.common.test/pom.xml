@@ -7,6 +7,6 @@
     <groupId>com.sap.sailing</groupId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>com.sap.see.common.test</artifactId>
+  <artifactId>com.sap.sse.common.test</artifactId>
   <packaging>eclipse-test-plugin</packaging>
 </project>

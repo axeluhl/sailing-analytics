@@ -2,11 +2,12 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 
 public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
     
-    public SmallMultihullVectorGraphics(String... compatibleBoatClassNames) {
-        super("Multihull", 710, 260, 525, compatibleBoatClassNames);
+    public SmallMultihullVectorGraphics(BoatClassMasterdata... compatibleBoatClasses) {
+        super(710, 260, 525, compatibleBoatClasses);
     }
 
     @Override

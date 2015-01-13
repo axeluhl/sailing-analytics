@@ -17,7 +17,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
@@ -33,6 +32,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sse.common.TimePoint;
 
 @SuppressWarnings("restriction")
 public class PathGeneratorTracTrac extends PathGeneratorBase {
@@ -74,7 +74,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         LOGGER.info("Calling service.addTracTracRace");
 
         try {
-            this.raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, raceURL, liveURI, storedURI, null, DEFAULT_TIMEOUT_MILLISECONDS);
+            this.raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, raceURL, liveURI, storedURI, 
+                    null, null, DEFAULT_TIMEOUT_MILLISECONDS);
 
         } catch (Exception error) {
             LOGGER.severe(error.getMessage());

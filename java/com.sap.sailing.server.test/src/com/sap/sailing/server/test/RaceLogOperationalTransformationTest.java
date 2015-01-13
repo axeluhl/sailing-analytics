@@ -11,21 +11,21 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogStartTimeEventImpl;
-import com.sap.sailing.operationaltransformation.OperationalTransformer;
-import com.sap.sailing.operationaltransformation.Peer;
-import com.sap.sailing.operationaltransformation.Peer.Role;
-import com.sap.sailing.operationaltransformation.PeerImpl;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogEventWithTransformationSupport;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogStartTimeEventWithTransformationSupport;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.operationaltransformation.OperationalTransformer;
+import com.sap.sse.operationaltransformation.Peer;
+import com.sap.sse.operationaltransformation.PeerImpl;
+import com.sap.sse.operationaltransformation.Peer.Role;
 
 public class RaceLogOperationalTransformationTest {
     private RaceLog raceLogClient1;
@@ -35,7 +35,7 @@ public class RaceLogOperationalTransformationTest {
     private Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> client2;
     private Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> server;
     private OperationalTransformer<RaceLog, RaceLogEventWithTransformationSupport<?>> transformer;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
     private CountDownLatch client1Latch;
     private CountDownLatch client2Latch;
     private CountDownLatch serverLatch;

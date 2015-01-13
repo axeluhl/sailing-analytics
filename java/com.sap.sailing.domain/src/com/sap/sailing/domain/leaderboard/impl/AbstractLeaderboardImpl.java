@@ -12,10 +12,10 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Abstract leaderboard implementation that already knows about carried points, competitor display name re-keying,

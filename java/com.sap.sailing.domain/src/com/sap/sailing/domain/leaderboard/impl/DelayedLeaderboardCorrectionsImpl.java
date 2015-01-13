@@ -9,10 +9,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -20,9 +20,9 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.IsManagedByCache;
 
 /**
  * Keeps a record of carried points and score corrections to be applied, keyed by the competitor names to which they
@@ -41,7 +41,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections, IsManagedBySharedDomainFactory {
+public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections, IsManagedByCache<SharedDomainFactory> {
     private static final long serialVersionUID = 8824782847677232275L;
     
     // deprecated structures that key corrections by name; to be removed once all databases have been migrated
@@ -457,7 +457,7 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
-    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         this.competitorFactory = domainFactory;
         return this;
     }

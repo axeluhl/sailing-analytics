@@ -23,7 +23,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @UiField(provided=true)
     Header headerPanel;
 
-    @UiField
+    @UiField(provided=true)
     Footer footerPanel;
 
     @UiField
@@ -31,6 +31,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
 
     public TabletAndDesktopApplicationView(HomePlacesNavigator navigator) {
         headerPanel = new Header(navigator);
+        footerPanel = new Footer(navigator);
         initWidget(uiBinder.createAndBindUi(this));
     }
 

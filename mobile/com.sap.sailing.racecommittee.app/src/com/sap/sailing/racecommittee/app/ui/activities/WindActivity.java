@@ -29,7 +29,6 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -38,6 +37,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindActivity extends SessionActivity implements CompassDirectionListener, LocationListener {
 

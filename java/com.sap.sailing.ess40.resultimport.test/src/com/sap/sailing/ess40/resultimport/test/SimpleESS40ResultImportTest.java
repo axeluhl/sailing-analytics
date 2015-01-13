@@ -15,8 +15,8 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.ess40.resultimport.impl.ScoreCorrectionProviderImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class SimpleESS40ResultImportTest {

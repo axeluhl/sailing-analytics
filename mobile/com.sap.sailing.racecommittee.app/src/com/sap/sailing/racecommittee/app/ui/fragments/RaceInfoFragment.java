@@ -15,11 +15,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
-import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
-import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -30,6 +29,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentCh
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private final static String TAG = RaceInfoFragment.class.getName();

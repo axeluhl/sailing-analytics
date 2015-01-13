@@ -2,9 +2,9 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
+import com.sap.sse.common.TimePoint;
 
 /**
  * For YachtBot and WindBot devices, this lists the number of satellites the device currently uses to determine its

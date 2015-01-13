@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.shiro.util.SimpleByteSource;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -19,9 +17,9 @@ import com.mongodb.DBObject;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
-import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
@@ -72,10 +70,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String passwordResetSecret = (String) userDBObject.get(FieldNames.User.PASSWORD_RESET_SECRET.name());
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
         Set<String> roles = new HashSet<String>();
+        Set<String> permissions = new HashSet<String>();
         BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLES.name());
-        if (rolesO != null){
-            for (Object o : rolesO){
+        if (rolesO != null) {
+            for (Object o : rolesO) {
                 roles.add((String) o);
+            }
+        }
+        BasicDBList permissionsO = (BasicDBList) userDBObject.get(FieldNames.User.PERMISSIONS.name());
+        if (permissionsO != null) {
+            for (Object o : permissionsO) {
+                permissions.add((String) o);
             }
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
@@ -83,6 +88,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         User result = new User(name, email, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
         for (String role : roles) {
             result.addRole(role);
+        }
+        for (String permission : permissions) {
+            result.addPermission(permission);
         }
         return result;
     }
@@ -103,7 +111,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         case USERNAME_PASSWORD:
             String name = (String) dbAccount.get(FieldNames.UsernamePassword.NAME.name());
             String saltedPassword = (String) dbAccount.get(FieldNames.UsernamePassword.SALTED_PW.name());
-            Object salt = new SimpleByteSource((byte[]) dbAccount.get(FieldNames.UsernamePassword.SALT.name()));
+            byte[] salt = (byte[]) dbAccount.get(FieldNames.UsernamePassword.SALT.name());
             return new UsernamePasswordAccount(name, saltedPassword, salt);
             //TODO [D056866] add other Account-types
         case SOCIAL_USER:

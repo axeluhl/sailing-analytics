@@ -32,7 +32,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     private static final String IDM_2013_EVENT = "IDM 5O5 2013";
     
     private static final String BMW_CUP_BOAT_CLASS = "J80";
-    private static final String IDM_2013_BOAT_CLASS = "505";
+    private static final String IDM_2013_BOAT_CLASS = "5O5";
     
     private static final String DEFAULT_REGATTA = "Default regatta";
     private static final String BMW_CUP_REGATTA = "BMW Cup (J80)";  //$NON-NLS-1$
@@ -47,11 +47,13 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     
 //    private static final String BMW_CUP_RACE_8 = "BMW Cup Race 8";
     
+    @Override
     @Before
     public void setUp() {
         this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(RACE, 1), BMW_CUP_BOAT_CLASS);
         this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(RACE, 1));
         clearState(getContextRoot());
+        super.setUp();
     }
     
     /**

@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
-import com.sap.sailing.domain.racelog.tracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
+import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 
 public class PlaceHolderDeviceIdentifierStringSerializationHandler extends PlaceHolderDeviceIdentifierSerializationHandler implements
         DeviceIdentifierStringSerializationHandler {

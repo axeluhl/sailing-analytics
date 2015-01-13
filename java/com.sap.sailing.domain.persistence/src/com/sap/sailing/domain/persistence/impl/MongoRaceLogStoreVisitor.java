@@ -3,31 +3,31 @@ package com.sap.sailing.domain.persistence.impl;
 import java.util.logging.Logger;
 
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
-import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
-import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
-import com.sap.sailing.domain.racelog.RevokeEvent;
-import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
-import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 
 public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
 
@@ -121,55 +121,55 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
     }
 
     @Override
-    public void visit(DeviceCompetitorMappingEvent event) {
+    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
 
     @Override
-    public void visit(DeviceMarkMappingEvent event) {
+    public void visit(RaceLogDeviceMarkMappingEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
 
     @Override
-    public void visit(DenoteForTrackingEvent event) {
+    public void visit(RaceLogDenoteForTrackingEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
 
     @Override
-    public void visit(StartTrackingEvent event) {
+    public void visit(RaceLogStartTrackingEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
 
     @Override
-    public void visit(RevokeEvent event) {
+    public void visit(RaceLogRevokeEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
 
     @Override
-    public void visit(RegisterCompetitorEvent event) {
+    public void visit(RaceLogRegisterCompetitorEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
 
     @Override
-    public void visit(DefineMarkEvent event) {
+    public void visit(RaceLogDefineMarkEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
     
     @Override
-    public void visit(CloseOpenEndedDeviceMappingEvent event) {
+    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
 
     @Override
-    public void visit(AdditionalScoringInformationEvent event) {
+    public void visit(RaceLogAdditionalScoringInformationEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }

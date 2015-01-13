@@ -21,7 +21,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ByteSource;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -40,13 +39,13 @@ import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
@@ -97,7 +96,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserDTO getCurrentUser() {
-        logger.info("Request: " + getThreadLocalRequest().getRequestURL());
+        logger.fine("Request: " + getThreadLocalRequest().getRequestURL());
         User user = getSecurityService().getCurrentUser();
         if (user == null) {
             return null;
@@ -175,11 +174,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public void resetPassword(String username, String email, String baseURL) throws UserManagementException, MailException {
+    public void resetPassword(String username, String email, String passwordResetBaseURL) throws UserManagementException, MailException {
         if (username == null || username.isEmpty()) {
             username = getSecurityService().getUserByEmail(email).getName();
         }
-        getSecurityService().resetPassword(username, baseURL);
+        getSecurityService().resetPassword(username, passwordResetBaseURL);
     }
 
     @Override
@@ -215,25 +214,49 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename())) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
-                return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
+                return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
             }
-            try {
-                Set<String> rolesToRemove = new HashSet<>();
-                Util.addAll(u.getRoles(), rolesToRemove);
-                Util.removeAll(roles, rolesToRemove);
-                for (String roleToRemove : rolesToRemove) {
-                    getSecurityService().removeRoleFromUser(username, roleToRemove);
-                }
-                Set<String> rolesToAdd = new HashSet<>();
-                Util.addAll(roles, rolesToAdd);
-                Util.removeAll(u.getRoles(), rolesToAdd);
-                for (String roleToAdd : rolesToAdd) {
-                    getSecurityService().addRoleForUser(username, roleToAdd);
-                }
-                return new SuccessInfo(true, "Added role: " + roles + ".", /* redirectURL */ null, createUserDTOFromUser(u));
-            } catch (UserManagementException e) {
-                return new SuccessInfo(false, e.getMessage(), /* redirectURL */ null, null);
+            Set<String> rolesToRemove = new HashSet<>();
+            Util.addAll(u.getRoles(), rolesToRemove);
+            Util.removeAll(roles, rolesToRemove);
+            for (String roleToRemove : rolesToRemove) {
+                getSecurityService().removeRoleFromUser(username, roleToRemove);
             }
+            Set<String> rolesToAdd = new HashSet<>();
+            Util.addAll(roles, rolesToAdd);
+            Util.removeAll(u.getRoles(), rolesToAdd);
+            for (String roleToAdd : rolesToAdd) {
+                getSecurityService().addRoleForUser(username, roleToAdd);
+            }
+            return new SuccessInfo(true, "Set roles " + roles + " for user " + username, /* redirectURL */null,
+                    createUserDTOFromUser(u));
+        } else {
+            return new SuccessInfo(false, "You don't have the required permissions to add a role.", /* redirectURL */ null, null);
+        }
+    }
+
+    @Override
+    public SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) {
+        Subject currentSubject = SecurityUtils.getSubject();
+        if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename())) {
+            User u = getSecurityService().getUserByName(username);
+            if (u == null) {
+                return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
+            }
+            Set<String> permissionsToRemove = new HashSet<>();
+            Util.addAll(u.getPermissions(), permissionsToRemove);
+            Util.removeAll(permissions, permissionsToRemove);
+            for (String permissionToRemove : permissionsToRemove) {
+                getSecurityService().removePermissionFromUser(username, permissionToRemove);
+            }
+            Set<String> permissionsToAdd = new HashSet<>();
+            Util.addAll(permissions, permissionsToAdd);
+            Util.removeAll(u.getPermissions(), permissionsToAdd);
+            for (String permissionToAdd : permissionsToAdd) {
+                getSecurityService().addPermissionForUser(username, permissionToAdd);
+            }
+            return new SuccessInfo(true, "Set roles " + permissions + " for user " + username, /* redirectURL */null,
+                    createUserDTOFromUser(u));
         } else {
             return new SuccessInfo(false, "You don't have the required permissions to add a role.", /* redirectURL */ null, null);
         }
@@ -261,12 +284,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
             default:
                 UsernamePasswordAccount upa = (UsernamePasswordAccount) a;
-                accountDTOs.add(new UsernamePasswordAccountDTO(upa.getName(), upa.getSaltedPassword(), ((ByteSource) upa.getSalt()).getBytes()));
+                accountDTOs.add(new UsernamePasswordAccountDTO(upa.getName(), upa.getSaltedPassword(), upa.getSalt()));
                 break;
             }
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.isEmailValidated(), accountDTOs);
         userDTO.addRoles(user.getRoles());
+        userDTO.addPermissions(user.getPermissions());
         return userDTO;
     }
 

@@ -15,8 +15,8 @@ import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionModel;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class UserListDataProvider extends AbstractDataProvider<UserDTO> {
     

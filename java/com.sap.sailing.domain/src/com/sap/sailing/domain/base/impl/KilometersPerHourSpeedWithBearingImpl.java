@@ -5,10 +5,10 @@ import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.AbstractSpeedWithAbstractBearingImpl;
 import com.sap.sailing.domain.common.impl.AbstractSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sse.common.TimePoint;
 
 public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpeedImpl implements SpeedWithBearing {
     private static final long serialVersionUID = 5749611820871048625L;

@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,25 +24,28 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.OperationExecutionListener;
-import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
 
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
+    private static final Logger logger = Logger.getLogger(TrackRaceReplicationTest.class.getName());
     private TrackedRace masterTrackedRace;
     private RegattaAndRaceIdentifier raceIdentifier;
     private RaceHandle racesHandle;
@@ -70,9 +74,9 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
         cal.set(2011, 05, 23, 15, 14, 31);
         MillisecondsTimePoint endOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
-        master.addOperationExecutionListener(new OperationExecutionListener() {
+        master.addOperationExecutionListener(new OperationExecutionListener<RacingEventService>() {
             @Override
-            public <T> void executed(RacingEventServiceOperation<T> operation) {
+            public <T> void executed(OperationWithResult<RacingEventService, T> operation) {
                 if (operation instanceof CreateTrackedRace) {
                     synchronized (notifier) {
                         notifier[0] = true;
@@ -81,9 +85,11 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
                 }
             }
         });
-        trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE.createTrackingConnectivityParameters(paramURL,
-                liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
+        trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE
+                .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
+                        startOfTracking, endOfTracking, /* delayToLiveInMillis */
+                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE,
+                        EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -97,12 +103,13 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         racesHandle = master.addRace(/* regattaToAddTo */ null, trackingParams, /* timeoutInMilliseconds */ 60000);
     }
 
-    private void waitForTrackRaceReplicationTrigger() throws InterruptedException {
+    private void waitForTrackRaceReplicationTrigger() throws InterruptedException, IllegalAccessException {
         while (!notifier[0]) {
             synchronized (notifier) {
                 notifier.wait();
             }
         }
+        replicaReplicator.waitUntilQueueIsEmpty();
     }
     
     @Test
@@ -159,14 +166,15 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
             receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
                     master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
         }
-        Thread.sleep(3000); // kept failing several times for a 1000ms timeout
+        Thread.sleep(1000);
+        logger.info("verifying replica's state");
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
-        Thread.sleep(3000);
+        Thread.sleep(1000);
         assertEquals(now, replicaTrackedRace.getStartOfRace());
     }
 
@@ -189,7 +197,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Override
     public void tearDown() throws Exception {
         if (racesHandle != null) {
-            racesHandle.getRaceTracker().stop();
+            racesHandle.getRaceTracker().stop(/* preemptive */ false);
         }
         super.tearDown();
     }

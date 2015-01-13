@@ -6,8 +6,8 @@ import java.util.concurrent.Callable;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Manages score corrections for a competitor in a race, in particular handling the following use cases:

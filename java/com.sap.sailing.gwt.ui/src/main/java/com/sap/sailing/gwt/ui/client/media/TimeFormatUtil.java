@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 public class TimeFormatUtil {
     

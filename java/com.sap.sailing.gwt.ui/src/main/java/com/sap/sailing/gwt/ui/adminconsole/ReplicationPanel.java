@@ -188,7 +188,7 @@ public class ReplicationPanel extends FlowPanel {
         dialog.show();
     }
 
-    private void updateReplicaList() {
+    public void updateReplicaList() {
         sailingService.getReplicaInfo(new AsyncCallback<ReplicationStateDTO>() {
             @Override
             public void onSuccess(ReplicationStateDTO replicas) {
