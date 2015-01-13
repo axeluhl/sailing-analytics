@@ -33,24 +33,24 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private enum FunctionRetrievalStrategies {
         All {
             @Override
-            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionRegistry registry) {
-                return registry.getAllFunctionsOf(declaringType);
+            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
+                return manager.getAllFunctionsOf(declaringType);
             }
         },
         Dimensions {
             @Override
-            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionRegistry registry) {
-                return registry.getDimensionsOf(declaringType);
+            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
+                return manager.getDimensionsOf(declaringType);
             }
         },
         Statistics {
             @Override
-            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionRegistry registry) {
-                return registry.getStatisticsOf(declaringType);
+            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
+                return manager.getStatisticsOf(declaringType);
             }
         };
         
-        public abstract Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionRegistry registry);
+        public abstract Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager);
         
     }
     
@@ -64,9 +64,9 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private final FunctionFactory functionFactory;
     private final FunctionDTOFactory functionDTOFactory;
     
-    private final Map<Class<?>, Set<Function<?>>> statistics;
-    private final Map<Class<?>, Set<Function<?>>> dimensions;
-    private final Map<Class<?>, Set<Function<?>>> externalFunctions;
+    protected final Map<Class<?>, Set<Function<?>>> statistics;
+    protected final Map<Class<?>, Set<Function<?>>> dimensions;
+    protected final Map<Class<?>, Set<Function<?>>> externalFunctions;
     
     private final Collection<Map<Class<?>, Set<Function<?>>>> functionMaps;
 
@@ -178,17 +178,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         }
     }
 
-    @Override
-    public Collection<Function<?>> getAllFunctions() {
-        Collection<Function<?>> allFunctions = new HashSet<>();
-        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
-            allFunctions.addAll(asSet(functionMap));
-        }
-        return allFunctions;
-    }
-
-    @Override
-    public Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {
+    private Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {
         Collection<Function<?>> allFunctions = new HashSet<>();
         for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
             Collection<Function<?>> functions = functionMap.get(declaringType);
@@ -198,48 +188,26 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         }
         return allFunctions;
     }
-
+    
     @Override
-    public Collection<Function<?>> getStatistics() {
+    public Collection<Function<?>> getAllStatistics() {
         return asSet(statistics);
     }
     
-    @Override
-    public Collection<Function<?>> getStatisticsOf(Class<?> declaringType) {
+    private Collection<Function<?>> getStatisticsOf(Class<?> declaringType) {
         return statistics.get(declaringType);
     }
     
-    @Override
-    public Collection<Function<?>> getDimensions() {
-        return asSet(dimensions);
-    }
-    
-    @Override
-    public Collection<Function<?>> getDimensionsOf(Class<?> declaringType) {
+    private Collection<Function<?>> getDimensionsOf(Class<?> declaringType) {
         return dimensions.get(declaringType);
     }
     
-    @Override
-    public Collection<Function<?>> getExternalFunctions() {
-        return asSet(externalFunctions);
-    }
-
-    @Override
-    public Collection<Function<?>> getExternalFunctionsOf(Class<?> declaringType) {
-        return externalFunctions.get(declaringType);
-    }
-    
-    private Collection<Function<?>> asSet(Map<?, Set<Function<?>>> map) {
+    protected Collection<Function<?>> asSet(Map<?, Set<Function<?>>> map) {
         Collection<Function<?>> set = new HashSet<>();
         for (Entry<?, Set<Function<?>>> entry : map.entrySet()) {
             set.addAll(entry.getValue());
         }
         return set;
-    }
-    
-    @Override
-    public Collection<Function<?>> getAllStatistics() {
-        return getStatistics();
     }
 
     @Override
@@ -344,6 +312,14 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             }
         }
         return functionsMatchingDTO;
+    }
+
+    private Collection<Function<?>> getAllFunctions() {
+        Collection<Function<?>> allFunctions = new HashSet<>();
+        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
+            allFunctions.addAll(asSet(functionMap));
+        }
+        return allFunctions;
     }
 
     private boolean moreThanOneFunctionMatchedDTO(Collection<Function<?>> functionsMatchingDTO) {

@@ -12,12 +12,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasContextWithDeadConnectorEnd;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
 import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
+import com.sap.sse.datamining.test.util.OpenFunctionManager;
 
 
 public class TestFunctionManagerAsFunctionRegistry {
@@ -45,7 +45,7 @@ public class TestFunctionManagerAsFunctionRegistry {
     
     @Test
     public void testRegistration() throws NoSuchMethodException, SecurityException {
-        FunctionRegistry registry = new FunctionManager();
+        OpenFunctionManager registry = new OpenFunctionManager();
         registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         registry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
         
@@ -55,7 +55,7 @@ public class TestFunctionManagerAsFunctionRegistry {
         assertThat(registry.getDimensions(), is(expectedDimensions));
         
         Collection<Function<?>> expectedStatistics = expectedFunctionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class);
-        assertThat(registry.getStatistics(), is(expectedStatistics));
+        assertThat(registry.getAllStatistics(), is(expectedStatistics));
         
         Collection<Function<?>> expectedExternalFunctions = expectedFunctionRegistryUtil.getExpectedExternalFunctionsFor(Test_ExternalLibraryClass.class);
         assertThat(registry.getExternalFunctions(), is(expectedExternalFunctions));
@@ -63,7 +63,7 @@ public class TestFunctionManagerAsFunctionRegistry {
     
     @Test
     public void testUnregistration() {
-        FunctionRegistry registry = new FunctionManager();
+        OpenFunctionManager registry = new OpenFunctionManager();
         registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         
         Collection<Function<?>> expectedDimensions = new HashSet<>();
