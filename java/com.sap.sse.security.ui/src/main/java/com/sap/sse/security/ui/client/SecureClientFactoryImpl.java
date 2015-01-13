@@ -1,17 +1,18 @@
 package com.sap.sse.security.ui.client;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.mvp.ClientFactoryImpl;
 import com.sap.sse.gwt.client.mvp.TopLevelView;
 
-public abstract class SecureClientFactoryImpl extends ClientFactoryImpl {
-    private UserService userService;
-    private UserManagementServiceAsync userManagementService;
+/**
+ * An implementation of a ClientFactory providing security services
+ * @author Frank
+ *
+ */
+public abstract class SecureClientFactoryImpl extends ClientFactoryImpl implements WithSecurity {
+    private WithSecurity securityProvider;
 
     public SecureClientFactoryImpl(TopLevelView root) {
         this(root, new SimpleEventBus());
@@ -24,16 +25,16 @@ public abstract class SecureClientFactoryImpl extends ClientFactoryImpl {
     protected SecureClientFactoryImpl(TopLevelView root, EventBus eventBus, PlaceController placeController) {
         super(root, eventBus, placeController);
         
-        userManagementService = GWT.create(UserManagementService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath);
-        userService = new UserService(userManagementService);
+        securityProvider = new DefaultWithSecurityImpl();
     }
 
+    @Override
     public UserManagementServiceAsync getUserManagementService() {
-        return userManagementService;
+        return securityProvider.getUserManagementService();
     }
     
+    @Override
     public UserService getUserService() {
-        return userService;
+        return securityProvider.getUserService();
     }
 }
