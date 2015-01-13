@@ -1,10 +1,9 @@
-package com.sap.sailing.polars.windestimation;
+package com.sap.sailing.util.kmeans;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
+
+import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
+import com.sap.sse.common.Util;
 
 /**
  * Clusters elements of type <code>T</code> into a pre-defined number of clusters such that after clustering the sum of
@@ -15,8 +14,8 @@ import java.util.function.Supplier;
  *
  * @param <T>
  */
-public class KMeansClusterer<T extends Supplier<Double>> {
-    private final Set<T>[] clusters;
+public class KMeansClusterer<ValueType, AveragesTo, T extends ScalableValue<ValueType, AveragesTo>> {
+    private final Cluster<ValueType, AveragesTo, T>[] clusters;
     
     /**
      * Clusters the <code>elements</code> into <code>numberOfClusters</code> clusters such that
@@ -32,19 +31,7 @@ public class KMeansClusterer<T extends Supplier<Double>> {
      *            the elements to cluster
      */
     public KMeansClusterer(int numberOfClusters, Iterable<T> elements) {
-        this(numberOfClusters, elements, getSeeds(numberOfClusters, elements));
-    }
-
-    private static <T> Iterable<T> getSeeds(int numberOfClusters, Iterable<T> elements) {
-        List<T> seeds = new ArrayList<>();
-        int i=0;
-        final Iterator<T> seedIter = elements.iterator();
-        while (i < numberOfClusters && seedIter.hasNext()) {
-            T nextSeed = seedIter.next();
-            seeds.add(nextSeed);
-            i++;
-        }
-        return seeds;
+        this(numberOfClusters, elements, elements);
     }
 
     /**
@@ -56,19 +43,36 @@ public class KMeansClusterer<T extends Supplier<Double>> {
      *            number of clusters is reduced to the number of seeds provided.
      */
     public KMeansClusterer(int numberOfClusters, Iterable<T> elements, Iterable<T> seeds) {
-        
+        final int k = Math.min(numberOfClusters, Util.size(seeds));
         @SuppressWarnings("unchecked")
-        Set<T>[] myClusters = (Set<T>[]) new Set<?>[numberOfClusters];
+        Cluster<ValueType, AveragesTo, T>[] myClusters = (Cluster<ValueType, AveragesTo, T>[]) new Cluster<?, ?, ?>[k];
         clusters = myClusters;
+        initClusters(seeds);
         cluster(elements);
+    }
+
+    private void initClusters(Iterable<T> seeds) {
+        Iterator<T> seedIter = seeds.iterator();
+        for (int i=0; i<clusters.length; i++) {
+            clusters[i] = new Cluster<ValueType, AveragesTo, T>(seedIter.next());
+        }
     }
     
     private void cluster(Iterable<T> elements) {
+        if (clusters.length > 0) {
+            for (T t : elements) {
+                Cluster<ValueType, AveragesTo, T> nearestCluster = clusters[0];
+                AveragesTo leastDistance = nearestCluster.getDistanceFromMean(t);
+                for (int i=1; i<clusters.length; i++) {
+                    
+                }
+            }
+        }
         // TODO Auto-generated method stub
         
     }
     
-    public Set<T>[] getClusters() {
+    public Cluster<ValueType, AveragesTo, T>[] getClusters() {
         return clusters;
     }
 }
