@@ -166,7 +166,6 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         for (final Entry<Maneuver, Competitor> maneuverAndCompetitor : maneuvers.entrySet()) {
             // Now for each maneuver's starting speed (speed into the maneuver) get the approximated
             // wind speed and direction assuming average upwind / downwind performance based on the polar service.
-            // TODO continue here, asking the polarService for the wind speed based on boat speed, leg type and tack
             Map<Pair<LegType, Tack>, Set<SpeedWithBearingWithConfidence<Void>>> estimatedTrueWindSpeedAndAngles = new HashMap<>();
             // for course changes to PORT use only UPWIND/PORT and DOWNWIND/STARBOARD and analogously for course changes to STARBOARD
             for (Pair<LegType, Tack> i : maneuverAndCompetitor.getKey().getDirectionChangeInDegrees() > 0 ? Arrays
