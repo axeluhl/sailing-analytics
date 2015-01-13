@@ -7,8 +7,9 @@ import java.util.Set;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.xrr.resultimport.Parser;
-import com.sap.sailing.xrr.resultimport.schema.Division;
-import com.sap.sailing.xrr.resultimport.schema.RaceResult;
+import com.sap.sailing.xrr.schema.Division;
+import com.sap.sailing.xrr.schema.RaceResult;
+
 
 public class ScoreCorrectionForRaceResult implements ScoreCorrectionsForRace {
     private final Parser parser;

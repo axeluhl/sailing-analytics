@@ -14,6 +14,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
@@ -50,26 +51,25 @@ public class TracTracEventManagementPanelPO extends PageArea {
 
         @Override
         public boolean equals(Object object) {
-            if (this == object)
+            if (this == object) {
                 return true;
-            
-            if (object == null)
+            }
+            if (object == null) {
                 return false;
-            
-            if (getClass() != object.getClass())
+            }
+            if (getClass() != object.getClass()) {
                 return false;
-            
+            }
             TrackableRaceDescriptor other = (TrackableRaceDescriptor) object;
-            
-            if(!Objects.equals(this.boatClass, other.boatClass))
+            if (!Objects.equals(BoatClassMasterdata.resolveBoatClass(this.boatClass), BoatClassMasterdata.resolveBoatClass(other.boatClass))) {
                 return false;
-            
-            if(!Objects.equals(this.eventName, other.eventName))
+            }
+            if (!Objects.equals(this.eventName, other.eventName)) {
                 return false;
-            
-            if(!Objects.equals(this.raceName, other.raceName))
+            }
+            if (!Objects.equals(this.raceName, other.raceName)) {
                 return false;
-            
+            }
             return true;
         }
     }

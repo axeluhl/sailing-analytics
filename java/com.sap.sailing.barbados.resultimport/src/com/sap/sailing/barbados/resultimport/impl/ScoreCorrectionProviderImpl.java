@@ -8,12 +8,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionProvider;
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {

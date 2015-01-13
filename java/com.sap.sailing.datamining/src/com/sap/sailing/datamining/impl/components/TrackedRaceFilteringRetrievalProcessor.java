@@ -13,11 +13,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
-import com.sap.sse.datamining.shared.annotations.DataRetriever;
 
-@DataRetriever(dataType=HasTrackedRaceContext.class,
-               groupName="Sailing",
-               level=2)
 public class TrackedRaceFilteringRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<Leaderboard, HasTrackedRaceContext> {
 

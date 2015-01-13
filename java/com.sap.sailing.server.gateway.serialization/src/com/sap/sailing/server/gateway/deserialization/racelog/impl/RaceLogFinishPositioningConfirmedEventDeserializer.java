@@ -6,17 +6,17 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.racelog.CompetitorResults;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class RaceLogFinishPositioningConfirmedEventDeserializer extends BaseRaceLogEventDeserializer {
@@ -26,7 +26,7 @@ public class RaceLogFinishPositioningConfirmedEventDeserializer extends BaseRace
     }
 
     @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
+    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
         
         JSONArray jsonPositionedCompetitors = Helpers.getNestedArraySafe(object, RaceLogFinishPositioningConfirmedEventSerializer.FIELD_POSITIONED_COMPETITORS);

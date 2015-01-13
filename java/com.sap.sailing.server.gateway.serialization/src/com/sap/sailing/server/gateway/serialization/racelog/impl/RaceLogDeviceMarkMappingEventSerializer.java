@@ -2,11 +2,11 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.shared.events.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceLogDeviceMarkMappingEventSerializer extends RaceLogDeviceMappingEventSerializer<Mark> {

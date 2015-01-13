@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sse.common.TimePoint;
+
 
 
 public interface SpeedWithBearing extends Speed {

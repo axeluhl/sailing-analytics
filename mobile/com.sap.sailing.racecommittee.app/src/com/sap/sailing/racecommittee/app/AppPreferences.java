@@ -14,13 +14,11 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
-import com.google.android.gms.maps.model.LatLng;
-import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
@@ -93,10 +91,15 @@ public class AppPreferences {
         this.preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
     }
 
-    public RaceLogEventAuthor getAuthor() {
+    public void setAuthor(AbstractLogEventAuthor author) {
+        preferences.edit().putString(HIDDEN_PREFERENCE_AUTHOR_NAME, author.getName()).commit();
+        preferences.edit().putInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).commit();
+    }
+
+    public AbstractLogEventAuthor getAuthor() {
         String authorName = preferences.getString(HIDDEN_PREFERENCE_AUTHOR_NAME, "<anonymous>");
         int authorPriority = preferences.getInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, 0);
-        return new RaceLogEventAuthorImpl(authorName, authorPriority);
+        return new LogEventAuthorImpl(authorName, authorPriority);
     }
 
     public BoatClassType getBoatClass() {

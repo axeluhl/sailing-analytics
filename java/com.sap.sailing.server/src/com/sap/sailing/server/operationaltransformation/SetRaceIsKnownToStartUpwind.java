@@ -26,6 +26,14 @@ public class SetRaceIsKnownToStartUpwind extends AbstractRaceOperation<Void> {
         return null;
     }
 
+    /**
+     * {@link #internalApplyTo(RacingEventService)} does not replicate the effects
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return true;
+    }
+    
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getExistingTrackedRace(getRaceIdentifier());

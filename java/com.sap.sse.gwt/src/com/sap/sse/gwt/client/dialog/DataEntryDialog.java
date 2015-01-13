@@ -473,6 +473,10 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.center();
     }
 
+    protected DialogBox getDialogBox() {
+        return dateEntryDialog;
+    }
+    
     public void ensureDebugId(String debugId) {
         dateEntryDialog.ensureDebugId(debugId);
     }

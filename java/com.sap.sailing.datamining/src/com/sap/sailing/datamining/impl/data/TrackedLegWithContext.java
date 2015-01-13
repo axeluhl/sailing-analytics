@@ -4,10 +4,10 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedLegWithContext implements HasTrackedLegContext {
 

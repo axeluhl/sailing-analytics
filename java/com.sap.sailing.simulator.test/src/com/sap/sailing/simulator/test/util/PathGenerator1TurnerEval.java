@@ -11,9 +11,7 @@ import java.io.ObjectInputStream;
 import junit.framework.Assert;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
@@ -22,6 +20,8 @@ import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PathGenerator1TurnerEval {
 

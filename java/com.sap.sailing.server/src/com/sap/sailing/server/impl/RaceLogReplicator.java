@@ -1,16 +1,16 @@
 package com.sap.sailing.server.impl;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplateResolver;
-import com.sap.sailing.domain.racelog.impl.RaceLogOnLeaderboardIdentifier;
-import com.sap.sailing.domain.racelog.impl.RaceLogOnRegattaIdentifier;
+import com.sap.sailing.domain.regattalike.FlexibleLeaderboardAsRegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifierResolver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
@@ -38,11 +38,11 @@ public class RaceLogReplicator implements RaceColumnListener {
 
     @Override
     public void raceLogEventAdded(final RaceColumn raceColumn, final RaceLogIdentifier identifier, final RaceLogEvent event) {
-        identifier.getTemplate().resolve(new RaceLogIdentifierTemplateResolver() {
+        identifier.getRegattaLikeParent().resolve(new RegattaLikeIdentifierResolver() {
             @Override
-            public void resolveOnRegattaIdentifierAndReplicate(RaceLogOnRegattaIdentifier identifierTemplate) {
+            public void resolveOnRegattaIdentifier(RegattaAsRegattaLikeIdentifier regattaLikeParent) {
                 RacingEventServiceOperation<?> operation = new RecordRaceLogEventOnRegatta(
-                        identifierTemplate.getParentObjectName(), 
+                        regattaLikeParent.getName(),
                         raceColumn.getName(), 
                         identifier.getFleetName(), 
                         event);
@@ -50,9 +50,9 @@ public class RaceLogReplicator implements RaceColumnListener {
             }
             
             @Override
-            public void resolveOnLeaderboardIdentifierAndReplicate(RaceLogOnLeaderboardIdentifier identifierTemplate) {
+            public void resolveOnFlexibleLeaderboardIdentifier(FlexibleLeaderboardAsRegattaLikeIdentifier regattaLikeParent) {
                 RacingEventServiceOperation<?> operation = new RecordRaceLogEventOnLeaderboard(
-                        identifierTemplate.getParentObjectName(), 
+                        regattaLikeParent.getName(), 
                         raceColumn.getName(), 
                         identifier.getFleetName(), 
                         event);

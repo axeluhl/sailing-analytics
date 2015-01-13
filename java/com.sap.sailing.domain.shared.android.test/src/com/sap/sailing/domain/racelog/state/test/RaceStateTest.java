@@ -13,6 +13,19 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
@@ -20,29 +33,16 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogStartProcedureChangedEventImpl;
-import com.sap.sailing.domain.racelog.state.RaceState;
-import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
-import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
-import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceStateTest {
     
     private RaceLog raceLog;
-    private RaceLogEventAuthor author;
+    private AbstractLogEventAuthor author;
     private RaceLogEventFactory factory;
     private RacingProcedureType defaultRacingProcedureType;
     private ConfigurationLoader<RegattaConfiguration> configuration;
@@ -54,7 +54,7 @@ public class RaceStateTest {
     @Before
     public void setUp() {
         raceLog = new RaceLogImpl("test-log");
-        author = new RaceLogEventAuthorImpl("Test", 1);
+        author = new LogEventAuthorImpl("Test", 1);
         factory = RaceLogEventFactory.INSTANCE;
         defaultRacingProcedureType = RacingProcedureType.RRS26;
         configuration = new EmptyRegattaConfiguration();

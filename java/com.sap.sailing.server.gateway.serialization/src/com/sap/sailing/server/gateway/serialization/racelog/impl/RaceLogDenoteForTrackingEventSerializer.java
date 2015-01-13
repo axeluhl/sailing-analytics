@@ -2,13 +2,13 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceLogDenoteForTrackingEventSerializer extends BaseRaceLogEventSerializer {
-    public static final String VALUE_CLASS = DenoteForTrackingEvent.class.getSimpleName();
+    public static final String VALUE_CLASS = RaceLogDenoteForTrackingEvent.class.getSimpleName();
     public static final String FIELD_RACE_NAME = "raceName";
     public static final String FIELD_BOAT_CLASS = "boatClass";
     public static final String FIELD_RACE_ID = "raceId";
@@ -25,7 +25,7 @@ public class RaceLogDenoteForTrackingEventSerializer extends BaseRaceLogEventSer
 
     @Override
     public JSONObject serialize(RaceLogEvent object) {
-        DenoteForTrackingEvent event = (DenoteForTrackingEvent) object;
+        RaceLogDenoteForTrackingEvent event = (RaceLogDenoteForTrackingEvent) object;
 
         JSONObject result = super.serialize(event);
         result.put(FIELD_RACE_NAME, event.getRaceName());

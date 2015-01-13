@@ -57,6 +57,7 @@
       <plugin id="com.sap.sailing.www.events" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xmlexport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xrr.resultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sse.replication" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sse.security.ui" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sse.security.userstore.mongodb" autoStart="true" startLevel="3" />
       <plugin id="org.apache.felix.shell" autoStart="true" startLevel="0" />

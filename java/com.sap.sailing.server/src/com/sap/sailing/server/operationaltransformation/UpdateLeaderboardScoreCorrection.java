@@ -3,10 +3,10 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnOperation<Util.Triple<Double, Double, Boolean>> {

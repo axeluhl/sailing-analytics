@@ -6,6 +6,9 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -23,15 +26,13 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**
@@ -415,7 +416,7 @@ public interface TrackedRace extends Serializable {
      * the approximation is at most <code>maxDistance</code>. The approximation's fixes are original fixes from
      * the competitor's {@link GPSFixTrack track}.
      */
-    List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
+    Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
     /**
      * @return a non-<code>null</code> but perhaps empty list of the maneuvers that <code>competitor</code> performed in
@@ -423,8 +424,7 @@ public interface TrackedRace extends Serializable {
      *         result is taken from the cache straight away (<code>waitForLatest==false</code>) or, if a re-calculation
      *         for the <code>key</code> is still ongoing, the result of that ongoing re-calculation is returned.
      */
-    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest)
-            throws NoWindException;
+    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest);
 
     /**
      * @return <code>true</code> if this race is known to start with an {@link LegType#UPWIND upwind} leg. If this is
@@ -568,6 +568,11 @@ public interface TrackedRace extends Serializable {
      * @param fromRaceLog Make sure that the fixes defined by the mappings in this racelog were loaded.
      */
     void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException;
+
+    /**
+     * @see #waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog)
+     */
+    void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 
@@ -598,6 +603,12 @@ public interface TrackedRace extends Serializable {
      * @param raceLog to be attached.
      */
     void attachRaceLog(RaceLog raceLog);
+    
+    /**
+     * Attaches the passed regatta log with this {@link TrackedRace}.
+     * This also causes fixes from the {@link GPSFixStore} to be loaded (see {@link #attachRaceLog} for details).
+     */
+    void attachRegattaLog(RegattaLog regattaLog);
     
     /**
      * Returns the attached race log event track for this race if any.

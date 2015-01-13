@@ -454,7 +454,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> result) {
+    public void fillRegattas(Iterable<RegattaDTO> result) {
         trackedRacesListComposite.fillRegattas(result);
     }
 

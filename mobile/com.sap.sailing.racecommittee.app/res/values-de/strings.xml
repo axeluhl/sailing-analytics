@@ -6,7 +6,6 @@
     <string name="service_info">SAP Race Committee Service</string>
     <string name="service_text_no_races">Warte auf Rennen&#8230;</string>
     <string name="service_text_num_races">Aktuell %d Rennen verwaltet.</string>
-    
     <string name="app_name">SAP Race Committee Cockpit</string>
     <string name="set_time">Start</string>
     <string name="reset_time">Startzeit ändern</string>
@@ -57,7 +56,7 @@
     <string name="race_reset_confirmation_header">Zurücksetzen des Rennens</string>
     <string name="race_reset_confirmation_warning">Beim Zurücksetzen des Rennens werden alle Daten gelöscht. Alle Informationen zum Rennen müssen erneut eingegeben werden. Nur der eingegeben Kurs bleibt erhalten. Ein Zurücksetzen wird nicht empfohlen.</string>
     <string name="race_reset_confirmation_title">Zurücksetzen</string>
-	<string name="race_reset_reset_button">Trotzdem zurücksetzen</string>
+    <string name="race_reset_reset_button">Trotzdem zurücksetzen</string>
     <string name="race_finished_start_time">Rennstart um:</string>
     <string name="race_finished_end_time">Rennende um:</string>
     <string name="race_startphase_countdown_mode_remove">%1$s bis %2$s eingeholt wird</string>
@@ -84,8 +83,8 @@
         <item>Backbord</item>
         <item>Steuerbord</item>
         <item>Gate</item>
-        <item >Linie</item>
-        <item >Ablauf</item>
+        <item>Linie</item>
+        <item>Ablauf</item>
     </string-array>
 
     <string name="publish">Veröffentlichen</string>
@@ -132,123 +131,110 @@
     <string name="no_location_found">Zu ihrer Suche konnte keine passende Position bestimmt werden.</string>
     <string name="store_position">Diese Position verwenden</string>
     <string name="store_wind">Windeingaben speichern</string>
-    
+
     <!-- SETTINGS -->
 	<string name="settings_activity_title">Einstellungen</string>
     <string name="settings_category_general">Weitere Einstellungen</string>
     <string name="settings_general_manageareas_header">Verwaltete Bahnen</string>
     <string name="settings_general_language_header">Sprache auswählen</string>
     <string name="settings_general_language_description">Sprache auswählen. Eventuell muss die App neugestartet werden.</string>
-    
     <string name="settings_category_regatta_defaults">Regatta Einstellungen (Standard)</string>
     <string name="settings_category_regattas">Regatta Einstellungen (Speziell)</string>
     <string name="settings_category_course_designer">Kursdesigner Einstellungen</string>
-    
     <string name="override_default_start_procedure_type_select_header">Standard Startprozedur (wenn überschrieben)</string>
     <string name="override_default_start_procedure_type_select_description">Wenn Option "Standard Startprozedur überschreiben" aktiv ist, wird ausgewählte Startprozedur als Standard gewählt.</string>
-    
     <string name="settings_please_reload">Zum Übernehmen der Änderung bitte Aktion \'Neuladen\' durchführen.</string>
     <string name="settings_advanced_service_header">Server URL</string>
     <string name="settings_advanced_mail_header">Empfänger der Ergebnislisten</string>
-    
     <string name="settings_category_polling">Polling Einstellungen</string>
     <string name="settings_polling_active_header">Aktiviere Polling</string>
     <string name="settings_polling_active_description">Wenn aktiv wird im festgelegten Intervall Änderungen an den Rennen beim Server abgefragt.</string>
     <string name="settings_polling_interval_header">Polling Intervall (Sekunden)</string>
     <!-- SETTINGS -->
-    
+
     <string name="compass_view_compass">Kompass</string>
     <string name="compass_view_needle">Nadel</string>
-    
     <string name="racing_course_area_missing">Die Bahn konnte nicht geladen werden. Bitte neu anmelden.</string>
     <string name="racing_load_success">%d Rennen erfolgreich geladen.</string>
     <string name="generic_load_failure">Beim Laden der Daten ist ein Fehler aufgetreten:\n\n\"%s\"\n\nErneut versuchen?</string>
     <string name="set_course_layout">Kurs setzen</string>
-    
     <string name="loading_failure">Fehler beim Laden</string>
-	<string name="wind_unknown">(Wind setzen)</string>
-	<string name="wind_info">(%1$s kn, %2$s)</string>
-	<string name="login">Anmelden</string>
-	<string name="please_select_a_login_type">Bitte Login-Typ angeben.</string>
-	
-	<string name="race_list_filter_show_all">Alle Rennen</string>
-	<string name="race_list_filter_show_active">Aktive Rennen</string>
-	
-	<string name="race_reset_time_schedule_race">Rennen planen</string>
-	<string name="race_reset_time_startmode_starttime">Startmodus und Startzeit setzen</string>
-	<string name="today">Heute</string>
-	<string name="start">Startzeit des Rennens setzen</string>
-	
-	<string name="nationality">Nationalität</string>
-	<string name="number">Nummer</string>
-	<string name="snap">Fotos schießen</string>
-	
-	<string name="logout_dialog_title">Möchten Sie sich abmelden?</string>
-	<string name="logout_dialog_message">Wenn Sie sich abmelden wird kein Rennen mehr verwaltet.</string>
-	<string name="logout">Abmelden</string>
-	
-	<string name="loading_configuration">Lade Konfiguration&#8230;</string>
-	<string name="loading_configuration_failed">Fehler beim Laden der Konfiguration.</string>
-	<string name="loading_configuration_not_found">Für dieses Gerät existiert keine Konfiguration auf dem Server.</string>
-	<string name="loading_configuration_succeded">Konfiguration vom Server übernommen.</string>
-	
-	<string name="auto_update_install">Installieren</string>
-	<string name="auto_update_install_anyway">Trotzdem installieren</string>
-	
-	
-	<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-	<string name="choose_xray_flag_down">Einzelrückruf entfernen</string>
+    <string name="wind_unknown">(Wind setzen)</string>
+    <string name="wind_info">(%1$s kn, %2$s)</string>
+    <string name="login">Anmelden</string>
+    <string name="please_select_a_login_type">Bitte Login-Typ angeben.</string>
+    <string name="race_list_filter_show_all">Alle Rennen</string>
+    <string name="race_list_filter_show_active">Aktive Rennen</string>
+    <string name="race_reset_time_schedule_race">Rennen planen</string>
+    <string name="race_reset_time_startmode_starttime">Startmodus und Startzeit setzen</string>
+    <string name="today">Heute</string>
+    <string name="start">Startzeit des Rennens setzen</string>
+    <string name="nationality">Nationalität</string>
+    <string name="number">Nummer</string>
+    <string name="snap">Fotos schießen</string>
+    <string name="logout_dialog_title">Möchten Sie sich abmelden?</string>
+    <string name="logout_dialog_message">Wenn Sie sich abmelden wird kein Rennen mehr verwaltet.</string>
+    <string name="logout">Abmelden</string>
+    <string name="loading_configuration">Lade Konfiguration&#8230;</string>
+    <string name="loading_configuration_failed">Fehler beim Laden der Konfiguration.</string>
+    <string name="loading_configuration_not_found">Für dieses Gerät existiert keine Konfiguration auf dem Server.</string>
+    <string name="loading_configuration_succeded">Konfiguration vom Server übernommen.</string>
+    <string name="auto_update_install">Installieren</string>
+    <string name="auto_update_install_anyway">Trotzdem installieren</string>
+
+    <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+    <string name="choose_xray_flag_down">Einzelrückruf entfernen</string>
     <string name="login_type_officer_on_start_vessel">Als Startschiff-Wettfahrtleiter anmelden</string>
     <string name="login_type_officer_on_finish_vessel">Als Zielschiff-Wettfahrtleiter anmelden</string>
     <string name="login_type_shore_control">Als Regattaleitung an Land anmelden</string>
     <string name="gate_launch_stops_after">Gate Launch stoppt nach %dmin</string>
     <string name="override_default_course_designer_type_select_header">Kursdesigner</string>
-	<string name="settings_course_designer_by_name_course_names_header">Kursnamen</string>
-	<string name="preference_racing_procedure_rrs26_startmode_flags_header">Startmodus Flaggen</string>
-	<string name="preference_racing_procedure_classflag_header">Klassenflagge</string>
-	<string name="preference_racing_procedure_hasxray_header">Einzelrückruf</string>
-	<string name="preference_racing_procedure_hasxray_description">Diese Option aktiviert den Einzelrückruf</string>
-	<string name="preference_racing_procedure_gatestart_haspathfinder_description">Diese Option aktiviert den Pathfinder</string>
-	<string name="preference_racing_procedure_gatestart_haspathfinder_header">Pathfinder</string>
-	<string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">Diese Option aktiviert das Wählen der zusätzlichen Golfflaggenzeit.</string>
-	<string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">Zusätzliche Golfflaggenzeit.</string>
-	<string name="device_identifier">Gerätename</string>
-	<string name="synchronize_connection_settings_header">Synchronisiere mit Server</string>
-	<string name="synchronize_connection_settings_description">Zur Synchronisierung der Gerätekonfiguration vom Server per QR-Code hier klicken.</string>
-	<string name="update_app_header">Update erzwingen</string>
-	<string name="update_app_description">Erzwingt ein Update. Es ist besser die Synchronisierung zu nutzen.</string>
-	<string name="options_menu_info">Technische Informationen</string>
-	<string name="gate_launch">Gate Launch</string>
-	<string name="golf_down">Golf</string>
-	<string name="preference_regatta_specific_title">Regattakonfiguration - %1$s</string>
-	<string name="preference_regatta_specific_save_title">Speichere %1$s Konfiguration</string>
-	<string name="preference_regatta_specific_save_description">Hier klicken um Regattakonfiguration für  1$s zu speichern.</string>
-	<string name="auto_update">Auto-Update</string>
-	<string name="auto_update_checking_version">Prüfe Versionsinformation auf Server&#8230;</string>
-	<string name="auto_update_downloading_version">Versuche Versionsinformation von %1$s zu erhalten</string>
-	<string name="auto_update_version_file_url_invalid">Link zur Versionsinformation ungültig.</string>
-	<string name="auto_update_click_install">Klicke \'Installieren\' um ein Update auf Version %1$d durchzuführen.</string>
-	<string name="auto_update_force_install">Es ist bereits die Server-Version installiert (Version %1$d).</string>
-	<string name="auto_update_already_up_to_date">Alles aktuell!</string>
-	<string name="auto_update_downloading_apk">Downloade APK vom Server&#8230;</string>
-	<string name="auto_update_apk_link_invalid">Der Downloadlink ist ungültig.</string>
-	<string name="auto_update_apk_file_error">Konnte Zieldatei nicht erstellen.</string>
-	<string name="auto_update_error">Fehler beim Update.</string>
-	<string name="auto_update_completed">Auto-Update erfolgreich</string>
-	<string name="auto_update_completed_text">Update erfolgreich ausgeführt. Es sollte erneut mit dem Server synchronisiert werden.</string>
-	<string name="auto_update_completed_take_me_there">Bring\' mich hin</string>
-	<string name="wind_gps_is_disabled">GPS ist ausgeschaltet, soll es aktiviert werde?</string>
-	<string name="rrs26_start_mode_changed_to">Startmodus Flagge verändert zu %1$s</string>
-	<string name="preference_there_are_no_regattas">Bisher keine Regatta geladen.</string>
-	<string name="configure_regatta">Konfiguriere Regatta %1$s</string>
+    <string name="settings_course_designer_by_name_course_names_header">Kursnamen</string>
+    <string name="preference_racing_procedure_rrs26_startmode_flags_header">Startmodus Flaggen</string>
+    <string name="preference_racing_procedure_classflag_header">Klassenflagge</string>
+    <string name="preference_racing_procedure_hasxray_header">Einzelrückruf</string>
+    <string name="preference_racing_procedure_hasxray_description">Diese Option aktiviert den Einzelrückruf</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_description">Diese Option aktiviert den Pathfinder</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_header">Pathfinder</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">Diese Option aktiviert das Wählen der zusätzlichen Golfflaggenzeit.</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">Zusätzliche Golfflaggenzeit.</string>
+    <string name="device_identifier">Gerätename</string>
+    <string name="synchronize_connection_settings_header">Synchronisiere mit Server</string>
+    <string name="synchronize_connection_settings_description">Zur Synchronisierung der Gerätekonfiguration vom Server per QR-Code hier klicken.</string>
+    <string name="update_app_header">Update erzwingen</string>
+    <string name="update_app_description">Erzwingt ein Update. Es ist besser die Synchronisierung zu nutzen.</string>
+    <string name="options_menu_info">Technische Informationen</string>
+    <string name="gate_launch">Gate Launch</string>
+    <string name="golf_down">Golf</string>
+    <string name="preference_regatta_specific_title">Regattakonfiguration - %1$s</string>
+    <string name="preference_regatta_specific_save_title">Speichere %1$s Konfiguration</string>
+    <string name="preference_regatta_specific_save_description">Hier klicken um Regattakonfiguration für  1$s zu speichern.</string>
+    <string name="auto_update">Auto-Update</string>
+    <string name="auto_update_checking_version">Prüfe Versionsinformation auf Server&#8230;</string>
+    <string name="auto_update_downloading_version">Versuche Versionsinformation von %1$s zu erhalten</string>
+    <string name="auto_update_version_file_url_invalid">Link zur Versionsinformation ungültig.</string>
+    <string name="auto_update_click_install">Klicke \'Installieren\' um ein Update auf Version %1$d durchzuführen.</string>
+    <string name="auto_update_force_install">Es ist bereits die Server-Version installiert (Version %1$d).</string>
+    <string name="auto_update_already_up_to_date">Alles aktuell!</string>
+    <string name="auto_update_downloading_apk">Downloade APK vom Server&#8230;</string>
+    <string name="auto_update_apk_link_invalid">Der Downloadlink ist ungültig.</string>
+    <string name="auto_update_apk_file_error">Konnte Zieldatei nicht erstellen.</string>
+    <string name="auto_update_error">Fehler beim Update.</string>
+    <string name="auto_update_completed">Auto-Update erfolgreich</string>
+    <string name="auto_update_completed_text">Update erfolgreich ausgeführt. Es sollte erneut mit dem Server synchronisiert werden.</string>
+    <string name="auto_update_completed_take_me_there">Bring\' mich hin</string>
+    <string name="wind_gps_is_disabled">GPS ist ausgeschaltet, soll es aktiviert werde?</string>
+    <string name="rrs26_start_mode_changed_to">Startmodus Flagge verändert zu %1$s</string>
+    <string name="preference_there_are_no_regattas">Bisher keine Regatta geladen.</string>
+    <string name="configure_regatta">Konfiguriere Regatta %1$s</string>
+    <string name="race_start_in_5_minutes">5 Minuten</string>
+    <string name="race_start_in_4_minutes">4 Minuten</string>
+    <string name="race_start_in_2_minutes">2 Minuten</string>
+    <string name="race_start_in_1_minute">1 Minute</string>
+    <string name="race_reset_course">Kurs ändern</string>
+    <string name="no_course_active">Kein Kurs gesetzt</string>
+    <string name="toggle_group_race_mode">Gruppenrennen?</string>
+    <string name="toggle_group_race_mode_off">Kein Gruppenrennen</string>
+    <string name="toggle_group_race_mode_on">Gruppenrennen</string>
 
-	<string name="race_start_in_5_minutes">5 Minuten</string>
-	<string name="race_start_in_4_minutes">4 Minuten</string>
-	<string name="race_start_in_2_minutes">2 Minuten</string>
-	<string name="race_start_in_1_minute">1 Minute</string>
-	<string name="race_reset_course">Kurs ändern</string>
-	<string name="no_course_active">Kein Kurs gesetzt</string>
-	<string name="toggle_group_race_mode">Gruppenrennen?</string>
-	<string name="toggle_group_race_mode_off">Kein Gruppenrennen</string>
-	<string name="toggle_group_race_mode_on">Gruppenrennen</string>
 </resources>

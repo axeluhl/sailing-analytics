@@ -45,9 +45,4 @@ public class SmartphoneStartView extends Composite implements StartView {
         mainEvents.setRecentEvents(recentEvents);
         mainMedia.setRecentEvents(recentEvents);
     }
-
-    @Override
-    public void adjustSizes() {
-        stage.adjustSize();
-    }
 }

@@ -5,8 +5,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.StringMessages;
-import com.sap.sse.security.ui.shared.UserManagementService;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 /**
  * Adds user management service and user service for security management to the general abstract entry point.

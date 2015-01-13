@@ -21,5 +21,4 @@ public class SolutionsActivity extends AbstractActivity {
         panel.setWidget(solutionsView.asWidget());
         Window.setTitle(TextMessages.INSTANCE.sapSailing() + " - " + TextMessages.INSTANCE.solutions());
     }
-
 }

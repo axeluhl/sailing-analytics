@@ -11,8 +11,8 @@ import java.util.logging.Logger;
 
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
+import com.sap.sse.common.TimePoint;
 
 public class TracTracStartTimeUpdateHandler extends UpdateHandler implements StartTimeChangedListener {
     

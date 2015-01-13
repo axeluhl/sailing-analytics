@@ -8,19 +8,15 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind;
+import com.sap.sailing.simulator.impl.PathGeneratorTreeGrow;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularGrid;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
@@ -28,6 +24,10 @@ import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorOscillationImpl;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TreeGrowTest {
 
@@ -62,7 +62,7 @@ public class TreeGrowTest {
         param.setProperty("Djikstra.gridv[int]", 10.0);
         param.setProperty("Djikstra.gridh[int]", 100.0);*/
 
-        PathGeneratorTreeGrowWind treeGrow = new PathGeneratorTreeGrowWind(param);
+        PathGeneratorTreeGrow treeGrow = new PathGeneratorTreeGrow(param);
 
         Path path = treeGrow.getPath();
 

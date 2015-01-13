@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.HashSet;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ListBox;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -42,13 +44,14 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
     }
     
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         this.trackedRacesListComposite.fillRegattas(regattas);
         RegattaDTO selectedRegatta = getSelectedRegatta();
         this.availableRegattas.clear();
         this.availableRegattasListBox.clear();
         this.availableRegattasListBox.addItem(this.stringMessages.defaultRegatta());
-        List<RegattaDTO> regattasSortedByName = new ArrayList<RegattaDTO>(regattas);
+        List<RegattaDTO> regattasSortedByName = new ArrayList<RegattaDTO>();
+        Util.addAll(regattas, regattasSortedByName);
         Collections.sort(regattasSortedByName, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO o1, RegattaDTO o2) {
@@ -162,7 +165,11 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
     }
 
     private boolean checkBoatClassMatch(Iterable<String> boatClassNames, RegattaDTO selectedRegatta) {
-        return Util.contains(boatClassNames, selectedRegatta.boatClass.getName());
+        Set<BoatClassMasterdata> boatClassNamesMappedToMasterData = new HashSet<>();
+        for (String boatClassName : boatClassNames) {
+            boatClassNamesMappedToMasterData.add(BoatClassMasterdata.resolveBoatClass(boatClassName));
+        }
+        return boatClassNamesMappedToMasterData.contains(BoatClassMasterdata.resolveBoatClass(selectedRegatta.boatClass.getName()));
     }
 
 }

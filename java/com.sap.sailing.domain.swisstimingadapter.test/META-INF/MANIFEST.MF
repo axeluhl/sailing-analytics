@@ -18,6 +18,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.swisstimingadapter.persistence;bundle-version="1.0.0",
  org.junit4;bundle-version="4.8.2",
  org.hamcrest.core;bundle-version="1.1.0",
+ com.sap.sse,
  com.sap.sse.common
 Bundle-ClassPath: resources/,
  .

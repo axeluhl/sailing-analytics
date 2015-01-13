@@ -4,15 +4,15 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sse.common.TimePoint;
 
 /**
  * This trivial "cache" implementation doesn't cache and may be used as a default for those cases where only few
- * calculations are to be done and creating the caching structure would cost spend cycles than simply doing the
+ * calculations are to be done and creating the caching structure would cost more cycles than simply doing the
  * calculation.
  * 
  * @author Axel Uhl (D043530)

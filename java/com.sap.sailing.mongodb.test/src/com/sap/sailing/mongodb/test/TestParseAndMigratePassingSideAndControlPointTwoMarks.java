@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.MarkImpl;
@@ -17,7 +18,6 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
-import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 
 public class TestParseAndMigratePassingSideAndControlPointTwoMarks {

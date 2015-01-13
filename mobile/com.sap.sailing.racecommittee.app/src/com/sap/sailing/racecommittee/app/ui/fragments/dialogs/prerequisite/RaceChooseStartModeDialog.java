@@ -15,12 +15,12 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl.StartmodePrerequisite;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl.StartmodePrerequisite;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsBitmapCache;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceChooseStartModeDialog extends PrerequisiteRaceDialog<StartmodePrerequisite, Flags> {
     

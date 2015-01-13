@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
@@ -22,6 +21,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**

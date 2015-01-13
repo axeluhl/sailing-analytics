@@ -10,10 +10,8 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -24,6 +22,8 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class Simulator {
     private static final Logger logger = Logger.getLogger(Simulator.class.getName());
@@ -104,7 +104,7 @@ public class Simulator {
      * {@link #setAdvanceInMillis(long)}.
      */
     private synchronized long getAdvanceInMillis() {
-        while (!isAdvanceInMilliseSet()) {
+        while (!isAdvanceInMillisSet()) {
             if (trackedRace.getStartOfRace() != null) {
                 setAdvanceInMillis(System.currentTimeMillis() - trackedRace.getStartOfRace().asMillis());
             } else {
@@ -173,7 +173,7 @@ public class Simulator {
     }
 
     private TimePoint advanceTimePointAndUseAsStartTimeIfNeeded(TimePoint time){
-        if (isAdvanceInMilliseSet()) {
+        if (isAdvanceInMillisSet()) {
             return advance(time);
         } else {
             setAdvanceInMillis(System.currentTimeMillis() - time.asMillis());
@@ -181,7 +181,7 @@ public class Simulator {
         }
     }
 
-    private boolean isAdvanceInMilliseSet() {
+    private boolean isAdvanceInMillisSet() {
         return advanceInMillis != -1;
     }
 

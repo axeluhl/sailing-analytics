@@ -21,12 +21,12 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.impl.LeaderboardGroupsJsonGetServlet;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
     private Regatta regatta;
@@ -46,7 +46,8 @@ public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
         Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, fleets,
                 raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
-        regatta = racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaName, boatClassName), boatClassName, UUID.randomUUID(), series, /*persistent*/ true,
+        regatta = racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaName, boatClassName), boatClassName, 
+                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series, /*persistent*/ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);

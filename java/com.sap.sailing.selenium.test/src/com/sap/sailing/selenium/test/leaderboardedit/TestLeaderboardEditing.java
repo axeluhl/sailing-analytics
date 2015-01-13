@@ -27,7 +27,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final String BMW_CUP_JSON_URL = "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
     private static final String BMW_CUP_RACE_8 = "BMW Cup Race 8";
     private static final String BMW_CUP_REGATTA = "BMW Cup";
-    private static final String BMW_CUP_BOAT_CLASS = "J80";
+    private static final String BMW_CUP_BOAT_CLASS = "J/80";
     
     private static final TrackableRaceDescriptor TRACKABLE_RACE = new TrackableRaceDescriptor(
             BMW_CUP_REGATTA, BMW_CUP_RACE_8, BMW_CUP_BOAT_CLASS);
@@ -35,11 +35,13 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
             BMW_CUP_REGATTA + " (" + BMW_CUP_BOAT_CLASS + ")", BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
     private static final RaceDescriptor RACE_COLUMN = new RaceDescriptor("R1", "Default", false, false, 0.0);
     
+    @Override
     @Before
-    public void clearDatabase() {
+    public void setUp() {
         clearState(getContextRoot());
+        super.setUp();
     }
-    
+
     @Test
     public void testSimpleLeaderboardEditing() {
         createNewLeaderboardLoadRaceAndLink(LEADERBOARD);

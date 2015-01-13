@@ -593,7 +593,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      *          outside of the horizontal splitter panel. In most cases one will create such a panel
      *          on top of the widget that has position {@link Direction#CENTER}.
      */
-    public void lastComponentHasBeenAdded(final SideBySideComponentViewer cm, AbsolutePanel panelForHorizontalButtons, List<Pair<Button, Component<?>>> additionalVerticalButtons) {
+    public void lastComponentHasBeenAdded(final SideBySideComponentViewer cm, AbsolutePanel panelForHorizontalButtons, List<Pair<Button, String>> additionalVerticalButtonsAndStyles) {
         WidgetCollection splitterChildren = super.getChildren();
         HSplitter lastHorizontalSplitter = null;
         VSplitter lastVerticalSplitter = null;
@@ -613,7 +613,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (lastVerticalSplitter != null) {
             Panel panel = createToggleButtonPanel(allVerticalSplitters,
                     "gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel", "gwt-SplitLayoutPanel-NorthSouthToggleButton",
-                    cm, additionalVerticalButtons);
+                    cm, additionalVerticalButtonsAndStyles);
             lastVerticalSplitter.addToogleButtons(panel);
             lastVerticalSplitter.setVisible(true);
             lastVerticalSplitter.setDraggerVisible(false);
@@ -633,16 +633,16 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * {@link Splitter}s including the {@link Component} and {@link Widget}.
      */
     private Panel createToggleButtonPanel(List<Splitter> splitters, String panelStyleName, String buttonStyleName,
-            final SideBySideComponentViewer componentViewer, List<Pair<Button, Component<?>>> additionalButtons) {
+            final SideBySideComponentViewer componentViewer, List<Pair<Button, String>> additionalButtonsAndStyles) {
         FlowPanel buttonFlowPanel = new FlowPanel();
         buttonFlowPanel.setStyleName(panelStyleName);
-        if (additionalButtons != null) {
-            for (Pair<Button, Component<?>> buttonAndComponentPair : additionalButtons) {
+        if (additionalButtonsAndStyles != null) {
+            for (Pair<Button, String> buttonAndComponentPair : additionalButtonsAndStyles) {
                 Button button = buttonAndComponentPair.getA();
                 button.setStyleName(buttonStyleName);
-                button.addStyleDependentName("Closed-"+buttonAndComponentPair.getB().getDependentCssClassName());
+                button.addStyleDependentName("Closed-"+buttonAndComponentPair.getB());
                 if (Document.get().getClientWidth() <= 1024) {
-                    button.addStyleDependentName("Small-"+buttonAndComponentPair.getB().getDependentCssClassName());
+                    button.addStyleDependentName("Small-"+buttonAndComponentPair.getB());
                 }
                 buttonFlowPanel.add(button);
             }

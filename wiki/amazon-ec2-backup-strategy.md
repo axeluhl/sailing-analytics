@@ -24,8 +24,8 @@ BUP is the tool that is being used to create the backups. You can access it's do
 
 As with git you have three stages when starting a backup.
 
-- First you need to initialize the repository (comparable to `git init`). This is also needed when using a remote repository. In that case the local repository is used to hold the index of files and to determine wether files have changed. The initialization is executed by invoking `bup [-d /path/to/repo] init`. In most cases you can just omit the directory - bup will then set it to $HOME/.bup.
-- Second you need to tell bup to create or update the index (comparable to `git add`). That operation will list all files and add them to the index. That index contains information about changes to the tree structure. At this stage you can specify wether to ignore certain files (--exclude and --exclude-rx). An index command could look like this: `bup index /etc`.
+- First you need to initialize the repository (comparable to `git init`). This is also needed when using a remote repository. In that case the local repository is used to hold the index of files and to determine whether files have changed. The initialization is executed by invoking `bup [-d /path/to/repo] init`. In most cases you can just omit the directory - bup will then set it to $HOME/.bup.
+- Second you need to tell bup to create or update the index (comparable to `git add`). That operation will list all files and add them to the index. That index contains information about changes to the tree structure. At this stage you can specify whether to ignore certain files (--exclude and --exclude-rx). An index command could look like this: `bup index /etc`.
 - Third all indexed files need to be saved (comparable to `git commit`). That process can either store files locally (comparable to `git commit`) or push them to a remote repository (`git commit && git push`).
 
 The last stage involves some magic because bup does not expose the notion of branches or HEAD to the user. In most cases one will save files by specifying the name of a backup (`bup save -n <name>`). Internally this will create or update a branch that matches the name given. More importantly this operation will remove all files not matching the index just created. 
@@ -58,7 +58,7 @@ Saving: 100.00% (24426/24426k, 1188/1188 files), done.
 bloom: creating from 1 file (3635 objects). 
 </pre>
 
-As bup is using the standard GIT repository layout one does not need to use bup to access files. But yuo have to keep in mind that as bup is splitting the files it would require some additional effort to put these files together again. The following chain shows how to access a repository. It assumes that one has logged into the backup server.
+As bup is using the standard GIT repository layout one does not need to use bup to access files. But you have to keep in mind that as bup is splitting the files it would require some additional effort to put these files together again. The following chain shows how to access a repository. It assumes that one has logged into the backup server.
 
 <pre>
 [backup@ip-172-31-25-136 ~]$ git clone file:///home/backup/database dbtest

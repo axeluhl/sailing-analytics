@@ -33,7 +33,6 @@ import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
@@ -47,6 +46,7 @@ import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ESSCourseDesignDialog extends RaceDialogFragment {
 	// private final static String TAG =

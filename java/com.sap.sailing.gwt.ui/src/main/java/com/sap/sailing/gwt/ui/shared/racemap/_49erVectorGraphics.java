@@ -2,11 +2,12 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 
 public class _49erVectorGraphics extends BoatClassVectorGraphics {
     
-    public _49erVectorGraphics(String... compatibleBoatClassNames) {
-        super("49ER", 499, 290, 499, compatibleBoatClassNames);
+    public _49erVectorGraphics(BoatClassMasterdata... compatibleBoatClasses) {
+        super(499, 290, 499, compatibleBoatClasses);
     }
 
     @Override

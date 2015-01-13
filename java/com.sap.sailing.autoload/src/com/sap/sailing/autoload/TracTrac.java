@@ -16,8 +16,10 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
@@ -27,6 +29,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Auto load TracTrac races from a parameter called <code>tractrac.autoload.json_urls</code>. This
@@ -77,17 +80,27 @@ public class TracTrac {
                                 regattaForRaceRecord = regatta.getRegattaIdentifier();
                             }
                         }
-                        getTracTracAdapter().addTracTracRace((TrackerManager)getService(), regattaForRaceRecord,
-                            record.getParamURL(), /*effectiveLiveURI*/ null,
-                            record.getStoredURI(), new URI(""),
-                            new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
-                            new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
-                            MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(getService().getMongoObjectFactory(), getService().getDomainObjectFactory()),
-                            RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /*simulateWithStartTimeNow*/false, 
-                            /*tracTracUsername*/"", /*tracTracPassword*/"",
-                            record.getRaceStatus(), record.getRaceVisibility());
+                        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(getService()
+                                .getMongoObjectFactory(), getService().getDomainObjectFactory());
+                        RegattaLogStore regattaLogStore = MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
+                                getService().getMongoObjectFactory(), getService().getDomainObjectFactory());
+                        getTracTracAdapter().addTracTracRace(
+                                (TrackerManager) getService(),
+                                regattaForRaceRecord,
+                                record.getParamURL(), /* effectiveLiveURI */
+                                null,
+                                record.getStoredURI(),
+                                new URI(""),
+                                new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
+                                new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
+                                raceLogStore, regattaLogStore,
+                                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* simulateWithStartTimeNow */
+                                false,
+                                /* tracTracUsername */"", /* tracTracPassword */"", record.getRaceStatus(),
+                                record.getRaceVisibility());
                     } else {
-                        logger.info("Ignoring race " + record.getName() + " because it is in status " + record.getRaceStatus() + " and visibility " + record.getRaceVisibility());
+                        logger.info("Ignoring race " + record.getName() + " because it is in status "
+                                + record.getRaceStatus() + " and visibility " + record.getRaceVisibility());
                     }
                 }
             }

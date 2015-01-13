@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
@@ -12,6 +12,6 @@ public interface StatisticProvider extends Component<Object> {
 
     public void addStatisticChangedListener(StatisticChangedListener listener);
     
-    public void applyQueryDefinition(QueryDefinition queryDefinition);
+    public void applyQueryDefinition(QueryDefinitionDTO queryDefinition);
 
 }
