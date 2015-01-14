@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.io.Serializable;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -61,7 +62,8 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         // Also see the corresponding case distinction in the deserialized which first tries to parse a string as a UUID becore
         // returning the ID as is.
         result.put(FIELD_ID_TYPE, competitor.getId().getClass().getName());
-        for (Entry<Object, Object> idKeyAndValue : getCompetitorIdQuery(competitor).entrySet()) {
+        Set<Entry<Object, Object>> entries = getCompetitorIdQuery(competitor).entrySet();
+        for (Entry<Object, Object> idKeyAndValue : entries) {
             result.put(idKeyAndValue.getKey(), idKeyAndValue.getValue());
         }
         result.put(FIELD_NAME, competitor.getName());

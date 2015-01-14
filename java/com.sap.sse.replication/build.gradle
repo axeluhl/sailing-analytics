@@ -1,0 +1,17 @@
+apply plugin: "java"
+
+sourceSets {
+    main {
+        java.srcDirs = ["src"]
+    }
+}
+
+dependencies {
+    compile "com.rabbitmq:amqp-client:2.8.4"
+
+    /* local dependencies */
+    compile project(":java:com.sap.sse.common")
+    compile project(":java:com.sap.sse.operationaltransformation")
+    compile project(":java:com.sap.sse")
+    compile project(":java:com.sap.sse.gateway")
+}

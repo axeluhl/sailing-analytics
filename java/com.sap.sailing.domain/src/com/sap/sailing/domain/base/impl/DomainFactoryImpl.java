@@ -60,7 +60,7 @@ import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class DomainFactoryImpl extends SharedDomainFactoryImpl implements DomainFactory {
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
