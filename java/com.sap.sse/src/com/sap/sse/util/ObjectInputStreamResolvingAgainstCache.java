@@ -1,9 +1,11 @@
-package com.sap.sse.common;
+package com.sap.sse.util;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
+
+import com.sap.sse.common.IsManagedByCache;
 
 /**
  * During de-serialization, resolves objects managed by a cache of type <C> using a cache of that type passed to the
