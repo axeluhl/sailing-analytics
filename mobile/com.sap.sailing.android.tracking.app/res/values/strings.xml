@@ -68,6 +68,7 @@
 	<string name="tracking_colon">Tracking:</string>
 	<string name="regatta_in_progress">The regatta is in progress.</string>
 	<string name="heading">Heading</string>
+	<string name="course_over_ground">Course over Ground</string>
 	<string name="sog">Speed over Ground</string>
 	<string name="none">None</string>
 	<string name="show_leaderboard">Leader board</string>

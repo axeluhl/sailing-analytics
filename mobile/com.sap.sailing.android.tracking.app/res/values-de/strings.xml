@@ -80,6 +80,7 @@
 	<string name="hud_heading_prefix">HDG: </string>
 	<string name="hud_speed_over_ground_prefix">SPD: </string>
 	<string name="heading">Kurs</string>
+	<string name="course_over_ground">Course over Ground</string>
 	<string name="sog">SOG</string>
 	<string name="none">Keine</string>
 	<string name="show_leaderboard">Leaderboard</string>

@@ -24,8 +24,6 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.API
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.sensors.CompassManager;
-import com.sap.sailing.android.tracking.app.sensors.CompassManager.MagneticHeadingListener;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
@@ -41,7 +39,7 @@ import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener,
-		APIConnectivityListener, MagneticHeadingListener {
+		APIConnectivityListener {
 
 	TrackingService trackingService;
 	boolean trackingServiceBound;
@@ -202,7 +200,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	@Override
 	protected void onPause() {
 		super.onPause();
-		CompassManager.getInstance(this).unregisterListener();
 		timer.stop();
 		
 		mPager = (ViewPager) findViewById(R.id.pager);
@@ -212,10 +209,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		if (prefs.getHeadingFromMagneticSensorPreferred()) {
-			CompassManager.getInstance(this).registerListener(this);
-		}
 
 		timer = new TimerRunnable();
 		timer.start();
@@ -317,28 +310,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			trackingServiceBound = false;
 		}
 	};
-
-	@Override
-	public void magneticHeadingUpdated(float heading) {
-		if (prefs.getHeadingFromMagneticSensorPreferred()) {
-			if (mPager.getCurrentItem() == ScreenSlidePagerAdapter.VIEW_PAGER_FRAGMENT_COMPASS) {
-				
-				ScreenSlidePagerAdapter viewPagerAdapter = getViewPagerAdapter();
-				if (viewPagerAdapter != null) {
-					CompassFragment compassFragment = viewPagerAdapter.getCompassFragment();
-					if (compassFragment != null && compassFragment.isAdded()) {
-						compassFragment.setBearing(heading);
-					}
-				}
-			}
-		} else {
-			if (BuildConfig.DEBUG) {
-				ExLog.i(this, TAG,
-						"Received magnet compass update, even though prefs say get from GPS. Unregistering listener.");
-			}
-			CompassManager.getInstance(this).unregisterListener();
-		}
-	}
 	
 	private ScreenSlidePagerAdapter getViewPagerAdapter() {
 		return (ScreenSlidePagerAdapter) mPager.getAdapter();

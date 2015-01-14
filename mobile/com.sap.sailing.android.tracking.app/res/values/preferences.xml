@@ -10,7 +10,7 @@
     <string name="preference_server_url_default">http://95.85.58.11:8000</string>
     
     <string name="preference_energy_saving_enabled_key">preferenceEnergySavingEnabled</string>
-    <string name="preference_heading_from_magnetic_key">preferenceHeadingFromMagneticKey</string>
+    <string name="preference_heading_with_declination">preferenceHeadingWithDeclination</string>
     
     <string name="settings_category_energy_saving">Battery Saving</string>
     <string name="energy_saving_enabled">Save Energy</string>
@@ -29,9 +29,9 @@
     <string name="preference_tracker_is_tracking_checkin_digest">trackerIsTrackingCheckinDigest</string>
     <string name="preference_last_scanned_qr_code">lastScannedQRCode</string>
     
-    <string name="preference_heading_from_magnetic_key_is_enabled">magn.</string>
-    <string name="preference_heading_from_magnetic_key_is_disabled">GPS</string>
-    <string name="preference_heading_from_magnetic_key_summary_is_enabled">Heading from magnetic compass</string>
-    <string name="preference_heading_from_magnetic_key_summary_is_disabled">Heading from GPS</string>
-    <string name="preference_heading_from_magnetic_enabled">Heading</string>
+    <string name="preference_heading_with_declination_key_is_enabled">On</string>
+    <string name="preference_heading_with_declination_key_is_disabled">Off</string>
+    <string name="preference_heading_with_declination_key_summary_is_enabled">Display: Magnetic + Declination</string>
+    <string name="preference_heading_with_declination_key_summary_is_disabled">Display: Magnetic</string>
+    <string name="preference_heading_with_declination_enabled">Heading</string>
 </resources>

@@ -7,9 +7,9 @@
     <string name="preference_energy_saving_is_disabled">Aus</string>
     <string name="prefrence_energy_saving_summary_is_enabled">GPS Updates werden alle 30 Sekunden verschickt.</string>
     <string name="prefrence_energy_saving_summary_is_disabled">GPS Updates werden alle 3 Sekunden verschickt.</string>
-    <string name="preference_heading_from_magnetic_key_is_enabled">magn.</string>
-    <string name="preference_heading_from_magnetic_key_is_disabled">GPS</string>
-    <string name="preference_heading_from_magnetic_key_summary_is_enabled">Richtung stammt vom Magnetkompass</string>
-    <string name="preference_heading_from_magnetic_key_summary_is_disabled">Richtung stammt vom GPS</string>
-    <string name="preference_heading_from_magnetic_enabled">Richtung</string>
+    <string name="preference_heading_with_declination_key_is_enabled">Ein</string>
+    <string name="preference_heading_with_declination_key_is_disabled">Aus</string>
+    <string name="preference_heading_with_declination_key_summary_is_enabled">Anzeige: Magnetkompasskurs + Ablenkung</string>
+    <string name="preference_heading_with_declination_key_summary_is_disabled">Anzeige: Magnetkompasskurs</string>
+    <string name="preference_heading_with_declination_enabled">Richtung</string>
 </resources>
