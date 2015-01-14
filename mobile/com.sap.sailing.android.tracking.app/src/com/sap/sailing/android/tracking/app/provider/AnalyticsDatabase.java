@@ -12,7 +12,6 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardColumns;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGpsColumns;
 
 public class AnalyticsDatabase extends SQLiteOpenHelper {
 
@@ -29,7 +28,6 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String COMPETITORS = "competitors";
         String EVENTS = "events";
         String EVENTS_COMPETITORS = "events_competitors";
-        String SENSOR_GPS = "sensor_gps";
         String LEADERBOARDS = "leaderboards";
         String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS +
         " INNER JOIN " + Tables.EVENTS + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST 
@@ -37,7 +35,6 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         " INNER JOIN " + Tables.COMPETITORS + " ON (" + Tables.LEADERBOARDS + "."+ Leaderboard.LEADERBOARD_CHECKIN_DIGEST 
         + " = " + Tables.COMPETITORS + "." + Competitor.COMPETITOR_CHECKIN_DIGEST + ") ";
         
-        String GPS_FIXES_JOIN_EVENTS = "sensor_gps LEFT JOIN events ON sensor_gps.event_id = events._id ";
         String LEADERBOARDS_JOIN_EVENTS = "events LEFT JOIN leaderboards ON " + Tables.EVENTS + "." + Event.EVENT_CHECKIN_DIGEST 
         		+ " = " + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST;
     }
@@ -72,22 +69,6 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + EventColumns.EVENT_SERVER + " TEXT, "
                 + EventColumns.EVENT_IMAGE_URL + " TEXT, "
                 + EventColumns.EVENT_CHECKIN_DIGEST + " TEXT )");
-
-        db.execSQL("CREATE TABLE " + Tables.SENSOR_GPS + " ( "
-                + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + SensorGpsColumns.GPS_ACCURACY + " DOUBLE, "
-                + SensorGpsColumns.GPS_ALTITUDE + " DOUBLE, "
-                + SensorGpsColumns.GPS_BEARING + " DOUBLE, "
-                + SensorGpsColumns.GPS_DEVICE + " TEXT, "
-                + SensorGpsColumns.GPS_LATITUDE + " DOUBLE, "
-                + SensorGpsColumns.GPS_LONGITUDE + " DOUBLE, "
-                + SensorGpsColumns.GPS_PROVIDER + " TEXT, "
-                + SensorGpsColumns.GPS_SPEED + " DOUBLE, "
-                + SensorGpsColumns.GPS_SYNCED + " INTEGER DEFAULT 0, "
-                + SensorGpsColumns.GPS_TIME + " INTEGER, "
-                + SensorGpsColumns.GPS_EVENT_FK + " INTEGER, "
-                + "FOREIGN KEY (" + SensorGpsColumns.GPS_EVENT_FK + ") " 
-                + "REFERENCES " + Tables.EVENTS + "( " + EventColumns.EVENT_ID  + " ))");
     }
 
     @Override
@@ -101,7 +82,6 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
            
            db.execSQL("DROP TABLE IF EXISTS " + Tables.COMPETITORS);
            db.execSQL("DROP TABLE IF EXISTS " + Tables.EVENTS);
-           db.execSQL("DROP TABLE IF EXISTS " + Tables.SENSOR_GPS);
            db.execSQL("DROP TABLE IF EXISTS " + Tables.LEADERBOARDS);
            
            onCreate(db);

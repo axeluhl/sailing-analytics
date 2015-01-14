@@ -30,20 +30,6 @@ public class AnalyticsContract {
 		String EVENT_CHECKIN_DIGEST = "event_checkin_digest";
 	}
 
-	interface SensorGpsColumns {
-		String GPS_ACCURACY = "gps_accuracy";
-		String GPS_ALTITUDE = "gps_altitude";
-		String GPS_BEARING = "gps_bearing";
-		String GPS_DEVICE = "gps_device";
-		String GPS_LATITUDE = "gps_latitude";
-		String GPS_LONGITUDE = "gps_longitude";
-		String GPS_PROVIDER = "gps_provider";
-		String GPS_SYNCED = "gps_synced";
-		String GPS_SPEED = "gps_speed";
-		String GPS_TIME = "gps_time";
-		String GPS_EVENT_FK = "event_id";
-	}
-
 	public static final String CONTENT_AUTHORITY = "com.sap.sailing.android.tracking.app.provider.db";
 
 	public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
@@ -51,17 +37,10 @@ public class AnalyticsContract {
 	private static final String PATH_COMPETITOR = "competitors";
 	private static final String PATH_EVENT = "events";
 	private static final String PATH_LEADERBOARD = "leaderboards";
-	private static final String PATH_SENSOR_GPS = "sensor_gps";
-	
 	
 	public static class LeaderboardsEventsJoined {
 		public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
 				.appendPath("leaderboards_events_joined").build();
-	}
-	
-	public static class EventGpsFixesJoined {
-		public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-				.appendPath("event_gps_fix_joined").build();
 	}
 	
 	public static class EventLeaderboardCompetitorJoined {
@@ -116,25 +95,6 @@ public class AnalyticsContract {
 		}
 
 		public static String getEventId(Uri uri) {
-			return uri.getPathSegments().get(1);
-		}
-	}
-
-	public static class SensorGps implements SensorGpsColumns, BaseColumns {
-		public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-				.appendPath(PATH_SENSOR_GPS).build();
-
-		public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
-				+ "/vnd.sap_sailing_analytics.sensor.gps";
-		public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
-				+ "/vnd.sap_sailing_analytics.sensor.gps";
-		public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
-
-		public static Uri buildSensorGpsUri(String gpsId) {
-			return CONTENT_URI.buildUpon().appendPath(gpsId).build();
-		}
-
-		public static String getGpsId(Uri uri) {
 			return uri.getPathSegments().get(1);
 		}
 	}

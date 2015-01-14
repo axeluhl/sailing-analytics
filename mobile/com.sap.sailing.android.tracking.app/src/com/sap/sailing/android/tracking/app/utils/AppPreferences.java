@@ -144,4 +144,9 @@ public class AppPreferences {
     {
     	preferences.edit().putString(context.getString(R.string.preference_last_scanned_qr_code), lastQRCode).commit();
     }
+    
+    public void setMessageResendInterval(int interval)
+    {
+    	preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), interval).commit();
+    }
 }

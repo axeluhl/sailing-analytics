@@ -1,7 +1,6 @@
 package com.sap.sailing.android.tracking.app.utils;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -11,20 +10,16 @@ import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
-import android.text.TextUtils;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventLeaderboardCompetitorJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
-import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
 
 public class DatabaseHelper {
@@ -42,117 +37,6 @@ public class DatabaseHelper {
 		return mInstance;
 	}
 
-	public List<GpsFix> getUnsentFixes(Context context, List<String> failedHosts, int updateBatchSize) {
-		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
-		String projectionClauseStr = "events._id as _eid,sensor_gps.gps_time,sensor_gps.gps_latitude,"
-				+ "sensor_gps.gps_longitude,sensor_gps.gps_speed,sensor_gps.gps_bearing,sensor_gps.gps_synced,"
-				+ "events.event_server,sensor_gps._id as _gid";
-		String[] projectionClause = projectionClauseStr.split(",");
-		String sortAndLimitClause = SensorGps.GPS_TIME + " DESC LIMIT "
-				+ updateBatchSize;
-
-		if (failedHosts != null) {
-			if (failedHosts.size() > 0) {
-				StringBuffer buf = new StringBuffer();
-				buf.append("( ");
-
-				for (String failedHost : failedHosts) {
-					buf.append("\"" + failedHost + "\",");
-				}
-
-				// remove the last comma
-				buf.setLength(buf.length() - 1);
-				buf.append(" )");
-
-				selectionClause += " AND " + Event.EVENT_SERVER + " NOT IN "
-						+ buf.toString();
-			}
-		}
-
-		ArrayList<GpsFix> list = new ArrayList<GpsFix>();
-		Cursor cur = context.getContentResolver().query(
-				EventGpsFixesJoined.CONTENT_URI, projectionClause,
-				selectionClause, null, sortAndLimitClause);
-		while (cur.moveToNext()) {
-
-			GpsFix gpsFix = new GpsFix();
-
-			gpsFix.id = cur.getInt(cur.getColumnIndex("_gid"));
-			gpsFix.timestamp = cur.getLong(cur.getColumnIndex(SensorGps.GPS_TIME));
-			gpsFix.latitude = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_LATITUDE));
-			gpsFix.longitude = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_LONGITUDE));
-			gpsFix.speed = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_SPEED));
-			gpsFix.course = cur.getDouble(cur.getColumnIndex(SensorGps.GPS_BEARING));
-			gpsFix.synced = cur.getInt(cur.getColumnIndex(SensorGps.GPS_SYNCED));
-			gpsFix.host = cur.getString(cur.getColumnIndex(Event.EVENT_SERVER));
-			gpsFix.eventId = cur.getString(cur.getColumnIndex("_eid"));
-
-			list.add(gpsFix);
-
-			if (list.size() >= updateBatchSize) {
-				break;
-			}
-		}
-
-		cur.close();
-		return list;
-	}
-	
-	public int getNumberOfUnsentGPSFixes(Context context)
-	{
-		String selectionClause = SensorGps.GPS_SYNCED + " = 0";
-		String sortAndLimitClause = SensorGps.GPS_TIME + " DESC LIMIT 1";
-	
-		int eventId = -1;
-
-		Cursor cur = context.getContentResolver().query(
-				EventGpsFixesJoined.CONTENT_URI,
-				new String[] { "events._id as _eid" }, 
-				selectionClause, 
-				null,
-				sortAndLimitClause);
-		
-		while (cur.moveToNext()) {
-			eventId = cur.getInt(0);
-		}
-		
-		cur.close();
-	
-		if (eventId == -1)
-		{
-			if (BuildConfig.DEBUG)
-			{
-				ExLog.i(context, TAG, "no event id, reporting 0 gps-fixes.");
-			}
-			return 0;
-		}
-		
-		String selectionClause2 = "events._id = " + eventId;
-		Cursor countCursor = context.getContentResolver().query(
-				EventGpsFixesJoined.CONTENT_URI,
-				new String[] { "count(*) AS count" }, selectionClause2, null, null);
-
-		countCursor.moveToFirst();
-		int count = countCursor.getInt(0);
-		countCursor.close();
-
-		return count;
-	}
-	
-	public int deleteGpsFixes(Context context, String[] fixIdStrings)
-	{
-		int numDeleted = 0;
-		
-		String idsJoined = TextUtils.join(", ", fixIdStrings);
-
-		ContentValues updateValues = new ContentValues();
-		updateValues.put(SensorGps.GPS_SYNCED, 1);
-
-		numDeleted = context.getContentResolver().delete(SensorGps.CONTENT_URI,
-				String.format("%s in (%s)", SensorGps._ID, idsJoined), null);
-
-		return numDeleted;
-	}
 	
 	public long getEventRowIdForCheckinDigest(Context context, String checkinDigest)
 	{
@@ -166,22 +50,6 @@ public class DatabaseHelper {
 		return result;
 	}
 
-	public void insertGPSFix(Context context, double lat, double lon, double speed,
-			double bearing, String provider, long timestamp, long eventRowId) {
-		ContentResolver cr = context.getContentResolver();
-		ContentValues cv = new ContentValues();
-		
-		cv.put(SensorGps.GPS_LATITUDE, lat);
-		cv.put(SensorGps.GPS_LONGITUDE, lon);
-		cv.put(SensorGps.GPS_PROVIDER, provider);
-		cv.put(SensorGps.GPS_SPEED, speed);
-		cv.put(SensorGps.GPS_TIME, timestamp);
-		cv.put(SensorGps.GPS_BEARING, bearing);
-		cv.put(SensorGps.GPS_EVENT_FK, eventRowId);
-
-		cr.insert(SensorGps.CONTENT_URI, cv);
-	}
-	
 //	public EventInfo getEventInfoWithLeaderboard(Context context, String eventId) {
 //		EventInfo result = new EventInfo();
 //		
