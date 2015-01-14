@@ -19,7 +19,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
-import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.common.ObjectInputStreamResolvingAgainstCache;
 
 public class MasterDataImporter {
     private final DomainFactory baseDomainFactory;

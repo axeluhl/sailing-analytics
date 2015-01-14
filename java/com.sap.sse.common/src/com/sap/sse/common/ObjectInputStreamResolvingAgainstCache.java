@@ -1,12 +1,9 @@
-package com.sap.sse.replication.impl;
+package com.sap.sse.common;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
-
-import com.sap.sse.common.IsManagedByCache;
-import com.sap.sse.replication.Replicable;
 
 /**
  * During de-serialization, resolves objects managed by a cache of type <C> using a cache of that type passed to the
