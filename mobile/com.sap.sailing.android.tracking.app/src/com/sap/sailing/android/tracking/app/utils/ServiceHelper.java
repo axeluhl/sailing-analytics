@@ -3,7 +3,6 @@ package com.sap.sailing.android.tracking.app.utils;
 import android.content.Context;
 import android.content.Intent;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TransmittingService;

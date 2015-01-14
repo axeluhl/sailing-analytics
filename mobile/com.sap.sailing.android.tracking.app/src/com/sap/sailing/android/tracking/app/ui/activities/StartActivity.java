@@ -1,7 +1,6 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
 import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.UpdateManager;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -53,7 +52,6 @@ public class StartActivity extends BaseActivity {
     		dialog.show();
     	}
     }
-    
     
     @Override
 	public void onStart() {
