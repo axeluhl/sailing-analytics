@@ -12,6 +12,7 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.GeomagneticField;
 import android.location.Location;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -157,7 +158,14 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 		ExLog.i(this, TAG, "LocationClient was disconnected");
 	}
 
-	public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed) {
+	public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed, double latitude, double longitude, double altitude) {
+		
+		if (prefs.getDisplayHeadingWithDeclination())
+		{
+			GeomagneticField geomagneticField = new GeomagneticField((float)latitude, (float)longitude, (float)altitude, System.currentTimeMillis());
+			bearing = bearing + geomagneticField.getDeclination();
+		}
+		
 		GPSQuality quality = GPSQuality.noSignal;
 		if (gpsQualityListener != null) {
 			if (gpsAccurracy > 48) {
@@ -176,7 +184,9 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	@Override
 	public void onLocationChanged(Location location) {		
 		updateResendIntervalSetting();
-		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
+		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(),
+				location.getSpeed(), location.getLatitude(), location.getLongitude(),
+				location.getAltitude());
 		
 		JSONObject json = new JSONObject();
 		try {
