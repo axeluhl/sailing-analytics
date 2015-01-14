@@ -21,3 +21,4 @@ Export-Package: com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.serialization.racelog.impl,
  com.sap.sailing.server.gateway.serialization.racelog.tracking,
  com.sap.sailing.server.gateway.serialization.racelog.tracking.impl
+Bundle-ActivationPolicy: lazy
