@@ -2,11 +2,12 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 
 public class Extreme40VectorGraphics extends BoatClassVectorGraphics {
     
-    public Extreme40VectorGraphics(String... compatibleBoatClassNames) {
-        super("EXTREME40", 1600, 760, 1220, compatibleBoatClassNames);
+    public Extreme40VectorGraphics(BoatClassMasterdata... compatibleBoatClasses) {
+        super(1600, 760, 1220, compatibleBoatClasses);
     }
 
     @Override

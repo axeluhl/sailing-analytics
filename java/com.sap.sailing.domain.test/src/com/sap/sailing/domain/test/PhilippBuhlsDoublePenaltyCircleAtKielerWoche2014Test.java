@@ -58,7 +58,7 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
                 /* liveUri */null, /* storedUri */storedUri, new ReceiverType[] { ReceiverType.MARKPASSINGS,
                         ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         getTrackedRace().recordWind(
-                new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("21/06/2014-13:03:35")),
+                new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("06/21/2014-13:03:35")),
                         new KnotSpeedWithBearingImpl(18, new DegreeBearingImpl(296))),
                 new WindSourceImpl(WindSourceType.WEB));
     }
