@@ -38,7 +38,8 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
      * can query the clusters and their centroids.
      * <p>
      * 
-     * As seeds for the clustering, the first <code>numberOfClusters</code> elements will be used. Use
+     * To determine the seeds for the clusters, all elements will be distributed randomly across the
+     * <code>numberOfClusters</code> clusters, and the resulting cluster centroids are used as seeds.
      * 
      * @param numberOfClusters
      *            this is the "k" in the k-means algorithm, defining how many clusters are expected.

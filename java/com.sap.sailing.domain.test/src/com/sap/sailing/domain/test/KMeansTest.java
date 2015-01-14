@@ -33,7 +33,7 @@ public class KMeansTest {
 
     @Test
     public void doubleTestWithRandomInitialization() {
-        Random random = new Random();
+        Random random = new Random(1234);
         List<ScalableDouble> elements = new ArrayList<>();
         for (int i=0; i<100000; i++) {
             elements.add(new ScalableDouble(random.nextDouble()));
@@ -68,7 +68,8 @@ public class KMeansTest {
             strings.add(sb.toString());
             sb.delete(0, sb.length());
         }
-        KMeansMappingClusterer<String, Integer, Integer, ScalableInteger> clusterer = new KMeansMappingClusterer<>(5, strings, (s)->new ScalableInteger(s.length()));
+        KMeansMappingClusterer<String, Integer, Integer, ScalableInteger> clusterer = new KMeansMappingClusterer<>(5, strings, (s)->new ScalableInteger(s.length()),
+                Arrays.asList(5, 25, 50, 75, 100).iterator());
         Set<Cluster<String, Integer, Integer, ScalableInteger>> clusters = clusterer.getClusters();
         assertEquals(5, clusters.size());
         for (Cluster<String, Integer, Integer, ScalableInteger> cluster : clusters) {

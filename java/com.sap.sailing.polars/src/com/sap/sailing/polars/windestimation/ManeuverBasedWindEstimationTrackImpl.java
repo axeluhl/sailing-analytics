@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
@@ -92,6 +93,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     private static class ManeuverClassification {
         private final Competitor competitor;
         private final TimePoint timePoint;
+        private final Position position;
         /**
          * Course change implied by the maneuver
          */
@@ -115,6 +117,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             super();
             this.competitor = competitor;
             this.timePoint = maneuver.getTimePoint();
+            this.position = maneuver.getPosition();
             this.legType = legType;
             this.tack = tack;
             this.estimatedTrueWindSpeedAndAngle = estimatedTrueWindSpeedAndAngle;
@@ -130,6 +133,10 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
         public TimePoint getTimePoint() {
             return timePoint;
+        }
+
+        public Position getPosition() {
+            return position;
         }
 
         public double getManeuverAngleDeg() {
@@ -226,17 +233,20 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * nor a jibe but a mark rounding or a significant head-up or bear-away maneuver.
      * <p>
      * 
-     * To figure out if one of the two hypotheses holds, the hypotheses are clustered based on the approximated true wind
-     * direction that follows from them. A confidence can be assigned to each hypothesis which is based on three factors:
+     * To figure out if one of the two hypotheses holds, the hypotheses are clustered based on the approximated true
+     * wind direction that follows from them. A confidence can be assigned to each hypothesis which is based on three
+     * factors:
      * <ul>
-     *   <li>How close to the expected maneuver angle was the maneuver's actual course change?</li>
-     *   <li>How consistent with the average speeds for the two hypothetical maneuver types is the maneuver's actual speed?
-     *       This assumes that jibes on a downwind leg usually have a somewhat higher</li>
-     *   <li></li>
+     * <li>How close to the expected maneuver angle was the maneuver's actual course change?</li>
+     * <li>How consistent with the average speeds for the two hypothetical maneuver types is the maneuver's actual
+     * speed? This assumes that jibes on a downwind leg may have a characteristically higher speed at the beginning of
+     * the maneuver when compared to a tack.</li>
+     * <li>How well does the virtual wind fix inferred from the hypothesis fit into the local spatial and temporal wind
+     * field resulting from the other virtual wind fixes? Of course, wind can theoretically shift by 180 degrees in
+     * a short period of time or across a short distance, but it may not be all too likely.</li>
      * </ul>
      * 
-     * The probability for the maneuver being a tack/jibe depends on two aspects. Primarily, the maneuver angle is
-     * usually fairly characteristic and helps to distinguish tacks from
+     * 
      */
     private void analyzeRace() throws NotEnoughDataHasBeenAddedException {
         final Map<Maneuver, Competitor> maneuvers = getAllManeuvers();
