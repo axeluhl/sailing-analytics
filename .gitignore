@@ -19,3 +19,12 @@ java/com.sap.sailing.simulator/bin/com/sap/sailing/simulator/Simulator.gwt.xml
 /mobile/com.sap.sailing.racecommittee.app/res/values/keys.xml
 java/com.sap.sailing.gwt.ui/SailingGWT Remote Profiling (Run-Mode only).launch
 java/com.sap.sailing.gwt.ui/SailingGWT.launch
+
+## Android Studio and Intellij and Android in general
+gen/
+.idea/
+*.ipr
+*.iws
+*.iml
+out/
+.gradle

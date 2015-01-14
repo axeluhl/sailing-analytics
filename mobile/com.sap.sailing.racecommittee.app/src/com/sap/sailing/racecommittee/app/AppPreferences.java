@@ -14,6 +14,8 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
@@ -321,11 +323,6 @@ public class AppPreferences {
         pollingActiveChangedListeners.add(listener);
     }
 
-    public void setAuthor(RaceLogEventAuthor author) {
-        preferences.edit().putString(HIDDEN_PREFERENCE_AUTHOR_NAME, author.getName()).commit();
-        preferences.edit().putInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).commit();
-    }
-
     public void setBoatClass(BoatClassType boatClass) {
         String boatClassString = boatClass.name();
         preferences.edit().putString(HIDDEN_PREFERENCE_BOAT_CLASS, boatClassString).commit();
@@ -462,10 +459,7 @@ public class AppPreferences {
     public void setEventID(Serializable id){
     	ExLog.i(getContext(), this.getClass().toString(), "Saving eventId: "+ id);
     	
-    	
-    	preferences.edit()
-    		.putString(HIDDEN_PREFERENCE_EVENT_ID, id.toString())
-    	.commit();
+    	preferences.edit().putString(HIDDEN_PREFERENCE_EVENT_ID, id.toString()).commit();
     	
     	ExLog.i(getContext(), this.getClass().toString(), "Loading eventId: "+ getEventID());
     }

@@ -53,6 +53,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -243,11 +244,11 @@ public class OfflineDataManager extends DataManager {
         });
     }
 
-	@Override
-	public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
-			PositionListFragment positionListFragment) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
+            PositionListFragment positionListFragment) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

@@ -200,6 +200,8 @@
     <string name="synchronize_connection_settings_description">When creating a configuration on the server, click here to synchronize your app and connection settings via QRCode.</string>
     <string name="update_app_header">Force update</string>
     <string name="update_app_description">Force an update from the server. It\'s a better idea to use the synchronize option.</string>
+    <string name="preference_wakelock_header">Stay screen on</string>
+	<string name="preference_wakelock_summary">Force the screen to stay awake. Caution: Uses more battery.</string>
     <string name="options_menu_info">Expert Information</string>
     <string name="auto_update_install">Install</string>
     <string name="auto_update_install_anyway">Install anyway</string>
@@ -239,4 +241,5 @@
 	
 	<string name="welcome">WELCOME</string>
     <string name="change">CHANGE</string>
+    <string name="loading_events_succeded">Events loaded.</string>
 </resources>

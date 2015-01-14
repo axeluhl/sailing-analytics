@@ -3,7 +3,9 @@ package com.sap.sailing.android.tracking.app.services;
 import java.util.concurrent.ScheduledExecutorService;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
@@ -27,227 +29,218 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
-public class TrackingService extends Service implements ConnectionCallbacks,
-		OnConnectionFailedListener, LocationListener {
+public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
+        LocationListener {
 
-	private LocationClient locationClient;
-	private LocationRequest locationRequest;
-	private NotificationManager notificationManager;
-	private boolean locationUpdateRequested = false;
-	private AppPreferences prefs;
-	private ScheduledExecutorService scheduler;
+    private LocationClient locationClient;
+    private LocationRequest locationRequest;
+    private NotificationManager notificationManager;
+    private boolean locationUpdateRequested = false;
+    private AppPreferences prefs;
+    private ScheduledExecutorService scheduler;
 
-	private GPSQualityListener gpsQualityListener;
-	private final IBinder trackingBinder = new TrackingBinder();
+    private GPSQualityListener gpsQualityListener;
+    private final IBinder trackingBinder = new TrackingBinder();
 
-	private static final String TAG = TrackingService.class.getName();
+    private static final String TAG = TrackingService.class.getName();
 
-	public static final String WEB_SERVICE_PATH = "/sailingserver/api/v1/gps_fixes";
-	// Unique Identification Number for the Notification.
-	// We use it on Notification start, and to cancel it.
-	private int NOTIFICATION_ID = R.string.tracker_started;
+    public static final String WEB_SERVICE_PATH = "/sailingserver/api/v1/gps_fixes";
+    // Unique Identification Number for the Notification.
+    // We use it on Notification start, and to cancel it.
+    private int NOTIFICATION_ID = R.string.tracker_started;
 
-	private String eventId;
-	private long eventRowId;
+    private String eventId;
+    private long eventRowId;
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		prefs = new AppPreferences(this);
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        prefs = new AppPreferences(this);
 
-		// http://developer.android.com/training/location/receive-location-updates.html
-		locationRequest = LocationRequest.create();
-		locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		locationRequest.setInterval(prefs.getGPSFixInterval());
-		locationRequest.setFastestInterval(prefs.getGPSFixFastestInterval());
+        // http://developer.android.com/training/location/receive-location-updates.html
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(prefs.getGPSFixInterval());
+        locationRequest.setFastestInterval(prefs.getGPSFixFastestInterval());
 
-		locationClient = new LocationClient(this, this, this);
-		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-	}
+        locationClient = new LocationClient(this, this, this);
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    }
 
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
 
-		if (intent != null) {
-			if (BuildConfig.DEBUG) {
-				ExLog.i(this, TAG, "Starting Tracking Service with eventId: "
-						+ eventId);
-			}
+        if (intent != null) {
+            if (BuildConfig.DEBUG) {
+                ExLog.i(this, TAG, "Starting Tracking Service with eventId: " + eventId);
+            }
 
-			if (intent.getAction() != null) {
-				if (intent.getAction().equals(
-						getString(R.string.tracking_service_stop))) {
-					stopTracking();
-				} else {
-					if (intent.getExtras() != null) {
-						eventId = intent
-								.getExtras()
-								.getString(getString(R.string.tracking_service_event_id_parameter));
-						
-						eventRowId = DatabaseHelper.getInstance().getRowIdForEventId(this, eventId);
-						
-						if (BuildConfig.DEBUG) {
-							ExLog.i(this, TAG, "Starting Tracking Service with eventId: "+ eventId);
-							ExLog.i(this, TAG, "And with event._id: " + eventRowId);
-						}
-						
-						startTracking();
-					}
-				}
-			} else {
-				stopTracking();
-			}
-		}
-		return Service.START_STICKY;
-	}
+            if (intent.getAction() != null) {
+                if (intent.getAction().equals(getString(R.string.tracking_service_stop))) {
+                    stopTracking();
+                } else {
+                    if (intent.getExtras() != null) {
+                        eventId = intent.getExtras().getString(getString(R.string.tracking_service_event_id_parameter));
 
-	public void startTracking() {
-		locationClient.connect();
-		locationUpdateRequested = true;
+                        eventRowId = DatabaseHelper.getInstance().getRowIdForEventId(this, eventId);
 
-		ExLog.i(this, TAG, "Started Tracking");
-		// showNotification();
+                        if (BuildConfig.DEBUG) {
+                            ExLog.i(this, TAG, "Starting Tracking Service with eventId: " + eventId);
+                            ExLog.i(this, TAG, "And with event._id: " + eventRowId);
+                        }
 
-		prefs.setTrackerIsTracking(true);
-		prefs.setTrackerIsTrackingEventId(eventId);
-	}
+                        startTracking();
+                    }
+                }
+            } else {
+                stopTracking();
+            }
+        }
+        return Service.START_STICKY;
+    }
 
-	public void stopTracking() {
-		if (locationClient.isConnected()) {
-			locationClient.removeLocationUpdates(this);
-		}
-		locationClient.disconnect();
-		locationUpdateRequested = false;
+    public void startTracking() {
+        locationClient.connect();
+        locationUpdateRequested = true;
 
-		if (scheduler != null) {
-			scheduler.shutdown();
-		}
+        ExLog.i(this, TAG, "Started Tracking");
+        // showNotification();
 
-		prefs.setTrackerIsTracking(false);
-		prefs.setTrackerIsTrackingEventId(null);
+        prefs.setTrackerIsTracking(true);
+        prefs.setTrackerIsTrackingEventId(eventId);
+    }
 
-		stopSelf();
-		ExLog.i(this, TAG, "Stopped Tracking");
-	}
+    public void stopTracking() {
+        if (locationClient.isConnected()) {
+            locationClient.removeLocationUpdates(this);
+        }
+        locationClient.disconnect();
+        locationUpdateRequested = false;
 
-	@Override
-	public void onConnectionFailed(ConnectionResult arg0) {
-		ExLog.e(this, TAG,
-				"Failed to connect to Google Play Services for location updates");
-	}
+        if (scheduler != null) {
+            scheduler.shutdown();
+        }
 
-	@Override
-	public void onConnected(Bundle arg0) {
-		if (locationUpdateRequested) {
-			locationClient.requestLocationUpdates(locationRequest, this);
-		}
-	}
+        prefs.setTrackerIsTracking(false);
+        prefs.setTrackerIsTrackingEventId(null);
 
-	@Override
-	public void onDisconnected() {
-		ExLog.i(this, TAG, "LocationClient was disconnected");
-	}
+        stopSelf();
+        ExLog.i(this, TAG, "Stopped Tracking");
+    }
 
-	public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed) {
-		GPSQuality quality = GPSQuality.noSignal;
-		if (gpsQualityListener != null) {
-			if (gpsAccurracy > 48) {
-				quality = GPSQuality.poor;
-			} else if (gpsAccurracy > 10) {
-				quality = GPSQuality.good;
-			} else if (gpsAccurracy <= 10) {
-				quality = GPSQuality.great;
-			}
+    @Override
+    public void onConnectionFailed(ConnectionResult arg0) {
+        ExLog.e(this, TAG, "Failed to connect to Google Play Services for location updates");
+    }
 
-			gpsQualityListener.gpsQualityAndAccurracyUpdated(quality, gpsAccurracy, bearing, speed);
-		}
-	}
+    @Override
+    public void onConnected(Bundle arg0) {
+        if (locationUpdateRequested) {
+            locationClient.requestLocationUpdates(locationRequest, this);
+        }
+    }
 
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-	@Override
-	public void onLocationChanged(Location location) {
-		
-		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
+    @Override
+    public void onDisconnected() {
+        ExLog.i(this, TAG, "LocationClient was disconnected");
+    }
 
-		DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
-				location.getLongitude(), location.getSpeed(),
-				location.getBearing(), location.getProvider(),
-				location.getTime(), eventRowId);
+    public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed) {
+        GPSQuality quality = GPSQuality.noSignal;
+        if (gpsQualityListener != null) {
+            if (gpsAccurracy > 48) {
+                quality = GPSQuality.poor;
+            } else if (gpsAccurracy > 10) {
+                quality = GPSQuality.good;
+            } else if (gpsAccurracy <= 10) {
+                quality = GPSQuality.great;
+            }
 
-		ensureTransmittingServiceIsRunning();
-	}
+            gpsQualityListener.gpsQualityAndAccurracyUpdated(quality, gpsAccurracy, bearing, speed);
+        }
+    }
 
-	/**
-	 * start transmitting service when a new fix arrives, because it ends
-	 * itself, if there's no data to send.
-	 */
-	private void ensureTransmittingServiceIsRunning() {
-		if (BuildConfig.DEBUG) {
-			ExLog.i(this, TAG,
-					"ensureTransmittingServiceIsRunning, starting TransmittingService");
-		}
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @Override
+    public void onLocationChanged(Location location) {
 
-		ServiceHelper.getInstance().startTransmittingService(this);
-	}
+        reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		return trackingBinder;
-	}
+        DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(), location.getLongitude(),
+                location.getSpeed(), location.getBearing(), location.getProvider(), location.getTime(), eventRowId);
 
-	@Override
-	public void onDestroy() {
-		stopTracking();
-		notificationManager.cancel(NOTIFICATION_ID);
-		Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT)
-				.show();
-	}
+        ensureTransmittingServiceIsRunning();
+    }
 
-	// private void showNotification() {
-	// Intent intent = new Intent(this, RegattaActivity.class);
-	// intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-	// | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	// PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
-	// CharSequence text = getText(R.string.tracker_started);
-	// Notification notification = new NotificationCompat.Builder(this)
-	// .setContentTitle(getText(R.string.app_name))
-	// .setContentText(text).setContentIntent(pi)
-	// .setSmallIcon(R.drawable.icon).build();
-	// notification.flags |= Notification.FLAG_NO_CLEAR;
-	// startForeground(NOTIFICATION_ID, notification);
-	// }
+    /**
+     * start transmitting service when a new fix arrives, because it ends itself, if there's no data to send.
+     */
+    private void ensureTransmittingServiceIsRunning() {
+        if (BuildConfig.DEBUG) {
+            ExLog.i(this, TAG, "ensureTransmittingServiceIsRunning, starting TransmittingService");
+        }
 
-	public void registerGPSQualityListener(GPSQualityListener listener) {
-		gpsQualityListener = listener;
-	}
+        ServiceHelper.getInstance().startTransmittingService(this);
+    }
 
-	public void unregisterGPSQualityListener() {
-		gpsQualityListener = null;
-	}
+    @Override
+    public IBinder onBind(Intent intent) {
+        return trackingBinder;
+    }
 
-	public class TrackingBinder extends Binder {
-		public TrackingService getService() {
-			return TrackingService.this;
-		}
-	}
+    @Override
+    public void onDestroy() {
+        stopTracking();
+        notificationManager.cancel(NOTIFICATION_ID);
+        Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
+    }
 
-	public enum GPSQuality {
-		noSignal(0), poor(2), good(3), great(4);
+    // private void showNotification() {
+    // Intent intent = new Intent(this, RegattaActivity.class);
+    // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+    // | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+    // PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+    // CharSequence text = getText(R.string.tracker_started);
+    // Notification notification = new NotificationCompat.Builder(this)
+    // .setContentTitle(getText(R.string.app_name))
+    // .setContentText(text).setContentIntent(pi)
+    // .setSmallIcon(R.drawable.icon).build();
+    // notification.flags |= Notification.FLAG_NO_CLEAR;
+    // startForeground(NOTIFICATION_ID, notification);
+    // }
 
-		private final int gpsQuality;
+    public void registerGPSQualityListener(GPSQualityListener listener) {
+        gpsQualityListener = listener;
+    }
 
-		GPSQuality(int quality) {
-			this.gpsQuality = quality;
-		}
+    public void unregisterGPSQualityListener() {
+        gpsQualityListener = null;
+    }
 
-		public int toInt() {
-			return this.gpsQuality;
-		}
-	}
+    public class TrackingBinder extends Binder {
+        public TrackingService getService() {
+            return TrackingService.this;
+        }
+    }
 
-	public interface GPSQualityListener {
-		public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float gpsBearing, float gpsSpeed);
-	}
+    public enum GPSQuality {
+        noSignal(0), poor(2), good(3), great(4);
+
+        private final int gpsQuality;
+
+        GPSQuality(int quality) {
+            this.gpsQuality = quality;
+        }
+
+        public int toInt() {
+            return this.gpsQuality;
+        }
+    }
+
+    public interface GPSQualityListener {
+        public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float gpsBearing,
+                float gpsSpeed);
+    }
 
     private void showNotification() {
         CharSequence text = getText(R.string.tracker_started);

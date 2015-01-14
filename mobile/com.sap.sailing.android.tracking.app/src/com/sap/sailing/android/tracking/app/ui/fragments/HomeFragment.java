@@ -59,8 +59,8 @@ import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuc
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 
 public class HomeFragment extends BaseFragment implements
 		LoaderCallbacks<Cursor> {

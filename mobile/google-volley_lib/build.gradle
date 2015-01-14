@@ -1,21 +1,12 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.8.+'
-    }
-}
-
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 android {
+    buildToolsVersion "21.1.2"
     compileSdkVersion 19
-    buildToolsVersion = 19
 
     sourceSets {
         defaultConfig {
-            testPackageName 'com.android.volley.tests'
+//            testPackageName 'com.android.volley.tests'
         }
 
         main {
