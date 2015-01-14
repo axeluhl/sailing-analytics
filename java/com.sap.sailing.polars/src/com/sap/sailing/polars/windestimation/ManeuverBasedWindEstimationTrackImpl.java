@@ -19,8 +19,12 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
+import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.common.confidence.HasConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -131,6 +135,18 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             return middleManeuverCourse;
         }
 
+        public Bearing getEstimatedWindBearing() {
+            switch (getLegType()) {
+            case UPWIND:
+                return getMiddleManeuverCourse().reverse();
+            case DOWNWIND:
+                return getMiddleManeuverCourse();
+            default:
+                throw new IllegalStateException("Found leg type "+getLegType()+" but can only handle "+LegType.UPWIND.name()+
+                        " and "+LegType.DOWNWIND.name());
+            }
+        }
+        
         public Distance getManeuverLoss() {
             return maneuverLoss;
         }
@@ -147,6 +163,10 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             return estimatedTrueWindSpeedAndAngle;
         }
         
+        public double getAbsoluteOffsetBetweenActualAndExpectedManeuverAngle() {
+            return Math.abs(getEstimatedTrueWindSpeedAndAngle().getObject().getBearing().getDegrees()*2)-Math.abs(getManeuverAngleDeg());
+        }
+        
         public static String getToStringColumnHeaders() {
             return "competitor, timePoint, angleDeg, boatSpeedKn, cogDeg, windEstimationFromDeg, lossM, assumedLegType, assumedTack, estimatedTrueWindSpeedKn, estimatedTrueWindAngleDeg";
         }
@@ -159,11 +179,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             final StringBuilder result = new StringBuilder();
             result.append(prefix);
             result.append(", ");
-            if (getLegType() == LegType.UPWIND) {
-                result.append(getMiddleManeuverCourse().getDegrees());
-            } else {
-                result.append(getMiddleManeuverCourse().reverse().getDegrees());
-            }
+            result.append(getEstimatedWindBearing().reverse().getDegrees());
             result.append(", ");
             result.append(getManeuverLoss() == null ? 0.0 : getManeuverLoss().getMeters());
             result.append(", ");
@@ -225,23 +241,32 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         KMeansMappingClusterer<ManeuverClassification, DoublePair, Bearing, ScalableBearing> clusterer =
                 new KMeansMappingClusterer<>(4,
                         maneuverClassifications.stream().filter(
-                                (mc)->Math.abs(mc.getEstimatedTrueWindSpeedAndAngle().getObject().getBearing().getDegrees()*2)-Math.abs(mc.getManeuverAngleDeg())<
-                                    MANEUVER_ANGLE_DEVIATION_IN_DEGREES_THRESHOLD),
-                                (m)->new ScalableBearing(m.getMiddleManeuverCourse()),
-                                // use an evenly distributed set of cluster seeds for clustering wind direction estimations
-                                Arrays.<Bearing>asList(new DegreeBearingImpl(0), new DegreeBearingImpl(90), new DegreeBearingImpl(180), new DegreeBearingImpl(270)).stream());
+                                (mc)->mc.getAbsoluteOffsetBetweenActualAndExpectedManeuverAngle()<MANEUVER_ANGLE_DEVIATION_IN_DEGREES_THRESHOLD),
+                        (mc)->new ScalableBearing(mc.getEstimatedWindBearing()),
+                        // use an evenly distributed set of cluster seeds for clustering wind direction estimations
+                        Arrays.<Bearing>asList(new DegreeBearingImpl(0), new DegreeBearingImpl(90), new DegreeBearingImpl(180), new DegreeBearingImpl(270)).stream());
         final Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusters = clusterer.getClusters();
         Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> dominantCluster = clusters.stream().max((a, b)->a.size()-b.size()).get();
         Pair<Set<SpeedWithConfidence<Void>>, Set<SpeedWithConfidence<Void>>> averageSpeedsIntoTacksAndJibes = dominantCluster.stream().collect(
                 ()->new Pair<Set<SpeedWithConfidence<Void>>, Set<SpeedWithConfidence<Void>>>(new HashSet<>(), new HashSet<>()),
                 (resultSoFar, mc)->{
                     if (mc.getLegType() == LegType.UPWIND) {
-                        resultSoFar.getA().add(new SpeedWithConfidenceImpl<Void>(mc.getSpeedAtManeuverStart(), /* TODO confidence */ 1.0, /* relative to */ null));
+                        resultSoFar.getA().add(new SpeedWithConfidenceImpl<Void>(mc.getSpeedAtManeuverStart(),
+                                /* high confidence for small deviation from expected maneuver angle */
+                                Math.max(0, (MANEUVER_ANGLE_DEVIATION_IN_DEGREES_THRESHOLD-mc.getAbsoluteOffsetBetweenActualAndExpectedManeuverAngle()))/
+                                        MANEUVER_ANGLE_DEVIATION_IN_DEGREES_THRESHOLD, /* relative to */ null));
                     } else { // DOWNWIND
-                        resultSoFar.getB().add(new SpeedWithConfidenceImpl<Void>(mc.getSpeedAtManeuverStart(), /* TODO confidence */ 1.0, /* relative to */ null));
+                        resultSoFar.getB().add(new SpeedWithConfidenceImpl<Void>(mc.getSpeedAtManeuverStart(),
+                                /* high confidence for small deviation from expected maneuver angle */
+                                Math.max(0, (MANEUVER_ANGLE_DEVIATION_IN_DEGREES_THRESHOLD-mc.getAbsoluteOffsetBetweenActualAndExpectedManeuverAngle()))/
+                                        MANEUVER_ANGLE_DEVIATION_IN_DEGREES_THRESHOLD, /* relative to */ null));
                     }
                 },
                 (s1, s2)->{ s1.getA().addAll(s2.getA()); s1.getB().addAll(s2.getB()); });
+        final ConfidenceBasedAverager<Double, Speed, Void> speedAverager = ConfidenceFactory.INSTANCE.createAverager(/* weigher */ null);
+        HasConfidence<Double, Speed, Void> averageSpeedIntoTack = speedAverager.getAverage(averageSpeedsIntoTacksAndJibes.getA(), /* at */ null);
+        HasConfidence<Double, Speed, Void> averageSpeedIntoJibe = speedAverager.getAverage(averageSpeedsIntoTacksAndJibes.getB(), /* at */ null);
+        // TODO it is possible that the speed differences are miniscule, not sufficient to decide with certainty what was a tack and what a jibe
         Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> potentiallyFlippedCluster = clusters.stream().max((a, b)->
                     (int) Math.signum(Math.abs(a.getMean().getDifferenceTo(dominantCluster.getMean()).getDegrees())-
                           Math.abs(b.getMean().getDifferenceTo(dominantCluster.getMean()).getDegrees()))).get();
