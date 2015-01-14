@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.URLEncoder;
@@ -215,12 +216,14 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
-		editMarkPassingPanel = new EditMarkPassingsPanel(sailingService,
-				asyncActionsExecutor, selectedRaceIdentifier, stringMessages,
-				competitorSelectionModel, errorReporter, timer);
-        editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
-        editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
-        components.add(editMarkPassingPanel);
+        if (userService.getCurrentUser().hasRole(UserRoles.administrator.getRolename())
+                || userService.getCurrentUser().hasRole(UserRoles.eventmanager.getRolename())) {
+            editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor,
+                    selectedRaceIdentifier, stringMessages, competitorSelectionModel, errorReporter, timer);
+            editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
+            editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
+            components.add(editMarkPassingPanel);
+        }
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,

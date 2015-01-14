@@ -90,6 +90,8 @@ public class EditMarkPassingsPanel extends FlexTable implements
 		this.errorReporter = errorReporter;
 		this.competitorSelectionModel = competitorSelectionModel;
 		competitorSelectionModel.addCompetitorSelectionChangeListener(this);
+		
+		setVisible(false);
 
 		// Waypoint list
 		currentWaypoints = new ArrayList<>();
@@ -309,6 +311,7 @@ public class EditMarkPassingsPanel extends FlexTable implements
 		// TODO clear all current info
 		waypointList.setList(new ArrayList<Util.Pair<Integer, Date>>());
 		disableButtons();
+		setVisible(false);
 	}
 
 	private void refillList() {
