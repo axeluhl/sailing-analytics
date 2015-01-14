@@ -5,7 +5,6 @@ import android.content.Intent;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
-import com.sap.sailing.android.tracking.app.services.TransmittingService;
 
 /**
  * Helper class that starts services.
@@ -23,17 +22,6 @@ public class ServiceHelper {
 			mInstance = new ServiceHelper();
 		}
 		return mInstance;
-	}
-
-	/**
-	 * Start transmitting service. It should be run at least once when the app
-	 * starts for the first time, and every time, when a tracking gps-fix is 
-	 * stored, to ensure it gets sent to the API-server.
-	 */
-	public void startTransmittingService(Context context) {
-		Intent intent = new Intent(context, TransmittingService.class);
-		intent.setAction(context.getString(R.string.transmitting_service_start));
-		context.startService(intent);
 	}
 	
 	/**

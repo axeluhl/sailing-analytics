@@ -9,7 +9,6 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 
 public class SqlDebugHelper {
 	
@@ -75,9 +74,6 @@ public class SqlDebugHelper {
 		
 		c3.close();
 		
-		Cursor c4 = cr.query(SensorGps.CONTENT_URI, null, null, null, null);
-		
-		ExLog.w(context, TAG, "--- NUMBER OF GPS FIXES IN DB: " + c4.getCount());
 		ExLog.w(context, TAG, "--- END OF SQL PRINTOUT" );
 	}
 }

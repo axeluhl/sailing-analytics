@@ -13,7 +13,6 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
-import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
 public class StartActivity extends BaseActivity {
     
@@ -74,9 +73,6 @@ public class StartActivity extends BaseActivity {
 			
 			homeFragment.handleScannedOrUrlMatchedUri(uri);
 		}
-
-        // start transmitting service that will henceforth run in the background
-		ServiceHelper.getInstance().startTransmittingService(this);
         
         intent.setData(null);
         

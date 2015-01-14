@@ -11,7 +11,9 @@ import android.annotation.TargetApi;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -51,6 +53,10 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	// Unique Identification Number for the Notification.
 	// We use it on Notification start, and to cancel it.
 	private int NOTIFICATION_ID = R.string.tracker_started;
+	
+	private final int UPDATE_INTERVAL_DEFAULT = 3000;
+	private final int UPDATE_INTERVAL_POWERSAVE_MODE = 30000;
+	private final float BATTERY_POWER_SAVE_TRESHOLD = 0.2f;
 
 	private String checkinDigest;
 	private EventInfo event;
@@ -169,6 +175,7 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	@Override
 	public void onLocationChanged(Location location) {		
+		updateResendIntervalSetting();
 		reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed());
 		
 		JSONObject json = new JSONObject();
@@ -202,6 +209,52 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 //				location.getBearing(), location.getProvider(),
 //				location.getTime(), eventRowId);
 //		ensureTransmittingServiceIsRunning();
+	}
+	
+	/**
+	 * Update whether message sending service should retry every 3 seconds or
+	 * every 30.
+	 */
+	private void updateResendIntervalSetting() {
+		float batteryPct = getBatteryPercentage();
+		boolean batteryIsCharging = prefs.getBatteryIsCharging();
+		
+		int updateInterval = UPDATE_INTERVAL_DEFAULT;
+		
+		if (prefs.getEnergySavingEnabledByUser() || 
+				(batteryPct < BATTERY_POWER_SAVE_TRESHOLD && !batteryIsCharging)) {
+			if (BuildConfig.DEBUG) {
+				ExLog.i(this, "POWER-LEVELS", "in power saving mode");
+			}
+
+			updateInterval = UPDATE_INTERVAL_POWERSAVE_MODE;
+		} else {
+			if (BuildConfig.DEBUG) {
+				ExLog.i(this, "POWER-LEVELS", "in default power mode");
+			}
+		}
+		
+		prefs.setMessageResendInterval(updateInterval);
+	}
+	
+	/**
+	 * Get battery charging level
+	 * @return battery charging level in interval [0,1]
+	 */
+	private float getBatteryPercentage() {
+		IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+		Intent batteryStatus = this.registerReceiver(null, ifilter);
+
+		int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+		int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+		float batteryPct = level / (float) scale;
+
+		if (BuildConfig.DEBUG) {
+			ExLog.i(this, TAG, "Battery: " + (batteryPct * 100) + "%");
+		}
+
+		return batteryPct;
 	}
 
 	/**

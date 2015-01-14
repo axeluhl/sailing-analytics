@@ -18,7 +18,6 @@ import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
@@ -42,9 +41,6 @@ public class AnalyticsProvider extends ContentProvider {
     private static final int MESSAGE = 400;
     private static final int MESSAGE_ID = 401;
     
-    private static final int SENSOR_GPS = 500;
-    private static final int SENSOR_GPS_ID = 501;
-    
     private static final int EVENT_LEADERBOARD_COMPETITOR_JOINED = 600;
     
     private static final int EVENT_GPS_FIXES_JOINED = 700;
@@ -66,9 +62,6 @@ public class AnalyticsProvider extends ContentProvider {
 
         matcher.addURI(authority, "messages", MESSAGE);
         matcher.addURI(authority, "messages/#", MESSAGE_ID);
-        
-        matcher.addURI(authority, "sensor_gps", SENSOR_GPS);
-        matcher.addURI(authority, "sensor_gps/#", SENSOR_GPS_ID);
         
         matcher.addURI(authority, "event_leaderboard_competitor_joined", EVENT_LEADERBOARD_COMPETITOR_JOINED);
         
@@ -110,12 +103,6 @@ public class AnalyticsProvider extends ContentProvider {
             	SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
             	qb.setTables(Tables.EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS);
             	cursor = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
-            	return cursor;
-            	
-            case EVENT_GPS_FIXES_JOINED:
-            	SQLiteQueryBuilder eb = new SQLiteQueryBuilder();
-            	eb.setTables(Tables.GPS_FIXES_JOIN_EVENTS);
-            	cursor = eb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
             	return cursor;
             	
             case LEADERBOARDS_EVENTS_JOINED:
@@ -161,12 +148,6 @@ public class AnalyticsProvider extends ContentProvider {
         case LEADERBOARD_ID:
         	return Leaderboard.CONTENT_ITEM_TYPE;
             
-        case SENSOR_GPS:
-            return SensorGps.CONTENT_TYPE;
-            
-        case SENSOR_GPS_ID:
-            return SensorGps.CONTENT_ITEM_TYPE;
-            
         default:
             throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -197,11 +178,6 @@ public class AnalyticsProvider extends ContentProvider {
         	notifyChange(uri);
         	return Leaderboard.buildLeaderboardUri(String.valueOf(leaderboardId));
             
-        case SENSOR_GPS:
-            db.insertOrThrow(Tables.SENSOR_GPS, null, values);
-            notifyChange(uri);
-            return SensorGps.buildSensorGpsUri("XX");
-            
         default:
             throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -218,18 +194,6 @@ public class AnalyticsProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
 		switch (sUriMatcher.match(uri)) {
-		
-		case SENSOR_GPS:
-			int numGpsFixesDeleted = db.delete(Tables.SENSOR_GPS, selection, selectionArgs);
-			notifyChange(uri);
-			return numGpsFixesDeleted;
-
-		case SENSOR_GPS_ID:
-			String idStr = uri.getLastPathSegment();
-		    String where = SensorGps._ID + " = " + idStr;
-		    int numGpsFixesWithIdDeleted = db.delete(Tables.SENSOR_GPS, where, selectionArgs);
-			notifyChange(uri);
-			return numGpsFixesWithIdDeleted;
 			
         case COMPETITOR:
         	int numCompetitorRowsDeleted = db.delete(Tables.COMPETITORS, selection, selectionArgs);
@@ -260,17 +224,9 @@ public class AnalyticsProvider extends ContentProvider {
 			ExLog.i(getContext(), TAG, message);
 		}
 
-		final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+		//final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
 		switch (sUriMatcher.match(uri)) {
-
-		case SENSOR_GPS_ID:
-			String idStr = uri.getLastPathSegment();
-		    String where = SensorGps._ID + " = " + idStr;
-			int numRowsAffected = db.update(Tables.SENSOR_GPS, values, where, selectionArgs);
-			notifyChange(uri);
-			return numRowsAffected;
-
 		default:
 			throw new UnsupportedOperationException("Unknown uri: " + uri);
 		}		
@@ -307,9 +263,6 @@ public class AnalyticsProvider extends ContentProvider {
             final String event_id = Event.getEventId(uri);
             return builder.table(Tables.EVENTS)
                     .where(Event.EVENT_ID + " = ?", event_id);
-            
-        case SENSOR_GPS:
-            return builder.table(Tables.SENSOR_GPS);
             
         default:
             throw new UnsupportedOperationException("Unknown uri: " + uri); 
