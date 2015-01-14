@@ -16,7 +16,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.mongodb.driver,
  com.sap.sse.common,
  com.sap.sse.replication,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sailing.server.gateway.serialization.shared.android
 Import-Package: com.mongodb,
  javax.servlet;version="2.6.0",
  org.json.simple,

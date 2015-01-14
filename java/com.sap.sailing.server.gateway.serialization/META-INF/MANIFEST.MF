@@ -6,20 +6,14 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.json.simple
-Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
- com.sap.sailing.domain.shared.android;bundle-version="1.0.0",
- com.sap.sailing.domain;bundle-version="1.0.0",
+Require-Bundle: com.sap.sailing.domain.common,
+ com.sap.sailing.domain.shared.android,
+ com.sap.sailing.domain,
  net.sf.marineapi;bundle-version="0.5.0",
  com.sap.sse,
- com.sap.sse.common
-Export-Package: com.sap.sailing.server.gateway.deserialization,
- com.sap.sailing.server.gateway.deserialization.coursedata.impl,
- com.sap.sailing.server.gateway.deserialization.impl,
- com.sap.sailing.server.gateway.deserialization.racelog.impl,
- com.sap.sailing.server.gateway.serialization,
- com.sap.sailing.server.gateway.serialization.coursedata.impl,
+ com.sap.sse.common,
+ com.sap.sailing.server.gateway.serialization.shared.android
+Export-Package: com.sap.sailing.server.gateway.deserialization.impl,
  com.sap.sailing.server.gateway.serialization.impl,
- com.sap.sailing.server.gateway.serialization.racegroup.impl,
- com.sap.sailing.server.gateway.serialization.racelog.impl,
  com.sap.sailing.server.gateway.serialization.racelog.tracking,
  com.sap.sailing.server.gateway.serialization.racelog.tracking.impl
