@@ -261,7 +261,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     private void sendMessage(Intent intent) {
         boolean sendingActive = PrefUtils.getBoolean(this, R.string.preference_isSendingActive_key,
                 R.bool.preference_isSendingActive_default);
-        if (! sendingActive) {
+        if (!sendingActive) {
             ExLog.i(this, TAG, "Sending deactivated. Message will not be sent to server.");
         } else {
             Serializable messageId = getMessageId(intent);
@@ -289,7 +289,7 @@ public class MessageSendingService extends Service implements MessageSendingList
                 SendDelayedMessagesCaller delayedCaller = new SendDelayedMessagesCaller(this);
                 handler.postDelayed(delayedCaller, resendMillis); // after 30 sec, try the sending again
                 isHandlerSet = true;
-            }            
+            }
             reportUnsentGPSFixesCount();
             serviceLogger.onMessageSentFailed();
         } else {

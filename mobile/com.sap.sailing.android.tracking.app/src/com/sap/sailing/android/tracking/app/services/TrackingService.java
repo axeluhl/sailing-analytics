@@ -189,9 +189,10 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 
 			String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
 
+
 			startService(MessageSendingService.createMessageIntent(this, postUrlStr,
 					null, UUID.randomUUID(), json.toString(), null));
-			
+
 		} catch (JSONException ex) {
 			ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
 		}
