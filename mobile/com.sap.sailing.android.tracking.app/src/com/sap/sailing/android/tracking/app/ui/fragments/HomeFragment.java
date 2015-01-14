@@ -108,7 +108,13 @@ public class HomeFragment extends BaseFragment implements
 	public void onResume() {
 		super.onResume();
 		getLoaderManager().restartLoader(REGATTA_LOADER, null, this);
+    	
+		String lastQRCode = prefs.getLastScannedQRCode();
+		if (lastQRCode != null) {
+			handleQRCode(lastQRCode);
+		}
 	}
+
 	
 	private void showNoQRCodeMessage()
 	{
@@ -144,11 +150,8 @@ public class HomeFragment extends BaseFragment implements
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == Activity.RESULT_OK) {
 			String scanResult = data.getStringExtra("SCAN_RESULT");
-
-			ExLog.i(getActivity(), TAG, "Parsing URI: " + scanResult);
-			Uri uri = Uri.parse(scanResult);
-			handleScannedOrUrlMatchedUri(uri);
-
+			prefs.setLastScannedQRCode(scanResult);
+			// handleQRCode is called in onResume()
 		} else if (resultCode == Activity.RESULT_CANCELED) {
 			Toast.makeText(getActivity(), getString(R.string.scanning_cancelled),
 					Toast.LENGTH_LONG).show();
@@ -158,6 +161,12 @@ public class HomeFragment extends BaseFragment implements
 					templateString.replace("{result-code}", String.valueOf(resultCode)),
 					Toast.LENGTH_LONG).show();
 		}
+	}
+	
+	private void handleQRCode(String qrCode) {
+		ExLog.i(getActivity(), TAG, "Parsing URI: " + qrCode);
+		Uri uri = Uri.parse(qrCode);
+		handleScannedOrUrlMatchedUri(uri);
 	}
 
 	public void handleScannedOrUrlMatchedUri(Uri uri) {
@@ -455,6 +464,7 @@ public class HomeFragment extends BaseFragment implements
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						clearScannedQRCodeInPrefs();
 						checkInWithAPIAndDisplayTrackingActivity(checkinData);
 					}
 
@@ -463,14 +473,17 @@ public class HomeFragment extends BaseFragment implements
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						
+						clearScannedQRCodeInPrefs();
 						dialog.cancel();
-
 					}
 				});
 
 		AlertDialog alert = builder.create();
 		alert.show();
+	}
+	
+	private void clearScannedQRCodeInPrefs() {
+		prefs.setLastScannedQRCode(null);
 	}
 
 	/**
@@ -480,8 +493,7 @@ public class HomeFragment extends BaseFragment implements
 	 * 
 	 * @param deviceMappingData
 	 */
-	private void checkInWithAPIAndDisplayTrackingActivity(
-			CheckinData checkinData) {
+	private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
 		if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(getActivity(), checkinData.checkinDigest)) {
 
 			try {
