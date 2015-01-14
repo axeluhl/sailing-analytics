@@ -57,8 +57,6 @@ public class CandidateChooserImpl implements CandidateChooser {
     private final Candidate end;
     private final DynamicTrackedRace race;
 
-    // TODO Locking?
-
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME) : null;
@@ -196,6 +194,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private void addEdge(Map<Candidate, Set<Edge>> edges, Edge e) {
+        logger.finest("Adding "+ e.toString());
         Set<Edge> edgeSet = edges.get(e.getStart());
         if (edgeSet == null) {
             edgeSet = new HashSet<>();
@@ -243,6 +242,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 if (!candidateWithParentAndSmallestTotalCost.containsKey(currentCheapestEdge.getEnd())) {
                     candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Util.Pair<Candidate, Double>(
                             currentCheapestEdge.getStart(), currentCheapestCost));
+                    logger.finest("Added "+ currentCheapestEdge + "as cheapest edge for " + c);
                     endFound = currentCheapestEdge.getEnd() == endOfFixedInterval;
                     if (!endFound) {
                         Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentCheapestEdge.getEnd());
@@ -256,7 +256,6 @@ public class CandidateChooserImpl implements CandidateChooser {
                     }
                 }
             }
-
             Candidate marker = candidateWithParentAndSmallestTotalCost.get(endOfFixedInterval).getA();
             while (marker.getOneBasedIndexOfWaypoint() > 0) {
                 mostLikelyCandidates.add(marker);
@@ -349,6 +348,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     private void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
         for (Candidate can : wrongCandidates) {
+            logger.finest("Removing all edges containing " + can.toString() + "of "+ c);
             candidates.get(c).remove(can);
             Map<Candidate, Set<Edge>> edges = allEdges.get(c);
             edges.remove(can);

@@ -50,7 +50,7 @@ public class Edge implements Comparable<Edge> {
     }
 
     public String toString() {
-        return "From ID " + start.getOneBasedIndexOfWaypoint() + " to " + end.getOneBasedIndexOfWaypoint() + ": " + getCost();
+        return "Edge from Waypoint " + start.getOneBasedIndexOfWaypoint() + " to " + end.getOneBasedIndexOfWaypoint() + ": " + getCost();
     }
 
     // TODO Only for Debugging!

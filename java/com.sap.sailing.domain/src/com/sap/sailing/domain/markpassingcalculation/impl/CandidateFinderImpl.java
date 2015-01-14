@@ -46,8 +46,8 @@ import com.sap.sse.common.Util;
  * 
  */
 public class CandidateFinderImpl implements CandidateFinder {
-    
-    // TODO Parallelization!!
+
+    // TODO Parallelization?
 
     private final int strictnessOfDistanceBasedProbability = 8;
     private final double penaltyForWrongSide = 0.7;
@@ -118,7 +118,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> markFixes) {
-        //TODO Right now creates on time stretch between the 2 outside markfixes
+        // TODO Right now creates on time stretch between the 2 outside markfixes
         Map<Competitor, List<GPSFix>> affectedFixes = new HashMap<>();
         TimePoint start = null;
         TimePoint end = null;
@@ -161,17 +161,17 @@ public class CandidateFinderImpl implements CandidateFinder {
 
         List<Candidate> newCans = new ArrayList<>();
         List<Candidate> wrongCans = new ArrayList<>();
-        Util.Pair<List<Candidate>, List<Candidate>> distanceCandidates = checkForDistanceCandidateChanges(c, fixes, race.getRace()
-                .getCourse().getWaypoints());
-        Util.Pair<List<Candidate>, List<Candidate>> xteCandidates = checkForXTECandidatesChanges(c, fixes, race.getRace().getCourse()
-                .getWaypoints());
+        Util.Pair<List<Candidate>, List<Candidate>> distanceCandidates = checkForDistanceCandidateChanges(c, fixes,
+                race.getRace().getCourse().getWaypoints());
+        Util.Pair<List<Candidate>, List<Candidate>> xteCandidates = checkForXTECandidatesChanges(c, fixes, race
+                .getRace().getCourse().getWaypoints());
+        logger.finest(distanceCandidates.getA().size() + " new Distance Candidates, " + xteCandidates.getA().size()
+                + " new XTE Candidates, " + distanceCandidates.getB().size() + " removed distance Candidates and "
+                + xteCandidates.getB().size() + " removed XTE Candidates.");
         newCans.addAll(xteCandidates.getA());
         newCans.addAll(distanceCandidates.getA());
         wrongCans.addAll(xteCandidates.getB());
         wrongCans.addAll(distanceCandidates.getB());
-        if (newCans.size() != 0 || wrongCans.size() != 0) {
-            logger.finest(newCans.size() + " new Candidates and " + wrongCans.size() + " removed Candidates for " + c);
-        }
         return new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, wrongCans);
     }
 
@@ -209,8 +209,8 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     @Override
-    public Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(Iterable<Waypoint> addedWaypoints,
-            Iterable<Waypoint> removedWaypoints, Integer smallestIndex) {
+    public Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(
+            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex) {
         Course course = race.getRace().getCourse();
         for (Waypoint w : addedWaypoints) {
             processNewWaypoint(w, course.getFirstWaypoint(), course.getLastWaypoint());
@@ -290,10 +290,10 @@ public class CandidateFinderImpl implements CandidateFinder {
     /**
      * For each fix the distance to each waypoint is calculated. Then the fix is checked for being a candidate.
      */
-    private Util.Pair<List<Candidate>, List<Candidate>> checkForDistanceCandidateChanges(Competitor c, Iterable<GPSFix> fixes,
-            Iterable<Waypoint> waypoints) {
-        Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(new ArrayList<Candidate>(),
-                new ArrayList<Candidate>());
+    private Util.Pair<List<Candidate>, List<Candidate>> checkForDistanceCandidateChanges(Competitor c,
+            Iterable<GPSFix> fixes, Iterable<Waypoint> waypoints) {
+        Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
+                new ArrayList<Candidate>(), new ArrayList<Candidate>());
         TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         for (GPSFix fix : fixes) {
@@ -370,7 +370,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                                 if (newProbability != null) {
                                     newProbability *= isOnCorrectSideOfWaypoint(w, p, t, false) ? penaltyForDistanceCandidates
                                             : penaltyForDistanceCandidates * penaltyForWrongSide;
-                                    if (newProbability > penaltyForSkipping && (probability == null || newProbability > probability)) {
+                                    if (newProbability > penaltyForSkipping
+                                            && (probability == null || newProbability > probability)) {
                                         isCan = true;
                                         probability = newProbability;
                                     }
@@ -383,16 +384,20 @@ public class CandidateFinderImpl implements CandidateFinder {
                         wasCan = true;
                     }
                     if (!wasCan && isCan) {
-                        Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability, w);
+                        Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t,
+                                probability, w);
                         distanceCandidates.get(c).get(w).put(fix, newCan);
                         result.getA().add(newCan);
+                        logger.finest("Added distance" + newCan.toString() + "for " + c);
                     } else if (wasCan && !isCan) {
                         distanceCandidates.get(c).get(w).remove(fix);
                         result.getB().add(oldCan);
                     } else if (wasCan && isCan && oldCan.getProbability() != probability) {
-                        Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability, w);
+                        Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t,
+                                probability, w);
                         distanceCandidates.get(c).get(w).put(fix, newCan);
                         result.getA().add(newCan);
+                        logger.finest("Added distance" + newCan.toString() + "for " + c);
                         result.getB().add(oldCan);
                     }
                 }
@@ -403,7 +408,6 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     private Map<Waypoint, List<Distance>> getDistances(Competitor c, GPSFix fix) {
         // TODO Possibly for specific waypoints
-        // Check if the fix is still cached
         Map<Waypoint, List<Distance>> result = distanceCache.get(c).get(fix);
         if (result == null) {
             // Else calculate distances and put them into the cache
@@ -423,10 +427,10 @@ public class CandidateFinderImpl implements CandidateFinder {
      * 
      * @param waypointAsList
      */
-    private Util.Pair<List<Candidate>, List<Candidate>> checkForXTECandidatesChanges(Competitor c, Iterable<GPSFix> fixes,
-            Iterable<Waypoint> waypoints) {
-        Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(new ArrayList<Candidate>(),
-                new ArrayList<Candidate>());
+    private Util.Pair<List<Candidate>, List<Candidate>> checkForXTECandidatesChanges(Competitor c,
+            Iterable<GPSFix> fixes, Iterable<Waypoint> waypoints) {
+        Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
+                new ArrayList<Candidate>(), new ArrayList<Candidate>());
         for (GPSFix fix : fixes) {
             TimePoint t = fix.getTimePoint();
             GPSFix fixBefore;
@@ -471,13 +475,15 @@ public class CandidateFinderImpl implements CandidateFinder {
                         if (fixAfter != null && xtesAfter != null) {
                             Double xteAfter = xtesAfter.get(w).get(0).getMeters();
                             if (xteAfter != null && xte < 0 != xteAfter <= 0) {
-                                newCandidates.put(Arrays.asList(fix, fixAfter), createCandidate(c, xte, xteAfter, t, tAfter, w, true));
+                                newCandidates.put(Arrays.asList(fix, fixAfter),
+                                        createCandidate(c, xte, xteAfter, t, tAfter, w, true));
                             }
                         }
                         if (fixBefore != null) {
                             Double xteBefore = xtesBefore.get(w).get(0).getMeters();
                             if (xte < 0 != xteBefore <= 0) {
-                                newCandidates.put(Arrays.asList(fixBefore, fix), createCandidate(c, xteBefore, xte, tBefore, t, w, true));
+                                newCandidates.put(Arrays.asList(fixBefore, fix),
+                                        createCandidate(c, xteBefore, xte, tBefore, t, w, true));
                             }
                         }
                     }
@@ -490,13 +496,15 @@ public class CandidateFinderImpl implements CandidateFinder {
                         if (fixAfter != null && xtesAfter != null) {
                             Double xteAfter = xtesAfter.get(w).get(1).getMeters();
                             if (xte < 0 != xteAfter <= 0) {
-                                newCandidates.put(Arrays.asList(fix, fixAfter), createCandidate(c, xte, xteAfter, t, tAfter, w, false));
+                                newCandidates.put(Arrays.asList(fix, fixAfter),
+                                        createCandidate(c, xte, xteAfter, t, tAfter, w, false));
                             }
                         }
                         if (fixBefore != null) {
                             Double xteBefore = xtesBefore.get(w).get(1).getMeters();
                             if (xte < 0 != xteBefore <= 0) {
-                                newCandidates.put(Arrays.asList(fixBefore, fix), createCandidate(c, xteBefore, xte, tBefore, t, w, false));
+                                newCandidates.put(Arrays.asList(fixBefore, fix),
+                                        createCandidate(c, xteBefore, xte, tBefore, t, w, false));
                             }
                         }
                     }
@@ -512,12 +520,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                             waypointCandidates.remove(canFixes);
                             if (newCan.getProbability() > penaltyForSkipping) {
                                 result.getA().add(newCan);
+                                logger.finest("Added XTE " + newCan.toString() + "for " + c);
                                 waypointCandidates.put(canFixes, newCan);
                             }
                         }
                     } else {
                         if (newCan.getProbability() > penaltyForSkipping) {
                             result.getA().add(newCan);
+                            logger.finest("Added XTE " + newCan.toString() + "for " + c);
                             waypointCandidates.put(canFixes, newCan);
                         }
                     }
@@ -563,7 +573,8 @@ public class CandidateFinderImpl implements CandidateFinder {
      * crossingInfo.getB()).getMeters()); } } } }
      */
 
-    private Candidate createCandidate(Competitor c, double xte1, double xte2, TimePoint t1, TimePoint t2, Waypoint w, Boolean portMark) {
+    private Candidate createCandidate(Competitor c, double xte1, double xte2, TimePoint t1, TimePoint t2, Waypoint w,
+            Boolean portMark) {
         long differenceInMillis = t2.asMillis() - t1.asMillis();
         double ratio = (Math.abs(xte1) / (Math.abs(xte1) + Math.abs(xte2)));
         TimePoint t = t1.plus((long) (differenceInMillis * ratio));
@@ -593,8 +604,10 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
                 pos.add(po);
             }
-            Bearing diff1 = pos.get(0).getBearingGreatCircle(p).getDifferenceTo(pos.get(0).getBearingGreatCircle(pos.get(1)));
-            Bearing diff2 = pos.get(1).getBearingGreatCircle(p).getDifferenceTo(pos.get(1).getBearingGreatCircle(pos.get(0)));
+            Bearing diff1 = pos.get(0).getBearingGreatCircle(p)
+                    .getDifferenceTo(pos.get(0).getBearingGreatCircle(pos.get(1)));
+            Bearing diff2 = pos.get(1).getBearingGreatCircle(p)
+                    .getDifferenceTo(pos.get(1).getBearingGreatCircle(pos.get(0)));
             if (Math.abs(diff1.getDegrees()) > 90 || Math.abs(diff2.getDegrees()) > 90) {
                 result = false;
             }
@@ -611,7 +624,8 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
             if (m != null) {
                 Util.Pair<Position, Bearing> crossingInfo = Util.get(getCrossingInformation(w, t), portMark ? 0 : 1);
-                result = p.crossTrackError(crossingInfo.getA(), crossingInfo.getB().add(new DegreeBearingImpl(90))).getMeters() < 0;
+                result = p.crossTrackError(crossingInfo.getA(), crossingInfo.getB().add(new DegreeBearingImpl(90)))
+                        .getMeters() < 0;
             }
         }
         return result;
@@ -689,8 +703,8 @@ public class CandidateFinderImpl implements CandidateFinder {
             Util.Pair<Mark, Mark> posGate = getPortAndStarboardMarks(t, w);
             Position portGatePosition = posGate.getA() == null ? null : race.getOrCreateTrack(posGate.getA())
                     .getEstimatedPosition(t, false);
-            Position starboardGatePosition = posGate.getB() == null ? null : race.getOrCreateTrack(posGate.getB()).getEstimatedPosition(t,
-                    false);
+            Position starboardGatePosition = posGate.getB() == null ? null : race.getOrCreateTrack(posGate.getB())
+                    .getEstimatedPosition(t, false);
             distances.add(portGatePosition != null ? p.getDistance(portGatePosition) : null);
             distances.add(starboardGatePosition != null ? p.getDistance(starboardGatePosition) : null);
 
@@ -699,9 +713,10 @@ public class CandidateFinderImpl implements CandidateFinder {
             Util.Pair<Mark, Mark> posLine = getPortAndStarboardMarks(t, w);
             Position portLinePosition = race.getOrCreateTrack(posLine.getA()).getEstimatedPosition(t, false);
             Position starboardLinePosition = race.getOrCreateTrack(posLine.getB()).getEstimatedPosition(t, false);
-            distances.add((portLinePosition != null && starboardLinePosition != null) ? p.getDistanceToLine(portLinePosition,
-                    starboardLinePosition) : portLinePosition != null ? p.getDistance(portLinePosition) : starboardLinePosition != null ? p
-                    .getDistance(portLinePosition) : null);
+            distances.add((portLinePosition != null && starboardLinePosition != null) ? p.getDistanceToLine(
+                    portLinePosition, starboardLinePosition) : portLinePosition != null ? p
+                    .getDistance(portLinePosition) : starboardLinePosition != null ? p.getDistance(portLinePosition)
+                    : null);
             break;
         case Offset:
             // TODO
@@ -712,7 +727,8 @@ public class CandidateFinderImpl implements CandidateFinder {
             break;
         }
         if (singleMark) {
-            Position markPosition = race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, false);
+            Position markPosition = race.getOrCreateTrack(w.getMarks().iterator().next())
+                    .getEstimatedPosition(t, false);
             distances.add(markPosition != null ? p.getDistance(markPosition) : null);
         }
         return distances;
@@ -746,7 +762,8 @@ public class CandidateFinderImpl implements CandidateFinder {
             Mark portMark = pos.getA();
             if (portMark != null) {
                 Position portPosition = race.getOrCreateTrack(portMark).getEstimatedPosition(t, false);
-                Bearing crossingPort = before.getBearingGreatCircle(portPosition).middle(after.getBearingGreatCircle(portPosition));
+                Bearing crossingPort = before.getBearingGreatCircle(portPosition).middle(
+                        after.getBearingGreatCircle(portPosition));
                 result.add(new Util.Pair<Position, Bearing>(portPosition, crossingPort));
             }
             Mark starboardMark = pos.getB();
@@ -792,12 +809,13 @@ public class CandidateFinderImpl implements CandidateFinder {
         final List<Leg> legs = race.getRace().getCourse().getLegs();
         final int indexOfWaypoint = race.getRace().getCourse().getIndexOfWaypoint(w);
         final boolean isStartLine = indexOfWaypoint == 0;
-        final Bearing legDeterminingDirectionBearing = race.getTrackedLeg(legs.get(isStartLine ? 0 : indexOfWaypoint - 1)).getLegBearing(t);
+        final Bearing legDeterminingDirectionBearing = race.getTrackedLeg(
+                legs.get(isStartLine ? 0 : indexOfWaypoint - 1)).getLegBearing(t);
         if (legDeterminingDirectionBearing == null) {
             return new Util.Pair<Mark, Mark>(null, null);
         }
-        Distance crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint = markPositions.get(0).crossTrackError(markPositions.get(1),
-                legDeterminingDirectionBearing);
+        Distance crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint = markPositions.get(0).crossTrackError(
+                markPositions.get(1), legDeterminingDirectionBearing);
         final Mark starboardMarkWhileApproachingLine;
         final Mark portMarkWhileApproachingLine;
         if (crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint.getMeters() < 0) {

@@ -50,8 +50,8 @@ public class MarkPassingCalculator {
     private CandidateChooser chooser;
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
     private final MarkPassingUpdateListener listener;
-    private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime()
-            .availableProcessors() - 1, 3),
+    private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime
+            .getRuntime().availableProcessors() - 1, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
     /* keepAliveTime */60, TimeUnit.SECONDS,
     /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1));
@@ -87,7 +87,7 @@ public class MarkPassingCalculator {
     private class Listen implements Runnable {
         @Override
         public void run() {
-            logger.fine("MarkPassingCalculator is listening for new Fixes.");
+            logger.fine("MarkPassingCalculator is listening");
             boolean finished = false;
             Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
             Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
@@ -99,29 +99,32 @@ public class MarkPassingCalculator {
             List<Pair<Competitor, Integer>> suppressedMarkPassings = new ArrayList<>();
             List<Competitor> unsuppressedMarkPassings = new ArrayList<>();
             while (!finished) {
+                logger.finer("MPC is checking the queue");
                 List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                 try {
                     allNewFixInsertions.add(listener.getQueue().take());
                 } catch (InterruptedException e) {
-                    logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage() + " while waiting for new GPSFixes");
+                    logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
+                            + " while waiting for new GPSFixes");
                 }
                 listener.getQueue().drainTo(allNewFixInsertions);
+                logger.finer("MPC recieved "+ allNewFixInsertions.size()+" new updates.");
                 for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
                     if (listener.isEndMarker(fixInsertion)) {
                         finished = true;
                     } else {
                         fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
-                                smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings,
-                                unsuppressedMarkPassings);
+                                smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
+                                suppressedMarkPassings, unsuppressedMarkPassings);
                     }
                 }
                 if (!suspended) {
-                    // TODO Interplay between changing waypoints and setting fixed passes
                     if (smallestChangedWaypointIndex != null) {
-                        Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder.updateWaypoints(
-                                addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
+                        Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
+                                .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
                         chooser.removeWaypoints(removedWaypoints);
-                        for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas.entrySet()) {
+                        for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
+                                .entrySet()) {
                             Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
                             chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
                         }
@@ -143,8 +146,9 @@ public class MarkPassingCalculator {
         }
 
         private void updateManuallySetMarkPassings(List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
-                List<Pair<Competitor, Integer>> removedMarkPassings, List<Pair<Competitor, Integer>> suppressedMarkPassings,
-                List<Competitor> unsuppressedMarkPassings) {
+                List<Pair<Competitor, Integer>> removedMarkPassings,
+                List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unsuppressedMarkPassings) {
+            logger.finest("Updating manually edited MarkPassings");
             for (Pair<Competitor, Integer> pair : suppressedMarkPassings) {
                 chooser.suppressMarkPassings(pair.getA(), pair.getB());
             }
@@ -168,7 +172,11 @@ public class MarkPassingCalculator {
          * {@link ComputeMarkPassings}).
          * 
          */
-        private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes, Map<Mark, List<GPSFix>> newMarkFixes) {
+        private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes,
+                Map<Mark, List<GPSFix>> newMarkFixes) {
+
+            logger.finer("Calculating markpassings with " + newCompetitorFixes.size() + " new competitor Fixes and "
+                    + newMarkFixes.size() + "new mark fixes.");
             Map<Competitor, Set<GPSFix>> combinedCompetitorFixes = new HashMap<>();
 
             for (Entry<Competitor, List<GPSFix>> competitorEntry : newCompetitorFixes.entrySet()) {
@@ -209,8 +217,11 @@ public class MarkPassingCalculator {
 
             @Override
             public void run() {
-                logger.finest("Calculating MarkPassings for " + c);
-                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
+                logger.finer("Calculating MarkPassings for " + c + " (" + Util.size(fixes) + " new fixes)");
+                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c,
+                        fixes);
+                logger.finer("Received " + Util.size(candidateDeltas.getA()) + " new Candidates and will remove "
+                        + Util.size(candidateDeltas.getB()) + " old Candidates for " + c);
                 chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
             }
         }
@@ -221,6 +232,7 @@ public class MarkPassingCalculator {
      * Only suspends the actual calculation. Even when suspended all incoming fixes are added to the queue and sorted.
      */
     public void suspend() {
+        logger.finest("Suspended MarkPassingCalculator");
         suspended = true;
     }
 
@@ -229,12 +241,15 @@ public class MarkPassingCalculator {
      * evaluated even if nothing else arrives after this is called.
      */
     public void resume() {
+        logger.finest("Resumed MarkPassingCalculator");
         suspended = false;
         listener.getQueue().add(new StorePositionUpdateStrategy() {
             @Override
-            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes,
-                    List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints, Integer smallestChangedWaypointIndex,
-                    List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings, List<Pair<Competitor, Integer>> removedMarkPassings,
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
+                    Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
+                    Integer smallestChangedWaypointIndex,
+                    List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                    List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
             }
         });
