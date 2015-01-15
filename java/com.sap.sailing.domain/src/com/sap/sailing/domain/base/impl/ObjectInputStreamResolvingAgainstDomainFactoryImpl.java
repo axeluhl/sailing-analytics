@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sse.common.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class ObjectInputStreamResolvingAgainstDomainFactoryImpl extends ObjectInputStreamResolvingAgainstCache<DomainFactory> {
     ObjectInputStreamResolvingAgainstDomainFactoryImpl(InputStream in, DomainFactory domainFactory) throws IOException {
