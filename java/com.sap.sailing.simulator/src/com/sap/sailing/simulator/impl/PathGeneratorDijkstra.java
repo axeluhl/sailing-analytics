@@ -34,8 +34,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
     public Path getPath() {
 
         // retrieve simulation parameters
-        Grid boundary = new RectangularGrid(this.parameters.getCourse().get(0), this.parameters
-                .getCourse().get(1));// simulationParameters.getBoundaries();
+        Grid boundary = new RectangularGrid(this.parameters.getCourse().get(0), this.parameters.getCourse().get(1));// simulationParameters.getBoundaries();
         WindFieldGenerator windField = this.parameters.getWindField();
         PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
         Position start = this.parameters.getCourse().get(0);
@@ -46,8 +45,8 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
         LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
 
         // initiate grid
-        int gridv = this.parameters.getProperty("Djikstra.gridv[int]").intValue(); // number of vertical grid steps
-        int gridh = this.parameters.getProperty("Djikstra.gridh[int]").intValue(); // number of horizontal grid
+        int gridv = 10; // number of vertical grid steps
+        int gridh = 100; // number of horizontal grid
         // steps
         Position[][] sailGrid = boundary.generatePositions(gridh, gridv, 0, 0);
 

@@ -32,17 +32,17 @@ public class SimulatorTest {
 
     @Test
     public void testSailingSimulatorALL() {
-        
+
         // race course: copacabana, rio de janeiro, brasil
-        Position start = new DegreePosition(-22.975779,-43.17421);
-        Position end = new DegreePosition(-22.99016,-43.156013);
-        //System.out.println("race course size: "+start.getDistance(end).getKilometers());
+        Position start = new DegreePosition(-22.975779, -43.17421);
+        Position end = new DegreePosition(-22.99016, -43.156013);
+        // System.out.println("race course size: "+start.getDistance(end).getKilometers());
 
         List<Position> course = new LinkedList<Position>();
         course.add(start);
         course.add(end);
-        PolarDiagram pd = new PolarDiagram49STG();//PolarDiagram49.CreateStandard49();
-        
+        PolarDiagram pd = new PolarDiagram49STG();// PolarDiagram49.CreateStandard49();
+
         RectangularGrid bd = new RectangularGrid(start, end);
         Position[][] positions = bd.generatePositions(10, 10, 0, 0);
         Bearing windBear = end.getBearingGreatCircle(start);
@@ -54,15 +54,16 @@ public class SimulatorTest {
         Duration timeStep = new MillisecondsDurationImpl(30000);
         wf.generate(startTime, null, timeStep);
 
-        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorConstants.ModeFreestyle, true, true);
+        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, null,
+                SailingSimulatorConstants.ModeFreestyle, true, true);
         SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
 
-        //Map<String, Path> paths = sailingSim.getAllPathsForLeg(new SimulatorUISelectionImpl(0, 0, 0, 0));
+        // Map<String, Path> paths = sailingSim.getAllPathsForLeg(new SimulatorUISelectionImpl(0, 0, 0, 0));
         Map<String, Path> paths = sailingSim.getAllPaths();
 
-        //System.out.println("opportunistic path points: "+paths.get("2#Opportunist Left").getPathPoints().size());
+        // System.out.println("opportunistic path points: "+paths.get("2#Opportunist Left").getPathPoints().size());
         Assert.assertNotNull(paths.get("2#Opportunist Left").getPathPoints());
-        //System.out.println("omnciscient path points: "+paths.get("1#Omniscient").getPathPoints().size());
+        // System.out.println("omnciscient path points: "+paths.get("1#Omniscient").getPathPoints().size());
         Assert.assertNotNull(paths.get("1#Omniscient").getPathPoints());
     }
 
