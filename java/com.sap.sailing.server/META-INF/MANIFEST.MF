@@ -28,7 +28,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.common,
  com.sap.sse.operationaltransformation,
  com.sap.sse.replication,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sailing.server.gateway.serialization.shared.android
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;
