@@ -39,7 +39,7 @@ public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
     }
     
     public static GPSFixMovingImpl create(double lonDeg, double latDeg, long timeMillis,
-            double speedInKnots, double bearingDeg, double accuracy, double altitude, String provider) {
+            double speedInKnots, double bearingDeg) {
         return new GPSFixMovingImpl(new DegreePosition(latDeg, lonDeg),
                 new MillisecondsTimePoint(timeMillis), new KnotSpeedWithBearingImpl(
                         speedInKnots, new DegreeBearingImpl(bearingDeg)));
