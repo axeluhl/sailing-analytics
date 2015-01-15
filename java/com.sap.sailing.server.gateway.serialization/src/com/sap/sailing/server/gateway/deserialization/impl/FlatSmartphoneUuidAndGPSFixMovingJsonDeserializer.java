@@ -24,9 +24,6 @@ import com.sap.sse.common.Util.Pair;
 public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements
         JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> {
     public static final String ACCURACY = "accuracy";
-    public static final String ALTITUDE = "altitude";
-    public static final String PROVIDER = "provider";
-
 
     @Override
     public Pair<UUID, List<GPSFixMoving>> deserialize(JSONObject object) throws JsonDeserializationException {
@@ -41,10 +38,7 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements
             double speedMperS = Double.parseDouble(fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.SPEED_M_PER_S).toString());
             double speedKnots = new MeterPerSecondSpeedImpl(speedMperS).getKnots();
             double bearingDeg = Double.parseDouble(fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG).toString());
-            double accuracy = Double.parseDouble(object.get(ACCURACY).toString());
-            double altitude = Double.parseDouble(object.get(ALTITUDE).toString());
-            String provider = object.get(PROVIDER).toString();
-            GPSFixMoving fix = GPSFixMovingImpl.create(lonDeg, latDeg, timeMillis, speedKnots, bearingDeg, accuracy, altitude, provider);
+            GPSFixMoving fix = GPSFixMovingImpl.create(lonDeg, latDeg, timeMillis, speedKnots, bearingDeg);
             fixes.add(fix);
         }
 
