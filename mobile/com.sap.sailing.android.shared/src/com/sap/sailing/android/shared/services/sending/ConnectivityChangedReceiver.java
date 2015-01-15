@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.sap.sailing.android.tracking.app.services.sending;
+package com.sap.sailing.android.shared.services.sending;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -12,8 +12,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.tracking.app.BuildConfig;
-import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
 /**
  * Informs {@link MessageSendingService} whenever connectivity is restored, so that it can start sending
@@ -21,7 +19,7 @@ import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
  * 
  * Register in manifest:
  * <pre>{@code
- * <receiver android:name="com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver" >
+ * <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver" >
  *   <intent-filter>
  *     <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
  *   </intent-filter>
@@ -31,29 +29,17 @@ import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 public class ConnectivityChangedReceiver extends BroadcastReceiver {
     
     private final static String TAG = ConnectivityChangedReceiver.class.getName();
-    
+
     /* (non-Javadoc)
      * @see android.content.BroadcastReceiver#onReceive(android.content.Context, android.content.Intent)
      */
     @Override
     public void onReceive(Context context, Intent intent) {
-		final ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		final NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
+        NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+        if (!networkInfo.isConnected())
+            return;
+        context.startService(MessageSendingService.createSendDelayedIntent(context));
 
-		if (networkInfo == null)
-		{
-			return; // was null when restarted router..
-		}
-		
-		if (!networkInfo.isConnected()) {
-			return;
-		}
-		
-		if (BuildConfig.DEBUG) {
-			ExLog.i(context, TAG, "Starting TransmittingService");
-    	}
-		
-		ServiceHelper.getInstance().startTransmittingService(context);
         disable(context);
     }
 
@@ -78,4 +64,5 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         packageManager.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         ExLog.w(context, TAG, "Connectivity lost. ConnectivityChangedReceiver enabled");
     }
+
 }

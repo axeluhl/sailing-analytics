@@ -18,15 +18,16 @@ public class NetworkHelper {
 	
 	private final static String TAG = NetworkHelper.class.getName();
 	
-	static NetworkHelper mInstance;
-	static Context mContext;
+	protected static NetworkHelper mInstance;
+	protected static Context mContext;
 	
 	public static NetworkHelper getInstance(Context context) {
 		if (mInstance == null)
 		{
 			mInstance = new NetworkHelper();
-			mContext = context;
+			mContext = context.getApplicationContext();
 		}
+		
 		return mInstance;
 	}
     
@@ -38,7 +39,7 @@ public class NetworkHelper {
 			NetworkHelperSuccessListener successListener, NetworkHelperFailureListener failureListener) {
 		
 		NetworkRequestTask task = new NetworkRequestTask(successListener, failureListener);
-		task.execute(request);
+		task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
     }
 	
 	private class NetworkRequestTask extends AsyncTask<HttpRequest, Void, Void>
@@ -65,7 +66,7 @@ public class NetworkHelper {
 				String responseStr = readStream(stream);
 
 				response = null;
-
+				
 				if (responseStr.length() > 0) {
 					response = new JSONObject(responseStr);
 				}

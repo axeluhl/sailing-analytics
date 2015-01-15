@@ -56,7 +56,7 @@ public class AutoResizeTextView extends TextView {
 
 	// Text size that is set from code. This acts as a starting point for
 	// resizing
-	private float mTextSize;
+	protected float mTextSize;
 
 	// Temporary upper bounds on the starting text size
 	private float mMaxTextSize = 0;

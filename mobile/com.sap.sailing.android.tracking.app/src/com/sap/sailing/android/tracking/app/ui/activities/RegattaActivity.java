@@ -64,13 +64,11 @@ public class RegattaActivity extends BaseActivity {
         competitor = new CompetitorInfo();
         leaderboard = new LeaderboardInfo();
         
-        String leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
-        String eventId = intent.getStringExtra(getString(R.string.event_id));
-        String competitorId = intent.getStringExtra(getString(R.string.competitor_id));
+        String checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
 
-        competitor = DatabaseHelper.getInstance().getCompetitor(this, competitorId);
-		event = DatabaseHelper.getInstance().getEventInfo(this, eventId);
-		leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, leaderboardName);
+        competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
+		event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+		leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
         
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -83,11 +81,21 @@ public class RegattaActivity extends BaseActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
-            getSupportActionBar().setTitle(leaderboardName);
+            getSupportActionBar().setTitle(leaderboard.name);
             getSupportActionBar().setSubtitle(event.name);
         }
         
         replaceFragment(R.id.content_frame, new RegattaFragment());	
+    }
+    
+    @Override
+	public void onStart() {
+    	super.onStart();
+    	if (prefs.getTrackerIsTracking())
+        {
+        	String checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
+        	startTrackingActivity(checkinDigest);
+        }
     }
 
     @Override
@@ -223,7 +231,6 @@ public class RegattaActivity extends BaseActivity {
             return;
         } 
         try {
-        	System.out.println("*** STORE IMAGE: " + image +", FILENAME: " + fileName);
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();
@@ -386,7 +393,7 @@ public class RegattaActivity extends BaseActivity {
 	 */
 	public void checkout()
 	{
-		final String checkoutURLStr = prefs.getServerURL()
+		final String checkoutURLStr = event.server
 				+ prefs.getServerCheckoutPath().replace("{leaderboard-name}",
 						Uri.encode(leaderboard.name));
 		
@@ -411,8 +418,7 @@ public class RegattaActivity extends BaseActivity {
 				
 				@Override
 				public void performAction(JSONObject response) {
-					DatabaseHelper.getInstance().deleteRegattaFromDatabase(
-							RegattaActivity.this, event, competitor, leaderboard);
+					DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this, event.checkinDigest);
 					deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
 					dismissProgressDialog();
 					finish();
@@ -443,5 +449,11 @@ public class RegattaActivity extends BaseActivity {
 		{
 			super.onBackPressed();
 		}
+	}
+	
+	private void startTrackingActivity(String checkinDigest) {
+		Intent intent = new Intent(this, TrackingActivity.class);
+		intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
+		startActivity(intent);
 	}
 }

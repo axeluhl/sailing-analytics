@@ -1,4 +1,4 @@
-package com.sap.sailing.android.tracking.app.services.sending;
+package com.sap.sailing.android.shared.services.sending;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,5 +68,4 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
         super.onPostExecute(resultTriple);
         listener.onMessageSent(resultTriple.getA(), resultTriple.getB(), resultTriple.getC());
     }
-
 }

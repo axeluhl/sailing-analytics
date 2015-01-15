@@ -15,11 +15,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
-import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
@@ -143,7 +143,7 @@ public class TrackingFragment extends BaseFragment {
 					TextView textView = (TextView) getActivity().findViewById(
 							R.id.mode);
 
-					if (apiConnectivity == APIConnectivity.reachableTransmissionSuccess) {
+					if (apiConnectivity == APIConnectivity.transmissionSuccess) {
 						if (prefs.getEnergySavingEnabledByUser()) {
 							textView.setText(getString(R.string.tracking_mode_battery_saving));
 							textView.setTextColor(Color
@@ -158,7 +158,7 @@ public class TrackingFragment extends BaseFragment {
 						textView.setText(getString(R.string.tracking_mode_offline));
 						textView.setTextColor(Color
 								.parseColor(getString(R.color.sap_green)));
-					} else if (apiConnectivity == APIConnectivity.reachableTransmissionError) {
+					} else if (apiConnectivity == APIConnectivity.transmissionError) {
 						textView.setText(getString(R.string.tracking_mode_api_error));
 						textView.setTextColor(Color
 								.parseColor(getString(R.color.sap_red)));
@@ -218,7 +218,6 @@ public class TrackingFragment extends BaseFragment {
 		if (isAdded())
 		{
 			Activity activity = getActivity();
-			System.out.println("ACTIVITY: " + activity);
 			SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) activity.findViewById(R.id.gps_quality_indicator);
 			indicatorView.setSignalQuality( quality.toInt() );
 			
@@ -232,22 +231,19 @@ public class TrackingFragment extends BaseFragment {
 	}
 	
 	public void setUnsentGPSFixesCount(final int count) {
-		if (isAdded()) {
-			getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					TextView unsentGpsFixesTextView = (TextView) getActivity()
-							.findViewById(R.id.tracking_unsent_fixes);
-					if (count == 0)
-					{
+		getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (isAdded()) {
+					TextView unsentGpsFixesTextView = (TextView) getActivity().findViewById(
+							R.id.tracking_unsent_fixes);
+					if (count == 0) {
 						unsentGpsFixesTextView.setText(getString(R.string.none));
-					}
-					else
-					{
-						unsentGpsFixesTextView.setText(String.valueOf(count));	
+					} else {
+						unsentGpsFixesTextView.setText(String.valueOf(count));
 					}
 				}
-			});
-		}
+			}
+		});
 	}
 }

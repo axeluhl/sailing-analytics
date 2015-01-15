@@ -29,7 +29,6 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
@@ -43,7 +42,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	private final int IMAGE_MAX_SIZE = 2000;
 	
 	private final String CAMERA_TEMP_FILE = "cameraTempFile";
-	
 	
 	private boolean showingThankYouNote;
 
@@ -323,9 +321,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 	private void startTrackingActivity() {
 		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
 		Intent intent = new Intent(getActivity(), TrackingActivity.class);
-		intent.putExtra(
-				getString(R.string.tracking_activity_event_id_parameter),
-				regattaActivity.event.id);
+		String checkinDigest = regattaActivity.event.checkinDigest;
+		intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
 		getActivity().startActivity(intent);
 	}
 

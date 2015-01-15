@@ -7,6 +7,7 @@ public class CompetitorInfo {
 	public String countryCode;
 	public String nationality;
 	public String sailId;
+	public String checkinDigest;
 	public int rowId; 
 			
 }
