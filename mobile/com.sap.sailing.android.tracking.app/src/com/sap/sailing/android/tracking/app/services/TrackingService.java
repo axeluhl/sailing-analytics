@@ -160,10 +160,10 @@ public class TrackingService extends Service implements ConnectionCallbacks,
 
 	public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed, double latitude, double longitude, double altitude) {
 		
-		if (prefs.getDisplayHeadingWithDeclination())
+		if (prefs.getDisplayHeadingWithSubtractedDeclination())
 		{
 			GeomagneticField geomagneticField = new GeomagneticField((float)latitude, (float)longitude, (float)altitude, System.currentTimeMillis());
-			bearing = bearing + geomagneticField.getDeclination();
+			bearing = bearing - geomagneticField.getDeclination();
 		}
 		
 		GPSQuality quality = GPSQuality.noSignal;
