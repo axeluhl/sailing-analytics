@@ -2,11 +2,12 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.annotations.Statistic;
 
 /**
- * A speed, convertable in various units of measure. Can be negative.
+ * A speed, convertible in various units of measure. Can be negative.
  * 
  * @author Axel Uhl (d043530)
  *

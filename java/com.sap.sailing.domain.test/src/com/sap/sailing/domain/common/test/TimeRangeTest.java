@@ -8,10 +8,10 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.TimeRangeImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TimeRangeTest {
     protected TimeRange create(long from, long to) {
@@ -94,8 +94,8 @@ public class TimeRangeTest {
     	
     	one = create(Long.MIN_VALUE, 10);
     	union = two.union(one);
-    	assertTrue(union.openBeginning());
-    	assertTrue(union.openEnd());
+    	assertTrue(union.hasOpenBeginning());
+    	assertTrue(union.hasOpenEnd());
     }
     
     @Test

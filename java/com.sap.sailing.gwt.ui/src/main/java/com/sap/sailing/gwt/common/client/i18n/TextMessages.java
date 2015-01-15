@@ -34,6 +34,10 @@ public interface TextMessages extends Messages {
     String chooseChart();
     String series();
     String regattaLeaderboards();
+    String features();
+    String releaseNotes();
+    String whatsNew();
+    String overview();
     String sapSailing();
     String search();
     

@@ -23,6 +23,7 @@ import org.osgi.framework.FrameworkUtil;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -75,13 +76,14 @@ public class SimulatorUtils {
         return prependedBundlePath;
     }
 
-    public static RaceHandle loadRace(RacingEventServiceImpl service, TracTracAdapterFactory tracTracAdapterFactory, URL paramURL, URI liveURI,
-            URI storedURI, RaceLogStore raceLogStore, long timeoutInMilliseconds) throws Exception {
-        //TODO: TracTrac Username / Password
+    public static RaceHandle loadRace(RacingEventServiceImpl service, TracTracAdapterFactory tracTracAdapterFactory,
+            URL paramURL, URI liveURI, URI storedURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            long timeoutInMilliseconds) throws Exception {
+        // TODO: TracTrac Username / Password
         String tractracUsername = "";
         String tractracPassword = "";
         RaceHandle raceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
-                .addTracTracRace(service, paramURL, liveURI, storedURI, null, raceLogStore,
+                .addTracTracRace(service, paramURL, liveURI, storedURI, null, raceLogStore, regattaLogStore,
                         timeoutInMilliseconds, tractracUsername, tractracPassword, TracTracConnectionConstants.ONLINE_STATUS,
                         TracTracConnectionConstants.ONLINE_VISIBILITY);
         return raceHandle;
@@ -374,7 +376,7 @@ public class SimulatorUtils {
         Map<String, Path> paths = new HashMap<String, Path>();
 
         // get instance of heuristic searcher
-        PathGeneratorTreeGrowWind genTreeGrow = new PathGeneratorTreeGrowWind(parameters);
+        PathGeneratorTreeGrow genTreeGrow = new PathGeneratorTreeGrow(parameters);
 
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1, null);
@@ -383,7 +385,7 @@ public class SimulatorUtils {
         PathCandidate leftBestCand = genTreeGrow.getBestCand();
         int left1TurnMiddle = 1000;
         if (leftBestCand != null) {
-            left1TurnMiddle = leftBestCand.path.indexOf("LR");
+            left1TurnMiddle = leftBestCand.getIndexOfTurnLR();
         }
 
         // search best right-starting 1-turner
@@ -393,7 +395,7 @@ public class SimulatorUtils {
         PathCandidate rightBestCand = genTreeGrow.getBestCand();
         int right1TurnMiddle = 1000;
         if (rightBestCand != null) {
-            right1TurnMiddle = rightBestCand.path.indexOf("RL");
+            right1TurnMiddle = rightBestCand.getIndexOfTurnRL();
         }
 
         // search best multi-turn course

@@ -9,17 +9,11 @@ import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sse.gwt.client.mvp.ClientFactoryImpl;
-import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.shared.UserManagementService;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
-
-public abstract class AbstractApplicationClientFactory extends ClientFactoryImpl implements AutoPlayAppClientFactory {
+public abstract class AbstractApplicationClientFactory extends SecureClientFactoryImpl implements AutoPlayAppClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
-    private final UserManagementServiceAsync userManagementService;
-    private final UserService userService;
     private final PlaceNavigator navigator;
 
     public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController) {
@@ -27,8 +21,6 @@ public abstract class AbstractApplicationClientFactory extends ClientFactoryImpl
         navigator = new PlaceNavigatorImpl(placeController);
         sailingService = GWT.create(SailingService.class);
         mediaService = GWT.create(MediaService.class);
-        userManagementService = GWT.create(UserManagementService.class);
-        userService = new UserService(userManagementService);
     }
     
     @Override
@@ -50,15 +42,4 @@ public abstract class AbstractApplicationClientFactory extends ClientFactoryImpl
     public PlaceNavigator getPlaceNavigator() {
         return navigator;
     }
-
-    @Override
-    public UserManagementServiceAsync getUserManagementService() {
-        return userManagementService;
-    }
-
-    @Override
-    public UserService getUserService() {
-        return userService;
-    }
-    
 }

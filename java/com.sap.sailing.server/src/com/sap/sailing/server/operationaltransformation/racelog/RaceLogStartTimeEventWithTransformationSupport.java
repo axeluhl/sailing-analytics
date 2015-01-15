@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation.racelog;
 
-import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 
 public class RaceLogStartTimeEventWithTransformationSupport extends RaceLogEventWithTransformationSupport<RaceLogStartTimeEvent>{
     public RaceLogStartTimeEventWithTransformationSupport(RaceLogStartTimeEvent raceLogEvent) {
@@ -25,5 +25,10 @@ public class RaceLogStartTimeEventWithTransformationSupport extends RaceLogEvent
     public RaceLogEventWithTransformationSupport<?> transformClientOpForStartTimeEvent(
             RaceLogStartTimeEventWithTransformationSupport raceLogStartTimeServerEventWithTransformationSupport) {
         return null;
+    }
+
+    @Override
+    public boolean requiresSynchronousExecution() {
+        return true;
     }
 }

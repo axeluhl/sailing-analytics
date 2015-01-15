@@ -25,6 +25,7 @@ public abstract class AbstractSerializationTest {
                 }
             }
         }.start();
+        Thread.currentThread().setContextClassLoader(AbstractSerializationTest.class.getClassLoader());
         ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis);
         @SuppressWarnings("unchecked")
         T result = (T) dis.readObject();

@@ -27,6 +27,14 @@ public class TrackRegatta extends AbstractRacingEventServiceOperation<DynamicTra
         return null;
     }
 
+    /**
+     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+    
     @Override
     public DynamicTrackedRegatta internalApplyTo(RacingEventService toState) {
         Regatta regatta = toState.getRegatta(regattaIdentifier);

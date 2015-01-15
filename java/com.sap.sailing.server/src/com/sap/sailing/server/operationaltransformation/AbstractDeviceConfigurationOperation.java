@@ -13,6 +13,16 @@ public abstract class AbstractDeviceConfigurationOperation extends AbstractRacin
         this.matcher = matcher;
     }
 
+    /**
+     * Operations of this type are considered to replicate their effects transitively during the execution
+     * of their {@link #internalApplyTo(com.sap.sailing.server.RacingEventService)} operation and therefore
+     * return <code>false</code> from this method.
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+    
     @Override
     public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return null;
@@ -22,6 +32,4 @@ public abstract class AbstractDeviceConfigurationOperation extends AbstractRacin
     public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return null;
     }
-
-
 }

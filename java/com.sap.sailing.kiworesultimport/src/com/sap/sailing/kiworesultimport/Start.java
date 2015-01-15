@@ -2,7 +2,7 @@ package com.sap.sailing.kiworesultimport;
 
 import java.text.ParseException;
 
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public interface Start {
     String getBoatClass();

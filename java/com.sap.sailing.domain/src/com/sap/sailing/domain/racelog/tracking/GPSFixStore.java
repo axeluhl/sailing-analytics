@@ -1,27 +1,31 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.shared.events.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sse.common.TimeRange;
 
 
 public interface GPSFixStore {
     /**
      * Load all fixes that correspond to the {@link DeviceCompetitorMappingEvent}s found in the {@code raceLog}.
      */
-    void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog,
+    void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log,
             Competitor competitor) throws TransformationException;
 
     /**
      * Load all fixes that correspond to the {@link DeviceMarkMappingEvent}s found in the {@code raceLog}.
      */
-    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark) throws TransformationException,
+    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark) throws TransformationException,
     NoCorrespondingServiceRegisteredException;
 
     /**

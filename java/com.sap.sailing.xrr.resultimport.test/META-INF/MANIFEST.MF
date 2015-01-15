@@ -8,3 +8,5 @@ Fragment-Host: com.sap.sailing.xrr.resultimport
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit4;bundle-version="4.8.2",
  com.sap.sse.common
+Export-Package: com.sap.sailing.xrr.resultimport.test
+Import-Package: com.sap.sailing.xrr.schema

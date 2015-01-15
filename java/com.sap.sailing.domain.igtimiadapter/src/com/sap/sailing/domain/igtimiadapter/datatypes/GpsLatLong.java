@@ -3,10 +3,10 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
+import com.sap.sse.common.TimePoint;
 
 public class GpsLatLong extends Fix {
     public static final String IGTIMI_ENABLE_WORKAROUND_FOR_SINGLE_DIGIT_LATITUDES = "igtimi.enableWorkaroundForSingleDigitLatitudes";

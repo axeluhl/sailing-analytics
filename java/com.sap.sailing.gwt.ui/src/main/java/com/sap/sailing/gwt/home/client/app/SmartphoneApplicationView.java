@@ -11,6 +11,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.footer.Footer;
 import com.sap.sailing.gwt.home.client.shared.header.Header;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.DefaultErrorReporter;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
@@ -22,6 +25,8 @@ public class SmartphoneApplicationView extends Composite implements ApplicationT
 
     private static ApplicationMobileViewUiBinder uiBinder = GWT.create(ApplicationMobileViewUiBinder.class);
 
+    private static ErrorReporter errorReporter = new DefaultErrorReporter<StringMessages>(StringMessages.INSTANCE);
+    
     @UiField(provided=true)
     Header headerPanel;
 
@@ -46,5 +51,10 @@ public class SmartphoneApplicationView extends Composite implements ApplicationT
     @Override
     public void showLoading(boolean visibile) {
         loadingMessage.getStyle().setVisibility(visibile ? Visibility.VISIBLE : Visibility.HIDDEN);
+    }
+
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
     }
 }

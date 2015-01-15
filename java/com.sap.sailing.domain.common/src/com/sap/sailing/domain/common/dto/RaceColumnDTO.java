@@ -23,11 +23,11 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     private Map<FleetDTO, RaceDTO> racesPerFleet;
     private Double explicitFactor;
     private double effectiveFactor;
-
-    private Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
+    private Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos;
     
     public RaceColumnDTO() {
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
+        raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();
         fleets = new ArrayList<FleetDTO>();
     }

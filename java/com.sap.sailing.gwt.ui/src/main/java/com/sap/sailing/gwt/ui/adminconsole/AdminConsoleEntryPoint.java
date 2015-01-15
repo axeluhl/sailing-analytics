@@ -19,8 +19,6 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -40,19 +38,17 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     private Set<LeaderboardsDisplayer> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
 
-    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
     
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         createUI();
     }
      
     private void createUI() {
-        AdminConsolePanel panel = new AdminConsolePanel(getUserService(), sailingService, persistentAlertLabel,
+        AdminConsolePanel panel = new AdminConsolePanel(getUserService(), sailingService, 
                 getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this, SecurityStylesheetResources.INSTANCE.css());
         BetterDateTimeBox.initialize();
         regattasDisplayers = new HashSet<>();
@@ -190,14 +186,22 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, getStringMessages());
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ResultImportUrlsManagementPanel>(resultImportUrlsManagementPanel),
                 getStringMessages().resultImportUrls(), SailingAdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
+        
+        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(sailingService, this, getStringMessages(), this, eventManagementPanel);
+        panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
+                getStringMessages().structureImportUrls(), SailingAdminConsoleFeatures.MANAGE_STRUCTURE_IMPORT_URLS);
 
         /* ADVANCED */
         
         final TabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(),
                 "AdvancedPanel", SailingAdminConsoleFeatures.MANAGE_REPLICATION);
         final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, getStringMessages());
-        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanel),
-                getStringMessages().replication(), SailingAdminConsoleFeatures.MANAGE_REPLICATION);
+        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanel) {
+            @Override
+            public void refreshAfterBecomingVisible() {
+                replicationPanel.updateReplicaList();
+            }
+        }, getStringMessages().replication(), SailingAdminConsoleFeatures.MANAGE_REPLICATION);
 
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), sailingService,
                 this, eventManagementPanel, this, this);

@@ -15,7 +15,7 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
+import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.ComponentTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
@@ -80,7 +80,7 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     private void verifyGroupedElement(Number originElement) {
         GroupKey mainKey = new GenericGroupKey<Object>(originElement.getLength());
         GroupKey subKey = new GenericGroupKey<Object>(originElement.getCrossSum());
-        GroupKey expectedKey = new CompoundGroupKey(mainKey, subKey);
+        GroupKey expectedKey = new NestingCompoundGroupKey(mainKey, subKey);
         assertThat(groupedElement.getKey(), is(expectedKey));
     }
 

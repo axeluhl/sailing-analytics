@@ -1,0 +1,11 @@
+/* web and common stuff */
+include ":java:com.sap.sailing.domain.common"
+include ":java:com.sap.sailing.domain.shared.android"
+include ":java:com.sap.sailing.server.gateway.serialization.shared.android"
+include ":java:com.sap.sse.common"
+include ":java:com.sap.sse.datamining.shared"
+
+/* android projects */
+include ":mobile:com.sap.sailing.android.shared"
+include ":mobile:com.sap.sailing.android.tracking.app"
+include ":mobile:com.sap.sailing.racecommittee.app"

@@ -43,10 +43,8 @@ import slash.navigation.gpx.GpxRoute;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -56,7 +54,9 @@ import com.sap.sailing.domain.tracking.impl.WindComparator;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.nmeaconnector.NmeaFactory;
 import com.sap.sailing.nmeaconnector.NmeaUtil;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ReadWindVaneDataTest {
     @Test

@@ -29,10 +29,8 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WithID;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -50,7 +48,10 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.WithID;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
 
@@ -91,7 +92,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, String raceID, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            String raceID, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry) {
         Regatta result = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
         if (result == null) {
             result = raceIDToRegattaCache.get(raceID);
@@ -99,9 +101,9 @@ public class DomainFactoryImpl implements DomainFactory {
         if (result == null) {
             BoatClass regattaBoatClass = boatClass != null ? boatClass : getRaceTypeFromRaceID(raceID).getBoatClass();
             Calendar calendar = Calendar.getInstance();
-            result = new RegattaImpl(raceLogStore, RegattaImpl.getDefaultName(
+            result = new RegattaImpl(raceLogStore, regattaLogStore, RegattaImpl.getDefaultName(
                     "ST Regatta " + calendar.get(Calendar.YEAR) + " for race " + raceID, regattaBoatClass.getName()),
-                    regattaBoatClass, trackedRegattaRegistry, getBaseDomainFactory().createScoringScheme(
+                    regattaBoatClass, /*startDate*/ null, /*endDate*/ null, trackedRegattaRegistry, getBaseDomainFactory().createScoringScheme(
                             ScoringSchemeType.LOW_POINT), raceID, null);
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
@@ -352,11 +354,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
-            String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore) {
-        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceName, raceDescription, boatClass, startList, delayToLiveInMillis, 
-                swissTimingFactory, domainFactory, raceLogStore);
+    public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port,
+            String raceID, String raceName, String raceDescription, BoatClass boatClass, StartList startList,
+            long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) {
+        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceName, raceDescription,
+                boatClass, startList, delayToLiveInMillis, swissTimingFactory, domainFactory, raceLogStore,
+                regattaLogStore);
     }
 
 }

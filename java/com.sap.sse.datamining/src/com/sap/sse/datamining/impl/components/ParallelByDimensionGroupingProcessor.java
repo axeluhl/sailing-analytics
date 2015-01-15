@@ -19,7 +19,7 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
  * @author Lennart Hensler (D054527)
  */
 public class ParallelByDimensionGroupingProcessor<DataType> extends
-        AbstractParallelMultiDimensionalGroupingProcessor<DataType> {
+        AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType> {
 
     private final DataMiningStringMessages stringMessages;
     private final Locale locale;

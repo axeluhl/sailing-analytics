@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.SecurityEntity;
+import com.sap.sse.common.TimePoint;
 
 public class DataAccessWindowImpl extends HasIdImpl implements DataAccessWindow {
     private final TimePoint startTime;

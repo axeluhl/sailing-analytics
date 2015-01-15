@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.RaceSummary;
 import com.sap.sailing.kiworesultimport.RegattaSummary;
+import com.sap.sse.common.TimePoint;
 
 public class RegattaSummaryImpl implements RegattaSummary {
     private final Iterable<RaceSummary> races;

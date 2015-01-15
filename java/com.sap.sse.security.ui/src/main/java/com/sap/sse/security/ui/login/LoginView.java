@@ -21,12 +21,12 @@ import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
 import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.ForgotPasswordDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class LoginView extends Composite {
     private static LoginViewUiBinder uiBinder = GWT.create(LoginViewUiBinder.class);
@@ -36,29 +36,30 @@ public class LoginView extends Composite {
 
     private final UserManagementServiceAsync userManagementService;
     private final UserService userService;
+    private final StringMessages stringMessages;
     
     @UiField TextBoxWithWatermark userNameTextBox;
-    @UiField Label appName;
+    @UiField Label appNameLabel;
     @UiField Anchor forgotPasswordAnchor; 
     @UiField PasswordTextBoxWithWatermark passwordTextBox;
     @UiField Button loginButton;
     @UiField Anchor signUpAnchor;
     @UiField HTMLPanel oAuthPanel;
     
-    public LoginView(UserManagementServiceAsync userManagementService, UserService userService, String appName) {
+    public LoginView(UserManagementServiceAsync userManagementService, UserService userService, StringMessages stringMessages, String appName) {
         this.userManagementService = userManagementService;
         this.userService = userService;
+        this.stringMessages = stringMessages;
         LoginViewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        this.appName.setText(appName);
-        userNameTextBox.setWatermark(StringMessages.INSTANCE.username());
+        appNameLabel.setText(appName);
+        userNameTextBox.setWatermark(stringMessages.username());
         userNameTextBox.setWatermarkStyleName(LoginViewResources.INSTANCE.css().textInput_watermark());
-        passwordTextBox.setWatermark(StringMessages.INSTANCE.password());
+        passwordTextBox.setWatermark(stringMessages.password());
         passwordTextBox.setWatermarkStyleName(LoginViewResources.INSTANCE.css().passwordTextInput_watermark());
-        String registrationLink = EntryPointLinkFactory.createRegistrationLink(Collections.<String, String> emptyMap());
-        signUpAnchor.setHref(registrationLink);
         oAuthPanel.add(new OAuthLogin(userManagementService));
         userNameTextBox.setFocus(true);
+        
         DialogUtils.linkEnterToButton(loginButton, userNameTextBox, passwordTextBox);
         userNameTextBox.addAttachHandler(new Handler() {
             @Override
@@ -82,11 +83,11 @@ public class LoginView extends Composite {
                     if (!result.getRedirectURL().equals("")) {
                         Window.Location.replace(result.getRedirectURL());
                     } else  {
-                        Window.alert(StringMessages.INSTANCE.loggedIn(result.getUserDTO().getName()));
+                        Window.alert(stringMessages.loggedIn(result.getUserDTO().getName()));
                     }
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
-                        Window.alert(StringMessages.INSTANCE.failedToSignIn());
+                        Window.alert(stringMessages.failedToSignIn());
                     } else {
                         Window.alert(result.getMessage());
                     }
@@ -94,9 +95,15 @@ public class LoginView extends Composite {
             }
         });        
     }
+
+    @UiHandler("signUpAnchor")
+    void signUpClicked(ClickEvent e) {
+        String registrationLink = EntryPointLinkFactory.createRegistrationLink(Collections.<String, String> emptyMap());
+        Window.open(registrationLink, "_blank", "");
+    }
     
     @UiHandler("forgotPasswordAnchor")
     void forgotPasswordClicked(ClickEvent e) {
-        new ForgotPasswordDialog(StringMessages.INSTANCE, userManagementService, userService.getCurrentUser()).show();
+        new ForgotPasswordDialog(stringMessages, userManagementService, userService.getCurrentUser()).show();
     }
 }

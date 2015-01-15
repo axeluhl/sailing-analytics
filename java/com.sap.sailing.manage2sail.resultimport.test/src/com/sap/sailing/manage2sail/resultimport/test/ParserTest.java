@@ -24,8 +24,6 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.manage2sail.resultimport.ScoreCorrectionProviderImpl;
@@ -35,8 +33,10 @@ import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sailing.resultimport.impl.ResultUrlRegistryImpl;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ParserTest {
     private static final String SAMPLE_INPUT_NAME_29er = "YES_29er_XRR.xml";

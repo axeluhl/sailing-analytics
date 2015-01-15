@@ -18,7 +18,7 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
  * @author Lennart Hensler (D054527)
  */
 public class ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>
-             extends AbstractParallelMultiDimensionalGroupingProcessor<DataType> {
+             extends AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType> {
 
     public ParallelMultiDimensionsValueNestingGroupingProcessor(Class<DataType> dataType,
                                                                 ExecutorService executor,

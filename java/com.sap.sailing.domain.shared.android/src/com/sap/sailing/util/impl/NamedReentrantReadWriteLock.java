@@ -102,14 +102,14 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         @Override
         public void lock() {
             readLock.lock();
+            readers.add(Thread.currentThread());
         }
 
         @Override
         public void lockInterruptibly() throws InterruptedException {
             try {
                 readLock.lockInterruptibly();
-                final Thread currentThread = Thread.currentThread();
-                readers.add(currentThread);
+                readers.add(Thread.currentThread());
             } catch (InterruptedException ie) {
                 throw ie;
             }
@@ -119,8 +119,7 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         public boolean tryLock() {
             boolean result = readLock.tryLock();
             if (result) {
-                final Thread currentThread = Thread.currentThread();
-                readers.add(currentThread);
+                readers.add(Thread.currentThread());
             }
             return result;
         }
@@ -129,8 +128,7 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         public boolean tryLock(long timeout, TimeUnit unit) throws InterruptedException {
             boolean result = readLock.tryLock(timeout, unit);
             if (result) {
-                final Thread currentThread = Thread.currentThread();
-                readers.add(currentThread);
+                readers.add(Thread.currentThread());
             }
             return result;
         }

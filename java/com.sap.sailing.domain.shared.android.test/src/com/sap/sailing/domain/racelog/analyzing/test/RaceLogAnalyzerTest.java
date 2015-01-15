@@ -8,12 +8,12 @@ import java.util.UUID;
 
 import org.junit.Before;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
-import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class RaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<?>> {
 
@@ -41,14 +41,14 @@ public abstract class RaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<?
     }
     
     protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, int passId, Serializable id) {
-        return createEvent(type, milliseconds, passId, id, mock(RaceLogEventAuthor.class));
+        return createEvent(type, milliseconds, passId, id, mock(AbstractLogEventAuthor.class));
     }
     
-    protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, int passId, RaceLogEventAuthor author) {
+    protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, int passId, AbstractLogEventAuthor author) {
         return createEvent(type, milliseconds, passId, UUID.randomUUID(), author);
     }
     
-    protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, int passId, Serializable id, RaceLogEventAuthor author) {
+    protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, int passId, Serializable id, AbstractLogEventAuthor author) {
         T event = mock(type);
         when(event.getAuthor()).thenReturn(author);
         when(event.getPassId()).thenReturn(passId);

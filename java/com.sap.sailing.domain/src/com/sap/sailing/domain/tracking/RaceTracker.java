@@ -22,10 +22,10 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
  * The data received by the tracker is usually fed into {@link TrackedRace} objects that {@link TrackedRace#getRace()
  * correspond} to the {@link RaceDefinition} objects for whose tracking this tracker is responsible. When the
  * {@link TrackedRace} isn't connected to its {@link TrackedRegatta#getTrackedRaces() owning} {@link TrackedRegatta}, a
- * tracker is assumed to no longer update the {@link TrackedRace} object, even if it hasn't been {@link #stop() stopped}.
+ * tracker is assumed to no longer update the {@link TrackedRace} object, even if it hasn't been {@link #stop(boolean) stopped}.
  * <p>
  * 
- * A tracker may be {@link #stop() stopped}. In this case, it will no longer receive any data at all. Stopping a tracker
+ * A tracker may be {@link #stop(boolean) stopped}. In this case, it will no longer receive any data at all. Stopping a tracker
  * will not modify the {@link Regatta} and the {@link TrackedRegatta} with regards to their ownership of their
  * {@link RaceDefiniion} and {@link TrackedRace}, respectively.
  * 
@@ -42,8 +42,9 @@ public interface RaceTracker {
 
     /**
      * Stops tracking the races.
+     * @param preemptive TODO
      */
-    void stop() throws MalformedURLException, IOException, InterruptedException;
+    void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException;
 
     com.sap.sailing.domain.base.Regatta getRegatta();
 

@@ -11,6 +11,8 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_BOATCLASS = "boatclass";
+    public static final String FIELD_START_DATE = "startDate";
+    public static final String FIELD_END_DATE = "endDate";
     public static final String FIELD_SCORINGSYSTEM = "scoringSystem";
     public static final String FIELD_SERIES = "series";
     public static final String FIELD_COMPETITORS = "competitors";
@@ -32,6 +34,8 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         JSONObject result = new JSONObject();
 
         result.put(FIELD_NAME, regatta.getName());
+        result.put(FIELD_START_DATE, regatta.getStartDate() != null ? regatta.getStartDate().asMillis() : null);
+        result.put(FIELD_END_DATE, regatta.getStartDate() != null ? regatta.getEndDate().asMillis() : null);
         result.put(FIELD_SCORINGSYSTEM, regatta.getScoringScheme().getType().name());
         result.put(FIELD_BOATCLASS, regatta.getBoatClass() != null ? regatta.getBoatClass().getName(): null);
         

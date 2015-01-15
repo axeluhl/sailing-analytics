@@ -18,24 +18,24 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.TripleSerializer;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
 
@@ -185,16 +185,15 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
     }
 
     private RaceLogIdentifier createIdentifier(String groupName, String raceColumnName, String fleetName) {
-        RaceLogIdentifierTemplate template = mock(RaceLogIdentifierTemplate.class);
-        when(template.getParentObjectName()).thenReturn(groupName);
-        when(template.getRaceColumnName()).thenReturn(raceColumnName);
+        RegattaLikeIdentifier regattaLike = mock(RegattaLikeIdentifier.class);
+        when(regattaLike.getName()).thenReturn(groupName);
         Fleet fleet = mock(Fleet.class);
         when(fleet.getName()).thenReturn(fleetName);
-        return new RaceLogIdentifierImpl(template, raceColumnName, fleet);
+        return new RaceLogIdentifierImpl(regattaLike, raceColumnName, fleet);
     }
 
     private RaceLogFlagEvent createRaceLogFlagEvent(Serializable id) {
-        return eventFactory.createFlagEvent(new MillisecondsTimePoint(42), new RaceLogEventAuthorImpl("Test author", /* priority */ 1), id, Collections.<Competitor> emptyList(),
+        return eventFactory.createFlagEvent(new MillisecondsTimePoint(42), new LogEventAuthorImpl("Test author", /* priority */ 1), id, Collections.<Competitor> emptyList(),
                 42, Flags.ALPHA, Flags.BRAVO, true);
     }
 
