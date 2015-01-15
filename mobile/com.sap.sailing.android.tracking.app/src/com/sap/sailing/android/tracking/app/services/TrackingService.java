@@ -16,11 +16,10 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
@@ -29,10 +28,9 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
-public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
-        LocationListener {
+public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    private LocationClient locationClient;
+    private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private NotificationManager notificationManager;
     private boolean locationUpdateRequested = false;
@@ -63,7 +61,11 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
         locationRequest.setInterval(prefs.getGPSFixInterval());
         locationRequest.setFastestInterval(prefs.getGPSFixFastestInterval());
 
-        locationClient = new LocationClient(this, this, this);
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }
 
@@ -100,7 +102,7 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     }
 
     public void startTracking() {
-        locationClient.connect();
+        googleApiClient.connect();
         locationUpdateRequested = true;
 
         ExLog.i(this, TAG, "Started Tracking");
@@ -111,10 +113,10 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     }
 
     public void stopTracking() {
-        if (locationClient.isConnected()) {
-            locationClient.removeLocationUpdates(this);
+        if (googleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
         }
-        locationClient.disconnect();
+        googleApiClient.disconnect();
         locationUpdateRequested = false;
 
         if (scheduler != null) {
@@ -136,13 +138,13 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     @Override
     public void onConnected(Bundle arg0) {
         if (locationUpdateRequested) {
-            locationClient.requestLocationUpdates(locationRequest, this);
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
         }
     }
 
     @Override
-    public void onDisconnected() {
-        ExLog.i(this, TAG, "LocationClient was disconnected");
+    public void onConnectionSuspended(int i) {
+
     }
 
     public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed) {
