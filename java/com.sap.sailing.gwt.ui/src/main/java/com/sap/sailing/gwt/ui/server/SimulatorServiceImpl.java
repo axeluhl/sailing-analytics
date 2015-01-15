@@ -14,16 +14,13 @@ import java.util.logging.Logger;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
@@ -77,7 +74,10 @@ import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
     private static final long serialVersionUID = 4445427185387524086L;
@@ -301,7 +301,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             windFieldDTO = this.createWindFieldDTO(wf, startTime, endTime, timeStep, params); // params.isShowStreamlets2(), params.isShowLines(), params.getSeedLines());
         }
 
-        return new SimulatorResultsDTO(null, 0, rcDTO, pathDTOs, windFieldDTO, simulatedPaths.notificationMessage);
+        return new SimulatorResultsDTO(null, timeStep.asMillis(), 0, rcDTO, pathDTOs, windFieldDTO, simulatedPaths.notificationMessage);
     }
 
     @Override

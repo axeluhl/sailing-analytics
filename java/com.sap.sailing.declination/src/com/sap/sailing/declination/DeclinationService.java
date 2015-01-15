@@ -8,8 +8,8 @@ import com.sap.sailing.declination.impl.NOAAImporter;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sse.common.TimePoint;
 
 public interface DeclinationService {
     /**

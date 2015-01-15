@@ -17,9 +17,9 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService;

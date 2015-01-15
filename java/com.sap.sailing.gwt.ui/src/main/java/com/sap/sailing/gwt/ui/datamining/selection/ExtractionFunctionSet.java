@@ -18,7 +18,7 @@ public class ExtractionFunctionSet {
         sourceTypeNamesMap = new HashMap<>();
     }
 
-    public void addAll(Collection<FunctionDTO> functionDTOs) {
+    public void addAll(Iterable<FunctionDTO> functionDTOs) {
         for (FunctionDTO functionDTO : functionDTOs) {
             add(functionDTO);
         }

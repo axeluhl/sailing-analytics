@@ -25,10 +25,10 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         byIanaInternet = new HashMap<String, CountryCode>();
         all = new HashSet<CountryCode>();
         add(new CountryCodeImpl("AFGHANISTAN", "AF", "AFG", "af", "AFG", "AFG", "004", "93"));
-        add(new CountryCodeImpl("ÅLAND ISLANDS", "AX", "ALA", "ax", null, null, "248", null));
+        add(new CountryCodeImpl("Ã…LAND ISLANDS", "AX", "ALA", "ax", null, null, "248", null));
         add(new CountryCodeImpl("ALBANIA", "AL", "ALB", "al", "AL", "ALB", "008", "355"));
         add(new CountryCodeImpl("ALDERNEY", null, null, null, "GBA", null, null, null));
-        add(new CountryCodeImpl("ALGERIA (El Djazaïr)", "DZ", "DZA", "dz", "DZ", "ALG", "012", "213"));
+        add(new CountryCodeImpl("ALGERIA (El DjazaÃ¯r)", "DZ", "DZA", "dz", "DZ", "ALG", "012", "213"));
         add(new CountryCodeImpl("AMERICAN SAMOA", "AS", "ASM", "as", null, "ASA", "016", "1-684"));
         add(new CountryCodeImpl("ANDORRA", "AD", "AND", "ad", "AND", "AND", "020", "376"));
         add(new CountryCodeImpl("ANGOLA", "AO", "AGO", "ao", null, "ANG", "024", "244"));
@@ -81,10 +81,10 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("CONGO, THE DEMOCRATIC REPUBLIC OF THE (formerly Zaire)", "CD", "COD", "cd", "ZRE", "COD", "180", "243"));
         add(new CountryCodeImpl("COOK ISLANDS", "CK", "COK", "ck", null, "COK", "184", "682"));
         add(new CountryCodeImpl("COSTA RICA", "CR", "CRI", "cr", "CR", "CRC", "188", "506"));
-        add(new CountryCodeImpl("CÔTE D'IVOIRE (Ivory Coast)", "CI", "CIV", "ci", "CI", "CIV", "384", "225"));
+        add(new CountryCodeImpl("CÃ”TE D'IVOIRE (Ivory Coast)", "CI", "CIV", "ci", "CI", "CIV", "384", "225"));
         add(new CountryCodeImpl("CROATIA (Hrvatska)", "HR", "HRV", "hr", "HR", "CRO", "191", "385"));
         add(new CountryCodeImpl("CUBA", "CU", "CUB", "cu", "CU", "CUB", "192", "53"));
-        add(new CountryCodeImpl("CURAÇAO", "CW", "CUW", "cw", null, null, "531", "599"));
+        add(new CountryCodeImpl("CURAÃ‡AO", "CW", "CUW", "cw", null, null, "531", "599"));
         add(new CountryCodeImpl("CYPRUS", "CY", "CYP", "cy", "CY", "CYP", "196", "357"));
         add(new CountryCodeImpl("CZECH REPUBLIC", "CZ", "CZE", "cz", "CZ", "CZE", "203", "420"));
         add(new CountryCodeImpl("DENMARK", "DK", "DNK", "dk", "DK", "DEN", "208", "45"));
@@ -156,7 +156,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("LESOTHO", "LS", "LSO", "ls", "LS", "LES", "426", "266"));
         add(new CountryCodeImpl("LIBERIA", "LR", "LBR", "lr", "LB", "LBR", "430", "231"));
         add(new CountryCodeImpl("LIBYA (Libyan Arab Jamahirya)", "LY", "LBY", "ly", "LAR", "LBA", "434", "218"));
-        add(new CountryCodeImpl("LIECHTENSTEIN (Fürstentum Liechtenstein)", "LI", "LIE", "li", "FL", "LIE", "438", "423"));
+        add(new CountryCodeImpl("LIECHTENSTEIN (FÃ¼rstentum Liechtenstein)", "LI", "LIE", "li", "FL", "LIE", "438", "423"));
         add(new CountryCodeImpl("LITHUANIA", "LT", "LTU", "lt", "LT", "LTU", "440", "370"));
         add(new CountryCodeImpl("LUXEMBOURG", "LU", "LUX", "lu", "L", "LUX", "442", "352"));
         add(new CountryCodeImpl("MACAO (Special Administrative Region of China)", "MO", "MAC", "mo", null, null, "446", "853"));
@@ -180,7 +180,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("MONTENEGRO", "ME", "MNE", "me", "MNE", "MNE", "499", "382"));
         add(new CountryCodeImpl("MONTSERRAT", "MS", "MSR", "ms", null, null, "500", "1-664"));
         add(new CountryCodeImpl("MOROCCO", "MA", "MAR", "ma", "MA", "MAR", "504", "212"));
-        add(new CountryCodeImpl("MOZAMBIQUE (Moçambique)", "MZ", "MOZ", "mz", "MOC", "MOZ", "508", "258"));
+        add(new CountryCodeImpl("MOZAMBIQUE (MoÃ§ambique)", "MZ", "MOZ", "mz", "MOC", "MOZ", "508", "258"));
         add(new CountryCodeImpl("MYANMAR (formerly Burma)", "MM", "MMR", "mm", "BUR", "MYA", "104", "95"));
         add(new CountryCodeImpl("NAMIBIA", "NA", "NAM", "na", "NAM", "NAM", "516", "264"));
         add(new CountryCodeImpl("NAURU", "NR", "NRU", "nr", "NAU", "NRU", "520", "674"));
@@ -210,11 +210,11 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("PORTUGAL", "PT", "PRT", "pt", "P", "POR", "620", "351"));
         add(new CountryCodeImpl("PUERTO RICO", "PR", "PRI", "pr", null, "PUR", "630", "1"));
         add(new CountryCodeImpl("QATAR", "QA", "QAT", "qa", "Q", "QAT", "634", "974"));
-        add(new CountryCodeImpl("RÉUNION", "RE", "REU", "re", null, null, "638", "262"));
+        add(new CountryCodeImpl("RÃ‰UNION", "RE", "REU", "re", null, null, "638", "262"));
         add(new CountryCodeImpl("ROMANIA", "RO", "ROU", "ro", "RO", "ROU", "642", "40"));
         add(new CountryCodeImpl("RUSSIAN FEDERATION", "RU", "RUS", "ru", "RUS", "RUS", "643", "7"));
         add(new CountryCodeImpl("RWANDA", "RW", "RWA", "rw", "RWA", "RWA", "646", "250"));
-        add(new CountryCodeImpl("SAINT BARTHÉLEMY", "BL", "BLM", "bl", null, null, "652", null));
+        add(new CountryCodeImpl("SAINT BARTHÃ‰LEMY", "BL", "BLM", "bl", null, null, "652", null));
         add(new CountryCodeImpl("SAINT HELENA", "SH", "SHN", "sh", null, null, "654", "290"));
         add(new CountryCodeImpl("SAINT KITTS AND NEVIS", "KN", "KNA", "kn", null, "SKN", "659", "1-869"));
         add(new CountryCodeImpl("SAINT LUCIA", "LC", "LCA", "lc", "WL", "LCA", "662", "1-758"));
@@ -238,7 +238,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("SOUTH AFRICA (Zuid Afrika)", "ZA", "ZAF", "za", "ZA", "RSA", "710", "27"));
         add(new CountryCodeImpl("SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS", "GS", "SGS", "gs", null, null, "239", null));
         add(new CountryCodeImpl("SOVIET UNION (Internet code still used)", null, null, "su", null, null, null, null));
-        add(new CountryCodeImpl("SPAIN (España)", "ES", "ESP", "es", "E", "ESP", "724", "34"));
+        add(new CountryCodeImpl("SPAIN (EspaÃ±a)", "ES", "ESP", "es", "E", "ESP", "724", "34"));
         add(new CountryCodeImpl("SRI LANKA (formerly Ceylon)", "LK", "LKA", "lk", "CL", "SRI", "144", "94"));
         add(new CountryCodeImpl("SUDAN", "SD", "SDN", "sd", "SUD", "SUD", "736", "249"));
         add(new CountryCodeImpl("SURINAME", "SR", "SUR", "sr", "SME", "SUR", "740", "597"));

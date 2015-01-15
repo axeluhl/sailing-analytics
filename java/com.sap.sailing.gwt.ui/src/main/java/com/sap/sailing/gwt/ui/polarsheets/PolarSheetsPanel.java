@@ -12,9 +12,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -24,8 +26,9 @@ import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
+import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.WindStepping;
+import com.sap.sailing.domain.common.WindSpeedStepping;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -58,6 +61,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     private List<RegattaAndRaceIdentifier> selectedRaces;
     private PolarSheetsChartPanel chartPanel;
     private PolarSheetsHistogramPanel histogramPanel;
+    private AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel;
 
     private Label polarSheetsGenerationLabel;
     private Label dataCountLabel;
@@ -93,8 +97,10 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         namingBox = new TextBox();
         namingContainer.add(namingBox);
         leftPanel.add(namingContainer);
+        addBoatClassDiagramArea(leftPanel);
         DockLayoutPanel rightPanel = new DockLayoutPanel(Unit.PCT);
-        PolarSheetsChartPanel polarSheetsChartPanel = createPolarSheetsChartPanel();
+        angleOverDataSizeHistogramPanel = new AngleOverDataSizeHistogramPanel(stringMessages);
+        PolarSheetsChartPanel polarSheetsChartPanel = createPolarSheetsChartPanel(angleOverDataSizeHistogramPanel);
         DockLayoutPanel polarChartAndControlPanel = new DockLayoutPanel(Unit.PCT);
         PolarChartControlPanel polarChartControlPanel = new PolarChartControlPanel(stringMessages,
                 polarSheetsChartPanel);
@@ -108,7 +114,11 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         rightPanel.addNorth(polarChartAndControlPanel, 70);
         histogramPanel = new PolarSheetsHistogramPanel(stringMessages);
         histogramPanel.getElement().setAttribute("align", "top");
-        rightPanel.addSouth(histogramPanel, 30);
+        //rightPanel.addSouth(histogramPanel, 30);
+        
+        
+        angleOverDataSizeHistogramPanel.getElement().setAttribute("align", "top");
+        rightPanel.addSouth(angleOverDataSizeHistogramPanel, 30);
 
         
         add(rightPanel);
@@ -119,6 +129,81 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         chartPanel.setSettings(initialSettings);
     }
     
+    private void addBoatClassDiagramArea(VerticalPanel leftPanel) {
+        leftPanel.add(new Label(stringMessages.showBoatClassChartsLabel()));
+        final ListBox boatClassListBox = createBoatClassListBox();
+        leftPanel.add(boatClassListBox);
+        Button showBoatClassDiagramButton = new Button(stringMessages.showDiagram());
+        showBoatClassDiagramButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                chartPanel.showLoadingInfo();
+                sailingService.showCachedPolarSheetForBoatClass(
+                        boatClassListBox.getItemText(boatClassListBox.getSelectedIndex()),
+                        new AsyncCallback<PolarSheetGenerationResponse>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getLocalizedMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(PolarSheetGenerationResponse result) {
+                                String name = createNameForPolarSheet(result);
+                                chartPanel.getPolarSheetsDataMap().put(result.getId(), result.getData());
+                                chartPanel.setData(name, result.getData());
+                                chartPanel.hideLoadingInfo();
+                            }
+                        });
+            }
+        });
+        leftPanel.add(showBoatClassDiagramButton);
+        
+        Button showXYDiagramsButton = new Button(stringMessages.showXYDiagram());
+        showXYDiagramsButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                sailingService.createXYDiagramForBoatClass(
+                        boatClassListBox.getItemText(boatClassListBox.getSelectedIndex()), new AsyncCallback<PolarSheetsXYDiagramData>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getLocalizedMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(PolarSheetsXYDiagramData result) {
+                                PolarSheetsXYDiagramPopupPanel popupPanel = new PolarSheetsXYDiagramPopupPanel(stringMessages, result);
+                                popupPanel.show();
+                                popupPanel.center();
+                            }
+                        });
+            }
+        });
+        leftPanel.add(showXYDiagramsButton);
+    }
+
+    private ListBox createBoatClassListBox() {
+        final ListBox boatClassListBox = new ListBox();
+        sailingService.getBoatClassNamesWithPolarSheetsAvailable(new AsyncCallback<List<String>>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getLocalizedMessage());
+            }
+
+            @Override
+            public void onSuccess(List<String> result) {
+                for (String item : result) {
+                    boatClassListBox.addItem(item);
+                }
+            }
+        });
+        return boatClassListBox;
+    }
+
     private void setEventListenersForPolarSheetChart() {
         PointSelectEventHandler pointSelectEventHandler = new PointSelectEventHandler() {
             @Override
@@ -129,7 +214,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                 String polarSheetName = split[0];
                 int windSpeed = Integer.parseInt(split[1]); 
                 PolarSheetsData currentPolarSheetsData = chartPanel.getPolarSheetsDataMap().get(polarSheetName);
-                WindStepping stepping = currentPolarSheetsData.getStepping();
+                WindSpeedStepping stepping = currentPolarSheetsData.getStepping();
                 PolarSheetsHistogramData histogramData = currentPolarSheetsData.getHistogramDataMap()
                         .get(stepping.getLevelIndexForValue(windSpeed)).get(angle);
                 histogramPanel.setData(histogramData);
@@ -144,8 +229,8 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         return polarSheetsGenerationStatusLabel;
     }
 
-    private PolarSheetsChartPanel createPolarSheetsChartPanel() {
-        chartPanel = new PolarSheetsChartPanel(stringMessages);
+    private PolarSheetsChartPanel createPolarSheetsChartPanel(AngleOverDataSizeHistogramPanel angleOverDataSizeHistogramPanel) {
+        chartPanel = new PolarSheetsChartPanel(stringMessages, angleOverDataSizeHistogramPanel);
         return chartPanel;
     }
 
@@ -227,7 +312,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
         polarSheetsTrackedRacesList.fillRegattas(regattas);
     }
 

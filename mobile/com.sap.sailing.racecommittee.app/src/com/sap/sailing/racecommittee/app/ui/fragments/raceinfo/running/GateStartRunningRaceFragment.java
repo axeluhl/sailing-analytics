@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 
 public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateStartRacingProcedure> {
 

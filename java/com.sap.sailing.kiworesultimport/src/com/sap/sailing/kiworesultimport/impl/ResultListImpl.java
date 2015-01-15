@@ -13,11 +13,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.BoatResultInRace;
 import com.sap.sailing.kiworesultimport.ResultList;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
     private static final Logger logger = Logger.getLogger(ResultListImpl.class.getName());

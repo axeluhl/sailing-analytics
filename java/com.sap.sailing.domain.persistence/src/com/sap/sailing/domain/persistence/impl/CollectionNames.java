@@ -71,7 +71,10 @@ public enum CollectionNames {
      * Stores competitors for smartphone tracking.
      */
     COMPETITORS,
+    
     RACE_LOGS,
+    
+    REGATTA_LOGS,
     
     /**
      * Stores configurations for mobile devices.

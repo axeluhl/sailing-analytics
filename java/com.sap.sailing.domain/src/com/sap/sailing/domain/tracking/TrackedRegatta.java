@@ -9,8 +9,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Manages a set of {@link TrackedRace} objects that belong to the same {@link Regatta} (regatta, sailing regatta for a

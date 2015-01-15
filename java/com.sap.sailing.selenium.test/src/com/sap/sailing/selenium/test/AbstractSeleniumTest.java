@@ -25,8 +25,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
@@ -84,13 +84,23 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
-    @Before
-    public void setUpAuthenticatedSession() {
+    protected void setUpAuthenticatedSession() {
         logger.info("Authenticating session...");
         Cookie sessionCookie = authenticate(getContextRoot());
         getWebDriver().get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
         getWebDriver().manage().addCookie(sessionCookie);
         logger.info("...obtained session cookie "+sessionCookie);
+    }
+
+    /**
+     * If subclasses want to clear the state using {@link #clearState(String)}, they must re-define this method and
+     * first invoke {@link #clearState(String)} before calling this implementation using <code>super.setUp()</code>.
+     * This is important because {@link #clearState(String)} will also clear all session state that has been constructed
+     * by {@link #setUpAuthenticatedSession()}.
+     */
+    @Before
+    public void setUp() {
+        setUpAuthenticatedSession();
     }
     
     /**

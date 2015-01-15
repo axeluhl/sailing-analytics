@@ -82,7 +82,8 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
         final String baseEventName = "Test Event";
-        AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, UUID.randomUUID());
+        AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName,
+                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID());
         Regatta regatta = master.apply(addRegattaOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());

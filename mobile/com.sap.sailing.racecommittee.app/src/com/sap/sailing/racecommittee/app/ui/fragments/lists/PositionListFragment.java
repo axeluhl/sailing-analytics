@@ -11,8 +11,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
@@ -21,7 +20,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSe
 public class PositionListFragment extends LoggableListFragment {
 
     private LoginType selectedLoginType;
-    private RaceLogEventAuthor author;
+    private LogEventAuthorImpl author;
     private AppPreferences preferences;
 
     private PositionSelectedListenerHost host;
@@ -87,22 +86,22 @@ public class PositionListFragment extends LoggableListFragment {
         case 0:
             selectedLoginType = LoginType.OFFICER;
             preferences.setSendingActive(true);
-            author = new RaceLogEventAuthorImpl("Race Officer on Start Vessel", 0);
+            author = new LogEventAuthorImpl("Race Officer on Start Vessel", 0);
             break;
         case 1:
             selectedLoginType = LoginType.OFFICER;
             preferences.setSendingActive(true);
-            author = new RaceLogEventAuthorImpl("Race Officer on Finish Vessel", 1);
+            author = new LogEventAuthorImpl("Race Officer on Finish Vessel", 1);
             break;
         case 2:
             selectedLoginType = LoginType.OFFICER;
             preferences.setSendingActive(true);
-            author = new RaceLogEventAuthorImpl("Shore Control", 2);
+            author = new LogEventAuthorImpl("Shore Control", 2);
             break;
         case 3:
             selectedLoginType = LoginType.VIEWER;
             preferences.setSendingActive(false);
-            author = new RaceLogEventAuthorImpl("Viewer", 3);
+            author = new LogEventAuthorImpl("Viewer", 3);
             break;
         default:
             selectedLoginType = LoginType.NONE;
@@ -112,7 +111,7 @@ public class PositionListFragment extends LoggableListFragment {
         host.onPositionSelected(selectedLoginType);
     }
 
-    public RaceLogEventAuthor getAuthor() {
+    public LogEventAuthorImpl getAuthor() {
         return author;
     }
 

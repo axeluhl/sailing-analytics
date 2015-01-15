@@ -3,6 +3,8 @@ package com.sap.sse.security.impl;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,10 +14,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.SecurityServiceImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
+import com.sap.sse.util.ClearStateTestSupport;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -75,6 +78,10 @@ public class Activator implements BundleActivator {
         securityService = new SecurityServiceImpl(store, mailProperties);
         registration = context.registerService(SecurityService.class.getName(),
                 securityService, null);
+        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, securityService.getId().toString());
+        context.registerService(Replicable.class.getName(), securityService, replicableServiceProperties);
+        context.registerService(ClearStateTestSupport.class.getName(), securityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
 

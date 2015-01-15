@@ -2,6 +2,7 @@ package com.sap.sse.datamining.impl.i18n;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -34,6 +35,26 @@ public class TestI18N {
     public void testGettingAMessageWithParameters() {
         assertThat(testStringMessages.get(Locale.ENGLISH, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
         assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("Deutsch Param0 - Param1"));
+    }
+    
+    @Test
+    public void testDynamicCompoundStringMessages() {
+        CompoundDataMiningStringMessages compoundStringMessages = new CompoundDataMiningStringMessages();
+        
+        try {
+            compoundStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY);
+            fail("There shouldn't be a string message in an empty compound string messages");
+        } catch (MissingResourceException e) { }
+        
+        compoundStringMessages.addStringMessages(testStringMessages);
+        assertThat(testStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY), is("English"));
+        assertThat(testStringMessages.get(Locale.GERMAN, SIMPLE_TEST_MESSAGE_KEY), is("Deutsch"));
+        
+        compoundStringMessages.removeStringMessages(testStringMessages);
+        try {
+            compoundStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY);
+            fail("There shouldn't be a string message in an empty compound string messages");
+        } catch (MissingResourceException e) { }
     }
     
     @Test

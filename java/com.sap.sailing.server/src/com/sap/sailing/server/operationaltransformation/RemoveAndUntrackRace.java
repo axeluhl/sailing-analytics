@@ -27,6 +27,14 @@ public class RemoveAndUntrackRace extends AbstractRaceOperation<Void> {
         return null;
     }
 
+    /**
+     * {@link #internalApplyTo(RacingEventService)} does not replicate the effects
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return true;
+    }
+    
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         Regatta regatta = toState.getRegatta(getRaceIdentifier());

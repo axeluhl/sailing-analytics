@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sse.common.Duration;
+
 /**
  * Provides methods to format a {@link Duration}.
  * 

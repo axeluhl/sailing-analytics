@@ -1,16 +1,15 @@
 package com.sap.sailing.domain.common.test;
 
 import static org.junit.Assert.*;
-
 import static org.hamcrest.Matchers.*;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.DurationFormatter;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DurationTest {
     @Test
@@ -53,7 +52,7 @@ public class DurationTest {
         assertEquals(0, oneSecond.asMinutes(), 0.2);
         assertEquals(1, oneSecond.asSeconds(), 0);
         assertEquals(1000, oneSecond.asMillis());
-        assertEquals("1.0seconds 1000millis", oneSecond.toString());
+        assertEquals("1.0s==1000ms", oneSecond.toString());
         Duration oneHour = Duration.ONE_HOUR;
         assertEquals(0, oneHour.asDays(), 0);
         assertEquals(1, oneHour.asHours(), 0);

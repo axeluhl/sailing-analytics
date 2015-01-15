@@ -12,11 +12,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
@@ -24,19 +27,16 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoRaceLogStoreImpl;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
-import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     public StoreAndLoadDeviceIdentifierTest() throws UnknownHostException, MongoException {
@@ -46,7 +46,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     protected static final String group = "group";
     protected static final String column = "column";
     protected static final String fleet = "fleet";
-    protected final RaceLogEventAuthor author = new RaceLogEventAuthorImpl("author", 0);
+    protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
     protected RaceLogIdentifier logIdentifier;
 
     protected MongoObjectFactoryImpl mongoFactory;
@@ -92,7 +92,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
         RaceLog loadedRaceLog = loadRaceLog();
         loadedRaceLog.lockForRead();
         assertEquals(1, Util.size(loadedRaceLog.getRawFixes()));
-        DeviceCompetitorMappingEvent mapping = (DeviceCompetitorMappingEvent) loadedRaceLog.getRawFixes().iterator().next();
+        RaceLogDeviceCompetitorMappingEvent mapping = (RaceLogDeviceCompetitorMappingEvent) loadedRaceLog.getRawFixes().iterator().next();
         loadedRaceLog.unlockAfterRead();
         
         return mapping.getDevice();

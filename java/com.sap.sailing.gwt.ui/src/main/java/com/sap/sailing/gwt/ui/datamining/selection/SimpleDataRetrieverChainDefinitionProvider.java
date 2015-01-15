@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -13,9 +12,9 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -24,7 +23,7 @@ import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedList
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -91,11 +90,14 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     
     private void updateAvailableRetrieverChains() {
         dataMiningService.getDataRetrieverChainDefinitionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale().getLocaleName(),
-                new AsyncCallback<Collection<DataRetrieverChainDefinitionDTO>>() {
+                new AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>>() {
                     @Override
-                    public void onSuccess(Collection<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
-                        if (!dataRetrieverChainDefinitions.isEmpty()) {
-                            List<DataRetrieverChainDefinitionDTO> sortedRetrieverChains = new ArrayList<>(dataRetrieverChainDefinitions);
+                    public void onSuccess(Iterable<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
+                        if (dataRetrieverChainDefinitions.iterator().hasNext()) {
+                            List<DataRetrieverChainDefinitionDTO> sortedRetrieverChains = new ArrayList<>();
+                            for (DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
+                                sortedRetrieverChains.add(dataRetrieverChainDefinition);
+                            }
                             Collections.sort(sortedRetrieverChains);
                             
                             DataRetrieverChainDefinitionDTO currentRetrieverChain = getDataRetrieverChainDefinition();
@@ -139,7 +141,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinition queryDefinition) {
+    public void applyQueryDefinition(QueryDefinitionDTO queryDefinition) {
         retrieverChainsListBox.setValue(queryDefinition.getDataRetrieverChainDefinition(), false);
     }
 

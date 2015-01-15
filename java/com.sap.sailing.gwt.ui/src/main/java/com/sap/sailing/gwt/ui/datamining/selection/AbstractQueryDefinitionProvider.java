@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
@@ -36,7 +36,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     }
     
     @Override
-    public Iterable<String> validateQueryDefinition(QueryDefinition queryDefinition) {
+    public Iterable<String> validateQueryDefinition(QueryDefinitionDTO queryDefinition) {
         Collection<String> errorMessages = new ArrayList<String>();
         
         if (queryDefinition != null) {
@@ -53,7 +53,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         return errorMessages;
     }
 
-    private String validateGrouper(QueryDefinition queryDefinition) {
+    private String validateGrouper(QueryDefinitionDTO queryDefinition) {
         for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
             if (dimension != null) {
                 return null;
@@ -62,7 +62,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         return stringMessages.noDimensionToGroupBySelectedError();
     }
 
-    private String validateStatisticAndAggregator(QueryDefinition queryDefinition) {
+    private String validateStatisticAndAggregator(QueryDefinitionDTO queryDefinition) {
         return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
     }
 
@@ -82,11 +82,32 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
 
     protected void notifyQueryDefinitionChanged() {
         if (!blockChangeNotification) {
-            QueryDefinition queryDefinition = getQueryDefinition();
-            for (QueryDefinitionChangedListener listener : listeners) {
-                listener.queryDefinitionChanged(queryDefinition);
+            QueryDefinitionDTO queryDefinition = getQueryDefinition();
+            if (isQueryDefinitionConsistent(queryDefinition)) {
+                for (QueryDefinitionChangedListener listener : listeners) {
+                    listener.queryDefinitionChanged(queryDefinition);
+                }
             }
         }
+    }
+
+    private boolean isQueryDefinitionConsistent(QueryDefinitionDTO queryDefinition) {
+        if (queryDefinition.getStatisticToCalculate() != null) { // The consistency can't be checked, if no statistic is selected
+            String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
+            
+            if (queryDefinition.getDataRetrieverChainDefinition() == null || 
+                !sourceTypeName.equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
+                return false;
+            }
+            
+            for (FunctionDTO dimensionToGroupBy : queryDefinition.getDimensionsToGroupBy()) {
+                if (!sourceTypeName.equals(dimensionToGroupBy.getSourceTypeName())) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
     }
 
     protected StringMessages getStringMessages() {

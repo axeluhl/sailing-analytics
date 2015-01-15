@@ -8,12 +8,12 @@ import java.io.Serializable;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;

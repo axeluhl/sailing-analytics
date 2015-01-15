@@ -13,6 +13,13 @@
     <artifactId>com.sap.sailing.android.tracking.app</artifactId>
     <packaging>apk</packaging>
 
+    <properties>
+        <!-- If you change this name, change in app too! -->
+        <additional-deployment-version-file>com.sap.sailing.android.tracking.app.version</additional-deployment-version-file>
+        <!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
+        <app-version>${tracking-app-version}</app-version>
+    </properties>
+
     <dependencies>
         <!-- needed on remote repository -->
         <dependency>
@@ -98,73 +105,18 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- plugins for generating version file and copying .apk -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
-                <executions>
-                    <execution>
-                        <id>copy-installed</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>${project.packaging}</type>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${additional-deployment-dir}</outputDirectory>
-                            <stripVersion>true</stripVersion>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.3</version>
-                <executions>
-                    <execution>
-                        <id>generate-version</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <property name="target.dir" value="${additional-deployment-dir}" />
-                                <property name="target.name" value="${additional-deployment-version-file}" />
-
-                                <echo file="${target.dir}/${target.name}" message="${project.build.finalName}.apk=${rc-app-api-version}" />
-                                <echo message="Version file generated in ${target.dir}/${target.name}." />
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${additional-deployment-dir}</directory>
-                            <includes>
-                                <include>${project.build.finalName}.apk</include>
-                                <include>${additional-deployment-version-file}</include>
-                            </includes>
-                            <excludes>
-                                <exclude>*.gitignore</exclude>
-                            </excludes>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                    </filesets>
-                </configuration>
             </plugin>
         </plugins>
     </build>

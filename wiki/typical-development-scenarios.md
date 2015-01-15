@@ -7,55 +7,59 @@ We distinguish two cases: adding a 3rd-party bundle to the target platform and a
 
 ## Adding a Bundle to the Target Platform
 Add a New Library which can not be found in any SAP Repository
-*	Check if the library is already OSGi-enabled (normally this means there is a MANIFEST.MF file in the META-INF folder of the JAR file containing valid OSGi metadata.
-*	In case the library is not OSGi-enabled someone has to create such a OSGi-enabled version (ask the technical lead of the project)
-*	Add the library to an appropriate target folder under plugins/ in the project com.sap.sailing.targetplatform.base (e.g. target-base)
-*	Add a corresponding entry to the corresponding feature.xml in the project com.sap.sailing.targetplatform.base
-*	Rebuild the base target platform by running the script `createLocalBaseP2repository.sh` (com.sap.sailing.targetplatform/scripts). The script needs to be adjusted to your local paths for your Eclipse and GIT workspace directories.
-*	Test the new overall target platform by settings the race-analysis-p2-ide-p2admin.target as target platform in the IDE
-*	The admin of the central p2 repository (currently at sapsailing.com) must now replace the content of the central server /home/trac/p2-repositories/sailing with the content of the new local base p2 repository (com.sap.sailing.targetplatform/base/gen/p2), using the `uploadRepositoryToServer.sh` script
-*	Reload the target platform in the IDE
+* Check if the library is already OSGi-enabled (normally this means there is a MANIFEST.MF file in the META-INF folder of the JAR file containing valid OSGi metadata.
+* In case the library is not OSGi-enabled someone has to create such a OSGi-enabled version (ask the technical lead of the project)
+* Add the library to an appropriate target folder under plugins/ in the project com.sap.sailing.targetplatform.base (e.g. target-base)
+* Add a corresponding entry to the corresponding feature.xml in the project com.sap.sailing.targetplatform.base
+* Go to directory 'java/com.sap.sailing.targetplatform/scripts'
+ * Rebuild the base target platform by running the script 'createLocalBaseP2repository.sh'
+ * Generate the target definition for this local repository by running the script 'createLocalTargetDef.sh'
+* Test the new overall target platform
+ * by setting the race-analysis-p2-local.target as target platform in the IDE
+ * by running the local maven build via ''buildAndUpdateProduct.sh -v build'' (the ''-v'' switch builds and uses the local p2 repository)
+* The admin of the central p2 repository (currently at sapsailing.com) must now replace the content of the central server /home/trac/p2-repositories/sailing with the content of the new local base p2 repository (com.sap.sailing.targetplatform/base/gen/p2), using the 'uploadRepositoryToServer.sh' script
+* Reload the target platform in the IDE
 
 ## Adding or Upgrading Bundles from a p2 Repository
 
 The Eclipse p2 handling is sometimes mysterious. Listing the plugins in a repository doesn't seem to be supported by the Eclipse UI. However, not always do we want to add entire features; sometimes, just a list of bundles would do. The following command, executed on the command line, executed from your Eclipse installation directory, can help you find the right bundles and their versions to add textually to the *.target definition file:
 
-  `java -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar -debug -consolelog -application org.eclipse.equinox.p2.director -repository http://download.eclipse.org/releases/luna/ -list`
+  'java -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar -debug -consolelog -application org.eclipse.equinox.p2.director -repository http://download.eclipse.org/releases/luna/ -list'
 
 Note that you may have to adjust the exact file name and version number of the equinox launcher JAR file according to your installed Eclipse version.
 
-From the list shown, pick the bundle you need and add it to the `*.target` file, as in
+From the list shown, pick the bundle you need and add it to the '*.target' file, as in
 
-  `<unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>`
+  '<unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>'
 
 ## Adding an Existing Remote p2 Repository as New Source of Libraries
-*	Add the URL of the remote p2 repository to all target definition files in com.sap.sailing.targetplatform/defintions
-*	Select the features of the p2 repository you want to use in the project
-*	Reload the target platform
+* Add the URL of the remote p2 repository to all target definition files in com.sap.sailing.targetplatform/defintions
+* Select the features of the p2 repository you want to use in the project
+* Reload the target platform
 
 ## Adding a GWT RPC Service
 
 We use a few GWT RPC services which offer easy serialization and asynchronous callback across the wire in a type-safe way. Historically, there was a single service covering a lot of ground: the SailingService. Over time, this service was split into several, including UserManagementService and MediaService.
 
-One challenge we faced was that the default URL under which a client-side service would expect the servlet is simply constructed by appending the relative service URL provided in the `@RemoteServiceRelativePath` annotation to the URL that hosts the current .html document that loaded the entry point. This, however, does not work for servlets exposed by OSGi web bundles such as the `com.sap.sailing.gwt.ui` bundle. Web bundles define in their MANIFEST.MF a Web-ContextRoot which is used as a prefix to all servlet URLs. In the case of the `com.sap.sailing.gwt.ui` bundle this is `/gwt`.
+One challenge we faced was that the default URL under which a client-side service would expect the servlet is simply constructed by appending the relative service URL provided in the '@RemoteServiceRelativePath' annotation to the URL that hosts the current .html document that loaded the entry point. This, however, does not work for servlets exposed by OSGi web bundles such as the 'com.sap.sailing.gwt.ui' bundle. Web bundles define in their MANIFEST.MF a Web-ContextRoot which is used as a prefix to all servlet URLs. In the case of the 'com.sap.sailing.gwt.ui' bundle this is '/gwt'.
 
-To change the URL that a client-side service uses to construct the requests to the servlet, a dirty trick is required. The implementation of the service proxy generated by using something like `GWT.create(SailingService.class)` also implements the `com.google.gwt.user.client.rpc.ServiceDefTarget` interface. Casting the service proxy returned by the `GWT.create(...)` call to this interface allows us to set the service's entry point. Here is an excerpt of the method `AbstractEntryPoint.doOnModuleLoad()`:
+To change the URL that a client-side service uses to construct the requests to the servlet, a dirty trick is required. The implementation of the service proxy generated by using something like 'GWT.create(SailingService.class)' also implements the 'com.google.gwt.user.client.rpc.ServiceDefTarget' interface. Casting the service proxy returned by the 'GWT.create(...)' call to this interface allows us to set the service's entry point. Here is an excerpt of the method 'AbstractEntryPoint.doOnModuleLoad()':
 
 <pre>
                 EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
 </pre>
 
-Whenever you add another GWT RPC service, make sure to add it to the list of services whose service entry point URL is adjusted in `AbstractEntryPoint.doOnModuleLoad()`.
+Whenever you add another GWT RPC service, make sure to add it to the list of services whose service entry point URL is adjusted in 'AbstractEntryPoint.doOnModuleLoad()'.
 
 ### Adding a GWT RPC service that is implemented in a different bundle
 
-When the RPC service implementation "lives" in a bundle different from the calling one, you'll need to also register the servlet in the calling bundle's `web.xml`. This is essential because during resolving the serialization policy, the client assumes that the service has the same base URL as the module using it. Adding it to your bundle's `web.xml` is no problem, even if it is declared in one or more other `web.xml` files of other bundles.
+When the RPC service implementation "lives" in a bundle different from the calling one, you'll need to also register the servlet in the calling bundle's 'web.xml'. This is essential because during resolving the serialization policy, the client assumes that the service has the same base URL as the module using it. Adding it to your bundle's 'web.xml' is no problem, even if it is declared in one or more other 'web.xml' files of other bundles.
 
 ## Adding a GWT Library to the com.sap.sailing.gwt.ui Project
-*	Copy the library (the jar file) to the folder /WEB-INF/lib
-*	Add the library to the bundle classpath (in the META-INF/manifest.mf file)
-*	Add a build dependency for the GWT compiler to the pom.xml
-*	Add the library to our central maven repository /home/trac/maven-repositories by using the mvn: install:install-file command
+* Copy the library (the jar file) to the folder /WEB-INF/lib
+* Add the library to the bundle classpath (in the META-INF/manifest.mf file)
+* Add a build dependency for the GWT compiler to the pom.xml
+* Add the library to our central maven repository /home/trac/maven-repositories by using the mvn: install:install-file command
 * Command sample to add the library gwt-maps-api-3.9.0-build-17.jar: mvn install:install-file -Dfile=/home/trac/git/java/com.sap.sailing.gwt.ui/WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar -DgroupId=com.github.branflake2267 -DartifactId=gwt-maps-api -Dversion=3.9.0-build-17 -Dpackaging=jar -DlocalRepositoryPath=/home/trac/maven-repositories
 
 ## Adding a shared GWT library bundle
@@ -83,11 +87,11 @@ Example: Integration of 'Atmosphere' framework (Server push technology)
 TODO
 
 ## Adding a Java Project Bundle
-*	Add a new Java plugin project, using <git-workspace>/java/<bundle-name> as the project directory; if you need an activator, you can let Eclipse generate one for you. Deselect "Create a plug-in using one of the templates" and press "Finish."
-*	Connect the project to eGit by selecting "Share Project..." from the "Team" menu. When Eclipse suggests the git directory to connect to, select the "Use or create repository in parent folder of project" checkbox at the top of the dialog. This will then usually already suggest the correct git workspace to add to.
-*	Add the project to the com.sap.sailing.feature project's feature.xml descriptor in the Plug-ins tab. This ensures the bundle will be added to the product built based on the raceanalysis.product descriptor.
-*	Add a pom.xml file to integrate the bundle with the maven build. You may start by copying a pom.xml file from a similar project. Note that the pom.xml's <packaging> specification varies between test and non-test bundles. Test bundles use "eclipse-test-plugin" as their packaging type, all other bundles use "eclipse-plugin" here. Adjust the version and artifactId tags correspondingly.
-*	Add an entry to the parent pom.xml in the java/ folder
+* Add a new Java plugin project, using <git-workspace>/java/<bundle-name> as the project directory; if you need an activator, you can let Eclipse generate one for you. Deselect "Create a plug-in using one of the templates" and press "Finish."
+* Connect the project to eGit by selecting "Share Project..." from the "Team" menu. When Eclipse suggests the git directory to connect to, select the "Use or create repository in parent folder of project" checkbox at the top of the dialog. This will then usually already suggest the correct git workspace to add to.
+* Add the project to the com.sap.sailing.feature project's feature.xml descriptor in the Plug-ins tab. This ensures the bundle will be added to the product built based on the raceanalysis.product descriptor.
+* Add a pom.xml file to integrate the bundle with the maven build. You may start by copying a pom.xml file from a similar project. Note that the pom.xml's <packaging> specification varies between test and non-test bundles. Test bundles use "eclipse-test-plugin" as their packaging type, all other bundles use "eclipse-plugin" here. Adjust the version and artifactId tags correspondingly.
+* Add an entry to the parent pom.xml in the java/ folder
 
 ## Adding a Column to the Leaderboard
 It is a typical request to have a new column with a new key figure added to the leaderboard structure. A number of things need to be considered to implement this.
@@ -176,35 +180,35 @@ The RacingEventService, in turn, executes the internalApplyTo method to perform 
 Usually, the internalApplyTo implementation makes use of the public methods exposed by RacingEventService to actually perform the changes. Note that there are a few cases in which invoking a method on RacingEventService triggers replication by itself, for example cacheAndReplicateDefaultRegatta which, after an implicit local state change, creates an operation solely for the purpose of replicating this local change which already took place. In those cases, the operation is not used to perform the state change locally, which should rather be the exception than the rule.
 
 ## Adding Persistence and Replication for Domain Objects
-1. For persisting and loading your Domain Objects to and from MongoDB, you can have a look in `MongoObjectFactoryImpl` and `DomainObjectFactoryImpl`. Note that you may be able to reuse existing JSON serializers and deserializers to create a String representation of Domain Objects and to create Domain Objects from JSON strings. With the JSON Strings, you can interface with MongoDB via the com.mongodb.util.JSON class, e.g.
-```
+1. For persisting and loading your Domain Objects to and from MongoDB, you can have a look in 'MongoObjectFactoryImpl' and 'DomainObjectFactoryImpl'. Note that you may be able to reuse existing JSON serializers and deserializers to create a String representation of Domain Objects and to create Domain Objects from JSON strings. With the JSON Strings, you can interface with MongoDB via the com.mongodb.util.JSON class, e.g.
+'''
 JSONObject json = competitorSerializer.serialize(competitor);
 BasicDBObject query = new BasicDBObject(FieldNames.COMPETITOR_ID.name(), competitor.getId());
 DBObject entry = (DBObject) JSON.parse(json.toString());
-```
+'''
 or
-```
+'''
 String jsonString = JSON.serialize(o);
 JSONObject json = Helpers.toJSONObjectSafe(JSONValue.parseWithException(jsonString));
 Competitor c = competitorDeserializer.deserialize(json);
-```
+'''
 
-2. Persisted Domain Objects should be loaded from the MongoDB after a server restart on the master instance. This is best done in the `RacingEventServiceImpl` constructor, where quite a few calls to other `load*` methods reside. If the objects are managed via a domain factory (e.g. implement `IsManagedBySharedDomainFactory`), remember to register them with that domain factory.
+2. Persisted Domain Objects should be loaded from the MongoDB after a server restart on the master instance. This is best done in the 'RacingEventServiceImpl' constructor, where quite a few calls to other 'load*' methods reside. If the objects are managed via a domain factory (e.g. implement 'IsManagedBySharedDomainFactory'), remember to register them with that domain factory.
 
-3. Whenever you add a Domain Object to an instance, it somehow has to be replicated to the other instances. To do so, create an Operation which you can then `apply()` to the `RacingEventService`, which will then replicate it to other intsances (the operations are basically commands as in the Command pattern, with the added difficulty of operational transformation to provide a uniform final state when operations are applied in different orders on different instances). Internally, the apply-mechanism writes to an `ObjectOutputStream`, which on the other side is evaluated by an `ObjectInputStreamResolvingAgainstDomainFactory`. For this reason, all objects implementing the `IsManagedBySharedDomainFactory` interface are resolved against the domain factory via their `resolve()` implementation. This removes the chance of duplicate instances representing the same actual object.
+3. Whenever you add a Domain Object to an instance, it somehow has to be replicated to the other instances. To do so, create an Operation which you can then 'apply()' to the 'RacingEventService', which will then replicate it to other intsances (the operations are basically commands as in the Command pattern, with the added difficulty of operational transformation to provide a uniform final state when operations are applied in different orders on different instances). Internally, the apply-mechanism writes to an 'ObjectOutputStream', which on the other side is evaluated by an 'ObjectInputStreamResolvingAgainstDomainFactory'. For this reason, all objects implementing the 'IsManagedBySharedDomainFactory' interface are resolved against the domain factory via their 'resolve()' implementation. This removes the chance of duplicate instances representing the same actual object.
 
-4. Also, whenever a replica (slave) instance registers with the master instance, it is provided with the current state of the master as an initial load. To do so, the master instance exports its state via the `serializeForInitialReplication()` method in the `RacintEventServiceImpl`, while the replica recieves the object stream output by the master via the `initiallyFillFrom()` method. Again, an `ObjectInputStreamResolvingAgainstDomainFactory` is used.
+4. Also, whenever a replica (slave) instance registers with the master instance, it is provided with the current state of the master as an initial load. To do so, the master instance exports its state via the 'serializeForInitialReplication()' method in the 'RacintEventServiceImpl', while the replica recieves the object stream output by the master via the 'initiallyFillFrom()' method. Again, an 'ObjectInputStreamResolvingAgainstDomainFactory' is used.
 
 ## Import Another Year of Magnetic Declination Values
 
 Under java/com.sap.sailing.declination/resources we store magnetic declination values, using one file per year. The resolution at which we usually store those is one degree of latitude and longitude, each. When for a year those values aren't found in a file, an online request is performed to the [NOAA Service](http://www.ngdc.noaa.gov/geomag-web/) which can be time and bandwidth consuming. Therefore, it is a good idea to keep a file with cached declination values around for the current year.
 
-To produce such a file, use the `main(...)` method of class `com.sap.sailing.declination.impl.DeclinationStore`. There are pre-defined launch configurations in place in the com.sap.sailing.declination bundle project. Adjust the from/to year parameters for the current year. The process usually takes several hours to complete at a one-degree resolution. Don't forget to commit the resulting resources/declination-<year> file to git.
+To produce such a file, use the 'main(...)' method of class 'com.sap.sailing.declination.impl.DeclinationStore'. There are pre-defined launch configurations in place in the com.sap.sailing.declination bundle project. Adjust the from/to year parameters for the current year. The process usually takes several hours to complete at a one-degree resolution. Don't forget to commit the resulting resources/declination-<year> file to git.
 
 Experience has shown that sometimes the SAP HTTP proxy doesn't properly resolve the NOAA service. In those cases, it is more convenient to run the process from either sapsailing.com or stg.sailtracks.de, using something like following command from a server's plugins/ directory after creating the resources/ subdirectory:
 
-`java -cp com.sap.sailing.domain_*.jar:com.sap.sailing.domain.common_*.jar:com.sap.sailing.declination_*.jar:com.sap.sailing.domain.shared.android_*.jar com.sap.sailing.declination.impl.DeclinationStore 2014 2014 1`
+'java -cp com.sap.sailing.domain_*.jar:com.sap.sailing.domain.common_*.jar:com.sap.sailing.declination_*.jar:com.sap.sailing.domain.shared.android_*.jar com.sap.sailing.declination.impl.DeclinationStore 2014 2014 1'
 
-Run this inside a tmux window to be sure that logging off does not interrupt the process. After the process completes, copy the resulting declination-<year> file to your git workspace to `java/com.sap.sailing.declination/resources` and commit.
+Run this inside a tmux window to be sure that logging off does not interrupt the process. After the process completes, copy the resulting declination-<year> file to your git workspace to 'java/com.sap.sailing.declination/resources' and commit.
 
 There is also a script java/target/importdeclination that automates these steps.

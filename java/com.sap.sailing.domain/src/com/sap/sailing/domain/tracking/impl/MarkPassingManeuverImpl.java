@@ -7,8 +7,8 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
+import com.sap.sse.common.TimePoint;
 
 public class MarkPassingManeuverImpl extends ManeuverImpl implements MarkPassingManeuver {
     private static final long serialVersionUID = 8935348908557191614L;

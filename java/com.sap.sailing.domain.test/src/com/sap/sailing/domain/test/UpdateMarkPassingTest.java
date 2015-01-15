@@ -21,15 +21,15 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class UpdateMarkPassingTest {
     @Test
@@ -43,7 +43,7 @@ public class UpdateMarkPassingTest {
         when(race.getBoatClass()).thenReturn(new BoatClassImpl("49er", /* typicallyStartsUpwind */ true));
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
-        /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, new HashSet<Series>(), false, null,
+        /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null,
                 "test", null)), race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
         /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,
         /* millisecondsOverWhichToAverageSpeed */30000);

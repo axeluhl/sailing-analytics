@@ -16,6 +16,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -25,13 +27,14 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.ImageSize;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.ImageSizeImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class EventImpl extends EventBaseImpl implements Event {
     private static final long serialVersionUID = 855135446595485715L;
+    private static final Logger logger = Logger.getLogger(EventImpl.class.getName());
     
     private final Set<Regatta> regattas;
     
@@ -125,6 +128,9 @@ public class EventImpl extends EventBaseImpl implements Event {
                                 reader.dispose();
                             }
                         }
+                    } catch (IOException ioe) {
+                        logger.log(Level.SEVERE, "Stale image link "+imageURL+" for event "+getName()+". Please double-check and replace or remove.", ioe);
+                        throw ioe;
                     } finally {
                         if (in != null) {
                             in.close();

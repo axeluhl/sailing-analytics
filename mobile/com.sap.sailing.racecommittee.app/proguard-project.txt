@@ -62,3 +62,9 @@
 -keepnames class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
+
+-dontwarn android.test.**
+
+# don't obfuscate
+-dontobfuscate
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable

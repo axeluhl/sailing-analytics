@@ -36,7 +36,6 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
@@ -57,6 +56,7 @@ import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedRaceContentsReplicationTest extends AbstractServerReplicationTest {
     private Competitor competitor;
@@ -77,7 +77,8 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
         final String baseEventName = "Test Event";
-        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, UUID.randomUUID());
+        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
+                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID());
         Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());

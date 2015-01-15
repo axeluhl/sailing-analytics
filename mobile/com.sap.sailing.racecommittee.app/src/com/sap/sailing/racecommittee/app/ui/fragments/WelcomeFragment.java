@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.io.Serializable;
-
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,27 +9,25 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 
 public class WelcomeFragment extends Fragment implements OnClickListener {
 
     private static CourseArea mCourseArea;
     private static EventBase mEvent;
-    private static RaceLogEventAuthor mEventAuthor;
+    private static AbstractLogEventAuthor mEventAuthor;
 
     public WelcomeFragment() {
         // needed for screen rotation
     }
 
     public WelcomeFragment(EventBase event, CourseArea course,
-            RaceLogEventAuthor raceLogEventAuthor) {
+            AbstractLogEventAuthor raceLogEventAuthor) {
     	//ExLog.i(getActivity(), this.getClass().toString(), "eventId: "+ eventId);
         mCourseArea = course;
         mEvent = event;

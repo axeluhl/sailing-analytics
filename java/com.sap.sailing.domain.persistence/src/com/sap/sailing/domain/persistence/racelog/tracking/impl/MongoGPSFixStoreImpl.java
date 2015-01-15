@@ -14,11 +14,11 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
+import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.TimeRange;
-import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
@@ -31,16 +31,16 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
-import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 /**
  * At the moment, the timerange covered by the fixes for a device, and the number of
@@ -105,9 +105,9 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
 
     @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog, Competitor competitor)
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log, Competitor competitor)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
-        List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder(raceLog).analyze().get(competitor);
+        List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder<>(log).analyze().get(competitor);
 
         if (mappings != null) {
             for (DeviceMapping<Competitor> mapping : mappings) {
@@ -117,9 +117,9 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
 
     @Override
-    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark)
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
-        List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder(raceLog).analyze().get(mark);
+        List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder<>(log).analyze().get(mark);
 
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {

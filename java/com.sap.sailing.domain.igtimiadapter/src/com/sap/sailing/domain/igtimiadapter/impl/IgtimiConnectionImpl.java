@@ -19,9 +19,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.common.Duration;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
@@ -42,7 +39,10 @@ import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionImpl.class.getName());

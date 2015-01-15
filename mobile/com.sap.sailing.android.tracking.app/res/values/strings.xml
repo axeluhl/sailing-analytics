@@ -13,12 +13,10 @@
     <string name="server_url">Server</string>
     <string name="device_identifier">Device Identifier</string>
     <string name="play_services_available">Google Play services is available</string>
-    <string name="stop_tracking">Stop Tracking</string>
-    <string name="start_tracking">Start Tracking</string>
     <string name="next_activity">Next Activity</string>
     <string name="tracker_started">SAP Sailing Tracker started</string>
     <string name="tracker_stopped">SAP Sailing Tracker stopped</string>
-    <string name="scan_race_barcode">Scan Race Barcode</string>
+    <string name="scan_qrcode">Scan QRCode</string>
     <string name="gps_fix_interval">GPS fix interval</string>
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_webview">Leader board</string>

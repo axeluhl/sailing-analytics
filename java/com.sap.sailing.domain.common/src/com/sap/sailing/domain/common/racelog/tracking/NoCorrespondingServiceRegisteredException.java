@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
-public class NoCorrespondingServiceRegisteredException extends RuntimeException {
+import java.io.Serializable;
+
+public class NoCorrespondingServiceRegisteredException extends RuntimeException implements Serializable {
     public String type;
     public String serviceInterface;
     private static final long serialVersionUID = -358955216089477585L;
