@@ -29,8 +29,6 @@ import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -57,14 +55,12 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private UUID eventId;
     private RaceBoardViewConfiguration raceboardViewConfig;
 
-    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
 
     @Override
     protected void doOnModuleLoad() {    
         super.doOnModuleLoad();
      
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
 
         // read mandatory parameters
