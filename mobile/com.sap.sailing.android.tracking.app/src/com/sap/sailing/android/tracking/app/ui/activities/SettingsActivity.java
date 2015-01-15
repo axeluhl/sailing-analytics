@@ -1,26 +1,43 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import java.util.List;
-
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 
+import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.preference.GeneralPreferenceFragment;
 
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends ActionBarActivity {
 	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		super.onCreate(savedInstanceState);
-	}
-	
-    @Override
-    public void onBuildHeaders(List<Header> target) {
-        //loadHeadersFromResource(R.xml.preference_headers, target);
-        getFragmentManager().beginTransaction().replace(android.R.id.content,
-                new GeneralPreferenceFragment()).commit();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.pref_with_actionbar);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        }
+        
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setTitle(R.string.preferences);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
+            toolbar.setPadding(20, 0, 0, 0);
+        }
+
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, new GeneralPreferenceFragment()).commit();
     }
+	
     
     /* (non-javadoc)
      * Seems to be new for this target API level, fixing a security hole.

@@ -81,4 +81,5 @@
 	<string name="warning">Warning</string>
 	<string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
 	<string name="knots">knots</string>
+	<string name="preferences">Preferences</string>
 </resources>
