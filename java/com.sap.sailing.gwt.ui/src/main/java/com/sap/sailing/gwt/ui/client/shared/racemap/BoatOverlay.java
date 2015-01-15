@@ -155,19 +155,14 @@ public class BoatOverlay extends CanvasOverlayV3 {
     public Util.Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
         // the minimum boat length is related to the hull of the boat, not the overall length 
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
-
         double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection,
                 LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg), boatClass.getHullLengthInMeters());
-        
-        if(boatHullLengthInPixel < minBoatHullLengthInPx) {
+        if (boatHullLengthInPixel < minBoatHullLengthInPx) {
             boatHullLengthInPixel = minBoatHullLengthInPx;
         }
-
         double boatSizeScaleFactor = boatHullLengthInPixel / (boatVectorGraphics.getHullLengthInPx());
-
         // as the canvas contains the whole boat the canvas size relates to the overall length, not the hull length 
         double scaledCanvasSize = (boatVectorGraphics.getOverallLengthInPx()) * boatSizeScaleFactor; 
-
         return new Util.Pair<Double, Size>(boatSizeScaleFactor, Size.newInstance(scaledCanvasSize + scaledCanvasSize / 2.0, scaledCanvasSize + scaledCanvasSize / 2.0));
     }
 }

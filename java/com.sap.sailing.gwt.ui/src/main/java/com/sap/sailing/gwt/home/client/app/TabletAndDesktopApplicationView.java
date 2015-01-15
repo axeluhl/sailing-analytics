@@ -9,6 +9,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.footer.Footer;
 import com.sap.sailing.gwt.home.client.shared.header.Header;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.DefaultErrorReporter;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
@@ -19,6 +22,8 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     }
 
     private static TabletAndDesktopApplicationViewUiBinder uiBinder = GWT.create(TabletAndDesktopApplicationViewUiBinder.class);
+
+    private static ErrorReporter errorReporter = new DefaultErrorReporter<StringMessages>(StringMessages.INSTANCE);
 
     @UiField(provided=true)
     Header headerPanel;
@@ -43,4 +48,10 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @Override
     public void showLoading(boolean visible) {
     }
+    
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
+    }
+
 }

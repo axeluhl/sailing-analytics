@@ -1,18 +1,20 @@
 package com.sap.sse.gwt.client.mvp.example;
 
 import com.google.gwt.core.client.GWT;
-import com.sap.sse.gwt.client.mvp.AbstractEntryPoint;
+import com.sap.sse.gwt.client.StringMessages;
+import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
 /**
- * Entry point classes define <code>onModuleLoad()</code>.
+ * 1. Call <code>AbstractMvpEntryPoint.doOnModuleLoad()</code>.
+ * 1. Call <code>AbstractMvpEntryPoint.onModuleLoad()</code>.
  * 
  * @author Axel Uhl (d043530)
  */
-public class ExampleEntryPoint extends AbstractEntryPoint {
-    /**
-     * This is the entry point method.
-     */
-    public void onModuleLoad() {
+public class ExampleEntryPoint<S extends StringMessages> extends AbstractMvpEntryPoint<S> {
+    
+    @Override
+    protected void doOnModuleLoad() {
+        
         // There are two typical ways in which to tell the concrete views to use, based on a responsive pattern:
         //  1) Use deferred binding in the GWT module's .gwt.xml flie, as in:
         //
@@ -29,6 +31,12 @@ public class ExampleEntryPoint extends AbstractEntryPoint {
         //     clientFactory = new MyThisAndThatClientFactory();
         // }
         AppPlaceHistoryMapper historyMapper = GWT.create(AppPlaceHistoryMapper.class);
-        onModuleLoad(clientFactory, historyMapper, new AppActivityMapper(clientFactory));
+        
+        initMvp(clientFactory, historyMapper, new AppActivityMapper(clientFactory));
+    }
+
+    @Override
+    protected S createStringMessages() {
+        return GWT.create(StringMessages.class);
     }
 }

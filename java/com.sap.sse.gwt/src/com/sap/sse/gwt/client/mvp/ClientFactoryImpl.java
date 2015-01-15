@@ -5,6 +5,7 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * Applications can use this as a default implementation of the {@link ClientFactory} interface
@@ -30,6 +31,11 @@ public abstract class ClientFactoryImpl implements ClientFactory {
         this.root = root;
         this.eventBus = eventBus;
         this.placeController = placeController;
+    }
+
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return root.getErrorReporter();
     }
 
     @Override
