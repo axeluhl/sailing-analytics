@@ -30,10 +30,6 @@ public class AppPreferences {
         return DeviceIdentifier;
     }
 
-    public String getServerURL() {
-        return PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default);
-    }
-    
     public String getServerGpsFixesPostPath() {
         return PrefUtils.getString(context, R.string.preference_server_gps_fixes_post_path, R.string.preference_server_gps_fixes_post_path);
     }
@@ -70,10 +66,6 @@ public class AppPreferences {
         return value == null ? -1 : Integer.valueOf(value);
     }
     
-    public void setServerURL(String serverUrl) {
-        preferences.edit().putString(context.getString(R.string.preference_server_url_key), serverUrl).apply();
-    }
-    
     public String getEventId() {
         return PrefUtils.getString(context, R.string.preference_eventid_key, R.string.preference_eventid_default);
     }
@@ -104,8 +96,8 @@ public class AppPreferences {
     	return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
     }
     
-    public boolean getHeadingFromMagneticSensorPreferred() {
-    	return preferences.getBoolean(context.getString(R.string.preference_heading_from_magnetic_key), true);
+    public boolean getDisplayHeadingWithSubtractedDeclination() {
+    	return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_enabled), true);
     }
     
     public void setTrackingTimerStarted(long milliseconds)
@@ -128,18 +120,33 @@ public class AppPreferences {
     	return preferences.getBoolean(context.getString(R.string.preference_tracker_is_tracking), false);
     }
     
-    public void setTrackerIsTrackingEventId(String eventId)
+    public void setTrackerIsTrackingCheckinDigest(String checkinDigest)
     {
-    	preferences.edit().putString(context.getString(R.string.preference_tracker_is_tracking_event_id), eventId).commit();
+    	preferences.edit().putString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), checkinDigest).commit();
     }
     
-    public String getTrackerIsTrackingEventId()
+    public String getTrackerIsTrackingCheckinDigest()
     {
-    	return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_event_id), null);
+    	return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), null);
     }
     
     public static boolean getPrintDatabaseOperationDebugMessages()
     {
     	return false;
+    }
+    
+    public String getLastScannedQRCode()
+    {
+    	return preferences.getString(context.getString(R.string.preference_last_scanned_qr_code), null);
+    }
+    
+    public void setLastScannedQRCode(String lastQRCode)
+    {
+    	preferences.edit().putString(context.getString(R.string.preference_last_scanned_qr_code), lastQRCode).commit();
+    }
+    
+    public void setMessageResendInterval(int interval)
+    {
+    	preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), interval).commit();
     }
 }

@@ -10,8 +10,10 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventGpsFixesJoined;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
@@ -98,14 +100,57 @@ public class DatabaseTestHelper {
 		cr.insert(SensorGps.CONTENT_URI, cv);
 	}
 	
-	public static long createNewEventInDBAndReturnItsId(Context context, String eventName, String eventId)
+	public static long createNewEventInDBAndReturnItsId(Context context, String eventName, String eventId, String checkinDigest)
 	{
 		ContentResolver cr = context.getContentResolver();
 		ContentValues cv = new ContentValues();
 		cv.put(Event.EVENT_NAME, eventName);
 		cv.put(Event.EVENT_ID, eventId);
 		cv.put(Event.EVENT_SERVER, "127.0.0.1");
+		cv.put(Event.EVENT_CHECKIN_DIGEST, checkinDigest);
 		Uri uri = cr.insert(Event.CONTENT_URI, cv);
+		return ContentUris.parseId(uri);
+	}
+	
+	public static long createNewRegattaInDBAndReturnEventRowId(Context context, String eventName,
+			String eventId, String leaderboardName, String competitorName, String checkinDigest) {
+		
+		long leaderboardRowId = createNewLeaderboardInDBAndReturnItsId(context, leaderboardName, checkinDigest);
+		long eventRowId = createNewEventInDBAndReturnItsId(context, eventName, eventId, leaderboardRowId, checkinDigest);
+		createNewCompetitorInDBAndReturnItsId(context, competitorName, leaderboardRowId, checkinDigest);
+		
+		return eventRowId;
+	}
+	
+	private static long createNewEventInDBAndReturnItsId(Context context, String eventName, String eventId, long leaderboardRowId, String checkinDigest)
+	{
+		ContentResolver cr = context.getContentResolver();
+		ContentValues cv = new ContentValues();
+		cv.put(Event.EVENT_NAME, eventName);
+		cv.put(Event.EVENT_ID, eventId);
+		cv.put(Event.EVENT_SERVER, "127.0.0.1");
+		cv.put(Event.EVENT_CHECKIN_DIGEST, checkinDigest);
+		Uri uri = cr.insert(Event.CONTENT_URI, cv);
+		return ContentUris.parseId(uri);
+	}
+	
+	private static long createNewLeaderboardInDBAndReturnItsId(Context context, String leaderboardName, String checkinDigest)
+	{
+		ContentResolver cr = context.getContentResolver();
+		ContentValues cv = new ContentValues();
+		cv.put(Leaderboard.LEADERBOARD_NAME, leaderboardName);
+		cv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, checkinDigest);
+		Uri uri = cr.insert(Leaderboard.CONTENT_URI, cv);
+		return ContentUris.parseId(uri);
+	}
+
+	private static long createNewCompetitorInDBAndReturnItsId(Context context,
+			String competitorDisplayName, long leaderboardRowId, String checkinDigest) {
+		ContentResolver cr = context.getContentResolver();
+		ContentValues cv = new ContentValues();
+		cv.put(Competitor.COMPETITOR_DISPLAY_NAME, competitorDisplayName);
+		cv.put(Competitor.COMPETITOR_CHECKIN_DIGEST, checkinDigest);
+		Uri uri = cr.insert(Competitor.CONTENT_URI, cv);
 		return ContentUris.parseId(uri);
 	}
 }

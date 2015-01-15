@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
         android:layout_alignParentTop="true"
-        android:text="@string/course_over_ground"
+        android:text="@string/heading"
         android:textColor="@android:color/darker_gray"
         android:textSize="15sp"
         android:paddingTop="15dp" 

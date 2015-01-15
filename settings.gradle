@@ -9,6 +9,3 @@ include ":java:com.sap.sse.datamining.shared"
 include ":mobile:com.sap.sailing.android.shared"
 include ":mobile:com.sap.sailing.android.tracking.app"
 include ":mobile:com.sap.sailing.racecommittee.app"
-
-/* to be removed later */
-include ":mobile:google-volley_lib"

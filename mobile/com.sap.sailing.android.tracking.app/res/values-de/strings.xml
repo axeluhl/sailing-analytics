@@ -80,9 +80,19 @@
 	<string name="hud_heading_prefix">HDG: </string>
 	<string name="hud_speed_over_ground_prefix">SPD: </string>
 	<string name="heading">Kurs</string>
+	<string name="course_over_ground">Course over Ground</string>
 	<string name="sog">SOG</string>
 	<string name="none">Keine</string>
 	<string name="show_leaderboard">Leaderboard</string>
 	<string name="desc_regatta_user_image">Benutzerdefiniertes Bild für Regatta</string>
 	<string name="desc_add_photo_button">Foto hinzufügen Button</string>
+	<string name="error_play_store_and_scanning_not_available">"PlayStore und BarcodeScanner-App nicht verfügbar."</string>
+	<string name="scanning_cancelled">Scan abgebrochen</string>
+	<string name="error_scanning_qrcode">Fehler beim Scannen des QR-Codes {result-code}</string>
+	<string name="error_invalid_qr_code">Ungültiger QR-Code</string>
+	<string name="error_while_receiving_server_data">Fehler beim Empfang vom Server</string>
+	<string name="info_already_checked_in_this_qr_code">Bereits für diese Regatta eingecheckt</string>
+	<string name="warning">Warnung</string>
+	<string name="gps_turned_off">GPS ist nicht aktiviert. Bitte aktivieren Sie den Standortzugriff (GPS) in Ihren Android-Einstellungen!</string>
+	<string name="knots">Knoten</string>
 </resources>

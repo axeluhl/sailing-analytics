@@ -1,7 +1,8 @@
-package com.sap.sailing.android.tracking.app.services.sending;
+package com.sap.sailing.android.shared.services.sending;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,9 +25,9 @@ import android.os.IBinder;
 
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
+import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.android.shared.util.PrefUtils;
-import com.sap.sailing.android.tracking.app.services.sending.MessagePersistenceManager.MessageRestorer;
-import com.sap.sailing.android.tracking.app.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
 /**
@@ -34,17 +35,16 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
  * by buffering the messages in a file, so that they can be sent when the connection is
  * re-established.<br>
  * 
- * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml}, and also specify
- * your class implementing the {@link MessagePersistenceManager.MessageRestorer} as a meta-data tag with the key
- * {@code com.sap.sailing.android.tracking.app..services.sending.messageRestorer}. Also refer to
- * {@link ConnectivityChangedReceiver}, which has to be registered as well. For example:
- * 
- * <pre>
- * {@code
+ * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml},
+ * and also specify your class implementing the {@link MessagePersistenceManager.MessageRestorer}
+ * as a meta-data tag with the key {@code com.sap.sailing.android.shared.services.sending.messageRestorer}.
+ * Also refer to {@link ConnectivityChangedReceiver}, which has to be registered as well.
+ * For example:
+ * <pre>{@code
  * <service
- *   android:name="com.sap.sailing.android.tracking.app.services.sending.MessageSendingService"
+ *   android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
  *   android:exported="false" >
- *   <meta-data android:name="com.sap.sailing.android.tracking.app.services.sending.messageRestorer"
+ *   <meta-data android:name="com.sap.sailing.android.shared.services.sending.messageRestorer"
  *     android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
  * </service>
  * }</pre>
@@ -55,8 +55,6 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
  * context.startService(MessageSendingService.createMessageIntent(
  *      context, url, race.getId(), eventId, serializedEventAsJson, callbackClass));
  * }</pre>
- * 
- * NOTE: Started using TransmittingService.java, perhaps this class can be dismissed? -LZ
  */
 public class MessageSendingService extends Service implements MessageSendingListener {
     public final static String URL = "url";
@@ -74,6 +72,8 @@ public class MessageSendingService extends Service implements MessageSendingList
     private boolean isHandlerSet;
     
     private Set<Serializable> suppressedMessageIds = new HashSet<Serializable>();
+    
+    private APIConnectivityListener apiConnectivityListener;
     
     public void registerMessageForSuppression(Serializable messageId) {
         suppressedMessageIds.add(messageId);
@@ -130,7 +130,8 @@ public class MessageSendingService extends Service implements MessageSendingList
         serviceLogger.onMessageSentSuccessful();
     }
 
-    public static Intent createMessageIntent(Context context, String url, Serializable callbackPayload, Serializable messageId, String payload,
+    public static Intent createMessageIntent(Context context, String url, 
+    		Serializable callbackPayload, Serializable messageId, String payload,
             Class<? extends ServerReplyCallback> callbackClass) {
         Intent messageIntent = new Intent(context, MessageSendingService.class);
         messageIntent.setAction(context.getString(R.string.intent_send_message));
@@ -231,6 +232,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             persistenceManager.persistIntent(intent);
             ConnectivityChangedReceiver.enable(this);
             serviceLogger.onMessageSentFailed();
+            reportApiConnectivity(APIConnectivity.notReachable);
         } else {
             sendMessage(intent);
         }
@@ -259,7 +261,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     private void sendMessage(Intent intent) {
         boolean sendingActive = PrefUtils.getBoolean(this, R.string.preference_isSendingActive_key,
                 R.bool.preference_isSendingActive_default);
-        if (! sendingActive) {
+        if (!sendingActive) {
             ExLog.i(this, TAG, "Sending deactivated. Message will not be sent to server.");
         } else {
             Serializable messageId = getMessageId(intent);
@@ -275,9 +277,12 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     @Override
     public void onMessageSent(Intent intent, boolean success, InputStream inputStream) {
+    	ExLog.i(this, "MS", "on message sent");
         int resendMillis = PrefUtils.getInt(this, R.string.preference_messageResendIntervalMillis_key,
                 R.integer.preference_messageResendIntervalMillis_default);
         if (!success) {
+        	ExLog.i(this, "MS", "success");
+        	reportApiConnectivity(APIConnectivity.transmissionError);
             ExLog.w(this, TAG, "Error while posting intent to server. Will persist intent...");
             persistenceManager.persistIntent(intent);
             if (!isHandlerSet) {
@@ -285,8 +290,11 @@ public class MessageSendingService extends Service implements MessageSendingList
                 handler.postDelayed(delayedCaller, resendMillis); // after 30 sec, try the sending again
                 isHandlerSet = true;
             }
+            reportUnsentGPSFixesCount();
             serviceLogger.onMessageSentFailed();
         } else {
+        	ExLog.i(this, "MS", "!success");
+        	reportApiConnectivity(APIConnectivity.transmissionSuccess);
             ExLog.i(this, TAG, "Message successfully sent.");
             if (persistenceManager.areIntentsDelayed()) {
                 persistenceManager.removeIntent(intent);
@@ -308,6 +316,8 @@ public class MessageSendingService extends Service implements MessageSendingList
                 String raceId = intent.getStringExtra(CALLBACK_PAYLOAD);
                 callback.processResponse(this, inputStream, raceId);
             }
+            ExLog.i(this, "MS", "report");
+            reportUnsentGPSFixesCount()	;
         }
     }
 
@@ -331,14 +341,87 @@ public class MessageSendingService extends Service implements MessageSendingList
     
     public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
             final String raceName, final String fleetName) {
-        String url = String.format("%s/sailingserver/rc/racelog?"+
-                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
-                PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
-                URLEncoder.encode(raceGroupName),
-                URLEncoder.encode(raceName), URLEncoder.encode(fleetName), uuid);
+        String url = null;
+		try {
+			url = String.format("%s/sailingserver/rc/racelog?"+
+			        RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
+			        RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
+			        RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
+			        RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
+			        PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
+			        URLEncoder.encode(raceGroupName, "UTF-8"),
+			        URLEncoder.encode(raceName,"UTF-8"), 
+			        URLEncoder.encode(fleetName, "UTF-8"), uuid);
+		} catch (UnsupportedEncodingException e) {
+			ExLog.e(context, TAG, "UnsupportedEncodingException: " + e.getLocalizedMessage());
+		}
         return url;
     }
+    
+    /**
+	 * Register listener for API-connectivity
+	 * 
+	 * @param listener class that wants to be notified of api-connectivity changes
+	 */
+	public void registerAPIConnectivityListener(APIConnectivityListener listener) {
+		apiConnectivityListener = listener;
+	}
+
+	/**
+	 * Unregister listener for API-connectivity
+	 */
+	public void unregisterAPIConnectivityListener() {
+		apiConnectivityListener = null;
+	}
+	
+	/**
+	 * Enum for reporting of network connectivity.
+	 */
+	public enum APIConnectivity {
+		notReachable(0),
+		transmissionSuccess(1), 
+		transmissionError(2), 
+		noAttempt(4);
+
+		private final int apiConnectivity;
+
+		APIConnectivity(int connectivity) {
+			this.apiConnectivity = connectivity;
+		}
+
+		public int toInt() {
+			return this.apiConnectivity;
+		}
+	}
+
+	/**
+	 * Listener interface for reporting of connectivity and number of 
+	 * unsent GPS-fixes.
+	 */
+	public interface APIConnectivityListener {
+		public void apiConnectivityUpdated(APIConnectivity apiConnectivity);
+		public void setUnsentGPSFixesCount(int count);
+	}
+	
+	/**
+	 * Report API connectivity to listening activity
+	 * 
+	 * @param apiConnectivity
+	 */
+	private void reportApiConnectivity(APIConnectivity apiConnectivity) {
+		if (apiConnectivityListener != null) {
+			apiConnectivityListener.apiConnectivityUpdated(apiConnectivity);
+		}
+	}
+	
+	/**
+	 * Report the number of currently unsent GPS-fixes
+	 * 
+	 * @param unsentGPSFixesCount
+	 */
+	private void reportUnsentGPSFixesCount() {
+		if (apiConnectivityListener != null) {
+			apiConnectivityListener.setUnsentGPSFixesCount(getDelayedIntentsCount());
+		}
+	}
 }

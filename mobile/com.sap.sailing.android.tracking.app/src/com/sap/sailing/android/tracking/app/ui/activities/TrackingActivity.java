@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -17,18 +18,16 @@ import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivityListener;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.sensors.CompassManager;
-import com.sap.sailing.android.tracking.app.sensors.CompassManager.MagneticHeadingListener;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
 import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingBinder;
-import com.sap.sailing.android.tracking.app.services.TransmittingService;
-import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivity;
-import com.sap.sailing.android.tracking.app.services.TransmittingService.APIConnectivityListener;
-import com.sap.sailing.android.tracking.app.services.TransmittingService.TransmittingBinder;
 import com.sap.sailing.android.tracking.app.ui.fragments.CompassFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.SpeedFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.StopTrackingButtonFragment;
@@ -40,13 +39,13 @@ import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener,
-		APIConnectivityListener, MagneticHeadingListener {
+		APIConnectivityListener {
 
 	TrackingService trackingService;
 	boolean trackingServiceBound;
 
-	TransmittingService transmittingService;
-	boolean transmittingServiceBound;
+	MessageSendingService messageSendingService;
+	boolean messageSendingServiceBound;
 
 	private final static String TAG = TrackingActivity.class.getName();
 	private final static String SIS_TRACKING_FRAGMENT = "savedInstanceTrackingFragment";
@@ -56,11 +55,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
 	private ViewPager mPager;
 	private ScreenSlidePagerAdapter mPagerAdapter;
-
-	private String eventId;
 	private AppPreferences prefs;
-
-	private TrackingFragment trackingFragment;	
+	
+	private String checkinDigest;
+	
+	private TrackingFragment trackingFragment;
 	private TimerRunnable timer;
 	
 	private int lastViewPagerItem;
@@ -72,18 +71,16 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	 * Thus they are cached here and the fragments can pick
 	 * them up.
 	 */
-	public String lastSpeedIndicatorText = "";
-	public String lastCompassIndicatorText = "";
+	public String lastSpeedIndicatorText = "-";
+	public String lastCompassIndicatorText = "-°";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		prefs = new AppPreferences(this);
-
-		Intent intent = getIntent();
-		eventId = intent.getExtras().getString(
-				getString(R.string.tracking_activity_event_id_parameter));
+		
+		checkinDigest = getIntent().getExtras().getString(getString(R.string.tracking_activity_checkin_digest_parameter));
 
 		setContentView(R.layout.fragment_hud_container);
 
@@ -96,7 +93,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		}
 
 		if (getSupportActionBar() != null) {
-			EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboard(this, eventId);
+			EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, checkinDigest);
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 			getSupportActionBar().setHomeButtonEnabled(true);
 			toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
@@ -124,8 +121,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			}
 			
 			lastViewPagerItem = savedInstanceState.getInt(SIS_LAST_VIEWPAGER_ITEM);
-			lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT);
-			lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT);
+			lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, "-");
+			lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, "-°");
 		} else {
 			trackingFragment = new TrackingFragment();
 		}
@@ -150,7 +147,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 		});
 
 		replaceFragment(R.id.tracking_linear_layout, trackingFragment);
-		ServiceHelper.getInstance().startTrackingService(this, eventId);
+		ServiceHelper.getInstance().startTrackingService(this, checkinDigest);
 	}
 
 	@Override
@@ -167,17 +164,16 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	}
 
 	@Override
-	protected void onStart() {
+	public void onStart() {
 		super.onStart();
-		Intent transmittingServiceIntent = new Intent(this, TransmittingService.class);
-		bindService(transmittingServiceIntent, transmittingServiceConnection,
-				Context.BIND_AUTO_CREATE);
+		Intent messageSendingServiceIntent = new Intent(this, MessageSendingService.class);
+		bindService(messageSendingServiceIntent, messageSendingServiceConnection, Context.BIND_AUTO_CREATE);
 		Intent trackingServiceIntent = new Intent(this, TrackingService.class);
 		bindService(trackingServiceIntent, trackingServiceConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
-	protected void onStop() {
+	public void onStop() {
 		super.onStop();
 		if (trackingServiceBound) {
 			trackingService.unregisterGPSQualityListener();
@@ -189,11 +185,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			}
 		}
 
-		if (transmittingServiceBound) {
-			transmittingService.unregisterAPIConnectivityListener();
-			unbindService(transmittingServiceConnection);
+		if (messageSendingServiceBound) {
+			messageSendingService.unregisterAPIConnectivityListener();
+			unbindService(messageSendingServiceConnection);
 
-			transmittingServiceBound = false;
+			messageSendingServiceBound = false;
 
 			if (BuildConfig.DEBUG) {
 				ExLog.i(this, TAG, "Unbound transmitting Service");
@@ -204,7 +200,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	@Override
 	protected void onPause() {
 		super.onPause();
-		CompassManager.getInstance(this).unregisterListener();
 		timer.stop();
 		
 		mPager = (ViewPager) findViewById(R.id.pager);
@@ -214,10 +209,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		if (prefs.getHeadingFromMagneticSensorPreferred()) {
-			CompassManager.getInstance(this).registerListener(this);
-		}
 
 		timer = new TimerRunnable();
 		timer.start();
@@ -229,6 +220,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
 		mPager.setAdapter(mPagerAdapter);
 		mPager.setCurrentItem(lastViewPagerItem);
+		
+		LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
+		boolean gpsEnabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		if (gpsEnabled == false)
+		{
+			showErrorPopup(R.string.warning, R.string.gps_turned_off);
+		}
 	}
 
 	@Override
@@ -270,24 +268,24 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 	}
 
 	/** Defines callbacks for service binding, passed to bindService() */
-	private ServiceConnection transmittingServiceConnection = new ServiceConnection() {
+	private ServiceConnection messageSendingServiceConnection = new ServiceConnection() {
 
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			// We've bound to LocalService, cast the IBinder and get
 			// LocalService instance
-			TransmittingBinder binder = (TransmittingBinder) service;
-			transmittingService = binder.getService();
-			transmittingServiceBound = true;
-			transmittingService.registerAPIConnectivityListener(TrackingActivity.this);
+			MessageSendingBinder binder = (MessageSendingBinder) service;
+			messageSendingService = binder.getService();
+			messageSendingServiceBound = true;
+			messageSendingService.registerAPIConnectivityListener(TrackingActivity.this);
 			if (BuildConfig.DEBUG) {
-				ExLog.i(TrackingActivity.this, TAG, "connected to transmitting service");
+				ExLog.i(TrackingActivity.this, TAG, "connected to message sending service");
 			}
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) {
-			transmittingServiceBound = false;
+			messageSendingServiceBound = false;
 		}
 	};
 
@@ -312,30 +310,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 			trackingServiceBound = false;
 		}
 	};
-
-	@Override
-	public void magneticHeadingUpdated(float heading) {
-		// HudFragment hudFragment = (HudFragment)
-		// getSupportFragmentManager().findFragmentById(R.id.hud_content_frame);
-		if (prefs.getHeadingFromMagneticSensorPreferred()) {
-			if (mPager.getCurrentItem() == ScreenSlidePagerAdapter.VIEW_PAGER_FRAGMENT_COMPASS) {
-				
-				ScreenSlidePagerAdapter viewPagerAdapter = getViewPagerAdapter();
-				if (viewPagerAdapter != null) {
-					CompassFragment compassFragment = viewPagerAdapter.getCompassFragment();
-					if (compassFragment != null && compassFragment.isAdded()) {
-						compassFragment.setBearing(heading);
-					}
-				}
-			}
-		} else {
-			if (BuildConfig.DEBUG) {
-				ExLog.i(this, TAG,
-						"Received magnet compass update, even though prefs say get from GPS. Unregistering listener.");
-			}
-			CompassManager.getInstance(this).unregisterListener();
-		}
-	}
 	
 	private ScreenSlidePagerAdapter getViewPagerAdapter() {
 		return (ScreenSlidePagerAdapter) mPager.getAdapter();

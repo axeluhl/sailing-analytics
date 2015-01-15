@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -35,29 +36,24 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
-import com.android.volley.VolleyError;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
+import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
-import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFailureListener;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
-import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
@@ -66,7 +62,6 @@ public class HomeFragment extends BaseFragment implements
 		LoaderCallbacks<Cursor> {
 
 	private final static String TAG = HomeFragment.class.getName();
-	private final static String REQUEST_TAG = "request_homefragment";
 	private final static int REGATTA_LOADER = 1;
 
 	private AppPreferences prefs;
@@ -93,7 +88,6 @@ public class HomeFragment extends BaseFragment implements
 		if (noQrCodeButton != null) {
 			noQrCodeButton.setOnClickListener(new ClickListener());
 		}
-		
 
 		ListView listView = (ListView) view.findViewById(R.id.listRegatta);
 		if (listView != null) {
@@ -114,7 +108,13 @@ public class HomeFragment extends BaseFragment implements
 	public void onResume() {
 		super.onResume();
 		getLoaderManager().restartLoader(REGATTA_LOADER, null, this);
+    	
+		String lastQRCode = prefs.getLastScannedQRCode();
+		if (lastQRCode != null) {
+			handleQRCode(lastQRCode);
+		}
 	}
+
 	
 	private void showNoQRCodeMessage()
 	{
@@ -139,7 +139,7 @@ public class HomeFragment extends BaseFragment implements
 				startActivity(marketIntent);
 			} else {
 				Toast.makeText(getActivity(),
-						"PlayStore and Scanning not available.",
+						getString(R.string.error_play_store_and_scanning_not_available),
 						Toast.LENGTH_LONG).show();
 			}
 			return false;
@@ -150,19 +150,23 @@ public class HomeFragment extends BaseFragment implements
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == Activity.RESULT_OK) {
 			String scanResult = data.getStringExtra("SCAN_RESULT");
-
-			ExLog.i(getActivity(), TAG, "Parsing URI: " + scanResult);
-			Uri uri = Uri.parse(scanResult);
-			handleScannedOrUrlMatchedUri(uri);
-
+			prefs.setLastScannedQRCode(scanResult);
+			// handleQRCode is called in onResume()
 		} else if (resultCode == Activity.RESULT_CANCELED) {
-			Toast.makeText(getActivity(), "Scanning canceled",
+			Toast.makeText(getActivity(), getString(R.string.scanning_cancelled),
 					Toast.LENGTH_LONG).show();
 		} else {
+			String templateString = getString(R.string.error_scanning_qrcode);
 			Toast.makeText(getActivity(),
-					"Error scanning QRCode (" + resultCode + ")",
+					templateString.replace("{result-code}", String.valueOf(resultCode)),
 					Toast.LENGTH_LONG).show();
 		}
+	}
+	
+	private void handleQRCode(String qrCode) {
+		ExLog.i(getActivity(), TAG, "Parsing URI: " + qrCode);
+		Uri uri = Uri.parse(qrCode);
+		handleScannedOrUrlMatchedUri(uri);
 	}
 
 	public void handleScannedOrUrlMatchedUri(Uri uri) {
@@ -172,11 +176,10 @@ public class HomeFragment extends BaseFragment implements
 			scheme = "http";
 		}
 
+		final String uriStr = uri.toString();
 		final String server = scheme + "://" + uri.getHost();
 		final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
 		final String hostWithPort = server + ":" + port;
-
-		prefs.setServerURL(hostWithPort);
 
 		String leaderboardNameFromQR;
 		try {
@@ -186,12 +189,12 @@ public class HomeFragment extends BaseFragment implements
 			leaderboardNameFromQR = "";
 		} catch (NullPointerException e) {
 			ExLog.e(getActivity(), TAG, "Invalid Barcode (no leaderboard-name set): " + e.getMessage());
-			Toast.makeText(this.getActivity(), "Invalid QR Code", Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getActivity(), getString(R.string.error_invalid_qr_code), Toast.LENGTH_LONG).show();
 			return;
 		}
 
 		final String competitorId = uri.getQueryParameter(CheckinHelper.COMPETITOR_ID);
-		final String checkinURLStr = prefs.getServerURL()
+		final String checkinURLStr = hostWithPort
 				+ prefs.getServerCheckinPath().replace("{leaderboard-name}",
 						leaderboardNameFromQR);
 		final String eventId = uri.getQueryParameter(CheckinHelper.EVENT_ID);
@@ -209,9 +212,9 @@ public class HomeFragment extends BaseFragment implements
 		
 		final StartActivity startActivity = (StartActivity)getActivity();
 
-		final String getEventUrl = prefs.getServerURL() + prefs.getServerEventPath(eventId);
-		final String getLeaderboardUrl = prefs.getServerURL() + prefs.getServerLeaderboardPath(leaderboardName);
-		final String getCompetitorUrl = prefs.getServerURL() + prefs.getServerCompetitorPath(competitorId);
+		final String getEventUrl = hostWithPort + prefs.getServerEventPath(eventId);
+		final String getLeaderboardUrl = hostWithPort + prefs.getServerLeaderboardPath(leaderboardName);
+		final String getCompetitorUrl = hostWithPort + prefs.getServerCompetitorPath(competitorId);
 
 		startActivity.showProgressDialog(R.string.please_wait, R.string.getting_leaderboard);
 		
@@ -354,6 +357,27 @@ public class HomeFragment extends BaseFragment implements
 																					data.leaderboardName = leaderboardName;
 																					data.deviceUid = deviceUuid
 																							.getStringRepresentation();
+																					try {
+																						data.setCheckinDigestFromString(uriStr);
+																					} catch (UnsupportedEncodingException e) {
+																						ExLog.e(getActivity(),
+																								TAG,
+																								"Failed to get generate digest of qr-code string (" 
+																								+ uriStr + "). "
+																										+ e.getMessage());
+																						startActivity.dismissProgressDialog();
+																						displayAPIErrorRecommendRetry();
+																						return;
+																					} catch (NoSuchAlgorithmException e) {
+																						ExLog.e(getActivity(),
+																								TAG,
+																								"Failed to get generate digest of qr-code string (" 
+																								+ uriStr + "). "
+																										+ e.getMessage());
+																						startActivity.dismissProgressDialog();
+																						displayAPIErrorRecommendRetry();
+																						return;
+																					} 
 
 																					displayUserConfirmationScreen(data);
 
@@ -419,12 +443,6 @@ public class HomeFragment extends BaseFragment implements
 
 	}
 
-	@Override
-	public void onDetach() {
-		super.onDetach();
-		VolleyHelper.getInstance(getActivity()).cancelRequest(REQUEST_TAG);
-	}
-
 	/**
 	 * Display a confirmation-dialog in which the user confirms his full name
 	 * and sail-id.
@@ -446,6 +464,7 @@ public class HomeFragment extends BaseFragment implements
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						clearScannedQRCodeInPrefs();
 						checkInWithAPIAndDisplayTrackingActivity(checkinData);
 					}
 
@@ -454,14 +473,17 @@ public class HomeFragment extends BaseFragment implements
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						
+						clearScannedQRCodeInPrefs();
 						dialog.cancel();
-
 					}
 				});
 
 		AlertDialog alert = builder.create();
 		alert.show();
+	}
+	
+	private void clearScannedQRCodeInPrefs() {
+		prefs.setLastScannedQRCode(null);
 	}
 
 	/**
@@ -471,14 +493,16 @@ public class HomeFragment extends BaseFragment implements
 	 * 
 	 * @param deviceMappingData
 	 */
-	private void checkInWithAPIAndDisplayTrackingActivity(
-			CheckinData checkinData) {
-		if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(
-				getActivity(), checkinData.eventId, checkinData.leaderboardName, checkinData.competitorId)) {
+	private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
+		if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(getActivity(), checkinData.checkinDigest)) {
 
 			try {
-				DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.getEvent(),
-						checkinData.getCompetitor(), checkinData.getLeaderboard());
+				DatabaseHelper.getInstance().storeCheckinRow(
+						getActivity(),
+						checkinData.getEvent(),
+						checkinData.getCompetitor(), 
+						checkinData.getLeaderboard());
+				
 				adapter.notifyDataSetChanged();
 			} catch (GeneralDatabaseHelperException e) {
 				ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
@@ -492,6 +516,7 @@ public class HomeFragment extends BaseFragment implements
 		} else {
 			ExLog.w(getActivity(), TAG,
 					"Combination of eventId, leaderboardName and competitorId already exists!");
+			Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG).show();
 		}
 
 		performAPICheckin(checkinData);
@@ -509,21 +534,23 @@ public class HomeFragment extends BaseFragment implements
 		startActivity.showProgressDialog(R.string.please_wait, R.string.checking_in);
 
 		try {
-			JSONObject requestObject = CheckinHelper.getCheckinJson(
-					checkinData.competitorId, checkinData.deviceUid, "TODO!!",
-					date.getTime());
+			JSONObject requestObject = CheckinHelper.getCheckinJson(checkinData.competitorId,
+					checkinData.deviceUid, "TODO!!", date.getTime());
 
-			JsonObjectOrStatusOnlyRequest checkinRequest = new JsonObjectOrStatusOnlyRequest(checkinData.checkinURL,
-					requestObject, new CheckinListener(checkinData.leaderboardName,
-							checkinData.eventId, checkinData.competitorId),
-					new CheckinErrorListener(checkinData.leaderboardName, checkinData.eventId,
-							checkinData.competitorId));
-			
-			VolleyHelper.getInstance(getActivity()).addRequest(checkinRequest);
+			HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkinData.checkinURL),
+					requestObject.toString(), getActivity());
+
+			NetworkHelper.getInstance(getActivity()).executeHttpJsonRequestAsnchronously(
+					request,
+					new CheckinListener(checkinData.checkinDigest),
+					new CheckinErrorListener(checkinData.checkinDigest));
 
 		} catch (JSONException e) {
+			ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
+			displayAPIErrorRecommendRetry();
+		} catch (MalformedURLException e) {
 			ExLog.e(getActivity(), TAG,
-					"Failed to generate checkin JSON: " + e.getMessage());
+					"Failed to perform checkin, MalformedURLException: " + e.getMessage());
 			displayAPIErrorRecommendRetry();
 		}
 	}
@@ -573,14 +600,11 @@ public class HomeFragment extends BaseFragment implements
 	/**
 	 * Start regatta activity.
 	 * 
-	 * @param regattaName
-	 * @param eventName
+	 * @param checkinDigest
 	 */
-	private void startRegatta(String leaderboardName, String eventId, String competitorId) {
+	private void startRegatta(String checkinDigest) {
 		Intent intent = new Intent(getActivity(), RegattaActivity.class);
-		intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
-		intent.putExtra(getString(R.string.event_id), eventId);
-		intent.putExtra(getString(R.string.competitor_id), competitorId);
+		intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
 		getActivity().startActivity(intent);
 	}
 
@@ -589,6 +613,7 @@ public class HomeFragment extends BaseFragment implements
 		switch (loaderId) {
 		case REGATTA_LOADER:
 			String[] projection = new String[] { 
+					"events.event_checkin_digest",
 					"events.event_id",
 					"events._id", "events.event_name", "events.event_server",
 					"competitors.competitor_display_name",
@@ -656,76 +681,55 @@ public class HomeFragment extends BaseFragment implements
 				return;
 			}
 
-			Cursor cursor = (Cursor) adapter.getItem(position - 1); // -1,
-																		// because
-																		// there's
-																		// a
-																		// header
-																		// row
-		
-			
-			prefs.setServerURL(cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER)));
+			// -1, because there's a header row
+			Cursor cursor = (Cursor) adapter.getItem(position - 1);
 
-			String leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
-			String competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
-			String eventId = cursor.getString(cursor.getColumnIndex("event_id"));
-
-			startRegatta(leaderboardName, eventId, competitorId);
+			String checkinDigest = cursor.getString(cursor.getColumnIndex("event_checkin_digest"));
+			startRegatta(checkinDigest);
 		}
 	}
 
-	private class CheckinListener implements Listener<JSONObject> {
+	private class CheckinListener implements NetworkHelperSuccessListener {
 
-		public String leaderboardName;
-		public String eventId;
-		public String competitorId;
+		public String checkinDigest;
 
-		public CheckinListener(String leaderboardName, String eventId, String competitorId) {
-			this.leaderboardName = leaderboardName;
-			this.eventId = eventId;
-			this.competitorId = competitorId;
+		public CheckinListener(String checkinDigest) {
+			this.checkinDigest = checkinDigest;
 		}
 
 		@Override
-		public void onResponse(JSONObject response) {
+		public void performAction(JSONObject response) {
 			StartActivity startActivity = (StartActivity)getActivity();
 			startActivity.dismissProgressDialog();
-			
-			startRegatta(leaderboardName, eventId, competitorId);
+			startRegatta(checkinDigest);
 		}
 	}
 
-	private class CheckinErrorListener implements ErrorListener {
+	private class CheckinErrorListener implements NetworkHelperFailureListener {
 
-		public String leaderboardName;
-		public String eventId;
-		public String competitorId;
+		public String checkinDigest;
 		
-		public CheckinErrorListener(String leaderboardName, String eventId, String competitorId) {
-			this.leaderboardName = leaderboardName;
-			this.eventId = eventId;
-			this.competitorId = competitorId;
+		public CheckinErrorListener(String checkinDigest) {
+			this.checkinDigest = checkinDigest;
 		}
 		
 		@Override
-		public void onErrorResponse(VolleyError error) {
-			if (error.getMessage() != null)
+		public void performAction(NetworkHelperError e) {
+			if (e.getMessage() != null)
 			{
-				ExLog.e(getActivity(), TAG, error.getMessage().toString());	
+				ExLog.e(getActivity(), TAG, e.getMessage().toString());	
 			}
 			else
 			{
 				ExLog.e(getActivity(), TAG, "Unknown Error");
 			}
 			
-			
 			StartActivity startActivity = (StartActivity)getActivity();
 			startActivity.dismissProgressDialog();
 			startActivity.showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
 			
-			DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), eventId, leaderboardName, competitorId);			
-			
-			Toast.makeText(getActivity(), "Error while receiving server data", Toast.LENGTH_LONG).show();
+			DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);			
+			Toast.makeText(getActivity(), getString(R.string.error_while_receiving_server_data), Toast.LENGTH_LONG).show();
 		}
 	}
 

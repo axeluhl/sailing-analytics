@@ -54,6 +54,8 @@ android {
 }
 
 dependencies {
+    compile "net.hockeyapp.android:HockeySDK:3.5.0"
+
     /* support libraries */
     compile "com.android.support:appcompat-v7:21.0.3"
 
@@ -62,10 +64,9 @@ dependencies {
 
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
-    compile project(":mobile:google-volley_lib")
 
     /* all local jar-libs */
-    compile fileTree(dir: "libs", include: ["*.jar"])
+//    compile fileTree(dir: "libs", include: ["*.jar"])
 }
 
 // Custom tasks

@@ -35,6 +35,7 @@
     <string name="competitor_id">CompetitorId</string>
 	<string name="event_id">EventId</string>
 	<string name="leaderboard_name">LeaderboardName</string>
+	<string name="checkin_digest">CheckinDigest</string>
 	<string name="add_team_photo">Add Team Photo</string>
 	<string name="do_you_want_to_choose_existing_img_or_take_a_new_one">Do you want to use an existing image or take a new one?</string>
 	<string name="existing_image">Existing</string>
@@ -65,8 +66,17 @@
 	<string name="tracking_colon">Tracking:</string>
 	<string name="regatta_in_progress">The regatta is in progress.</string>
 	<string name="heading">Heading</string>
-	<string name="sog">SOG</string>
+	<string name="course_over_ground">Course over Ground</string>
+	<string name="sog">Speed over Ground</string>
 	<string name="none">None</string>
 	<string name="show_leaderboard">Leader board</string>
-	
+	<string name="error_play_store_and_scanning_not_available">"PlayStore and Scanning not available."</string>
+	<string name="scanning_cancelled">Scanning cancelled</string>
+	<string name="error_scanning_qrcode">Error scanning QR-Code {result-code}</string>
+	<string name="error_invalid_qr_code">Invalid QR-Code</string>
+	<string name="error_while_receiving_server_data">Error while receiving server data</string>
+	<string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
+	<string name="warning">Warning</string>
+	<string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
+	<string name="knots">knots</string>
 </resources>
