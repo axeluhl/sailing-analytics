@@ -10,6 +10,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -46,9 +48,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdate;
@@ -79,8 +78,8 @@ import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class WindFragment extends LoggableFragment implements CompassDirectionListener, ConnectionCallbacks,
-        OnConnectionFailedListener, LocationListener, OnClickListener, OnMarkerDragListener, OnMapClickListener,
+public class WindFragment extends LoggableFragment implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, OnClickListener, OnMarkerDragListener, OnMapClickListener,
         TextView.OnEditorActionListener, OnFocusChangeListener {
 
     private final static String TAG = WindFragment.class.getName();
@@ -105,7 +104,7 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     private RelativeLayout rl_gpsOverlay;
     private EditText et_location;
 
-    private LocationClient locationClient;
+    private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private Location currentLocation;
     private DecimalFormat speedFormat;
@@ -149,7 +148,11 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
         locationRequest.setInterval(FIVE_SEC);
         locationRequest.setFastestInterval(EVERY_POSITION_CHANGE);
 
-        locationClient = new LocationClient(getActivity(), this, this);
+        googleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
 
         // buttons
         sendButton.setOnClickListener(this);
@@ -235,16 +238,16 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
     public void onStart() {
         super.onStart();
 
-        locationClient.connect();
+        googleApiClient.connect();
         compassView.setDirectionListener(this);
     }
 
     @Override
     public void onPause() {
-        if (locationClient.isConnected()) {
-            locationClient.removeLocationUpdates(this);
+        if (googleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
         }
-        locationClient.disconnect();
+        googleApiClient.disconnect();
 
         Fragment fragment = (getFragmentManager().findFragmentById(R.id.windMap));
 
@@ -537,12 +540,12 @@ public class WindFragment extends LoggableFragment implements CompassDirectionLi
 
     @Override
     public void onConnected(Bundle arg0) {
-        locationClient.requestLocationUpdates(locationRequest, this);
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
     }
 
     @Override
-    public void onDisconnected() {
-        ExLog.i(getActivity(), TAG, "LocationClient was disconnected");
+    public void onConnectionSuspended(int i) {
+        ExLog.i(getActivity(), TAG, "GoogleApiClient connection has been suspend");
     }
 
     @Override
