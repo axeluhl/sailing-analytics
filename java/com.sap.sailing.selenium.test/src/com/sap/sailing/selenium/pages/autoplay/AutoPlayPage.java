@@ -44,7 +44,7 @@ public class AutoPlayPage extends HostPage {
     }
     
     public AutoPlayConfiguration getAutoPlayConfiguration() {
-        return new AutoPlayConfiguration(this.driver, findElementBySeleniumId(context, "AutoPlayStartView"));
+        return new AutoPlayConfiguration(this.driver, autoPlayStartView);
     }
     
     @Override
