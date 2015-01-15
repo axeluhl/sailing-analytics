@@ -7,6 +7,9 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.DefaultErrorReporter;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * This is the top-level view of the autoplay application. Every time another presenter wants to reveal itself,
@@ -17,6 +20,8 @@ public class DesktopApplicationView extends Composite implements ApplicationTopL
     }
 
     private static DesktopApplicationViewUiBinder uiBinder = GWT.create(DesktopApplicationViewUiBinder.class);
+
+    private static ErrorReporter errorReporter = new DefaultErrorReporter<StringMessages>(StringMessages.INSTANCE);
 
     @UiField
     SimplePanel mainContentPanel;
@@ -32,5 +37,10 @@ public class DesktopApplicationView extends Composite implements ApplicationTopL
     
     @Override
     public void showLoading(boolean visible) {
+    }
+
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
     }
 }

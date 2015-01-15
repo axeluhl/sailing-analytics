@@ -81,12 +81,14 @@ public class PolarDataServiceImpl implements PolarDataService {
         //return polarDataMiner.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
     }
 
-    private void solveAndAddResults(Set<SpeedWithBearingWithConfidence<Void>> result, CubicEquation upWindEquation, int angle) {
-        double[] windSpeedCandidates = upWindEquation.solve();
+    private void solveAndAddResults(Set<SpeedWithBearingWithConfidence<Void>> result, CubicEquation equation, int angle) {
+        double[] windSpeedCandidates = equation.solve();
         for (int i = 0; i < windSpeedCandidates.length; i++) {
             double windSpeedCandidateInKnots = windSpeedCandidates[i] > 0 ? windSpeedCandidates[i] : 0;
-            result.add(new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
-                    windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.00001, null));
+            if (windSpeedCandidateInKnots < 40) {
+                result.add(new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
+                        windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.00001, null));
+            }
         }
     }
 

@@ -27,7 +27,7 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.LaunchActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 
 public class TrackingService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,
         LocationListener {
@@ -108,17 +108,16 @@ public class TrackingService extends Service implements ConnectionCallbacks, OnC
     public void onLocationChanged(Location location) {
         JSONObject json = new JSONObject();
         try {
-            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.DEVICE_UUID,
-                    prefs.getDeviceIdentifier());
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.DEVICE_UUID, prefs.getDeviceIdentifier());
             JSONArray fixes = new JSONArray();
             JSONObject fix = new JSONObject();
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.LAT_DEG, location.getLatitude());
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.LON_DEG, location.getLongitude());
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.TIME_MILLIS, location.getTime());
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.SPEED_M_PER_S, location.getSpeed());
-            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.BEARING_DEG, location.getBearing());
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, location.getTime());
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.SPEED_M_PER_S, location.getSpeed());
+            fix.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG, location.getBearing());
             fixes.put(0, fix);
-            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer.FIXES, fixes);
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.FIXES, fixes);
         } catch (JSONException e) {
             ExLog.e(this, TAG, "Error serializing fix: " + e.getMessage());
         }

@@ -67,7 +67,9 @@ public class StartActivity extends AbstractActivity {
             }
         }
         Collections.sort(featuredEvents, new FeaturedEventsComparator());
-        featuredEvents = featuredEvents.subList(0, MAX_STAGE_EVENTS);
+        if(featuredEvents.size() > MAX_STAGE_EVENTS) {
+            featuredEvents = featuredEvents.subList(0, MAX_STAGE_EVENTS);
+        }
         view.setFeaturedEvents(featuredEvents);
         Collections.sort(recentEventsOfLast12Month, new Comparator<EventBaseDTO>() {
             @Override
