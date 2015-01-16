@@ -216,15 +216,13 @@ Multipart message with ``image`` part containing encoded JPEG or PNG image.
 ```
 The response contains the URL of the uploaded image.
 
-***
-
 ## Training
 
 A training is defined by a course, participants and is split into sessions.
 
 ### Properties
 
-The ``trainings`` object has the following properties:
+The ``training`` object has the following properties:
 
 * ``training_id`` server generated key for training session
 * ``create_date`` timestamp, date training was created
@@ -238,9 +236,15 @@ The ``trainings`` object has the following properties:
 
 ### Get Training
 
-Get complete details about a training.
+Get complete details about a training. These include:
 
-**Path:** ``trainings/{training_id}``
+* course
+* wind
+* list of join requests
+* list of markers
+* list of sesions
+
+**Path:** ``training/{training_id}``
 
 **Verb:** ``GET``
 
@@ -249,6 +253,7 @@ Get complete details about a training.
 {
   "training_id" : "c185ddac8b5a8f5aa23c5b80bc12d214",
   "create_user_id" : "9871d3a2c554b27151cacf1422eec048",
+  "create_user_name" : "John Doe",
   "create_date" : 14144160080000,
   "finish_date" : 14144180080000,
   "course" : {
@@ -266,6 +271,14 @@ Get complete details about a training.
     "direction" : 14.2,
     "speed" : 5.1
   },
+  "join_requests" : [
+    {
+      "join_request_id": "7f06f4e629a40de268ceaa22bba16f2b"
+      "status": "accepted",
+      "user_id" : "9871d3a2c554b27151cacf1422eec048",
+      "name" : "Anna"
+    } 
+  ],
   "markers" : [
     {
       "marker_id" : "111dda7aaed6fb03a543e8adb272393c",
@@ -288,7 +301,7 @@ Get complete details about a training.
 
 Start a new training.
 
-**Path:** ``trainings``
+**Path:** ``training``
 
 **Verb:** ``POST``
 
@@ -312,7 +325,7 @@ Start a new training.
 
 Finish a training.
 
-**Path:** ``trainings/{training_id}/finish``
+**Path:** ``training/{training_id}/finish``
 
 **Verb:** ``POST``
 
@@ -325,21 +338,105 @@ Finish a training.
 
 ### Users
 
-#### Get List of Nearby Users 
+When a user sets up a training, the device GPS location is sent to the server. Nearby users can see the training and request to join in. The author of the training can than accept join requests.
 
-TODO
+#### Get List of Nearby Trainings 
 
-#### Get List of Participating Users
+This call gets all training possiblilities nearby.
 
-TODO
+**Path:** ``training/nearby``
 
-#### Invite User
+**Verb:** ``GET``
 
-TODO
+**Response:**
+```
+{
+  "nearby" : [
+    {
+      "training_id" : "c185ddac8b5a8f5aa23c5b80bc12d214",
+      "create_user_id" : "9871d3a2c554b27151cacf1422eec048",
+      "create_user_name" : "John Doe",
+      "create_date" : 14144160080000
+    }
+  ]
+}
+```
 
-#### Accept Invitation
+#### Send a Join Request
 
-TODO
+This call is used by the users who wants to join a training.
+
+This call gets all training possiblilities nearby.
+
+**Path:** ``training/{training_id}/join_request``
+
+**Verb:** ``POST``
+
+**Request:**
+```
+{
+  "user_id" : "9871d3a2c554b27151cacf1422eec048",
+  "name" : "Anna"
+}
+```
+**Response:**
+```
+{
+  "join_request_id": "7f06f4e629a40de268ceaa22bba16f2b"
+  "status": "open",
+  "user_id" : "9871d3a2c554b27151cacf1422eec048",
+  "name" : "Anna"
+}
+```
+
+#### Get List of Join Requests
+
+This call is used by the initiator to see who wants to join in.
+
+**Path:** ``training/{training_id}/join_requests``
+
+**Verb:** ``GET``
+
+**Response:**
+```
+{
+  "join_requests": [
+    {
+      "join_request_id": "7f06f4e629a40de268ceaa22bba16f2b"
+      "status": "open",
+      "user_id" : "9871d3a2c554b27151cacf1422eec048",
+      "name" : "Anna"
+    }
+  ]
+}
+```
+``status`` can have the values ``open``, ``denied``, ``accepted``
+
+#### Accept or Deny a Join Request
+
+This call is used by the initiator accept or deny a join request.
+
+**Path:** ``training/{training_id}/join_requests/{join_request_id}``
+
+**Verb:** ``PUT``
+
+**Request:**
+```
+{
+  "status" : "accepted"
+}
+```
+``status`` can have the values ``open``, ``denied``, ``accepted``
+
+**Response:**
+ ```
+{
+  "join_request_id": "7f06f4e629a40de268ceaa22bba16f2b"
+  "status": "accepted",
+  "user_id" : "9871d3a2c554b27151cacf1422eec048",
+  "name" : "Anna"
+}
+```
 
 ### Course
 
@@ -347,7 +444,7 @@ TODO
 
 Get details about a training's course.
 
-**Path:** ``trainings/{training_id}/course``
+**Path:** ``training/{training_id}/course``
 
 **Verb:** ``GET``
 
@@ -370,7 +467,7 @@ Get details about a training's course.
 
 Currently only the course type can be set.
 
-**Path:** ``trainings/{training_id}/course``
+**Path:** ``training/{training_id}/course``
 
 **Verb:** ``PUT``
 
@@ -393,7 +490,7 @@ TODO Possible values for ``course_type`` must be defined.
 
 Creates the race course for training.
 
-**Path:** ``trainings/{training_id}/course``
+**Path:** ``training/{training_id}/course``
 
 **Verb:** ``POST``
 
@@ -416,7 +513,7 @@ TODO Possible values for ``course_type`` must be defined.
 
 Sets a course mark, e.g. pin end, leeward mark, windward park, or reach mark.
 
-**Path:** ``trainings/{training_id}/course/marks/{mark_id}``
+**Path:** ``training/{training_id}/course/marks/{mark_id}``
 
 **Verb:** ``POST``
 
@@ -444,7 +541,7 @@ TODO Possible values for ``mark_type`` must be defined.
 
 Deletes a previously defined course mark.
 
-**Path:** ``trainings/{training_id}/course/marks/{mark_id}``
+**Path:** ``training/{training_id}/course/marks/{mark_id}``
 
 **Verb:** ``DELETE``
 
@@ -452,7 +549,7 @@ Deletes a previously defined course mark.
 
 Sets wind speed and direction.
 
-**Path:** ``trainings/{training_id}/wind``
+**Path:** ``training/{training_id}/wind``
 
 **Verb:** ``POST``
 
@@ -473,7 +570,7 @@ During a training, markers are set, these are timestamps. Afterwards, the traini
 
 Sets wind speed and direction.
 
-**Path:** ``trainings/{training_id}/markers``
+**Path:** ``training/{training_id}/markers``
 
 **Verb:** ``POST``
 
@@ -498,7 +595,7 @@ Sets wind speed and direction.
 
 #### Create a Session
 
-**Path:** ``trainings/{training_id}/sessions``
+**Path:** ``training/{training_id}/sessions``
 
 **Verb:** ``POST``
 
@@ -521,7 +618,7 @@ Sets wind speed and direction.
 
 #### Update a Session
 
-**Path:** ``trainings/{training_id}/sessions/{session_id}``
+**Path:** ``training/{training_id}/sessions/{session_id}``
 
 **Verb:** ``PUT``
 
@@ -544,7 +641,7 @@ Sets wind speed and direction.
 
 #### Delete a Session
 
-**Path:** ``trainings/{training_id}/sessions/{session_id}``
+**Path:** ``training/{training_id}/sessions/{session_id}``
 
 **Verb:** ``DELETE``
 
