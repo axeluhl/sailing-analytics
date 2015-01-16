@@ -243,6 +243,6 @@ Multipart message with ``image`` part containing encoded JPEG or PNG image.
 **Response:**
 ```
 {
-  "team_image_url" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
+  "teamImageUrl" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
 }
 ```
