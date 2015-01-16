@@ -7,10 +7,9 @@ sourceSets {
 }
 
 dependencies {
-    compile "com.googlecode.json-simple:json-simple:1.1.1"
-
     /* local dependencies */
     compile project(":java:com.sap.sailing.domain.common")
     compile project(":java:com.sap.sailing.domain.shared.android")
     compile project(":java:com.sap.sse.common")
+    compile project(":java:org.json.simple")
 }
