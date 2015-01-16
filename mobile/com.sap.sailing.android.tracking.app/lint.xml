@@ -3,4 +3,14 @@
     <issue id="TypographyDashes">
         <ignore path="res/values/preferences.xml" />
     </issue>
+
+		<!-- Reason:  Don't want to use apply() instead of commit() -->
+    <issue id="CommitPrefEdits">
+    		<ignore path="src/com/sap/sailing/android/tracking/app/utils/AppPreferences.java" />
+    </issue>
+
+		<!-- Reason: Eclipse users don't get the override -->
+    <issue id="GradleOverrides">
+    		<ignore path="AndroidManifest.xml" />
+    </issue>
 </lint>

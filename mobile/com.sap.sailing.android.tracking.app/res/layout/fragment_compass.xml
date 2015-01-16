@@ -23,7 +23,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:gravity="center"
-        android:text=""
+        android:text="@string/initial_hyphen_degrees"
         android:layout_centerInParent="true"
         android:textSize="124sp" /> 
 
