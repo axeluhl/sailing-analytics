@@ -84,10 +84,8 @@ The ``users`` object has the following properties:
 
 * ``user_id`` server generated key for user
 * ``email`` email address is used for logging in, therefore it is unique
-* ``name`` full name of user, displayed on user's device and on others' invite list
+* ``name`` optional, full name of user, displayed on user's device and on others' invite list
 * ``password`` password of user, preferably hashed, see login further below
-* ``sailing_club`` optional, name of sailing club
-* ``city`` optional, city of user
 * ``countryCode`` optional, country code of user
 * ``profile_image_url`` optional, URL pointing to user's profile image
 
@@ -105,9 +103,7 @@ Called for getting details of logged in user, typically after login.
   "user_id" : "9871d3a2c554b27151cacf1422eec048",
   "email" : "anna@web.de",
   "name" : "Anna",
-  "city" : "Waldorf",
-  "countryCode" : "DE",
-  ...
+  "countryCode" : "DE"
 }
 ```
 
@@ -127,9 +123,7 @@ Called for getting details of other users, e.g. on invite to training.
   "user_id" : "d34974c6fca82061398f88bd1ab993c7",
   "email" : "berta@web.de",
   "name" : "Berta",
-  "city" : "Waldorf",
-  "countryCode" : "DE",
-  ...
+  "countryCode" : "DE"
 }
 ```
 
@@ -177,8 +171,7 @@ Update a user. Only sent properties are updated, all others remain untouched. To
 **Request:**
 ```
 {
-  "name" : "Anna",
-  "city" : "New York",
+  "name" : "Anna B.",
   "countryCode" : "US"
 }
 ```
@@ -188,10 +181,8 @@ Update a user. Only sent properties are updated, all others remain untouched. To
 {
   "user_id" : "9871d3a2c554b27151cacf1422eec048",
   "email" : "anna@web.de",
-  "name" : "Anna",
-  "city" : "New York",
-  "countryCode" : "US",
-  ...
+  "name" : "Anna B.",
+  "countryCode" : "US"
 }
 ```
 The password is omitted from the response.
@@ -242,7 +233,7 @@ Get complete details about a training. These include:
 * wind
 * list of join requests
 * list of markers
-* list of sesions
+* list of sessions
 
 **Path:** ``training/{training_id}``
 
@@ -366,7 +357,7 @@ This call gets all training possiblilities nearby.
 
 This call is used by the users who wants to join a training.
 
-This call gets all training possiblilities nearby.
+This call gets all training possibilities nearby.
 
 **Path:** ``training/{training_id}/join_request``
 
