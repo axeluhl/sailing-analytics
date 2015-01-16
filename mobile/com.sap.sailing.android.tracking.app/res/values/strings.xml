@@ -80,4 +80,9 @@
 	<string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
 	<string name="knots">knots</string>
 	<string name="preferences">Preferences</string>
+	
+	<string name="initial_timer_text_zerozero" translatable="false">00:00:00</string>
+	<string name="initial_zero" translatable="false">0</string>
+	<string name="initial_hyphen" translatable="false">-</string>
+	<string name="initial_hyphen_degrees" translatable="false">-°</string>
 </resources>
