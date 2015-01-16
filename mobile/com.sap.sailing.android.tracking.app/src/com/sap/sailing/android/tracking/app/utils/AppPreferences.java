@@ -80,7 +80,7 @@ public class AppPreferences {
     
     public void setBatteryIsCharging(boolean batteryIsCharging)
     {
-    	preferences.edit().putBoolean(context.getString(R.string.preference_battery_is_charging), batteryIsCharging);
+    	preferences.edit().putBoolean(context.getString(R.string.preference_battery_is_charging), batteryIsCharging).commit();
     }
     
     public boolean getBatteryIsCharging()
