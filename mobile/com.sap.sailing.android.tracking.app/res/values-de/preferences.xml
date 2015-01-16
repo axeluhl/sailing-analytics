@@ -2,7 +2,6 @@
 <resources>
     <string name="settings_category_energy_saving">Batterie Sparen</string>
     <string name="energy_saving_enabled">Batteriesparmodus</string>
-    <string name="energy_saving_summary">Verringert die Häufigkeit der Verbindungen mit dem Server</string>
     <string name="preference_energy_saving_is_enabled">Ein</string>
     <string name="preference_energy_saving_is_disabled">Aus</string>
     <string name="prefrence_energy_saving_summary_is_enabled">GPS Updates werden alle 30 Sekunden verschickt.</string>
