@@ -8,24 +8,31 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayAppClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayAppHistoryMapper;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.EntryPointHelper;
-import com.sap.sse.gwt.client.mvp.AbstractEntryPoint;
+import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
-public class AutoPlayEntryPoint extends AbstractEntryPoint {
+public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages> {
 
-    public void onModuleLoad() {
+    @Override
+    public void doOnModuleLoad() {
         AutoPlayAppClientFactory clientFactory = GWT.create(AutoPlayAppClientFactory.class);
 
         EntryPointHelper.registerASyncService((ServiceDefTarget) clientFactory.getSailingService(), RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) clientFactory.getMediaService(), RemoteServiceMappingConstants.mediaServiceRemotePath);
         
         AutoPlayAppHistoryMapper applicationHistoryMapper = GWT.create(AutoPlayAppHistoryMapper.class);
-        onModuleLoad(clientFactory, applicationHistoryMapper, new AutoPlayAppActivityMapper(clientFactory));
+        initMvp(clientFactory, applicationHistoryMapper, new AutoPlayAppActivityMapper(clientFactory));
 
         SharedResources.INSTANCE.mediaCss().ensureInjected();
         SharedResources.INSTANCE.mainCss().ensureInjected();
 
         StyleInjector.injectAtEnd("@media (min-width: 25em) { "+SharedResources.INSTANCE.mediumCss().getText()+"}");
         StyleInjector.injectAtEnd("@media (min-width: 50em) { "+SharedResources.INSTANCE.largeCss().getText()+"}");
+    }
+    
+    @Override
+    protected StringMessages createStringMessages() {
+        return GWT.create(StringMessages.class);
     }
 }
