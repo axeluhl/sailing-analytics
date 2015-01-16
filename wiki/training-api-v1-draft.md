@@ -191,7 +191,7 @@ The password is omitted from the response.
 
 A multipart message is used to upload a profile image.
 
-**Path:** ``me/{user_id}/profile_image``
+**Path:** ``me/profile_image``
 
 **Verb:** ``POST``
 
@@ -243,8 +243,11 @@ Get complete details about a training. These include:
 ```
 {
   "training_id" : "c185ddac8b5a8f5aa23c5b80bc12d214",
-  "create_user_id" : "9871d3a2c554b27151cacf1422eec048",
-  "create_user_name" : "John Doe",
+  "create_user" : {
+    "user_id" : "9871d3a2c554b27151cacf1422eec048",
+    "name" : "John Doe",
+    "device_id" : "d1985d09f09be0203a2d81fa7f62c2a7"
+  }
   "create_date" : 14144160080000,
   "finish_date" : 14144180080000,
   "course" : {
@@ -267,7 +270,8 @@ Get complete details about a training. These include:
       "join_request_id": "7f06f4e629a40de268ceaa22bba16f2b"
       "status": "accepted",
       "user_id" : "9871d3a2c554b27151cacf1422eec048",
-      "name" : "Anna"
+      "name" : "Anna",
+      "device_id" : "9d2156743e689119c4e4c28a4eb81153"
     } 
   ],
   "markers" : [
@@ -300,14 +304,19 @@ Start a new training.
 ```
 {
   "create_user_id" : "9871d3a2c554b27151cacf1422eec048",
-  "create_date" : 14144160080000
+  "create_date" : 14144160080000,
+  "device_id" : "d1985d09f09be0203a2d81fa7f62c2a7"
 }
 ```
 **Response:**
 ```
 {
   "training_id" : "c185ddac8b5a8f5aa23c5b80bc12d214",
-  "create_user_id" : "9871d3a2c554b27151cacf1422eec048",
+  "create_user" : {
+    "user_id" : "9871d3a2c554b27151cacf1422eec048",
+    "name" : "John Doe",
+    "device_id" : "d1985d09f09be0203a2d81fa7f62c2a7"
+  }
   "create_date" : 14144160080000
 }
 ```
@@ -367,7 +376,8 @@ This call gets all training possibilities nearby.
 ```
 {
   "user_id" : "9871d3a2c554b27151cacf1422eec048",
-  "name" : "Anna"
+  "name" : "Anna",
+  "device_id" : "d1985d09f09be0203a2d81fa7f62c2a7"
 }
 ```
 **Response:**
@@ -376,7 +386,8 @@ This call gets all training possibilities nearby.
   "join_request_id": "7f06f4e629a40de268ceaa22bba16f2b"
   "status": "open",
   "user_id" : "9871d3a2c554b27151cacf1422eec048",
-  "name" : "Anna"
+  "name" : "Anna",
+  "device_id" : "d1985d09f09be0203a2d81fa7f62c2a7"
 }
 ```
 
@@ -396,7 +407,8 @@ This call is used by the initiator to see who wants to join in.
       "join_request_id": "7f06f4e629a40de268ceaa22bba16f2b"
       "status": "open",
       "user_id" : "9871d3a2c554b27151cacf1422eec048",
-      "name" : "Anna"
+      "name" : "Anna",
+      "device_id" : "d1985d09f09be0203a2d81fa7f62c2a7"
     }
   ]
 }
@@ -425,7 +437,8 @@ This call is used by the initiator accept or deny a join request.
   "join_request_id": "7f06f4e629a40de268ceaa22bba16f2b"
   "status": "accepted",
   "user_id" : "9871d3a2c554b27151cacf1422eec048",
-  "name" : "Anna"
+  "name" : "Anna",
+  "device_id" : "d1985d09f09be0203a2d81fa7f62c2a7"
 }
 ```
 
