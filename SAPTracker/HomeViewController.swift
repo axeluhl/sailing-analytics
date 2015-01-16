@@ -38,6 +38,12 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let imageView = UIImageView(image: UIImage(named: "sap_logo"))
         let barButtonItem = UIBarButtonItem(customView: imageView)
         navigationItem.leftBarButtonItem = barButtonItem
+        
+        // check that user accepted terms
+        if !AcceptTermsViewController.acceptedTerms() {
+            performSegueWithIdentifier("EULA", sender: nil)
+            
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -179,6 +185,6 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         alertView.tag = AlertView.NoCameraAvailable.rawValue;
         alertView.show()
     }
-    
+
 }
 

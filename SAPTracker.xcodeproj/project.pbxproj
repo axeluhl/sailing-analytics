@@ -11,6 +11,7 @@
 		7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* ScanViewController.swift */; };
 		7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* QRCodeData.swift */; };
 		7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */; };
+		7F0EA8511A695E5B003F3A61 /* eula-ios.html in Resources */ = {isa = PBXBuildFile; fileRef = 7F0EA8501A695E5B003F3A61 /* eula-ios.html */; };
 		7F14A10A1A13B9A6001C1ECB /* _abkhazia.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0041A13B9A6001C1ECB /* _abkhazia.png */; };
 		7F14A10B1A13B9A6001C1ECB /* _basque-country.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0051A13B9A6001C1ECB /* _basque-country.png */; };
 		7F14A10C1A13B9A6001C1ECB /* _british-antarctic-territory.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */; };
@@ -282,6 +283,7 @@
 		7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */; };
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
+		7F509AC01A69549D0043EC69 /* AcceptTermsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F509ABF1A69549D0043EC69 /* AcceptTermsViewController.swift */; };
 		7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
 		7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* HomeViewController.swift */; };
@@ -303,7 +305,6 @@
 		7FA2220B1A25E55400FD364B /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
 		7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* DataManager.swift */; };
 		7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FAFA7941A126B5700D230F1 /* AboutViewController.swift */; };
-		7FAFB0B61A603C3E0054D457 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7FAFB0B51A603C3E0054D457 /* LICENSE.txt */; };
 		7FC5232D19F6AEE800BBFDCC /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */; };
 		7FCDB6621A1636610075D7D9 /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FCDB65E1A1636610075D7D9 /* GPSFix.swift */; };
 		7FCDB6631A1636610075D7D9 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FCDB65F1A1636610075D7D9 /* Event.swift */; };
@@ -334,6 +335,7 @@
 		7F0658FC19F7D6700077FF95 /* ScanViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScanViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F0658FE19F7EE910077FF95 /* QRCodeData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = QRCodeData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceUDIDManager.swift; sourceTree = "<group>"; };
+		7F0EA8501A695E5B003F3A61 /* eula-ios.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "eula-ios.html"; sourceTree = "<group>"; };
 		7F14A0041A13B9A6001C1ECB /* _abkhazia.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _abkhazia.png; sourceTree = "<group>"; };
 		7F14A0051A13B9A6001C1ECB /* _basque-country.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_basque-country.png"; sourceTree = "<group>"; };
 		7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_british-antarctic-territory.png"; sourceTree = "<group>"; };
@@ -605,6 +607,7 @@
 		7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendGPSFixController.swift; sourceTree = "<group>"; };
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 		7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		7F509ABF1A69549D0043EC69 /* AcceptTermsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AcceptTermsViewController.swift; sourceTree = "<group>"; };
 		7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplashScreenDummy.swift; sourceTree = "<group>"; };
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F15419F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -703,6 +706,7 @@
 			isa = PBXGroup;
 			children = (
 				7F83F15719F154F000C53328 /* HomeViewController.swift */,
+				7F509ABF1A69549D0043EC69 /* AcceptTermsViewController.swift */,
 				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
@@ -1012,6 +1016,7 @@
 				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
 				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
 				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
+				7F0EA8501A695E5B003F3A61 /* eula-ios.html */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1306,7 +1311,6 @@
 				7F14A15F1A13B9A6001C1ECB /* ES.png in Resources */,
 				7F14A1831A13B9A6001C1ECB /* IM.png in Resources */,
 				7F14A19D1A13B9A6001C1ECB /* LK.png in Resources */,
-				7FAFB0B61A603C3E0054D457 /* LICENSE.txt in Resources */,
 				7F14A1571A13B9A6001C1ECB /* DM.png in Resources */,
 				7F14A1F51A13B9A6001C1ECB /* TM.png in Resources */,
 				7F14A1601A13B9A6001C1ECB /* ET.png in Resources */,
@@ -1416,6 +1420,7 @@
 				7F14A12B1A13B9A6001C1ECB /* AW.png in Resources */,
 				7F14A10D1A13B9A6001C1ECB /* _commonwealth.png in Resources */,
 				7F14A1521A13B9A6001C1ECB /* CY.png in Resources */,
+				7F0EA8511A695E5B003F3A61 /* eula-ios.html in Resources */,
 				7F14A1391A13B9A6001C1ECB /* BN.png in Resources */,
 				7F14A1231A13B9A6001C1ECB /* AM.png in Resources */,
 				7F14A10F1A13B9A6001C1ECB /* _gosquared.png in Resources */,
@@ -1535,6 +1540,7 @@
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
 				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
+				7F509AC01A69549D0043EC69 /* AcceptTermsViewController.swift in Sources */,
 				7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
