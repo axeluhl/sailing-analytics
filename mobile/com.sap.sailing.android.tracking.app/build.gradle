@@ -90,7 +90,8 @@ build.doLast {
         into "../../java/com.sap.sailing.www/apps"
         rename { String fileName -> fileName.replace("-release-unsigned", "") }
     }
-//
-//    // Create version file
-//    xmlFile = file("$wwwFolder/$packageName.version")
+
+    // Create version file
+    def versionFile = file("../../java/com.sap.sailing.www/apps/$packageName." + "version")
+    versionFile.text = "$packageName" + ".apk=$verCode"
 }
