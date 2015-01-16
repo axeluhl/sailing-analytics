@@ -13,4 +13,10 @@
     <issue id="GradleOverrides">
     		<ignore path="AndroidManifest.xml" />
     </issue>
+
+		<!-- Reason: Yes, overlap possible, but can easily be caught by testers / also: not critical -->
+    <issue id="RelativeOverlap">
+    		<ignore path="res/layout/fragment_tracking.xml" />
+    		<ignore path="res/layout-land/fragment_tracking.xml" />
+    </issue>
 </lint>
