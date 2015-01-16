@@ -1,8 +1,5 @@
 apply plugin: 'com.android.library'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 android {
     buildToolsVersion "21.1.2"
     compileSdkVersion 21
