@@ -462,6 +462,7 @@ Get details about a training's course.
   ]
 }
 ```
+TODO Possible values for ``course_type`` must be defined.
 
 #### Update Course
 
