@@ -30,11 +30,10 @@ android {
 }
 
 dependencies {
+    compile "com.googlecode.json-simple:json-simple:1.1.1"
+
     /* support libraries */
     compile "com.android.support:appcompat-v7:21.0.3"
-//    compile "com.android.support:multidex:1.0.0"
-
-    compile "com.googlecode.json-simple:json-simple:1.1.1"
 
     /* local dependencies */
     compile project(":java:com.sap.sailing.domain.common")
@@ -43,5 +42,5 @@ dependencies {
     compile project(":java:com.sap.sse.common")
 
     /* all local jar-libs */
-    compile fileTree(dir: "libs", include: ["*.jar"], exclude: ["json*.jar"])
+//    compile fileTree(dir: "libs", include: ["*.jar"])
 }
