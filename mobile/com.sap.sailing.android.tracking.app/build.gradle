@@ -1,8 +1,5 @@
 apply plugin: "com.android.application"
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 def packageName = "com.sap.sailing.android.tracking.app"
 def verCode = 1
 
@@ -15,7 +12,8 @@ android {
         minSdkVersion 14
         targetSdkVersion 21
         versionCode verCode
-        versionName "1 - Altitude"
+        versionName "$verCode - Altitude"
+        useJack false
     }
 
     sourceSets {
@@ -72,24 +70,26 @@ dependencies {
 // Custom tasks
 
 /**
- * Deletes apk and xml from www apps directory
+ * Deletes apk and version from www apps directory
  */
 clean.doLast {
-//    delete(fileTree(dir: "../../java/com.sap.sailing.www/apps", includes: "com.sap.sailing.android.tracking.*.*"))
+    ant.delete() {
+        fileset(dir: file("../../java/com.sap.sailing.www/apps"), includes: "$packageName*")
+    }
 }
 
 /**
- * Copies apk into www apps directory and create xml file
+ * Copies apk into www apps directory and create version file
  */
 build.doLast {
-//    // Copy APK file
-//    copy {
-//        from ("build/outputs/apk") {
-//            include "**/*release*.apk"
-//        }
-//        into "../../java/com.sap.sailing.wwww/apps"
-//        rename { String fileName -> fileName.replace("-release-unsigned", "") }
-//    }
+    // Copy APK file
+    copy {
+        from ("build/outputs/apk") {
+            include "**/*release-unsigned.apk"
+        }
+        into "../../java/com.sap.sailing.www/apps"
+        rename { String fileName -> fileName.replace("-release-unsigned", "") }
+    }
 //
 //    // Create version file
 //    xmlFile = file("$wwwFolder/$packageName.version")

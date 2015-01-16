@@ -1,18 +1,19 @@
 apply plugin: "com.android.application"
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+def packageName = "com.sap.sailing.racecommittee.app"
+def verCode = 6
 
 android {
     buildToolsVersion "21.1.2"
     compileSdkVersion 21
 
     defaultConfig {
-        applicationId "com.sap.sailing.racecommittee.app"
+        applicationId packageName
         minSdkVersion 13
         targetSdkVersion 21
-        versionCode 6
-        versionName "6 - Laser"
+        versionCode verCode
+        versionName "$verCode - Laser"
+        useJack false
     }
 
     sourceSets {
@@ -20,6 +21,7 @@ android {
             manifest.srcFile "AndroidManifest.xml"
             java.srcDirs = ["src"]
             res.srcDirs = ["res"]
+            assets.srcDirs = ['assets']
         }
     }
 
@@ -65,3 +67,30 @@ dependencies {
     compile fileTree(dir: "libs", include: ["*.jar"])
 }
 
+// Custom tasks
+
+/**
+ * Deletes apk and version from www apps directory
+ */
+clean.doLast {
+    ant.delete() {
+        fileset(dir: file("../../java/com.sap.sailing.www/apps"), includes: "$packageName*")
+    }
+}
+
+/**
+ * Copies apk into www apps directory and create version file
+ */
+build.doLast {
+    // Copy APK file
+    copy {
+        from ("build/outputs/apk") {
+            include "**/*release-unsigned.apk"
+        }
+        into "../../java/com.sap.sailing.www/apps"
+        rename { String fileName -> fileName.replace("-release-unsigned", "") }
+    }
+//
+//    // Create version file
+//    xmlFile = file("$wwwFolder/$packageName.version")
+}
