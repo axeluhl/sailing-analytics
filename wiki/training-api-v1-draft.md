@@ -429,7 +429,7 @@ This call is used by the initiator accept or deny a join request.
 ``status`` can have the values ``open``, ``denied``, ``accepted``
 
 **Response:**
- ```
+```
 {
   "join_request_id": "7f06f4e629a40de268ceaa22bba16f2b"
   "status": "accepted",
