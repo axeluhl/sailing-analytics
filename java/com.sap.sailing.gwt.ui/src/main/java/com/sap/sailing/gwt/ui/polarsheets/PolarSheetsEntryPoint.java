@@ -4,31 +4,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sse.gwt.client.EntryPointHelper;
 
 public class PolarSheetsEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher {
 
     private Set<RegattasDisplayer> regattaDisplayers;
 
-    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
-
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
-
         regattaDisplayers = new HashSet<RegattasDisplayer>();
         createUI();
         fillRegattas();

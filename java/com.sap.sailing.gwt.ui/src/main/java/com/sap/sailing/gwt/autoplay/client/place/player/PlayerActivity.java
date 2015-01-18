@@ -10,12 +10,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-public class PlayerActivity extends AbstractActivity implements ErrorReporter {
+public class PlayerActivity extends AbstractActivity {
     private final PlayerClientFactory clientFactory;
     private final PlayerPlace playerPlace;
     private AutoPlayController autoPlayController; 
@@ -47,7 +46,7 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
                 RootLayoutPanel.get().add(view.asWidget());
 
                 autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory
-                        .getMediaService(), clientFactory.getUserService(), PlayerActivity.this, playerPlace
+                        .getMediaService(), clientFactory.getUserService(), clientFactory.getErrorReporter(), playerPlace
                         .isFullscreen(), /* leaderboardGroupName */"", playerPlace.getLeaderboardIdAsNameString(),
                         playerPlace.getLeaderboardZoom(), userAgent, delayToLiveMillis, showRaceDetails,
                         readRaceboardConfiguration, view);
@@ -85,24 +84,4 @@ public class PlayerActivity extends AbstractActivity implements ErrorReporter {
         ErrorView view = clientFactory.createErrorView(errorMessage, errorReason);
         panel.setWidget(view.asWidget());
     }
-    
-    @Override
-    public void reportError(String message) {
-        Window.alert(message);
-    }
-
-    @Override
-    public void reportError(String message, boolean silentMode) {
-        if (silentMode) {
-            Window.setStatus(message);
-        } else {
-            reportError(message);
-        }
-    }
-
-    @Override
-    public void reportPersistentInformation(String message) {
-        Window.setStatus(message);
-    }
-
 }
