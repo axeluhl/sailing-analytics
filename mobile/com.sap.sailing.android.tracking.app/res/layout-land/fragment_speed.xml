@@ -12,7 +12,7 @@
         android:id="@+id/speed_header_text_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/sog"
+        android:text="@string/speed_over_ground"
         android:textColor="@android:color/darker_gray"
         android:textSize="14sp"
         android:paddingLeft="10dp"

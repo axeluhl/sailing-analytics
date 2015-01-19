@@ -91,13 +91,21 @@ public class AppPreferences {
     public void setCompetitorId(String id) {
         preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).commit();
     }
+
+    public void setEnergySavingEnabledByUser(boolean newValue) {
+        preferences.edit().putBoolean(context.getString(R.string.preference_energy_saving_enabled_key), newValue).commit();
+    }
     
     public boolean getEnergySavingEnabledByUser() {
     	return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
     }
+
+    public void setDisplayHeadingWithSubtractedDeclination(boolean newValue) {
+        preferences.edit().putBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), newValue).commit();
+    }
     
     public boolean getDisplayHeadingWithSubtractedDeclination() {
-    	return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_enabled), true);
+    	return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), true);
     }
     
     public void setTrackingTimerStarted(long milliseconds)
