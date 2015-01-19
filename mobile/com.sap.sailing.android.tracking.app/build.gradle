@@ -23,17 +23,21 @@ android {
             res.srcDirs = ["res"]
             assets.srcDirs = ['assets']
         }
+
+    signingConfigs {
+        stg_debug {
+            keyAlias 'stg_debug'
+            keyPassword 'stg_debug'
+            storeFile file('../android-keystore/STG-debug.jks')
+            storePassword 'stg_debug'
+        }
     }
 
     buildTypes {
         debug {
             applicationIdSuffix ".dev"
             versionNameSuffix ".debug"
-
-/*
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-project.txt", "../proguard-mobile.txt"
-*/
+            signingConfig signingConfigs.stg_debug
         }
 
         release {
