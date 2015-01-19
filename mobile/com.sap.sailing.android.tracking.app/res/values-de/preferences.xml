@@ -6,10 +6,10 @@
     <string name="preference_energy_saving_is_disabled">Aus</string>
     <string name="prefrence_energy_saving_summary_is_enabled">GPS Updates werden alle 30 Sekunden verschickt.</string>
     <string name="prefrence_energy_saving_summary_is_disabled">GPS Updates werden alle 3 Sekunden verschickt.</string>
-    <string name="preference_heading_with_declination_subtracted_key_is_enabled">Ein</string>
-    <string name="preference_heading_with_declination_subtracted_key_is_disabled">Aus</string>
-    <string name="preference_heading_with_declination_subtracted_key_summary_is_enabled">Anzeige: Magnetkompasskurs ohne Ablenkung</string>
-    <string name="preference_heading_with_declination_subtracted_key_summary_is_disabled">Anzeige: Magnetkompasskurs mit Ablenkung</string>
+    <string name="preference_heading_with_declination_subtracted_is_enabled">Ein</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">Aus</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Anzeige: Ablenkung abziehen</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Anzeige: Course over Ground</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Richtung</string>
     
     
