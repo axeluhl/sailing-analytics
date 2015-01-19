@@ -604,6 +604,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
+        ( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | $ANDROID_HOME/tools/android update sdk --no-ui
         ./gradlew clean build
     else
         echo "INFO: Deactivating mobile modules"
