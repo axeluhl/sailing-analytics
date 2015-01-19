@@ -18,11 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // set up hockey app, used for crash reports and beta testing
-        BITHockeyManager.sharedHockeyManager().configureWithIdentifier("8c2070839f98ada3aff80a0882dd29e0")
-        BITHockeyManager.sharedHockeyManager().startManager()
-        BITHockeyManager.sharedHockeyManager().authenticator.authenticateInstallation()
-  
+
         // set up connection logging for debug builds
         #if DEBUG
         AFNetworkActivityLogger.sharedLogger().startLogging()

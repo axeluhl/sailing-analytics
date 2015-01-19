@@ -59,22 +59,17 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - UIActionSheetDelegate
     
     @IBAction func showActionSheet(sender: AnyObject) {
-        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Feedback", "Settings", "About", "Cancel")
+        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Settings", "About", "Cancel")
         actionSheet.cancelButtonIndex = 3
         actionSheet.showInView(view)
     }
     
     func actionSheet(actionSheet: UIActionSheet!, clickedButtonAtIndex buttonIndex: Int) {
         switch buttonIndex{
-        case 0:
-            let feedbackComposeViewController = BITHockeyManager.sharedHockeyManager().feedbackManager.feedbackComposeViewController()
-            let navController = UINavigationController(rootViewController: feedbackComposeViewController)
-            navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet;
-            presentViewController(navController, animated: true, completion: nil)
-        case 1:
+         case 0:
             performSegueWithIdentifier("Settings", sender: actionSheet)
             break
-        case 2:
+        case 1:
             performSegueWithIdentifier("About", sender: actionSheet)
             break
         default:
