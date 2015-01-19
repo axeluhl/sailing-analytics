@@ -128,8 +128,10 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
             case .Update:
                 let cell = tableView.cellForRowAtIndexPath(indexPath)
-                configureCell(cell!, atIndexPath: indexPath)
-                tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                if cell != nil {
+                    configureCell(cell!, atIndexPath: indexPath)
+                    tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                }
             case .Move:
                 tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
                 tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
