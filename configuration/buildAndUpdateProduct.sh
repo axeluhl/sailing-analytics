@@ -80,7 +80,7 @@ testing=1
 clean="clean"
 offline=0
 proxy=0
-android=0
+android=1
 reporting=0
 suppress_confirmation=0
 extra=''
@@ -180,6 +180,7 @@ fi
 
 
 if [[ "$@" == "clean" ]]; then
+    ./gradlew clean
     cd $PROJECT_HOME/java
     rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
     rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.*
@@ -603,7 +604,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
-        
+        ./gradlew clean build
     else
         echo "INFO: Deactivating mobile modules"
         extra="$extra -P !with-mobile"
