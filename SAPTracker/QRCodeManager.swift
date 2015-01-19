@@ -151,18 +151,23 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         let competitorId = competitorDictionary!["id"] as String
         let now = NSDate()
         let fromMillis = Int64(now.timeIntervalSince1970 * 1000)
+        let checkIn = DataManager.sharedManager.newCheckIn()
+        checkIn.serverUrl = self.qrcodeData!.serverUrl!
+        checkIn.eventId = self.qrcodeData!.eventId!
+        checkIn.leaderBoardName = self.qrcodeData!.leaderBoardName!.stringByReplacingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+        checkIn.competitorId = self.qrcodeData!.competitorId!
+        checkIn.lastSyncDate = NSDate()
+        
         // TODO: add push token
         APIManager.sharedManager.checkIn(leaderBoardName, competitorId: competitorId, deviceUuid: DeviceUDIDManager.UDID, pushDeviceId: "", fromMillis: fromMillis,
             success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
                 
                 // create core data objects
-                var event = DataManager.sharedManager.event(self.qrcodeData!.eventId!)
-                event.serverUrl = self.qrcodeData!.serverUrl!
+                var event = DataManager.sharedManager.newEvent(checkIn)
                 event.initWithDictionary(self.eventDictionary!)
-                event.lastSyncDate = NSDate()
-                var leaderBoard = DataManager.sharedManager.leaderBoard(event)
+                var leaderBoard = DataManager.sharedManager.newLeaderBoard(checkIn)
                 leaderBoard.initWithDictionary(self.leaderBoardDictionary!)
-                var competitor = DataManager.sharedManager.competitor(leaderBoard)
+                var competitor = DataManager.sharedManager.newCompetitor(checkIn)
                 competitor.initWithDictionary(self.competitorDictionary!)
                 DataManager.sharedManager.saveContext()
 

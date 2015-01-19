@@ -98,10 +98,9 @@ class SAPTrackerAPITests: XCTestCase {
         XCTAssertEqual(event.name, "505 Worlds 2013")
         XCTAssertEqual(event.startDate, NSDate(timeIntervalSince1970: 1429653600))
         XCTAssertEqual(event.endDate, NSDate(timeIntervalSince1970: 1430604000))
-        XCTAssertEqual(event.imageUrl!, "http://static.sapsailing.com/ubilabsimages/505Worlds2013_eventteaser.jpg")
         
         // delete test object
-        DataManager.sharedManager.deleteEvent(event)
+        DataManager.sharedManager.managedObjectContext!.deleteObject(event)
     }
     
     // MARK: - Leader Board

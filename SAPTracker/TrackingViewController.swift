@@ -28,11 +28,8 @@ class TrackingViewController : UIViewController {
         super.viewDidLoad()
   
         // set values
-        navigationItem.title = DataManager.sharedManager.selectedEvent!.leaderBoard!.name
+        navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
         cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
-        
-        // set tracking event, data for this event is sent in higher priority
-        SendGPSFixController.sharedManager.trackingEvent = DataManager.sharedManager.selectedEvent
         
         // set online/buffering label
         networkAvailabilityChanged()

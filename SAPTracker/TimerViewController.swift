@@ -56,7 +56,7 @@ class TimerViewController: UIViewController, UIAlertViewDelegate {
                 break
             default:
                 LocationManager.sharedManager.stopTracking()
-                SendGPSFixController.sharedManager.trackingEvent = nil
+                SendGPSFixController.sharedManager.checkIn = nil
                 self.dismissViewControllerAnimated(true, nil)
             }
             break

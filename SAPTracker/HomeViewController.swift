@@ -27,7 +27,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         qrCodeManager = QRCodeManager(delegate: self)
         
         // set up data source for list
-        fetchedResultsController = DataManager.sharedManager.eventsFetchedResultsController()
+        fetchedResultsController = DataManager.sharedManager.checkInFetchedResultsController()
         fetchedResultsController!.delegate = self
         fetchedResultsController!.performFetch(nil)
         
@@ -42,13 +42,12 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         // check that user accepted terms
         if !AcceptTermsViewController.acceptedTerms() {
             performSegueWithIdentifier("EULA", sender: nil)
-            
         }
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        DataManager.sharedManager.selectedEvent = nil;
+        DataManager.sharedManager.selectedCheckIn = nil;
     }
 
     func openUrl(notification: NSNotification) {
@@ -111,8 +110,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        let event = fetchedResultsController!.objectAtIndexPath(indexPath) as Event
-        cell.textLabel?.text = event.leaderBoard?.name
+        let checkIn = fetchedResultsController!.objectAtIndexPath(indexPath) as CheckIn
+        cell.textLabel?.text = checkIn.leaderBoardName
     }
     
     // MARK: - NSFetchedResultsControllerDelegate
@@ -149,7 +148,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - UITableViewDelegate
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        DataManager.sharedManager.selectedEvent = (fetchedResultsController!.objectAtIndexPath(indexPath) as Event)
+        DataManager.sharedManager.selectedCheckIn = (fetchedResultsController!.objectAtIndexPath(indexPath) as CheckIn)
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         performSegueWithIdentifier("Regatta", sender: tableView)
     }

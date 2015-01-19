@@ -9,15 +9,14 @@
 import Foundation
 
 class AcceptTermsViewController: UIViewController {
-   
+    
     struct Keys {
         static let acceptedTerms = "acceptedTerms"
     }
     class func acceptedTerms()->Bool {
-        
         return NSUserDefaults.standardUserDefaults().boolForKey(Keys.acceptedTerms)
     }
-   
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         let urlpath = NSBundle.mainBundle().pathForResource("eula-ios", ofType: "html");
@@ -33,7 +32,9 @@ class AcceptTermsViewController: UIViewController {
     }
     
     @IBAction func acceptButtonTap(sender: AnyObject) {
-        NSUserDefaults.standardUserDefaults().setBool(true, forKey:Keys.acceptedTerms)
+        let preferences = NSUserDefaults.standardUserDefaults()
+        preferences.setBool(true, forKey:Keys.acceptedTerms)
+        preferences.synchronize()
         dismissViewControllerAnimated(true, completion: nil)
     }
 }

@@ -10,16 +10,16 @@ import Foundation
 import CoreData
 
 public class DataManager: NSObject {
-
-    var selectedEvent: Event?
-
+    
+    var selectedCheckIn: CheckIn?
+    
     public class var sharedManager: DataManager {
         struct Singleton {
             static let sharedManager = DataManager()
         }
         return Singleton.sharedManager
     }
-
+    
     override init() {
         super.init()
         
@@ -31,13 +31,13 @@ public class DataManager: NSObject {
         // save context when done tracking
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStopped:", name: LocationManager.NotificationType.trackingStopped, object: nil)
     }
-
+    
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     // MARK: - notification callbacks
-
+    
     /* New location detected, store to database. */
     func newLocation(notification: NSNotification) {
         if notification == NSNull() {
@@ -45,45 +45,38 @@ public class DataManager: NSObject {
         }
         let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as GPSFix
         gpsFix.initWithDictionary(notification.userInfo!)
-        gpsFix.event = selectedEvent!
+        if selectedCheckIn == nil {
+            abort();
+        }
+        gpsFix.checkIn = selectedCheckIn!
+        saveContext()
     }
     
     /* Tracking stopped, save data to disk. */
     func trackingStopped(notification: NSNotification) {
         saveContext()
     }
-
+    
     // MARK: - public database access
-
-    func event(eventId: String) -> Event {
-        let fetchRequest = NSFetchRequest(entityName: "Event")
-        fetchRequest.predicate = NSPredicate(format: "eventId = %@", eventId)
-        var error: NSError? = nil
-        let results = self.managedObjectContext!.executeFetchRequest(fetchRequest, error: &error)
-        if (results != nil && results!.count > 0) {
-            return results![0] as Event
-        } else {
-            return NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: self.managedObjectContext!) as Event
-        }
+    func newCheckIn()->CheckIn {
+        return NSEntityDescription.insertNewObjectForEntityForName("CheckIn", inManagedObjectContext: self.managedObjectContext!) as CheckIn
     }
     
-    func leaderBoard(event: Event) -> LeaderBoard {
-        if event.leaderBoard != nil {
-            return event.leaderBoard!
-        }
+    func newEvent(checkIn: CheckIn) -> Event {
+        var event = NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: self.managedObjectContext!) as Event
+        event.checkIn = checkIn
+        return event
+    }
+    
+    func newLeaderBoard(checkIn: CheckIn) -> LeaderBoard {
         var leaderBoard = NSEntityDescription.insertNewObjectForEntityForName("LeaderBoard", inManagedObjectContext: self.managedObjectContext!) as LeaderBoard
-        leaderBoard.event = event
-        event.leaderBoard = leaderBoard
+        leaderBoard.checkIn = checkIn
         return leaderBoard
     }
     
-    func competitor(leaderBoard: LeaderBoard) -> Competitor {
-        if leaderBoard.competitor != nil {
-            return leaderBoard.competitor!
-        }
+    func newCompetitor(checkIn: CheckIn) -> Competitor {
         var competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: self.managedObjectContext!) as Competitor
-        competitor.leaderBoard = leaderBoard
-        leaderBoard.competitor = competitor
+        competitor.checkIn = checkIn
         return competitor
     }
     
@@ -97,7 +90,7 @@ public class DataManager: NSObject {
         let results = self.managedObjectContext!.executeFetchRequest(fetchRequest, error: &error)
         return results as [GPSFix]
     }
-
+    
     func countCachedFixes() -> Int {
         let request = NSFetchRequest()
         request.entity = NSEntityDescription.entityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!)
@@ -109,16 +102,16 @@ public class DataManager: NSObject {
         }
         return count
     }
-
-    /* Get all sailing events. */
-    func eventsFetchedResultsController()->NSFetchedResultsController {
-        let fetchRequest = NSFetchRequest(entityName: "Event")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "startDate", ascending: true)]
+    
+    /* Get all check ins. */
+    func checkInFetchedResultsController()->NSFetchedResultsController {
+        let fetchRequest = NSFetchRequest(entityName: "CheckIn")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "leaderBoardName", ascending: true)]
         return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext!, sectionNameKeyPath: nil, cacheName: nil)
     }
     
-    public func deleteEvent(event: Event) {
-        self.managedObjectContext!.deleteObject(event)
+    public func deleteCheckIn(checkIn: CheckIn) {
+        self.managedObjectContext!.deleteObject(checkIn)
     }
     
     // MARK: - Core Data stack

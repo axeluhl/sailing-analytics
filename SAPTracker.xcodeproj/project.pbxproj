@@ -283,6 +283,7 @@
 		7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */; };
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
+		7F4EEDBA1A6D2BAC0026F711 /* CheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */; };
 		7F509AC01A69549D0043EC69 /* AcceptTermsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F509ABF1A69549D0043EC69 /* AcceptTermsViewController.swift */; };
 		7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
@@ -607,6 +608,7 @@
 		7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendGPSFixController.swift; sourceTree = "<group>"; };
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 		7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckIn.swift; sourceTree = "<group>"; };
 		7F509ABF1A69549D0043EC69 /* AcceptTermsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AcceptTermsViewController.swift; sourceTree = "<group>"; };
 		7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplashScreenDummy.swift; sourceTree = "<group>"; };
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -693,6 +695,7 @@
 			isa = PBXGroup;
 			children = (
 				7F0658FE19F7EE910077FF95 /* QRCodeData.swift */,
+				7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */,
 				7FCDB65F1A1636610075D7D9 /* Event.swift */,
 				7FCDB6601A1636610075D7D9 /* LeaderBoard.swift */,
 				7FCDB6611A1636610075D7D9 /* Competitor.swift */,
@@ -1537,6 +1540,7 @@
 				7FCDB6621A1636610075D7D9 /* GPSFix.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
+				7F4EEDBA1A6D2BAC0026F711 /* CheckIn.swift in Sources */,
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
 				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
