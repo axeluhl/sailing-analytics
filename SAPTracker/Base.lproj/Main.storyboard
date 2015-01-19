@@ -149,9 +149,6 @@
                                                 </label>
                                             </subviews>
                                         </tableViewCellContentView>
-                                        <connections>
-                                            <segue destination="m2Z-l8-J2c" kind="presentation" identifier="EULA" id="WUg-uT-i5F"/>
-                                        </connections>
                                     </tableViewCell>
                                 </prototypes>
                                 <connections>
@@ -204,6 +201,7 @@
                         <segue destination="plm-Uw-c62" kind="show" identifier="Scan" id="U8l-If-CrF"/>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Xxn-jp-xEB"/>
                         <segue destination="dfN-Ch-vpm" kind="presentation" identifier="About" id="QMa-LQ-D8c"/>
+                        <segue destination="m2Z-l8-J2c" kind="presentation" identifier="EULA" id="vUb-1Q-chO"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
