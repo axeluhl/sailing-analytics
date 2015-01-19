@@ -1,4 +1,4 @@
-# Training API V1 – draft
+# Training API V1 – draft
 
 ## Introduction
 
@@ -20,7 +20,7 @@ Use cases include:
     * Analyze sessions
     * View history
 
-Please note that this interface is independant of the race tracking API described here: http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft
+Please note that this interface is independent of the race tracking API described here: http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft
 
 ## Endpoint
 
@@ -61,7 +61,7 @@ This should be the only API call that doesn't need the ``X-Access-Token`` header
 
 ```
 {
-  "access_token" : "57f1e17d64d93597956d56b362ae52ec"
+  "accessToken" : "57f1e17d64d93597956d56b362ae52ec"
 }
 ```
 On incorrect login, HTTP status code ``401`` is returned.
@@ -82,14 +82,12 @@ Users are not competitors as definied in the race tracking API. A user is a pers
 
 The ``users`` object has the following properties:
 
-* ``user_id`` server generated key for user
+* ``userId`` server generated key for user
 * ``email`` email address is used for logging in, therefore it is unique
-* ``name`` full name of user, displayed on user's device and on others' invite list
+* ``name`` optional, full name of user, displayed on user's device and on others' invite list
 * ``password`` password of user, preferably hashed, see login further below
-* ``sailing_club`` optional, name of sailing club
-* ``city`` optional, city of user
 * ``countryCode`` optional, country code of user
-* ``profile_image_url`` optional, URL pointing to user's profile image
+* ``profileImageUrl`` optional, URL pointing to user's profile image
 
 ### Get Details of Logged In User
 
@@ -102,12 +100,10 @@ Called for getting details of logged in user, typically after login.
 **Response:**
 ```
 {
-  "user_id" : "9871d3a2c554b27151cacf1422eec048",
+  "userId" : "9871d3a2c554b27151cacf1422eec048",
   "email" : "anna@web.de",
   "name" : "Anna",
-  "city" : "Waldorf",
-  "countryCode" : "DE",
-  ...
+  "countryCode" : "DE"
 }
 ```
 
@@ -117,19 +113,17 @@ The password is omitted from the response.
 
 Called for getting details of other users, e.g. on invite to training.
 
-**Path:** ``users/{user_id}``
+**Path:** ``users/{userId}``
 
 **Verb:** ``GET``
 
 **Response:**
 ```
 {
-  "user_id" : "d34974c6fca82061398f88bd1ab993c7",
+  "userId" : "d34974c6fca82061398f88bd1ab993c7",
   "email" : "berta@web.de",
   "name" : "Berta",
-  "city" : "Waldorf",
-  "countryCode" : "DE",
-  ...
+  "countryCode" : "DE"
 }
 ```
 
@@ -154,12 +148,12 @@ Called on registration.
 
 **Response:**
 
-On registration, user details as well as an ``access_token`` are returned (latter to short-cut a call to ``login``).
+On registration, user details as well as an ``accessToken`` are returned (latter to short-cut a call to ``login``).
 
 ```
 {
-  "access_token" : "0e0530c1430da76495955eb06eb99d95",
-  "user_id" : "9871d3a2c554b27151cacf1422eec048",
+  "accessToken" : "0e0530c1430da76495955eb06eb99d95",
+  "userId" : "9871d3a2c554b27151cacf1422eec048",
   "email" : "anna@web.de",
   "name" : "Anna"
 }
@@ -170,15 +164,14 @@ The password is omitted from the response.
 
 Update a user. Only sent properties are updated, all others remain untouched. To delete a value, it must be set to ``null``.
 
-**Path:** ``users/{user_id}``
+**Path:** ``users/{userId}``
 
 **Verb:** ``PUT``
 
 **Request:**
 ```
 {
-  "name" : "Anna",
-  "city" : "New York",
+  "name" : "Anna B.",
   "countryCode" : "US"
 }
 ```
@@ -186,12 +179,10 @@ Update a user. Only sent properties are updated, all others remain untouched. To
 **Response:**
 ```
 {
-  "user_id" : "9871d3a2c554b27151cacf1422eec048",
+  "userId" : "9871d3a2c554b27151cacf1422eec048",
   "email" : "anna@web.de",
-  "name" : "Anna",
-  "city" : "New York",
-  "countryCode" : "US",
-  ...
+  "name" : "Anna B.",
+  "countryCode" : "US"
 }
 ```
 The password is omitted from the response.
@@ -200,7 +191,7 @@ The password is omitted from the response.
 
 A multipart message is used to upload a profile image.
 
-**Path:** ``me/{user_id}/profile_image``
+**Path:** ``me/profileImage``
 
 **Verb:** ``POST``
 
@@ -211,12 +202,10 @@ Multipart message with ``image`` part containing encoded JPEG or PNG image.
 **Response:**
 ```
 {
-  "profile_image_url" : "http://training.sapsailing.com/profile_images/9871d3a2c554b27151cacf1422eec048.jpeg"
+  "profileImageUrl" : "http://training.sapsailing.com/profileImages/9871d3a2c554b27151cacf1422eec048.jpeg"
 }
 ```
 The response contains the URL of the uploaded image.
-
-***
 
 ## Training
 
@@ -224,13 +213,13 @@ A training is defined by a course, participants and is split into sessions.
 
 ### Properties
 
-The ``trainings`` object has the following properties:
+The ``training`` object has the following properties:
 
-* ``training_id`` server generated key for training session
-* ``create_date`` timestamp, date training was created
-* ``finish_date`` timestamp, date training was finished
-* ``create_user_id`` ID of user that created training session
-* ``user_ids`` array of user IDs participating
+* ``trainingId`` server generated key for training session
+* ``createDate`` timestamp, date training was created
+* ``finishDate`` timestamp, date training was finished
+* ``createUserId`` ID of user that created training session
+* ``userIds`` array of user IDs participating
 * ``course`` object describing course, e.g. type, GPS coordinates of marks
 * ``wind`` object describing wind, i.e. direction and speed
 * ``markers`` array containing timestamps of markers set during training
@@ -238,25 +227,35 @@ The ``trainings`` object has the following properties:
 
 ### Get Training
 
-Get complete details about a training.
+Get complete details about a training. These include:
 
-**Path:** ``trainings/{training_id}``
+* course
+* wind
+* list of join requests
+* list of markers
+* list of sessions
+
+**Path:** ``training/{trainingId}``
 
 **Verb:** ``GET``
 
 **Response:**
 ```
 {
-  "training_id" : "c185ddac8b5a8f5aa23c5b80bc12d214",
-  "create_user_id" : "9871d3a2c554b27151cacf1422eec048",
-  "create_date" : 14144160080000,
-  "finish_date" : 14144180080000,
+  "trainingId" : "c185ddac8b5a8f5aa23c5b80bc12d214",
+  "createUser" : {
+    "userId" : "9871d3a2c554b27151cacf1422eec048",
+    "name" : "John Doe",
+    "deviceId" : "d1985d09f09be0203a2d81fa7f62c2a7"
+  }
+  "createDate" : 14144160080000,
+  "finishDate" : 14144180080000,
   "course" : {
-    "course_type" : "triangle",
+    "courseType" : "triangle",
     "marks" : [
       {
-        "mark_id" : "ac673f4dbac79922838901b5974a419a",
-        "mark_type" : "pin_end",
+        "markId" : "ac673f4dbac79922838901b5974a419a",
+        "markType" : "pinEnd",
         "latitude" : 55.12456,
         "longitude" : 8.03456
       }  
@@ -266,9 +265,18 @@ Get complete details about a training.
     "direction" : 14.2,
     "speed" : 5.1
   },
+  "joinRequests" : [
+    {
+      "joinRequestId": "7f06f4e629a40de268ceaa22bba16f2b"
+      "status": "accepted",
+      "userId" : "9871d3a2c554b27151cacf1422eec048",
+      "name" : "Anna",
+      "deviceId" : "9d2156743e689119c4e4c28a4eb81153"
+    } 
+  ],
   "markers" : [
     {
-      "marker_id" : "111dda7aaed6fb03a543e8adb272393c",
+      "markerId" : "111dda7aaed6fb03a543e8adb272393c",
       "timestamp" : 14144168490000,
       "latitude" : 55.12456,
       "longitude" : 8.03456
@@ -276,7 +284,7 @@ Get complete details about a training.
   ],
   "sessions" : [
     {
-      "session_id" : "21d6f40cfb511982e4424e0e250a9557",
+      "sessionId" : "21d6f40cfb511982e4424e0e250a9557",
       "start" : 14144168490000,
       "finish" : 14144190000000
     }
@@ -288,23 +296,28 @@ Get complete details about a training.
 
 Start a new training.
 
-**Path:** ``trainings``
+**Path:** ``training``
 
 **Verb:** ``POST``
 
 **Request:**
 ```
 {
-  "create_user_id" : "9871d3a2c554b27151cacf1422eec048",
-  "create_date" : 14144160080000
+  "createUserId" : "9871d3a2c554b27151cacf1422eec048",
+  "createDate" : 14144160080000,
+  "deviceId" : "d1985d09f09be0203a2d81fa7f62c2a7"
 }
 ```
 **Response:**
 ```
 {
-  "training_id" : "c185ddac8b5a8f5aa23c5b80bc12d214",
-  "create_user_id" : "9871d3a2c554b27151cacf1422eec048",
-  "create_date" : 14144160080000
+  "trainingId" : "c185ddac8b5a8f5aa23c5b80bc12d214",
+  "createUser" : {
+    "userId" : "9871d3a2c554b27151cacf1422eec048",
+    "name" : "John Doe",
+    "deviceId" : "d1985d09f09be0203a2d81fa7f62c2a7"
+  }
+  "createDate" : 14144160080000
 }
 ```
 
@@ -312,34 +325,122 @@ Start a new training.
 
 Finish a training.
 
-**Path:** ``trainings/{training_id}/finish``
+**Path:** ``training/{trainingId}/finish``
 
 **Verb:** ``POST``
 
 **Request:**
 ```
 {
-  "finish_date" : 14144180080000
+  "finishDate" : 14144180080000
 }
 ```
 
 ### Users
 
-#### Get List of Nearby Users 
+When a user sets up a training, the device GPS location is sent to the server. Nearby users can see the training and request to join in. The author of the training can than accept join requests.
 
-TODO
+#### Get List of Nearby Trainings 
 
-#### Get List of Participating Users
+This call gets all training possiblilities nearby.
 
-TODO
+**Path:** ``training/nearby``
 
-#### Invite User
+**Verb:** ``GET``
 
-TODO
+**Response:**
+```
+{
+  "nearby" : [
+    {
+      "trainingId" : "c185ddac8b5a8f5aa23c5b80bc12d214",
+      "createUserId" : "9871d3a2c554b27151cacf1422eec048",
+      "createUserName" : "John Doe",
+      "createDate" : 14144160080000
+    }
+  ]
+}
+```
 
-#### Accept Invitation
+#### Send a Join Request
 
-TODO
+This call is used by the users who wants to join a training.
+
+This call gets all training possibilities nearby.
+
+**Path:** ``training/{trainingId}/joinRequest``
+
+**Verb:** ``POST``
+
+**Request:**
+```
+{
+  "userId" : "9871d3a2c554b27151cacf1422eec048",
+  "name" : "Anna",
+  "deviceId" : "d1985d09f09be0203a2d81fa7f62c2a7"
+}
+```
+**Response:**
+```
+{
+  "joinRequestId": "7f06f4e629a40de268ceaa22bba16f2b"
+  "status": "open",
+  "userId" : "9871d3a2c554b27151cacf1422eec048",
+  "name" : "Anna",
+  "deviceId" : "d1985d09f09be0203a2d81fa7f62c2a7"
+}
+```
+
+#### Get List of Join Requests
+
+This call is used by the initiator to see who wants to join in.
+
+**Path:** ``training/{trainingId}/joinRequests``
+
+**Verb:** ``GET``
+
+**Response:**
+```
+{
+  "joinequests": [
+    {
+      "joinRequestId": "7f06f4e629a40de268ceaa22bba16f2b"
+      "status": "open",
+      "userId" : "9871d3a2c554b27151cacf1422eec048",
+      "name" : "Anna",
+      "deviceId" : "d1985d09f09be0203a2d81fa7f62c2a7"
+    }
+  ]
+}
+```
+``status`` can have the values ``open``, ``denied``, ``accepted``
+
+#### Accept or Deny a Join Request
+
+This call is used by the initiator accept or deny a join request.
+
+**Path:** ``training/{trainingId}/joinRequests/{joinRequestId}``
+
+**Verb:** ``PUT``
+
+**Request:**
+```
+{
+  "status" : "accepted"
+}
+```
+``status`` can have the values ``open``, ``denied``, ``accepted``
+
+**Response:**
+```
+{
+  "joinRequestId": "7f06f4e629a40de268ceaa22bba16f2b"
+  "status": "accepted",
+  "userId" : "9871d3a2c554b27151cacf1422eec048",
+  "name" : "Anna",
+  "deviceId" : "d1985d09f09be0203a2d81fa7f62c2a7"
+}
+```
 
 ### Course
 
@@ -347,45 +448,46 @@ TODO
 
 Get details about a training's course.
 
-**Path:** ``trainings/{training_id}/course``
+**Path:** ``training/{trainingId}/course``
 
 **Verb:** ``GET``
 
 **Response:**
 ```
 {
-  "course_type" : "triangle",
+  "courseType" : "triangle",
   "marks" : [
     {
-      "mark_id" : "ac673f4dbac79922838901b5974a419a",
-      "mark_type" : "pin_end",
+      "markId" : "ac673f4dbac79922838901b5974a419a",
+      "markType" : "pinEnd",
       "latitude" : 55.12456,
       "longitude" : 8.03456
     }  
   ]
 }
 ```
+TODO Possible values for ``courseType`` must be defined.
 
 #### Update Course
 
 Currently only the course type can be set.
 
-**Path:** ``trainings/{training_id}/course``
+**Path:** ``training/{trainingId}/course``
 
 **Verb:** ``PUT``
 
 **Request:**
 ```
 {
-  "course_type" : "triangle"
+  "courseType" : "triangle"
 }
 ```
-TODO Possible values for ``course_type`` must be defined.
+TODO Possible values for ``courseType`` must be defined.
 
 **Response:**
 ```
 {
-  "course_type" : "triangle"
+  "courseType" : "triangle"
 }
 ```
 
@@ -393,22 +495,22 @@ TODO Possible values for ``course_type`` must be defined.
 
 Creates the race course for training.
 
-**Path:** ``trainings/{training_id}/course``
+**Path:** ``training/{trainingId}/course``
 
 **Verb:** ``POST``
 
 **Request:**
 ```
 {
-  "course_type" : "triangle"
+  "courseType" : "triangle"
 }
 ```
-TODO Possible values for ``course_type`` must be defined.
+TODO Possible values for ``courseType`` must be defined.
 
 **Response:**
 ```
 {
-  "course_type" : "triangle"
+  "courseType" : "triangle"
 }
 ```
 
@@ -416,25 +518,25 @@ TODO Possible values for ``course_type`` must be defined.
 
 Sets a course mark, e.g. pin end, leeward mark, windward park, or reach mark.
 
-**Path:** ``trainings/{training_id}/course/marks/{mark_id}``
+**Path:** ``training/{trainingId}/course/marks/{markId}``
 
 **Verb:** ``POST``
 
 **Request:**
 ```
 {
-  "mark_type" : "pin_end",
+  "markType" : "pinEnd",
   "latitude" : 55.12456,
   "longitude" : 8.03456
 }
 ```
-TODO Possible values for ``mark_type`` must be defined.
+TODO Possible values for ``markType`` must be defined.
 
 **Response:**
 ```
 {
-  "mark_id" : "ac673f4dbac79922838901b5974a419a",
-  "mark_type" : "pin_end",
+  "markId" : "ac673f4dbac79922838901b5974a419a",
+  "markType" : "pinEnd",
   "latitude" : 55.12456,
   "longitude" : 8.03456
 }
@@ -444,7 +546,7 @@ TODO Possible values for ``mark_type`` must be defined.
 
 Deletes a previously defined course mark.
 
-**Path:** ``trainings/{training_id}/course/marks/{mark_id}``
+**Path:** ``training/{trainingId}/course/marks/{markId}``
 
 **Verb:** ``DELETE``
 
@@ -452,7 +554,7 @@ Deletes a previously defined course mark.
 
 Sets wind speed and direction.
 
-**Path:** ``trainings/{training_id}/wind``
+**Path:** ``training/{trainingId}/wind``
 
 **Verb:** ``POST``
 
@@ -473,7 +575,7 @@ During a training, markers are set, these are timestamps. Afterwards, the traini
 
 Sets wind speed and direction.
 
-**Path:** ``trainings/{training_id}/markers``
+**Path:** ``training/{trainingId}/markers``
 
 **Verb:** ``POST``
 
@@ -489,7 +591,7 @@ Sets wind speed and direction.
 **Response:**
 ```
 {
-  "marker_id" : "111dda7aaed6fb03a543e8adb272393c",
+  "markerId" : "111dda7aaed6fb03a543e8adb272393c",
   "timestamp" : 14144168490000,
   "latitude" : 55.12456,
   "longitude" : 8.03456
@@ -498,7 +600,7 @@ Sets wind speed and direction.
 
 #### Create a Session
 
-**Path:** ``trainings/{training_id}/sessions``
+**Path:** ``training/{trainingId}/sessions``
 
 **Verb:** ``POST``
 
@@ -513,7 +615,7 @@ Sets wind speed and direction.
 **Response:**
 ```
 {
-  "session_id" : "21d6f40cfb511982e4424e0e250a9557",
+  "sessionId" : "21d6f40cfb511982e4424e0e250a9557",
   "start" : 14144168490000,
   "finish" : 14144190000000
 }
@@ -521,7 +623,7 @@ Sets wind speed and direction.
 
 #### Update a Session
 
-**Path:** ``trainings/{training_id}/sessions/{session_id}``
+**Path:** ``training/{trainingId}/sessions/{sessionId}``
 
 **Verb:** ``PUT``
 
@@ -536,7 +638,7 @@ Sets wind speed and direction.
 **Response:**
 ```
 {
-  "session_id" : "21d6f40cfb511982e4424e0e250a9557",
+  "sessionId" : "21d6f40cfb511982e4424e0e250a9557",
   "start" : 14144168490000,
   "finish" : 14144190000000
 }
@@ -544,7 +646,7 @@ Sets wind speed and direction.
 
 #### Delete a Session
 
-**Path:** ``trainings/{training_id}/sessions/{session_id}``
+**Path:** ``training/{trainingId}/sessions/{sessionId}``
 
 **Verb:** ``DELETE``
 
@@ -552,7 +654,7 @@ Sets wind speed and direction.
 
 The tracking interface is identical to that of the race tracking API http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Send-Measurements-%28to-the-Fix-Store%29
 
-**Path:** ``gps_fixes``
+**Path:** ``gpsFixes``
 
 **Verb:** ``POST``
 
