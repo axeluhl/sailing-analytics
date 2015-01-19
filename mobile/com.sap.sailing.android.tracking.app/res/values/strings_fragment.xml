@@ -1,43 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="regatta_list_title">Checked-In Regattas</string>
-    <string name="show_more">Show more</string>
-    <string name="scan_intro">GPS-Tracker Configuration for Regatta</string>
     <string name="scan_qr">Scan QR-Code</string>
     <string name="scan_hint">The QR-code can be found on your confirmation of participation</string>
     <string name="no_qr_code">You got no QR-Code?</string>
-    <string name="add_team_picture">Add team picture</string>
-    <string name="messages">Messages:</string>
-    <string name="last_refresh">(last refresh XX min ago)</string>
-    <string name="next_race">Next race in approximately XX min</string>
-    <string name="announcement">Note announcement</string>
     <string name="start_tracking">Start tracking</string>
     <string name="stop_tracking">Stop tracking</string>
-    <string name="empty_regatta_listview">You are not registered for any Regatta</string>
-    <string name="homefragment_volley_404">This data is not available at the server. Please retry.</string>
-    <string name="homefragment_volley_unknown">The server returned an unknown code (%s).</string>
-    <string name="homefragment_volley_unexpected">The server returned an unexpected value.</string>
 	<string name="tracking_gps_accuracy">GPS Accuracy</string>
 	<string name="tracking_mode">Mode</string>
 	<string name="tracking_mode_live">Live</string>
 	<string name="tracking_mode_battery_saving">Battery Saving</string>
 	<string name="tracking_unsent_fixes">Unsent fixes</string>
-	<string name="zero">0</string>
 	<string name="tracking_mode_caching">Offline</string>
 	<string name="tracking_mode_api_error">API-Error</string>
 	<string name="tracking_mode_offline">Offline</string>
 	<string name="tracking_time">Tracking Time</string>
-	<string name="regatta_name" translatable="false">RegattaName</string>
-	<string name="event_name" translatable="false">EventName</string>
-	<string name="competitor_name" translatable="false">CompetitorName</string>	
-	<string name="country_code">Country Code</string>
-	<string name="sail_id" translatable="false">SailId</string>
 	<string name="tracking_status" translatable="false">Status</string>
 	<string name="tracking_status_tracking">Tracking running</string>
-	<string name="tracking_status_not_tracking">Tracking stopped</string>
 	<string name="tracking_status_no_gps_signal">No GPS Signal!</string>
-	<string name="hud_heading_prefix">HDG: </string>
-	<string name="hud_speed_over_ground_prefix">SPD: </string>
 	<string name="desc_regatta_user_image">Regatta User Image</string>
 	<string name="desc_add_photo_button">Add Photo Button</string>
 </resources>
