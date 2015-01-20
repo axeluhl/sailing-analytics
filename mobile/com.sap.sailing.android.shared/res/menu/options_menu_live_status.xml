@@ -6,6 +6,6 @@
         android:id="@+id/options_menu_live"
         android:icon="@drawable/ic_share_white_36dp"
         android:title="@string/options_menu_live"
-        android:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom"/>
 
 </menu>

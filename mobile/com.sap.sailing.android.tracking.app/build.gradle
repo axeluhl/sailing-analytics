@@ -13,7 +13,7 @@ android {
         targetSdkVersion 21
         versionCode verCode
         versionName "$verCode - Altitude"
-        useJack true
+        useJack false // not working on Windows yet
     }
 
     sourceSets {
@@ -36,9 +36,11 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix ".dev"
             versionNameSuffix ".debug"
             signingConfig signingConfigs.stg_debug
+
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-project.txt", "../proguard-mobile.txt"
         }
 
         release {
@@ -88,10 +90,10 @@ build.doLast {
     // Copy APK file
     copy {
         from ("build/outputs/apk") {
-            include "**/*release-unsigned.apk"
+            include "**/*debug.apk"
         }
         into "../../java/com.sap.sailing.www/apps"
-        rename { String fileName -> fileName.replace("-release-unsigned", "") }
+        rename { String fileName -> fileName.replace("-debug", "") }
     }
 
     // Create version file
