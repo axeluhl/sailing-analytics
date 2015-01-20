@@ -34,6 +34,7 @@
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/desc_add_photo_button"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
                 android:src="@drawable/ic_menu_camera" />
 
             <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
@@ -42,6 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:text="@string/add_team_photo"
                 android:textColor="@color/white" />
         </LinearLayout>
@@ -52,6 +54,7 @@
             android:layout_height="40dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:background="@color/black_transparent"
             android:baselineAligned="false"
             android:measureWithLargestChild="false"
@@ -63,8 +66,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="left|center_vertical"
+                android:gravity="start|center_vertical"
                 android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:text="@string/empty"
                 android:textColor="@color/white" />
 
@@ -75,7 +79,8 @@
                 android:cropToPadding="true"
                 android:paddingTop="3dp"
                 android:paddingBottom="3dp"
-                android:gravity="right"
+                android:gravity="end"
+                android:paddingLeft="5dp"
                 android:paddingRight="5dp" >
 
                 <ImageView
@@ -91,7 +96,7 @@
                 android:id="@+id/sail_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="right|center_vertical"
+                android:gravity="end|center_vertical"
                 android:padding="0dp"
                 android:text="@string/empty"
                 android:textColor="@color/white" />
@@ -103,8 +108,10 @@
             android:layout_height="wrap_content"
             android:layout_above="@id/competitor_info_layout"
             android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_marginBottom="15dp"
             android:layout_marginRight="15dp"
+            android:layout_marginEnd="15dp"
             android:background="@drawable/background_transparent_box"
             android:orientation="horizontal"
             android:padding="0dp" >
@@ -122,6 +129,7 @@
             android:layout_height="4dp"
             android:layout_alignBottom="@+id/competitor_info_layout"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:background="@color/sap_yellow" />
 
         <View
@@ -129,6 +137,7 @@
             android:layout_width="fill_parent"
             android:layout_height="4dp"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:background="@color/sap_yellow" />
     </RelativeLayout>
@@ -163,7 +172,7 @@
                     android:id="@+id/thank_you_note"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="left"
+                    android:gravity="start"
                     android:padding="0dp"
                     android:text="@string/thank_you_you_successfully_participated"
                     android:textColor="@color/white"
@@ -312,6 +321,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="1dp"
                     android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:background="@color/white_transparent" />
 
@@ -357,6 +367,7 @@
         android:layout_height="40dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:background="@color/darker_gray" >
 
         <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView

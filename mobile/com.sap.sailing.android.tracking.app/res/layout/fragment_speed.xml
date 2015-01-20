@@ -14,6 +14,7 @@
         android:textColor="@android:color/darker_gray"
         android:textSize="14sp"
         android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:paddingTop="15dp"  />
     
     <RelativeLayout
