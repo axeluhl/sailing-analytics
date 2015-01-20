@@ -248,62 +248,53 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * 
      * All maneuvers of all competitors between start and end time are considered (usually race start and end for that
      * competitor, but may be the start of tracking, e.g., in case no course is set, and current time in case no finish
-     * line mark passing is found for that competitor yet) and {@link #getManeuverClassifications classified} based on
-     * two hypotheses for each maneuver: the competitor was sailing upwind and the maneuver was a tack, or the
-     * competitor was sailing downwind and the maneuver was a jibe, and the approximate true wind direction under this
-     * hypothesis is the middle course over ground between start and end of the maneuver (reversed for upwind beats).
-     * Obviously, at most one of the two hypotheses can hold true for any maneuver. None of them applies if the maneuver
-     * was neither a tack nor a jibe but a mark rounding or a significant head-up or bear-away maneuver.
+     * line mark passing is found for that competitor yet). Clustering the candidates by average COG should give two
+     * clusters that are approximately 180deg apart from each other: one with the tacks and one with the jibes. A bunch
+     * of other clusters will emerge for head-up/bear-away maneuvers with small course changes (one for each actual
+     * tack/leg type combination), making them very unlikely candidates for maneuvers that have distinct wide expected
+     * maneuver angles. Two more clusters typically emerge that hold the mark rounding maneuvers that have maneuver
+     * angles similar to that of a typical tack and that would result in estimated wind directions offset by
+     * approximately 90deg from the correct wind direction. Altogether this makes for eight expected clusters, two of
+     * which are the interesting ones, four of which are expected to not contain likely candidates for the wide-angle
+     * maneuvers (head-up/bear-away clusters), and the mark rounding clusters which to each other also tend to have a
+     * 180deg offset.
      * <p>
      * 
-     * To start with, we try to identify the maneuvers of the type that should have the most precisely defined expected
-     * angle. Usually, those will be the tacks because the optimum upwind beat angle is within a narrow range compared
-     * to the optimum downwind angle where usually more leeway exists for most boat classes, leading to much greater
-     * variance in the actual maneuver angles chosen by the competitors. (TODO: actually infer this from the polar
-     * service). For the remainder of this comment we'll assume that the maneuver we'll start with are the tacks.
+     * Now for each cluster we check if it's the tack cluster. The tack cluster shows some characteristic features that
+     * make it a little easier to identify: its maneuver angle is in most cases wider than that of the jibes, resulting
+     * in two well-defined maneuver angle clusters (one for port-to-starboard and one for starboard-to-port tacks).
+     * There are usually no other maneuvers with similar middle COG because boats can't sail straight against the wind.
      * <p>
      * 
-     * To identify these maneuvers, all classifications are visited, and a probability/confidence for being a maneuver
-     * of the type sought is determined, based on the distance from the angle expected and the preciseness required by
-     * the polar sheet (TODO: have the polar service tell us the probability for a given actual maneuver angle). All
-     * maneuvers are grouped into four clusters using their middle maneuver angle: one cluster for the true wind
-     * direction (expected to be the opposite direction of the middle maneuver angle of the actual tacks), one for the
-     * reverse true wind direction (expected to hold the jibes incorrectly assumed to be a tack), and two more clusters
-     * for the other maneuvers such as head-up and bear-away as found for mark roundings.
+     * We evaluate each clusters likelihood of being the tack cluster by for each of its maneuvers adding up the
+     * likelihood of that maneuver being a tack, solely based on its maneuver angle, as judged by the polar service. If
+     * a cluster exists that has approximately the opposite average middle COG (the jibe cluster candidate), the
+     * likelihoods for its maneuvers being a jibe are added. (TODO adding is statistically not adequate here; however,
+     * multiplying hundreds if not thousands of probability values would easily lead to a double value going to 0.0
+     * quickly. But is adding adequate to estimate the cluster having the maximum likelihood of being the tack cluster?
+     * We'd only need a monotonous function.) Finally, the resulting likelihood is multiplied by how likely the speed
+     * ratio between the tack and jibe cluster candidates is, based on the polar diagram. For this task, the cluster's
+     * maneuvers' average speed (weighted by each maneuver's likelihood of being a tack) is divided by that of the jibe
+     * cluster's maneuvers' average speed (weighted by each maneuver's likelihood of being a jibe) and assigned a
+     * likelihood by the polar service.
      * <p>
      * 
-     * Each cluster is then evaluated regarding the probability that it really contains the actual tack maneuvers. This
-     * probability is influenced by the following factors:
-     * <ul>
-     * <li>How close to the expected maneuver angle was the maneuver's actual course change?</li>
-     * <li>How many maneuvers were there in the cluster?</li>
-     * <li>Is there a cluster approximately pointing the reverse direction where the cluster elements' average speed
-     * before the maneuver has the correct ratio compared to the average speed before the maneuver in the cluster under
-     * consideration and whose average maneuver angle resembles that expected of jibes. In other words, if we're checking if the
-     * current cluster holds tacks then we consider this to be more likely if we find a cluster with the middle maneuver
-     * angle pointing the other way with usually slightly higher speeds, assuming that jibes for the current boat class
-     * have slightly higher speeds than tacks.</li>
-     * </ul>
+     * The cluster that has the highest likelihood of being the tack cluster is selected. The confidence of the choice
+     * depends on how clearly this cluster was the favorite among all clusters. For each of its maneuvers a wind fix is
+     * generated with a confidence defined by the confidence of having picked the correct cluster as the tack cluster,
+     * multiplied with the likelihood of the maneuver being a tack (as judged by the polar service). Similarly, each
+     * maneuver from the jibe cluster is turned into a wind fix whose confidence results from the likelihood of the
+     * maneuver being a jibe (based on the polar service's judgement) and the general confidence of the correct jibe
+     * cluster having been selected.
+     * <p>
      * 
-     * With the cluster winning this decision we then assume that its elements describe the tacks. If the jibing angle
-     * exceeds a certain threshold we may continue with the flipped cluster and for those maneuvers sufficiently close to
-     * the expected jibing angle we may take those as wind fix with a certain confidence as well.<p>
+     * One benefit of looking primarily for the tacks is that boats cannot sail straight against the wind. Therefore,
+     * there usually are almost no maneuvers that have the same middle COG with a maneuver angle that resembles that of
+     * the other maneuvers in the cluster. This way, the tack cluster will show two cleanly separated clusters along the
+     * maneuver angle dimension that show low variance each, compared to all other clusters.
+     * <p>
      * 
-     * TODO the below probably no longer should apply
-     * To figure out if one of the two hypotheses holds, the hypotheses are clustered based on the approximated true
-     * wind direction that follows from them. A confidence can be assigned to each hypothesis which is based on three
-     * factors:
-     * <ul>
-     * <li>How close to the expected maneuver angle was the maneuver's actual course change?</li>
-     * <li>How consistent with the average speeds for the two hypothetical maneuver types is the maneuver's actual
-     * speed? This assumes that jibes on a downwind leg may have a characteristically higher speed at the beginning of
-     * the maneuver when compared to a tack.</li>
-     * <li>How well does the virtual wind fix inferred from the hypothesis fit into the local spatial and temporal wind
-     * field resulting from the other virtual wind fixes? Of course, wind can theoretically shift by 180 degrees in a
-     * short period of time or across a short distance, but it may not be all too likely.</li>
-     * </ul>
-     * 
-     * 
+     * TODO with enough candidates at hand, apply temporal and spatial segmentation to account for heterogeneous wind fields
      */
     private void analyzeRace() throws NotEnoughDataHasBeenAddedException {
         final Map<Maneuver, Competitor> maneuvers = getAllManeuvers();
