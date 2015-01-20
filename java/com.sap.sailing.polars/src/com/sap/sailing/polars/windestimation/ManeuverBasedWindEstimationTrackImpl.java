@@ -1,5 +1,7 @@
 package com.sap.sailing.polars.windestimation;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,6 +75,8 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     private final PolarDataService polarService;
 
     private final TrackedRace trackedRace;
+    
+    private final StringBuilder stringRepresentation;
 
     public ManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, TrackedRace trackedRace, long millisecondsOverWhichToAverage)
             throws NotEnoughDataHasBeenAddedException {
@@ -80,6 +84,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                 /* nameForReadWriteLock */ ManeuverBasedWindEstimationTrackImpl.class.getName());
         this.polarService = polarService;
         this.trackedRace = trackedRace;
+        this.stringRepresentation = new StringBuilder();
         analyzeRace();
     }
 
@@ -112,8 +117,8 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
          */
         private ManeuverClassification opposite;
         
-        protected ManeuverClassification(Competitor competitor,
-                Maneuver maneuver, LegType legType, Tack tack, SpeedWithBearingWithConfidence<Void> estimatedTrueWindSpeedAndAngle) {
+        protected ManeuverClassification(Competitor competitor, Maneuver maneuver, LegType legType, Tack tack,
+                SpeedWithBearingWithConfidence<Void> estimatedTrueWindSpeedAndAngle) {
             super();
             this.competitor = competitor;
             this.timePoint = maneuver.getTimePoint();
@@ -184,28 +189,46 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         }
         
         public static String getToStringColumnHeaders() {
-            return "competitor, timePoint, angleDeg, boatSpeedKn, cogDeg, windEstimationFromDeg, lossM, assumedLegType, assumedTack, estimatedTrueWindSpeedKn, estimatedTrueWindAngleDeg";
+            return "datapoint\tcompetitor\ttimePoint\tangleDeg\tboatSpeedKn\tcogDeg\tmiddleManeuverCourse\twindEstimationFromDeg\tlossM\tassumedLegType\tassumedTack\testimatedTrueWindSpeedKn\testimatedTrueWindAngleDeg\toffsetFromExpectedManeuverAngle";
+        }
+        
+        public static String getToStringColumnTypes() {
+            return "infoitem\tstring\tdate\tfloat\tfloat\tfloat\tfloat\tfloat\tfloat\tstring\tstring\tfloat\tfloat\tfloat";
         }
         
         @Override
         public String toString() {
-            final String prefix = "" + getCompetitor().getName() + ", " + getTimePoint() + ", " + getManeuverAngleDeg()
-                    + ", " + getSpeedAtManeuverStart().getKnots() + ", "
+            return toString(/* id */ null);
+        }
+        
+        public String toString(String id) {
+            DateFormat df = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
+            final String prefix = getCompetitor().getName() + "\t" + df.format(getTimePoint().asDate()) + "\t" + getManeuverAngleDeg()
+                    + "\t" + getSpeedAtManeuverStart().getKnots() + "\t"
                     + getSpeedAtManeuverStart().getBearing().getDegrees();
             final StringBuilder result = new StringBuilder();
+            if (id != null) {
+                result.append("ID");
+                result.append(id);
+                result.append('\t');
+            }
             result.append(prefix);
-            result.append(", ");
+            result.append("\t");
+            result.append(getMiddleManeuverCourse().getDegrees());
+            result.append("\t");
             result.append(getEstimatedWindBearing().reverse().getDegrees());
-            result.append(", ");
+            result.append("\t");
             result.append(getManeuverLoss() == null ? 0.0 : getManeuverLoss().getMeters());
-            result.append(", ");
+            result.append("\t");
             result.append(getLegType());
-            result.append(", ");
+            result.append("\t");
             result.append(getTack());
-            result.append(", ");
+            result.append("\t");
             result.append(getEstimatedTrueWindSpeedAndAngle().getObject().getKnots());
-            result.append(", ");
+            result.append("\t");
             result.append(getEstimatedTrueWindSpeedAndAngle().getObject().getBearing().getDegrees());
+            result.append("\t");
+            result.append(Math.abs(Math.abs(getEstimatedTrueWindSpeedAndAngle().getObject().getBearing().getDegrees()*2)-Math.abs(getManeuverAngleDeg())));
             return result.toString();
         }
 
@@ -329,10 +352,22 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         }
         Bearing mostLikelyCandidateForWindBearingSoFar = dominantCluster.getMean();
         // FIXME remove again when done with debugging
-        System.out.println(ManeuverClassification.getToStringColumnHeaders());
+        int id=0;
+        stringRepresentation.delete(0, stringRepresentation.length());
+        stringRepresentation.append(ManeuverClassification.getToStringColumnHeaders());
+        stringRepresentation.append('\n');
+        stringRepresentation.append(ManeuverClassification.getToStringColumnTypes());
+        stringRepresentation.append('\n');
+        stringRepresentation.append(ManeuverClassification.getToStringColumnHeaders());
+        stringRepresentation.append('\n');
         for (ManeuverClassification i : maneuverClassifications) {
-            System.out.println(i);
+            stringRepresentation.append(i.toString(""+id++));
+            stringRepresentation.append('\n');
         }
+    }
+    
+    public String getStringRepresentation() {
+        return stringRepresentation.toString();
     }
 
     /**

@@ -113,15 +113,15 @@ public class PolarResource extends AbstractSailingServerResource {
                 PolarDataService service = getService().getPolarDataService();
                 ManeuverBasedWindEstimationTrackImpl maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
                         service, trackedRace, /* millisecondsOverWhichToAverage */ 30000);
-                maneuverBasedWindEstimationTrackImpl.lockForRead();
-                try {
-                    for (Wind wind : maneuverBasedWindEstimationTrackImpl.getFixes()) {
-                        resultAsJson.add(serializer.serialize(wind));
-                    }
-                } finally {
-                    maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
-                }
-                ResponseBuilder responseBuilder = Response.ok(resultAsJson.toJSONString(), MediaType.TEXT_PLAIN);
+//                maneuverBasedWindEstimationTrackImpl.lockForRead();
+//                try {
+//                    for (Wind wind : maneuverBasedWindEstimationTrackImpl.getFixes()) {
+//                        resultAsJson.add(serializer.serialize(wind));
+//                    }
+//                } finally {
+//                    maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
+//                }
+                ResponseBuilder responseBuilder = Response.ok(maneuverBasedWindEstimationTrackImpl.getStringRepresentation(), MediaType.TEXT_PLAIN);
                 response = responseBuilder.build();
             }
         }
