@@ -113,7 +113,7 @@ The password is omitted from the response.
 
 Called for getting details of other users, e.g. on invite to training.
 
-**Path:** ``users/{userId}``
+**Path:** ``users/{user_id}``
 
 **Verb:** ``GET``
 
@@ -164,7 +164,7 @@ The password is omitted from the response.
 
 Update a user. Only sent properties are updated, all others remain untouched. To delete a value, it must be set to ``null``.
 
-**Path:** ``users/{userId}``
+**Path:** ``users/{user_id}``
 
 **Verb:** ``PUT``
 
@@ -191,7 +191,7 @@ The password is omitted from the response.
 
 A multipart message is used to upload a profile image.
 
-**Path:** ``me/profileImage``
+**Path:** ``me/profile_image``
 
 **Verb:** ``POST``
 
@@ -235,7 +235,7 @@ Get complete details about a training. These include:
 * list of markers
 * list of sessions
 
-**Path:** ``training/{trainingId}``
+**Path:** ``training/{training_id}``
 
 **Verb:** ``GET``
 
@@ -325,7 +325,7 @@ Start a new training.
 
 Finish a training.
 
-**Path:** ``training/{trainingId}/finish``
+**Path:** ``training/{training_id}/finish``
 
 **Verb:** ``POST``
 
@@ -368,7 +368,7 @@ This call is used by the users who wants to join a training.
 
 This call gets all training possibilities nearby.
 
-**Path:** ``training/{trainingId}/joinRequest``
+**Path:** ``training/{training_id}/join_request``
 
 **Verb:** ``POST``
 
@@ -395,7 +395,7 @@ This call gets all training possibilities nearby.
 
 This call is used by the initiator to see who wants to join in.
 
-**Path:** ``training/{trainingId}/joinRequests``
+**Path:** ``training/{training_id}/join_requests``
 
 **Verb:** ``GET``
 
@@ -419,7 +419,7 @@ This call is used by the initiator to see who wants to join in.
 
 This call is used by the initiator accept or deny a join request.
 
-**Path:** ``training/{trainingId}/joinRequests/{joinRequestId}``
+**Path:** ``training/{training_id}/join_requests/{join_request_id}``
 
 **Verb:** ``PUT``
 
@@ -448,7 +448,7 @@ This call is used by the initiator accept or deny a join request.
 
 Get details about a training's course.
 
-**Path:** ``training/{trainingId}/course``
+**Path:** ``training/{training_id}/course``
 
 **Verb:** ``GET``
 
@@ -472,7 +472,7 @@ TODO Possible values for ``courseType`` must be defined.
 
 Currently only the course type can be set.
 
-**Path:** ``training/{trainingId}/course``
+**Path:** ``training/{training_id}/course``
 
 **Verb:** ``PUT``
 
@@ -495,7 +495,7 @@ TODO Possible values for ``courseType`` must be defined.
 
 Creates the race course for training.
 
-**Path:** ``training/{trainingId}/course``
+**Path:** ``training/{training_id}/course``
 
 **Verb:** ``POST``
 
@@ -518,7 +518,7 @@ TODO Possible values for ``courseType`` must be defined.
 
 Sets a course mark, e.g. pin end, leeward mark, windward park, or reach mark.
 
-**Path:** ``training/{trainingId}/course/marks/{markId}``
+**Path:** ``training/{training_id}/course/marks/{mark_id}``
 
 **Verb:** ``POST``
 
@@ -546,7 +546,7 @@ TODO Possible values for ``markType`` must be defined.
 
 Deletes a previously defined course mark.
 
-**Path:** ``training/{trainingId}/course/marks/{markId}``
+**Path:** ``training/{training_id}/course/marks/{mark_id}``
 
 **Verb:** ``DELETE``
 
@@ -554,7 +554,7 @@ Deletes a previously defined course mark.
 
 Sets wind speed and direction.
 
-**Path:** ``training/{trainingId}/wind``
+**Path:** ``training/{training_id}/wind``
 
 **Verb:** ``POST``
 
@@ -575,7 +575,7 @@ During a training, markers are set, these are timestamps. Afterwards, the traini
 
 Sets wind speed and direction.
 
-**Path:** ``training/{trainingId}/markers``
+**Path:** ``training/{training_id}/markers``
 
 **Verb:** ``POST``
 
@@ -600,7 +600,7 @@ Sets wind speed and direction.
 
 #### Create a Session
 
-**Path:** ``training/{trainingId}/sessions``
+**Path:** ``training/{training_id}/sessions``
 
 **Verb:** ``POST``
 
@@ -623,7 +623,7 @@ Sets wind speed and direction.
 
 #### Update a Session
 
-**Path:** ``training/{trainingId}/sessions/{sessionId}``
+**Path:** ``training/{training_id}/sessions/{session_id}``
 
 **Verb:** ``PUT``
 
@@ -646,7 +646,7 @@ Sets wind speed and direction.
 
 #### Delete a Session
 
-**Path:** ``training/{trainingId}/sessions/{sessionId}``
+**Path:** ``training/{training_id}/sessions/{session_id}``
 
 **Verb:** ``DELETE``
 
@@ -654,7 +654,7 @@ Sets wind speed and direction.
 
 The tracking interface is identical to that of the race tracking API http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Send-Measurements-%28to-the-Fix-Store%29
 
-**Path:** ``gpsFixes``
+**Path:** ``gps_fixes``
 
 **Verb:** ``POST``
 
