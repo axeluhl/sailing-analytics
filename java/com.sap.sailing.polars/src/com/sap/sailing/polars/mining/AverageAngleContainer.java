@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 
@@ -38,15 +37,6 @@ public class AverageAngleContainer {
     public AverageAngleContainer(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
         dataCountAndAngleSumMap = new HashMap<>();
-    }
-    
-    /**
-     * Looks at all entries in {@link #dataCountAndAngleSumMap} and determines the wind speed and true wind angle at
-     * which the boat has most likely been sailing to achieve the <code>boatSpeed</code> provided.
-     */
-    SpeedWithBearing getAverageTrueWindSpeedAndAngle(BoatClass boatClass, Speed boatSpeed) {
-        // TODO implement getAverageTrueWindSpeedAndAngle
-        return null;
     }
 
     public void addFix(BoatClass boatClass, Speed windSpeed, int roundedAngleDeg) {

@@ -1,0 +1,39 @@
+package com.sap.sailing.server.gateway.deserialization.coursedata.impl;
+
+import java.io.Serializable;
+
+import org.json.simple.JSONObject;
+
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+
+/**
+ * Deserializer for marks.
+ */
+public class MarkDeserializer implements JsonDeserializer<Mark> {
+
+    private SharedDomainFactory factory;
+
+    public MarkDeserializer(SharedDomainFactory factory) {
+        this.factory = factory;
+    }
+
+    @Override
+    public Mark deserialize(JSONObject object) throws JsonDeserializationException {
+        Serializable id = Helpers.tryUuidConversion((Serializable) object.get(MarkJsonSerializer.FIELD_ID));
+        String color = (String) object.get(MarkJsonSerializer.FIELD_COLOR);
+        String pattern = (String) object.get(MarkJsonSerializer.FIELD_PATTERN);
+        String shape = (String) object.get(MarkJsonSerializer.FIELD_SHAPE);
+        MarkType type = MarkType.valueOf((String) object.get(MarkJsonSerializer.FIELD_TYPE));
+        String name = (String) object.get(MarkJsonSerializer.FIELD_NAME);
+        
+        Mark mark = factory.getOrCreateMark(id, name, type, color, shape, pattern);
+        return mark;
+    }
+
+}

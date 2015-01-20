@@ -42,7 +42,7 @@ import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestin
 
 public class PolarDataMiner implements PolarSheetAnalyzer {
 
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+    private static final int THREAD_POOL_SIZE = Math.min(Runtime.getRuntime().availableProcessors(), 3);
     private static final ThreadPoolExecutor executor = createExecutor();
     private final PolarSheetGenerationSettings backendPolarSheetGenerationSettings;
 
@@ -122,10 +122,10 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
             throws NotEnoughDataHasBeenAddedException {
         return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle).getSpeedWithConfidence();
     }
-
-    public SpeedWithBearingWithConfidence<Void> estimateTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround,
-            LegType legType, Tack tack) {
-        return incrementalRegressionProcessor.estimateTrueWindSpeedAndAngle(boatClass, speedOverGround, legType, tack);
+    
+    public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
+            Speed speedOverGround, LegType legType, Tack tack) {
+        return incrementalRegressionProcessor.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
     }
 
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {

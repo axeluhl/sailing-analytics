@@ -102,7 +102,7 @@ public class SimpleDomainFactoryTest {
             }
         });
         assertNotNull(raceDefinition.getBoatClass());
-        assertEquals("Unknown", raceDefinition.getBoatClass().getName());
+        assertEquals("UNKNOWN", raceDefinition.getBoatClass().getName());
     }
     
     @Test

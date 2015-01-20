@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
@@ -13,7 +15,11 @@ import com.sap.sailing.domain.common.Tack;
  * The drawing of the graphics is implemented as a list of graphics command on the Context2D,
  * We created the drawing commands not manually but used a SVG graphics with a well defined scale as a basis in combination
  * with a tool which translates this SVG graphics into the list of drawing commands. 
- * See http://wiki.sapsailing.com/wiki/boatgraphicssvg for further details.
+ * See http://wiki.sapsailing.com/wiki/boatgraphicssvg for further details.<p>
+ * 
+ * The {@link #drawBoat(Context2d, boolean, String)} implementations are expected to draw a pixel
+ * size such that one pixel corresponds to one centimeter in reality. This assumption will be
+ * used when scaling the boats according to hull length and zoom factor.
  * 
  * @author Frank
  *
@@ -29,23 +35,21 @@ public abstract class BoatClassVectorGraphics {
     private final double hullLengthInPx;
     private final double beamInPx;
     
-    private final String mainBoatClassName;
-    private final List<String> compatibleBoatClassNames;
+    private final Set<BoatClassMasterdata> compatibleBoatClasses;
     
-    BoatClassVectorGraphics(String mainBoatClassName, double overallLengthInPx, double beamInPx, double hullLengthInPx) {
-        this.mainBoatClassName = mainBoatClassName;
-        this.overallLengthInPx = overallLengthInPx;
-        this.beamInPx = beamInPx;
-        this.hullLengthInPx = hullLengthInPx;
-        this.compatibleBoatClassNames = new ArrayList<String>();
+    BoatClassVectorGraphics(double boatOverallLengthInPx, double boatBeamInPx, double boatHullLengthInPx, 
+            BoatClassMasterdata... compatibleBoatClasses) {
+        this.overallLengthInPx = boatOverallLengthInPx;
+        this.beamInPx = boatBeamInPx;
+        this.hullLengthInPx = boatHullLengthInPx;
+        this.compatibleBoatClasses = new HashSet<>();
+        for (BoatClassMasterdata compatibleBoatClass : compatibleBoatClasses) {
+            this.compatibleBoatClasses.add(compatibleBoatClass);
+        }
     }
     
-    BoatClassVectorGraphics(String mainBoatClassName, double boatOverallLengthInMeters, double boatBeamInMeters, double boatHullLengthInMeters, 
-            String...compatibleBoatClassNames) {
-        this(mainBoatClassName, boatOverallLengthInMeters, boatBeamInMeters, boatHullLengthInMeters);
-        for(String compatibleBoatClass: compatibleBoatClassNames) {
-            this.compatibleBoatClassNames.add(compatibleBoatClass);
-        }
+    public Set<BoatClassMasterdata> getCompatibleBoatClasses() {
+        return Collections.unmodifiableSet(compatibleBoatClasses);
     }
 
     protected abstract void drawBoat(Context2d ctx, boolean isSelected, String color);
@@ -128,32 +132,8 @@ public abstract class BoatClassVectorGraphics {
         return beamInPx;
     }
 
-    public boolean isBoatClassNameCompatible(String boatClass) {
-        boolean result = false;
-        // remove all white space characters
-        String boatClassToCheck = boatClass.replaceAll("\\s","");
-        // remove all '-' characters
-        boatClassToCheck = boatClass.replaceAll("-","");
-        
-        if(mainBoatClassName.equalsIgnoreCase(boatClassToCheck)) {
-            result = true;
-        } else {
-            for(String compatibleName: compatibleBoatClassNames) {
-                if(compatibleName.equalsIgnoreCase(boatClassToCheck)) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    public String getMainBoatClassName() {
-        return mainBoatClassName;
-    }
-
-    public List<String> getCompatibleBoatClassNames() {
-        return compatibleBoatClassNames;
+    public boolean isBoatClassNameCompatible(String boatClassName) {
+        return compatibleBoatClasses.contains(BoatClassMasterdata.resolveBoatClass(boatClassName));
     }
 
     public double getMinHullLengthInPx() {

@@ -27,12 +27,12 @@ public class PolarDiagramCSV extends PolarDiagramBase {
         InputStreamReader isr = new InputStreamReader(csvFile);
         BufferedReader bfr = new BufferedReader(isr);
 
-        List<Speed> velocities = new ArrayList<Speed>();
+        List<Speed> windSpeeds = new ArrayList<Speed>();
         List<Bearing> beatAngles = new ArrayList<Bearing>();
-        List<Speed> beatVMG = new ArrayList<Speed>();
+        List<Speed> beatSpeed = new ArrayList<Speed>();
         Map<Bearing, List<Speed>> speeds = new HashMap<Bearing, List<Speed>>();
-        List<Speed> runVMG = new ArrayList<Speed>();
-        List<Bearing> gybeAngles = new ArrayList<Bearing>();
+        List<Speed> jibeSpeed = new ArrayList<Speed>();
+        List<Bearing> jibeAngles = new ArrayList<Bearing>();
 
         String line = "";
         String[] elements = null;
@@ -47,9 +47,9 @@ public class PolarDiagramCSV extends PolarDiagramBase {
             elements[0] = elements[0].toLowerCase();
 
             switch (elements[0]) {
-            case "windvelocity":
+            case "windspeed":
                 for (int i = 1; i < elements.length; i++) {
-                    velocities.add(new KnotSpeedImpl(new Double(elements[i])));
+                    windSpeeds.add(new KnotSpeedImpl(new Double(elements[i])));
                 }
                 break;
             case "beatangles":
@@ -59,17 +59,17 @@ public class PolarDiagramCSV extends PolarDiagramBase {
                 break;
             case "beatsog":
                 for (int i = 1; i < elements.length; i++) {
-                    beatVMG.add(new KnotSpeedImpl(new Double(elements[i])));
+                    beatSpeed.add(new KnotSpeedImpl(new Double(elements[i])));
                 }
                 break;
-            case "runsog":
+            case "jibesog":
                 for (int i = 1; i < elements.length; i++) {
-                    runVMG.add(new KnotSpeedImpl(new Double(elements[i])));
+                    jibeSpeed.add(new KnotSpeedImpl(new Double(elements[i])));
                 }
                 break;
-            case "gybeangles":
+            case "jibeangles":
                 for (int i = 1; i < elements.length; i++) {
-                    gybeAngles.add(new DegreeBearingImpl(new Double(elements[i])));
+                    jibeAngles.add(new DegreeBearingImpl(new Double(elements[i])));
                 }
                 break;
             default:
@@ -92,16 +92,16 @@ public class PolarDiagramCSV extends PolarDiagramBase {
 
         NavigableMap<Speed, NavigableMap<Bearing, Speed>> mapSpeedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
         NavigableMap<Speed, Bearing> mapBeatAngles = new TreeMap<Speed, Bearing>();
-        NavigableMap<Speed, Bearing> mapGybeAngles = new TreeMap<Speed, Bearing>();
+        NavigableMap<Speed, Bearing> mapJibeAngles = new TreeMap<Speed, Bearing>();
         NavigableMap<Speed, Speed> mapBeatSOG = new TreeMap<Speed, Speed>();
-        NavigableMap<Speed, Speed> mapGybeSOG = new TreeMap<Speed, Speed>();
+        NavigableMap<Speed, Speed> mapJibeSOG = new TreeMap<Speed, Speed>();
 
-        Speed velocity = null;
-        Speed speed = null;
+        Speed windSpeed = null;
+        Speed boatSpeed = null;
         NavigableMap<Bearing, Speed> speedTableLine = null;
 
-        for (int index = 0; index < velocities.size(); index++) {
-            velocity = velocities.get(index);
+        for (int index = 0; index < windSpeeds.size(); index++) {
+            windSpeed = windSpeeds.get(index);
             speedTableLine = new TreeMap<Bearing, Speed>(bearingComparator);
 
             for (Entry<Bearing, List<Speed>> entry : speeds.entrySet()) {
@@ -109,27 +109,27 @@ public class PolarDiagramCSV extends PolarDiagramBase {
                     continue;
                 }
 
-                speed = entry.getValue().get(index);
+                boatSpeed = entry.getValue().get(index);
 
-                if (speed != Speed.NULL) {
-                    speedTableLine.put(entry.getKey(), speed);
+                if (boatSpeed != Speed.NULL) {
+                    speedTableLine.put(entry.getKey(), boatSpeed);
                 }
             }
 
-            mapSpeedTable.put(velocity, speedTableLine);
-            mapBeatAngles.put(velocity, beatAngles.get(index));
-            mapGybeAngles.put(velocity, gybeAngles.get(index));
-            mapBeatSOG.put(velocity, beatVMG.get(index));
-            mapGybeSOG.put(velocity, runVMG.get(index));
+            mapSpeedTable.put(windSpeed, speedTableLine);
+            mapBeatAngles.put(windSpeed, beatAngles.get(index));
+            mapJibeAngles.put(windSpeed, jibeAngles.get(index));
+            mapBeatSOG.put(windSpeed, beatSpeed.get(index));
+            mapJibeSOG.put(windSpeed, jibeSpeed.get(index));
         }
 
         //setWind(new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180)));
 
         super.speedTable = mapSpeedTable;
         super.beatAngles = mapBeatAngles;
-        super.gybeAngles = mapGybeAngles;
+        super.jibeAngles = mapJibeAngles;
         super.beatSOG = mapBeatSOG;
-        super.gybeSOG = mapGybeSOG;
+        super.jibeSOG = mapJibeSOG;
 
         for (Speed s : super.speedTable.keySet()) {
 
@@ -137,8 +137,8 @@ public class PolarDiagramCSV extends PolarDiagramBase {
                 super.speedTable.get(s).put(super.beatAngles.get(s), super.beatSOG.get(s));
             }
 
-            if (super.gybeAngles.containsKey(s) && !super.speedTable.get(s).containsKey(super.gybeAngles.get(s))) {
-                super.speedTable.get(s).put(super.gybeAngles.get(s), super.gybeSOG.get(s));
+            if (super.jibeAngles.containsKey(s) && !super.speedTable.get(s).containsKey(super.jibeAngles.get(s))) {
+                super.speedTable.get(s).put(super.jibeAngles.get(s), super.jibeSOG.get(s));
             }
 
         }

@@ -32,7 +32,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     private static final String IDM_2013_EVENT = "IDM 5O5 2013";
     
     private static final String BMW_CUP_BOAT_CLASS = "J80";
-    private static final String IDM_2013_BOAT_CLASS = "505";
+    private static final String IDM_2013_BOAT_CLASS = "5O5";
     
     private static final String DEFAULT_REGATTA = "Default regatta";
     private static final String BMW_CUP_REGATTA = "BMW Cup (J80)";  //$NON-NLS-1$
