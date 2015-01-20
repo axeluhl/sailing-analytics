@@ -36,7 +36,6 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix ".dev"
             versionNameSuffix ".debug"
             signingConfig signingConfigs.stg_debug
         }
@@ -92,10 +91,10 @@ build.doLast {
     // Copy APK file
     copy {
         from ("build/outputs/apk") {
-            include "**/*release-unsigned.apk"
+            include "**/*debug.apk"
         }
         into "../../java/com.sap.sailing.www/apps"
-        rename { String fileName -> fileName.replace("-release-unsigned", "") }
+        rename { String fileName -> fileName.replace("-debug", "") }
     }
 
     // Create version file
