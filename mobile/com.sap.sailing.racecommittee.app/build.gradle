@@ -13,7 +13,7 @@ android {
         targetSdkVersion 21
         versionCode verCode
         versionName "$verCode - Laser"
-        useJack true
+        useJack false // not working on Windows yet
     }
 
     sourceSets {
@@ -38,6 +38,9 @@ android {
         debug {
             versionNameSuffix ".debug"
             signingConfig signingConfigs.stg_debug
+
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-project.txt", "../proguard-mobile.txt"
         }
 
         release {
