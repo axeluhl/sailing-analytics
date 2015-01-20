@@ -301,6 +301,10 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         Set<ManeuverClassification> maneuverClassifications = getManeuverClassifications(maneuvers);
         // Now cluster the maneuvers by estimated maneuver angle
         // constrain the clustering to those maneuvers that are sufficiently close to the expected maneuver angle
+        // TODO cluster into eight clusters by middle COG first, then aggregate tack likelihoods for each, and jibe likelihoods for opposite cluster
+        // TODO compare weighted speed average for tack and jibe cluster candidates and let polar service assign probability for the ratio
+        // TODO determine confidence of tack cluster being the tack cluster by comparing ratings against other cluster pairs
+        // TODO create wind fixes from tack and jibe cluster maneuvers (optionally with a threshold for minimum confidence of the maneuver being what it was guessed to be)
         KMeansMappingClusterer<ManeuverClassification, DoublePair, Bearing, ScalableBearing> clusterer =
                 new KMeansMappingClusterer<>(4,
                         maneuverClassifications.stream().filter(
