@@ -95,7 +95,7 @@ public class PolarResource extends AbstractSailingServerResource {
     }
 
     @GET
-    @Produces("text/plain;charset=UTF-8")
+    @Produces("application/json;charset=UTF-8")
     @Path("windestimation/{regattaname}/races/{racename}")
     public Response getCompetitorPositions(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) throws NotEnoughDataHasBeenAddedException {
         Regatta regatta = findRegattaByName(regattaName);
@@ -113,16 +113,15 @@ public class PolarResource extends AbstractSailingServerResource {
                 PolarDataService service = getService().getPolarDataService();
                 ManeuverBasedWindEstimationTrackImpl maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
                         service, trackedRace, /* millisecondsOverWhichToAverage */ 30000);
-//                maneuverBasedWindEstimationTrackImpl.lockForRead();
-//                try {
-//                    for (Wind wind : maneuverBasedWindEstimationTrackImpl.getFixes()) {
-//                        resultAsJson.add(serializer.serialize(wind));
-//                    }
-//                } finally {
-//                    maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
-//                }
-                ResponseBuilder responseBuilder = Response.ok(maneuverBasedWindEstimationTrackImpl.getStringRepresentation(), MediaType.TEXT_PLAIN);
-                response = responseBuilder.build();
+                maneuverBasedWindEstimationTrackImpl.lockForRead();
+                try {
+                    for (Wind wind : maneuverBasedWindEstimationTrackImpl.getFixes()) {
+                        resultAsJson.add(serializer.serialize(wind));
+                    }
+                } finally {
+                    maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
+                }
+                response = Response.ok(resultAsJson.toJSONString(), MediaType.APPLICATION_JSON).build();
             }
         }
         return response;

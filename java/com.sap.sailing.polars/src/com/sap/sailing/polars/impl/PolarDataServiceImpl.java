@@ -52,7 +52,7 @@ public class PolarDataServiceImpl implements PolarDataService {
     public SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle) throws NotEnoughDataHasBeenAddedException {
         return polarDataMiner.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle);
     }
-    
+
     @Override
     public Set<SpeedWithBearingWithConfidence<Void>> getAverageTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {

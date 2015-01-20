@@ -96,7 +96,7 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
      * Same as {@link #KMeansMappingClusterer(int, Iterable, Function, Iterator)}, only that the elements and the seeds are
      * provided by streams instead of iterables and iterators.
      */
-    public KMeansMappingClusterer(int numberOfClusters, Stream<E> elements, Function<E, T> mapper, Stream<AveragesTo> seeds) {
+    public KMeansMappingClusterer(int numberOfClusters, Stream<E> elements, Function<E, T> mapper, Stream<? extends AveragesTo> seeds) {
         this(numberOfClusters, streamToList(elements), mapper, seeds.iterator());
     }
     
@@ -108,7 +108,7 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
      *            elements to use as the seeds; if fewer than <code>numberOfClusters</code> seeds are provided, the
      *            number of clusters is reduced to the number of seeds provided.
      */
-    public KMeansMappingClusterer(int numberOfClusters, Iterable<E> elements, Function<E, T> mapper, Iterator<AveragesTo> seeds) {
+    public KMeansMappingClusterer(int numberOfClusters, Iterable<E> elements, Function<E, T> mapper, Iterator<? extends AveragesTo> seeds) {
         this.mapper = mapper;
         clusters = new ArrayList<>();
         initClusters(elements, seeds);
@@ -123,7 +123,7 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
      * <code>elements</code> provided; in case fewer elements are provided, only a prefix of the <code>seeds</code>
      * iterator will be used.
      */
-    private void initClusters(Iterable<E> elements, Iterator<AveragesTo> seeds) {
+    private void initClusters(Iterable<E> elements, Iterator<? extends AveragesTo> seeds) {
         Iterator<E> elementsIter = elements.iterator();
         while (elementsIter.hasNext() && seeds.hasNext()) {
             elementsIter.next();
