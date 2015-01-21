@@ -1,15 +1,15 @@
-package com.sap.sailing.util.kmeans;
+package com.sap.sse.util.kmeans;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
+import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 
 /**
  * Clusters elements of type <code>E</code> into a pre-defined number of clusters such that after clustering the sum of
@@ -170,7 +170,7 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
     }
     
     public Set<Cluster<E, ValueType, AveragesTo, T>> getClusters() {
-        Set<Cluster<E, ValueType, AveragesTo, T>> result = new HashSet<>();
+        Set<Cluster<E, ValueType, AveragesTo, T>> result = new LinkedHashSet<>();
         for (Cluster<E, ValueType, AveragesTo, T> i : clusters) {
             if (!i.isEmpty()) {
                 result.add(i);

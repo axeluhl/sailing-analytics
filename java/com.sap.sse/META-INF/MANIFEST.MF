@@ -7,6 +7,7 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sse,
  com.sap.sse.util,
- com.sap.sse.util.impl
+ com.sap.sse.util.impl,
+ com.sap.sse.util.kmeans
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.common

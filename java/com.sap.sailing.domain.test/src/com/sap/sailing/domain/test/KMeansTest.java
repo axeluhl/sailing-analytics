@@ -14,10 +14,10 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.ScalableInteger;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
-import com.sap.sailing.util.kmeans.Cluster;
-import com.sap.sailing.util.kmeans.KMeansClusterer;
-import com.sap.sailing.util.kmeans.KMeansClustererWithEquidistantInitialization;
-import com.sap.sailing.util.kmeans.KMeansMappingClusterer;
+import com.sap.sse.util.kmeans.Cluster;
+import com.sap.sse.util.kmeans.KMeansClusterer;
+import com.sap.sse.util.kmeans.KMeansClustererWithEquidistantInitialization;
+import com.sap.sse.util.kmeans.KMeansMappingClusterer;
 
 public class KMeansTest {
     @Test

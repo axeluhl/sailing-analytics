@@ -2,8 +2,8 @@ package com.sap.sailing.domain.common.scalablevalue.impl;
 
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
+import com.sap.sse.common.scalablevalue.ScalableValue;
+import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 
 public class ScalableSpeed implements ScalableValueWithDistance<Double, Speed> {
     private final double knots;

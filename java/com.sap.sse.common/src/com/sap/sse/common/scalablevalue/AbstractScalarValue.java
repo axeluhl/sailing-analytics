@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.scalablevalue;
+package com.sap.sse.common.scalablevalue;
 
 
 /**

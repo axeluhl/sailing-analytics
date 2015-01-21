@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.scalablevalue;
+package com.sap.sse.common.scalablevalue;
 
 /**
  * In addition to being a {@link ScalableValue}, specifies the {@link #getDistance} method which determines

@@ -3,8 +3,8 @@ package com.sap.sailing.domain.common.scalablevalue.impl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
+import com.sap.sse.common.scalablevalue.ScalableValue;
+import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 
 public class ScalableBearing implements ScalableValueWithDistance<DoublePair, Bearing> {
     private final double sin;

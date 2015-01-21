@@ -1,11 +1,11 @@
-package com.sap.sailing.util.kmeans;
+package com.sap.sse.util.kmeans;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sap.sailing.domain.common.scalablevalue.ComparableScalableValueWithDistance;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
+import com.sap.sse.common.scalablevalue.ComparableScalableValueWithDistance;
+import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 
 /**
  * Requires {@link ComparableScalableValueWithDistance comparable scalable values} as elements for which then

@@ -34,12 +34,13 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
-import com.sap.sailing.util.kmeans.Cluster;
-import com.sap.sailing.util.kmeans.KMeansMappingClusterer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.kmeans.Cluster;
+import com.sap.sse.util.kmeans.KMeansMappingClusterer;
 
 /**
  * Implements a wind estimation based on maneuver classifications.
@@ -65,6 +66,12 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     private final PolarDataService polarService;
 
     private final TrackedRace trackedRace;
+
+    private final Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusters;
+
+    private final Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> tackCluster;
+
+    private final Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> jibeCluster;
     
     public ManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, TrackedRace trackedRace, long millisecondsOverWhichToAverage, boolean waitForLatest)
             throws NotEnoughDataHasBeenAddedException {
@@ -72,7 +79,12 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                 /* nameForReadWriteLock */ ManeuverBasedWindEstimationTrackImpl.class.getName());
         this.polarService = polarService;
         this.trackedRace = trackedRace;
-        analyzeRace(waitForLatest);
+        Triple<Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>>,
+               Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>,
+               Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusterStructure = analyzeRace(waitForLatest);
+        clusters = clusterStructure.getA();
+        tackCluster = clusterStructure.getB();
+        jibeCluster = clusterStructure.getC();
     }
 
     /**
@@ -82,7 +94,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * @author Axel Uhl (D043530)
      *
      */
-    private class ManeuverClassification {
+    public class ManeuverClassification {
         private final Competitor competitor;
         private final TimePoint timePoint;
         private final Position position;
@@ -210,30 +222,38 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         
         @Override
         public String toString() {
-            return toString(/* id */ null);
-        }
-        
-        public String toString(String id) {
-            DateFormat df = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
-            final String prefix = getCompetitor().getName() + "\t" + df.format(getTimePoint().asDate()) + "\t" + getManeuverAngleDeg()
-                    + "\t" + getSpeedAtManeuverStart().getKnots() + "\t"
-                    + getSpeedAtManeuverStart().getBearing().getDegrees();
-            final StringBuilder result = new StringBuilder();
-            if (id != null) {
-                result.append("ID");
-                result.append(id);
-                result.append('\t');
-            }
-            result.append(prefix);
-            result.append("\t");
-            result.append(getMiddleManeuverCourse().getDegrees());
-            result.append("\t");
-            result.append(getManeuverLoss() == null ? 0.0 : getManeuverLoss().getMeters());
-            return result.toString();
+            return format(this, /* id */ null);
         }
 
     }
     
+    public String getManeuverClassificationColumnHeaders() {
+        return "datapoint\tcompetitor\ttimePoint\tangleDeg\tboatSpeedKn\tcogDeg\tmiddleManeuverCourse\tlossM";
+    }
+
+    public String getManeuverClassificationColumnTypes() {
+        return "infoitem\tstring\tdate\tfloat\tfloat\tfloat\tfloat\tfloat";
+    }
+
+    public String format(ManeuverClassification mc, String id) {
+        DateFormat df = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+        final String prefix = mc.getCompetitor().getName() + "\t" + df.format(mc.getTimePoint().asDate()) + "\t" + mc.getManeuverAngleDeg()
+                + "\t" + mc.getSpeedAtManeuverStart().getKnots() + "\t"
+                + mc.getSpeedAtManeuverStart().getBearing().getDegrees();
+        final StringBuilder result = new StringBuilder();
+        if (id != null) {
+            result.append("ID");
+            result.append(id);
+            result.append('\t');
+        }
+        result.append(prefix);
+        result.append("\t");
+        result.append(mc.getMiddleManeuverCourse().getDegrees());
+        result.append("\t");
+        result.append(mc.getManeuverLoss() == null ? 0.0 : mc.getManeuverLoss().getMeters());
+        return result.toString();
+    }
+
     /**
      * Fetches all the race's maneuvers and tries to find the tacks and jibes. For each such maneuver identified, a wind
      * fix will be created based on the average COG into and out of the maneuver.
@@ -289,7 +309,9 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * 
      * TODO with enough candidates at hand, apply temporal and spatial segmentation to account for heterogeneous wind fields
      */
-    private void analyzeRace(boolean waitForLatest) throws NotEnoughDataHasBeenAddedException {
+    private Triple<Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>>,
+                   Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>,
+                   Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> analyzeRace(boolean waitForLatest) throws NotEnoughDataHasBeenAddedException {
         final Map<Maneuver, Competitor> maneuvers = getAllManeuvers(waitForLatest);
         // cluster into eight clusters by middle COG first, then aggregate tack likelihoods for each, and jibe likelihoods for opposite cluster
         final int numberOfClusters = 8;
@@ -300,6 +322,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                         // use an evenly distributed set of cluster seeds for clustering wind direction estimations
                         IntStream.range(0, numberOfClusters).mapToObj((i)->new DegreeBearingImpl(((double) i)*360./(double) numberOfClusters)));
         final Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusters = clusterer.getClusters();
+        assert maneuvers.size() == clusters.stream().map((c)->c.size()).reduce((s1, s2)->s1+s2).get();
         final Set<Pair<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>, Double>> clustersAndLikelihoodOfBeingTackCluster =
                 clusters.stream().map((c)->new Pair<>(c, getLikelihoodIsTackCluster(c, clusters))).collect(Collectors.toSet());
         // find most likely tack cluster, based on proximity of maneuver angles in cluster and opposite cluster as well as the speed ratio
@@ -312,11 +335,13 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         if (jibeCluster != null) {
             addWindFixes(jibeCluster, ManeuverType.JIBE);
         }
+        return new Triple<>(clusters, dominantClusterAndLikelihoodOfBeingTackCluster.getA(), jibeCluster);
     }
 
     private void addWindFixes(
             Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> dominantClusterAndLikelihoodOfBeingTackCluster,
             final ManeuverType maneuverType) {
+        // TODO see bug 1562 comment #8: use WindWithConfidenceImpl internally and implement WindTrack.getAveragedWindWithConfidence
         for (ManeuverClassification mc : dominantClusterAndLikelihoodOfBeingTackCluster) {
             final SpeedWithBearingWithConfidence<Void> estimatedWindSpeedAndBearing = mc.getEstimatedWindSpeedAndBearing(maneuverType);
             if (estimatedWindSpeedAndBearing != null) {
@@ -439,5 +464,38 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             }
         }
         return Collections.unmodifiableMap(maneuvers);
+    }
+    
+    public Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> getClusters() {
+        return clusters;
+    }
+    
+    public Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> getTackCluster() {
+        return tackCluster;
+    }
+
+    public Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> getJibeCluster() {
+        return jibeCluster;
+    }
+    
+    public String getStringRepresentation(boolean waitForLatest) {
+        return getStringRepresentation(getClusters().stream(), waitForLatest);
+    }
+    
+    public String getStringRepresentation(Stream<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusters, boolean waitForLatest) {
+        StringBuilder stringRepresentation = new StringBuilder();
+        stringRepresentation.delete(0, stringRepresentation.length());
+        stringRepresentation.append(getManeuverClassificationColumnHeaders());
+        stringRepresentation.append('\n');
+        stringRepresentation.append(getManeuverClassificationColumnTypes());
+        stringRepresentation.append('\n');
+        stringRepresentation.append(getManeuverClassificationColumnHeaders());
+        stringRepresentation.append('\n');
+        final int[] id = new int[1];
+        clusters.map((c)->c.stream()).reduce(Stream::concat).get().forEach((i)->{
+            stringRepresentation.append(format(i, ""+id[0]++));
+            stringRepresentation.append('\n');
+        });
+        return stringRepresentation.toString();
     }
 }

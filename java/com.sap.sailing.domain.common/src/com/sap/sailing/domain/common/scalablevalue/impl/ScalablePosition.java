@@ -2,8 +2,8 @@ package com.sap.sailing.domain.common.scalablevalue.impl;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.RadianPosition;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
+import com.sap.sse.common.scalablevalue.ScalableValue;
+import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 
 public class ScalablePosition implements ScalableValueWithDistance<ScalablePosition, Position> {
     private final double x, y, z;

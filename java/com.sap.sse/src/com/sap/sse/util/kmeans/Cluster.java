@@ -1,4 +1,4 @@
-package com.sap.sailing.util.kmeans;
+package com.sap.sse.util.kmeans;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
+import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 
 /**
  * A k-means cluster that can determine its centroid (arithmetic mean of all its values) and for each element the
@@ -75,7 +75,7 @@ public class Cluster<E, ValueType, AveragesTo, T extends ScalableValueWithDistan
     
     /**
      * @return <code>null</code> for an empty cluster; otherwise the average obtained by dividing the element
-     *         {@link ScalableValueWithDistance#add(com.sap.sailing.domain.common.scalablevalue.ScalableValue) sum} by
+     *         {@link ScalableValueWithDistance#add(com.sap.sse.common.scalablevalue.ScalableValue) sum} by
      *         the number of elements that have been added to this cluster so far
      */
     public AveragesTo getCentroid() {

@@ -1,8 +1,8 @@
-package com.sap.sailing.util.kmeans;
+package com.sap.sse.util.kmeans;
 
 import java.util.Iterator;
 
-import com.sap.sailing.domain.common.scalablevalue.ScalableValueWithDistance;
+import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 
 /**
  * Clusters elements of type <code>T</code> into a pre-defined number of clusters such that after clustering the sum of
