@@ -77,7 +77,6 @@
             <type>aar</type>
         </dependency>
 
-		<!-- needed on remote repository -->
         <dependency>
             <groupId>android</groupId>
             <artifactId>android</artifactId>
