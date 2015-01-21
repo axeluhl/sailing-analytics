@@ -347,21 +347,22 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      */
     private double getLikelihoodIsTackCluster(Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> tackClusterCandidate,
             Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusters) {
-        double likelihoodSum = 0;
+        double tackClusterLikelihood = 0;
         for (ManeuverClassification mc : tackClusterCandidate) {
-            likelihoodSum += mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.TACK).getA();
+            tackClusterLikelihood += mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.TACK).getA();
         }
         Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> jibeClusterCandidate = getOppositeCluster(tackClusterCandidate, clusters);
         final double speedMatchFactor;
+        double jibeClusterLikelihood = 0;
         if (jibeClusterCandidate != null) {
             for (ManeuverClassification mc : jibeClusterCandidate) {
-                likelihoodSum += mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.JIBE).getA();
+                jibeClusterLikelihood += mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.JIBE).getA();
             }
             speedMatchFactor = getLikelihoodTackJibeSpeedRatio(tackClusterCandidate, jibeClusterCandidate);
         } else {
             speedMatchFactor = .5; // no jibe cluster found; penalize for not being able to compare average speeds between tacks and jibes
         }
-        return speedMatchFactor * likelihoodSum;
+        return speedMatchFactor * tackClusterLikelihood * jibeClusterLikelihood;
     }
 
     private Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> getOppositeCluster(
@@ -399,15 +400,16 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         Speed tackClusterWeightedAverageSpeed = getWeightedAverageSpeed(tackClusterCandidate, ManeuverType.TACK);
         Speed jibeClusterWeightedAverageSpeed = getWeightedAverageSpeed(jibeClusterCandidate, ManeuverType.JIBE);
         // TODO ask polarService how likely the ratio we found actually is
-        return .5;
+        return Math.min(1., jibeClusterWeightedAverageSpeed.getKnots()/tackClusterWeightedAverageSpeed.getKnots());
     }
 
     private Speed getWeightedAverageSpeed(Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> cluster, ManeuverType maneuverType) {
         double weightSum = 0;
         ScalableSpeed scalableSpeed = new ScalableSpeed(Speed.NULL);
         for (ManeuverClassification mc : cluster) {
-            weightSum += mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(maneuverType).getA();
-            scalableSpeed = scalableSpeed.add(new ScalableSpeed(mc.getSpeedAtManeuverStart()));
+            final Double weight = mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(maneuverType).getA();
+            weightSum += weight;
+            scalableSpeed = scalableSpeed.add(new ScalableSpeed(mc.getSpeedAtManeuverStart()).multiply(weight));
         }
         return scalableSpeed.divide(weightSum);
     }
