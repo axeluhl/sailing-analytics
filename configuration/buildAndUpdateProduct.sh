@@ -181,6 +181,9 @@ fi
 
 if [[ "$@" == "clean" ]]; then
     ./gradlew clean
+    if [[ $? != 0 ]]; then
+        exit 100
+    fi
     cd $PROJECT_HOME/java
     rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
     rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.*
@@ -606,6 +609,9 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
         ( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | $ANDROID_HOME/tools/android update sdk --no-ui
         ./gradlew clean build
+        if [[ $? != 0 ]]; then
+            exit 100
+        fi
     else
         echo "INFO: Deactivating mobile modules"
         extra="$extra -P !with-mobile"

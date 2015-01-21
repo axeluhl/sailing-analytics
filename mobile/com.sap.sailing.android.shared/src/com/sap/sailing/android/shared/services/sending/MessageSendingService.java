@@ -62,6 +62,8 @@ public class MessageSendingService extends Service implements MessageSendingList
     public final static String CALLBACK_CLASS = "callback";
     public final static String CALLBACK_PAYLOAD = "callbackPayload"; // passed back to callback
     public final static String MESSAGE_ID = "messageId";
+    
+    public static final String charsetName = "UTF=8";
 
     protected final static String TAG = MessageSendingService.class.getName();
 
@@ -229,7 +231,11 @@ public class MessageSendingService extends Service implements MessageSendingList
         ExLog.i(this, TAG, String.format("Trying to send a message..."));
         if (!isConnected()) {
             ExLog.i(this, TAG, String.format("Send aborted because there is no connection."));
-            persistenceManager.persistIntent(intent);
+            try {
+                persistenceManager.persistIntent(intent);
+            } catch (UnsupportedEncodingException e) {
+                ExLog.e(this, TAG, "Could not persist message (unsupported encoding)");
+            }
             ConnectivityChangedReceiver.enable(this);
             serviceLogger.onMessageSentFailed();
             reportApiConnectivity(APIConnectivity.notReachable);
@@ -251,10 +257,14 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private void sendDelayedMessages() {
-        List<Intent> delayedIntents = persistenceManager.restoreMessages();
-        ExLog.i(this, TAG, String.format("Resending %d messages...", delayedIntents.size()));
-        for (Intent intent : delayedIntents) {
-            sendMessage(intent);
+        try {
+            List<Intent> delayedIntents = persistenceManager.restoreMessages();
+            ExLog.i(this, TAG, String.format("Resending %d messages...", delayedIntents.size()));
+            for (Intent intent : delayedIntents) {
+                sendMessage(intent);
+            }
+        } catch (UnsupportedEncodingException e) {
+            ExLog.e(this, TAG, "Could not restore messages (unsupported encoding)");
         }
     }
 
@@ -284,7 +294,11 @@ public class MessageSendingService extends Service implements MessageSendingList
         	ExLog.i(this, "MS", "success");
         	reportApiConnectivity(APIConnectivity.transmissionError);
             ExLog.w(this, TAG, "Error while posting intent to server. Will persist intent...");
-            persistenceManager.persistIntent(intent);
+            try {
+                persistenceManager.persistIntent(intent);
+            } catch (UnsupportedEncodingException e) {
+                ExLog.e(this, TAG, "Could not store message (unsupported encoding)");
+            }
             if (!isHandlerSet) {
                 SendDelayedMessagesCaller delayedCaller = new SendDelayedMessagesCaller(this);
                 handler.postDelayed(delayedCaller, resendMillis); // after 30 sec, try the sending again
@@ -297,7 +311,11 @@ public class MessageSendingService extends Service implements MessageSendingList
         	reportApiConnectivity(APIConnectivity.transmissionSuccess);
             ExLog.i(this, TAG, "Message successfully sent.");
             if (persistenceManager.areIntentsDelayed()) {
-                persistenceManager.removeIntent(intent);
+                try {
+                    persistenceManager.removeIntent(intent);
+                } catch (UnsupportedEncodingException e) {
+                    ExLog.e(this, TAG, "Could not remove message (unsupported encoding)");
+                }
             }
             lastSuccessfulSend = Calendar.getInstance().getTime();
             serviceLogger.onMessageSentSuccessful();
@@ -340,21 +358,16 @@ public class MessageSendingService extends Service implements MessageSendingList
     public final static UUID uuid = UUID.randomUUID();
     
     public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
-            final String raceName, final String fleetName) {
-        String url = null;
-		try {
-			url = String.format("%s/sailingserver/rc/racelog?"+
-			        RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
-			        RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
-			        RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
-			        RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
-			        PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
-			        URLEncoder.encode(raceGroupName, "UTF-8"),
-			        URLEncoder.encode(raceName,"UTF-8"), 
-			        URLEncoder.encode(fleetName, "UTF-8"), uuid);
-		} catch (UnsupportedEncodingException e) {
-			ExLog.e(context, TAG, "UnsupportedEncodingException: " + e.getLocalizedMessage());
-		}
+            final String raceName, final String fleetName) throws UnsupportedEncodingException {
+        String url = String.format("%s/sailingserver/rc/racelog?"+
+                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
+                PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
+                URLEncoder.encode(raceGroupName, charsetName),
+                URLEncoder.encode(raceName, charsetName), 
+				URLEncoder.encode(fleetName, charsetName), uuid);
         return url;
     }
     

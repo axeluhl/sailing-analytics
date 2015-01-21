@@ -65,10 +65,8 @@ public class RaceLogPoller implements PollingActiveChangedListener {
             this.hasRacesToPoll = true;
             ExLog.i(context, TAG, String.format("Registered race %s for polling, will start in %d milliseconds.", race.getId(),
                     pollingInterval));
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | UnsupportedEncodingException e) {
             ExLog.e(context, TAG, String.format("Unable to create polling URL for race %s: %s", race.getId(), e.getMessage()));
-        } catch (UnsupportedEncodingException e) {
-            ExLog.ex(context, TAG, e);
         }
     }
 

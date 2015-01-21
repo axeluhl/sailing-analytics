@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId packageName
-        minSdkVersion 13
+        minSdkVersion 14
         targetSdkVersion 21
         versionCode verCode
         versionName "$verCode - Laser"

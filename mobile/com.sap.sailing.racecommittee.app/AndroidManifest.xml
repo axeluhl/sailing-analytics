@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sap.sailing.racecommittee.app"
     android:versionCode="6"
-    android:versionName="6 - Laser" >
+    android:versionName="6 - Laser" xmlns:tools="http://schemas.android.com/tools">
 
     <uses-sdk
-        android:minSdkVersion="13"
+        android:minSdkVersion="14"
         android:targetSdkVersion="21" />
 
     <permission
