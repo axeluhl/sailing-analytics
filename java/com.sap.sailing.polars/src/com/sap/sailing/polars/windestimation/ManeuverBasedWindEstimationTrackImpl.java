@@ -304,7 +304,6 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                 clusters.stream().map((c)->new Pair<>(c, getLikelihoodIsTackCluster(c, clusters))).collect(Collectors.toSet());
         // find most likely tack cluster, based on proximity of maneuver angles in cluster and opposite cluster as well as the speed ratio
         // between the cluster and its opposite jibe cluster candidate
-        // TODO compute a likelihood for the tack cluster candidate actually being the tack cluster, based on the ratio between its "likelihood number" and the "likelihood numbers" of the other clusters; then use this as an additional factor for the wind fix confidences
         Pair<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>, Double> dominantClusterAndLikelihoodOfBeingTackCluster =
                 clustersAndLikelihoodOfBeingTackCluster.stream().max(
                         (a, b)->(int) Math.signum(a.getB() - b.getB())).get();
@@ -351,6 +350,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         for (ManeuverClassification mc : tackClusterCandidate) {
             tackClusterLikelihood += mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.TACK).getA();
         }
+        // TODO the cluster is more likely a tack cluster if two maneuver angle clusters are found that have small variance (no "into-the-wind" maneuvers other than tacks) 
         Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> jibeClusterCandidate = getOppositeCluster(tackClusterCandidate, clusters);
         final double speedMatchFactor;
         double jibeClusterLikelihood = 0;
@@ -400,7 +400,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         Speed tackClusterWeightedAverageSpeed = getWeightedAverageSpeed(tackClusterCandidate, ManeuverType.TACK);
         Speed jibeClusterWeightedAverageSpeed = getWeightedAverageSpeed(jibeClusterCandidate, ManeuverType.JIBE);
         // TODO ask polarService how likely the ratio we found actually is
-        return Math.min(1., jibeClusterWeightedAverageSpeed.getKnots()/tackClusterWeightedAverageSpeed.getKnots());
+        return Math.min(1., 0.5*jibeClusterWeightedAverageSpeed.getKnots()/tackClusterWeightedAverageSpeed.getKnots());
     }
 
     private Speed getWeightedAverageSpeed(Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> cluster, ManeuverType maneuverType) {
