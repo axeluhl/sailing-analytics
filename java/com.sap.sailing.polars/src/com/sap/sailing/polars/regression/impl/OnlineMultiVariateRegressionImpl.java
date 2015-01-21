@@ -14,13 +14,22 @@ public class OnlineMultiVariateRegressionImpl implements OnlineMultiVariateRegre
     
     private double[] weights;
     
-    private int addedPoints = 0;
+    private int numberOfAddedPoints = 0;
+    
+    private final double[] means;
+    
+    private final double[] sumsOfSquaresOfDifferencesFromMean;
+    
+    private final double[] variances;
 
     public OnlineMultiVariateRegressionImpl(int numberOfDimensions) {
-        weights = initializeWeightsArray(numberOfDimensions + 1);
+        weights = initializeDoubleArray(numberOfDimensions + 1);
+        means = initializeDoubleArray(numberOfDimensions);
+        sumsOfSquaresOfDifferencesFromMean = initializeDoubleArray(numberOfDimensions);
+        variances = initializeDoubleArray(numberOfDimensions);
     }
 
-    private double[] initializeWeightsArray(int arrayLength) {
+    private double[] initializeDoubleArray(int arrayLength) {
         double[] weights = new double[arrayLength];
         for (int i = 0; i < weights.length; i++) {
             weights[i] = 0;
@@ -31,14 +40,24 @@ public class OnlineMultiVariateRegressionImpl implements OnlineMultiVariateRegre
     @Override
     public void addData(double y, double[] x) {
         checkNumberOfDimensions(x);
-        addedPoints++;
-        double[] newWeights = initializeWeightsArray(weights.length);
-        double alpha = 1.0/addedPoints;
+        numberOfAddedPoints++;
+        double[] newWeights = initializeDoubleArray(weights.length);
+        double alpha = 1.0/numberOfAddedPoints;
         newWeights[0] = weights[0] + alpha * (y - estimateY(x));
         for (int i = 1; i < weights.length; i++) {
-            newWeights[i] = weights[i] + alpha*(y - estimateY(x))*x[i-1];
+            incrementallyUpdateVariances(x, i);
+            double normalizedInput = (x[i-1] - means[i-1]) / Math.sqrt(variances[i-1]);
+            newWeights[i] = weights[i] + alpha*(y - estimateY(x))*normalizedInput;
         }
         weights = newWeights;
+    }
+
+    private void incrementallyUpdateVariances(double[] x, int i) {
+        //http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Incremental_algorithm
+        double oldMean = means[i-1];
+        means[i-1] = means[i-1] + ((x[i-1] - means[i-1]) / numberOfAddedPoints);
+        sumsOfSquaresOfDifferencesFromMean[i-1] = sumsOfSquaresOfDifferencesFromMean[i-1] + (x[i-1] - oldMean) * (x[i-1] - means[i-1]);
+        variances[i-1] = sumsOfSquaresOfDifferencesFromMean[i-1] / (numberOfAddedPoints - 1);
     }
 
     @Override
