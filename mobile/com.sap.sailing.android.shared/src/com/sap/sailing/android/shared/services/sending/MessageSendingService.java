@@ -63,7 +63,7 @@ public class MessageSendingService extends Service implements MessageSendingList
     public final static String CALLBACK_PAYLOAD = "callbackPayload"; // passed back to callback
     public final static String MESSAGE_ID = "messageId";
     
-    public static final String charsetName = "UTF=8";
+    public static final String charsetName = "UTF-8";
 
     protected final static String TAG = MessageSendingService.class.getName();
 
