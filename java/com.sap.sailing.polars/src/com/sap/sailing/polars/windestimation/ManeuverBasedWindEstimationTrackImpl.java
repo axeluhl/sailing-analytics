@@ -66,13 +66,13 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
     private final TrackedRace trackedRace;
     
-    public ManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, TrackedRace trackedRace, long millisecondsOverWhichToAverage)
+    public ManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, TrackedRace trackedRace, long millisecondsOverWhichToAverage, boolean waitForLatest)
             throws NotEnoughDataHasBeenAddedException {
         super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, /* useSpeed */ false,
                 /* nameForReadWriteLock */ ManeuverBasedWindEstimationTrackImpl.class.getName());
         this.polarService = polarService;
         this.trackedRace = trackedRace;
-        analyzeRace();
+        analyzeRace(waitForLatest);
     }
 
     /**
@@ -289,8 +289,8 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * 
      * TODO with enough candidates at hand, apply temporal and spatial segmentation to account for heterogeneous wind fields
      */
-    private void analyzeRace() throws NotEnoughDataHasBeenAddedException {
-        final Map<Maneuver, Competitor> maneuvers = getAllManeuvers();
+    private void analyzeRace(boolean waitForLatest) throws NotEnoughDataHasBeenAddedException {
+        final Map<Maneuver, Competitor> maneuvers = getAllManeuvers(waitForLatest);
         // cluster into eight clusters by middle COG first, then aggregate tack likelihoods for each, and jibe likelihoods for opposite cluster
         final int numberOfClusters = 8;
         KMeansMappingClusterer<ManeuverClassification, DoublePair, Bearing, ScalableBearing> clusterer =
@@ -336,12 +336,12 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * 
      * If a jibe cluster candidate is found, the resulting number is scaled by the likelihood that the average speed
      * difference (weighted by the likelihood of being the expected maneuver type) between tack and jibe cluster makes
-     * sense. Otherwise, the value is scaled down by a factor of .5 as a penalty for not having found a jibe cluster.
+     * sense. Otherwise, the value is scaled down by a factor of .25 as a penalty for not having found a jibe cluster.
      * 
      * @return not a 0..1 likelihood but some scaled value that can grow beyond 1 and represents the sum for all
      *         relevant <code>tackClusterCandidate</code> maneuvers' likelihood that they are a tack, added to the
      *         likelihood sum for an opposite cluster that its maneuvers are jibes, scaled by the probability that the
-     *         speed ratio between tack and jibe cluster makes sense (or .5 in case there is no jibe cluster candidate
+     *         speed ratio between tack and jibe cluster makes sense (or .25 in case there is no jibe cluster candidate
      *         found within the threshold).
      */
     private double getLikelihoodIsTackCluster(Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> tackClusterCandidate,
@@ -360,7 +360,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             }
             speedMatchFactor = getLikelihoodTackJibeSpeedRatio(tackClusterCandidate, jibeClusterCandidate);
         } else {
-            speedMatchFactor = .5; // no jibe cluster found; penalize for not being able to compare average speeds between tacks and jibes
+            speedMatchFactor = .25; // no jibe cluster found; penalize for not being able to compare average speeds between tacks and jibes
         }
         return speedMatchFactor * tackClusterLikelihood * jibeClusterLikelihood;
     }
@@ -370,13 +370,13 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusters) {
         final Bearing clusterCentroid = cluster.getCentroid();
         final Bearing opposite = clusterCentroid.reverse();
-        Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> jibeClusterCandidate =
+        Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> oppositeClusterCandidate =
                 clusters.stream().min((a, b)->
                     (int) Math.signum(Math.abs(opposite.getDifferenceTo(a.getCentroid()).getDegrees()) -
                             Math.abs(opposite.getDifferenceTo(b.getCentroid()).getDegrees()))).get();
         final Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> result;
-        if (Math.abs(opposite.getDifferenceTo(jibeClusterCandidate.getCentroid()).getDegrees()) < THRESHOLD_OPPOSITE_CLUSTER_DIFFERENCE_DEGREES) {
-            result = jibeClusterCandidate;
+        if (Math.abs(opposite.getDifferenceTo(oppositeClusterCandidate.getCentroid()).getDegrees()) < THRESHOLD_OPPOSITE_CLUSTER_DIFFERENCE_DEGREES) {
+            result = oppositeClusterCandidate;
         } else {
             result = null;
         }
@@ -422,7 +422,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             new ManeuverClassification(maneuverAndCompetitor.getValue(), maneuverAndCompetitor.getKey()));
     }
 
-    private Map<Maneuver, Competitor> getAllManeuvers() {
+    private Map<Maneuver, Competitor> getAllManeuvers(boolean waitForLatest) {
         Map<Maneuver, Competitor> maneuvers = new HashMap<>();
         final Waypoint firstWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
         final Waypoint lastWaypoint = trackedRace.getRace().getCourse().getLastWaypoint();
@@ -432,9 +432,9 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                     trackedRace.getStartOfRace(), trackedRace.getStartOfTracking());
             final TimePoint to = Util.getFirstNonNull(
                     lastWaypoint == null ? null : trackedRace.getMarkPassing(competitor, lastWaypoint) == null ? null : trackedRace.getMarkPassing(competitor, lastWaypoint).getTimePoint(),
-                    trackedRace.getEndOfRace() , trackedRace.getEndOfTracking(),
+                    trackedRace.getEndOfRace(), trackedRace.getEndOfTracking(),
                     MillisecondsTimePoint.now());
-            for (Maneuver maneuver : trackedRace.getManeuvers(competitor, from, to, /* waitForLatest */ false)) {
+            for (Maneuver maneuver : trackedRace.getManeuvers(competitor, from, to, waitForLatest)) {
                 maneuvers.put(maneuver, competitor);
             }
         }

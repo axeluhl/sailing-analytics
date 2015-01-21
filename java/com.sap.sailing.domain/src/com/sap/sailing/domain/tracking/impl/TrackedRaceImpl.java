@@ -2095,23 +2095,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         // compute the maneuvers for competitor
         com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-        boolean markPassingsNotEmpty;
         TimePoint extendedFrom = null;
         MarkPassing crossedFinishLine = null;
         // getLastWaypoint() will wait for a read lock on the course; do this outside the synchronized block to avoid
         // deadlocks
         final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
-        lockForRead(markPassings);
-        try {
-            markPassingsNotEmpty = markPassings != null && !markPassings.isEmpty();
-            if (markPassingsNotEmpty) {
-                extendedFrom = markPassings.iterator().next().getTimePoint();
-                crossedFinishLine = getMarkPassing(competitor, lastWaypoint);
+        if (lastWaypoint != null) {
+            lockForRead(markPassings);
+            try {
+                if (markPassings != null && !markPassings.isEmpty()) {
+                    extendedFrom = markPassings.iterator().next().getTimePoint();
+                    crossedFinishLine = getMarkPassing(competitor, lastWaypoint);
+                }
+            } finally {
+                unlockAfterRead(markPassings);
             }
-        } finally {
-            unlockAfterRead(markPassings);
         }
-        if (markPassingsNotEmpty) {
+        if (extendedFrom == null) {
+            GPSFixMoving firstRawFix = getTrack(competitor).getFirstRawFix();
+            if (firstRawFix != null) {
+                extendedFrom = firstRawFix.getTimePoint();
+            }
+        }
+        if (extendedFrom != null) {
             TimePoint extendedTo;
             if (crossedFinishLine != null) {
                 extendedTo = crossedFinishLine.getTimePoint();
@@ -2125,9 +2131,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (extendedTo != null) {
                 try {
-                    List<Maneuver> extendedResultForCache = detectManeuvers(competitor, extendedFrom, extendedTo, /* ignoreMarkPassings */ false);
-                    result = new com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo,
-                            extendedResultForCache);
+                    List<Maneuver> extendedResultForCache = detectManeuvers(competitor, extendedFrom, extendedTo, /* ignoreMarkPassings */
+                            false);
+                    result = new com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom,
+                            extendedTo, extendedResultForCache);
                 } catch (NoWindException ex) {
                     // Catching the NoWindException here without letting it propagate thru other handlers.
                     // This is mainly to avoid having logs flooded with stack traces. It is safe to catch
@@ -2139,8 +2146,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // recomputation.
                     logger.fine("NoWindException during computation of maneuvers for " + competitor.getName());
                 }
-            } // else competitor has no fixes to consider; remove any maneuver cache entry
-        } // else competitor hasn't started yet; remove any maneuver cache entry
+            }
+        } // else competitor has no fixes to consider; remove any maneuver cache entry
         logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
