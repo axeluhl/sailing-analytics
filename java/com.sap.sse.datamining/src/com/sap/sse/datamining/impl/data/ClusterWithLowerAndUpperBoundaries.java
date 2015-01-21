@@ -7,17 +7,17 @@ import com.sap.sse.datamining.data.ClusterBoundary;
 
 public class ClusterWithLowerAndUpperBoundaries<ElementType> extends AbstractCluster<ElementType> {
 
-    public ClusterWithLowerAndUpperBoundaries(String name, ClusterBoundary<ElementType> lowerBound,
+    public ClusterWithLowerAndUpperBoundaries(String messageKey, ClusterBoundary<ElementType> lowerBound,
             ClusterBoundary<ElementType> upperBound) {
-        super(name, Arrays.asList(lowerBound, upperBound));
+        super(messageKey, Arrays.asList(lowerBound, upperBound));
     }
     
     @Override
-    public String toString() {
+    protected String getBoundariesAsString() {
         Iterator<ClusterBoundary<ElementType>> boundariesIterator = super.getClusterBoundaries().iterator();
         ClusterBoundary<ElementType> lowerBound = boundariesIterator.next();
         ClusterBoundary<ElementType> upperBound = boundariesIterator.next();
-        return super.getName() + " " + lowerBound + " - " + upperBound;
+        return lowerBound + " - " + upperBound;
     }
-
+    
 }

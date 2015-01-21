@@ -68,5 +68,4 @@ public class AddLeaderboardGroupToEvent extends AbstractRacingEventServiceOperat
         // TODO Auto-generated method stub
         return null;
     }
-
 }

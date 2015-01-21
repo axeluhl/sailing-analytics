@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <string name="id">id</string>
-    <string name="tracking_service">Tracking Service</string>
-    <string name="tracking_service_start">tracking_start</string>
-    <string name="tracking_service_stop">tracking_stop</string>
-    <string name="tracking_service_change">tracking_change</string>
-    <string name="tracking_service_event_id_parameter">trackingServiceEventId</string>
-    <string name="transmitting_service">Transmitting Service</string>
-    <string name="transmitting_service_start">transmitting_start</string>
-    <string name="transmitting_service_stop">transmitting_stop</string>
-    
+    <string name="tracking_service" translatable="false">Tracking Service</string>
+    <string name="tracking_service_start" translatable="false">tracking_start</string>
+    <string name="tracking_service_stop" translatable="false">tracking_stop</string>
+    <string name="tracking_service_checkin_digest_parameter" translatable="false">trackingServiceCheckinDigest</string>
     
 </resources>

@@ -12,11 +12,12 @@ import java.util.List;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public interface TracTracAdapter {
@@ -47,8 +48,9 @@ public interface TracTracAdapter {
      *            is stopped; use -1 to wait forever
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
-            URI courseDesignUpdateURI, RaceLogStore raceLogStore, long timeoutInMilliseconds,
-            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility) throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
+            URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
+            String raceVisibility) throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
      * Same as {@link #addTracTracRace(URL, URI, URI, WindStore, long)}, only that start and end of tracking are
@@ -65,12 +67,11 @@ public interface TracTracAdapter {
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      * @param raceStatus 
      */
-    RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
-            URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
-            TimePoint trackingEndTime, RaceLogStore raceLogStore,
-            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow, 
-            String tracTracUsername, String tracTracPassword, 
-            String raceStatus, String raceVisibility)
+    RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
+            URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
+            TimePoint trackingEndTime, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow,
+            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -89,8 +90,9 @@ public interface TracTracAdapter {
      *            that race is stopped; use -1 to wait forever
      * @param raceLogStore TODO
      */
-    Regatta addRegatta(TrackerManager trackerManager, URL jsonURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, WindStore windStore, 
-            long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, RaceLogStore raceLogStore)
+    Regatta addRegatta(TrackerManager trackerManager, URL jsonURL, URI liveURI, URI storedURI,
+            URI courseDesignUpdateURI, WindStore windStore, long timeoutInMilliseconds, String tracTracUsername,
+            String tracTracPassword, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, ParseException,
             org.json.simple.parser.ParseException, Exception;
 

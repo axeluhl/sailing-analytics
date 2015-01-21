@@ -30,9 +30,9 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.CollectionUtils;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -54,6 +54,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RacingActivity extends SessionActivity implements RaceInfoListener, NavigationDrawerCallbacks,
         TickListener, OnClickListener {
@@ -536,5 +537,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 mProgressSpinner.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void setupActionBar(CourseArea courseArea) {
+        AbstractLogEventAuthor author = preferences.getAuthor();
+        String title = String.format(getString(R.string.racingview_header), courseArea.getName());
+        title += " (" + author.getName() + ")";
+
+        getSupportActionBar().setTitle(title);
     }
 }

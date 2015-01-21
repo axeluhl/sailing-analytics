@@ -4,9 +4,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
@@ -17,6 +15,8 @@ import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 
 public class WindFieldGeneratorMeasured extends WindFieldGeneratorImpl implements WindFieldGenerator {
 

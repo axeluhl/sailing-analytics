@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
-public class ObjectInputStreamResolvingAgainstDomainFactoryImpl extends ObjectInputStreamResolvingAgainstDomainFactory {
-    ObjectInputStreamResolvingAgainstDomainFactoryImpl(InputStream in, DomainFactory domainFactory)
-            throws IOException {
+public class ObjectInputStreamResolvingAgainstDomainFactoryImpl extends ObjectInputStreamResolvingAgainstCache<DomainFactory> {
+    ObjectInputStreamResolvingAgainstDomainFactoryImpl(InputStream in, DomainFactory domainFactory) throws IOException {
         super(in, domainFactory);
     }
 }

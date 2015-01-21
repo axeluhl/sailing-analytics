@@ -12,13 +12,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.test.ServiceTestCase;
 
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
+import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TransmittingService;
 import com.sap.sailing.android.tracking.app.test.extensions.DatabaseHelperTestable;
-import com.sap.sailing.android.tracking.app.test.extensions.VolleyHelperTestable;
+import com.sap.sailing.android.tracking.app.test.extensions.NetworkHelperTestable;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFailureListener;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 
 public class TransmittingServiceTest extends ServiceTestCase<TransmittingService> {
@@ -26,7 +28,7 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 	static final String TAG = TransmittingServiceTest.class.getName();
 	final String eventId = "test123";
 	
-	private VolleyHelperTestable volleyHelperSpy;
+	private NetworkHelperTestable networkHelperSpy;
 	private DatabaseHelperTestable databaseHelperMock;
 	
 	public TransmittingServiceTest() {
@@ -40,11 +42,10 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
         DatabaseTestHelper.deleteAllEventsFromDB(getContext());
         DatabaseTestHelper.deleteAllGpsFixesFromDB(getContext());
         
-        if (volleyHelperSpy == null)
+        if (networkHelperSpy == null)
         {
-        	VolleyHelperTestable.injectInstance(null, null);
-        	volleyHelperSpy = Mockito.spy(new VolleyHelperTestable(getContext()));
-        	VolleyHelperTestable.injectInstance(getContext(), volleyHelperSpy);
+        	networkHelperSpy = Mockito.spy(new NetworkHelperTestable());
+        	NetworkHelperTestable.injectInstance(getContext(), networkHelperSpy);
         }
         
         if (databaseHelperMock == null)
@@ -71,8 +72,8 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 	public void testTransmittingServiceTransmitsGpsFix() throws InterruptedException, JSONException {
 		long timestamp = (new Date()).getTime();
 		
-		ArgumentCaptor<JSONObject> jsonObjectCaptor = ArgumentCaptor.forClass(JSONObject.class);
-		ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<HttpJsonPostRequest> requestCaptor = ArgumentCaptor.forClass(HttpJsonPostRequest.class);
+		//ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
 	
 		ArrayList<GpsFix> list = new ArrayList<GpsFix>();
 		GpsFix fix = new GpsFix();
@@ -91,22 +92,22 @@ public class TransmittingServiceTest extends ServiceTestCase<TransmittingService
 		startService();
 		
 		Thread.sleep(3500); 
+		
+		Mockito.verify(networkHelperSpy, Mockito.times(1)).executeHttpJsonRequestAsnchronously(requestCaptor.capture(), 
+				(NetworkHelperSuccessListener)Mockito.any(), (NetworkHelperFailureListener)Mockito.any());
 
-		Mockito.verify(volleyHelperSpy, Mockito.times(1)).enqueueRequest(
-				urlCaptor.capture(), jsonObjectCaptor.capture(), 
-				(Listener<JSONObject>)Mockito.any(), Mockito.any(ErrorListener.class));
 
-		JSONObject json = jsonObjectCaptor.getValue();
+		JSONObject json = new JSONObject(requestCaptor.getValue().getRequestBody());
 		assertEquals(1, json.getJSONArray("fixes").length());
 		
 		JSONObject jsonFix = (JSONObject)json.getJSONArray("fixes").get(0);
-		assertEquals(timestamp, jsonFix.getLong("timeMillis"));
-		assertEquals(12, jsonFix.getLong("lonDeg"));
-		assertEquals(13, jsonFix.getLong("latDeg"));
-		assertEquals(14, jsonFix.getLong("speedMperS"));
-		assertEquals(101.5, jsonFix.getDouble("bearingDeg"));
+		assertEquals(timestamp, jsonFix.getLong("timestamp"));
+		assertEquals(12, jsonFix.getLong("longitude"));
+		assertEquals(13, jsonFix.getLong("latitude"));
+		assertEquals(14, jsonFix.getLong("speed"));
+		assertEquals(101.5, jsonFix.getDouble("course"));
 		
-		assertEquals("http://127.0.0.1/sailingserver/api/v1/gps_fixes", urlCaptor.getValue());
+		assertEquals("http://127.0.0.1/sailingserver/api/v1/gps_fixes", requestCaptor.getValue().getUrlAsString());
 		shutdownService();
 	}
 

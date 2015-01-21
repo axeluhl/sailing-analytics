@@ -8,8 +8,8 @@
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
-	
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
+	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->

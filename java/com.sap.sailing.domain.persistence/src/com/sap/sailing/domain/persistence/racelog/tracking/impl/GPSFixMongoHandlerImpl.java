@@ -3,7 +3,6 @@ package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
@@ -11,6 +10,7 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sse.common.TimePoint;
 
 public class GPSFixMongoHandlerImpl implements GPSFixMongoHandler {
     private final MongoObjectFactoryImpl mof;

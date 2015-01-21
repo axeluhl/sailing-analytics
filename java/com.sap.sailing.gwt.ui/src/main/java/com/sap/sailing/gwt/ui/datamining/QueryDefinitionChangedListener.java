@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 
 public interface QueryDefinitionChangedListener {
 
-    void queryDefinitionChanged(QueryDefinition newQueryDefinition);
+    void queryDefinitionChanged(QueryDefinitionDTO newQueryDefinition);
 
 }

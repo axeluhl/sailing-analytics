@@ -18,22 +18,16 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
 import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
-import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
+import com.sap.sailing.gwt.ui.datamining.selection.BufferingQueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
-import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
-    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
-
     private static DataMiningResources resources = GWT.create(DataMiningResources.class);
     
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
@@ -42,7 +36,6 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
@@ -51,7 +44,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addNorth(createLogoAndTitlePanel(), 68);
-        QueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(getStringMessages(), sailingService, dataMiningService, this);
+        BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new BufferingQueryDefinitionProviderWithControls(getStringMessages(), sailingService, dataMiningService, this);
         queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
         dockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
         
@@ -93,19 +86,6 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             }
         });
         panel.add(runnerSettingsAnchor);
-        
-        Label selectionTablesSettingsLabel = new Label(queryDefinitionProvider.getSelectionProvider().getLocalizedShortName() + ":");
-        panel.add(selectionTablesSettingsLabel);
-        Anchor selectionTablesSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
-        selectionTablesSettingsAnchor.setTitle(getStringMessages().settings());
-        selectionTablesSettingsAnchor.addClickHandler(new ClickHandler() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void onClick(ClickEvent event) {
-                new SettingsDialog<RefreshingSelectionTablesSettings>((Component<RefreshingSelectionTablesSettings>) queryDefinitionProvider.getSelectionProvider(), getStringMessages()).show();
-            }
-        });
-        panel.add(selectionTablesSettingsAnchor);
         
         return panel;
     }

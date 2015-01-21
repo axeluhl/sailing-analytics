@@ -16,11 +16,11 @@ import android.provider.Settings.Secure;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
@@ -93,10 +93,15 @@ public class AppPreferences {
         this.preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
     }
 
-    public RaceLogEventAuthor getAuthor() {
+    public void setAuthor(AbstractLogEventAuthor author) {
+        preferences.edit().putString(HIDDEN_PREFERENCE_AUTHOR_NAME, author.getName()).commit();
+        preferences.edit().putInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).commit();
+    }
+
+    public AbstractLogEventAuthor getAuthor() {
         String authorName = preferences.getString(HIDDEN_PREFERENCE_AUTHOR_NAME, "<anonymous>");
         int authorPriority = preferences.getInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, 0);
-        return new RaceLogEventAuthorImpl(authorName, authorPriority);
+        return new LogEventAuthorImpl(authorName, authorPriority);
     }
 
     public BoatClassType getBoatClass() {
@@ -318,11 +323,6 @@ public class AppPreferences {
         pollingActiveChangedListeners.add(listener);
     }
 
-    public void setAuthor(RaceLogEventAuthor author) {
-        preferences.edit().putString(HIDDEN_PREFERENCE_AUTHOR_NAME, author.getName()).commit();
-        preferences.edit().putInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).commit();
-    }
-
     public void setBoatClass(BoatClassType boatClass) {
         String boatClassString = boatClass.name();
         preferences.edit().putString(HIDDEN_PREFERENCE_BOAT_CLASS, boatClassString).commit();
@@ -459,10 +459,7 @@ public class AppPreferences {
     public void setEventID(Serializable id){
     	ExLog.i(getContext(), this.getClass().toString(), "Saving eventId: "+ id);
     	
-    	
-    	preferences.edit()
-    		.putString(HIDDEN_PREFERENCE_EVENT_ID, id.toString())
-    	.commit();
+    	preferences.edit().putString(HIDDEN_PREFERENCE_EVENT_ID, id.toString()).commit();
     	
     	ExLog.i(getContext(), this.getClass().toString(), "Loading eventId: "+ getEventID());
     }

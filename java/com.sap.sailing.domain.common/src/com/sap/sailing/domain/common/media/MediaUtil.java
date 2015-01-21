@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.media;
 
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 public class MediaUtil {
 

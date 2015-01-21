@@ -3,4 +3,25 @@
     <issue id="TypographyDashes">
         <ignore path="res/values/preferences.xml" />
     </issue>
+
+	<!-- Reason:  Don't want to use apply() instead of commit() -->
+    <issue id="CommitPrefEdits">
+    		<ignore path="src/com/sap/sailing/android/tracking/app/utils/AppPreferences.java" />
+    </issue>
+
+	<!-- Reason: Eclipse users don't get the override -->
+    <issue id="GradleOverrides">
+    		<ignore path="AndroidManifest.xml" />
+    </issue>
+
+	<!-- Reason: Yes, overlap possible, but can easily be caught by testers / also: not critical -->
+    <issue id="RelativeOverlap">
+    		<ignore path="res/layout/fragment_tracking.xml" />
+    		<ignore path="res/layout-land/fragment_tracking.xml" />
+    </issue>
+
+    <!-- Reason: Looks like it belongs to vpi__dark_theme -->
+    <issue id="UnusedResources">
+        <ignore path="res/color/vpi__light_theme.xml" />
+    </issue>
 </lint>

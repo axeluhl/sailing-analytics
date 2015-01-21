@@ -12,32 +12,32 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class SimpleDeclinationTest extends AbstractDeclinationTest {
     @Test
     public void testSimpleCorrection() throws IOException, ParseException, ParserConfigurationException, SAXException {
-        Declination record = importer.importRecord(new DegreePosition(53, 3),
-                new MillisecondsTimePoint(simpleDateFormat.parse("1920-05-27").getTime()));
-        assertEquals(-12.68941, record.getBearing().getDegrees(), 0.0001);
-        assertEquals(0.1863178, record.getAnnualChange().getDegrees(), 0.0001);
-        TimePoint oneYearLater = new MillisecondsTimePoint(simpleDateFormat.parse("1921-05-27").getTime());
+        final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(simpleDateFormat.parse("2019-05-27").getTime());
+        Declination record = importer.importRecord(new DegreePosition(53, 3), timePoint);
+        assertEquals(0.70594, record.getBearing().getDegrees(), 0.0001);
+        assertEquals(0.14745, record.getAnnualChange().getDegrees(), 0.0001);
+        TimePoint oneYearLater = timePoint.plus(Duration.ONE_YEAR);
         Bearing bearing = record.getBearingCorrectedTo(oneYearLater);
-        assertEquals(-12.68941+0.1863178, bearing.getDegrees(), 0.0001);
+        assertEquals(0.70594+0.14745, bearing.getDegrees(), 0.0001);
     }
 
     @Test
     public void testBackwardCorrection() throws IOException, ParseException, ParserConfigurationException, SAXException {
-        Declination record = importer.importRecord(new DegreePosition(53, 3),
-                new MillisecondsTimePoint(simpleDateFormat.parse("1920-05-27").getTime()));
-        assertEquals(-12.68941, record.getBearing().getDegrees(), 0.0001);
-        assertEquals(0.1863178, record.getAnnualChange().getDegrees(), 0.0001);
-        // 1920 is a leap year, so add one day, otherwise it wouldn't match the 365 day assumption
-        TimePoint oneYearEarlier = new MillisecondsTimePoint(simpleDateFormat.parse("1919-05-28").getTime());
+        final MillisecondsTimePoint timePoint = new MillisecondsTimePoint(simpleDateFormat.parse("2019-05-27").getTime());
+        Declination record = importer.importRecord(new DegreePosition(53, 3), timePoint);
+        assertEquals(0.70594, record.getBearing().getDegrees(), 0.0001);
+        assertEquals(0.14745, record.getAnnualChange().getDegrees(), 0.0001);
+        TimePoint oneYearEarlier = timePoint.minus(Duration.ONE_YEAR);
         Bearing bearing = record.getBearingCorrectedTo(oneYearEarlier);
-        assertEquals(-12.68941-0.1863178, bearing.getDegrees(), 0.0001);
+        assertEquals(0.70594-0.14745, bearing.getDegrees(), 0.0001);
     }
 
 }

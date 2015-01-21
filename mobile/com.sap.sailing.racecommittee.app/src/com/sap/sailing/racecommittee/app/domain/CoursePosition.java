@@ -2,11 +2,10 @@ package com.sap.sailing.racecommittee.app.domain;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.WithID;
 
-public interface CoursePosition extends Named, WithID, IsManagedBySharedDomainFactory {
+public interface CoursePosition extends Named, WithID {
 
    UUID getId();
 

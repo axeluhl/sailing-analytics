@@ -3,7 +3,9 @@ package com.sap.sailing.android.tracking.app.ui.fragments.preference;
 
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.SwitchPreference;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -15,7 +17,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_general);
-        
+
         AppPreferences prefs = new AppPreferences(getActivity());
         String currentDeviceId = prefs.getDeviceIdentifier();
         
@@ -33,5 +35,17 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         	deviceIdPreference.setSummary(newDeviceId);
         }
     }
- 
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        SwitchPreference prefEnergy = (SwitchPreference)findPreference(R.string.preference_energy_saving_enabled_key);
+        SwitchPreference prefDeclination = (SwitchPreference)findPreference(R.string.preference_heading_with_declination_subtracted_key);
+
+        AppPreferences prefs = new AppPreferences(getActivity());
+
+        prefs.setEnergySavingEnabledByUser(prefEnergy.isChecked());
+        prefs.setDisplayHeadingWithSubtractedDeclination(prefDeclination.isChecked());
+    }
 }

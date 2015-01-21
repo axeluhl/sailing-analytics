@@ -22,7 +22,7 @@ import com.sap.sailing.android.tracking.app.valueobjects.GpsFix;
 public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 
 	static final String TAG = TrackingServiceTest.class.getName();
-	final String eventId = "test123";
+	final String checkinDigest = "testDigest123";
 	long eventRowId;
 
 	private ServiceHelperTestable serviceHelperSpy;
@@ -37,8 +37,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 		System.setProperty("dexmaker.dexcache", getContext().getCacheDir().toString());
 		DatabaseTestHelper.deleteAllGpsFixesFromDB(getContext());
 		DatabaseTestHelper.deleteAllEventsFromDB(getContext());
-		eventRowId = DatabaseTestHelper.createNewEventInDBAndReturnItsId(getContext(), "test123",
-				eventId);
+		eventRowId = DatabaseTestHelper.createNewEventInDBAndReturnItsId(getContext(), "test123", "123-456", checkinDigest);
 
 		serviceHelperSpy = Mockito.mock(ServiceHelperTestable.class);
 		ServiceHelperTestable.injectInstance(serviceHelperSpy);
@@ -52,8 +51,7 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 	private void startService() {
 		Intent startIntent = new Intent();
 		startIntent.setClass(getContext(), TrackingService.class);
-		startIntent.putExtra(getContext().getString(R.string.tracking_service_event_id_parameter),
-				eventId);
+		startIntent.putExtra(getContext().getString(R.string.tracking_service_checkin_digest_parameter), checkinDigest);
 		startIntent.setAction(getContext().getString(R.string.tracking_service_start));
 		startService(startIntent);
 	}
@@ -152,14 +150,14 @@ public class TrackingServiceTest extends ServiceTestCase<TrackingService> {
 		TrackingService service = getService();
 		service.registerGPSQualityListener(listener);
 
-		getService().onLocationChanged(getTestLocation(50, 12.5f, 123));
+		getService().onLocationChanged(getTestLocation(12, 12.5f, 123));
 
 		Mockito.verify(listener, Mockito.times(1)).gpsQualityAndAccurracyUpdated(
 				gpsQualityCaptor.capture(), accuracyCaptor.capture(), bearingCaptor.capture(),
 				speedCaptor.capture());
 
 		assertEquals(GPSQuality.good, gpsQualityCaptor.getValue());
-		assertEquals(50f, accuracyCaptor.getValue().floatValue());
+		assertEquals(12f, accuracyCaptor.getValue().floatValue());
 		assertEquals(123f, bearingCaptor.getValue().floatValue());
 		assertEquals(12.5f, speedCaptor.getValue().floatValue());
 

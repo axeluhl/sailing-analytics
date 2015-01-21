@@ -15,7 +15,7 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DeclinationImportTest extends AbstractDeclinationTest {
     @Test
@@ -39,25 +39,25 @@ public class DeclinationImportTest extends AbstractDeclinationTest {
     @Test
     public void importSimpleDeclination() throws IOException, ParseException, ParserConfigurationException, SAXException {
         Declination record = importer.importRecord(new DegreePosition(53, 3),
-                new MillisecondsTimePoint(simpleDateFormat.parse("1920-05-27").getTime()));
-        assertEquals(-12.68941, record.getBearing().getDegrees(), 0.0001);
-        assertEquals(0.1863178, record.getAnnualChange().getDegrees(), 0.0001);
+                new MillisecondsTimePoint(simpleDateFormat.parse("2016-05-27").getTime()));
+        assertEquals(0.26307, record.getBearing().getDegrees(), 0.0001);
+        assertEquals(0.14795, record.getAnnualChange().getDegrees(), 0.0001);
     }
 
     @Test
     public void importSouthernHemisphereDeclination() throws IOException, ParseException, ParserConfigurationException, SAXException {
         long start = System.currentTimeMillis();
         Declination record = importer.importRecord(new DegreePosition(-10, 3),
-                new MillisecondsTimePoint(simpleDateFormat.parse("2011-05-27").getTime()));
+                new MillisecondsTimePoint(simpleDateFormat.parse("2017-05-27").getTime()));
         System.out.println("took "+(System.currentTimeMillis()-start)+"ms");
-        assertEquals(-9.54538, record.getBearing().getDegrees(), 0.0001);
-        assertEquals(0.17543, record.getAnnualChange().getDegrees(), 0.0001);
+        assertEquals(-8.44581, record.getBearing().getDegrees(), 0.0001);
+        assertEquals(0.17712, record.getAnnualChange().getDegrees(), 0.0001);
     }
     
     @Test
     public void readOnlineOrFromFile() throws IOException, ClassNotFoundException, ParseException {
         Declination declination = importer.getDeclination(new DegreePosition(53, 3),
-                new MillisecondsTimePoint(simpleDateFormat.parse("2011-05-27").getTime()), 
+                new MillisecondsTimePoint(simpleDateFormat.parse("2018-05-27").getTime()), 
                 /* timeoutForOnlineFetchInMilliseconds */ 10000);
         assertNotNull(declination);
         System.out.println(declination);

@@ -31,7 +31,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     private DoubleBox outlierRadiusBox;
     private DoubleBox outlierNeighborhoodPctBox;
     private CheckBox useOnlyEstimationForWindDirectionBox;
-    private WindSteppingConfiguratorPanel windSteppingBox;
+    private WindSpeedSteppingConfiguratorPanel windSteppingBox;
     private DoubleBox windSteppingMaxDistanceBox;
     private CheckBox splitByWindGaugesBox;
 
@@ -113,12 +113,12 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
         numberOfHistogramColumnsBox = dialog.createIntegerBox(settings.getNumberOfHistogramColumns(), 3);
         grid.setWidget(10, 1, numberOfHistogramColumnsBox);
         grid.setWidget(11, 0, new Label(stringMessages.polarSheetWindSteppingInKnots() + ":"));
-        windSteppingBox = new WindSteppingConfiguratorPanel(settings.getWindStepping());
+        windSteppingBox = new WindSpeedSteppingConfiguratorPanel(settings.getWindSpeedStepping());
         grid.setWidget(11, 1, windSteppingBox);
         Label windSteppingMaxDistanceLabel = new Label(stringMessages.polarSheetWindSteppingMaxDistance() + ":");
         windSteppingMaxDistanceLabel.setTitle(stringMessages.polarSheetWindSteppingMaxDistanceTooltip());
         grid.setWidget(12, 0, windSteppingMaxDistanceLabel);
-        windSteppingMaxDistanceBox = dialog.createDoubleBox(settings.getWindStepping().getMaxDistance(), 6);
+        windSteppingMaxDistanceBox = dialog.createDoubleBox(settings.getWindSpeedStepping().getMaxDistance(), 6);
         grid.setWidget(12, 1, windSteppingMaxDistanceBox);
         grid.setWidget(13, 0, new Label(stringMessages.pleaseSeeToolTips()));
         

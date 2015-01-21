@@ -1,15 +1,18 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import net.hockeyapp.android.CrashManager;
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
-import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 
 public class StartActivity extends BaseActivity {
     
@@ -35,9 +38,22 @@ public class StartActivity extends BaseActivity {
         replaceFragment(R.id.content_frame, new HomeFragment());
     }
     
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	checkForCrashes();
+        //checkForUpdates();
+        
+    	int googleServicesResultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+    	if (googleServicesResultCode != ConnectionResult.SUCCESS)
+    	{
+    		Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googleServicesResultCode, this, 0);
+    		dialog.show();
+    	}
+    }
     
     @Override
-    protected void onStart() {
+	public void onStart() {
     	super.onStart();
 
     	// get url if launched via url intent-filter
@@ -47,8 +63,7 @@ public class StartActivity extends BaseActivity {
         
 		if (urlStr != null) {
 			if (BuildConfig.DEBUG) {
-				ExLog.i(this, TAG,
-						"Matched URL, handling scanned or matched URL.");
+				ExLog.i(this, TAG, "Matched URL, handling scanned or matched URL.");
 			}
 			
 			Uri uri = Uri.parse(urlStr);
@@ -58,23 +73,34 @@ public class StartActivity extends BaseActivity {
 			
 			homeFragment.handleScannedOrUrlMatchedUri(uri);
 		}
-
-        // start transmitting service that will henceforth run in the background
-		ServiceHelper.getInstance().startTransmittingService(this);
         
         intent.setData(null);
         
         if (prefs.getTrackerIsTracking())
         {
-        	String eventId = prefs.getTrackerIsTrackingEventId();
-        	startTrackingActivity(eventId);
+        	String checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
+        	startRegatta(checkinDigest);
         }
     }
-    
-    private void startTrackingActivity(String eventId) {
-		Intent intent = new Intent(this, TrackingActivity.class);
-		intent.putExtra(getString(R.string.tracking_activity_event_id_parameter), eventId);
-		startActivity(intent);
+
+    /**
+     * Hockeyapp integration method.
+     */
+	private void checkForCrashes() {
+		CrashManager.register(this, "060ff0c8a907638e3b31d3146091c87b");
 	}
 
+//	/**
+//     * Hockeyapp integration method.
+//     */
+//	private void checkForUpdates() {
+//		// TODO: Remove this for store builds!
+//		UpdateManager.register(this, "060ff0c8a907638e3b31d3146091c87b");
+//	}
+
+    private void startRegatta(String checkinDigest) {
+		Intent intent = new Intent(this, RegattaActivity.class);
+		intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
+		startActivity(intent);
+	}
 }

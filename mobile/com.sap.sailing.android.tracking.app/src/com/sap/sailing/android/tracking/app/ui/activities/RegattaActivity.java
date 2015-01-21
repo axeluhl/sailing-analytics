@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Locale;
 
 import org.json.JSONException;
@@ -27,16 +29,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
-import com.android.volley.VolleyError;
+import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
-import com.sap.sailing.android.tracking.app.utils.JsonObjectOrStatusOnlyRequest;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperError;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFailureListener;
+import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
-import com.sap.sailing.android.tracking.app.utils.VolleyHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
@@ -62,13 +64,11 @@ public class RegattaActivity extends BaseActivity {
         competitor = new CompetitorInfo();
         leaderboard = new LeaderboardInfo();
         
-        String leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
-        String eventId = intent.getStringExtra(getString(R.string.event_id));
-        String competitorId = intent.getStringExtra(getString(R.string.competitor_id));
+        String checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
 
-        competitor = DatabaseHelper.getInstance().getCompetitor(this, competitorId);
-		event = DatabaseHelper.getInstance().getEventInfo(this, eventId);
-		leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, leaderboardName);
+        competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
+		event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+		leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
         
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -81,11 +81,21 @@ public class RegattaActivity extends BaseActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
-            getSupportActionBar().setTitle(leaderboardName);
+            getSupportActionBar().setTitle(leaderboard.name);
             getSupportActionBar().setSubtitle(event.name);
         }
         
         replaceFragment(R.id.content_frame, new RegattaFragment());	
+    }
+    
+    @Override
+	public void onStart() {
+    	super.onStart();
+    	if (prefs.getTrackerIsTracking())
+        {
+        	String checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
+        	startTrackingActivity(checkinDigest);
+        }
     }
 
     @Override
@@ -221,7 +231,6 @@ public class RegattaActivity extends BaseActivity {
             return;
         } 
         try {
-        	System.out.println("*** STORE IMAGE: " + image +", FILENAME: " + fileName);
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();
@@ -384,7 +393,7 @@ public class RegattaActivity extends BaseActivity {
 	 */
 	public void checkout()
 	{
-		final String checkoutURLStr = prefs.getServerURL()
+		final String checkoutURLStr = event.server
 				+ prefs.getServerCheckoutPath().replace("{leaderboard-name}",
 						Uri.encode(leaderboard.name));
 		
@@ -403,28 +412,29 @@ public class RegattaActivity extends BaseActivity {
 			return;
 		}
 		
-		JsonObjectOrStatusOnlyRequest checkoutRequest = new JsonObjectOrStatusOnlyRequest(
-				checkoutURLStr, checkoutData, new Listener<JSONObject>() {
-					@Override
-					public void onResponse(JSONObject response) {
-						DatabaseHelper.getInstance().deleteRegattaFromDatabase(
-								RegattaActivity.this, event, competitor, leaderboard);
-						deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
-						dismissProgressDialog();
-						finish();
-					}
-				}, new ErrorListener() {
-
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						dismissProgressDialog();
-						showErrorPopup(
-								R.string.error,
-								R.string.error_could_not_complete_operation_on_server_try_again);
-					}
-				});
-
-		VolleyHelper.getInstance(this).addRequest(checkoutRequest);
+		try {
+			HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkoutURLStr), checkoutData.toString(), this);
+			NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(request, new NetworkHelperSuccessListener() {
+				
+				@Override
+				public void performAction(JSONObject response) {
+					DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this, event.checkinDigest);
+					deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
+					dismissProgressDialog();
+					finish();
+				}
+			}, new NetworkHelperFailureListener() {
+				
+				@Override
+				public void performAction(NetworkHelperError e) {
+					dismissProgressDialog();
+					showErrorPopup(R.string.error,R.string.error_could_not_complete_operation_on_server_try_again);
+				}
+			});
+			
+		} catch (MalformedURLException e) {
+			ExLog.w(this, TAG, "Error, can't check out, MalformedURLException: " + e.getMessage());
+		}
 	}
 	
 	@Override
@@ -439,5 +449,11 @@ public class RegattaActivity extends BaseActivity {
 		{
 			super.onBackPressed();
 		}
+	}
+	
+	private void startTrackingActivity(String checkinDigest) {
+		Intent intent = new Intent(this, TrackingActivity.class);
+		intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
+		startActivity(intent);
 	}
 }

@@ -16,12 +16,12 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
 import com.sap.sailing.android.shared.ui.activities.ResilientActivity;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService;
-import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService.MessageSendingBinder;
-import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService.MessageSendingServiceLogger;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity {
     

@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 
 public abstract class AbstractRaceLogEventOperation extends AbstractRaceLogOperation<RaceLogEvent> {
     private static final long serialVersionUID = -8559301422783375526L;

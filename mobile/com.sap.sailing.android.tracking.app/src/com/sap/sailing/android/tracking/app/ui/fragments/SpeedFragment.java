@@ -34,7 +34,7 @@ public class SpeedFragment extends BaseFragment {
 			String formattedSpeed = df.format(speedInKnots);
 
 			TextView speedText = (TextView) getActivity().findViewById(R.id.speed_text_view);
-			speedText.setText(formattedSpeed + "kn");
+			speedText.setText(formattedSpeed);
 			TrackingActivity activity = (TrackingActivity) getActivity();
 
 			if (activity != null) {
@@ -53,7 +53,7 @@ public class SpeedFragment extends BaseFragment {
 		if (activity != null) {
 			speedText.setText(activity.lastSpeedIndicatorText);
 		} else {
-			speedText.setText("");
+			speedText.setText("0");
 		}
 
 	}

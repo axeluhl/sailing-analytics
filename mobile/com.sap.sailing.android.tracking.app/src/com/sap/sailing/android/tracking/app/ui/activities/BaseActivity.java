@@ -8,17 +8,19 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.SqlDebugHelper;
 
-public class BaseActivity extends ActionBarActivity {
+import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
+
+public class BaseActivity extends SendingServiceAwareActivity {
 	private static final String TAG = BaseActivity.class.getName();
 
 	protected AppPreferences prefs;
@@ -101,5 +103,10 @@ public class BaseActivity extends ActionBarActivity {
 
 	public void showErrorPopup(int string1Id, int string2Id) {
 		showErrorPopup(getString(string1Id), getString(string2Id));
+	}
+
+	@Override
+	protected int getOptionsMenuResId() {
+		return R.menu.options_menu;
 	}
 }

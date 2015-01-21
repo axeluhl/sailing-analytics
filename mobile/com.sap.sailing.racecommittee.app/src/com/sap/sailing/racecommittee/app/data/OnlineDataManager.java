@@ -12,6 +12,7 @@ import android.content.Loader;
 import android.os.Bundle;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -47,7 +48,6 @@ import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
-import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
@@ -185,9 +185,9 @@ public class OnlineDataManager extends DataManager {
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), "UTF-8");
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), "UTF-8");
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), "UTF-8");
+                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), MessageSendingService.charsetName);
+                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
+                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
                 return new OnlineDataLoader<Collection<Mark>>(context, new URL(preferences.getServerBaseURL()
                         + "/sailingserver/rc/marks?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
@@ -212,9 +212,9 @@ public class OnlineDataManager extends DataManager {
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), "UTF-8");
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), "UTF-8");
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), "UTF-8");
+                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), MessageSendingService.charsetName);
+                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
+                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
                 return new OnlineDataLoader<CourseBase>(context, new URL(preferences.getServerBaseURL()
                         + "/sailingserver/rc/currentcourse?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
@@ -241,9 +241,9 @@ public class OnlineDataManager extends DataManager {
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), "UTF-8");
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), "UTF-8");
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), "UTF-8");
+                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), MessageSendingService.charsetName);
+                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
+                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
                 return new OnlineDataLoader<Collection<Competitor>>(context, new URL(preferences.getServerBaseURL()
                         + "/sailingserver/rc/competitors?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
@@ -265,7 +265,7 @@ public class OnlineDataManager extends DataManager {
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(
                         DeviceConfigurationJsonDeserializer.create());
 
-                String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier(), "UTF-8");
+                String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier(), MessageSendingService.charsetName);
                 encodedIdentifier = encodedIdentifier.replace("+", "%20");
 
                 return new OnlineDataLoader<DeviceConfiguration>(context, new URL(preferences.getServerBaseURL()

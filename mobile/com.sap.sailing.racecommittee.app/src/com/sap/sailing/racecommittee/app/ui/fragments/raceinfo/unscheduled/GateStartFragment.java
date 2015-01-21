@@ -9,7 +9,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
@@ -18,6 +17,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceStartTimeFrag
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.gatestart.GateTimingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.gatestart.PathFinderFragment;
 import com.sap.sailing.racecommittee.app.utils.NextFragmentListener;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class GateStartFragment extends RaceFragment implements NextFragmentListener{
     

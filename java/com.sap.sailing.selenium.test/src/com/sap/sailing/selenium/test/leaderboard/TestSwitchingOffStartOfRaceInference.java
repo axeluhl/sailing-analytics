@@ -48,6 +48,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     private RaceDescriptor raceColumn;
     private AdminConsolePage adminConsole;
     
+    @Override
     @Before
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
@@ -55,6 +56,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         this.trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, RACE);
         this.raceColumn = new RaceDescriptor("R3", "Default", false, false, 0.0);
         clearState(getContextRoot());
+        super.setUp();
         adminConsole = configureRegattaAndLeaderboard();
     }
     

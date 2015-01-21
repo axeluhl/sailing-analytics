@@ -16,12 +16,12 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.AppPreferences.PollingActiveChangedListener;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollerTask.PollingResultListener;
-import com.sap.sailing.racecommittee.app.services.sending.MessageSendingService;
 import com.sap.sse.common.Util;
 
 /**
@@ -65,10 +65,8 @@ public class RaceLogPoller implements PollingActiveChangedListener {
             this.hasRacesToPoll = true;
             ExLog.i(context, TAG, String.format("Registered race %s for polling, will start in %d milliseconds.", race.getId(),
                     pollingInterval));
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | UnsupportedEncodingException e) {
             ExLog.e(context, TAG, String.format("Unable to create polling URL for race %s: %s", race.getId(), e.getMessage()));
-        } catch (UnsupportedEncodingException e) {
-            ExLog.ex(context, TAG, e);
         }
     }
 

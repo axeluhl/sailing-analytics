@@ -1,8 +1,6 @@
 package com.sap.sse.security;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.ServletContext;
@@ -10,16 +8,19 @@ import javax.servlet.ServletContext;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 
+import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.security.impl.ReplicableSecurityService;
+import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 
-public interface SecurityService {
+public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
 
     SecurityManager getSecurityManager();
 
-    Collection<User> getUserList();
+    Iterable<User> getUserList();
 
     User getUserByName(String username);
 
@@ -51,11 +52,17 @@ public interface SecurityService {
 
     void deleteUser(String username) throws UserManagementException;
 
-    Set<String> getRolesFromUser(String username) throws UserManagementException;
+    Iterable<String> getRolesFromUser(String username) throws UserManagementException;
 
-    void addRoleForUser(String username, String role) throws UserManagementException;
+    void addRoleForUser(String username, String role);
 
-    void removeRoleFromUser(String username, String role) throws UserManagementException;
+    void removeRoleFromUser(String username, String role);
+
+    Iterable<String> getPermissionsFromUser(String username) throws UserManagementException;
+    
+    void removePermissionFromUser(String username, String permissionToRemove);
+
+    void addPermissionForUser(String username, String permissionToAdd);
 
     /**
      * Registers a settings key together with its type. Calling this method is necessary for {@link #setSetting(String, Object)}

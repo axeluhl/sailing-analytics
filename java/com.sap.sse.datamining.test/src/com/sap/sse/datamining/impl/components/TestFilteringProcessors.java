@@ -77,11 +77,13 @@ public class TestFilteringProcessors {
         Processor<Integer, Void> receiver = new NullProcessor<Integer, Void>(Integer.class, Void.class) {
             @Override
             public void processElement(Integer element) {
-                if (!receivedElements.containsKey(element)) {
-                    receivedElements.put(element, 0);
+                synchronized (receivedElements) {
+                    if (!receivedElements.containsKey(element)) {
+                        receivedElements.put(element, 0);
+                    }
+                    Integer elementAmount = receivedElements.get(element) + 1;
+                    receivedElements.put(element, elementAmount);
                 }
-                Integer elementAmount = receivedElements.get(element) + 1;
-                receivedElements.put(element, elementAmount);
             }
         };
         

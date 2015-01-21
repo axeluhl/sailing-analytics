@@ -23,7 +23,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.Crewmember;
 import com.sap.sailing.kiworesultimport.ParserFactory;
@@ -32,6 +31,7 @@ import com.sap.sailing.kiworesultimport.ResultList;
 import com.sap.sailing.kiworesultimport.ResultListParser;
 import com.sap.sailing.kiworesultimport.Skipper;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ParserTest {
     private static final String SAMPLE_INPUT_NAME = "2011-06-18_49er_Wettfahrt_2_Extra.xml";

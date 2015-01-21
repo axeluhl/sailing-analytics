@@ -1,6 +1,6 @@
 package com.sap.sailing.kiworesultimport;
 
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Derived object, providing a view onto the data parsed from the result ZIP

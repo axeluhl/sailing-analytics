@@ -2,21 +2,21 @@ package com.sap.sailing.android.tracking.app.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 
 public class AppPreferences {
     protected final Context context;
     protected final SharedPreferences preferences;
-    public static final RaceLogEventAuthor raceLogEventAuthor = new RaceLogEventAuthorImpl("Tracking App", 0);
+    public static final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl("Tracking App", 0);
     
     public AppPreferences(Context context) {
         this.context = context;
-        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        //multi process mode so that services read consistent values
+        this.preferences = context.getSharedPreferences(AppPreferences.class.getName(), Context.MODE_MULTI_PROCESS);
     }
     
     public void setDeviceIdentifier(String deviceId)
@@ -30,10 +30,6 @@ public class AppPreferences {
         return DeviceIdentifier;
     }
 
-    public String getServerURL() {
-        return PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default);
-    }
-    
     public String getServerGpsFixesPostPath() {
         return PrefUtils.getString(context, R.string.preference_server_gps_fixes_post_path, R.string.preference_server_gps_fixes_post_path);
     }
@@ -70,10 +66,6 @@ public class AppPreferences {
         return value == null ? -1 : Integer.valueOf(value);
     }
     
-    public void setServerURL(String serverUrl) {
-        preferences.edit().putString(context.getString(R.string.preference_server_url_key), serverUrl).commit();
-    }
-    
     public String getEventId() {
         return PrefUtils.getString(context, R.string.preference_eventid_key, R.string.preference_eventid_default);
     }
@@ -88,7 +80,7 @@ public class AppPreferences {
     
     public void setBatteryIsCharging(boolean batteryIsCharging)
     {
-    	preferences.edit().putBoolean(context.getString(R.string.preference_battery_is_charging), batteryIsCharging);
+    	preferences.edit().putBoolean(context.getString(R.string.preference_battery_is_charging), batteryIsCharging).commit();
     }
     
     public boolean getBatteryIsCharging()
@@ -99,13 +91,21 @@ public class AppPreferences {
     public void setCompetitorId(String id) {
         preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).commit();
     }
+
+    public void setEnergySavingEnabledByUser(boolean newValue) {
+        preferences.edit().putBoolean(context.getString(R.string.preference_energy_saving_enabled_key), newValue).commit();
+    }
     
     public boolean getEnergySavingEnabledByUser() {
     	return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
     }
+
+    public void setDisplayHeadingWithSubtractedDeclination(boolean newValue) {
+        preferences.edit().putBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), newValue).commit();
+    }
     
-    public boolean getHeadingFromMagneticSensorPreferred() {
-    	return preferences.getBoolean(context.getString(R.string.preference_heading_from_magnetic_key), true);
+    public boolean getDisplayHeadingWithSubtractedDeclination() {
+    	return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), true);
     }
     
     public void setTrackingTimerStarted(long milliseconds)
@@ -128,18 +128,33 @@ public class AppPreferences {
     	return preferences.getBoolean(context.getString(R.string.preference_tracker_is_tracking), false);
     }
     
-    public void setTrackerIsTrackingEventId(String eventId)
+    public void setTrackerIsTrackingCheckinDigest(String checkinDigest)
     {
-    	preferences.edit().putString(context.getString(R.string.preference_tracker_is_tracking_event_id), eventId).commit();
+    	preferences.edit().putString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), checkinDigest).commit();
     }
     
-    public String getTrackerIsTrackingEventId()
+    public String getTrackerIsTrackingCheckinDigest()
     {
-    	return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_event_id), null);
+    	return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), null);
     }
     
     public static boolean getPrintDatabaseOperationDebugMessages()
     {
     	return false;
+    }
+    
+    public String getLastScannedQRCode()
+    {
+    	return preferences.getString(context.getString(R.string.preference_last_scanned_qr_code), null);
+    }
+    
+    public void setLastScannedQRCode(String lastQRCode)
+    {
+    	preferences.edit().putString(context.getString(R.string.preference_last_scanned_qr_code), lastQRCode).commit();
+    }
+    
+    public void setMessageResendInterval(int interval)
+    {
+    	preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), interval).commit();
     }
 }

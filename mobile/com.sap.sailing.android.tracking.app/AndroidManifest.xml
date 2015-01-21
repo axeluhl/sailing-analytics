@@ -12,7 +12,7 @@
         android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
+    <!--<uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -79,29 +79,29 @@
         <activity
             android:name=".ui.activities.SettingsActivity"
             android:screenOrientation="unspecified" />
+        <activity android:name="net.hockeyapp.android.UpdateActivity" />
         <service
             android:name=".services.TrackingService"
             android:exported="false"
             android:icon="@drawable/icon"
             android:label="@string/tracking_service" />
-        <service
+<!--         <service
             android:name=".services.TransmittingService"
             android:exported="false"
             android:icon="@drawable/icon"
-            android:label="@string/transmitting_service" />
-        <!--
+            android:label="@string/transmitting_service" /> -->
+        
         <service
-            android:name="com.sap.sailing.android.tracking.app.services.sending.MessageSendingService"
+            android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.sap.sailing.android.tracking.app.action.sendSavedIntents" />
                 <action android:name="com.sap.sailing.android.tracking.app.action.sendMessage" />
             </intent-filter>
         </service>
-        -->
-        <service android:name=".service.GcmIntentService" />
+        <!--<service android:name=".service.GcmIntentService" />-->
 
-        <receiver android:name="com.sap.sailing.android.tracking.app.services.sending.ConnectivityChangedReceiver" >
+        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>

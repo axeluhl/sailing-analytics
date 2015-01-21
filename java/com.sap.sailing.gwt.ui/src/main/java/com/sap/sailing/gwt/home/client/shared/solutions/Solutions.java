@@ -20,6 +20,8 @@ import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 
 public class Solutions extends Composite {
     interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
@@ -41,6 +43,9 @@ public class Solutions extends Composite {
     @UiField DivElement trainingDiaryDiv;
     @UiField DivElement simulatorDiv;
 
+    @UiField Anchor sailingAnalyticsDetailsAnchor;
+    @UiField Anchor raceCommitteeAppDetailsAnchor;
+
     private final PlaceNavigation<SolutionsPlace> sailingAnalyticsNavigation; 
     private final PlaceNavigation<SolutionsPlace> raceCommitteeAppNavigation; 
     private final PlaceNavigation<SolutionsPlace> postRaceAnalyticsNavigation; 
@@ -48,8 +53,14 @@ public class Solutions extends Composite {
     private final PlaceNavigation<SolutionsPlace> sailingSimulatorNavigation; 
     
     private final SolutionsNavigationTabs navigationTab;
+    
+    private final PlaceNavigation<WhatsNewPlace> sailingAnalyticsDetailsNavigation;
+    private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppDetailsNavigation;
+    private final HomePlacesNavigator placesNavigator;
+    
     public Solutions(SolutionsNavigationTabs navigationTab, HomePlacesNavigator placesNavigator) {
         this.navigationTab = navigationTab;
+        this.placesNavigator = placesNavigator;
         
         SolutionsResources.INSTANCE.css().ensureInjected();
         
@@ -58,6 +69,12 @@ public class Solutions extends Composite {
 
         initWidget(uiBinder.createAndBindUi(this));
         
+        sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
+        raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceCommiteeApp);
+        
+        sailingAnalyticsDetailsAnchor.setHref(sailingAnalyticsDetailsNavigation.getTargetUrl());
+        raceCommitteeAppDetailsAnchor.setHref(raceCommitteeAppDetailsNavigation.getTargetUrl());
+
         sailingAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
         raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceCommiteeApp);
         postRaceAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.PostRaceAnalytics);
@@ -83,33 +100,38 @@ public class Solutions extends Composite {
     @UiHandler("sailingAnalyticsAnchor")
     public void scrollToSailingAnalytics(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.SailingAnalytics);
-        handleClickEvent(e, sailingAnalyticsNavigation);
+        handleClickEventWithLocalNavigation(e, sailingAnalyticsNavigation);
     }
     
     @UiHandler("raceAnchor")
     public void scrollToRace(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.RaceCommiteeApp);
-        handleClickEvent(e, raceCommitteeAppNavigation);
+        handleClickEventWithLocalNavigation(e, raceCommitteeAppNavigation);
     }
 
     @UiHandler("postRaceAnchor")
     public void scrollToPostRace(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.PostRaceAnalytics);
-        handleClickEvent(e, postRaceAnalyticsNavigation);
+        handleClickEventWithLocalNavigation(e, postRaceAnalyticsNavigation);
     }
 
     @UiHandler("trainingDiaryAnchor")
     public void scrollToTrainingDiary(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.TrainingDiary);
-        handleClickEvent(e, trainingDiaryNavigation);
+        handleClickEventWithLocalNavigation(e, trainingDiaryNavigation);
     }
 
     @UiHandler("simulatorAnchor")
     public void scrollToSimulator(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.SailingSimulator);
-        handleClickEvent(e, sailingSimulatorNavigation);
+        handleClickEventWithLocalNavigation(e, sailingSimulatorNavigation);
     }
 
+    @UiHandler("sailingAnalyticsDetailsAnchor")
+    public void sailingAnalyticsDetailsClicked(ClickEvent e) {
+        handleClickEventWithPlaceController(e, sailingAnalyticsDetailsNavigation);
+    }
+    
     private void scrollToView(SolutionsNavigationTabs navigationTab) {
         switch (navigationTab) {
             case SailingAnalytics:
@@ -130,10 +152,17 @@ public class Solutions extends Composite {
         }
     }
     
-    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+    private void handleClickEventWithLocalNavigation(ClickEvent e, PlaceNavigation<?> placeNavigation) {
         if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
             // don't use the placecontroller for navigation here as we want to avoid a page reload
             History.newItem(placeNavigation.getHistoryUrl(), false);
+            e.preventDefault();
+         }
+    }
+    
+    private void handleClickEventWithPlaceController(ClickEvent e, PlaceNavigation<?> placeNavigation) {
+        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
+            placesNavigator.goToPlace(placeNavigation);
             e.preventDefault();
          }
     }

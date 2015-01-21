@@ -18,7 +18,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
@@ -27,6 +26,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**
@@ -90,7 +90,8 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         }
     }
     
-    public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(resultDiscardingRule);
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
@@ -223,5 +224,4 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     public String getName() {
         return name;
     }
-
 }

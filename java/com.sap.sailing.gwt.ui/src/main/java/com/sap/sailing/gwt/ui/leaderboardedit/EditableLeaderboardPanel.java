@@ -648,7 +648,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
 
-        final Button setScoreCorrectionDefaultTimeBtn = new Button(stringMessages.setTimeToNow()); // FIXME i18n
+        final Button setScoreCorrectionDefaultTimeBtn = new Button(stringMessages.setTimeToNow());
         setScoreCorrectionDefaultTimeBtn.addStyleName("inlineButton");
         scoreCorrectionInfoGrid.setWidget(0, 2, setScoreCorrectionDefaultTimeBtn);
         showUncorrectedNetPointsCheckbox = new CheckBox(stringMessages.showUncorrectedNetPoints());

@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0 Beta</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0 Beta</h1>
+<h2>URL: /api/v1/gps_fixes</h2>
+
+<b>Description:</b>
+<p>Adds an arbitrary number GPS-fixes that originated from a device with a unique identifier to the GPSFixStore.
+These can be mapped to a competitor or a mark via the DeviceMappings in the RaceLog-Tracking connector.</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Post data input format:</td>
+		<td>JSON</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>HTTP 200</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>
+		POST the following JSON data to <a href="http://www.sapsailing.com/sailingserver/api/v1/gps_fixes">http://www.sapsailing.com/sailingserver/api/v1/gps_fixes</a>
+		<pre><code>
+{
+  "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
+  "fixes" : [
+    {
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
+      "speed" : 3.61,
+      "course" : 258.11,
+    },
+    {
+      "timestamp" : 14144168490000,
+      "latitude" : 55.12456,
+      "longitude" : 8.03456,
+      "speed" : 5.1,
+      "course" : 14.2,
+    }
+  ]
+}
+		</code></pre></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

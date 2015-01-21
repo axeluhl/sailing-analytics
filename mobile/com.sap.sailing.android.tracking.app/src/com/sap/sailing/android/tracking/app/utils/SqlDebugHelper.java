@@ -9,7 +9,6 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.SensorGps;
 
 public class SqlDebugHelper {
 	
@@ -28,6 +27,7 @@ public class SqlDebugHelper {
 			StringBuffer sb = new StringBuffer();
 			sb.append("_ID: " + c1.getString(c1.getColumnIndex(BaseColumns._ID)) + ", ");
 			sb.append("NAME: " + c1.getString(c1.getColumnIndex(Leaderboard.LEADERBOARD_NAME)) + "\n");
+			sb.append("DIGEST: " + c1.getString(c1.getColumnIndex(Leaderboard.LEADERBOARD_CHECKIN_DIGEST)) + "\n");
 			ExLog.w(context, TAG, "Leaderboard: " + sb.toString());
 		}
 		
@@ -47,6 +47,7 @@ public class SqlDebugHelper {
 			sb.append("DATE END: " + c2.getString(c2.getColumnIndex(Event.EVENT_DATE_END)) + ", ");
 			sb.append("IMAGE-URL: " + c2.getString(c2.getColumnIndex(Event.EVENT_IMAGE_URL)) + ", ");
 			sb.append("SERVER: " + c2.getString(c2.getColumnIndex(Event.EVENT_SERVER)) + "\n");
+			sb.append("DIGEST: " + c2.getString(c2.getColumnIndex(Event.EVENT_CHECKIN_DIGEST)) + "\n");
 
 			ExLog.w(context, TAG, "Event: " + sb.toString());
 		}
@@ -66,15 +67,13 @@ public class SqlDebugHelper {
 			sb.append("NATIONALITY: " + c3.getString(c3.getColumnIndex(Competitor.COMPETITOR_NATIONALITY)) + ", ");
 			sb.append("COUNTRY CODE: " + c3.getString(c3.getColumnIndex(Competitor.COMPETITOR_COUNTRY_CODE)) + ", ");
 			sb.append("SAIL-ID: " + c3.getString(c3.getColumnIndex(Competitor.COMPETITOR_SAIL_ID)) + "\n");
+			sb.append("DIGEST: " + c3.getString(c3.getColumnIndex(Competitor.COMPETITOR_CHECKIN_DIGEST)) + "\n");
 			
 			ExLog.w(context, TAG, "Competitor: " + sb.toString());
 		}
 		
 		c3.close();
 		
-		Cursor c4 = cr.query(SensorGps.CONTENT_URI, null, null, null, null);
-		
-		ExLog.w(context, TAG, "--- NUMBER OF GPS FIXES IN DB: " + c4.getCount());
 		ExLog.w(context, TAG, "--- END OF SQL PRINTOUT" );
 	}
 }

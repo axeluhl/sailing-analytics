@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -93,7 +92,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
                 if (source instanceof TabLayoutPanel) {
                     final TabLayoutPanel tabPanel = ((TabLayoutPanel) source);
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
-                    refreshDataFor(unwrapScrollPanel(selectedPanel));
+                    refreshDataFor(selectedPanel);
                 } else if (source instanceof VerticalTabLayoutPanel) {
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
                     Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
@@ -101,7 +100,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
                         TabLayoutPanel selectedTabLayoutPanel = (TabLayoutPanel) widgetAssociatedToVerticalTab;
                         final int selectedIndex = selectedTabLayoutPanel.getSelectedIndex();
                         if (selectedIndex >= 0) {
-                            widgetAssociatedToVerticalTab = unwrapScrollPanel(selectedTabLayoutPanel.getWidget(selectedIndex));
+                            widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
                         }
                     }
                     refreshDataFor(widgetAssociatedToVerticalTab);
@@ -110,7 +109,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         }
 
         private void refreshDataFor(Widget target) {
-            RefreshableAdminConsolePanel refreshTarget = panelsByWidget.get(target);
+            RefreshableAdminConsolePanel refreshTarget = panelsByWidget.get(unwrapScrollPanel(target));
             if (refreshTarget != null) {
                 refreshTarget.refreshAfterBecomingVisible();
             }
@@ -132,7 +131,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
     }
     
     public AdminConsolePanel(UserService userService, BuildVersionRetriever buildVersionRetriever,
-            Label persistentAlertLabel, String releaseNotesAnchorLabel, String releaseNotesURL,
+            String releaseNotesAnchorLabel, String releaseNotesURL,
             ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
         super(Unit.EM);
         this.userService = userService;
@@ -164,7 +163,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         informationPanel.setSize("100%", "95%");
         informationPanel.setSpacing(10);
         informationPanel.add(new LoginPanel(loginPanelCss, getUserService()), DockPanel.WEST);
-        informationPanel.add(persistentAlertLabel, DockPanel.CENTER);
+        informationPanel.add(errorReporter.getPersistentInformationWidget(), DockPanel.CENTER);
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter);
         sysinfoPanel.ensureDebugId("SystemInformation");
         final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);

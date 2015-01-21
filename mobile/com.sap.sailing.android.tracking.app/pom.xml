@@ -13,40 +13,47 @@
     <artifactId>com.sap.sailing.android.tracking.app</artifactId>
     <packaging>apk</packaging>
 
+    <properties>
+        <!-- If you change this name, change in app too! -->
+        <additional-deployment-version-file>com.sap.sailing.android.tracking.app.version</additional-deployment-version-file>
+        <!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
+        <app-version>${tracking-app-version}</app-version>
+    </properties>
+
     <dependencies>
-        <!-- needed on remote repository -->
         <dependency>
             <groupId>android</groupId>
             <artifactId>android</artifactId>
         </dependency>
 
-        <!-- needed on remote repository -->
+<!--
         <dependency>
-          <groupId>android.support</groupId>
-          <artifactId>compatibility-v4</artifactId>
+            <groupId>com.android.support</groupId>
+            <artifactId>support-annotations</artifactId>
+            <version>21.0.3</version>
+            <type>aar</type>
         </dependency>
+-->
 
-        <!-- needed on remote repository -->
         <dependency>
-            <groupId>com.google.android.maps</groupId>
-            <artifactId>maps</artifactId>
-            <version>13_r1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- needed on remote repository -->
-        <dependency>
-          <groupId>com.google.android.gms</groupId>
-          <artifactId>google-play-services</artifactId>
-          <version>13</version>
-          <type>jar</type>
+            <groupId>com.android.support</groupId>
+            <artifactId>support-v4</artifactId>
+            <version>21.0.3</version>
+            <type>aar</type>
         </dependency>
 
         <dependency>
-          <groupId>com.google.android.gms</groupId>
-          <artifactId>google-play-services</artifactId>
-          <version>13</version>
-          <type>apklib</type>
+            <groupId>com.android.support</groupId>
+            <artifactId>appcompat-v7</artifactId>
+            <version>21.0.3</version>
+            <type>aar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.android.gms</groupId>
+            <artifactId>play-services</artifactId>
+            <version>6.5.87</version>
+            <type>aar</type>
         </dependency>
 
         <dependency>
@@ -68,7 +75,7 @@
                     <undeployBeforeDeploy>true</undeployBeforeDeploy>
                     <extractDuplicates>true</extractDuplicates>
                     <sdk>
-                        <platform>13</platform>
+                        <platform>21</platform>
                     </sdk>
                     <release>true</release>
                     <proguard>
@@ -96,6 +103,19 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- plugins for generating version file and copying .apk -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

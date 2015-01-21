@@ -28,7 +28,7 @@ public class RaceFilter {
     
     private boolean compliesToGpsFixFilter(RaceDTO race) {
         if (withGpsFixes!=null) {
-            if (race.trackedRace.hasGPSData != withGpsFixes) {
+            if (race.trackedRace == null || race.trackedRace.hasGPSData != withGpsFixes) {
                 return false;
             }
         }
@@ -37,7 +37,7 @@ public class RaceFilter {
     
     private boolean compliesToWindDataFilter(RaceDTO race) {
         if (withGpsFixes!=null) {
-            if (race.trackedRace.hasWindData != withWindData) {
+            if (race.trackedRace == null || race.trackedRace.hasWindData != withWindData) {
                 return false;
             }
         }

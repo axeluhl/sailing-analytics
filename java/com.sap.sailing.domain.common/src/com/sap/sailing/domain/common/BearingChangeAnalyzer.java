@@ -13,8 +13,8 @@ public interface BearingChangeAnalyzer {
     BearingChangeAnalyzer INSTANCE = new BearingChangeAnalyzerImpl();
     
     /**
-     * Determines whether during a maneuver a certain course was reached and crossed during a maneuver. When used with
-     * the wind direction, this can tell whether a boat tacked or jibed.
+     * Determines whether during a maneuver a certain course was reached and crossed. When used with the wind direction,
+     * this can tell whether a boat tacked or jibed.
      * 
      * @param totalCourseChangeInDegrees
      *            tells how far and to which direction the course was changed. Positive values mean a change to
@@ -25,7 +25,12 @@ public interface BearingChangeAnalyzer {
      *            positive then the competitor passed the 000deg course, whereas had the
      *            <code>totalCourseChangeInDegrees</code> been negative and less than 370deg then the competitor would
      *            have passed the 180deg course but not the 000deg course.
+     * @return the number of times that the course identified by
+     *         <code>wasThisCourseReachedAndCrossedDuringManeuver</code> was crossed; <code>0</code> means it was not
+     *         crossed; any positive number tells how many times it was crossed, otherwise. Numbers greater than
+     *         <code>1</code> require <code>totalCourseChangeInDegrees</code> to be greater than 360 degrees.
+     * 
      */
-    boolean didPass(Bearing courseBeforeManeuver, double totalCourseChangeInDegrees,
+    int didPass(Bearing courseBeforeManeuver, double totalCourseChangeInDegrees,
             Bearing courseAfterManeuver, Bearing wasThisCourseReachedAndCrossedDuringManeuver);
 }
