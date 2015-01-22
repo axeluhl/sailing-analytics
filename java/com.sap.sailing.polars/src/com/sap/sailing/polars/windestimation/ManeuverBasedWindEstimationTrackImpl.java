@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -22,7 +23,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
@@ -117,8 +117,6 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         private final SpeedWithBearing speedAtManeuverStart;
         private final Bearing middleManeuverCourse;
         private final Distance maneuverLoss;
-        private final SpeedWithBearingWithConfidence<Void> mostLikelyTackTwsTwa;
-        private final SpeedWithBearingWithConfidence<Void> mostLikelyJibeTwsTwa;
         
         protected ManeuverClassification(Competitor competitor, Maneuver maneuver) {
             super();
@@ -129,26 +127,6 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             this.speedAtManeuverStart = maneuver.getSpeedWithBearingBefore();
             this.middleManeuverCourse = maneuver.getSpeedWithBearingBefore().getBearing().middle(maneuver.getSpeedWithBearingAfter().getBearing());
             this.maneuverLoss = maneuver.getManeuverLoss();
-            this.mostLikelyTackTwsTwa = getClosestTwaTws(ManeuverType.TACK);
-            this.mostLikelyJibeTwsTwa = getClosestTwaTws(ManeuverType.JIBE);
-        }
-        
-        private SpeedWithBearingWithConfidence<Void> getClosestTwaTws(ManeuverType type) {
-            assert type == ManeuverType.TACK || type == ManeuverType.JIBE;
-            double minDiff = Double.MAX_VALUE;
-            SpeedWithBearingWithConfidence<Void> closestTwsTwa = null;
-            for (SpeedWithBearingWithConfidence<Void> trueWindSpeedAndAngle : polarService.getAverageTrueWindSpeedAndAngleCandidates(
-                    getCompetitor().getBoat().getBoatClass(), getSpeedAtManeuverStart(),
-                    type == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND,
-                    type == ManeuverType.TACK ? getManeuverAngleDeg() >= 0 ? Tack.PORT : Tack.STARBOARD
-                                              : getManeuverAngleDeg() >= 0 ? Tack.STARBOARD : Tack.PORT)) {
-                double diff = Math.abs(trueWindSpeedAndAngle.getObject().getBearing().getDegrees()*2)-Math.abs(getManeuverAngleDeg());
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    closestTwsTwa = trueWindSpeedAndAngle;
-                }
-            }
-            return closestTwsTwa;
         }
         
         public Competitor getCompetitor() {
@@ -176,7 +154,8 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         }
 
         public SpeedWithBearingWithConfidence<Void> getEstimatedWindSpeedAndBearing(ManeuverType maneuverType) {
-            Pair<Double, SpeedWithBearingWithConfidence<Void>> likelihoodAndTWSBasedOnSpeedAndAngle = getLikelihoodAndTWSBasedOnSpeedAndAngle(maneuverType);
+            Pair<Double, SpeedWithBearingWithConfidence<Void>> likelihoodAndTWSBasedOnSpeedAndAngle = polarService.getManeuverLikelihoodAndTwsTwa(
+                    getCompetitor().getBoat().getBoatClass(), getSpeedAtManeuverStart(), getManeuverAngleDeg(), maneuverType);
             final SpeedWithBearingWithConfidenceImpl<Void> result;
             // if no reasonable wind speed was found for the maneuver speed, return null
             if (likelihoodAndTWSBasedOnSpeedAndAngle.getB() == null) {
@@ -216,20 +195,9 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
          * 
          * @return a value between 0 and 1
          */
-        public Pair<Double, SpeedWithBearingWithConfidence<Void>> getLikelihoodAndTWSBasedOnSpeedAndAngle(final ManeuverType type) {
-            assert type == ManeuverType.TACK || type == ManeuverType.JIBE;
-            SpeedWithBearingWithConfidence<Void> closestTwsTwa = type == ManeuverType.TACK ? this.mostLikelyTackTwsTwa : this.mostLikelyJibeTwsTwa;
-            final Pair<Double, SpeedWithBearingWithConfidence<Void>> result;
-            if (closestTwsTwa == null) {
-                result = new Pair<>(0.0, null);
-            } else {
-                double minDiffDeg = Math.abs(Math.abs(Math.abs(closestTwsTwa.getObject().getBearing().getDegrees() * 2)
-                        - Math.abs(getManeuverAngleDeg())));
-                // TODO ask polar service how likely this is because the polar service knows how narrow or wide the
-                // maneuver angle range is
-                result = new Pair<>(1. / (1. + (minDiffDeg / 10.) * (minDiffDeg / 10.)), closestTwsTwa);
-            }
-            return result;
+        public Pair<Double, SpeedWithBearingWithConfidence<Void>> getLikelihoodAndTWSBasedOnSpeedAndAngle(final ManeuverType maneuverType) {
+            return polarService.getManeuverLikelihoodAndTwsTwa(getCompetitor().getBoat().getBoatClass(),
+                    getSpeedAtManeuverStart(), getManeuverAngleDeg(), maneuverType);
         }
         
         @Override
@@ -396,10 +364,12 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         final double speedMatchFactor;
         double jibeClusterLikelihood = 0;
         if (jibeClusterCandidate != null) {
+            BoatClass boatClass = null; // TODO what if the race has more than one?
             for (ManeuverClassification mc : jibeClusterCandidate) {
                 jibeClusterLikelihood += mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.JIBE).getA();
+                boatClass = mc.getCompetitor().getBoat().getBoatClass();
             }
-            speedMatchFactor = getLikelihoodTackJibeSpeedRatio(tackClusterCandidate, jibeClusterCandidate);
+            speedMatchFactor = getLikelihoodTackJibeSpeedRatio(tackClusterCandidate, jibeClusterCandidate, boatClass);
         } else {
             speedMatchFactor = .25; // no jibe cluster found; penalize for not being able to compare average speeds between tacks and jibes
         }
@@ -434,14 +404,15 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * The weight of a maneuver for computing the weighted speed average is determined to be the
      * {@link ManeuverClassification#getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType) likelihood of the maneuver being
      * what it is assumed to be}.
+     * @param boatClass 
      */
     private double getLikelihoodTackJibeSpeedRatio(
             Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> tackClusterCandidate,
-            Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> jibeClusterCandidate) {
+            Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> jibeClusterCandidate, BoatClass boatClass) {
         Speed tackClusterWeightedAverageSpeed = getWeightedAverageSpeed(tackClusterCandidate, ManeuverType.TACK);
         Speed jibeClusterWeightedAverageSpeed = getWeightedAverageSpeed(jibeClusterCandidate, ManeuverType.JIBE);
-        // TODO ask polarService how likely the ratio we found actually is
-        return Math.min(1., 0.5*jibeClusterWeightedAverageSpeed.getKnots()/tackClusterWeightedAverageSpeed.getKnots());
+        return polarService.getConfidenceForTackJibeSpeedRatio(tackClusterWeightedAverageSpeed,
+                jibeClusterWeightedAverageSpeed, boatClass);
     }
 
     private Speed getWeightedAverageSpeed(Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> cluster, ManeuverType maneuverType) {
