@@ -266,8 +266,8 @@ To still get the usual logging and URL re-writing features, replicas need to run
 Here are the steps to create a load balanced setup:
 
 - Create a master instance holding all data (see http://wiki.sapsailing.com/wiki/amazon-ec2#Setting-up-Master-and-Replica)
-- When using the Race Committee App (RCApp), make sure the app is configured to send its data to the master instance and not the ELB (otherwise, write requests may end up at replicas which they wouldn't know how to handle). You may want to configure a separate URL for the master server for this purpose, so you don't have to re-configure the RCApp devices when switching to a different master server.
-- Create `n` instances that are configured to connect to the master server
+- When using the Race Committee App (RCApp), try to make sure the app is configured to send its data to the master instance and not the ELB (otherwise, write requests may end up at replicas which then have to reverse-replicate these to the master which is as of this writing (2014-12-18) an EXPERIMENTAL feature). You may want to configure a separate URL for the master server for this purpose, so you don't have to re-configure the RCApp devices when switching to a different master server.
+- Create `n` instances that are configured to connect to the master server, automatically launching replication by using one of the `*...-replica-...*` environment from http://releases.sapsailing.com/environments.
 - Create a load balancer that redirects everything from HTTP port 8888 to HTTP port 8888 and leave the other switches and checkboxes on their default value
 - As "Ping Port" enter HTTP port 8888 and use /index.html as the "Ping Path." Leave the other values on their defaults again.
 - Put the ELB into the "Sailing Analytics App" security group as it will appear in the landscape as a regular sailing analytics application server.

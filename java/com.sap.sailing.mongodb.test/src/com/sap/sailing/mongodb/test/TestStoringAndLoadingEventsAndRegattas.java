@@ -274,7 +274,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             private static final long serialVersionUID = 1234L;
             @Override
             public RegattaAndRaceIdentifier getRaceIdentifier() {
-                return new RegattaNameAndRaceName("Kieler Woche (29erXX)", "Yellow Race 2");
+                return new RegattaNameAndRaceName("Kieler Woche (29ERXX)", "Yellow Race 2");
             }
             @Override
             public DynamicTrackedRegatta getTrackedRegatta() {
@@ -306,7 +306,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         
         // load new RacingEventService including regatta and leaderboard
         RacingEventService resForLoading = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
-        Regatta loadedRegatta = resForLoading.getRegattaByName("Kieler Woche (29erXX)");
+        Regatta loadedRegatta = resForLoading.getRegattaByName("Kieler Woche (29ERXX)");
         assertNotNull(loadedRegatta);
         assertEquals(regatta.getName(), loadedRegatta.getName());
         assertEquals(Util.size(regatta.getSeries()), Util.size(loadedRegatta.getSeries()));

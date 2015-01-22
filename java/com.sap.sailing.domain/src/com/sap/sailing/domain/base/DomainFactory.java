@@ -23,7 +23,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public interface DomainFactory extends SharedDomainFactory {
     /**

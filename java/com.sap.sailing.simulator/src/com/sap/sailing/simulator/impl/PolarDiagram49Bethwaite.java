@@ -30,19 +30,19 @@ public class PolarDiagram49Bethwaite extends PolarDiagramBase {
         beatSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(11.96 * beatScale));
         beatSOG.put(new KnotSpeedImpl(25), new KnotSpeedImpl(13.08 * beatScale));
 
-        gybeAngles = new TreeMap<Speed, Bearing>();
-        gybeAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(135.0));
-        gybeAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(141.7));
-        gybeAngles.put(new KnotSpeedImpl(9), new DegreeBearingImpl(144.7));
-        gybeAngles.put(new KnotSpeedImpl(12), new DegreeBearingImpl(150.8));
-        gybeAngles.put(new KnotSpeedImpl(25), new DegreeBearingImpl(155.8));
+        jibeAngles = new TreeMap<Speed, Bearing>();
+        jibeAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(135.0));
+        jibeAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(141.7));
+        jibeAngles.put(new KnotSpeedImpl(9), new DegreeBearingImpl(144.7));
+        jibeAngles.put(new KnotSpeedImpl(12), new DegreeBearingImpl(150.8));
+        jibeAngles.put(new KnotSpeedImpl(25), new DegreeBearingImpl(155.8));
 
-        gybeSOG = new TreeMap<Speed, Speed>();
-        gybeSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
-        gybeSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(12.63));
-        gybeSOG.put(new KnotSpeedImpl(9), new KnotSpeedImpl(14.35));
-        gybeSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(17.82));
-        gybeSOG.put(new KnotSpeedImpl(25), new KnotSpeedImpl(23.25));
+        jibeSOG = new TreeMap<Speed, Speed>();
+        jibeSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
+        jibeSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(12.63));
+        jibeSOG.put(new KnotSpeedImpl(9), new KnotSpeedImpl(14.35));
+        jibeSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(17.82));
+        jibeSOG.put(new KnotSpeedImpl(25), new KnotSpeedImpl(23.25));
 
         speedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
         NavigableMap<Bearing, Speed> tableRow;
@@ -161,8 +161,8 @@ public class PolarDiagram49Bethwaite extends PolarDiagramBase {
                 speedTable.get(s).put(beatAngles.get(s), beatSOG.get(s));
             }
 
-            if (gybeAngles.containsKey(s) && !speedTable.get(s).containsKey(gybeAngles.get(s))) {
-                speedTable.get(s).put(gybeAngles.get(s), gybeSOG.get(s));
+            if (jibeAngles.containsKey(s) && !speedTable.get(s).containsKey(jibeAngles.get(s))) {
+                speedTable.get(s).put(jibeAngles.get(s), jibeSOG.get(s));
             }
 
         }

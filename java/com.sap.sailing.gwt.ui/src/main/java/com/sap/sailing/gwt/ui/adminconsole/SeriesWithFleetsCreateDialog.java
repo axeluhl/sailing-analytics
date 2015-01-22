@@ -25,19 +25,19 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+    protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     private StringMessages stringMessages;
     private SeriesDTO series;
 
-    private TextBox nameEntryField;
-    private CheckBox isMedalSeriesCheckbox;
-    private CheckBox startsWithZeroScoreCheckbox;
-    private CheckBox hasSplitFleetContiguousScoringCheckbox;
-    private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
-    private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
-    private DiscardThresholdBoxes discardThresholdBoxes;
-    private ListEditorComposite<FleetDTO> fleetListComposite;
+    protected final TextBox nameEntryField;
+    protected CheckBox isMedalSeriesCheckbox;
+    protected CheckBox startsWithZeroScoreCheckbox;
+    protected CheckBox hasSplitFleetContiguousScoringCheckbox;
+    protected CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
+    protected CheckBox useSeriesResultDiscardingThresholdsCheckbox;
+    protected final DiscardThresholdBoxes discardThresholdBoxes;
+    protected ListEditorComposite<FleetDTO> fleetListComposite;
 
     protected static class SeriesParameterValidator implements Validator<SeriesDTO> {
         private StringMessages stringMessages;
@@ -99,11 +99,20 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     public SeriesWithFleetsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringMessages,
             DialogCallback<SeriesDTO> callback) {
+        this(existingSeries, stringMessages, /* discard thresholds */ null, callback);
+    }
+    
+    /**
+     * @param existingSeries
+     *            used for validation for duplicate series names
+     */
+    protected SeriesWithFleetsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringMessages,
+            int[] discardThresholds, DialogCallback<SeriesDTO> callback) {
         super(stringMessages.series(), null, stringMessages.ok(), stringMessages.cancel(),  
                 new SeriesParameterValidator(stringMessages, existingSeries), callback);
         this.stringMessages = stringMessages;
         this.series = new SeriesDTO();
-        
+        this.discardThresholdBoxes = discardThresholds == null ? new DiscardThresholdBoxes(this, stringMessages) : new DiscardThresholdBoxes(this, discardThresholds, stringMessages);
         nameEntryField = createTextBox(null);
         nameEntryField.ensureDebugId("NameTextBox");
         nameEntryField.setVisibleLength(40);
@@ -125,16 +134,19 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                discardThresholdBoxes.getWidget().setVisible(event.getValue());
+                SeriesWithFleetsCreateDialog.this.discardThresholdBoxes.getWidget().setVisible(event.getValue());
             }
         });
-        
-        discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
         Widget widget = discardThresholdBoxes.getWidget();
         widget.ensureDebugId("DiscardThresholdBoxes");
         widget.setVisible(false);
         
-        fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
+        initializeFleetListComposite(stringMessages);
+    }
+
+    protected void initializeFleetListComposite(StringMessages stringMessages) {
+        fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO(
+                LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
         fleetListComposite.ensureDebugId("FleetListEditorComposite");
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<Iterable<FleetDTO>>() {
             @Override
@@ -151,7 +163,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
         series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoringCheckbox.getValue());
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
-        series.setFleets(fleetListComposite.getValue());
+    	series.setFleets(fleetListComposite.getValue());
         series.setDiscardThresholds(useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds() : null);
         return series;
     }

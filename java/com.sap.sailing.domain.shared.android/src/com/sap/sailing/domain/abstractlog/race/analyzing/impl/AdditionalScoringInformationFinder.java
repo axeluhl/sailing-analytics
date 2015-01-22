@@ -5,11 +5,11 @@ import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 
 /**
- * Returns all {@link AdditionalScoringInformationEvent}s from the race log 
+ * Returns all {@link RaceLogAdditionalScoringInformationEvent}s from the race log 
  * that have not been revoked when using {@link #analyze()}. The resulting list 
  * has the newest event first. The pass id is not relevant for the result.
  * 
@@ -21,7 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformat
  * 
  * @author Simon Marcel Pamies
  */
-public class AdditionalScoringInformationFinder extends RaceLogAnalyzer<List<AdditionalScoringInformationEvent>> {
+public class AdditionalScoringInformationFinder extends RaceLogAnalyzer<List<RaceLogAdditionalScoringInformationEvent>> {
 
     public AdditionalScoringInformationFinder(RaceLog raceLog) {
         super(raceLog);
@@ -31,10 +31,10 @@ public class AdditionalScoringInformationFinder extends RaceLogAnalyzer<List<Add
      * Analyze the race log for all events that match the given type filter. Returns only the <emph>newest</emph>
      * one as we assume that there can be only one unrevoked event of the same type.
      */
-    public AdditionalScoringInformationEvent analyze(AdditionalScoringInformationType filterBy) {
-        AdditionalScoringInformationEvent result = null;
-        final List<AdditionalScoringInformationEvent> allUnrevokedEventsFromNewestToOldest = analyze();
-        for (AdditionalScoringInformationEvent event : allUnrevokedEventsFromNewestToOldest) {
+    public RaceLogAdditionalScoringInformationEvent analyze(AdditionalScoringInformationType filterBy) {
+        RaceLogAdditionalScoringInformationEvent result = null;
+        final List<RaceLogAdditionalScoringInformationEvent> allUnrevokedEventsFromNewestToOldest = analyze();
+        for (RaceLogAdditionalScoringInformationEvent event : allUnrevokedEventsFromNewestToOldest) {
             if (event != null && event.getType() == filterBy) {
                 result = event;
                 break;
@@ -44,12 +44,12 @@ public class AdditionalScoringInformationFinder extends RaceLogAnalyzer<List<Add
     }
 
     @Override
-    protected List<AdditionalScoringInformationEvent> performAnalysis() {
-        final List<AdditionalScoringInformationEvent> result = new ArrayList<AdditionalScoringInformationEvent>();
+    protected List<RaceLogAdditionalScoringInformationEvent> performAnalysis() {
+        final List<RaceLogAdditionalScoringInformationEvent> result = new ArrayList<RaceLogAdditionalScoringInformationEvent>();
         // fetch all unrevoked events starting with newest going to oldest
         for (RaceLogEvent event : getLog().getUnrevokedEventsDescending()) {
-            if (event instanceof AdditionalScoringInformationEvent) {
-                result.add((AdditionalScoringInformationEvent) event);
+            if (event instanceof RaceLogAdditionalScoringInformationEvent) {
+                result.add((RaceLogAdditionalScoringInformationEvent) event);
             }
         }
         return result;

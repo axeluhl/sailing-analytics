@@ -3,8 +3,8 @@ package com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.DenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 
 public class RaceLogTrackingStateAnalyzer extends RaceLogAnalyzer<RaceLogTrackingState> {
@@ -16,9 +16,9 @@ public class RaceLogTrackingStateAnalyzer extends RaceLogAnalyzer<RaceLogTrackin
     @Override
     protected RaceLogTrackingState performAnalysis() {
         for (RaceLogEvent event : getLog().getUnrevokedEventsDescending()) {
-            if (event instanceof StartTrackingEvent) {
+            if (event instanceof RaceLogStartTrackingEvent) {
                 return RaceLogTrackingState.TRACKING;
-            } else if (event instanceof DenoteForTrackingEvent) {
+            } else if (event instanceof RaceLogDenoteForTrackingEvent) {
                 return RaceLogTrackingState.AWAITING_RACE_DEFINITION;
             }
         }

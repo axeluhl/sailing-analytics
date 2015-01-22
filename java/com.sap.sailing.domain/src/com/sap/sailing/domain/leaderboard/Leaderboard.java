@@ -508,5 +508,4 @@ public interface Leaderboard extends LeaderboardBase {
             InterruptedException, ExecutionException;
 
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
-
 }

@@ -791,6 +791,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
             super(TrackBasedEstimationWindTrackImpl.this, trackedRace, from, to, /* resolution in milliseconds */ 1000l);
         }
 
+        @Override
         protected Wind getWind(Position p, TimePoint timePoint) {
             final WindWithConfidence<TimePoint> estimatedWindDirectionWithConfidence = getWindWithConfidence(timePoint);
             return estimatedWindDirectionWithConfidence == null ? null : estimatedWindDirectionWithConfidence.getObject();

@@ -99,7 +99,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     private void handleFinishPositioningList(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
-        Leaderboard leaderboard = service.getLeaderboardByName(raceLogIdentifier.getTemplate().getParentObjectName());
+        Leaderboard leaderboard = service.getLeaderboardByName(raceLogIdentifier.getRegattaLikeParent().getName());
         if (leaderboard != null) {
             Fleet fleet = raceColumn.getFleetByName(raceLogIdentifier.getFleetName());
             RaceLog raceLog = raceColumn.getRaceLog(fleet);

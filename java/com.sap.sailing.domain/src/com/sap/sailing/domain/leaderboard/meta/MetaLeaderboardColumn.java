@@ -13,7 +13,8 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -33,11 +34,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
         this.leaderboard = leaderboard;
         this.metaFleet = metaFleet;
         leaderboard.addRaceColumnListener(this);
-    }
-
-    @Override
-    public void setRaceLogInformation(RaceLogInformation information) {
-        return;
     }
 
     @Override
@@ -187,19 +183,18 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public RaceLogInformation getRaceLogInformation() {
-        return null;
-    }
-
-    @Override
-    public void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl) {
-    }
-
-    @Override
     public void removeRaceIdentifier(Fleet fleet) {
     }
 
     @Override
     public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
+    }
+
+    @Override
+    public void setRaceLogInformation(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent) {
+    }
+
+    @Override
+    public void reloadRaceLog(Fleet fleet) {
     }
 }

@@ -12,10 +12,9 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;
 
@@ -27,13 +26,8 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     private Map<Fleet, RaceLog> raceLogs;
     
-    /**
-     * holds the race log identifier template needed to create the appropriate RaceLogIdentifer that is constructed from the 
-     * parent object name, name of this raceColumn and the name of a fleet of this raceColumn to access the RaceLog in the 
-     * RaceLogStore for persistence purposes.
-     */
-    private transient RaceLogInformation raceLogInformation;
-    private RaceLogIdentifierTemplate raceLogIdentifierTemplate;
+    private transient RaceLogStore raceLogStore;
+    private RegattaLikeIdentifier regattaLikeParent;
 
     public AbstractRaceColumn() {
         this.trackedRaces = new TrackedRaces();
@@ -42,9 +36,11 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
 
     @Override
-    public synchronized void setRaceLogInformation(final RaceLogInformation information) {
+    public synchronized void setRaceLogInformation(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent) {
+        this.raceLogStore = raceLogStore;
+        this.regattaLikeParent = regattaLikeParent;
         for (final Fleet fleet : getFleets()) {
-            setOrReloadRaceLogInformation(information, fleet);
+            reloadRaceLog(fleet);
         }
     }
 
@@ -57,7 +53,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     @Override
     public RaceLogIdentifier getRaceLogIdentifier(Fleet fleet) {
-        return new RaceLogIdentifierImpl(raceLogInformation.getIdentifierTemplate(), getName(), fleet);
+        return new RaceLogIdentifierImpl(regattaLikeParent, getName(), fleet);
     }
 
     @Override
@@ -99,8 +95,8 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public synchronized void releaseTrackedRace(Fleet fleet) {
         TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
         this.trackedRaces.remove(fleet);
-        if (previouslyLinkedRace != null && raceLogInformation != null) {
-            RaceLogIdentifierImpl identifier = new RaceLogIdentifierImpl(raceLogInformation.getIdentifierTemplate(), getName(), fleet);
+        if (previouslyLinkedRace != null && regattaLikeParent != null) {
+            RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
             previouslyLinkedRace.detachRaceLog(identifier.getIdentifier());
             getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
         }
@@ -153,18 +149,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
 
     @Override
-    public RaceLogInformation getRaceLogInformation() {
-        return raceLogInformation;
-    }
-
-    @Override
-    public void setOrReloadRaceLogInformation(RaceLogInformation information, Fleet fleet) {
+    public void reloadRaceLog(Fleet fleet) {
         synchronized(raceLogs) {
-            raceLogInformation = information;
-            RaceLogStore store = information.getStore();
-            raceLogIdentifierTemplate = raceLogInformation.getIdentifierTemplate();
-            RaceLogIdentifier identifier = raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet);
-            RaceLog newOrLoadedRaceLog = store.getRaceLog(identifier, /*ignoreCache*/ true);
+            RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
+            RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /*ignoreCache*/ true);
             RaceLog raceLogAvailable = raceLogs.get(fleet);
             if (raceLogAvailable == null) {
                 RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
@@ -185,7 +173,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
-            raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet)));
+            raceLog.addListener(new RaceColumnRaceLogReplicator(this, getRaceLogIdentifier(fleet)));
             // now comes a little secrecy (see bug 2506) about how, after de-serialization, the connections
             // between race column, race log, tracked race and the listener pumping stuff from the race log
             // into the tracked race are re-established. The race log's listener structure is transient, and so

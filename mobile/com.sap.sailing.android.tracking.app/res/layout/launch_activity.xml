@@ -5,9 +5,17 @@
     android:orientation="vertical" >
 
     <Button
-        android:id="@+id/btnScanBarcode"
+        android:id="@+id/btnScanQRCode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/scan_race_barcode" />
+        android:text="@string/scan_qrcode"
+        android:onClick="onScanQRCodeClicked" />
+
+    <Button
+        android:id="@+id/btnToggleTracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/start_tracking"
+        android:onClick="onToggleTrackingClicked" />
 
 </LinearLayout>

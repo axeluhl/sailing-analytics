@@ -59,27 +59,27 @@ public class GetLeaderboardByNameAction implements AsyncAction<LeaderboardDTO> {
     public void execute(final AsyncCallback<LeaderboardDTO> callback) {
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, addOverallDetails,
-                        previousLeaderboard==null?null:previousLeaderboard.getId(), fillNetPointsUncorrected,
-                                new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                callback.onFailure(caught);
-                            }
+                previousLeaderboard==null?null:previousLeaderboard.getId(), fillNetPointsUncorrected,
+                        new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
-                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
-                                if (result == null) {
-                                    errorReporter.reportError(stringMessages.errorTryingToObtainLeaderboardContents(leaderboardName), /* silent */ true);
-                                } else {
-                                    if (timerToAdjustOffetIn != null) {
-                                        timerToAdjustOffetIn.adjustClientServerOffset(clientTimeWhenRequestWasSent,
-                                                result.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
-                                    }
-                                    LeaderboardDTO leaderboardDTOResult = result.getLeaderboardDTO(previousLeaderboard);
-                                    callback.onSuccess(leaderboardDTOResult);
-                                }
+                    @Override
+                    public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
+                        final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                        if (result == null) {
+                            errorReporter.reportError(stringMessages.errorTryingToObtainLeaderboardContents(leaderboardName), /* silent */ true);
+                        } else {
+                            if (timerToAdjustOffetIn != null) {
+                                timerToAdjustOffetIn.adjustClientServerOffset(clientTimeWhenRequestWasSent,
+                                        result.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
                             }
+                            LeaderboardDTO leaderboardDTOResult = result.getLeaderboardDTO(previousLeaderboard);
+                            callback.onSuccess(leaderboardDTOResult);
+                        }
+                    }
                 });
     }
 

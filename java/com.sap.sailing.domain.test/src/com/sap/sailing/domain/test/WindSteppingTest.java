@@ -4,16 +4,16 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.WindStepping;
-import com.sap.sailing.domain.common.impl.WindSteppingImpl;
-import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
+import com.sap.sailing.domain.common.WindSpeedStepping;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingImpl;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 
 public class WindSteppingTest {
     
     @Test
     public void testStepping() {
-        Double[] levels = {2.,4.};
-        WindStepping stepping = new WindSteppingImpl(levels);
+        double[] levels = {2.,4.};
+        WindSpeedStepping stepping = new WindSpeedSteppingImpl(levels);
         Assert.assertEquals(0, stepping.getLevelIndexForValue(1));
         Assert.assertEquals(1, stepping.getLevelIndexForValue(5));
         Assert.assertEquals(1, stepping.getLevelIndexForValue(3));
@@ -23,8 +23,8 @@ public class WindSteppingTest {
     
     @Test
     public void testSteppingWithMaxDistance() {
-        Double[] levels = {2.,4.};
-        WindStepping stepping = new WindSteppingWithMaxDistance(levels, 1.0);
+        double[] levels = {2.,4.};
+        WindSpeedStepping stepping = new WindSpeedSteppingWithMaxDistance(levels, 1.0);
         Assert.assertEquals(0, stepping.getLevelIndexForValue(1));
         Assert.assertEquals(1, stepping.getLevelIndexForValue(5));
         Assert.assertEquals(-1, stepping.getLevelIndexForValue(5.01));

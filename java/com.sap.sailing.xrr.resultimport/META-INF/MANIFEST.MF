@@ -6,9 +6,15 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sailing.xrr.resultimport,
- com.sap.sailing.xrr.resultimport.impl,
- com.sap.sailing.xrr.resultimport.schema
-Import-Package: org.osgi.framework;version="1.6.0"
+ com.sap.sailing.xrr.resultimport.impl
+Import-Package: com.google.gwt.json.client,
+ com.sap.sailing.server,
+ com.sap.sailing.server.impl,
+ com.sap.sailing.server.operationaltransformation,
+ com.sap.sailing.xrr.schema,
+ org.json.simple,
+ org.json.simple.parser,
+ org.osgi.framework;version="1.6.0"
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sailing.resultimport,

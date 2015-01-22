@@ -870,7 +870,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> result) {
+    public void fillRegattas(Iterable<RegattaDTO> result) {
     }
 
     private void setDescriptionEditable(boolean isEditable) {

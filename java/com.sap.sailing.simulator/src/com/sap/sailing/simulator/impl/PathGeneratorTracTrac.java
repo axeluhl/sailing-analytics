@@ -74,7 +74,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         LOGGER.info("Calling service.addTracTracRace");
 
         try {
-            this.raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, raceURL, liveURI, storedURI, null, DEFAULT_TIMEOUT_MILLISECONDS);
+            this.raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, raceURL, liveURI, storedURI, 
+                    null, null, DEFAULT_TIMEOUT_MILLISECONDS);
 
         } catch (Exception error) {
             LOGGER.severe(error.getMessage());

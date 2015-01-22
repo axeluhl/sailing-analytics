@@ -6,7 +6,6 @@ import java.util.Collection;
 import slash.navigation.gpx.GpxRoute;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -28,22 +27,12 @@ public class ManueverDataRetriever extends AbstractDataRetriever {
                 return new TrackReader<Competitor, Maneuver>() {
                     @Override
                     public Iterable<Maneuver> getRawTrack(Competitor e) {
-                        try {
-                            return race.getManeuvers(e, start, end, false);
-                        } catch (NoWindException e1) {
-                            e1.printStackTrace();
-                        }
-                        return null;
+                        return race.getManeuvers(e, start, end, false);
                     }
 
                     @Override
                     public Iterable<Maneuver> getTrack(Competitor e) {
-                        try {
-                            return race.getManeuvers(e, start, end, false);
-                        } catch (NoWindException e1) {
-                            e1.printStackTrace();
-                        }
-                        return null;
+                        return race.getManeuvers(e, start, end, false);
                     }
 
                     @Override

@@ -42,7 +42,7 @@ public class TracTracWriter {
         for (String paramURLStr : sources) {
             URL paramURL = new URL(paramURLStr);
             RaceHandle raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI,
-                    null, 60000);
+                    null, null, 60000);
             String regatta = raceHandle.getRegatta().getName();
             RaceDefinition r = raceHandle.getRace();
             List<TrackedRace> racesList = new ArrayList<TrackedRace>();

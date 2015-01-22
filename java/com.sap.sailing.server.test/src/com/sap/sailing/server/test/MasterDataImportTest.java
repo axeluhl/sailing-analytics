@@ -33,6 +33,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.mongodb.DB;
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -43,6 +45,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventFactoryImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -244,6 +248,12 @@ public class MasterDataImportTest {
         raceColumn.getRaceLog(testFleet1).add(windEvent);
         storedLogUUIDs.add(logEvent.getId());
         storedLogUUIDs.add(windEvent.getId());
+        
+        // Set RegattaLog event
+        TimePoint regattaLogTimepoint = new MillisecondsTimePoint(84392048L);
+        RegattaLogRegisterCompetitorEvent registerEvent = new RegattaLogRegisterCompetitorEventImpl(regattaLogTimepoint,
+                author, regattaLogTimepoint, UUID.randomUUID(), competitor);
+        regatta.getRegattaLog().add(registerEvent);
 
         // Set score correction
         double scoreCorrection = 12.0;
@@ -283,17 +293,16 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
+            DB db = destService.getMongoObjectFactory().getDatabase();
+            db.setWriteConcern(WriteConcern.SAFE);
             inputStream = new ByteArrayInputStream(os.toByteArray());
-
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
             importer.importFromStream(inputStream, randomUUID, false);
+            db.getLastError(); // make sure the write has finished before reads are used
         } finally {
             os.close();
             inputStream.close();
         }
-
-
-
 
         MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
                 .getResult();
@@ -367,6 +376,13 @@ public class MasterDataImportTest {
         Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstFixAtOrAfter(logTimePoint2));
         Assert.assertEquals(wind, ((RaceLogWindFixEvent) raceColumnOnTarget.getRaceLog(fleet1OnTarget)
                 .getFirstFixAtOrAfter(logTimePoint2)).getWindFix());
+        
+        // Check for regatta log event
+        RegattaLogRegisterCompetitorEvent registerEventOnTarget = (RegattaLogRegisterCompetitorEvent)
+                regattaOnTarget.getRegattaLog().getFirstFixAtOrAfter(regattaLogTimepoint);
+        Assert.assertNotNull(registerEventOnTarget);
+        Assert.assertEquals(registerEvent.getId(), registerEventOnTarget.getId());
+        Assert.assertEquals(competitor.getId(), registerEventOnTarget.getCompetitor().getId());
 
         // Check for persisting of race log events:
         RacingEventService dest2 = new RacingEventServiceImplMock();
@@ -374,6 +390,13 @@ public class MasterDataImportTest {
         RaceColumn raceColumn2 = lb2.getRaceColumns().iterator().next();
         RaceLog raceLog2 = raceColumn2.getRaceLog(raceColumn2.getFleetByName(fleet1OnTarget.getName()));
         Assert.assertEquals(logEvent.getId(), raceLog2.getFirstRawFixAtOrAfter(logTimePoint).getId());
+        
+        // Check for persisting of regatta log events
+        Regatta regattaOnTarget2 = dest2.getRegattaByName(TEST_LEADERBOARD_NAME);
+        RegattaLogRegisterCompetitorEvent registerEventOnTarget2 = (RegattaLogRegisterCompetitorEvent)
+                regattaOnTarget2.getRegattaLog().getFirstFixAtOrAfter(regattaLogTimepoint);
+        Assert.assertNotNull(registerEventOnTarget2);
+        Assert.assertEquals(registerEvent.getId(), registerEventOnTarget2.getId());
     }
 
     @Test

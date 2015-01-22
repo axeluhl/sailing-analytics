@@ -19,7 +19,7 @@ import com.sap.sse.InvalidDateException;
  * http://www.w3.org/TR/1998/NOTE-datetime-19980827
  * 
  * @version $Revision: 1.5 $
- * @author Beno�� Mah(bmahe@w3.org)
+ * @author Benoit Mah(bmahe@w3.org)
  */
 public class DateParser {
 

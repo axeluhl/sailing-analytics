@@ -8,8 +8,8 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSettings {
     
     public static PolarSheetGenerationSettings createStandardPolarSettings() {
-        Double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
-        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.5);
+        double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
+        WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 2.5);
         return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
                 false);
     }
@@ -19,9 +19,12 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
         for (double levelValue = 0.5; levelValue < 35; levelValue = levelValue + 0.5) {
             levelList.add(levelValue);
         }
-        Double[] levels = levelList.toArray(new Double[levelList.size()]);
-        
-        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 0.5);
+        double[] levels = new double[levelList.size()];
+        int i=0;
+        for (Double level : levelList) {
+            levels[i++] = level;
+        }
+        WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 0.5);
         return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
                 false);
     }
@@ -37,7 +40,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     private double outlierDetectionNeighboorhoodRadius;
     private double outlierMinimumNeighboorhoodPct;
     private boolean useOnlyEstimationForWindDirection;
-    private WindSteppingWithMaxDistance windStepping;
+    private WindSpeedSteppingWithMaxDistance windStepping;
     private boolean splitByWindGauges;
     
     //GWT
@@ -47,7 +50,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
             Integer minimumDataCountPerAngle, Integer numberOfHistogramColumns, double minimumConfidenceMeasure,
             boolean useOnlyWindGaugesForWindSpeed, boolean shouldRemoveOutliers,
             double outlierDetectionNeighboorhoodRadius, double outlierMinimumNeighboorhoodPct,
-            boolean useOnlyEstimationForWindDirection, WindSteppingWithMaxDistance windStepping,
+            boolean useOnlyEstimationForWindDirection, WindSpeedSteppingWithMaxDistance windStepping,
             boolean splitByWindGauges) {
         this.minimumDataCountPerGraph = minimumDataCountPerGraph;
         this.minimumWindConfidence = minimumWindConfidence;
@@ -114,7 +117,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     }
 
     @Override
-    public WindSteppingWithMaxDistance getWindStepping() {
+    public WindSpeedSteppingWithMaxDistance getWindSpeedStepping() {
         return windStepping;
     }
 

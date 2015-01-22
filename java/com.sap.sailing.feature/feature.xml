@@ -373,8 +373,29 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
+         id="com.sap.sailing.xrr.structureimport"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.server.gateway.serialization.shared.android"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.server.gateway.serialization"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+         <plugin
          id="com.sap.sailing.dashboards.gwt"
          download-size="0"
          install-size="0"
