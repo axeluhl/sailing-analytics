@@ -9,9 +9,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -20,6 +22,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
@@ -103,9 +106,34 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
         assertEquals(16, clusters.size());
         
         // Now work towards identifying the two tack clusters
-        
+        List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clustersSortedByAverageTackLikelihood =
+                clusters.stream()
+                .sorted((c1, c2) -> (int) -Math.signum(getAverageLikelihood(c1, ManeuverType.TACK)
+                        - getAverageLikelihood(c2, ManeuverType.TACK))).collect(Collectors.toList());
+        // expecting a wind direction that is from around 245deg, +/- 10deg
+        // TODO compute average weighted by the likelihood of being a tack, thereby largely suppressing non-tack maneuvers in cluster
+        assertEquals(245., getWeightedAverageMiddleManeuverCOG(clustersSortedByAverageTackLikelihood.get(0)), 10.);
+        assertEquals(245., getWeightedAverageMiddleManeuverCOG(clustersSortedByAverageTackLikelihood.get(1)), 10.);
     }
 
+    private double getWeightedAverageMiddleManeuverCOG(
+            Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> cluster) {
+        double weightedMiddleCOGDegSum = 0;
+        double weightSum = 0;
+        for (ManeuverClassification e : cluster) {
+            final double weight = e.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.TACK).getA();
+            weightedMiddleCOGDegSum += weight * e.getMiddleManeuverCourse().getDegrees();
+            weightSum += weight;
+        }
+        return weightedMiddleCOGDegSum / weightSum;
+    }
+
+    private double getAverageLikelihood(
+            Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> cluster,
+            ManeuverType maneuverType) {
+        return cluster.stream().mapToDouble((mc)->mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(maneuverType).getA()).average().getAsDouble();
+    }
+    
     private Wind getManeuverBasedAverageWind() throws NotEnoughDataHasBeenAddedException {
         ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(Executors.newFixedThreadPool(4)),
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ true);
