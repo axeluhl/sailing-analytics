@@ -454,12 +454,15 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     /**
      * For each maneuver from <code>maneuvers</code>, a {@link ManeuverClassification object} is created.
      */
-    private Stream<ManeuverClassification> getManeuverClassifications(final Map<Maneuver, Competitor> maneuvers) {
+    Stream<ManeuverClassification> getManeuverClassifications(final Map<Maneuver, Competitor> maneuvers) {
         return maneuvers.entrySet().stream().map((maneuverAndCompetitor)->
             new ManeuverClassification(maneuverAndCompetitor.getValue(), maneuverAndCompetitor.getKey()));
     }
 
-    private Map<Maneuver, Competitor> getAllManeuvers(boolean waitForLatest) {
+    /**
+     * Package scope to let test fragment access it
+     */
+    Map<Maneuver, Competitor> getAllManeuvers(boolean waitForLatest) {
         Map<Maneuver, Competitor> maneuvers = new HashMap<>();
         final Waypoint firstWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
         final Waypoint lastWaypoint = trackedRace.getRace().getCourse().getLastWaypoint();

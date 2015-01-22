@@ -1,4 +1,4 @@
-package com.sap.sailing.polars.windestimation.test;
+package com.sap.sailing.polars.windestimation;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,18 +9,31 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.ScalableWind;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
-import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
+import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.kmeans.Cluster;
+import com.sap.sse.util.kmeans.KMeansMappingClusterer;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
@@ -66,6 +79,28 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
         setUp("event_20110609_KielerWoch-505_Race_4");
         Wind average = getManeuverBasedAverageWind();
         assertEquals(275, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
+    }
+    
+    @Test
+    public void testTwoDimensionalClustering() throws NotEnoughDataHasBeenAddedException, MalformedURLException,
+            IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
+            CreateModelException {
+        setUp("event_20110609_KielerWoch-505_Race_3");
+        ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(Executors.newFixedThreadPool(4)),
+                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ true);
+        final Map<Maneuver, Competitor> maneuvers = windTrack.getAllManeuvers(/* waitForLatest */ true);
+        final int numberOfClusters = 16;
+        KMeansMappingClusterer<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> clusterer =
+                new KMeansMappingClusterer<>(numberOfClusters,
+                        windTrack.getManeuverClassifications(maneuvers),
+                        (mc)->new ScalableBearingAndScalableDouble(mc.getMiddleManeuverCourse(), mc.getManeuverAngleDeg()), // maps maneuver classification to cluster metric
+                        // use an evenly distributed set of cluster seeds for clustering wind direction estimations
+                        Stream.concat(IntStream.range(0, numberOfClusters/2).mapToObj((i)->
+                            new Pair<>(new DegreeBearingImpl(((double) i)*360./(double) numberOfClusters/2), 45.)),
+                            IntStream.range(0, numberOfClusters/2).mapToObj((i)->
+                                new Pair<>(new DegreeBearingImpl(((double) i)*360./(double) numberOfClusters/2), -45.))));
+        final Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters = clusterer.getClusters();
+        assertEquals(8, clusters.size());
     }
 
     private Wind getManeuverBasedAverageWind() throws NotEnoughDataHasBeenAddedException {
