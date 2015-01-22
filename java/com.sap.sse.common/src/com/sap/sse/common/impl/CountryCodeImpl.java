@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sse.common.impl;
 
-import com.sap.sailing.domain.common.CountryCode;
+import com.sap.sse.common.CountryCode;
 
 public class CountryCodeImpl implements CountryCode {
     private final String name;

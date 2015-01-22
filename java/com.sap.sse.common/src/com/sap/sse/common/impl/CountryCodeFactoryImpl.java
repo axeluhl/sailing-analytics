@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sse.common.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.CountryCode;
-import com.sap.sailing.domain.common.CountryCodeFactory;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
 
 public class CountryCodeFactoryImpl implements CountryCodeFactory {
     private final Map<String, CountryCode> byThreeLetterIOCName;
