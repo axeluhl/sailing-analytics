@@ -131,6 +131,11 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
         }
     }
     
+    /**
+     * Computes the next iteration by creating new clusters that use as their mean the centroids of the
+     * current clusters; then, assigns all elements to these clusters and repeats this process until
+     * the latest iteration produces the same clustering that the previous iteration produced.
+     */
     private void iterate(Iterable<E> elements) {
         List<Cluster<E, ValueType, AveragesTo, T>> oldClusters;
         do {
