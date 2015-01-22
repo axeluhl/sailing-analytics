@@ -13,30 +13,27 @@ import com.sap.sailing.polars.regression.impl.OnlineMultiVariateRegressionImpl;
 
 public class OnlineMultiVariateLinearRegressionTest {
 
-    private static double EPSILON = 0.5;
+    private static double EPSILON = 1;
     
     @Test
     public void testRegressionWithPolarData() throws NotEnoughDataHasBeenAddedException {
         OnlineMultiVariateRegression regression = new OnlineMultiVariateRegressionImpl(3);
-        Random random = new Random(9999);
+        Random random = new Random(1);
         
-        for (int i = 0; i < 1000; i++) {
-            double x = random.nextDouble() * 20 - 10;
+        for (int i = 0; i < 10000; i++) {
+            double x = random.nextDouble() * 80 - 40;
             double[] xArray  = {x, x*x, x*x*x};
             regression.addData(function(x, random), xArray);
         }
         
-        double[] xArray  = {0, 0, 0};
+        double[] xArray  = {5, 25, 125};
         double estimated = regression.estimateY(xArray);
         
-        assertThat(estimated, closeTo(function(0, random), EPSILON));
-        
-        
-
+        assertThat(estimated, closeTo(function(5, random), EPSILON));
     }
     
     private double function(double x) {
-        return 1 + x*0.2 - x*x + 0.1*x*x*x;
+        return 0.0003*x*x*x-0.0373*x*x+1.5213*x -2.1309;
     }
 
     private double function(double x, Random random) {

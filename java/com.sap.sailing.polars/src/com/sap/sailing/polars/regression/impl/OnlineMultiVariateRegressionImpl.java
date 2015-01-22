@@ -42,14 +42,24 @@ public class OnlineMultiVariateRegressionImpl implements OnlineMultiVariateRegre
         checkNumberOfDimensions(x);
         numberOfAddedPoints++;
         double[] newWeights = initializeDoubleArray(weights.length);
-        double alpha = 0.03;
+        double alpha = 0.005;
         newWeights[0] = weights[0] + alpha * (y - estimateY(x));
         for (int i = 1; i < weights.length; i++) {
             incrementallyUpdateVariances(x, i);
-            double normalizedInput = (x[i-1] - means[i-1]) / Math.sqrt(variances[i-1]);
-            newWeights[i] = weights[i] + alpha * (y - estimateY(x)) * Math.pow(alpha, i) * x[i-1];//normalizedInput;
+            double normalizedInput = normalizeInput(x, i - 1);
+            newWeights[i] = weights[i] + (y - estimateY(x)) * Math.pow(alpha, i + 1) * x[i - 1];// normalizedInput;
         }
         weights = newWeights;
+    }
+
+    private double normalizeInput(double[] x, int dimensionIndex) {
+        double normalizedInput;
+        if (variances[dimensionIndex] > 0) {
+            normalizedInput = (x[dimensionIndex] - means[dimensionIndex]) / Math.sqrt(variances[dimensionIndex]);
+        } else {
+            normalizedInput = x[dimensionIndex];
+        }
+        return normalizedInput;
     }
 
     private void incrementallyUpdateVariances(double[] x, int i) {
@@ -57,7 +67,7 @@ public class OnlineMultiVariateRegressionImpl implements OnlineMultiVariateRegre
         double oldMean = means[i-1];
         means[i-1] = means[i-1] + ((x[i-1] - means[i-1]) / numberOfAddedPoints);
         sumsOfSquaresOfDifferencesFromMean[i-1] = sumsOfSquaresOfDifferencesFromMean[i-1] + (x[i-1] - oldMean) * (x[i-1] - means[i-1]);
-        variances[i-1] = sumsOfSquaresOfDifferencesFromMean[i-1] / (numberOfAddedPoints - 1);
+        variances[i-1] = sumsOfSquaresOfDifferencesFromMean[i-1] / numberOfAddedPoints ;
     }
 
     @Override
@@ -65,7 +75,8 @@ public class OnlineMultiVariateRegressionImpl implements OnlineMultiVariateRegre
         checkNumberOfDimensions(x);
         double resultSum = weights[0];
         for (int i = 1; i < weights.length; i++) {
-            resultSum = resultSum + (weights[i] * x[i-1]);
+            double normalizedInput = normalizeInput(x, i - 1);
+            resultSum = resultSum + (weights[i] * x[i - 1]);
         }
         return resultSum;
     }
