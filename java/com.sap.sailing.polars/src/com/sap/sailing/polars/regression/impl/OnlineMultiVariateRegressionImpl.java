@@ -42,12 +42,12 @@ public class OnlineMultiVariateRegressionImpl implements OnlineMultiVariateRegre
         checkNumberOfDimensions(x);
         numberOfAddedPoints++;
         double[] newWeights = initializeDoubleArray(weights.length);
-        double alpha = 0.01;
+        double alpha = 0.03;
         newWeights[0] = weights[0] + alpha * (y - estimateY(x));
         for (int i = 1; i < weights.length; i++) {
             incrementallyUpdateVariances(x, i);
             double normalizedInput = (x[i-1] - means[i-1]) / Math.sqrt(variances[i-1]);
-            newWeights[i] = weights[i] + Math.pow(alpha, i)*(y - estimateY(x)) * x[i-1];//normalizedInput;
+            newWeights[i] = weights[i] + alpha * (y - estimateY(x)) * Math.pow(alpha, i) * x[i-1];//normalizedInput;
         }
         weights = newWeights;
     }
