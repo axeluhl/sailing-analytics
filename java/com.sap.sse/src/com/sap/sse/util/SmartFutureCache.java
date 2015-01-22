@@ -1,4 +1,4 @@
-package com.sap.sailing.util;
+package com.sap.sse.util;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,9 +19,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.SmartFutureCache.UpdateInterval;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**

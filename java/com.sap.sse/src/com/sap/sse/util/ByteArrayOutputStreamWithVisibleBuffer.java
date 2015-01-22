@@ -1,4 +1,4 @@
-package com.sap.sailing.util;
+package com.sap.sse.util;
 
 import java.io.ByteArrayOutputStream;
 

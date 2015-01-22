@@ -1,4 +1,4 @@
-package com.sap.sailing.util.impl;
+package com.sap.sse.concurrent;
 
 import java.util.AbstractCollection;
 import java.util.Map.Entry;

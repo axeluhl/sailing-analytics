@@ -1,7 +1,8 @@
-package com.sap.sailing.util;
+package com.sap.sse.util;
 
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+
 
 public class AutoCloseableWriteLock implements AutoCloseable {
     private final NamedReentrantReadWriteLock lock;

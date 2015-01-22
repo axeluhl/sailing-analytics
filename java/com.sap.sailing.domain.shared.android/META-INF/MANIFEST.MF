@@ -4,10 +4,11 @@ Bundle-Name: com.sap.sailing.domain.shared.android
 Bundle-SymbolicName: com.sap.sailing.domain.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sse.datamining.shared,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.shared.android
 Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.impl,
  com.sap.sailing.domain.abstractlog.race,
@@ -46,5 +47,4 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.racelogtracking,
  com.sap.sailing.domain.racelogtracking.impl,
  com.sap.sailing.domain.tracking,
- com.sap.sailing.domain.tracking.impl,
- com.sap.sailing.util.impl
+ com.sap.sailing.domain.tracking.impl

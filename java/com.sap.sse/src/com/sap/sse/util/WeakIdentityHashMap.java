@@ -2,7 +2,7 @@
  * Copyright (c) 2005, 2008, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
-package com.sap.sailing.util;
+package com.sap.sse.util;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;

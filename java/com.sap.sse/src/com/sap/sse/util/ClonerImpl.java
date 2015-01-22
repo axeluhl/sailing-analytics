@@ -1,9 +1,9 @@
-package com.sap.sailing.util;
+package com.sap.sse.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import com.sap.sailing.domain.common.Cloner;
+import com.sap.sse.common.Cloner;
 
 public class ClonerImpl implements Cloner {
     public void clone(Object from, Object to) {

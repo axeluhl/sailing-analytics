@@ -21,8 +21,8 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 public class TransientCompetitorStoreImpl implements CompetitorStore, Serializable {
     private static final Logger logger = Logger.getLogger(TransientCompetitorStoreImpl.class.getName());

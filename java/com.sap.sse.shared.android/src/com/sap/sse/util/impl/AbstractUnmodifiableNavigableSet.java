@@ -1,4 +1,4 @@
-package com.sap.sailing.util.impl;
+package com.sap.sse.util.impl;
 
 import java.io.Serializable;
 import java.util.Collection;

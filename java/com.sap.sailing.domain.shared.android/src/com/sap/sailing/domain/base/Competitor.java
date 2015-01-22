@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Color;
-import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
+import com.sap.sse.datamining.shared.annotations.Connector;
 
 public interface Competitor extends Named, WithID, IsManagedByCache<SharedDomainFactory> {
     @Connector(messageKey="Team", ordinal=9)

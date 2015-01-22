@@ -10,4 +10,5 @@ Export-Package: com.sap.sse,
  com.sap.sse.util.impl,
  com.sap.sse.util.kmeans
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.sap.sse.common
+Require-Bundle: com.sap.sse.common,
+ com.sap.sse.shared.android

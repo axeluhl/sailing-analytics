@@ -1,4 +1,4 @@
-package com.sap.sailing.util.impl;
+package com.sap.sse.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;

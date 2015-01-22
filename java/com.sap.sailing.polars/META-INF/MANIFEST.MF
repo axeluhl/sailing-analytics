@@ -20,7 +20,8 @@ Require-Bundle:
  com.sap.sse.datamining,
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sse.common,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sse.shared.android
 Import-Package: 
  com.sap.sailing.util,
  com.sap.sse.common

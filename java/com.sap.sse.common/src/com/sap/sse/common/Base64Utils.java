@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common;
+package com.sap.sse.common;
 
 /*
  * Copyright 2009 Google Inc.
