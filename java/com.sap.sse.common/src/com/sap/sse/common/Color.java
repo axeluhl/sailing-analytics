@@ -1,8 +1,8 @@
-package com.sap.sailing.domain.common;
+package com.sap.sse.common;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.impl.RGBColor;
+import com.sap.sse.common.impl.RGBColor;
 
 public interface Color extends Serializable {
     final Color WHITE = new RGBColor(255, 255, 255);

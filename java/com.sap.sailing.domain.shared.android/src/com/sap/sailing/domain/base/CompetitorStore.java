@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sse.common.Color;
 
 /**
  * Manages a set of {@link Competitor} objects. There may be a transient implementation based on a simple cache,

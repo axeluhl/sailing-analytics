@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sse.common.impl;
 
-import com.sap.sailing.domain.common.Color;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 
 public abstract class AbstractColor implements Color {

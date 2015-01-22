@@ -10,11 +10,11 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
 import com.sap.sailing.gwt.ui.shared.racemap.Shape;
+import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
