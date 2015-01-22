@@ -158,7 +158,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 if ("tack".equals(cluster)) {
                     clusters = Stream.of(maneuverBasedWindEstimationTrackImpl.getTackCluster());
                 } else if ("jibe".equals(cluster)) {
-                    clusters = Stream.of(maneuverBasedWindEstimationTrackImpl.getTackCluster());
+                    clusters = Stream.of(maneuverBasedWindEstimationTrackImpl.getJibeCluster());
                 } else if (cluster != null && cluster.matches("[0-9][0-9]*")) {
                     clusters = Stream.of(new ArrayList<>(maneuverBasedWindEstimationTrackImpl.getClusters()).get(Integer.valueOf(cluster)));
                 } else {
