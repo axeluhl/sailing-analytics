@@ -80,7 +80,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     private final Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> tackCluster;
 
     /**
-     * References one element of {@link #clutsers} that was selected as the jibe cluster; this is for debugging, mostly,
+     * References one element of {@link #clusters} that was selected as the jibe cluster; this is for debugging, mostly,
      * and could be removed/commented again when this class works as expected.
      */
     private final Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> jibeCluster;

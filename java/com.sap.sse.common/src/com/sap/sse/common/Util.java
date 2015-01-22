@@ -353,6 +353,7 @@ public class Util {
      * Returns the first non-<code>null</code> object in <code>objects</code> or <code>null</code>
      * if no such object exists.
      */
+    @SafeVarargs
     public static <T> T getFirstNonNull(T... objects) {
         for (T t : objects) {
             if (t != null) {
