@@ -80,13 +80,13 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
@@ -1814,7 +1814,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             InterruptedException, ExecutionException {
         LeaderboardDTO result = null;
         if (timePoint == null) {
-            // date==null means live mode; however, if we're after the end of all races and after all score
+            // timePoint==null means live mode; however, if we're after the end of all races and after all score
             // corrections, don't use the live leaderboard updater which would keep re-calculating over and over again, but map
             // this to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly
             // when the tracked race associations or score corrections or tracked race contents changes:

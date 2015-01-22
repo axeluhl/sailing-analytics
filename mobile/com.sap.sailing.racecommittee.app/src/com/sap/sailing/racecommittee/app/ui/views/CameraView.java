@@ -28,7 +28,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         // underlying surface is created and destroyed.
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
-        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
     public void snap(final PictureCallback pictureHandler) {

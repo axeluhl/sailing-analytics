@@ -6,8 +6,8 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
  * Separately scales speed and bearing. Instead of considering speed and bearing a single vector that can be scaled, the

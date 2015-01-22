@@ -20,7 +20,7 @@ public abstract class AbstractSpeedWithAbstractBearingImpl extends AbstractSpeed
     
     @Override
     public String toString() {
-        return super.toString()+" to "+getBearing().getDegrees()+"Â°";
+        return super.toString()+" to "+getBearing().getDegrees()+"°";
     }
 
     @Override
