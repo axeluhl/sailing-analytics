@@ -67,10 +67,22 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
     private final TrackedRace trackedRace;
 
+    /**
+     * Keeps the clusters that were used during the last {@link #analyzeRace(boolean)} run; this is for debugging, mostly,
+     * and could be removed/commented again when this class works as expected.
+     */
     private final Set<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusters;
 
+    /**
+     * References one element of {@link #clutsers} that was selected as the tack cluster; this is for debugging, mostly,
+     * and could be removed/commented again when this class works as expected.
+     */
     private final Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> tackCluster;
 
+    /**
+     * References one element of {@link #clutsers} that was selected as the jibe cluster; this is for debugging, mostly,
+     * and could be removed/commented again when this class works as expected.
+     */
     private final Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing> jibeCluster;
     
     public ManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, TrackedRace trackedRace, long millisecondsOverWhichToAverage, boolean waitForLatest)
