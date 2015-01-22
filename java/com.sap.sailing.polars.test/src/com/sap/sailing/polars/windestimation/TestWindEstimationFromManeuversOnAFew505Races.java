@@ -100,7 +100,10 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
                             IntStream.range(0, numberOfClusters/2).mapToObj((i)->
                                 new Pair<>(new DegreeBearingImpl(((double) i)*360./(double) numberOfClusters/2), -45.))));
         final Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters = clusterer.getClusters();
-        assertEquals(8, clusters.size());
+        assertEquals(16, clusters.size());
+        
+        // Now work towards identifying the two tack clusters
+        
     }
 
     private Wind getManeuverBasedAverageWind() throws NotEnoughDataHasBeenAddedException {

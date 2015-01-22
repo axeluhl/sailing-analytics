@@ -240,11 +240,11 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     }
     
     public String getManeuverClassificationColumnHeaders() {
-        return "datapoint\tcompetitor\ttimePoint\tangleDeg\tboatSpeedKn\tcogDeg\tmiddleManeuverCourse\tlossM";
+        return "datapoint\tcompetitor\ttimePoint\tangleDeg\tboatSpeedKn\tcogDeg\tmiddleManeuverCourse\tlossM\ttackLikelihood\tjibeLikelihood";
     }
 
     public String getManeuverClassificationColumnTypes() {
-        return "infoitem\tstring\tdate\tfloat\tfloat\tfloat\tfloat\tfloat";
+        return "infoitem\tstring\tdate\tfloat\tfloat\tfloat\tfloat\tfloat\tfloat\tfloat";
     }
 
     public String format(ManeuverClassification mc, String id) {
@@ -263,6 +263,10 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         result.append(mc.getMiddleManeuverCourse().getDegrees());
         result.append("\t");
         result.append(mc.getManeuverLoss() == null ? 0.0 : mc.getManeuverLoss().getMeters());
+        result.append("\t");
+        result.append(mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.TACK).getA());
+        result.append("\t");
+        result.append(mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.JIBE).getA());
         return result.toString();
     }
 
