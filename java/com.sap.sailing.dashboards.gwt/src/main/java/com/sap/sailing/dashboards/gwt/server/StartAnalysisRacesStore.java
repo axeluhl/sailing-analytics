@@ -64,15 +64,6 @@ public class StartAnalysisRacesStore {
     private Map<String, List<StartAnalysisDTO>> startAnalysisDTOListForCompetitorName;
 
     /**
-     * Contains {@link StartAnalysisCompetitorDTO}s for every competitor name in every race. This map gets created for a
-     * tracked race when the first mark one rounding of a tracked race gets received. Caching
-     * {@link StartAnalysisCompetitorDTO}s brings the advantage of faster code at creating finished
-     * {@link #startAnalysisDTOListForCompetitorName}
-     * */
-    // private Map<TrackedRace, Map<String, StartAnalysisCompetitorDTO>>
-    // startAnalysisCompetitorDTOsForCompetitorNameForTrackedRace;
-
-    /**
      * Contains a ranking list of competitor at mark one for every race
      * */
     private Map<TrackedRace, List<Competitor>> rankingListAtMarkOneForTrackedRace;
@@ -104,7 +95,6 @@ public class StartAnalysisRacesStore {
         startAnalysisDTOListForCompetitorName = new HashMap<String, List<StartAnalysisDTO>>();
         rankingListAtMarkOneForTrackedRace = new HashMap<TrackedRace, List<Competitor>>();
         gpsFixesPathBeforeStartForCompetitor = new HashMap<TrackedRace, Map<String, List<GPSFixDTO>>>();
-
     }
 
     /**
@@ -182,7 +172,6 @@ public class StartAnalysisRacesStore {
                 fromPerCompetitorIdAsString.put(competitor.getId().toString(), fiveSecondsBeforeStart);
             }
         } catch (NoWindException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return fromPerCompetitorIdAsString;
@@ -400,7 +389,6 @@ public class StartAnalysisRacesStore {
                                         .asMillis())), true));
             }
         } catch (NoWindException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return gpsFixesPathBeforeStartForCompetitor.get(trackedRace);
@@ -461,7 +449,7 @@ public class StartAnalysisRacesStore {
                     }
                 }
             }
-           
         }
     }
+    
 }

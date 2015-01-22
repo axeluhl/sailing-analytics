@@ -7,7 +7,6 @@ public abstract class StartAnalysisStartRankTableTeamCollumn<T> extends Column<T
 
     public StartAnalysisStartRankTableTeamCollumn() {
         super(new StartAnalysisStartRankTableTeamCell());
-        // TODO Auto-generated constructor stub
     }
 
     @Override

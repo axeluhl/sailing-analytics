@@ -231,7 +231,6 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets,
 
     @Override
     public void bottomNotificationClicked() {
-        // TODO Auto-generated method stub
         scrollToLast();
     }
 

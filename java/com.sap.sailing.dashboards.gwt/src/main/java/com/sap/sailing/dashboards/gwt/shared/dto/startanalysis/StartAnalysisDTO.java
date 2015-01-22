@@ -22,7 +22,6 @@ public class StartAnalysisDTO implements Serializable, Comparable<StartAnalysisD
 
     @Override
     public int compareTo(StartAnalysisDTO o) {
-        // TODO Auto-generated method stub
         return raceName.compareTo(o.raceName);
     }
 }

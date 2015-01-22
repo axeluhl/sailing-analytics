@@ -136,7 +136,6 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
 
     @Override
     public void didSelectedRowWithCompetitorName(String competitorName) {
-        // TODO Auto-generated method stub
         button.getElement().addClassName(style.buttonshow());
         currentCompetitorSelected = competitorName;
     }

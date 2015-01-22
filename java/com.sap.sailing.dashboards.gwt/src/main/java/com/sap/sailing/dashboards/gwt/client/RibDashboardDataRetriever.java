@@ -242,7 +242,6 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
 
     @Override
     public void didClickedOKWithCompetitorName(String competitorName) {
-        System.out.println("Did clicked with competitor " + competitorName);
         this.selectedTeamName = competitorName;
         Cookies.setCookie(KEY_SLECTED_TEAM_COOKIE, competitorName, new Date(new Date().getTime()
                 + SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS));
