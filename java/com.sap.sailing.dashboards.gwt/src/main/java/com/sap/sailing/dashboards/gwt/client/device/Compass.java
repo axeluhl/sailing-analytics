@@ -35,11 +35,13 @@ public class Compass {
 					.addEventListener(
 							'deviceorientation',
 							function(e) {
-								var c = e.compassHeading
-										|| e.webkitCompassHeading || 0;
-								var accuracy = e.compassAccuracy
-										|| e.webkitCompassAccuracy || 0;
-								compass.@com.sap.sailing.dashboards.gwt.client.device.Compass::notifiyListenerAboutHeadingChange(DD)(c, accuracy);
+								if (e != null) {
+									var c = e.compassHeading
+											|| e.webkitCompassHeading || 0;
+									var accuracy = e.compassAccuracy
+											|| e.webkitCompassAccuracy || 0;
+									compass.@com.sap.sailing.dashboards.gwt.client.device.Compass::notifiyListenerAboutHeadingChange(DD)(c, accuracy);
+								}
 							}, false);
 		} else {
 			window.alert("Compass not supported for this device");

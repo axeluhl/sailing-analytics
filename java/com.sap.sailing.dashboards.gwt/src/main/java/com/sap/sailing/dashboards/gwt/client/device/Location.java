@@ -37,9 +37,11 @@ public class Location {
 			window.alert("no position supported");
 		}
 		function showPosition(position) {
-			var lat = position.coords.latitude;
-			var lon = position.coords.longitude
-			location.@com.sap.sailing.dashboards.gwt.client.device.Location::notifiyListenerAboutLocationChange(DD)(lat, lon);
+			if (position != null) {
+				var lat = position.coords.latitude;
+				var lon = position.coords.longitude
+				location.@com.sap.sailing.dashboards.gwt.client.device.Location::notifiyListenerAboutLocationChange(DD)(lat, lon);
+			}
 		}
     }-*/;
 
