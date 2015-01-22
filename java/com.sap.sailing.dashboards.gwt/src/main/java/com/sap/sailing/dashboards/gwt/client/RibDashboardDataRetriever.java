@@ -47,6 +47,15 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
     private ArrayList<NewStartAnalysisListener> newStartAnalysisListeners;
     private ArrayList<RaceSelectionChangeListener> raceSelectionChangeListener;
 
+    private String selectedTeamName;
+
+    private CompetitorSelectionPopup competitorSelectionPopup;
+    private RacingNotYetStartedPopup popupRacingNotYetStarted;
+    private BottomNotification bottomNotification;
+    private FocusPanel competitorEditButton;
+    private Label competitorLabel;
+    private boolean shouldReloadStartAnalysis;
+    
     private final RibDashboardServiceAsync ribDashboardService;
 
     private final Object MUTEX;
@@ -57,14 +66,6 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
     private static final String KEY_SLECTED_TEAM_COOKIE = "selectedTeam";
     private static final int SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS = 60 * 1000 * 60 * 5;
 
-    private String selectedTeamName;
-
-    private CompetitorSelectionPopup competitorSelectionPopup;
-    private RacingNotYetStartedPopup popupRacingNotYetStarted;
-    private BottomNotification bottomNotification;
-    private FocusPanel competitorEditButton;
-    private Label competitorLabel;
-    private boolean shouldReloadStartAnalysis;
 
     public RibDashboardDataRetriever() {
         initNonFinalMemberVariablesWithNoArgumentConstructor();
