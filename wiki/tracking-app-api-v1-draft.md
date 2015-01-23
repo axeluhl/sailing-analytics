@@ -234,15 +234,20 @@ Allows to retrieve team information for the team of a certain competitor
 
 Set the team image of a certain competitor
 
-**Path:** ``{competitor-id}/team/image``
+**Path:** ``competitors/{competitor-id}/image``
 
 **Verb:** ``POST``
 
-Multipart message with ``image`` part containing encoded JPEG or PNG image.
+Binary data (not multipart) with ``Content-Type`` of ``image/jpeg`` or ``image/png``
+e.g.
+```
+$ curl -H "Content-Type:image/jpeg" --data-binary @<path-to-jpeg> \
+   http://127.0.0.1:8888/sailingserver/api/v1/competitors/<competitor-id>/image
+```
 
 **Response:**
 ```
 {
-  "teamImageUrl" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
+  "teamImageUri" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
 }
 ```
