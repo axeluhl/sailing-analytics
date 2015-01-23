@@ -69,6 +69,10 @@ public class Cluster<E, ValueType, AveragesTo, T extends ScalableValueWithDistan
         }
     }
     
+    /**
+     * Determines the {@link ScalableValueWithDistance#getDistance(Object) distance} of the element <code>e</code> to
+     * this cluster's {@link #mean} value.
+     */
     public double getDistanceFromMean(final E e) {
         return mapper.apply(e).getDistance(mean);
     }

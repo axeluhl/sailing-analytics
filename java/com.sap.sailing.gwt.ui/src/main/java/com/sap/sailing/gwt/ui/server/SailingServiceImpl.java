@@ -1052,7 +1052,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
                     raceRecord.getTrackingStartTime().asDate(), 
                     raceRecord
-                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(),
+                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime() == null ? null : raceRecord.getRaceStartTime().asDate(),
                     raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getRaceVisibility(), raceRecord.getJsonURL().toString(),
                     hasRememberedRegatta(raceRecord.getID())));
         }
