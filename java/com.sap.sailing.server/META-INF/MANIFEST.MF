@@ -30,7 +30,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.replication,
  com.sap.sse,
  com.sap.sailing.server.gateway.serialization.shared.android,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sse.filestorage;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;
