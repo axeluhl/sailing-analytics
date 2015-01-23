@@ -423,6 +423,7 @@ import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.dto.FileStorageServiceDTO;
 import com.sap.sse.filestorage.dto.PropertyErrors;
+import com.sap.sse.filestorage.impl.FileStorageServiceDTOUtils;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -5433,7 +5434,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public FileStorageServiceDTO[] getAvailableFileStorageServices() {
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
         for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
-            serviceDtos.add(FileStorageServiceDTO.convert(s));
+            serviceDtos.add(FileStorageServiceDTOUtils.convert(s));
         }
         return serviceDtos.toArray(new FileStorageServiceDTO[0]);
     }
@@ -5451,7 +5452,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         try {
             getFileStorageService(serviceName).testProperties();
         } catch (InvalidPropertiesException e) {
-            return new PropertyErrors(e);
+            return FileStorageServiceDTOUtils.convert(e);
         }
         return null;
     }
@@ -5461,7 +5462,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         try {
             getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
         } catch (InvalidPropertiesException e) {
-            return new PropertyErrors(e);
+            return FileStorageServiceDTOUtils.convert(e);
         }
         return null;
     }

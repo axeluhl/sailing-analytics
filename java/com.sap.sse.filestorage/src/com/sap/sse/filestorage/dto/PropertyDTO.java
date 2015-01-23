@@ -2,8 +2,6 @@ package com.sap.sse.filestorage.dto;
 
 import java.io.Serializable;
 
-import com.sap.sse.filestorage.Property;
-
 public class PropertyDTO implements Serializable {
     private static final long serialVersionUID = -2721807793068803143L;
     public boolean isRequired;
@@ -20,9 +18,5 @@ public class PropertyDTO implements Serializable {
         this.name = name;
         this.value = value;
         this.description = description;
-    }
-    
-    public static PropertyDTO convert(Property p) {
-        return new PropertyDTO(p.isRequired(), p.getName(), p.getValue(), p.getDescription());
     }
 }
