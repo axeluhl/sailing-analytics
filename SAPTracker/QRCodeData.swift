@@ -59,7 +59,7 @@ public class QRCodeData {
         leaderBoardName = queryStringDictionary[QRCodeData.Keys.leaderBoardName]
         // change %20 to space
         if leaderBoardName != nil {
-            leaderBoardName = leaderBoardName!.stringByReplacingPercentEscapesUsingEncoding(NSUTF8StringEncoding)
+            leaderBoardName = leaderBoardName!.stringByReplacingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         }
         competitorId = queryStringDictionary[QRCodeData.Keys.competitorId]
         return eventId != nil && leaderBoardName != nil && competitorId != nil

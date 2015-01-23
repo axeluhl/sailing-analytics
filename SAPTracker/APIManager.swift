@@ -89,7 +89,7 @@ public class APIManager: NSObject {
     
     /* Get leader board */
     public func getLeaderBoard(leaderBoardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName)"
+        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
