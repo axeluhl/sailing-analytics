@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.domain.common.Base64Utils;
 import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Base64Utils;
 
 public abstract class HttpMessageSenderServletRequestHandler {
     private static final Logger logger = Logger.getLogger(AbstractHttpPostServlet.class.getName());

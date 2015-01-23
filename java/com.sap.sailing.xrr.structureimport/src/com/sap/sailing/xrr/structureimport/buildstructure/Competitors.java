@@ -1,7 +1,7 @@
 package com.sap.sailing.xrr.structureimport.buildstructure;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sse.common.Color;
 
 public class Competitors {
     private String countryCode = "";

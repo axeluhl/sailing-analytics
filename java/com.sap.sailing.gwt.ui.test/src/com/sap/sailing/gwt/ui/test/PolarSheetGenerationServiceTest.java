@@ -23,7 +23,6 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -54,6 +53,7 @@ import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

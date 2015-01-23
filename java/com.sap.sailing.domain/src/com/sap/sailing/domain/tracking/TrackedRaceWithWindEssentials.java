@@ -12,8 +12,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 
 public abstract class TrackedRaceWithWindEssentials implements TrackedRace {

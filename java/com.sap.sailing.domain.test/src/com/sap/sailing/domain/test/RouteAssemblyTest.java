@@ -12,8 +12,8 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.tractrac.model.lib.api.route.IControlRoute;
 import com.sap.sse.common.Util;
+import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.subscription.lib.api.control.IControlRouteChangeListener;
 
 public class RouteAssemblyTest extends AbstractTracTracLiveTest {

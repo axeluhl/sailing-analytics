@@ -19,6 +19,7 @@ Require-Bundle: com.sap.sailing.domain,
  org.json.simple;bundle-version="1.1.0",
  com.sap.sse.common,
  com.sap.sse.replication,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sse.shared.android
 Export-Package: com.sap.sailing.domain.test,
  com.sap.sailing.domain.test.mock

@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.abstractlog.shared.analyzing;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sse.common.WithID;
 
