@@ -33,11 +33,11 @@ import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
-	
-	private static final Logger logger = Logger.getLogger(CompetitorsResource.class.getName());
-	
+    private static final Logger logger = Logger.getLogger(CompetitorsResource.class.getName());
+    private static final int MAX_SIZE_IN_MB = 5;
+
     public static JSONObject getCompetitorJSON(Competitor competitor) {
-        //see http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Competitor-Information
+        // see http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Competitor-Information
         JSONObject json = new JSONObject();
         json.put("id", competitor.getId().toString());
         json.put("name", competitor.getName());
@@ -48,7 +48,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
 
         return json;
     }
-    
+
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{competitorId}")
@@ -58,42 +58,43 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                 competitorIdAsString);
         if (competitor == null) {
             response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + competitorIdAsString + "'.").type(MediaType.TEXT_PLAIN)
-                    .build();
+                    .entity("Could not find a competitor with id '" + competitorIdAsString + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
         } else {
             String jsonString = getCompetitorJSON(competitor).toJSONString();
             response = Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
         }
         return response;
     }
-    
+
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{competitor-id}/team")
     public Response getTeam(@PathParam("competitor-id") String competitorId) {
         Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
-        
-        if (competitor == null){ 
-        	return Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + competitorId + "'.")
-                    .type(MediaType.TEXT_PLAIN).build();
+
+        if (competitor == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a competitor with id '" + competitorId + "'.").type(MediaType.TEXT_PLAIN)
+                    .build();
         }
-        
+
         Team team = competitor.getTeam();
-    
+
         if (team == null) {
             return Response.status(Status.NOT_FOUND)
                     .entity("Could not find a team associated with competitor '" + competitorId + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
-        } 
-            
-        TeamJsonSerializer teamJsonSerializer = new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer()));
+        }
+
+        TeamJsonSerializer teamJsonSerializer = new TeamJsonSerializer(new PersonJsonSerializer(
+                new NationalityJsonSerializer()));
         JSONObject teamJson = teamJsonSerializer.serialize(team);
         String json = teamJson.toJSONString();
-        
+
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
-    
+
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces("application/json;charset=UTF-8")
@@ -101,6 +102,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     public String setTeamImage(@PathParam("competitor-id") String competitorId,
             @FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetails) {
+
         RacingEventService service = getService();
         CompetitorStore store = service.getCompetitorStore();
         Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
@@ -114,6 +116,12 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         try {
             String fileName = fileDetails.getFileName();
             long sizeInBytes = fileDetails.getSize();
+
+            if (sizeInBytes > 1024 * 1024 * MAX_SIZE_IN_MB) {
+                throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                        .entity("Image is larger than " + MAX_SIZE_IN_MB + "MB").build());
+            }
+
             imageUri = getService().getFileStorageService().storeFile(uploadedInputStream, fileName, sizeInBytes);
         } catch (IOException e) {
             logger.log(Level.WARNING, "Could not store competitor image", e);
