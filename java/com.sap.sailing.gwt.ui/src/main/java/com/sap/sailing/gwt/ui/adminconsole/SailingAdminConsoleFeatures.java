@@ -23,4 +23,5 @@ public interface SailingAdminConsoleFeatures {
     final AdminConsoleFeatures MANAGE_MASTERDATA_IMPORT = new AdminConsoleFeatures("MANAGE_MASTERDATA_IMPORT", UserRoles.administrator.getRolename());
     final AdminConsoleFeatures MANAGE_DEVICE_CONFIGURATION = new AdminConsoleFeatures("MANAGE_DEVICE_CONFIGURATION", UserRoles.eventmanager.getRolename(), UserRoles.administrator.getRolename());
     final AdminConsoleFeatures MANAGE_USERS = new AdminConsoleFeatures("MANAGE_USERS", UserRoles.administrator.getRolename());
+    final AdminConsoleFeatures MANAGE_FILE_STORAGE = new AdminConsoleFeatures("MANAGE_FILE_STORAGE", UserRoles.administrator.getRolename());
 }

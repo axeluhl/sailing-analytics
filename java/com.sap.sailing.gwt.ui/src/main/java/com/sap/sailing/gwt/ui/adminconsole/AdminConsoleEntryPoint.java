@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.filestorage.FileStoragePanel;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -220,6 +221,10 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel),
                 getStringMessages().userManagement(), SailingAdminConsoleFeatures.MANAGE_USERS);
+        
+        final FileStoragePanel fileStoragePanel = new FileStoragePanel(sailingService, this, getStringMessages());
+        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
+                getStringMessages().fileStorage(), SailingAdminConsoleFeatures.MANAGE_FILE_STORAGE);
 
         panel.initUI();
         fillRegattas();
