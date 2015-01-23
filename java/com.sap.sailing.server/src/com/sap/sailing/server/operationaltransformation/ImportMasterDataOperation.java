@@ -50,8 +50,8 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
-import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sse.common.Util;
+import com.sap.sse.concurrent.LockUtil;
 
 public class ImportMasterDataOperation extends
         AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {

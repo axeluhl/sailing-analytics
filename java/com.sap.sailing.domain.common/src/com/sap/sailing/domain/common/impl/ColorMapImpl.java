@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.ColorMap;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.HSVColor;
 
 
 /**

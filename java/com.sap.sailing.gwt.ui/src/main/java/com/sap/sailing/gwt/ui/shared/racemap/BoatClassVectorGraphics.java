@@ -6,9 +6,9 @@ import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sse.common.Color;
 
 /**
  * The base class for boat graphics based on SVG graphics drawn to a HTML5 canvas.

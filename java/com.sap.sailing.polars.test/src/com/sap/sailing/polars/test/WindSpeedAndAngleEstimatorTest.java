@@ -54,7 +54,6 @@ public class WindSpeedAndAngleEstimatorTest {
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.5, ERROR));
         assertThat(result.getConfidence(), closeTo(0.5, ERROR));
         
-        
         result = estimator.getAverageTrueWindSpeedAndAngle(new KnotSpeedImpl(4.25));
         assertThat(result.getObject().getKnots(), closeTo(6.5, ERROR));
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.25, ERROR));
@@ -74,7 +73,6 @@ public class WindSpeedAndAngleEstimatorTest {
         assertThat(result.getObject().getKnots(), closeTo(7, ERROR));
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.5, ERROR));
         assertThat(result.getConfidence(), closeTo(0.25, ERROR));
-             
     }
 
     /**
@@ -109,7 +107,6 @@ public class WindSpeedAndAngleEstimatorTest {
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.5, ERROR));
         assertThat(result.getConfidence(), closeTo(0.5, ERROR));
         
-        
         result = estimator.getAverageTrueWindSpeedAndAngle(new KnotSpeedImpl(4.25));
         assertThat(result.getObject().getKnots(), closeTo(5.5, ERROR));
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.25, ERROR));
@@ -129,7 +126,6 @@ public class WindSpeedAndAngleEstimatorTest {
         assertThat(result.getObject().getKnots(), closeTo(5, ERROR));
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.5, ERROR));
         assertThat(result.getConfidence(), closeTo(0.25, ERROR));
-             
     }
     
     @Test
@@ -151,7 +147,6 @@ public class WindSpeedAndAngleEstimatorTest {
         
         result = estimator.getAverageTrueWindSpeedAndAngle(new KnotSpeedImpl(5.5));
         assertThat(result, nullValue());
-             
     }
     
     @Test
@@ -175,7 +170,6 @@ public class WindSpeedAndAngleEstimatorTest {
         assertThat(result.getObject().getKnots(), closeTo(6.5, ERROR));
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.25, ERROR));
         assertThat(result.getConfidence(), closeTo(0.55, ERROR));
-                
     }
     
     @Test
@@ -263,5 +257,4 @@ public class WindSpeedAndAngleEstimatorTest {
         assertThat(result.getObject().getBearing().getDegrees(), closeTo(47.5, ERROR));
         assertThat(result.getConfidence(), closeTo(0.455555, ERROR));
     }
-    
 }

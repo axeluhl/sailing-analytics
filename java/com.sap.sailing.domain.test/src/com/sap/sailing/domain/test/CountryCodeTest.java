@@ -19,8 +19,8 @@ import java.util.regex.Pattern;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.CountryCode;
-import com.sap.sailing.domain.common.CountryCodeFactory;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 
 public class CountryCodeTest {

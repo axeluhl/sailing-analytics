@@ -11,7 +11,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.util.impl.ConcurrentHashBag;
+import com.sap.sse.concurrent.ConcurrentHashBag;
 
 /**
  * Initiated by bug 2502 (http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2502), this test tries to reproduce a

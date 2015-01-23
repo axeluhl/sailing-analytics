@@ -4,8 +4,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.junit.Test;
 
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * {@link ReentrantReadWriteLock} can produce a lock between readers and other readers if the lock

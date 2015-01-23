@@ -18,8 +18,8 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.WithNationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.impl.RGBColor;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.impl.RGBColor;
 
 /**
  * Tests the {@link CompetitorChangeListener} stuff including the serialization of the transitive listener
