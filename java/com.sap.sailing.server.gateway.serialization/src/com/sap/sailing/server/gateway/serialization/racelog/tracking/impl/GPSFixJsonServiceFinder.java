@@ -1,7 +1,5 @@
 package com.sap.sailing.server.gateway.serialization.racelog.tracking.impl;
 
-import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
@@ -13,6 +11,8 @@ import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingJsonSeriali
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingNmeaDTOJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixNmeaDTOJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TypeBasedServiceFinder;
 
 public class GPSFixJsonServiceFinder implements TypeBasedServiceFinder<GPSFixJsonHandler> {
     private final GPSFixJsonHandler gpsFixHandler = new GPSFixJsonHandlerImpl<GPSFix>(new GPSFixJsonDeserializer(), new GPSFixJsonSerializer());

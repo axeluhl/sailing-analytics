@@ -1,4 +1,7 @@
-package com.sap.sailing.domain.common.racelog.tracking;
+package com.sap.sse.common.impl;
+
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**
  * Only can provide the service for a single {@code type}, e.g. on smartphones with no OSGi context.

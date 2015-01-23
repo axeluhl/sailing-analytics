@@ -1,5 +1,7 @@
 package com.sap.sse.filestorage.ui.client;
 
+import org.osgi.framework.InvalidSyntaxException;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.ui.shared.FileStorageServiceDTO;
@@ -11,7 +13,7 @@ import com.sap.sse.filestorage.ui.shared.FileStorageServiceDTO;
  *
  */
 public interface FileStorageManagementService extends RemoteService {
-    FileStorageServiceDTO getAvailableFileStorageServices();
+    FileStorageServiceDTO[] getAvailableFileStorageServices() throws InvalidSyntaxException;
     void setFileStorageServiceProperty(String serviceName, String propertyName, String propertyValue);
     void testFileStorageServiceProperties(String serviceName) throws InvalidPropertiesException;
     void setFileStorageServiceToUse(String serviceName) throws InvalidPropertiesException;

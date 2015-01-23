@@ -5,7 +5,7 @@ import com.sap.sse.filestorage.ui.shared.FileStorageServiceDTO;
 
 public interface FileStorageManagementServiceAsync {
 
-    void getAvailableFileStorageServices(AsyncCallback<FileStorageServiceDTO> callback);
+    void getAvailableFileStorageServices(AsyncCallback<FileStorageServiceDTO[]> callback);
 
     void setFileStorageServiceProperty(String serviceName, String propertyName, String propertyValue,
             AsyncCallback<Void> callback);

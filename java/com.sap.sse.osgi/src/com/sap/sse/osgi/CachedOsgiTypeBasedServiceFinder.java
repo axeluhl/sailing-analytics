@@ -1,4 +1,4 @@
-package com.sap.sailing.server.racelog.tracking;
+package com.sap.sse.osgi;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,8 +8,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**
  * Caches OSGI services of a certain type, based on their type property. Has to be registered as the

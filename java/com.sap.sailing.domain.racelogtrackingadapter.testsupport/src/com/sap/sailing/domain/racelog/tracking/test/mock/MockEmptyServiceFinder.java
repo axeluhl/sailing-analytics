@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking.test.mock;
 
-import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TypeBasedServiceFinder;
 
 public class MockEmptyServiceFinder<ServiceType> implements TypeBasedServiceFinder<ServiceType> {
     private ServiceType fallback;

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelog.tracking.test.mock;
 
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sse.common.TypeBasedServiceFinder;
 
 public class MockServiceFinder<T> implements TypeBasedServiceFinder<T> {
     private final T handler;

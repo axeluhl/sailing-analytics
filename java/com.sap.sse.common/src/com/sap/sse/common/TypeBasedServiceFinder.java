@@ -1,4 +1,5 @@
-package com.sap.sailing.domain.common.racelog.tracking;
+package com.sap.sse.common;
+
 
 /**
  * @author Fredrik Teschke

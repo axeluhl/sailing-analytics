@@ -1,4 +1,4 @@
-package com.sap.sailing.server.racelog.tracking;
+package com.sap.sse.osgi;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,8 +8,8 @@ import java.util.Set;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
+import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 
 /**
  * Use the OSGi service registry to find the desired services.
