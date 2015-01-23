@@ -9,7 +9,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.common.Color;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 
 public class CompetitorImpl implements DynamicCompetitor {

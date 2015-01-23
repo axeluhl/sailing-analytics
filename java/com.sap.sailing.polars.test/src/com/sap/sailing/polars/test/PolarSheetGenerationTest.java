@@ -29,7 +29,6 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
@@ -64,6 +63,7 @@ import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.data.impl.DataPointWithOriginInfoImpl;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.generation.PolarSheetHistogramBuilder;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

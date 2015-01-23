@@ -42,7 +42,6 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
@@ -54,6 +53,7 @@ import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRe
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

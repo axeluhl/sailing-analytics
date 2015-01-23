@@ -11,8 +11,8 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
-import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.CountryCode;
 
 public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_ID = "id";

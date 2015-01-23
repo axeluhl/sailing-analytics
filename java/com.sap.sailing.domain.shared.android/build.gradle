@@ -10,4 +10,6 @@ dependencies {
     /* local dependencies */
     compile project(":java:com.sap.sailing.domain.common")
     compile project(":java:com.sap.sse.common")
+    compile project(":java:com.sap.sse.datamining.shared")
+    compile project(":java:com.sap.sse.shared.android")
 }

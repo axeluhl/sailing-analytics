@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.abstractlog.impl;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 
 /**
  * Finds the most recent event in the log which is an {@code instanceof} {@link #ofType}.

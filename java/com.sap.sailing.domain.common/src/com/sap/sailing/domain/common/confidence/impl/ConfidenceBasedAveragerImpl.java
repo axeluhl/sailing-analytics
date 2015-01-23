@@ -4,8 +4,8 @@ import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
 import com.sap.sailing.domain.common.confidence.HasConfidenceAndIsScalable;
 import com.sap.sailing.domain.common.confidence.Weigher;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 
 
 /**

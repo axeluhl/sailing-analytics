@@ -2,8 +2,8 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.common.CountryCode;
-import com.sap.sailing.domain.common.CountryCodeFactory;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.IsManagedByCache;
 
 public class NationalityImpl implements Nationality {

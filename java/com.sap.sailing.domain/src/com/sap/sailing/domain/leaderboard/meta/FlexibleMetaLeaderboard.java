@@ -7,8 +7,8 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
     private static final long serialVersionUID = 789076326144062944L;
