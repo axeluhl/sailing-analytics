@@ -23,9 +23,9 @@ public class LocalFileStorageServiceImpl implements FileStorageService {
     private static final String retrievalProtocol = "http";
 
     @Override
-    public URI storeFile(InputStream is, String originalFileName, long lengthInBytes) throws IOException {
+    public URI storeFile(InputStream is, String fileExtension, long lengthInBytes) throws IOException {
         OutputStream outputStream = null;
-        String pathToFile = path + "/" + getKey(originalFileName);
+        String pathToFile = path + "/" + getKey(fileExtension);
 
         outputStream = new FileOutputStream(new File(pathToFile));
 
@@ -50,13 +50,9 @@ public class LocalFileStorageServiceImpl implements FileStorageService {
         return getUri(pathToFile);
     }
 
-    private static String getKey(String originalFileName) {
+    private static String getKey(String fileEnding) {
         String key = UUID.randomUUID().toString();
-        if (originalFileName != null) {
-            String ending = originalFileName.substring(originalFileName.lastIndexOf("."));
-            key += ending;
-            // key += "/" + originalFileName;
-        }
+        key += fileEnding;
         return key;
     }
 

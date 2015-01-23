@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -30,8 +31,6 @@ import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
@@ -98,12 +97,10 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     }
 
     @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces("application/json;charset=UTF-8")
+    @Consumes({ "image/jpeg", "image/png" })
     @Path("{competitor-id}/image")
-    public String setTeamImage(@PathParam("competitor-id") String competitorId,
-            @FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetails) {
+    public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
+            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) {
 
         RacingEventService service = getService();
         CompetitorStore store = service.getCompetitorStore();
@@ -114,17 +111,21 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .entity("Could not find competitor with id " + competitorId).type(MediaType.TEXT_PLAIN).build());
         }
 
+        String fileExtension = null;
+        if (fileType.equals("image/jpeg")) {
+            fileExtension += ".jpg";
+        } else {
+            fileExtension += ".png";
+        }
+
         URI imageUri;
         try {
-            String fileName = fileDetails.getFileName();
-            long sizeInBytes = fileDetails.getSize();
-
             if (sizeInBytes > 1024 * 1024 * MAX_SIZE_IN_MB) {
                 throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                         .entity("Image is larger than " + MAX_SIZE_IN_MB + "MB").build());
             }
 
-            imageUri = getService().getActiveFileStorageService().storeFile(uploadedInputStream, fileName, sizeInBytes);
+            imageUri = getService().getActiveFileStorageService().storeFile(uploadedInputStream, fileExtension, sizeInBytes);
         } catch (IOException | OperationFailedException | InvalidPropertiesException e) {
             logger.log(Level.WARNING, "Could not store competitor image", e);
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
