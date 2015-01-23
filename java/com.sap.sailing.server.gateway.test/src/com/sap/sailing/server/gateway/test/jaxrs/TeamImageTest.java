@@ -27,14 +27,14 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
-import com.sap.sailing.server.gateway.jaxrs.api.TeamResource;
+import com.sap.sailing.server.gateway.jaxrs.api.CompetitorsResource;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
-public class TeamResourceTest extends AbstractJaxRsApiTest {    
+public class TeamImageTest extends AbstractJaxRsApiTest {    
     private static final String name = "Heiko KRÖGER";
     private static final String id = "af855a56-9726-4a9c-a77e-da955bd289be";
     private static final String boatClassName = "49er";
@@ -60,7 +60,7 @@ public class TeamResourceTest extends AbstractJaxRsApiTest {
     public void storeAndRemoveTeamImage() throws URISyntaxException, ParseException, MalformedURLException,
             IOException, OperationFailedException, InvalidPropertiesException {
         //set team image
-        TeamResource r = spyResource(new TeamResource());
+        CompetitorsResource r = spyResource(new CompetitorsResource());
         URL fileUrl = getClass().getResource("/" + teamImageFile);
         URI fileUri = new URI(fileUrl.toString());
         long length = new File(fileUri).length();

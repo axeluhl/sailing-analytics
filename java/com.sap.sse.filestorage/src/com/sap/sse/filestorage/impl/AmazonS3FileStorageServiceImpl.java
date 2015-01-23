@@ -91,7 +91,8 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
 
     private URI getUri(String key) {
         try {
-            return new URI(retrievalProtocol, bucketName.getValue() + "." + baseUrl, "/" + key, null);
+            // FIXME: region is missing s3-... see: http://stackoverflow.com/questions/10975475/amazon-s3-upload-file-and-get-url
+            return new URI(retrievalProtocol, baseUrl, "/" + bucketName.getValue() + "/" + key, null);
         } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "Could not create URI for uploaded file with key " + key, e);
             return null;
@@ -128,7 +129,6 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
         }
         logger.info("Removed file " + uri);
     }
-
     @Override
     public Property[] getProperties() {
         return new Property[] { accessId, accessKey, bucketName };
