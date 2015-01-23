@@ -153,7 +153,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 announcementsLabel.text = " "
             }
                 // before race
-            else if now.timeIntervalSinceDate(event.startDate) < 0 { regattaStartLabel.text = "Regatta will start in"
+            else if now.timeIntervalSinceDate(event.startDate) < 0 {
+                regattaStartLabel.text = "Regatta will start in"
                 lastSyncLabel.hidden = false
                 leaderBoardButtonHeight.constant = 0
                 let delta = floor(now.timeIntervalSinceDate(event.startDate)) * -1
@@ -167,15 +168,15 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 loop = NSTimer(timeInterval: 60, target: self, selector: "checkRegattaStatus", userInfo: nil, repeats: false)
                 NSRunLoop.currentRunLoop().addTimer(loop!, forMode:NSRunLoopCommonModes)
             }
-        }
-            // during race
-        else {
-            regattaStartLabel.text = "Regatta in progress"
-            daysHeight.constant = 0
-            hoursHeight.constant = 0
-            minutesHeight.constant = 0
-            leaderBoardButtonHeight.constant = ButtonHeight.smallButtonPortrait
-            lastSyncLabel.hidden = false
+                // during race
+            else {
+                regattaStartLabel.text = "Regatta in progress"
+                daysHeight.constant = 0
+                hoursHeight.constant = 0
+                minutesHeight.constant = 0
+                leaderBoardButtonHeight.constant = ButtonHeight.smallButtonPortrait
+                lastSyncLabel.hidden = false
+            }
         }
     }
     
