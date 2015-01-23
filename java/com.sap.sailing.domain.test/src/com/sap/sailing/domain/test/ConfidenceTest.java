@@ -206,7 +206,7 @@ public class ConfidenceTest {
     @Test
     public void testAveragingWithNullArrayYieldsNull() {
         ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
-        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(null, null);
+        HasConfidence<Double, Double, TimePoint> average = averager.getAverage((Iterable<? extends HasConfidenceAndIsScalable<Double, Double, TimePoint>>) null, null);
         assertNull(average);
     }
 
@@ -414,7 +414,7 @@ public class ConfidenceTest {
     public void testConfidenceBasedAveragingWithNullArrayYieldsNull() {
         ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceFactory.INSTANCE
                 .createAverager(ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(1000));
-        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(null, null);
+        HasConfidence<Double, Double, TimePoint> average = averager.getAverage((Iterable<? extends HasConfidenceAndIsScalable<Double, Double, TimePoint>>) null, null);
         assertNull(average);
     }
 

@@ -1,10 +1,11 @@
 package com.sap.sailing.domain.common.confidence.impl;
 
+import java.util.Iterator;
+
 import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
 import com.sap.sailing.domain.common.confidence.HasConfidenceAndIsScalable;
 import com.sap.sailing.domain.common.confidence.Weigher;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 
@@ -45,13 +46,21 @@ public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implem
     @Override
     public HasConfidence<ValueType, BaseType, RelativeTo> getAverage(
             Iterable<? extends HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo>> values, RelativeTo at) {
-        if (values == null || Util.isEmpty(values)) {
+        return getAverage(values.iterator(), at);
+    }
+    
+    @Override
+    public HasConfidence<ValueType, BaseType, RelativeTo> getAverage(
+            Iterator<? extends HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo>> values, RelativeTo at) {
+        if (values == null || !values.hasNext()) {
             return null;
         } else {
             ScalableValue<ValueType, BaseType> numerator = null;
             double confidenceSum = 0;
-            for (HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo> next : values) {
-                double relativeWeight = (getWeigher() == null ? 1.0 : getWeigher().getConfidence(next.getRelativeTo(), at)) * next.getConfidence();
+            int count = 0;
+            while (values.hasNext()) {
+                HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo> next = values.next();
+                double relativeWeight = getWeight(next, at);
                 ScalableValue<ValueType, BaseType> weightedNext = next.getScalableValue().multiply(relativeWeight);
                 if (numerator == null) {
                     numerator = weightedNext;
@@ -59,15 +68,20 @@ public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implem
                     numerator = numerator.add(weightedNext);
                 }
                 confidenceSum += relativeWeight;
+                count++;
             }
             // TODO consider greater variance to reduce the confidence
-            double newConfidence = confidenceSum / Util.size(values);
+            double newConfidence = confidenceSum / count;
             BaseType result = numerator.divide(confidenceSum);
             return new HasConfidenceImpl<ValueType, BaseType, RelativeTo>(result, newConfidence, at);
         }
     }
 
-    protected Weigher<RelativeTo> getWeigher() {
+    protected double getWeight(HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo> next, RelativeTo at) {
+        return (getWeigher() == null ? 1.0 : getWeigher().getConfidence(next.getRelativeTo(), at)) * next.getConfidence();
+    }
+
+    private Weigher<RelativeTo> getWeigher() {
         return weigher;
     }
 }
