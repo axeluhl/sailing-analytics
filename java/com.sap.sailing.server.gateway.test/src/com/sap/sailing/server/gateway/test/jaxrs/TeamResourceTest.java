@@ -4,11 +4,17 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
+import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -18,6 +24,7 @@ import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.server.gateway.jaxrs.api.TeamResource;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.impl.AmazonS3FileStorageServiceImpl;
@@ -45,7 +52,7 @@ public class TeamResourceTest extends AbstractJaxRsApiTest {
     }
 
     @Test
-    public void storeAndRemoveTeamImage() throws URISyntaxException {
+    public void storeAndRemoveTeamImage() throws URISyntaxException, ParseException, MalformedURLException, IOException {
         //set team image
         TeamResource r = new TeamResource();
         long length = new File(new URI(getClass().getResource(teamImageFile).toString())).length();
@@ -54,9 +61,14 @@ public class TeamResourceTest extends AbstractJaxRsApiTest {
 
         FormDataContentDisposition fileDetails = FormDataContentDisposition.name("file").size(length)
                 .fileName(teamImageFile).build();
-        r.setTeamImage(id, stream, fileDetails);
+        String jsonString = r.setTeamImage(id, stream, fileDetails);
         
         //now download and compare
+        JSONObject json = (JSONObject) JSONValue.parseWithException(jsonString);
+        String imageUri = (String) json.get(DeviceMappingConstants.JSON_TEAM_IMAGE_URI);
         
+        InputStream downloadStream = new URI(imageUri).toURL().openStream();
+        stream = getClass().getResourceAsStream(teamImageFile);
+        IOUtils.contentEquals(downloadStream, stream);
     }
 }

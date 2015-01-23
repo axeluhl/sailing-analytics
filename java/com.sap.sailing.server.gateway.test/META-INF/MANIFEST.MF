@@ -13,7 +13,8 @@ Require-Bundle: org.mockito.mockito-core;bundle-version="1.9.5",
  org.junit4;bundle-version="4.8.2",
  com.sap.sailing.domain.racelogtrackingadapter.testsupport;bundle-version="1.0.0",
  com.sap.sse.common,
- com.sun.jersey
+ com.sun.jersey,
+ org.apache.commons.io;bundle-version="2.2.0"
 Import-Package: com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.persistence.impl,
  com.sap.sailing.server.impl

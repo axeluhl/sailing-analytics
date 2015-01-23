@@ -21,6 +21,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
@@ -90,6 +91,8 @@ public class TeamResource extends AbstractSailingServerResource {
                 competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri);
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
 
-        return Response.status(Status.OK).build();
+        JSONObject result = new JSONObject();
+        result.put(DeviceMappingConstants.JSON_TEAM_IMAGE_URI, imageUri.toString());
+        return result.toString();
     }
 }
