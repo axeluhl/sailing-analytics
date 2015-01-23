@@ -46,7 +46,7 @@ public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implem
     @Override
     public HasConfidence<ValueType, BaseType, RelativeTo> getAverage(
             Iterable<? extends HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo>> values, RelativeTo at) {
-        return getAverage(values.iterator(), at);
+        return values == null ? null : getAverage(values.iterator(), at);
     }
     
     @Override
