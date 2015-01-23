@@ -96,6 +96,11 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
 
+    //
+    // example for testing upload:
+    // $ curl -v -H "Content-Type:image/jpeg" \
+    //     --data-binary @<path-to-local-jpg> \
+    //     http://127.0.0.1:8888/sailingserver/api/v1/competitors/<competitor-id>/image
     @POST
     @Consumes({ "image/jpeg", "image/png" })
     @Path("{competitor-id}/image")
@@ -111,11 +116,11 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .entity("Could not find competitor with id " + competitorId).type(MediaType.TEXT_PLAIN).build());
         }
 
-        String fileExtension = null;
+        String fileExtension = "";
         if (fileType.equals("image/jpeg")) {
-            fileExtension += ".jpg";
-        } else {
-            fileExtension += ".png";
+            fileExtension = ".jpg";
+        } else if (fileType.equals("image/png")) {
+            fileExtension = ".png";
         }
 
         URI imageUri;

@@ -98,19 +98,24 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public URI storeFile(InputStream is, String fileExtension, long lengthInBytes)
+    public URI storeFile(final InputStream is, String fileExtension, long lengthInBytes)
             throws InvalidPropertiesException, OperationFailedException {
-        ObjectMetadata metadata = new ObjectMetadata();
+        final ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(lengthInBytes);
-        String key = getKey(fileExtension);
-        PutObjectRequest request = new PutObjectRequest(bucketName.getValue(), key, is, metadata)
+        final String key = getKey(fileExtension);
+        final PutObjectRequest request = new PutObjectRequest(bucketName.getValue(), key, is, metadata)
                 .withCannedAcl(CannedAccessControlList.PublicRead);
-        AmazonS3Client s3Client = createS3Client();
-        try {
-            s3Client.putObject(request);
-        } catch (AmazonClientException e) {
-            throw new OperationFailedException("Could not store file", e);
-        }
+        final AmazonS3Client s3Client = createS3Client();
+
+            new Thread() {
+                public void run() {
+                    try {
+                        s3Client.putObject(request);
+                    } catch (AmazonClientException e) {
+                        logger.log(Level.WARNING, "Could not store file", e);
+                    }
+                };
+            }.run();
         URI uri = getUri(key);
         logger.info("Stored file " + uri);
         return uri;
