@@ -41,6 +41,8 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTracBasedTest {
 
+    private String expectedEventName;
+
     public TestWindEstimationFromManeuversOnAFew505Races() throws URISyntaxException, MalformedURLException {
         super();
     }
@@ -52,6 +54,35 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
         super.setUp(new URL("file:///"+new File("../com.sap.sailing.domain.test/resources/"+fileBaseName+".txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS }); // only the tracks; no mark positions, no wind, no mark passings
+    }
+    
+    public void setUp(final String expectedEventName, final String fileBaseName) throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+        setExpectedEventName(expectedEventName);
+        setUp(fileBaseName);
+    }
+    
+    @Override
+    protected String getExpectedEventName() {
+        final String result;
+        if (expectedEventName == null) {
+            result = super.getExpectedEventName();
+        } else {
+            result = expectedEventName;
+        }
+        return result;
+    }
+
+    private void setExpectedEventName(String expectedEventName) {
+        this.expectedEventName = expectedEventName;
+    }
+
+    @Test
+    public void testWindEstimationFromManeuversOnOBMR2012V2Blue() throws MalformedURLException, IOException,
+            InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
+            CreateModelException, NotEnoughDataHasBeenAddedException {
+        setUp("OBMR 2012", "event_20121031_OBMR-OBMR_2012_VR_Fr_Fleet_1_2");
+        Wind average = getManeuverBasedAverageWind();
+        assertEquals(215, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
     }
 
     @Test
