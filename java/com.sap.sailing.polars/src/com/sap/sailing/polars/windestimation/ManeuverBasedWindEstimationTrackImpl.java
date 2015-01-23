@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -55,6 +56,8 @@ import com.sap.sse.util.kmeans.KMeansMappingClusterer;
  */
 public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     private static final long serialVersionUID = -764156498143531475L;
+    
+    private static final Logger logger = Logger.getLogger(ManeuverBasedWindEstimationTrackImpl.class.getName());
     
     /**
      * Using a fairly low base confidence for this estimation wind track. It shall only serve as a
@@ -105,10 +108,12 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         this.polarService = polarService;
         this.trackedRace = trackedRace;
         this.weightedAverageMiddleCOGForManeuverType = new HashMap<>();
+        long start = System.currentTimeMillis();
         Triple<Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>,
                List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>,
                List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>> clusterStructure =
                analyzeRace(waitForLatest);
+        logger.fine("Computed virtual wind fixes from maneuvers for race "+trackedRace.getRace().getName()+" in "+(System.currentTimeMillis()-start)+"ms");
         clusters = clusterStructure.getA();
         tackClusters = clusterStructure.getB();
         jibeClusters = clusterStructure.getC();

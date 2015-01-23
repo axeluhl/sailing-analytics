@@ -64,7 +64,6 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
         assertEquals(235, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
     }
 
-    @Ignore("The test is currently still red because the clustering doesn't work; see bug 1562 comment #8")
     @Test
     public void testWindEstimationFromManeuversOn505KW2011Race3() throws MalformedURLException, IOException,
             InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
@@ -74,7 +73,6 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
         assertEquals(245, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
     }
 
-    @Ignore("The test is currently still red because the clustering doesn't work; see bug 1562 comment #8")
     @Test
     public void testWindEstimationFromManeuversOn505KW2011Race4() throws MalformedURLException, IOException,
             InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
