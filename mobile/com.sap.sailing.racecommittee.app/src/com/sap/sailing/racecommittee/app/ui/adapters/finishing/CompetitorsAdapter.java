@@ -22,9 +22,8 @@ public class CompetitorsAdapter extends ArrayAdapter<Competitor> {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (convertView == null) {
-
-            LayoutInflater li = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
-            view = li.inflate(R.layout.welter_grid_competitor_cell, null);
+            LayoutInflater inflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+            view = inflater.inflate(R.layout.welter_grid_competitor_cell, parent, false);
         }
 
         Competitor competitor = getItem(position);

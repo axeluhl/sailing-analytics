@@ -32,7 +32,7 @@ public class NamedArrayAdapter<T extends Named> extends ArrayAdapter<T> {
     	ViewHolder holder;
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.login_list_item, /* view group */null);
+            convertView = inflater.inflate(R.layout.login_list_item, parent, false);
             holder = new ViewHolder();
             holder.text = (TextView) convertView.findViewById(R.id.txt_list_item);
             holder.check = (ImageView) convertView.findViewById(R.id.iv_check);

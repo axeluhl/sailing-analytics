@@ -49,8 +49,10 @@ android {
         }
     }
 
-    lintOptions {
-        abortOnError false
+    android {
+        lintOptions {
+            abortOnError false
+        }
     }
 
     packagingOptions {

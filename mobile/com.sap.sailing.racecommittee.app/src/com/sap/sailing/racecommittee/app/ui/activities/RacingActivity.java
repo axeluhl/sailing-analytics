@@ -406,13 +406,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 .replace("#EVENT#", event.getName()).replace("#AUTHOR#", preferences.getAuthor().getName());
         SpannableString header = new SpannableString(race);
         StyleSpan spanBold = new StyleSpan(Typeface.BOLD);
-        header.setSpan(spanBold, 0, event.getName().toString().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        header.setSpan(spanBold, 0, event.getName().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         navDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), header);
     }
 
-    private void loadWelcomeFragment(CourseArea courseArea, EventBase event) {
-        getFragmentManager().beginTransaction()
-                .replace(R.id.racing_view_container, new WelcomeFragment(event, courseArea, preferences.getAuthor()))
+    private void loadWelcomeFragment(CourseArea courseArea, EventBase event){
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.racing_view_container, WelcomeFragment.newInstance(event, courseArea, preferences.getAuthor()))
                 .commit();
     }
 

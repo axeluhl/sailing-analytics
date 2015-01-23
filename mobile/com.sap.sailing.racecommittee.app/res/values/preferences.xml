@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     
-    <string name="preference_identifier_key">identifierPreference</string>
-    <string name="preference_sync_key">syncConnectionPreference</string>
-    <string name="preference_update_key">forceUpdatePreference</string>
+    <string name="preference_identifier_key" translatable="false">identifierPreference</string>
+    <string name="preference_sync_key" translatable="false">syncConnectionPreference</string>
+    <string name="preference_update_key" translatable="false">forceUpdatePreference</string>
 
-    <string name="preference_language_key">languagePref</string>
-    <string name="preference_course_areas_key">courseAreasPref</string>
+    <string name="preference_language_key" translatable="false">languagePref</string>
+    <string name="preference_course_areas_key" translatable="false">courseAreasPref</string>
     <string-array name="preference_course_areas_default">
         <item>Alpha</item>
         <item>Marina Bay</item>
@@ -19,21 +19,21 @@
         <item>Offshore</item>
     </string-array>
 
-    <string name="preference_mail_key">mailRecipientPreference</string>
-    <string name="preference_mail_default">lukas.niemeier@sap.com</string>
+    <string name="preference_mail_key" translatable="false">mailRecipientPreference</string>
+    <string name="preference_mail_default" translatable="false">lukas.niemeier@sap.com</string>
     
-    <string name="preference_polling_active_key">pollingActivePreference</string>
+    <string name="preference_polling_active_key" translatable="false">pollingActivePreference</string>
     <bool name="preference_polling_active_default">true</bool>
-    <string name="preference_polling_interval_key">pollingIntervalPreference</string>
+    <string name="preference_polling_interval_key" translatable="false">pollingIntervalPreference</string>
     <integer name="preference_polling_interval_default">120</integer>
 
-    <string name="preference_racing_procedure_override_key">defaultRacingProcedureType</string>
-    <string name="preference_racing_procedure_override_default">RRS26</string>
+    <string name="preference_racing_procedure_override_key" translatable="false">defaultRacingProcedureType</string>
+    <string name="preference_racing_procedure_override_default" translatable="false">RRS26</string>
 
-    <string name="preference_course_designer_override_key">defaultCourseDesignerType</string>
-    <string name="preference_course_designer_override_default">BY_NAME</string>
+    <string name="preference_course_designer_override_key" translatable="false">defaultCourseDesignerType</string>
+    <string name="preference_course_designer_override_default" translatable="false">BY_NAME</string>
     
-    <string name="preference_course_designer_by_name_course_names_key">courseDesignerByNameCourseNames</string>
+    <string name="preference_course_designer_by_name_course_names_key" translatable="false">courseDesignerByNameCourseNames</string>
     <string-array name="preference_course_designer_by_name_course_names_default">
         <item>O2</item>
         <item>I2</item>
@@ -48,37 +48,37 @@
         <item>I3</item>
     </string-array>
 
-    <string name="preference_racing_procedure_classflag_default">CLASS</string>
-    <string name="preference_racing_procedure_rrs26_classflag_key">rrs26ClassFlag</string>
-    <string name="preference_racing_procedure_rrs26_hasxray_key">rrs26IndividualRecall</string>
+    <string name="preference_racing_procedure_classflag_default" translatable="false">CLASS</string>
+    <string name="preference_racing_procedure_rrs26_classflag_key" translatable="false">rrs26ClassFlag</string>
+    <string name="preference_racing_procedure_rrs26_hasxray_key" translatable="false">rrs26IndividualRecall</string>
     <bool name="preference_racing_procedure_rrs26_hasxray_default">true</bool>
-    <string name="preference_racing_procedure_rrs26_startmode_flags_key">rrs26StartmodeFlags</string>
+    <string name="preference_racing_procedure_rrs26_startmode_flags_key" translatable="false">rrs26StartmodeFlags</string>
     <string-array name="preference_racing_procedure_rrs26_startmode_flags_default">
         <item>PAPA</item>
         <item>INDIA</item>
         <item>BLACK</item>
         <item>ZULU</item>
     </string-array>
-    <string name="preference_racing_procedure_gatestart_classflag_key">gateStartClassFlag</string>
-    <string name="preference_racing_procedure_gatestart_hasxray_key">gateStartIndividualRecall</string>
+    <string name="preference_racing_procedure_gatestart_classflag_key" translatable="false">gateStartClassFlag</string>
+    <string name="preference_racing_procedure_gatestart_hasxray_key" translatable="false">gateStartIndividualRecall</string>
     <bool name="preference_racing_procedure_gatestart_hasxray_default">false</bool>
-    <string name="preference_racing_procedure_gatestart_haspathfinder_key">gateStartPathfinder</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_key" translatable="false">gateStartPathfinder</string>
     <bool name="preference_racing_procedure_gatestart_haspathfinder_default">true</bool>
-    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key">gateStartHasAdditionalGolfDownTime</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key" translatable="false">gateStartHasAdditionalGolfDownTime</string>
     <bool name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_default">true</bool>
-	<string name="preference_racing_procedure_ess_classflag_key">essClassFlag</string>
-    <string name="preference_racing_procedure_ess_hasxray_key">essIndividualRecall</string>
+	<string name="preference_racing_procedure_ess_classflag_key" translatable="false">essClassFlag</string>
+    <string name="preference_racing_procedure_ess_hasxray_key" translatable="false">essIndividualRecall</string>
     <bool name="preference_racing_procedure_ess_hasxray_default">true</bool>
-	<string name="preference_racing_procedure_basic_classflag_key">basicClassFlag</string>
-    <string name="preference_racing_procedure_basic_hasxray_key">basicIndividualRecall</string>
+	<string name="preference_racing_procedure_basic_classflag_key" translatable="false">basicClassFlag</string>
+    <string name="preference_racing_procedure_basic_hasxray_key" translatable="false">basicIndividualRecall</string>
     <bool name="preference_racing_procedure_basic_hasxray_default">false</bool>
     
-    <string name="preference_regatta_specific_save_key">basicIndividualRecall</string>
+    <string name="preference_regatta_specific_save_key" translatable="false">basicIndividualRecall</string>
     
     <!-- override android.shared default value -->
-    <string name="app_folder">racecommittee</string>
+    <string name="app_folder" translatable="false">racecommittee</string>
     <bool name="preference_isSendingActive_default">false</bool>
     
-    <string name="preference_wakelock_key">enable_wakelock</string>
+    <string name="preference_wakelock_key" translatable="false">enable_wakelock</string>
     <bool name="preference_wakelock_default">true</bool>
 </resources>

@@ -236,8 +236,19 @@
     <string name="toggle_group_race_mode">Gruppenrennen?</string>
     <string name="toggle_group_race_mode_off">Kein Gruppenrennen</string>
     <string name="toggle_group_race_mode_on">Gruppenrennen</string>
-    <string name="available_races">verfügbare Rennen</string>
+    <string name="welcome">WILKOMMEN</string>
+    <string name="races_all">ALLE RENNEN</string>
+    <string name="races_current">AKTUELLE RENNEN</string>
+    <string name="race_unscheduled">Ungeplant</string>
+    <string name="race_starts">Startet %s</string>
+    <string name="race_show_all">zeige alle</string>
+    <string name="race_show_less">zeige weniger</string>
+    <string name="preference_wakelock_summary">Lässt den Bildschirm immer an. Achtung: Verbraucht mehr Strom.</string>
+    <string name="preference_wakelock_header">Behalte Bildschirm an</string>
+    <string name="loading_events_succeded">Events geladen.</string>
+    <string name="available_races">Verfügbare Rennen</string>
     <string name="change">ÄNDERN</string>
-    <string name="app_folder">racecommittee</string>
+    <string name="race_started">Gestartet %s</string>
+    <string name="race_finished">Beendet %s</string>
 
 </resources>

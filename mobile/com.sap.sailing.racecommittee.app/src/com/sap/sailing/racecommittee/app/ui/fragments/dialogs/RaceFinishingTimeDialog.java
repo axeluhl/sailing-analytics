@@ -55,7 +55,7 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.finished_time_view, null);
+        View view = inflater.inflate(R.layout.finished_time_view, container, false);
         timePicker = (TimePicker) view.findViewById(R.id.protest_time_time_time_picker);
         setupTimePicker(timePicker);
         getDialog().setTitle(getText(R.string.finished_dialog_title));

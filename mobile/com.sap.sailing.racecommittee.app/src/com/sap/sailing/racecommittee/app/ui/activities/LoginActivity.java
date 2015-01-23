@@ -138,6 +138,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.login_view);
+        setSupportProgressBarIndeterminateVisibility(false);
 
 //        addEventListFragment();
 

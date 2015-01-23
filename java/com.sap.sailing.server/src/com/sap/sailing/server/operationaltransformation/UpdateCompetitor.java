@@ -2,9 +2,9 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sse.common.Color;
 
 public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Competitor> {
     private static final long serialVersionUID = 1172181354320184263L;

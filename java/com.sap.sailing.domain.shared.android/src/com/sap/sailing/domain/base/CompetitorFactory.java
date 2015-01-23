@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
-import com.sap.sailing.domain.common.Color;
+import com.sap.sse.common.Color;
 
 /**
  * Base interface for classes managing a set of {@link Competitor} objects.
