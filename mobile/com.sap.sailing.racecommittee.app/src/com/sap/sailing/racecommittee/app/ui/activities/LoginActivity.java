@@ -138,7 +138,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.login_view);
-        setProgressBarIndeterminateVisibility(false);
+        setSupportProgressBarIndeterminateVisibility(false);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -256,7 +256,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadFailed(Exception reason) {
-                        setProgressBarIndeterminateVisibility(false);
+                        setSupportProgressBarIndeterminateVisibility(false);
                         progressDialog.dismiss();
 
                         if (reason instanceof FileNotFoundException) {
@@ -275,7 +275,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadSucceded(DeviceConfiguration configuration, boolean isCached) {
-                        setProgressBarIndeterminateVisibility(false);
+                        setSupportProgressBarIndeterminateVisibility(false);
                         progressDialog.dismiss();
 
                         // this is our 'global' configuration, let's store it in app preferences

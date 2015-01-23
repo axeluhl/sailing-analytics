@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
     <issue id="IconLocation" severity="ignore" />
+
     <issue id="NestedWeights">
         <ignore path="res/layout/results_capturing_view.xml" />
     </issue>
+
     <issue id="UselessLeaf">
         <ignore path="res/layout/results_capturing_view.xml" />
     </issue>
+
+    <!-- Reason:  Don't want to use apply() instead of commit() -->
+    <issue id="CommitPrefEdits">
+        <ignore path="src/com/sap/sailing/racecommittee/app/AppPreferences.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/utils/autoupdate/AutoUpdater.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/preference/GeneralPreferenceFragment.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/utils/PreferenceHelper.java" />
+    </issue>
+
+    <!-- Reason: Eclipse users don't get the override -->
+    <issue id="GradleOverrides">
+        <ignore path="AndroidManifest.xml" />
+    </issue>
+
+    <!-- Reason: There is no parent available -->
+    <issue id="InflateParams">
+        <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/raceinfo/running/ConfirmDialog.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/dialogs/ProtestTimeDialogFragment.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/RaceInfoFragment.java" />
+    </issue>
+
 </lint>
