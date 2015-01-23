@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="84">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="85">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
@@ -224,6 +224,7 @@
 <plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-base"/>
 <plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider"/>
 <plugin id="org.apache.servicemix.bundles.aws-java-sdk"/>
+<plugin id="com.sun.jersey.contribs.jersey-multipart"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
