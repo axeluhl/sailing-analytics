@@ -9,12 +9,14 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -41,6 +43,7 @@ public class TeamResourceTest extends AbstractJaxRsApiTest {
     private final FileStorageService storageService = new AmazonS3FileStorageServiceImpl();
 
     @Override
+    @Before
     public void setUp() {
         super.setUp();
         racingEventService = spy(racingEventService);
@@ -54,10 +57,11 @@ public class TeamResourceTest extends AbstractJaxRsApiTest {
     @Test
     public void storeAndRemoveTeamImage() throws URISyntaxException, ParseException, MalformedURLException, IOException {
         //set team image
-        TeamResource r = new TeamResource();
-        long length = new File(new URI(getClass().getResource(teamImageFile).toString())).length();
-        System.out.println("Found file with size (bytes) " + length);
-        InputStream stream = getClass().getResourceAsStream(teamImageFile);
+        TeamResource r = spyResource(new TeamResource());
+        URL fileUrl = getClass().getResource("/" + teamImageFile);
+        URI fileUri = new URI(fileUrl.toString());
+        long length = new File(fileUri).length();
+        InputStream stream = getClass().getResourceAsStream("/" + teamImageFile);
 
         FormDataContentDisposition fileDetails = FormDataContentDisposition.name("file").size(length)
                 .fileName(teamImageFile).build();
@@ -65,10 +69,13 @@ public class TeamResourceTest extends AbstractJaxRsApiTest {
         
         //now download and compare
         JSONObject json = (JSONObject) JSONValue.parseWithException(jsonString);
-        String imageUri = (String) json.get(DeviceMappingConstants.JSON_TEAM_IMAGE_URI);
+        String imageUriString = (String) json.get(DeviceMappingConstants.JSON_TEAM_IMAGE_URI);
+        URI imageUri = new URI(imageUriString);
         
-        InputStream downloadStream = new URI(imageUri).toURL().openStream();
-        stream = getClass().getResourceAsStream(teamImageFile);
+        InputStream downloadStream = imageUri.toURL().openStream();
+        stream = getClass().getResourceAsStream("/" + teamImageFile);
         IOUtils.contentEquals(downloadStream, stream);
+        
+        storageService.removeFile(imageUri);
     }
 }

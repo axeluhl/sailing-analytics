@@ -20,8 +20,10 @@ import javax.ws.rs.core.Response.Status;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
@@ -69,7 +71,9 @@ public class TeamResource extends AbstractSailingServerResource {
     public String setTeamImage(@PathParam("competitor-id") String competitorId,
             @FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetails) {
-        Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
+        RacingEventService service = getService();
+        CompetitorStore store = service.getCompetitorStore();
+        Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
         if (competitor == null) {
             logger.log(Level.INFO, "Could not find competitor to store image for: " + competitorId);
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)

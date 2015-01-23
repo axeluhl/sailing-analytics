@@ -61,14 +61,16 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
     private static String getKey(String originalFileName) {
         String key = UUID.randomUUID().toString();
         if (originalFileName != null) {
-            key += "/" + originalFileName;
+            String ending = originalFileName.substring(originalFileName.lastIndexOf("."));
+            key += ending;
+//            key += "/" + originalFileName;
         }
         return key;
     }
     
     private static URI getUri(String key) {
         try {
-            return new URI(retrievalProtocol, bucketName + "." + baseUrl, key, null);
+            return new URI(retrievalProtocol, bucketName + "." + baseUrl, "/" + key, null);
         } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "Could not create URI for uploaded file with key " + key, e);
             return null;
@@ -84,13 +86,16 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
         PutObjectRequest request = new PutObjectRequest(bucketName, key, is, metadata)
             .withCannedAcl(CannedAccessControlList.PublicRead);
         s3.putObject(request);
-        return getUri(key);
+        URI uri = getUri(key);
+        logger.info("Stored file " + uri);
+        return uri;
     }
 
     @Override
     public void removeFile(URI uri) {
-        String key = uri.getPath();
+        String key = uri.getPath().substring(1); //remove initial slash
         s3.deleteObject(new DeleteObjectRequest(bucketName, key));
+        logger.info("Removed file " + uri);
     }
 
 }
