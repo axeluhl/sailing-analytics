@@ -1,21 +1,22 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.UUID;
-
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.Window;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -41,6 +42,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
+
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.UUID;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
         PositionSelectedListenerHost {
@@ -125,24 +130,16 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         ExLog.i(this, "LoginActivity", "PositionFragment created.");
     }
 
-    /** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        // features must be requested before anything else
-        getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.login_view);
-        setProgressBarIndeterminateVisibility(false);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
-            mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
-        }
-
-        addEventListFragment();
+//        addEventListFragment();
 
         UUID courseUUID = preferences.getCourseUUID();
         if (courseUUID != new UUID(0, 0)) {
@@ -166,6 +163,44 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         setupDataManager(null);
 
         new AutoUpdater(this).notifyAfterUpdate();
+
+        final View backdrop = findViewById(R.id.login_view_backdrop);
+        if (backdrop != null) {
+            backdrop.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View view) {
+                    if (view.getY() == 0) {
+                        long aniTime = getResources().getInteger(android.R.integer.config_longAnimTime);
+                        final View bottomView = findViewById(R.id.login_listview);
+                        View title = findViewById(R.id.backdrop_title);
+                        View subTitle = findViewById(R.id.backdrop_subtitle);
+                        subTitle.setAlpha(0f);
+
+                        ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(view, "y", 0, -view.getHeight() + (view.getHeight() / 5));
+                        ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
+                        ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
+
+                        ValueAnimator heightAnimation = ValueAnimator.ofInt(0, view.getHeight() - (view.getHeight() / 5));
+                        heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                int val = (Integer) valueAnimator.getAnimatedValue();
+                                ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
+                                layoutParams.height = val;
+                                bottomView.setLayoutParams(layoutParams);
+                            }
+                        });
+
+                        AnimatorSet animatorSet = new AnimatorSet();
+                        animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation);
+                        animatorSet.setDuration(aniTime);
+                        animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+                        animatorSet.start();
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -223,19 +258,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         showAreaPositionListFragment();
     }
 
-    @Override
-    public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
-        super.setSupportProgressBarIndeterminateVisibility(visible);
-
-        if (mProgressSpinner != null) {
-            if (visible) {
-                mProgressSpinner.setVisibility(View.VISIBLE);
-            } else {
-                mProgressSpinner.setVisibility(View.GONE);
-            }
-        }
-    }
-
     private void setupDataManager(Serializable eventId) {
         final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setMessage(getString(R.string.loading_configuration));
@@ -252,7 +274,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadFailed(Exception reason) {
-                        setProgressBarIndeterminateVisibility(false);
+                        setSupportProgressBarIndeterminateVisibility(false);
                         progressDialog.dismiss();
 
                         if (reason instanceof FileNotFoundException) {
@@ -271,7 +293,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                     @Override
                     public void onLoadSucceded(DeviceConfiguration configuration, boolean isCached) {
-                        setProgressBarIndeterminateVisibility(false);
+                        setSupportProgressBarIndeterminateVisibility(false);
                         progressDialog.dismiss();
 
                         // this is our 'global' configuration, let's store it in app preferences

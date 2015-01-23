@@ -39,9 +39,9 @@
     <string name="flag_ap">AP Flag</string>
     <string name="flag_november">November</string>
     <string name="flag_jury">Jury</string>
-    <string name="label_login_events">Select Event</string>
-    <string name="label_login_course_area">Select Area</string>
-    <string name="label_login_position">Select Position</string>
+    <string name="label_login_events">Event</string>
+    <string name="label_login_course_area">Area</string>
+    <string name="label_login_position">Position</string>
     <string name="login_type_officer_on_start_vessel">Login as race officer on the selected course\'s start vessel.</string>
     <string name="login_type_officer_on_finish_vessel">Login as race officer on the selected course\'s finish vessel.</string>
     <string name="login_type_shore_control">Login as shore control.</string>
@@ -238,7 +238,6 @@
     <string name="toggle_group_race_mode_off">No Group Racing</string>
     <string name="toggle_group_race_mode_on">Group Racing</string>
 
-	
 	<string name="confirm_start_time">Confirm Start Time</string>
 	<string name="confirm_start_mode">Confirm Start Mode</string>
 	
@@ -256,4 +255,7 @@
     <string name="start_mode">Start Mode</string>
     <string name="course">Course</string>
     <string name="loading_events_succeded">Events loaded.</string>
+
+    <string name="login_text">Welcome to SAP Sailing\nRace Committee App</string>
+    <string name="login_sub_text">Where are you?</string>
 </resources>

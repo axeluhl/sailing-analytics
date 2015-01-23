@@ -12,7 +12,6 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.DrawerLayout;
@@ -182,9 +181,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                     setupFragments();
                 }
             }
-
         }
-
     }
 
     private void setupFragments() {

@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical" >
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools" android:id="@+id/loginLayout"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:orientation="vertical">
 
-    <include
-        android:id="@+id/toolbar_layout"
-        layout="@layout/toolbar" />
+    <fragment
+            android:id="@+id/login_view_backdrop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            class="com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop"
+            tools:layout="@layout/login_backdrop"/>
 
-    <RelativeLayout
-        android:id="@+id/loginLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:baselineAligned="false" >
-
-        <View
+    <View
             android:id="@+id/center_point"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_centerInParent="true" />
+            android:layout_centerInParent="true"/>
 
-        <FrameLayout
+    <FrameLayout
             android:id="@+id/login_view_left_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -29,9 +26,9 @@
             android:layout_alignEnd="@id/center_point"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_alignRight="@id/center_point" />
+            android:layout_alignRight="@id/center_point"/>
 
-        <FrameLayout
+    <FrameLayout
             android:id="@+id/login_view_right_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -39,13 +36,19 @@
             android:layout_alignLeft="@id/center_point"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_alignStart="@id/center_point" />
+            android:layout_alignStart="@id/center_point"/>
 
-        <FrameLayout
+    <FrameLayout
             android:id="@+id/login_view_bottom_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/center_point" />
-    </RelativeLayout>
+            android:layout_below="@+id/center_point"/>
 
-</LinearLayout>
+    <fragment android:layout_width="match_parent"
+              android:id="@+id/login_listview"
+              android:layout_height="0dp"
+              class="com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews"
+              tools:layout="@layout/login_listviews"
+              android:layout_gravity="center_horizontal|bottom"/>
+</FrameLayout>
+

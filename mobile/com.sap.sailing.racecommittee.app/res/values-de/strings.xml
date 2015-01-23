@@ -34,9 +34,9 @@
     <string name="flag_ap">AP Flagge</string>
     <string name="flag_november">November</string>
     <string name="flag_jury">Jury</string>
-    <string name="label_login_events">Event auswählen</string>
-    <string name="label_login_course_area">Bahn auswählen</string>
-    <string name="label_login_position">Position auswählen</string>
+    <string name="label_login_events">Event</string>
+    <string name="label_login_course_area">Bahn</string>
+    <string name="label_login_position">Position</string>
     <string name="login_type_viewer">Im Demo-Modus anmelden</string>
     <string name="racelist_unscheduled">Noch nicht geplant</string>
     <string name="racelist_scheduled">Geplant für %s</string>
@@ -236,5 +236,8 @@
     <string name="toggle_group_race_mode">Gruppenrennen?</string>
     <string name="toggle_group_race_mode_off">Kein Gruppenrennen</string>
     <string name="toggle_group_race_mode_on">Gruppenrennen</string>
+    <string name="available_races">verfügbare Rennen</string>
+    <string name="change">ÄNDERN</string>
+    <string name="app_folder">racecommittee</string>
 
 </resources>
