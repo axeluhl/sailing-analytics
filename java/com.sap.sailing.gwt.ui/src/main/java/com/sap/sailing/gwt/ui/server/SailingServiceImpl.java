@@ -419,6 +419,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.filestorage.FileStorageService;
+import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.dto.FileStorageServiceDTO;
+import com.sap.sse.filestorage.dto.PropertyErrors;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -5419,5 +5423,51 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 pointsForDownwindPortAverageSpeedMovingAverage, pointsForDownwindPortAverageConfidence);
 
         return data;
+    }
+    
+    private FileStorageService getFileStorageService(String name) {
+        return getService().getFileStorageManagementService().getFileStorageService(name);
+    }
+
+    @Override
+    public FileStorageServiceDTO[] getAvailableFileStorageServices() {
+        List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
+        for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
+            serviceDtos.add(FileStorageServiceDTO.convert(s));
+        }
+        return serviceDtos.toArray(new FileStorageServiceDTO[0]);
+    }
+
+    @Override
+    public void setFileStorageServiceProperties(String serviceName, Map<String, String> properties) {
+        for (Entry<String, String> p : properties.entrySet()) {
+            getService().getFileStorageManagementService()
+                .setFileStorageServiceProperty(serviceName, p.getKey(), p.getValue());
+        }
+    }
+
+    @Override
+    public PropertyErrors testFileStorageServiceProperties(String serviceName) {
+        try {
+            getFileStorageService(serviceName).testProperties();
+        } catch (InvalidPropertiesException e) {
+            return new PropertyErrors(e);
+        }
+        return null;
+    }
+
+    @Override
+    public PropertyErrors setActiveFileStorageService(String serviceName) {
+        try {
+            getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
+        } catch (InvalidPropertiesException e) {
+            return new PropertyErrors(e);
+        }
+        return null;
+    }
+
+    @Override
+    public String getActiveFileStorageServiceName() {
+        return getService().getFileStorageManagementService().getActiveFileStorageService().getName();
     }
 }

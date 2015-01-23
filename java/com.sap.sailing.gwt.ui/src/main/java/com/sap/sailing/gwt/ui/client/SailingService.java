@@ -88,6 +88,8 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.filestorage.dto.FileStorageServiceDTO;
+import com.sap.sse.filestorage.dto.PropertyErrors;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
@@ -574,4 +576,29 @@ public interface SailingService extends RemoteService {
     
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
+    
+    FileStorageServiceDTO[] getAvailableFileStorageServices();
+
+    /**
+     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
+     * @return only a service with valid properties can be selected for usage
+     */
+    PropertyErrors testFileStorageServiceProperties(String serviceName) throws NoCorrespondingServiceRegisteredException;
+
+    /**
+     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
+     * @return only a service with valid properties can be selected for usage
+     */
+    PropertyErrors setActiveFileStorageService(String serviceName) throws NoCorrespondingServiceRegisteredException;
+
+    /**
+     * @return may be {@code null}
+     */
+    String getActiveFileStorageServiceName();
+    
+    /**
+     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
+     * @throws IllegalArgumentException if the property with name {@code propertyName} doesn't exist for the service
+     */
+    void setFileStorageServiceProperties(String serviceName, Map<String, String> properties);
 }

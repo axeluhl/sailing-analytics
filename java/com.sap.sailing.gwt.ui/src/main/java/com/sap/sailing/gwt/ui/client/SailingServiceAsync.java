@@ -76,6 +76,8 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.filestorage.dto.FileStorageServiceDTO;
+import com.sap.sse.filestorage.dto.PropertyErrors;
 import com.sap.sse.gwt.client.BuildVersionRetriever;
 
 /**
@@ -683,6 +685,17 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
     void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
 
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
-			EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
+			EventDTO newEvent, AsyncCallback<Void> asyncCallback);
+
+    void setFileStorageServiceProperties(String serviceName, Map<String, String> properties,
+            AsyncCallback<Void> callback);
+
+    void getAvailableFileStorageServices(AsyncCallback<FileStorageServiceDTO[]> callback);
+
+    void testFileStorageServiceProperties(String serviceName, AsyncCallback<PropertyErrors> callback);
+
+    void setActiveFileStorageService(String serviceName, AsyncCallback<PropertyErrors> callback);
+
+    void getActiveFileStorageServiceName(AsyncCallback<String> callback); 
 
 }

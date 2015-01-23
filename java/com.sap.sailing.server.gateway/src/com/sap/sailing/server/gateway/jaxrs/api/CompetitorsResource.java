@@ -124,7 +124,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                         .entity("Image is larger than " + MAX_SIZE_IN_MB + "MB").build());
             }
 
-            imageUri = getService().getFileStorageService().storeFile(uploadedInputStream, fileName, sizeInBytes);
+            imageUri = getService().getActiveFileStorageService().storeFile(uploadedInputStream, fileName, sizeInBytes);
         } catch (IOException | OperationFailedException | InvalidPropertiesException e) {
             logger.log(Level.WARNING, "Could not store competitor image", e);
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)

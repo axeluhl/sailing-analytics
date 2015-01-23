@@ -1,4 +1,4 @@
-package com.sap.sse.filestorage.ui.shared;
+package com.sap.sse.filestorage.dto;
 
 import java.io.Serializable;
 

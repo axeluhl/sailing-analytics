@@ -92,7 +92,8 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
 
     private URI getUri(String key) {
         try {
-            // FIXME: region is missing s3-... see: http://stackoverflow.com/questions/10975475/amazon-s3-upload-file-and-get-url
+            // FIXME: region is missing s3-... see:
+            // http://stackoverflow.com/questions/10975475/amazon-s3-upload-file-and-get-url
             return new URI(retrievalProtocol, baseUrl, "/" + bucketName.getValue() + "/" + key, null);
         } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "Could not create URI for uploaded file with key " + key, e);
@@ -130,6 +131,7 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
         }
         logger.info("Removed file " + uri);
     }
+
     @Override
     public Property[] getProperties() {
         return new Property[] { accessId, accessKey, bucketName };
@@ -163,12 +165,13 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
             s3.doesBucketExist(bucketName.getValue());
         } catch (Exception e) {
             throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket", e,
-                    new Pair<>(accessId, "seems to be invalid"), new Pair<>(accessKey, "seems to be invalid"));
+                    new Pair<Property, String>(accessId, "seems to be invalid"), new Pair<Property, String>(accessKey,
+                            "seems to be invalid"));
         }
 
         // test if bucket exists
         if (!s3.doesBucketExist(bucketName.getValue())) {
-            throw new InvalidPropertiesException("invalid bucket", new Pair<>(bucketName,
+            throw new InvalidPropertiesException("invalid bucket", new Pair<Property, String>(bucketName,
                     "bucket does not exist"));
         }
     }

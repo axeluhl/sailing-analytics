@@ -10,22 +10,26 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
  */
 public interface FileStorageManagementService {
     FileStorageService[] getAvailableFileStorageServices();
-    
+
     FileStorageService getFileStorageService(String name);
 
     /**
-     * Sets the property of the service, and also stores the property value so that it can be restored
-     * after a server restart.
-     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
-     * @throws IllegalArgumentException if the property with name {@code propertyName} doesn't exist for the service
+     * Sets the property of the service, and also stores the property value so that it can be restored after a server
+     * restart.
+     * 
+     * @throws NoCorrespondingServiceRegisteredException
+     *             service may have disappeared from registry in the meantime
+     * @throws IllegalArgumentException
+     *             if the property with name {@code propertyName} doesn't exist for the service
      */
     void setFileStorageServiceProperty(String serviceName, String propertyName, String propertyValue)
             throws NoCorrespondingServiceRegisteredException, IllegalArgumentException;
-    
+
     /**
-     * @return may be {@code null} if no service has been selected so far.
+     * @throws NoCorrespondingServiceRegisteredException
+     *             if no service has been selected so far.
      */
-    FileStorageService getActiveFileStorageService();
+    FileStorageService getActiveFileStorageService() throws NoCorrespondingServiceRegisteredException;
 
     /**
      * @throws InvalidPropertiesException

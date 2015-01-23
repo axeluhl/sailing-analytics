@@ -49,7 +49,7 @@ public class TeamImageTest extends AbstractJaxRsApiTest {
         super.setUp();
         racingEventService = spy(racingEventService);
         storageService = AmazonS3TestSupport.createService();
-        doReturn(storageService).when(racingEventService).getFileStorageService();
+        doReturn(storageService).when(racingEventService).getActiveFileStorageService();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(
                 nationality), null, null)), null);
         DynamicBoat boat = new BoatImpl(null, new BoatClassImpl(boatClassName, false), sailID);

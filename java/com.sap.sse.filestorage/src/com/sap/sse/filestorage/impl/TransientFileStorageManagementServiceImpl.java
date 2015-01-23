@@ -21,6 +21,9 @@ public class TransientFileStorageManagementServiceImpl implements FileStorageMan
 
     @Override
     public FileStorageService getActiveFileStorageService() {
+        if (active == null) {
+            throw new NoCorrespondingServiceRegisteredException();
+        }
         return active;
     }
 

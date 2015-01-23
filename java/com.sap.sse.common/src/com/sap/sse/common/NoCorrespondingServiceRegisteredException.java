@@ -7,7 +7,7 @@ public class NoCorrespondingServiceRegisteredException extends RuntimeException 
     public String serviceInterface;
     private static final long serialVersionUID = -358955216089477585L;
     
-    protected NoCorrespondingServiceRegisteredException() {}
+    public NoCorrespondingServiceRegisteredException() {}
 
     public NoCorrespondingServiceRegisteredException(String message, String type, String serviceInterface) {
         super(message);

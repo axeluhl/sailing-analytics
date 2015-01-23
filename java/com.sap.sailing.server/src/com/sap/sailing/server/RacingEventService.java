@@ -64,6 +64,7 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -71,6 +72,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
+import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
@@ -577,7 +579,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * Get the currently configured {@link FileStorageService}.
-     * @return may be {@code null} if no service is correctly configured.
+     * @throws NoCorrespondingServiceRegisteredException if no service has been activated
      */
-    FileStorageService getFileStorageService();
+    FileStorageService getActiveFileStorageService() throws NoCorrespondingServiceRegisteredException;
+    
+    FileStorageManagementService getFileStorageManagementService();
 }
