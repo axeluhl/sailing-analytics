@@ -24,12 +24,13 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.FileStoragePropertyDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
 import com.sap.sailing.gwt.ui.shared.FileStoragePropertyErrors;
+import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class FileStoragePanel extends FlowPanel {
@@ -65,6 +66,8 @@ public class FileStoragePanel extends FlowPanel {
         add(activeServicePanel);
         
         CaptionPanel editServicePanel = new CaptionPanel(stringMessages.edit());
+        VerticalPanel editServicePanelContent = new VerticalPanel();
+        editServicePanel.add(editServicePanelContent);
         servicesListBox = new ListBox();
         servicesListBox.addChangeHandler(new ChangeHandler() {
             @Override
@@ -72,10 +75,10 @@ public class FileStoragePanel extends FlowPanel {
                 onServiceSelectionChanged();
             }
         });
-        editServicePanel.add(servicesListBox);
+        editServicePanelContent.add(servicesListBox);
         
         serviceDescriptionLabel = new Label();
-        editServicePanel.add(serviceDescriptionLabel);
+        editServicePanelContent.add(serviceDescriptionLabel);
 
         propertiesTable = new CellTable<>();
         ListDataProvider<FileStoragePropertyDTO> propertiesListDataProvider = new ListDataProvider<>(properties);
@@ -120,7 +123,7 @@ public class FileStoragePanel extends FlowPanel {
         };
         propertiesTable.addColumn(errorColumn, stringMessages.error());
         
-        editServicePanel.add(propertiesTable);
+        editServicePanelContent.add(propertiesTable);
         
         HorizontalPanel buttonsPanel = new HorizontalPanel();
         
@@ -142,7 +145,7 @@ public class FileStoragePanel extends FlowPanel {
         });
         buttonsPanel.add(setAsActiveServiceButton);
         
-        editServicePanel.add(buttonsPanel);
+        editServicePanelContent.add(buttonsPanel);
         
         add(editServicePanel);
     }
