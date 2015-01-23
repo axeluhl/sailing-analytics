@@ -35,6 +35,7 @@ import com.sap.sse.filestorage.Property;
  *
  */
 public class AmazonS3FileStorageServiceImpl implements FileStorageService {
+    public static final String NAME = "Amazon S3";
     private static final Logger logger = Logger.getLogger(AmazonS3FileStorageServiceImpl.class.getName());
 
     private static final String baseUrl = "s3.amazonaws.com";
@@ -144,7 +145,7 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public String getName() {
-        return "Amazon S3";
+        return NAME;
     }
 
     @Override

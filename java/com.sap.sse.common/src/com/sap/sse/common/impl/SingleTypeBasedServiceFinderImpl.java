@@ -1,5 +1,8 @@
 package com.sap.sse.common.impl;
 
+import java.util.Collections;
+import java.util.Set;
+
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
@@ -36,5 +39,9 @@ TypeBasedServiceFinder<ServiceType> {
     public void setFallbackService(ServiceType fallback) {
         this.fallback = fallback;
     }
-
+    
+    @Override
+    public Set<ServiceType> findAllServices() {
+        return Collections.singleton(service);
+    }
 }

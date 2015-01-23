@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import com.sap.sse.common.TypeBasedServiceFinder;
+
 /**
  * Service for storing files. The interface is intentionally agnostic of the underlying implementation, which may be
  * provided e.g. by using Amazon's S3 or simply saving the files to a statically reachable directory on one of our
  * servers. Implementations of this service are announced via the OSGi service registry. They should provide their name
- * as the OSGi property "name";
+ * as the OSGi property {@link TypeBasedServiceFinder#TYPE type};
  * 
  * TODO The storage service to use should be configured via the AdminConsole. Upon auto-discovering the available
  * services, the AdminConsole should allow to edit properties for each service (e.g. access credentials for AWS S3). We
@@ -34,6 +36,8 @@ public interface FileStorageService {
     Property[] getProperties();
 
     /**
+     * Should not be called directly, but through {@link FileStorageManagementService#setFileStorageServiceProperty}
+     * as this deals with storing the new values.
      * @throws IllegalArgumentException
      *             if {@code name} is not a valid property name
      */

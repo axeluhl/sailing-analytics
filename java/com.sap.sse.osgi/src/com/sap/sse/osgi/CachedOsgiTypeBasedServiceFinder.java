@@ -1,7 +1,9 @@
 package com.sap.sse.osgi;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -70,5 +72,10 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
     @Override
     public void setFallbackService(ServiceT fallback) {
         this.fallback = fallback;
+    }
+
+    @Override
+    public Set<ServiceT> findAllServices() {
+        return new HashSet<ServiceT>(services.values());
     }
 }

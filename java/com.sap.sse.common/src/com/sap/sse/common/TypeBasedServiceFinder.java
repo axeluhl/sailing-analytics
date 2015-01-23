@@ -1,5 +1,7 @@
 package com.sap.sse.common;
 
+import java.util.Set;
+
 
 /**
  * @author Fredrik Teschke
@@ -16,6 +18,8 @@ public interface TypeBasedServiceFinder<ServiceType> {
      * @throws NoCorrespondingServiceRegisteredException Thrown, if no service is registered for this type.
      */
     ServiceType findService(String type) throws NoCorrespondingServiceRegisteredException;
+
+    Set<ServiceType> findAllServices();
     
     /**
      * Sets a fallback service (optional), that is used if no service is registered for a {@code type}.
