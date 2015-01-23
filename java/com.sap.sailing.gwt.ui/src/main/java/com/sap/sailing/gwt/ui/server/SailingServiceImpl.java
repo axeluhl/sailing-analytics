@@ -4532,9 +4532,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     				team, boat));
     	}
     	
+    	Competitor oldC = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+    	        competitor.getIdAsString());
         return getBaseDomainFactory().convertToCompetitorDTO(
                 getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
-                competitor.getColor(), competitor.getSailID(), nationality)));
+                competitor.getColor(), competitor.getSailID(), nationality, oldC.getTeam().getImage())));
     }
 
     @Override

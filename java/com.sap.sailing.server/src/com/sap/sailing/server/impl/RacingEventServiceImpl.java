@@ -40,6 +40,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -200,6 +201,7 @@ import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -459,7 +461,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor
-                        .getColor(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality()));
+                        .getColor(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
+                        competitor.getTeam().getImage()));
             }
         });
         this.windStore = windStore;
@@ -2980,5 +2983,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public boolean hasSentOperationToMaster(OperationWithResult<RacingEventService, ?> operation) {
         return this.operationsSentToMasterForReplication.remove(operation);
+    }
+    
+    @Override
+    public FileStorageService getFileStorageService() {
+        //TODO make this configurable in the AdminConsole
+        //when stopping context, also unget existing service references
+        ServiceReference<FileStorageService> ref = bundleContext.getServiceReference(FileStorageService.class);
+        return bundleContext.getService(ref);
     }
 }

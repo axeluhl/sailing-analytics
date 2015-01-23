@@ -71,6 +71,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
 /**
@@ -574,4 +575,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
 
+    /**
+     * Get the currently configured {@link FileStorageService}.
+     */
+    FileStorageService getFileStorageService();
 }
