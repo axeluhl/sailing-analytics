@@ -29,24 +29,26 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.server.gateway.jaxrs.api.TeamResource;
 import com.sap.sse.filestorage.FileStorageService;
-import com.sap.sse.filestorage.impl.AmazonS3FileStorageServiceImpl;
+import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
-public class TeamResourceTest extends AbstractJaxRsApiTest {
-    private final String name = "Heiko KRÖGER";
-    private final String id = "af855a56-9726-4a9c-a77e-da955bd289be";
-    private final String boatClassName = "49er";
-    private final String sailID = "GER 1";
-    private final String nationality = "GER";
-    private final String teamImageFile = "Bundesliga2014_Regatta6_eventteaser.jpg";
+public class TeamResourceTest extends AbstractJaxRsApiTest {    
+    private static final String name = "Heiko KRÖGER";
+    private static final String id = "af855a56-9726-4a9c-a77e-da955bd289be";
+    private static final String boatClassName = "49er";
+    private static final String sailID = "GER 1";
+    private static final String nationality = "GER";
+    private static final String teamImageFile = "Bundesliga2014_Regatta6_eventteaser.jpg";
     
-    private final FileStorageService storageService = new AmazonS3FileStorageServiceImpl();
+    private FileStorageService storageService;
 
-    @Override
     @Before
-    public void setUp() {
+    public void setUpSubClass() throws InvalidPropertiesException {
         super.setUp();
         racingEventService = spy(racingEventService);
+        storageService = AmazonS3TestSupport.createService();
         doReturn(storageService).when(racingEventService).getFileStorageService();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(
                 nationality), null, null)), null);
@@ -55,7 +57,8 @@ public class TeamResourceTest extends AbstractJaxRsApiTest {
     }
 
     @Test
-    public void storeAndRemoveTeamImage() throws URISyntaxException, ParseException, MalformedURLException, IOException {
+    public void storeAndRemoveTeamImage() throws URISyntaxException, ParseException, MalformedURLException,
+            IOException, OperationFailedException, InvalidPropertiesException {
         //set team image
         TeamResource r = spyResource(new TeamResource());
         URL fileUrl = getClass().getResource("/" + teamImageFile);

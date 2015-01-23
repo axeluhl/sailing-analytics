@@ -18,6 +18,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
@@ -40,10 +41,12 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
     private static final String retrievalProtocol = "http";
     // private static final String bucketName = "ftes-sap-sailing";
 
-    private final PropertyImpl accessId = new PropertyImpl("accessId", true, "Access ID");
-    private final PropertyImpl accessKey = new PropertyImpl("accessKey", true, "Secret Access Key");
+    private final PropertyImpl accessId = new PropertyImpl("accessId", false,
+            "Access ID (leave blank to use ~/.aws/credentials instead)");
+    private final PropertyImpl accessKey = new PropertyImpl("accessKey", false,
+            "Secret Access Key (leave blank to use ~/.aws/credentials instead)");
     private final PropertyImpl bucketName = new PropertyImpl("bucketName", true,
-            "Name of Bucket to use (has to already exist)");
+            "Name of Bucket to use (has to already exist, and user needs sufficient permissions)");
     private final Map<String, PropertyImpl> properties = new HashMap<>();
 
     public AmazonS3FileStorageServiceImpl() {
@@ -56,36 +59,24 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    private void testCredentials(AWSCredentials credentials) throws Exception {
-        AmazonS3Client s3 = new AmazonS3Client(credentials);
-        s3.getS3AccountOwner(); // might throw exception
-    }
-
     private AmazonS3Client createS3Client() throws InvalidPropertiesException {
-        AWSCredentials credentials = null;
+        AWSCredentials creds;
 
         // first try to use properties
         if (accessId.getValue() != null && accessKey.getValue() != null) {
-            credentials = new BasicAWSCredentials(accessId.getValue(), accessKey.getValue());
+            creds = new BasicAWSCredentials(accessId.getValue(), accessKey.getValue());
 
+        } else {
+            // if properties are empty, read credentials from ~/.aws/credentials
             try {
-                testCredentials(credentials);
-                return new AmazonS3Client(credentials);
+                creds = new ProfileCredentialsProvider().getCredentials();
             } catch (Exception e) {
-                throw new InvalidPropertiesException("Access ID and secret key and ID seem to be invalid", e);
+                throw new InvalidPropertiesException(
+                        "credentials in ~/.aws/credentials seem to be invalid (tried this as fallback because properties were empty)",
+                        e);
             }
         }
-
-        // if properties are empty, read credentials from ~/.aws/credentials
-        try {
-            credentials = new ProfileCredentialsProvider().getCredentials();
-            testCredentials(credentials);
-            return new AmazonS3Client(credentials);
-        } catch (Exception e) {
-            throw new InvalidPropertiesException(
-                    "Credentials in ~/.aws/credentials seem to be invalid (tried this as fallback because properties were empty)",
-                    e);
-        }
+        return new AmazonS3Client(creds);
     }
 
     private static String getKey(String originalFileName) {
@@ -163,6 +154,21 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public void testProperties() throws InvalidPropertiesException {
-        createS3Client();
+        AmazonS3Client s3 = createS3Client();
+
+        // test if credentials are valid
+        // TODO seems to even work if credentials are not valid if bucket is publicly visible
+        try {
+            s3.doesBucketExist(bucketName.getValue());
+        } catch (Exception e) {
+            throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket", e,
+                    new Pair<>(accessId, "seems to be invalid"), new Pair<>(accessKey, "seems to be invalid"));
+        }
+
+        // test if bucket exists
+        if (!s3.doesBucketExist(bucketName.getValue())) {
+            throw new InvalidPropertiesException("invalid bucket", new Pair<>(bucketName,
+                    "bucket does not exist"));
+        }
     }
 }

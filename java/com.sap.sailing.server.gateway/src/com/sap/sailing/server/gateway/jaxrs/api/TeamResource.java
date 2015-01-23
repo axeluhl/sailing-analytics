@@ -28,6 +28,8 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
+import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.OperationFailedException;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
@@ -85,7 +87,7 @@ public class TeamResource extends AbstractSailingServerResource {
             String fileName = fileDetails.getFileName();
             long sizeInBytes = fileDetails.getSize();
             imageUri = getService().getFileStorageService().storeFile(uploadedInputStream, fileName, sizeInBytes);
-        } catch (IOException e) {
+        } catch (IOException | OperationFailedException | InvalidPropertiesException e) {
             logger.log(Level.WARNING, "Could not store competitor image", e);
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Could not store competitor image").type(MediaType.TEXT_PLAIN).build());

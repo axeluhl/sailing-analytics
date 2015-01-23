@@ -17,13 +17,15 @@ public class InvalidPropertiesException extends Exception {
         super(message, cause);
     }
 
+    @SafeVarargs
     public InvalidPropertiesException(String message,
-            @SuppressWarnings("unchecked") Pair<Property, String>... perPropertyMessages) {
+            Pair<Property, String>... perPropertyMessages) {
         this(message, null, perPropertyMessages);
     }
 
+    @SafeVarargs
     public InvalidPropertiesException(String message, Throwable cause,
-            @SuppressWarnings("unchecked") Pair<Property, String>... perPropertyMessages) {
+           Pair<Property, String>... perPropertyMessages) {
         super(message, cause);
         for (Pair<Property, String> pair : perPropertyMessages) {
             this.perPropertyMessages.put(pair.getA(), pair.getB());
