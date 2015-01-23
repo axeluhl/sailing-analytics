@@ -577,6 +577,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * Get the currently configured {@link FileStorageService}.
+     * @return may be {@code null} if no service is correctly configured.
      */
     FileStorageService getFileStorageService();
 }
