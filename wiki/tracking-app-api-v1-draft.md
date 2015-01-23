@@ -234,15 +234,16 @@ Allows to retrieve team information for the team of a certain competitor
 
 Set the team image of a certain competitor
 
-**Path:** ``competitors/{competitor-id}/image``
+**Path:** ``competitors/{competitor-id}/team/image``
 
 **Verb:** ``POST``
 
 Binary data (not multipart) with ``Content-Type`` of ``image/jpeg`` or ``image/png``
+
 e.g.
 ```
 $ curl -H "Content-Type:image/jpeg" --data-binary @<path-to-jpeg> \
-   http://127.0.0.1:8888/sailingserver/api/v1/competitors/<competitor-id>/image
+   http://127.0.0.1:8888/sailingserver/api/v1/competitors/<competitor-id>/team/image
 ```
 
 **Response:**
