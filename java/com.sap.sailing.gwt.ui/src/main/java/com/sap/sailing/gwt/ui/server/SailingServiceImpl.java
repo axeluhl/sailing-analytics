@@ -276,6 +276,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
+import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrors;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
@@ -305,8 +307,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
-import com.sap.sailing.gwt.ui.shared.FileStoragePropertyErrors;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
@@ -5426,6 +5426,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private FileStorageService getFileStorageService(String name) {
+        if (name == null || name.equals("")) {
+            return null;
+        }
         return getService().getFileStorageManagementService().getFileStorageService(name);
     }
 
@@ -5441,15 +5444,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void setFileStorageServiceProperties(String serviceName, Map<String, String> properties) {
         for (Entry<String, String> p : properties.entrySet()) {
-            getService().getFileStorageManagementService()
-                .setFileStorageServiceProperty(serviceName, p.getKey(), p.getValue());
+            try {
+                getService().getFileStorageManagementService()
+                    .setFileStorageServiceProperty(serviceName, p.getKey(), p.getValue());
+            } catch (NoCorrespondingServiceRegisteredException | IllegalArgumentException e) {
+                //ignore, doing refresh afterwards anyways
+            }
         }
     }
 
     @Override
-    public FileStoragePropertyErrors testFileStorageServiceProperties(String serviceName) {
+    public FileStorageServicePropertyErrors testFileStorageServiceProperties(String serviceName) {
         try {
-            getFileStorageService(serviceName).testProperties();
+            FileStorageService service = getFileStorageService(serviceName);
+            if (service != null) {
+                service.testProperties();
+            }
         } catch (InvalidPropertiesException e) {
             return FileStorageServiceDTOUtils.convert(e);
         }
@@ -5457,17 +5467,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public FileStoragePropertyErrors setActiveFileStorageService(String serviceName) {
-        try {
-            getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
-        } catch (InvalidPropertiesException e) {
-            return FileStorageServiceDTOUtils.convert(e);
-        }
-        return null;
+    public void setActiveFileStorageService(String serviceName) {
+        getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
     }
 
     @Override
     public String getActiveFileStorageServiceName() {
-        return getService().getFileStorageManagementService().getActiveFileStorageService().getName();
+        try {
+            return getService().getFileStorageManagementService().getActiveFileStorageService().getName();
+        } catch (NoCorrespondingServiceRegisteredException e) {
+            return null;
+        }
     }
 }

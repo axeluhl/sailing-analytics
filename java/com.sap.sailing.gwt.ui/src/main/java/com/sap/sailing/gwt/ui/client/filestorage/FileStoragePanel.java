@@ -28,8 +28,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.FileStoragePropertyDTO;
-import com.sap.sailing.gwt.ui.shared.FileStoragePropertyErrors;
+import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyDTO;
+import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrors;
 import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
@@ -39,12 +39,13 @@ public class FileStoragePanel extends FlowPanel {
 
     private final Label activeServiceLabel;
     private final ListBox servicesListBox;
-    private CellTable<FileStoragePropertyDTO> propertiesTable;
+    private CellTable<FileStorageServicePropertyDTO> propertiesTable;
     private final Label serviceDescriptionLabel;
 
-    private final List<FileStoragePropertyDTO> properties = new ArrayList<>();
+    private final List<FileStorageServicePropertyDTO> properties;
     private final Map<String, FileStorageServiceDTO> availableServices = new HashMap<>();
-    private final Map<FileStoragePropertyDTO, String> perPropertyErros = new HashMap<>();
+    private final Map<FileStorageServicePropertyDTO, String> perPropertyErrors = new HashMap<>();
+    private final ListDataProvider<FileStorageServicePropertyDTO> propertiesListDataProvider;
 
     public FileStoragePanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
@@ -81,46 +82,48 @@ public class FileStoragePanel extends FlowPanel {
         editServicePanelContent.add(serviceDescriptionLabel);
 
         propertiesTable = new CellTable<>();
-        ListDataProvider<FileStoragePropertyDTO> propertiesListDataProvider = new ListDataProvider<>(properties);
+        propertiesListDataProvider = new ListDataProvider<>(new ArrayList<FileStorageServicePropertyDTO>());
+        properties = propertiesListDataProvider.getList();
         propertiesListDataProvider.addDataDisplay(propertiesTable);
 
-        TextColumn<FileStoragePropertyDTO> nameColumn = new TextColumn<FileStoragePropertyDTO>() {
+        TextColumn<FileStorageServicePropertyDTO> nameColumn = new TextColumn<FileStorageServicePropertyDTO>() {
             @Override
-            public String getValue(FileStoragePropertyDTO p) {
+            public String getValue(FileStorageServicePropertyDTO p) {
                 return p.name;
             }
         };
         propertiesTable.addColumn(nameColumn, stringMessages.name());
 
-        Column<FileStoragePropertyDTO, String> inputColumn = new Column<FileStoragePropertyDTO, String>(new TextInputCell()) {
+        Column<FileStorageServicePropertyDTO, String> inputColumn = new Column<FileStorageServicePropertyDTO, String>(new TextInputCell()) {
             @Override
-            public String getValue(FileStoragePropertyDTO object) {
+            public String getValue(FileStorageServicePropertyDTO object) {
                 return object.value;
             }
         };
-        inputColumn.setFieldUpdater(new FieldUpdater<FileStoragePropertyDTO, String>() {
+        inputColumn.setFieldUpdater(new FieldUpdater<FileStorageServicePropertyDTO, String>() {
             @Override
-            public void update(int index, FileStoragePropertyDTO object, String value) {
+            public void update(int index, FileStorageServicePropertyDTO object, String value) {
                 object.value = value;
             }
         });
         propertiesTable.addColumn(inputColumn, stringMessages.value());
 
-        TextColumn<FileStoragePropertyDTO> descriptionColumn = new TextColumn<FileStoragePropertyDTO>() {
+        TextColumn<FileStorageServicePropertyDTO> descriptionColumn = new TextColumn<FileStorageServicePropertyDTO>() {
             @Override
-            public String getValue(FileStoragePropertyDTO p) {
+            public String getValue(FileStorageServicePropertyDTO p) {
                 return p.description;
             }
         };
         propertiesTable.addColumn(descriptionColumn, stringMessages.description());
 
-        TextColumn<FileStoragePropertyDTO> errorColumn = new TextColumn<FileStoragePropertyDTO>() {
+        TextColumn<FileStorageServicePropertyDTO> errorColumn = new TextColumn<FileStorageServicePropertyDTO>() {
             @Override
-            public String getValue(FileStoragePropertyDTO p) {
-                String error = perPropertyErros.get(p);
+            public String getValue(FileStorageServicePropertyDTO p) {
+                String error = perPropertyErrors.get(p);
                 return error == null ? "" : error;
             }
         };
+        errorColumn.setCellStyleNames("errorLabel");
         propertiesTable.addColumn(errorColumn, stringMessages.error());
         
         editServicePanelContent.add(propertiesTable);
@@ -137,7 +140,7 @@ public class FileStoragePanel extends FlowPanel {
         buttonsPanel.add(saveAndTestPropertiesButton);
         
         Button setAsActiveServiceButton = new Button(stringMessages.setAsActive());
-        saveAndTestPropertiesButton.addClickHandler(new ClickHandler() {
+        setAsActiveServiceButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 setAsActiveService();
@@ -148,6 +151,8 @@ public class FileStoragePanel extends FlowPanel {
         editServicePanelContent.add(buttonsPanel);
         
         add(editServicePanel);
+        
+        refresh();
     }
 
     private String getSelectedServiceName() {
@@ -156,24 +161,25 @@ public class FileStoragePanel extends FlowPanel {
 
     private void saveAndTestProperties(final Callback<Void, Void> callback) {
         Map<String, String> values = new HashMap<String, String>();
-        for (FileStoragePropertyDTO p : properties) {
+        for (FileStorageServicePropertyDTO p : properties) {
             values.put(p.name, p.value);
         }
-        perPropertyErros.clear();
+        perPropertyErrors.clear();
         sailingService.setFileStorageServiceProperties(getSelectedServiceName(), values, new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 sailingService.testFileStorageServiceProperties(getSelectedServiceName(),
-                        new AsyncCallback<FileStoragePropertyErrors>() {
+                        new AsyncCallback<FileStorageServicePropertyErrors>() {
                             @Override
-                            public void onSuccess(FileStoragePropertyErrors result) {
+                            public void onSuccess(FileStorageServicePropertyErrors result) {
                                 if (result != null) {
-                                    perPropertyErros.putAll(result.perPropertyMessages);
+                                    perPropertyErrors.putAll(result.perPropertyMessages);
+                                } else {
+                                    if (callback != null) {
+                                        callback.onSuccess(null);
+                                    }
                                 }
-                                propertiesTable.redraw();
-                                if (callback != null) {
-                                    callback.onSuccess(null);
-                                }
+                                propertiesListDataProvider.refresh();
                             }
 
                             @Override
@@ -194,9 +200,9 @@ public class FileStoragePanel extends FlowPanel {
         saveAndTestProperties(new Callback<Void, Void>() {
             @Override
             public void onSuccess(Void result) {
-                sailingService.setActiveFileStorageService(getSelectedServiceName(), new AsyncCallback<FileStoragePropertyErrors>() {
+                sailingService.setActiveFileStorageService(getSelectedServiceName(), new AsyncCallback<Void>() {
                     @Override
-                    public void onSuccess(FileStoragePropertyErrors result) {
+                    public void onSuccess(Void result) {
                         refresh();
                     }
                     
@@ -217,7 +223,7 @@ public class FileStoragePanel extends FlowPanel {
 
     private void onServiceSelectionChanged() {
         properties.clear();
-        perPropertyErros.clear();
+        perPropertyErrors.clear();
         serviceDescriptionLabel.setText("");
         FileStorageServiceDTO selected = availableServices.get(getSelectedServiceName());
         if (selected == null) {

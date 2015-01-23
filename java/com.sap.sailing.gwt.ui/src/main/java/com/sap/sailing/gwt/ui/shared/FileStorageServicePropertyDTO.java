@@ -2,20 +2,22 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.io.Serializable;
 
-public class FileStorageServiceDTO implements Serializable {
-    private static final long serialVersionUID = 6101940297792100418L;
+public class FileStorageServicePropertyDTO implements Serializable {
+    private static final long serialVersionUID = -2721807793068803143L;
+    public boolean isRequired;
     public String name;
+    public String value;
     public String description;
-    public FileStorageServicePropertyDTO[] properties;
 
     // for GWT
-    FileStorageServiceDTO() {
+    FileStorageServicePropertyDTO() {
     }
 
-    public FileStorageServiceDTO(String name, String description, FileStorageServicePropertyDTO... properties) {
+    public FileStorageServicePropertyDTO(boolean isRequired, String name, String value, String description) {
+        this.isRequired = isRequired;
         this.name = name;
+        this.value = value;
         this.description = description;
-        this.properties = properties;
     }
 
     @Override
@@ -34,12 +36,12 @@ public class FileStorageServiceDTO implements Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        FileStorageServiceDTO other = (FileStorageServiceDTO) obj;
+        FileStorageServicePropertyDTO other = (FileStorageServicePropertyDTO) obj;
         if (name == null) {
             if (other.name != null)
                 return false;
         } else if (!name.equals(other.name))
             return false;
         return true;
-    }    
+    }
 }

@@ -31,10 +31,5 @@ public interface FileStorageManagementService {
      */
     FileStorageService getActiveFileStorageService() throws NoCorrespondingServiceRegisteredException;
 
-    /**
-     * @throws InvalidPropertiesException
-     *             if the service properties are {@link FileStorageService#testProperties() invalid}. Then the old
-     *             active service (if any) remains active.
-     */
-    void setActiveFileStorageService(FileStorageService service) throws InvalidPropertiesException;
+    void setActiveFileStorageService(FileStorageService service);
 }

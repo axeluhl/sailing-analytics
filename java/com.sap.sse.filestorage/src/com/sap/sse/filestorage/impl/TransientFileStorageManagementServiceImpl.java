@@ -6,7 +6,6 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
-import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 
 public class TransientFileStorageManagementServiceImpl implements FileStorageManagementService {
@@ -28,7 +27,7 @@ public class TransientFileStorageManagementServiceImpl implements FileStorageMan
     }
 
     @Override
-    public void setActiveFileStorageService(FileStorageService service) throws InvalidPropertiesException {
+    public void setActiveFileStorageService(FileStorageService service) {
         active = service;
     }
 

@@ -56,7 +56,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
-import com.sap.sailing.gwt.ui.shared.FileStoragePropertyErrors;
+import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrors;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
@@ -581,15 +581,13 @@ public interface SailingService extends RemoteService {
 
     /**
      * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
-     * @return only a service with valid properties can be selected for usage
      */
-    FileStoragePropertyErrors testFileStorageServiceProperties(String serviceName) throws NoCorrespondingServiceRegisteredException;
+    FileStorageServicePropertyErrors testFileStorageServiceProperties(String serviceName) throws NoCorrespondingServiceRegisteredException;
 
     /**
      * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
-     * @return only a service with valid properties can be selected for usage
      */
-    FileStoragePropertyErrors setActiveFileStorageService(String serviceName) throws NoCorrespondingServiceRegisteredException;
+    void setActiveFileStorageService(String serviceName) throws NoCorrespondingServiceRegisteredException;
 
     /**
      * @return may be {@code null}
