@@ -305,6 +305,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
+import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
+import com.sap.sailing.gwt.ui.shared.FileStoragePropertyErrors;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
@@ -421,9 +423,6 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
-import com.sap.sse.filestorage.dto.FileStorageServiceDTO;
-import com.sap.sse.filestorage.dto.PropertyErrors;
-import com.sap.sse.filestorage.impl.FileStorageServiceDTOUtils;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -5448,7 +5447,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public PropertyErrors testFileStorageServiceProperties(String serviceName) {
+    public FileStoragePropertyErrors testFileStorageServiceProperties(String serviceName) {
         try {
             getFileStorageService(serviceName).testProperties();
         } catch (InvalidPropertiesException e) {
@@ -5458,7 +5457,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public PropertyErrors setActiveFileStorageService(String serviceName) {
+    public FileStoragePropertyErrors setActiveFileStorageService(String serviceName) {
         try {
             getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
         } catch (InvalidPropertiesException e) {

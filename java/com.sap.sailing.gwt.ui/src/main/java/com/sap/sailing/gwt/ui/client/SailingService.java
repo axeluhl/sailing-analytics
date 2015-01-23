@@ -55,6 +55,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
+import com.sap.sailing.gwt.ui.shared.FileStoragePropertyErrors;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
@@ -88,8 +90,6 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
-import com.sap.sse.filestorage.dto.FileStorageServiceDTO;
-import com.sap.sse.filestorage.dto.PropertyErrors;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
@@ -583,13 +583,13 @@ public interface SailingService extends RemoteService {
      * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
      * @return only a service with valid properties can be selected for usage
      */
-    PropertyErrors testFileStorageServiceProperties(String serviceName) throws NoCorrespondingServiceRegisteredException;
+    FileStoragePropertyErrors testFileStorageServiceProperties(String serviceName) throws NoCorrespondingServiceRegisteredException;
 
     /**
      * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
      * @return only a service with valid properties can be selected for usage
      */
-    PropertyErrors setActiveFileStorageService(String serviceName) throws NoCorrespondingServiceRegisteredException;
+    FileStoragePropertyErrors setActiveFileStorageService(String serviceName) throws NoCorrespondingServiceRegisteredException;
 
     /**
      * @return may be {@code null}

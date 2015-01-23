@@ -27,9 +27,9 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.filestorage.dto.FileStorageServiceDTO;
-import com.sap.sse.filestorage.dto.PropertyDTO;
-import com.sap.sse.filestorage.dto.PropertyErrors;
+import com.sap.sailing.gwt.ui.shared.FileStoragePropertyDTO;
+import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
+import com.sap.sailing.gwt.ui.shared.FileStoragePropertyErrors;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class FileStoragePanel extends FlowPanel {
@@ -38,12 +38,12 @@ public class FileStoragePanel extends FlowPanel {
 
     private final Label activeServiceLabel;
     private final ListBox servicesListBox;
-    private CellTable<PropertyDTO> propertiesTable;
+    private CellTable<FileStoragePropertyDTO> propertiesTable;
     private final Label serviceDescriptionLabel;
 
-    private final List<PropertyDTO> properties = new ArrayList<>();
+    private final List<FileStoragePropertyDTO> properties = new ArrayList<>();
     private final Map<String, FileStorageServiceDTO> availableServices = new HashMap<>();
-    private final Map<PropertyDTO, String> perPropertyErros = new HashMap<>();
+    private final Map<FileStoragePropertyDTO, String> perPropertyErros = new HashMap<>();
 
     public FileStoragePanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
@@ -78,42 +78,42 @@ public class FileStoragePanel extends FlowPanel {
         editServicePanel.add(serviceDescriptionLabel);
 
         propertiesTable = new CellTable<>();
-        ListDataProvider<PropertyDTO> propertiesListDataProvider = new ListDataProvider<>(properties);
+        ListDataProvider<FileStoragePropertyDTO> propertiesListDataProvider = new ListDataProvider<>(properties);
         propertiesListDataProvider.addDataDisplay(propertiesTable);
 
-        TextColumn<PropertyDTO> nameColumn = new TextColumn<PropertyDTO>() {
+        TextColumn<FileStoragePropertyDTO> nameColumn = new TextColumn<FileStoragePropertyDTO>() {
             @Override
-            public String getValue(PropertyDTO p) {
+            public String getValue(FileStoragePropertyDTO p) {
                 return p.name;
             }
         };
         propertiesTable.addColumn(nameColumn, stringMessages.name());
 
-        Column<PropertyDTO, String> inputColumn = new Column<PropertyDTO, String>(new TextInputCell()) {
+        Column<FileStoragePropertyDTO, String> inputColumn = new Column<FileStoragePropertyDTO, String>(new TextInputCell()) {
             @Override
-            public String getValue(PropertyDTO object) {
+            public String getValue(FileStoragePropertyDTO object) {
                 return object.value;
             }
         };
-        inputColumn.setFieldUpdater(new FieldUpdater<PropertyDTO, String>() {
+        inputColumn.setFieldUpdater(new FieldUpdater<FileStoragePropertyDTO, String>() {
             @Override
-            public void update(int index, PropertyDTO object, String value) {
+            public void update(int index, FileStoragePropertyDTO object, String value) {
                 object.value = value;
             }
         });
         propertiesTable.addColumn(inputColumn, stringMessages.value());
 
-        TextColumn<PropertyDTO> descriptionColumn = new TextColumn<PropertyDTO>() {
+        TextColumn<FileStoragePropertyDTO> descriptionColumn = new TextColumn<FileStoragePropertyDTO>() {
             @Override
-            public String getValue(PropertyDTO p) {
+            public String getValue(FileStoragePropertyDTO p) {
                 return p.description;
             }
         };
         propertiesTable.addColumn(descriptionColumn, stringMessages.description());
 
-        TextColumn<PropertyDTO> errorColumn = new TextColumn<PropertyDTO>() {
+        TextColumn<FileStoragePropertyDTO> errorColumn = new TextColumn<FileStoragePropertyDTO>() {
             @Override
-            public String getValue(PropertyDTO p) {
+            public String getValue(FileStoragePropertyDTO p) {
                 String error = perPropertyErros.get(p);
                 return error == null ? "" : error;
             }
@@ -153,7 +153,7 @@ public class FileStoragePanel extends FlowPanel {
 
     private void saveAndTestProperties(final Callback<Void, Void> callback) {
         Map<String, String> values = new HashMap<String, String>();
-        for (PropertyDTO p : properties) {
+        for (FileStoragePropertyDTO p : properties) {
             values.put(p.name, p.value);
         }
         perPropertyErros.clear();
@@ -161,9 +161,9 @@ public class FileStoragePanel extends FlowPanel {
             @Override
             public void onSuccess(Void result) {
                 sailingService.testFileStorageServiceProperties(getSelectedServiceName(),
-                        new AsyncCallback<PropertyErrors>() {
+                        new AsyncCallback<FileStoragePropertyErrors>() {
                             @Override
-                            public void onSuccess(PropertyErrors result) {
+                            public void onSuccess(FileStoragePropertyErrors result) {
                                 if (result != null) {
                                     perPropertyErros.putAll(result.perPropertyMessages);
                                 }
@@ -191,9 +191,9 @@ public class FileStoragePanel extends FlowPanel {
         saveAndTestProperties(new Callback<Void, Void>() {
             @Override
             public void onSuccess(Void result) {
-                sailingService.setActiveFileStorageService(getSelectedServiceName(), new AsyncCallback<PropertyErrors>() {
+                sailingService.setActiveFileStorageService(getSelectedServiceName(), new AsyncCallback<FileStoragePropertyErrors>() {
                     @Override
-                    public void onSuccess(PropertyErrors result) {
+                    public void onSuccess(FileStoragePropertyErrors result) {
                         refresh();
                     }
                     
