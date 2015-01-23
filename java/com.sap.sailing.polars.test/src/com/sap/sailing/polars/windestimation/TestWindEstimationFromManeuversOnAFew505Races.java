@@ -111,21 +111,33 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
                 .sorted((c1, c2) -> (int) -Math.signum(getAverageLikelihood(c1, ManeuverType.TACK)
                         - getAverageLikelihood(c2, ManeuverType.TACK))).collect(Collectors.toList());
         // expecting a wind direction that is from around 245deg, +/- 10deg
-        // TODO compute average weighted by the likelihood of being a tack, thereby largely suppressing non-tack maneuvers in cluster
-        assertEquals(245., getWeightedAverageMiddleManeuverCOG(clustersSortedByAverageTackLikelihood.get(0)), 10.);
-        assertEquals(245., getWeightedAverageMiddleManeuverCOG(clustersSortedByAverageTackLikelihood.get(1)), 10.);
+        assertEquals(245., getWeightedAverageMiddleManeuverCOGDeg(clustersSortedByAverageTackLikelihood.get(0), ManeuverType.TACK).getDegrees(), 10.);
+        assertEquals(245., getWeightedAverageMiddleManeuverCOGDeg(clustersSortedByAverageTackLikelihood.get(1), ManeuverType.TACK).getDegrees(), 10.);
     }
 
-    private double getWeightedAverageMiddleManeuverCOG(
-            Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> cluster) {
-        double weightedMiddleCOGDegSum = 0;
+    /**
+     * For a cluster of maneuver classifications, clustered two-dimensionally by middle COG and maneuver angle, computes the
+     * weighted average of the middle COG where as the weight of each maneuver the likelihood that the maneuver was of type
+     * <code>maneuverType</code> is used.
+     * 
+     * @return the weighted average middle COG
+     */
+    private Bearing getWeightedAverageMiddleManeuverCOGDeg(
+            Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> cluster,
+            ManeuverType maneuverType) {
+        ScalableBearing weightedMiddleCOGDegSum = null;
         double weightSum = 0;
         for (ManeuverClassification e : cluster) {
-            final double weight = e.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.TACK).getA();
-            weightedMiddleCOGDegSum += weight * e.getMiddleManeuverCourse().getDegrees();
+            final double weight = e.getLikelihoodAndTWSBasedOnSpeedAndAngle(maneuverType).getA();
+            final ScalableBearing weightedScalableMiddleManeuverCOG = new ScalableBearing(e.getMiddleManeuverCourse()).multiply(weight);
+            if (weightedMiddleCOGDegSum == null) {
+                weightedMiddleCOGDegSum = weightedScalableMiddleManeuverCOG;
+            } else {
+                weightedMiddleCOGDegSum  = weightedMiddleCOGDegSum.add(weightedScalableMiddleManeuverCOG);
+            }
             weightSum += weight;
         }
-        return weightedMiddleCOGDegSum / weightSum;
+        return weightedMiddleCOGDegSum.divide(weightSum);
     }
 
     private double getAverageLikelihood(
