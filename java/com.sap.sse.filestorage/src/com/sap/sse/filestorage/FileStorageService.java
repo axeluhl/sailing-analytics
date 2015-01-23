@@ -22,7 +22,7 @@ public interface FileStorageService {
      * @param originalFileName
      *            may be {@code null}
      */
-    URI storeFile(InputStream is, String originalFileName, long lengthInBytes) throws IOException,
+    URI storeFile(InputStream is, String fileExtension, long lengthInBytes) throws IOException,
             OperationFailedException, InvalidPropertiesException;
 
     /**

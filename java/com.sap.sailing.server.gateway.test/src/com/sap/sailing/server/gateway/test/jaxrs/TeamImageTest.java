@@ -32,7 +32,6 @@ import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
-import com.sun.jersey.core.header.FormDataContentDisposition;
 
 public class TeamImageTest extends AbstractJaxRsApiTest {    
     private static final String name = "Heiko KRÖGER";
@@ -63,12 +62,10 @@ public class TeamImageTest extends AbstractJaxRsApiTest {
         CompetitorsResource r = spyResource(new CompetitorsResource());
         URL fileUrl = getClass().getResource("/" + teamImageFile);
         URI fileUri = new URI(fileUrl.toString());
+        String fileExtension = teamImageFile.substring(teamImageFile.lastIndexOf("."));
         long length = new File(fileUri).length();
         InputStream stream = getClass().getResourceAsStream("/" + teamImageFile);
-
-        FormDataContentDisposition fileDetails = FormDataContentDisposition.name("file").size(length)
-                .fileName(teamImageFile).build();
-        String jsonString = r.setTeamImage(id, stream, fileDetails);
+        String jsonString = r.setTeamImage(id, stream, fileExtension, length);
         
         //now download and compare
         JSONObject json = (JSONObject) JSONValue.parseWithException(jsonString);
