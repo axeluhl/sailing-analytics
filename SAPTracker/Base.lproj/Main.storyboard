@@ -166,7 +166,7 @@
                             <constraint firstItem="OXU-ft-TXZ" firstAttribute="trailing" secondItem="OqX-q3-43s" secondAttribute="trailing" id="0By-UZ-sE4"/>
                             <constraint firstItem="Fp0-61-7he" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" id="4Dn-p7-PiC"/>
                             <constraint firstItem="3y9-Us-aIu" firstAttribute="centerY" secondItem="kh9-bI-dsS" secondAttribute="centerY" id="4Mu-Fa-imb"/>
-                            <constraint firstItem="3y9-Us-aIu" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="281" id="7gO-Cn-hUH"/>
+                            <constraint firstAttribute="centerX" secondItem="3y9-Us-aIu" secondAttribute="centerX" id="53x-0Y-njH"/>
                             <constraint firstItem="OqX-q3-43s" firstAttribute="top" secondItem="Fp0-61-7he" secondAttribute="bottom" constant="8" symbolic="YES" id="B05-JG-PP2"/>
                             <constraint firstItem="npJ-tu-ac3" firstAttribute="trailing" secondItem="OXU-ft-TXZ" secondAttribute="trailing" id="EYo-J3-vux"/>
                             <constraint firstItem="Fp0-61-7he" firstAttribute="centerX" secondItem="OqX-q3-43s" secondAttribute="centerX" id="QEn-dN-lh7"/>
@@ -1260,23 +1260,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9B5-jO-9sa" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1971" y="-1908"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="LIE-ZF-KtR">
-            <objects>
-                <viewController id="zcw-r9-lO8" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="46j-bx-nrS"/>
-                        <viewControllerLayoutGuide type="bottom" id="PBN-Xf-Q2e"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="gLC-lZ-ycY">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="7q2-XP-pBE" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
         </scene>
     </scenes>
     <resources>

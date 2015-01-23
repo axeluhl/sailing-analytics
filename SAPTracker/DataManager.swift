@@ -58,6 +58,19 @@ public class DataManager: NSObject {
     }
     
     // MARK: - public database access
+    func getCheckIn(eventId: String, leaderBoardName: String, competitorId: String)->CheckIn? {
+        let fetchRequest = NSFetchRequest()
+        fetchRequest.entity = NSEntityDescription.entityForName("CheckIn", inManagedObjectContext: self.managedObjectContext!)
+        fetchRequest.predicate = NSPredicate(format: "eventId = %@ AND leaderBoardName = %@ AND competitorId = %@", eventId, leaderBoardName, competitorId)
+        var error: NSError? = nil
+        let results = self.managedObjectContext!.executeFetchRequest(fetchRequest, error: &error)
+        if results!.count == 0 {
+            return nil
+        } else {
+            return results![0] as? CheckIn
+        }
+    }
+
     func newCheckIn()->CheckIn {
         return NSEntityDescription.insertNewObjectForEntityForName("CheckIn", inManagedObjectContext: self.managedObjectContext!) as CheckIn
     }
