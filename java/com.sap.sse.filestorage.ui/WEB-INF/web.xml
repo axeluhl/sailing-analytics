@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+	<!-- Disable directory listing: -->
+	<servlet>
+		<servlet-name>default</servlet-name>
+		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
+		</servlet-class>
+		<init-param>
+			<param-name>dirAllowed</param-name>
+			<param-value>false</param-value>
+		</init-param>
+	</servlet>
+    
+	<servlet>
+		<display-name>File Storage Management Service</display-name>
+		<servlet-name>FileStorageManagementService</servlet-name>
+		<servlet-class>com.sap.sse.filestorage.ui.server.FileStorageManagementServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FileStorageManagementService</servlet-name>
+		<url-pattern>/service/filestoragemanagement</url-pattern>
+	</servlet-mapping>
+</web-app>
