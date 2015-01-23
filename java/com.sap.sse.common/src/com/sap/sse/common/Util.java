@@ -348,4 +348,18 @@ public class Util {
         }
         return join(separator, strings);
     }
+    
+    /**
+     * Returns the first non-<code>null</code> object in <code>objects</code> or <code>null</code>
+     * if no such object exists.
+     */
+    @SafeVarargs
+    public static <T> T getFirstNonNull(T... objects) {
+        for (T t : objects) {
+            if (t != null) {
+                return t;
+            }
+        }
+        return null;
+    }
 }

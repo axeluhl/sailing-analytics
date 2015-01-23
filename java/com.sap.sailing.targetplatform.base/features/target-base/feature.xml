@@ -117,4 +117,18 @@
          version="1.1.2"
          unpack="false"/>
 
+   <plugin
+         id="org.apache.servicemix.bundles.aws-java-sdk"
+         download-size="0"
+         install-size="0"
+         version="1.9.8.1"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.jersey.contribs.jersey-multipart"
+         download-size="0"
+         install-size="0"
+         version="1.17.1"
+         unpack="false"/>
+
 </feature>

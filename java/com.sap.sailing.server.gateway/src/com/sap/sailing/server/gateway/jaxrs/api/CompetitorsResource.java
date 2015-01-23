@@ -1,6 +1,9 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -9,23 +12,24 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.Team;
-import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
@@ -91,40 +95,38 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     }
     
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("{competitor-id}/team/image")
-    public Response setTeamImage(String json, @PathParam("competitor-id") String competitorId) {
-    	Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
-    	TeamImpl team = (TeamImpl) competitor.getTeam();
-    	
-        Object requestBody;
-        JSONObject requestObject;
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces("application/json;charset=UTF-8")
+    @Path("{competitor-id}/image")
+    public String setTeamImage(@PathParam("competitor-id") String competitorId,
+            @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetails) {
+        RacingEventService service = getService();
+        CompetitorStore store = service.getCompetitorStore();
+        Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
+        if (competitor == null) {
+            logger.log(Level.INFO, "Could not find competitor to store image for: " + competitorId);
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity("Could not find competitor with id " + competitorId).type(MediaType.TEXT_PLAIN).build());
+        }
+
+        URI imageUri;
         try {
-            requestBody = JSONValue.parseWithException(json);
-            requestObject = Helpers.toJSONObjectSafe(requestBody);
-        } catch (ParseException | JsonDeserializationException e) {
-            logger.warning(String.format("Exception while parsing post request:\n%s", e.toString()));
-            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
-                    .type(MediaType.TEXT_PLAIN).build();
+            String fileName = fileDetails.getFileName();
+            long sizeInBytes = fileDetails.getSize();
+            imageUri = getService().getFileStorageService().storeFile(uploadedInputStream, fileName, sizeInBytes);
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Could not store competitor image", e);
+            throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity("Could not store competitor image").type(MediaType.TEXT_PLAIN).build());
         }
-        
-        String teamImageURIAsString = (String) requestObject.get(TeamJsonSerializer.FIELD_IMAGE_URI);
-        
-        if (teamImageURIAsString == null){
-        	return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
-                    .type(MediaType.TEXT_PLAIN).build();
-        }
-        
-        URI teamImageURI;
-        try {
-        	teamImageURI = URI.create(teamImageURIAsString);
-        } catch (IllegalArgumentException e){
-        	return Response.status(Status.BAD_REQUEST).entity("Invalid imageURI in JSON request body")
-                    .type(MediaType.TEXT_PLAIN).build();
-        }
-        
-        team.setImage(teamImageURI);
-    	
-        return Response.status(Status.OK).build();
+
+        getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getColor(),
+                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri);
+        logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
+
+        JSONObject result = new JSONObject();
+        result.put(DeviceMappingConstants.JSON_TEAM_IMAGE_URI, imageUri.toString());
+        return result.toString();
     }
 }

@@ -6,11 +6,11 @@ import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.ArrayListNavigableSet;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * Computing {@link #getDistanceTraveled(TimePoint, TimePoint)} is more expensive the longer the track is and the

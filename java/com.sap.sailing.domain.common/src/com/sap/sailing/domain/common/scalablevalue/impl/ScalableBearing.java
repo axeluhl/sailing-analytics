@@ -3,9 +3,10 @@ package com.sap.sailing.domain.common.scalablevalue.impl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
+import com.sap.sse.common.scalablevalue.ScalableValue;
+import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 
-public class ScalableBearing implements ScalableValue<DoublePair, Bearing> {
+public class ScalableBearing implements ScalableValueWithDistance<DoublePair, Bearing> {
     private final double sin;
     private final double cos;
     
@@ -20,13 +21,13 @@ public class ScalableBearing implements ScalableValue<DoublePair, Bearing> {
     }
     
     @Override
-    public ScalableValue<DoublePair, Bearing> multiply(double factor) {
+    public ScalableBearing multiply(double factor) {
         DoublePair pair = getValue();
         return new ScalableBearing(factor*pair.getA(), factor*pair.getB());
     }
 
     @Override
-    public ScalableValue<DoublePair, Bearing> add(ScalableValue<DoublePair, Bearing> t) {
+    public ScalableBearing add(ScalableValue<DoublePair, Bearing> t) {
         DoublePair value = getValue();
         DoublePair tValue = t.getValue();
         return new ScalableBearing(value.getA()+tValue.getA(), value.getB()+tValue.getB());
@@ -56,5 +57,10 @@ public class ScalableBearing implements ScalableValue<DoublePair, Bearing> {
     @Override
     public DoublePair getValue() {
         return new DoublePair(sin, cos);
+    }
+
+    @Override
+    public double getDistance(Bearing other) {
+        return Math.abs(divide(1).getDifferenceTo(other).getDegrees());
     }
 }

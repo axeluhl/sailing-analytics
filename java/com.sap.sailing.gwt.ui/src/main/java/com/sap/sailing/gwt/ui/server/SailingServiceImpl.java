@@ -126,7 +126,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
@@ -408,6 +407,7 @@ import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.BuildVersion;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -465,7 +465,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
 
-    private final com.sap.sailing.domain.common.CountryCodeFactory countryCodeFactory;
+    private final com.sap.sse.common.CountryCodeFactory countryCodeFactory;
 
     private final Executor executor;
     
@@ -516,7 +516,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         .getTracTracDomainFactory());
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
-        countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
+        countryCodeFactory = com.sap.sse.common.CountryCodeFactory.INSTANCE;
         leaderboardDifferenceCacheByIdPair = new LinkedHashMap<com.sap.sse.common.Util.Pair<String, String>, IncrementalLeaderboardDTO>(LEADERBOARD_DIFFERENCE_CACHE_SIZE, 0.75f, /* accessOrder */ true) {
             private static final long serialVersionUID = 3775119859130148488L;
             @Override
@@ -4532,9 +4532,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     				team, boat));
     	}
     	
+    	Competitor oldC = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+    	        competitor.getIdAsString());
         return getBaseDomainFactory().convertToCompetitorDTO(
                 getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
-                competitor.getColor(), competitor.getSailID(), nationality)));
+                competitor.getColor(), competitor.getSailID(), nationality, oldC.getTeam().getImage())));
     }
 
     @Override

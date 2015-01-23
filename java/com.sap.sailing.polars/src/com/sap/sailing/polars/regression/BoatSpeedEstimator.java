@@ -6,8 +6,8 @@ import java.io.Serializable;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.polars.mining.IncrementalRegressionProcessor;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * Supplies incremental arithmetic mean for confidence and speed.

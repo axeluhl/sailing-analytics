@@ -56,6 +56,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -70,6 +71,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
 /**
@@ -573,4 +575,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
 
+    /**
+     * Get the currently configured {@link FileStorageService}.
+     */
+    FileStorageService getFileStorageService();
 }

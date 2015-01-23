@@ -16,6 +16,7 @@
 	<modules>
 		<module>com.sap.sse</module>
 		<module>com.sap.sse.common</module>
+		<module>com.sap.sse.shared.android</module>
 		<module>com.sap.sse.mongodb</module>
 		<module>com.sap.sse.gateway</module>
 		<module>com.sap.sse.gwt</module>
@@ -34,6 +35,8 @@
 		<module>com.sap.sse.replication</module>
 		<module>com.sap.sse.replication.testsupport</module>
 		<module>com.sap.sse.common.test</module>
+		<module>com.sap.sse.filestorage</module>
+		<module>com.sap.sse.filestorage.test</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
@@ -139,7 +142,7 @@
                     If so the IP of the host would be the same for all profiles.
 		-->
         <parameters.common>
-		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest -DspatialWind=true
+		  -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
         </parameters.common>
 		<parameters.vm-settings>
           -ea -Xmx1024m -XX:PermSize=256m -XX:+UseG1GC

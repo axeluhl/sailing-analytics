@@ -116,6 +116,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((fleet == null) ? 0 : fleet.hashCode());
         result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
         result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
+        result = prime * result + ((netPointsUncorrected == null) ? 0 : netPointsUncorrected.hashCode());
         result = prime * result + (netPointsCorrected ? 1231 : 1237);
         result = prime * result + ((race == null) ? 0 : race.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
@@ -181,6 +182,11 @@ public class LeaderboardEntryDTO implements Serializable {
             if (other.netPoints != null)
                 return false;
         } else if (!netPoints.equals(other.netPoints))
+            return false;
+        if (netPointsUncorrected == null) {
+            if (other.netPointsUncorrected != null)
+                return false;
+        } else if (!netPointsUncorrected.equals(other.netPointsUncorrected))
             return false;
         if (netPointsCorrected != other.netPointsCorrected)
             return false;
