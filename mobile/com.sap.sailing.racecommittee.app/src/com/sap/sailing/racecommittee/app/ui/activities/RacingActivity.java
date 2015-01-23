@@ -420,7 +420,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         getFragmentManager()
         .beginTransaction()
         .replace(R.id.racing_view_container,
-                new WelcomeFragment( event, courseArea, preferences.getAuthor()))
+                WelcomeFragment.newInstance(event, courseArea, preferences.getAuthor()))
         .commit();
 
         

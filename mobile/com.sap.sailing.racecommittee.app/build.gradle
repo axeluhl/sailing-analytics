@@ -49,10 +49,6 @@ android {
         }
     }
 
-    lintOptions {
-        abortOnError false
-    }
-
     packagingOptions {
         exclude "LICENSE.txt"
         exclude ".readme"

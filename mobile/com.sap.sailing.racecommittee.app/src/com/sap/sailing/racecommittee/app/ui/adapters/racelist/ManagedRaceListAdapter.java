@@ -204,8 +204,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             RaceState state = race.getRace().getState();
             if (state != null) {
                 if (state.getStartTime() != null) {
-                    race_started.setText(String.format(mResources.getString(R.string.race_started,
-                            format.format(state.getStartTime().asDate()))));
+                    race_started.setText(mResources.getString(R.string.race_started,
+                            format.format(state.getStartTime().asDate())));
                     if (state.getFinishedTime() == null) {
                         time
                                 .setText(getDuration(state.getStartTime().asDate(), Calendar.getInstance().getTime()));
@@ -214,8 +214,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 if (state.getFinishedTime() != null) {
                     time.setVisibility(View.GONE);
                     race_finished.setVisibility(View.VISIBLE);
-                    race_finished.setText(String.format(mResources.getString(R.string.race_finished,
-                            format.format(state.getFinishedTime().asDate()))));
+                    race_finished.setText(mResources.getString(R.string.race_finished,
+                            format.format(state.getFinishedTime().asDate())));
                 }
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
                     race_scheduled.setVisibility(View.GONE);

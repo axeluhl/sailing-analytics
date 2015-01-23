@@ -3,8 +3,8 @@
 
     <string-array name="empty_array" tools:ignore="UnusedResources" />
 
-    <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
-    <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
+    <string name="url_google_geocoder" translatable="false">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
+    <string name="urlpart_google_geocoder_sensor" translatable="false">\?sensor=true</string>
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
     <string name="service_info">SAP Race Committee Service</string>
@@ -238,8 +238,25 @@
     <string name="toggle_group_race_mode_off">No Group Racing</string>
     <string name="toggle_group_race_mode_on">Group Racing</string>
 
-	
-	<string name="welcome">WELCOME</string>
+    <string name="nav_drawer_open" translatable="false">Open Navigation Drawer</string>
+    <string name="nav_drawer_close" translatable="false">Close Navigation Drawer</string>
+
+    <string name="available_races">Available Races</string>
+
+    <string name="race_started">Started %s</string>
+    <string name="race_finished">Finished %s</string>
+    <string name="race_starts">Starts %s</string>
+    <string name="race_unscheduled">Unscheduled</string>
+
+    <string name="race_show_all">show all</string>
+    <string name="race_show_less">show less</string>
+
+    <string name="nav_header" translatable="false">#EVENT#\n#AREA# / #AUTHOR#</string>
+    <string name="races_current">CURRENT RACES</string>
+    <string name="races_all">ALL RACES</string>
+
+    <string name="welcome">WELCOME</string>
     <string name="change">CHANGE</string>
     <string name="loading_events_succeded">Events loaded.</string>
+    <string name="empty"></string>
 </resources>

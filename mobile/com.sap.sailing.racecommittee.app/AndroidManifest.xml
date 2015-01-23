@@ -53,7 +53,6 @@
         </activity>
         <activity android:name=".ui.activities.RacingActivity" />
         <activity android:name=".ui.activities.ResultsCapturingActivity" />
-        <activity android:name=".ui.activities.WindActivity" />
         <activity android:name=".ui.activities.PreferenceActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
@@ -72,7 +71,7 @@
             </intent-filter>
         </service>
         <service
-            android:name="com.sap.sailing.racecommittee.app.services.sending.MessageSendingService"
+            android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.sap.sailing.racecommittee.app.action.sendSavedIntents" />
@@ -84,7 +83,7 @@
                 android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
         </service>
 
-        <receiver android:name="com.sap.sailing.racecommittee.app.services.sending.ConnectivityChangedReceiver" >
+        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
