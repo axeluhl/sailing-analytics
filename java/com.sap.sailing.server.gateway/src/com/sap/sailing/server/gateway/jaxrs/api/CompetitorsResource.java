@@ -100,10 +100,10 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     // example for testing upload:
     // $ curl -v -H "Content-Type:image/jpeg" \
     //     --data-binary @<path-to-local-jpg> \
-    //     http://127.0.0.1:8888/sailingserver/api/v1/competitors/<competitor-id>/image
+    //     http://127.0.0.1:8888/sailingserver/api/v1/competitors/<competitor-id>/team/image
     @POST
     @Consumes({ "image/jpeg", "image/png" })
-    @Path("{competitor-id}/image")
+    @Path("{competitor-id}/team/image")
     public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
             @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) {
 
