@@ -147,6 +147,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         private final Bearing middleManeuverCourse;
         private final Distance maneuverLoss;
         private Pair<Double, SpeedWithBearingWithConfidence<Void>>[] likelihoodAndTWSBasedOnSpeedAndAngleCache;
+        private ScalableBearingAndScalableDouble scalableMiddleManeuverCourseAndManeuverAngleDegCache;
         
         protected ManeuverClassification(Competitor competitor, Maneuver maneuver) {
             super();
@@ -184,6 +185,14 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
         public Bearing getMiddleManeuverCourse() {
             return middleManeuverCourse;
+        }
+        
+        public ScalableBearingAndScalableDouble getScalableMiddleManeuverCourseAndManeuverAngleDeg() {
+            if (scalableMiddleManeuverCourseAndManeuverAngleDegCache == null) {
+                scalableMiddleManeuverCourseAndManeuverAngleDegCache = new ScalableBearingAndScalableDouble(
+                        getMiddleManeuverCourse(), getManeuverAngleDeg());
+            }
+            return scalableMiddleManeuverCourseAndManeuverAngleDegCache;
         }
 
         public SpeedWithBearingWithConfidence<Void> getEstimatedWindSpeedAndBearing(ManeuverType maneuverType) {
@@ -339,7 +348,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         KMeansMappingClusterer<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> clusterer =
                 new KMeansMappingClusterer<>(numberOfClusters,
                         getManeuverClassifications(maneuvers),
-                        (mc)->new ScalableBearingAndScalableDouble(mc.getMiddleManeuverCourse(), mc.getManeuverAngleDeg()), // maps maneuver classification to cluster metric
+                        (mc)->mc.getScalableMiddleManeuverCourseAndManeuverAngleDeg(), // maps maneuver classification to cluster metric
                         // use an evenly distributed set of cluster seeds for clustering wind direction estimations
                         Stream.concat(IntStream.range(0, numberOfClusters/2).mapToObj((i)->
                             new Pair<>(new DegreeBearingImpl(((double) i)*360./(double) numberOfClusters/2), 45.)),

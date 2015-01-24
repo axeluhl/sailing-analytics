@@ -12,7 +12,11 @@ import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
  * Addition} works component wise, and so does {@link #multiply(double) multiplication} and {@link #divide(double)
  * division}. The {@link #getDistance(Pair) distance} is calculated as the Euklidian two-dimensional distance between
  * the two bearing pairs, with "degrees" as conceptual unit. For example, another object of this type that is 2 and 3 degrees
- * apart from this object will have a distance of {@link Math#sqrt(double) Math.sqrt(13)}.
+ * apart from this object will have a distance of {@link Math#sqrt(double) Math.sqrt(13)}.<p>
+ * 
+ * The {@link #getDistance(Pair)} implementation uses {@link ScalableBearing#getApproximateDegreeDistanceTo(Bearing)} on
+ * the scalable bearing part of this object. This is only an approximation but works a lot faster and is still monotonous.
+ * It works well for small angles.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -44,7 +48,7 @@ public class ScalableBearingAndScalableDouble implements
 
     @Override
     public double getDistance(Pair<Bearing, Double> other) {
-        final double b1DiffDeg = b1.divide(1).getDifferenceTo(other.getA()).getDegrees();
+        final double b1DiffDeg = b1.getApproximateDegreeDistanceTo(other.getA());
         final double b2DiffDeg = Math.abs(b2.divide(1)-other.getB());
         return Math.sqrt(b1DiffDeg*b1DiffDeg + b2DiffDeg*b2DiffDeg);
     }
