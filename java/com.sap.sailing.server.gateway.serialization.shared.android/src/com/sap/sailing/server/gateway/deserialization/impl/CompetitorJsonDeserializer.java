@@ -12,11 +12,11 @@ import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
-import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.impl.RGBColor;
 
 public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> {
     protected final CompetitorFactory competitorStore;

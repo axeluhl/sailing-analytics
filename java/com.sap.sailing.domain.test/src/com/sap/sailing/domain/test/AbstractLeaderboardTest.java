@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.Color;
+import com.sap.sse.common.Color;
 
 public abstract class AbstractLeaderboardTest {
     public static CompetitorImpl createCompetitor(String competitorName) {

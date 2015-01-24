@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.common.Color;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.NamedImpl;
 
 /**
