@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.confidence.impl;
 
+import java.util.Iterator;
+
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -13,7 +15,6 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.ScalableWind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
-import com.sap.sse.common.Util;
 
 /**
  * In order to enable the aggregation of {@link Wind} objects whose {@link WindSource}'s {@link WindSourceType} suggests
@@ -37,16 +38,24 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
     @Override
     public WindWithConfidence<RelativeTo> getAverage(
             Iterable<? extends HasConfidenceAndIsScalable<ScalableWind, Wind, RelativeTo>> values, RelativeTo at) {
+        return getAverage(values.iterator(), at);
+    }
+
+    @Override
+    public WindWithConfidence<RelativeTo> getAverage(
+            Iterator<? extends HasConfidenceAndIsScalable<ScalableWind, Wind, RelativeTo>> values, RelativeTo at) {
         boolean atLeastOneFixWasMarkedToUseSpeed = false;
-        if (values == null || Util.isEmpty(values)) {
+        if (values == null || !values.hasNext()) {
             return null;
         } else {
             ScalableWind numerator = null;
             double confidenceSum = 0;
             double speedConfidenceSum = 0;
             double knotSum = 0;
-            for (HasConfidenceAndIsScalable<ScalableWind, Wind, RelativeTo> next : values) {
-                double relativeWeight = (getWeigher() == null ? 1.0 : getWeigher().getConfidence(next.getRelativeTo(), at)) * next.getConfidence();
+            int count = 0;
+            while (values.hasNext()) {
+                HasConfidenceAndIsScalable<ScalableWind, Wind, RelativeTo> next = values.next();
+                double relativeWeight = getWeight(next, at);
                 ScalableWind weightedNext = next.getScalableValue().multiply(relativeWeight).getValue();
                 double weighedNextKnots = next.getObject().getKnots() * relativeWeight;
                 if (numerator == null) {
@@ -61,9 +70,10 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
                     speedConfidenceSum += relativeWeight;
                     knotSum += weighedNextKnots;
                 }
+                count++;
             }
             // TODO consider greater variance to reduce the confidence
-            double newConfidence = confidenceSum / Util.size(values);
+            double newConfidence = confidenceSum / count;
             Wind preResult = numerator.divide(confidenceSum);
             // if only values with useSpeed=false were aggregated, use the original result, otherwise compute
             // separate speed average:

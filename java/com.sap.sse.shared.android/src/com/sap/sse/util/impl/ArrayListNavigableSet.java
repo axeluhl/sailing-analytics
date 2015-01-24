@@ -1,4 +1,4 @@
-package com.sap.sse.common;
+package com.sap.sse.util.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
+
+import com.sap.sse.common.ReverseRandomAccessList;
 
 /**
  * A {@link NavigableSet} implementation that internally uses an {@link ArrayList} to represent the data structure.
