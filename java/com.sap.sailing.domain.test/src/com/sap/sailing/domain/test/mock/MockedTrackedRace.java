@@ -473,28 +473,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             public void removeTrackedRace(RaceDefinition raceDefinition) {
             }
 
-			@Override
-			public DynamicTrackedRace createTrackedRace(
-					RaceDefinition raceDefinition,
-					Iterable<Sideline> sidelines, WindStore windStore,
-					GPSFixStore gpsFixStore, long delayToLiveInMillis,
-					long millisecondsOverWhichToAverageWind,
-					long millisecondsOverWhichToAverageSpeed,
-					DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-					boolean useMarkPassingcalculator) {
-				return null;
-			}
-
-			@Override
-			public DynamicTrackedRace createTrackedRace(
-					RaceDefinition raceDefinition,
-					Iterable<Sideline> sidelines, WindStore windStore,
-					GPSFixStore gpsFixStore, long delayToLiveInMillis,
-					long millisecondsOverWhichToAverageWind,
-					DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-					boolean useMarkPassingCalculator) {
-				return null;
-			}
+            @Override
+            public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines,
+                    WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
+                    long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator) {
+                return null;
+            }
         };
     }
 
