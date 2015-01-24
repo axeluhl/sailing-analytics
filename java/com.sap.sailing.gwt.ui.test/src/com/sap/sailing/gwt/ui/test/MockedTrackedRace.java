@@ -581,18 +581,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                 // TODO Auto-generated method stub
                 return null;
             }
-
-			@Override
-			public DynamicTrackedRace createTrackedRace(
-					RaceDefinition raceDefinition,
-					Iterable<Sideline> sidelines, WindStore windStore,
-					GPSFixStore gpsFixStore, long delayToLiveInMillis,
-					long millisecondsOverWhichToAverageWind,
-					DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-					boolean useMarkPassingCalculator) {
-				// TODO Auto-generated method stub
-				return null;
-			}
         };
     }
 

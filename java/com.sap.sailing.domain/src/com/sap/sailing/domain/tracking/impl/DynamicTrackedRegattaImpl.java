@@ -39,15 +39,4 @@ public class DynamicTrackedRegattaImpl extends TrackedRegattaImpl implements Dyn
         return (DynamicTrackedRace) super.createTrackedRace(raceDefinition, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate, useMarkPassingCalculator);
     }
-
-	@Override
-	public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition,
-			Iterable<Sideline> sidelines, WindStore windStore,
-			GPSFixStore gpsFixStore, long delayToLiveInMillis,
-			long millisecondsOverWhichToAverageWind,
-			DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-			boolean useMarkPassingCalculator) {
-		return null;
-	}
-
 }
