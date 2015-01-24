@@ -107,7 +107,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
     public void testWindEstimationFromManeuversOn505KW2011Race4() throws MalformedURLException, IOException,
             InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
             CreateModelException, NotEnoughDataHasBeenAddedException {
-        setUp("event_20110609_KielerWoch-505_Race_4");
+        setUp("event_20110609_KielerWoch-505_race_4");
         Wind average = getManeuverBasedAverageWind();
         assertEquals(275, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
     }
