@@ -2,8 +2,8 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 
 public class ColorJsonSerializer implements JsonSerializer<Color> {

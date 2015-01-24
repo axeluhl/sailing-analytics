@@ -27,7 +27,7 @@ import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
-import com.sap.sailing.util.SmartFutureCache;
+import com.sap.sse.util.SmartFutureCache;
 
 /**
  * Uses two chained {@link SmartFutureCache}s. One to store {@link PolarFix}es extracted from {@link TrackedRace}s and
@@ -52,7 +52,7 @@ public class PolarDataServiceImpl implements PolarDataService {
     public SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle) throws NotEnoughDataHasBeenAddedException {
         return polarDataMiner.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle);
     }
-    
+
     @Override
     public Set<SpeedWithBearingWithConfidence<Void>> getAverageTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
@@ -65,13 +65,11 @@ public class PolarDataServiceImpl implements PolarDataService {
         // corresponding angle
 
         Set<SpeedWithBearingWithConfidence<Void>> resultSet = new HashSet<>();
-        int tackFactor = (tack.equals(Tack.PORT)) ? -1 : 1;
+        final int tackFactor = (tack.equals(Tack.PORT)) ? -1 : 1;
         if (legType.equals(LegType.UPWIND)) {
             CubicEquation upWindEquation = new CubicEquation(0.0002, -0.0245, 0.7602, -0.0463-speedOverGround.getKnots());
             int angle = 49 * tackFactor;
             solveAndAddResults(resultSet, upWindEquation, angle);
-
-            
         } else if (legType.equals(LegType.DOWNWIND)) {
             CubicEquation downWindEquation = new CubicEquation(0.0003, -0.0373, 1.5213, -2.1309-speedOverGround.getKnots());
             int angle = 30 * tackFactor;

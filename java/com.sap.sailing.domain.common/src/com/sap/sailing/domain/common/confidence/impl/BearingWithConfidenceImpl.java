@@ -3,9 +3,9 @@ package com.sap.sailing.domain.common.confidence.impl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
-import com.sap.sailing.domain.common.scalablevalue.IsScalable;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sse.common.scalablevalue.IsScalable;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 
 public class BearingWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<DoublePair, Bearing, RelativeTo>
 implements BearingWithConfidence<RelativeTo>, IsScalable<DoublePair, Bearing> {

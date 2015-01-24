@@ -11,15 +11,15 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
-import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.CountryCode;
-import com.sap.sailing.domain.common.CountryCodeFactory;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
-import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**

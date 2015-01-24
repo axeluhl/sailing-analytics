@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.Cloner;
+import com.sap.sse.common.Cloner;
 import com.sap.sse.common.Util;
 
 /**

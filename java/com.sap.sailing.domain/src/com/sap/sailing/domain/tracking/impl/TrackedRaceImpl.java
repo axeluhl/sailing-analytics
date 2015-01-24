@@ -48,6 +48,7 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -102,26 +103,27 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.util.SmartFutureCache;
-import com.sap.sailing.util.SmartFutureCache.AbstractCacheUpdater;
-import com.sap.sailing.util.SmartFutureCache.EmptyUpdateInterval;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.ArrayListNavigableSet;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.SmartFutureCache;
+import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
+import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -2096,23 +2098,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         // compute the maneuvers for competitor
         com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-        boolean markPassingsNotEmpty;
         TimePoint extendedFrom = null;
         MarkPassing crossedFinishLine = null;
         // getLastWaypoint() will wait for a read lock on the course; do this outside the synchronized block to avoid
         // deadlocks
         final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
-        lockForRead(markPassings);
-        try {
-            markPassingsNotEmpty = markPassings != null && !markPassings.isEmpty();
-            if (markPassingsNotEmpty) {
-                extendedFrom = markPassings.iterator().next().getTimePoint();
-                crossedFinishLine = getMarkPassing(competitor, lastWaypoint);
+        if (lastWaypoint != null) {
+            lockForRead(markPassings);
+            try {
+                if (markPassings != null && !markPassings.isEmpty()) {
+                    extendedFrom = markPassings.iterator().next().getTimePoint();
+                    crossedFinishLine = getMarkPassing(competitor, lastWaypoint);
+                }
+            } finally {
+                unlockAfterRead(markPassings);
             }
-        } finally {
-            unlockAfterRead(markPassings);
         }
-        if (markPassingsNotEmpty) {
+        if (extendedFrom == null) {
+            GPSFixMoving firstRawFix = getTrack(competitor).getFirstRawFix();
+            if (firstRawFix != null) {
+                extendedFrom = firstRawFix.getTimePoint();
+            }
+        }
+        if (extendedFrom != null) {
             TimePoint extendedTo;
             if (crossedFinishLine != null) {
                 extendedTo = crossedFinishLine.getTimePoint();
@@ -2126,9 +2134,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (extendedTo != null) {
                 try {
-                    List<Maneuver> extendedResultForCache = detectManeuvers(competitor, extendedFrom, extendedTo, /* ignoreMarkPassings */ false);
-                    result = new com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo,
-                            extendedResultForCache);
+                    List<Maneuver> extendedResultForCache = detectManeuvers(competitor, extendedFrom, extendedTo, /* ignoreMarkPassings */
+                            false);
+                    result = new com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom,
+                            extendedTo, extendedResultForCache);
                 } catch (NoWindException ex) {
                     // Catching the NoWindException here without letting it propagate thru other handlers.
                     // This is mainly to avoid having logs flooded with stack traces. It is safe to catch
@@ -2140,8 +2149,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // recomputation.
                     logger.fine("NoWindException during computation of maneuvers for " + competitor.getName());
                 }
-            } // else competitor has no fixes to consider; remove any maneuver cache entry
-        } // else competitor hasn't started yet; remove any maneuver cache entry
+            }
+        } // else competitor has no fixes to consider; remove any maneuver cache entry
         logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
