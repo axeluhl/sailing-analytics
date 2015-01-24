@@ -92,17 +92,12 @@ public class TracTrac {
                                 record.getStoredURI(),
                                 new URI(""),
                                 new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
-										new MillisecondsTimePoint(record
-												.getTrackingEndTime()
-												.asMillis()),
-										raceLogStore,
-										regattaLogStore,
-										RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* simulateWithStartTimeNow */
-										false,
-										/* ignoreTracTracMarkPassings */false,
-										/* tracTracUsername */"", /* tracTracPassword */
-										"", record.getRaceStatus(),
-										record.getRaceVisibility());
+                                new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
+                                raceLogStore, regattaLogStore,
+                                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* simulateWithStartTimeNow */
+                                false, /*useTracTracMarkPassings*/ false,
+                                /* tracTracUsername */"", /* tracTracPassword */"", record.getRaceStatus(),
+                                record.getRaceVisibility());
                     } else {
                         logger.info("Ignoring race " + record.getName() + " because it is in status "
                                 + record.getRaceStatus() + " and visibility " + record.getRaceVisibility());
