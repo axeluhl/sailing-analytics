@@ -27,7 +27,6 @@ import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisComp
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
-import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapOverlaysZIndexes;
@@ -35,6 +34,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.TailFactory;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sse.common.impl.RGBColor;
 
 public class StartAnalysisSimpleMap extends AbsolutePanel implements TailFactory {
 
