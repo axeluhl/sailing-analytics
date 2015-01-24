@@ -47,7 +47,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
         super();
     }
 
-    public void setUp(final String fileBaseName) throws MalformedURLException, IOException, InterruptedException, URISyntaxException,
+    private void setUp(final String fileBaseName) throws MalformedURLException, IOException, InterruptedException, URISyntaxException,
             ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("../com.sap.sailing.domain.test/resources/"+fileBaseName+".mtb").getCanonicalPath().replace('\\', '/'));
@@ -56,7 +56,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
                 new ReceiverType[] { ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS }); // only the tracks; no mark positions, no wind, no mark passings
     }
     
-    public void setUp(final String expectedEventName, final String fileBaseName) throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+    private void setUp(final String expectedEventName, final String fileBaseName) throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         setExpectedEventName(expectedEventName);
         setUp(fileBaseName);
     }
