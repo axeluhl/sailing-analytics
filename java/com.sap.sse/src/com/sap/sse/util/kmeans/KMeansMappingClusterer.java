@@ -32,6 +32,7 @@ import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> {
     private List<Cluster<E, ValueType, AveragesTo, T>> clusters;
     private final Function<E, T> mapper;
+    private int numberOfIterations;
     
     /**
      * Clusters the <code>elements</code> into <code>numberOfClusters</code> clusters such that the sum of squared
@@ -138,6 +139,7 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
     private void iterate(Iterable<E> elements) {
         List<Cluster<E, ValueType, AveragesTo, T>> oldClusters;
         do {
+            numberOfIterations++;
             List<Cluster<E, ValueType, AveragesTo, T>> newClusters = new ArrayList<>(clusters.size());
             for (Cluster<E, ValueType, AveragesTo, T> c : clusters) {
                 AveragesTo newMean = c.getCentroid();
@@ -152,6 +154,10 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
         } while (!clusters.equals(oldClusters));
     }
 
+    public int getNumberOfIterations() {
+        return numberOfIterations;
+    }
+    
     /**
      * adds all <code>elements</code> to their nearest cluster
      */

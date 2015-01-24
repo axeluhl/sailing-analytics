@@ -146,6 +146,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         private final SpeedWithBearing speedAtManeuverStart;
         private final Bearing middleManeuverCourse;
         private final Distance maneuverLoss;
+        private Pair<Double, SpeedWithBearingWithConfidence<Void>> likelihoodAndTWSBasedOnSpeedAndAngleCache;
         
         protected ManeuverClassification(Competitor competitor, Maneuver maneuver) {
             super();
@@ -225,8 +226,11 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
          * @return a value between 0 and 1
          */
         public Pair<Double, SpeedWithBearingWithConfidence<Void>> getLikelihoodAndTWSBasedOnSpeedAndAngle(final ManeuverType maneuverType) {
-            return polarService.getManeuverLikelihoodAndTwsTwa(getCompetitor().getBoat().getBoatClass(),
+            if (likelihoodAndTWSBasedOnSpeedAndAngleCache == null) {
+                likelihoodAndTWSBasedOnSpeedAndAngleCache = polarService.getManeuverLikelihoodAndTwsTwa(getCompetitor().getBoat().getBoatClass(),
                     getSpeedAtManeuverStart(), getManeuverAngleDeg(), maneuverType);
+            }
+            return likelihoodAndTWSBasedOnSpeedAndAngleCache;
         }
         
         @Override
@@ -338,6 +342,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                             new Pair<>(new DegreeBearingImpl(((double) i)*360./(double) numberOfClusters/2), 45.)),
                             IntStream.range(0, numberOfClusters/2).mapToObj((i)->
                                 new Pair<>(new DegreeBearingImpl(((double) i)*360./(double) numberOfClusters/2), -45.))));
+        logger.fine("K-Means maneuver clusterer for wind estimation took "+clusterer.getNumberOfIterations()+" iterations");
         final Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters = clusterer.getClusters();
         assert maneuvers.size() == clusters.stream().map((c)->c.size()).reduce((s1, s2)->s1+s2).get();
         // Now work towards identifying the two tack clusters
