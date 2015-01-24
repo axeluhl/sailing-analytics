@@ -8,11 +8,11 @@ import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.tracking.Track;
-import com.sap.sse.common.ArrayListNavigableSet;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 import com.sap.sse.util.impl.UnmodifiableNavigableSet;
 
 public class TrackImpl<FixType extends Timed> implements Track<FixType> {
