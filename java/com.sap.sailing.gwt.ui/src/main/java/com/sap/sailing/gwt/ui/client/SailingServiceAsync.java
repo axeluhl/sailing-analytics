@@ -107,9 +107,11 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
      * @param simulateWithStartTimeNow
      *            if <code>true</code>, the connector will adjust the time stamps of all events received such that the
      *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
-     *            events received such that they seem to be sent in "real-time." So, more or less the time points attached
-     *            to the events sent to the receivers will again approximate the wall time.
-     * @param ignoreTracTracMarkPassings 
+     *            events received such that they seem to be sent in "real-time." So, more or less the time points
+     *            attached to the events sent to the receivers will again approximate the wall time.
+     * @param ignoreTracTracMarkPassings
+     *            whether or not to ignore the TracTrac-provided mark passings; if <code>true</code>, a separate mark
+     *            passing calculator is used, and the TracTrac-provided ones are ignored.
      * @param storedURImay
      *            be <code>null</code> or the empty string in which case the server will use the
      *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
