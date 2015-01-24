@@ -82,7 +82,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("OBMR 2012", "event_20121031_OBMR-OBMR_2012_VR_Fr_Fleet_1_2");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(222, average.getFrom().getDegrees(), 10.0); // wind in this race was from 075deg on average
+        assertEquals(222, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
     }
 
     @Test

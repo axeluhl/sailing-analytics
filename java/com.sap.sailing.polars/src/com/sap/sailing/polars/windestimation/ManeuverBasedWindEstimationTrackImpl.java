@@ -146,7 +146,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         private final SpeedWithBearing speedAtManeuverStart;
         private final Bearing middleManeuverCourse;
         private final Distance maneuverLoss;
-        private Pair<Double, SpeedWithBearingWithConfidence<Void>> likelihoodAndTWSBasedOnSpeedAndAngleCache;
+        private Pair<Double, SpeedWithBearingWithConfidence<Void>>[] likelihoodAndTWSBasedOnSpeedAndAngleCache;
         
         protected ManeuverClassification(Competitor competitor, Maneuver maneuver) {
             super();
@@ -157,6 +157,9 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             this.speedAtManeuverStart = maneuver.getSpeedWithBearingBefore();
             this.middleManeuverCourse = maneuver.getSpeedWithBearingBefore().getBearing().middle(maneuver.getSpeedWithBearingAfter().getBearing());
             this.maneuverLoss = maneuver.getManeuverLoss();
+            @SuppressWarnings("unchecked")
+            Pair<Double, SpeedWithBearingWithConfidence<Void>>[] myLikelihoodAndTWSBasedOnSpeedAndAngleCache = (Pair<Double, SpeedWithBearingWithConfidence<Void>>[]) new Pair<?, ?>[ManeuverType.values().length];
+            this.likelihoodAndTWSBasedOnSpeedAndAngleCache = myLikelihoodAndTWSBasedOnSpeedAndAngleCache;
         }
         
         public Competitor getCompetitor() {
@@ -226,11 +229,11 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
          * @return a value between 0 and 1
          */
         public Pair<Double, SpeedWithBearingWithConfidence<Void>> getLikelihoodAndTWSBasedOnSpeedAndAngle(final ManeuverType maneuverType) {
-            if (likelihoodAndTWSBasedOnSpeedAndAngleCache == null) {
-                likelihoodAndTWSBasedOnSpeedAndAngleCache = polarService.getManeuverLikelihoodAndTwsTwa(getCompetitor().getBoat().getBoatClass(),
+            if (likelihoodAndTWSBasedOnSpeedAndAngleCache[maneuverType.ordinal()] == null) {
+                likelihoodAndTWSBasedOnSpeedAndAngleCache[maneuverType.ordinal()] = polarService.getManeuverLikelihoodAndTwsTwa(getCompetitor().getBoat().getBoatClass(),
                     getSpeedAtManeuverStart(), getManeuverAngleDeg(), maneuverType);
             }
-            return likelihoodAndTWSBasedOnSpeedAndAngleCache;
+            return likelihoodAndTWSBasedOnSpeedAndAngleCache[maneuverType.ordinal()];
         }
         
         @Override
