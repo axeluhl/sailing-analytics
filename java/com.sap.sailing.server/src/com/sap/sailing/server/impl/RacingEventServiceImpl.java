@@ -3001,6 +3001,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public FileStorageManagementService getFileStorageManagementService() {
         ServiceReference<FileStorageManagementService> ref = bundleContext
                 .getServiceReference(FileStorageManagementService.class);
+        if (ref == null) {
+            logger.warning("No file storage management service registered");
+            return null;
+        }
         return bundleContext.getService(ref);
     }
 }

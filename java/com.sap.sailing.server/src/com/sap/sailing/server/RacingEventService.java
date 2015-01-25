@@ -583,5 +583,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     FileStorageService getActiveFileStorageService() throws NoCorrespondingServiceRegisteredException;
     
+    /**
+     * @return {@code null} if no service can be found in the OSGi registry
+     */
     FileStorageManagementService getFileStorageManagementService();
 }
