@@ -1,11 +1,9 @@
 package com.sap.sse.filestorage.test;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -27,15 +25,17 @@ public class AmazonS3Test {
     
     @Test
     public void testStoreAndRemoveFileTest() throws URISyntaxException, IOException, OperationFailedException, InvalidPropertiesException {
-        URL fileUrl = getClass().getResource("/" + teamImageFile);
-        URI fileUri = new URI(fileUrl.toString());
-        long length = new File(fileUri).length();
-        InputStream stream = getClass().getResourceAsStream("/" + teamImageFile);
+        InputStream stream = getClass().getClassLoader().getResourceAsStream(teamImageFile);
+        
+        // this is not ideal, as this #available() is not supposed to be used for getting the file size
+        // however, working with a File() descriptor does not work, as when running via maven/tycho the
+        // URL has the bundleresource:// scheme instead of file:, which File() can't handle
+        long length = stream.available();
 
         URI uri = storageService.storeFile(stream, teamImageFile, length);
         
         InputStream downloadStream = uri.toURL().openStream();
-        stream = getClass().getResourceAsStream("/" + teamImageFile);
+        stream = getClass().getClassLoader().getResourceAsStream(teamImageFile);
         IOUtils.contentEquals(downloadStream, stream);
         
         storageService.removeFile(uri);

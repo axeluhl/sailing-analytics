@@ -3,13 +3,11 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
@@ -60,11 +58,14 @@ public class TeamImageTest extends AbstractJaxRsApiTest {
             IOException, OperationFailedException, InvalidPropertiesException {
         //set team image
         CompetitorsResource r = spyResource(new CompetitorsResource());
-        URL fileUrl = getClass().getResource("/" + teamImageFile);
-        URI fileUri = new URI(fileUrl.toString());
-        String fileExtension = teamImageFile.substring(teamImageFile.lastIndexOf("."));
-        long length = new File(fileUri).length();
+        String fileExtension = teamImageFile.substring(teamImageFile.lastIndexOf("."));;
         InputStream stream = getClass().getResourceAsStream("/" + teamImageFile);
+        
+        // this is not ideal, as this #available() is not supposed to be used for getting the file size
+        // however, working with a File() descriptor does not work, as when running via maven/tycho the
+        // URL has the bundleresource:// scheme instead of file:, which File() can't handle
+        long length = stream.available();
+        
         String jsonString = r.setTeamImage(id, stream, fileExtension, length);
         
         //now download and compare
