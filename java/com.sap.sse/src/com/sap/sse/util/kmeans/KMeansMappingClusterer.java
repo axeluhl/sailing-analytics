@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
@@ -31,6 +32,7 @@ import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> {
     private List<Cluster<E, ValueType, AveragesTo, T>> clusters;
     private final Function<E, T> mapper;
+    private int numberOfIterations;
     
     /**
      * Clusters the <code>elements</code> into <code>numberOfClusters</code> clusters such that the sum of squared
@@ -64,9 +66,7 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
 
     private static <E> Iterable<E> streamToList(Stream<E> elements) {
         assert !elements.isParallel();
-        final List<E> result = new ArrayList<>();
-        elements.forEach((e)->result.add(e));
-        return result;
+        return elements.collect(Collectors.toList());
     }
 
     /**
@@ -139,6 +139,7 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
     private void iterate(Iterable<E> elements) {
         List<Cluster<E, ValueType, AveragesTo, T>> oldClusters;
         do {
+            numberOfIterations++;
             List<Cluster<E, ValueType, AveragesTo, T>> newClusters = new ArrayList<>(clusters.size());
             for (Cluster<E, ValueType, AveragesTo, T> c : clusters) {
                 AveragesTo newMean = c.getCentroid();
@@ -153,6 +154,10 @@ public class KMeansMappingClusterer<E, ValueType, AveragesTo, T extends Scalable
         } while (!clusters.equals(oldClusters));
     }
 
+    public int getNumberOfIterations() {
+        return numberOfIterations;
+    }
+    
     /**
      * adds all <code>elements</code> to their nearest cluster
      */

@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
@@ -27,6 +28,7 @@ import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.SmartFutureCache;
 
 /**
@@ -130,4 +132,42 @@ public class PolarDataServiceImpl implements PolarDataService {
         return polarDataMiner.getDataCountsForWindSpeed(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
     }
 
+    @Override
+    public double getConfidenceForTackJibeSpeedRatio(Speed intoTackSpeed, Speed intoJibeSpeed, BoatClass boatClass) {
+        return Math.min(1., 0.5*intoJibeSpeed.getKnots()/intoTackSpeed.getKnots());
+    }
+
+    @Override
+    public Pair<Double, SpeedWithBearingWithConfidence<Void>> getManeuverLikelihoodAndTwsTwa(BoatClass boatClass, Speed speedAtManeuverStart, double courseChangeDeg,
+            ManeuverType maneuverType) {
+        assert maneuverType == ManeuverType.TACK || maneuverType == ManeuverType.JIBE;
+        SpeedWithBearingWithConfidence<Void> closestTwsTwa = getClosestTwaTws(maneuverType, speedAtManeuverStart, courseChangeDeg, boatClass);
+        final Pair<Double, SpeedWithBearingWithConfidence<Void>> result;
+        if (closestTwsTwa == null) {
+            result = new Pair<>(0.0, null);
+        } else {
+            double minDiffDeg = Math.abs(Math.abs(Math.abs(closestTwsTwa.getObject().getBearing().getDegrees() * 2)
+                    - Math.abs(courseChangeDeg)));
+            result = new Pair<>(1. / (1. + (minDiffDeg / 10.) * (minDiffDeg / 10.)), closestTwsTwa);
+        }
+        return result;
+    }
+
+    private SpeedWithBearingWithConfidence<Void> getClosestTwaTws(ManeuverType type, Speed speedAtManeuverStart, double courseChangeDeg, BoatClass boatClass) {
+        assert type == ManeuverType.TACK || type == ManeuverType.JIBE;
+        double minDiff = Double.MAX_VALUE;
+        SpeedWithBearingWithConfidence<Void> closestTwsTwa = null;
+        for (SpeedWithBearingWithConfidence<Void> trueWindSpeedAndAngle : getAverageTrueWindSpeedAndAngleCandidates(
+                boatClass, speedAtManeuverStart,
+                type == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND,
+                type == ManeuverType.TACK ? courseChangeDeg >= 0 ? Tack.PORT : Tack.STARBOARD
+                                          : courseChangeDeg >= 0 ? Tack.STARBOARD : Tack.PORT)) {
+            double diff = Math.abs(trueWindSpeedAndAngle.getObject().getBearing().getDegrees()*2)-Math.abs(courseChangeDeg);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestTwsTwa = trueWindSpeedAndAngle;
+            }
+        }
+        return closestTwsTwa;
+    }
 }

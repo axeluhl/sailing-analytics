@@ -21,10 +21,10 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
@@ -34,9 +34,11 @@ import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
+import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.kmeans.Cluster;
 
 /**
@@ -154,11 +156,11 @@ public class PolarResource extends AbstractSailingServerResource {
                 PolarDataService service = getService().getPolarDataService();
                 ManeuverBasedWindEstimationTrackImpl maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
                         service, trackedRace, /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ false);
-                final Stream<Cluster<ManeuverClassification, DoublePair, Bearing, ScalableBearing>> clusters;
+                final Stream<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters;
                 if ("tack".equals(cluster)) {
-                    clusters = Stream.of(maneuverBasedWindEstimationTrackImpl.getTackCluster());
+                    clusters = maneuverBasedWindEstimationTrackImpl.getTackClusters().stream();
                 } else if ("jibe".equals(cluster)) {
-                    clusters = Stream.of(maneuverBasedWindEstimationTrackImpl.getJibeCluster());
+                    clusters = maneuverBasedWindEstimationTrackImpl.getJibeClusters().stream();
                 } else if (cluster != null && cluster.matches("[0-9][0-9]*")) {
                     clusters = Stream.of(new ArrayList<>(maneuverBasedWindEstimationTrackImpl.getClusters()).get(Integer.valueOf(cluster)));
                 } else {
