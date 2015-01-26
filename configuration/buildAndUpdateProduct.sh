@@ -612,6 +612,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         if [[ $? != 0 ]]; then
             exit 100
         fi
+        if [ $testing -eq 1 ]; then
+            ./gradlew connectedAndroidTest
+            if [[ $? != 0 ]]; then
+              exit 101
+            fi
+        fi
     else
         echo "INFO: Deactivating mobile modules"
         extra="$extra -P !with-mobile"

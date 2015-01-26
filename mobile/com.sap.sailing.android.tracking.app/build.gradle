@@ -21,16 +21,22 @@ android {
             manifest.srcFile "AndroidManifest.xml"
             java.srcDirs = ["src"]
             res.srcDirs = ["res"]
-            assets.srcDirs = ['assets']
+            assets.srcDirs = ["assets"]
+        }
+
+        androidTest {
+            java.srcDirs = ["tests/src"]
+            res.srcDirs = ["tests/res"]
+            assets.srcDirs = ["tests/assets"]
         }
     }
 
     signingConfigs {
         stg_debug {
-            keyAlias 'stg_debug'
-            keyPassword 'stg_debug'
-            storeFile file('../android-keystore/STG-debug.jks')
-            storePassword 'stg_debug'
+            keyAlias "stg_debug"
+            keyPassword "stg_debug"
+            storeFile file("../android-keystore/STG-debug.jks")
+            storePassword "stg_debug"
         }
     }
 
@@ -63,7 +69,7 @@ dependencies {
     compile "com.android.support:appcompat-v7:21.0.3"
 
     /* Google Play Services */
-    compile 'com.google.android.gms:play-services-location:6.5.87'
+    compile "com.google.android.gms:play-services-location:6.5.87"
 
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
