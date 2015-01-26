@@ -115,7 +115,11 @@ public class Cluster<E, ValueType, AveragesTo, T extends ScalableValueWithDistan
     
     @Override
     public String toString() {
-        return "{mean: "+getMean()+", centroid: "+getCentroid()+", elements: "+elements+"}";
+        return "{mean: "+getMean()+", centroid: "+getCentroid()+", size: "+size()+", variance: "+getVariance()+", elements: "+elements+"}";
+    }
+
+    private double getVariance() {
+        return stream().mapToDouble((e)->getDistanceFromMean(e)*getDistanceFromMean(e)).average().getAsDouble();
     }
 
     public Stream<E> stream() {

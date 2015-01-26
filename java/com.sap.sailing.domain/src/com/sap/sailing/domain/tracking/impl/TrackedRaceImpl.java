@@ -112,7 +112,6 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sse.common.ArrayListNavigableSet;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -123,6 +122,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 import difflib.DiffUtils;
 import difflib.Patch;
