@@ -14,7 +14,7 @@ public class ScalablePosition implements ScalableValueWithDistance<ScalablePosit
                 Math.sin(position.getLatRad()));
     }
     
-    public ScalablePosition(double x, double y, double z) {
+    private ScalablePosition(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;

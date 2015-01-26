@@ -31,10 +31,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
-import com.sap.sse.common.ArrayListNavigableSet;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
  * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.

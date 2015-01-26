@@ -25,9 +25,9 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sse.common.ArrayListNavigableSet;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
  * Records {@link Wind} objects over time and offers to average the last so many of them into an
