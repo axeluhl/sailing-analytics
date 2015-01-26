@@ -607,17 +607,34 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
-        ( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | $ANDROID_HOME/tools/android update sdk --no-ui
+        ANDROID_SDK_VERSION="r24.0.2"
+        BUILD_TOOLS="21.1.2"
+        TARGET_API="21"
+        ANDROID_ABI="x86_64"
+        echo "Updating Android SDK...."
+        echo yes | android update sdk --filter platform-tools --no-ui --force > /dev/null
+        echo yes | android update sdk --filter build-tools-${BUILD_TOOLS} --no-ui --force > /dev/null
+        echo yes | android update sdk --filter android-${TARGET_API} --no-ui --force > /dev/null
+        echo yes | android update sdk --filter extra-android-m2repository --no-ui --force > /dev/null
+        echo yes | android update sdk --filter extra-google-m2repository --no-ui --force > /dev/null
         ./gradlew clean build
         if [[ $? != 0 ]]; then
             exit 100
         fi
-        #if [ $testing -eq 1 ]; then
-        #    ./gradlew connectedCheck
-        #    if [[ $? != 0 ]]; then
-        #      exit 101
-        #    fi
-        #fi
+        if [ $testing -eq 1 ]; then
+            echo "Downloading and installing emulator image..."
+            echo yes | android update sdk -u -a -t sys-img-${ANDROID_ABI}-android-${TARGET_API} > /dev/null
+            echo no | android create avd --force -n androidTest -t android-${TARGET_API} --abi ${ANDROID_ABI}
+            emulator -avd androidTest -no-skin -no-audio -no-window &
+            echo "Waiting for device to start..."
+            adb wait-for-device
+            adb shell input keyevent 82 &
+            ./gradlew deviceCheck connectedCheck
+            if [[ $? != 0 ]]; then
+              exit 101
+            fi
+            adb emu kill
+        fi
     else
         echo "INFO: Deactivating mobile modules"
         extra="$extra -P !with-mobile"
