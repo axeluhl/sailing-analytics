@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.Test;
 
-import com.sap.sailing.util.impl.ConcurrentHashBag;
 import com.sap.sse.common.Util;
+import com.sap.sse.concurrent.ConcurrentHashBag;
 
 /**
  * Measures the performance of different concurrent collections types and shows their add and remove behavior for

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common;
 
-import com.sap.sailing.domain.common.impl.RGBColor;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.impl.RGBColor;
 
 public enum FleetColors {
     GOLD (222, 138, 46, 1), 

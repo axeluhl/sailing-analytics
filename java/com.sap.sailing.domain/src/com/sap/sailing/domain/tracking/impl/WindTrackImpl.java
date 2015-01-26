@@ -25,9 +25,9 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
  * Records {@link Wind} objects over time and offers to average the last so many of them into an
@@ -165,7 +165,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     /**
      * This method implements the functionality of the {@link #getAveragedWind(Position, TimePoint)} interface method.
-     * It does so by collecting (smoothened, outliers removed)) wind fixes around the <code>at</code> time point up to
+     * It does so by collecting (smoothened, outliers removed) wind fixes around the <code>at</code> time point up to
      * an interval length as specified by {@link #getMillisecondsOverWhichToAverageWind()}. At least one fix that is
      * closest to <code>at</code> will be picked up. If the track is empty, <code>null</code> is returned. Otherwise,
      * the wind fixes in the interval constructed are averaged using a {@link ConfidenceBasedWindAverager}.

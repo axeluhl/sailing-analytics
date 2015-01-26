@@ -18,6 +18,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 import org.junit.After;
@@ -36,11 +38,13 @@ import com.sap.sse.replication.impl.RabbitOutputStream;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
-import com.sap.sse.replication.impl.ReplicationServiceImpl;
 import com.sap.sse.replication.impl.ReplicationReceiver;
+import com.sap.sse.replication.impl.ReplicationServiceImpl;
 import com.sap.sse.replication.impl.SingletonReplicablesProvider;
 
 public abstract class AbstractServerReplicationTest<ReplicableInterface extends Replicable<?, ?>, ReplicableImpl extends ReplicableInterface> {
+    private static final Logger logger = Logger.getLogger(AbstractServerReplicationTest.class.getName());
+    
     protected static final int SERVLET_PORT = 9990;
     protected ReplicableImpl replica;
     protected ReplicableImpl master;
@@ -92,6 +96,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
      */
     protected Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> basicSetUp(boolean dropDB,
             ReplicableImpl master, ReplicableImpl replica) throws Exception {
+        logger.info("basicSetUp for test class "+getClass().getName());
         persistenceSetUp(dropDB);
         String exchangeName = "test-sapsailinganalytics-exchange";
         String exchangeHost = "localhost";
@@ -119,8 +124,10 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,
                 this.replica, this.master, masterReplicator, masterDescriptor);
         Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
+        logger.info("starting initial load transmission servlet for "+getClass().getName());
         initialLoadTestServerThread = replicaReplicator.startInitialLoadTransmissionServlet();
         this.replicaReplicator = replicaReplicator; 
+        logger.info("basicSetUp for test class "+getClass().getName()+" finished");
         return result;
     }
 
@@ -140,25 +147,31 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
 
     @After
     public void tearDown() throws Exception {
+        logger.info("starting to tearDown() test");
         persistenceTearDown();
         if (masterReplicator != null) {
+            logger.info("before unregisterReplica...");
             masterReplicator.unregisterReplica(replicaDescriptor);
         }
         if (masterDescriptor != null) {
+            logger.info("before stopConnection...");
             masterDescriptor.stopConnection();
         }
         try {
             if (initialLoadTestServerThread != null) {
+                logger.info("found non-null initialLoadTestServerThread that we'll now try to stop...");
                 URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
                 urlConnection.getInputStream().close();
+                logger.info("sent and closed STOP request");
                 initialLoadTestServerThread.join(10000 /* wait 10s */);
+                logger.info("joined servlet thread");
                 assertFalse("Expected initial load test server thread to die", initialLoadTestServerThread.isAlive());
             }
         } catch (ConnectException ex) {
             /* do not make tests fail because of a server that has been shut down
              * or when an exception occured (see setUp()) - let the
              * original exception propagate */
-            ex.printStackTrace();
+            logger.log(Level.SEVERE, "Exception trying to connect to initial load test servlet to STOP it", ex);
         }
     }
     
@@ -205,6 +218,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
                         while (!stop) {
                             Socket s = ss.accept();
                             String request = new BufferedReader(new InputStreamReader(s.getInputStream())).readLine();
+                            logger.info("received request "+request);
                             PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
                             pw.println("HTTP/1.1 200 OK");
                             pw.println("Content-Type: text/plain");
@@ -230,9 +244,11 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
                                 ros.close();
                             } else if (request.contains("STOP")) {
                                 stop = true;
+                                logger.info("received STOP request");
                             }
                             pw.close();
                             s.close();
+                            logger.info("Request handled successfully.");
                         }
                     } catch (IOException e) {
                         throw new RuntimeException(e);

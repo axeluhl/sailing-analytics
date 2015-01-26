@@ -89,7 +89,7 @@
                     <undeployBeforeDeploy>true</undeployBeforeDeploy>
                     <extractDuplicates>true</extractDuplicates>
                     <sdk>
-                        <platform>13</platform>
+                        <platform>19</platform>
                     </sdk>
                     <release>true</release>
                     <proguard>

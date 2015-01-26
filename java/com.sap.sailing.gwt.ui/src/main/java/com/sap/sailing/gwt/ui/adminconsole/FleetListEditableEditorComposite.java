@@ -12,10 +12,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Color;
 import com.sap.sse.gwt.client.controls.listedit.ExpandedListEditorUi;
 
 public class FleetListEditableEditorComposite extends FleetListEditorComposite {

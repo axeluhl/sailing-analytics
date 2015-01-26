@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.dto;
 
-import com.sap.sailing.domain.common.Color;
+import com.sap.sse.common.Color;
 
 /**
  * Equality and hash code are based on the index pointing into a previous leaderboard's competitors list.

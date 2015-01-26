@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
+import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 
 /**
  * Finds all events in the log which is an {@code instanceof} {@link #ofType}.

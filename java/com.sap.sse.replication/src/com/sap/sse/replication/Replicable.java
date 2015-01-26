@@ -13,8 +13,8 @@ import org.osgi.framework.BundleContext;
 import com.sap.sse.common.WithID;
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
-import com.sap.sse.replication.impl.ObjectInputStreamResolvingAgainstCache;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 /**
  * Represents a replicable part of an application. Such a replicable part is usually holder of application state and a

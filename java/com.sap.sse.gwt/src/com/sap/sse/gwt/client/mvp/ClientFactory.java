@@ -5,6 +5,7 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * Provides GWT modules a way to bind specific configurations for which event bus
@@ -24,6 +25,8 @@ import com.google.web.bindery.event.shared.EventBus;
  *
  */
 public interface ClientFactory {
+    ErrorReporter getErrorReporter();
+
     EventBus getEventBus();
 
     PlaceController getPlaceController();

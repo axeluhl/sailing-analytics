@@ -37,6 +37,9 @@ public interface CourseBase extends Named {
 
     Waypoint getFirstWaypoint();
 
+    /**
+     * @return the course's last waypoint if not empty, <code>null</code> otherwise. Acquires the course's read lock.
+     */
     Waypoint getLastWaypoint();
 
     void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd);

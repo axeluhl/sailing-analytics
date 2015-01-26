@@ -87,6 +87,7 @@ public class DesktopStartView extends Composite implements StartView {
          }
         
         initWidget(uiBinder.createAndBindUi(this));
+        this.ensureDebugId("AutoPlayStartView");
 
         leaderboardAutoZoomBox.setValue(true);
         leaderboardZoomBox.setEnabled(false);

@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.services.polling;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -64,12 +65,12 @@ public class RaceLogPoller implements PollingActiveChangedListener {
             this.hasRacesToPoll = true;
             ExLog.i(context, TAG, String.format("Registered race %s for polling, will start in %d milliseconds.", race.getId(),
                     pollingInterval));
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | UnsupportedEncodingException e) {
             ExLog.e(context, TAG, String.format("Unable to create polling URL for race %s: %s", race.getId(), e.getMessage()));
         }
     }
 
-    private URL createURL(ManagedRace race) throws MalformedURLException {
+    private URL createURL(ManagedRace race) throws MalformedURLException, UnsupportedEncodingException {
         return new URL(MessageSendingService.getRaceLogEventSendAndReceiveUrl(context, race.getRaceGroup().getName(),
                 race.getName(), race.getFleet().getName()));
     }
