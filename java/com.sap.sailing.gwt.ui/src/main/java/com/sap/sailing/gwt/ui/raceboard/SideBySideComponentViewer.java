@@ -27,7 +27,6 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.ui.client.UserService;
@@ -156,6 +155,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
             additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
                     "managemedia"));
         }
+        onUserStatusChange(userService.getCurrentUser());
 
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
@@ -289,9 +289,15 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
 
     @Override
     public void onUserStatusChange(UserDTO user) {
-        if (user == null || !(user.hasRole(UserRoles.administrator.getRolename()) || user.hasRole(UserRoles.eventmanager.getRolename()))) {
-            Splitter associatedSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
-            associatedSplitter.getToggleButtonsPanel().remove(associatedSplitter.getToggleButton());
+        Button toggleButton = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel).getToggleButton();
+        if (user != null
+                && (user.hasRole(UserRoles.administrator.getRolename()) || user.hasRole(UserRoles.eventmanager.getRolename()))) {
+            toggleButton.setVisible(true);
+            forceLayout();
+        } else {
+            markPassingsPanel.setVisible(false);
+            toggleButton.setVisible(false);
+            forceLayout();
         }
     }
 }
