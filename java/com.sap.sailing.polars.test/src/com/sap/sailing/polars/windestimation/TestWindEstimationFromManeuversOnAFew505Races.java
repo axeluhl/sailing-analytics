@@ -139,8 +139,11 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
                 .sorted((c1, c2) -> (int) -Math.signum(getAverageLikelihood(c1, ManeuverType.TACK)
                         - getAverageLikelihood(c2, ManeuverType.TACK))).collect(Collectors.toList());
         // expecting a wind direction that is from around 245deg, +/- 10deg
-        assertEquals(245., windTrack.getWeightedAverageMiddleManeuverCOGDeg(clustersSortedByAverageTackLikelihood.get(0), ManeuverType.TACK).getDegrees(), 10.);
-        assertEquals(245., windTrack.getWeightedAverageMiddleManeuverCOGDeg(clustersSortedByAverageTackLikelihood.get(1), ManeuverType.TACK).getDegrees(), 10.);
+        assertEquals(
+                245., windTrack.getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(
+                                clustersSortedByAverageTackLikelihood.get(0), ManeuverType.TACK).getA().getDegrees(), 10.);
+        assertEquals(245., windTrack.getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(
+                                clustersSortedByAverageTackLikelihood.get(1), ManeuverType.TACK).getA().getDegrees(), 10.);
     }
 
     private double getAverageLikelihood(
