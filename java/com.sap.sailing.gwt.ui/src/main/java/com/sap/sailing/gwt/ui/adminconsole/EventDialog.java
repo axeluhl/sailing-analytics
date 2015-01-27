@@ -122,7 +122,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                 callback);
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroups = availableLeaderboardGroups;
-        getDialogBox().setWidth("750px");
+        getDialogBox().getWidget().setWidth("730px");
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
