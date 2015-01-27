@@ -278,7 +278,6 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
     }
 
     private void disableEditing() {
-        setVisible(false);
         waypointList.setList(new ArrayList<Util.Pair<Integer, Date>>());
         clearInfo();
     }
