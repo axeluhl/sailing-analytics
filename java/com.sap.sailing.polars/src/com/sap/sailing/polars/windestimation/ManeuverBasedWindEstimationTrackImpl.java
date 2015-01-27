@@ -77,7 +77,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
     /**
      * When one or two jibe clusters have been found whose
-     * {@link #getLikelihoodOfBeingJibeCluster(Speed, Stream, BoatClass) likelihood of being a jibe cluster} is 100%,
+     * {@link #getLikelihoodOfBeingJibeCluster(Speed, Stream, BoatClass, Set) likelihood of being a jibe cluster} is 100%,
      * this is the boost factor by which the base likelihood for the tack cluster candidate will be increased (up to a
      * maximum of 1.0).
      */
@@ -104,6 +104,14 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * the jibe cluster may be off from the reversed tack cluster's centroid in order to be accepted as jibe cluster candidate.
      */
     private static final double THRESHOLD_JIBE_CLUSTER_DIFFERENCE_DEGREES = 20;
+
+    /**
+     * For judging the likelihood of a cluster being a speed cluster, the speed ratio of the tack cluster candidate and
+     * the jibe cluster candidate is computed and compared to what the polar service predicts. The basic likelihood of the
+     * jibe cluster candidate (based on the maneuver angles relative to their speeds) is boosted by this factor for a perfect
+     * speed ratio match.
+     */
+    private static final double BOOST_FACTOR_FOR_JIBE_TACK_SPEED_RATIO_LIKELIHOOD = 0;
     
     private final PolarDataService polarService;
 
@@ -337,7 +345,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * for that maneuver being a tack, solely based on its speed and maneuver angle, as
      * {@link PolarDataService#getManeuverLikelihoodAndTwsTwa(BoatClass, Speed, double, ManeuverType) judged by the
      * polar service}. If a cluster exists that has approximately the opposite average middle COG (the jibe cluster
-     * candidate), the {@link #getLikelihoodOfBeingJibeCluster(Speed, Stream, BoatClass) likelihood for its maneuvers
+     * candidate), the {@link #getLikelihoodOfBeingJibeCluster(Speed, Stream, BoatClass, Set) likelihood for its maneuvers
      * being jibes} are determined and may result in a "boost" for the basic probability of up to 20%. Finally, the
      * resulting likelihood is multiplied by how likely the speed ratio between the tack and jibe cluster candidates is,
      * based on the polar diagram. For this task, the cluster's maneuvers' average speed (weighted by each maneuver's
@@ -360,8 +368,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * maneuver angle dimension that show low variance each, compared to all other clusters.
      * <p>
      * 
-     * TODO with enough candidates at hand, apply temporal and spatial segmentation to account for heterogeneous wind
-     * fields
+     * TODO with enough candidates at hand, apply temporal and spatial segmentation to account for heterogeneous wind fields
      */
     private Triple<Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>,
                    List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>,
@@ -491,9 +498,11 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
         // Now search for head-up/bear-away cluster(s) to port and to starboard of cluster's weighted middle COG
         final Bearing expectedUpwindStarboardTackCOG = averageUpwindCOG.add(new DegreeBearingImpl(-averageTackingAngleDeg/2.));
-        double starboardHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(cluster, clusters, expectedUpwindStarboardTackCOG);
+        double starboardHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(
+                clusters.stream().filter(c->c!=cluster), expectedUpwindStarboardTackCOG);
         final Bearing expectedUpwindPortTackCOG = averageUpwindCOG.add(new DegreeBearingImpl(averageTackingAngleDeg/2.));
-        double portHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(cluster, clusters, expectedUpwindPortTackCOG);
+        double portHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(
+                clusters.stream().filter(c->c!=cluster), expectedUpwindPortTackCOG);
 
         // under the assumption that cluster holds tacks, find the clusters that then most likely hold the jibes
         final Bearing approximateMiddleCOGForJibes = averageUpwindCOG.reverse();
@@ -505,12 +514,12 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         if (tackClusterWeightedAverageSpeed != null) {
             // find out how likely the speed ratio is between the candidate tack cluster and the corresponding
             // hypothetical jibe clusters
-            double tackJibeLikelihoodBasedOnSpeedRatioAndAverageManeuverAngle = getLikelihoodOfBeingJibeCluster(
+            double jibeClusterLikelihood = getLikelihoodOfBeingJibeCluster(
                     tackClusterWeightedAverageSpeed, jibeClusters.map((jc) -> jc.stream()).reduce(Stream::concat)
-                            .orElse(Stream.empty()), getBoatClass());
+                            .orElse(Stream.empty()), getBoatClass(), clusters);
             // Likely jibe clusters may raise the general likelihood by up to 20% of the value so far, but not to over 1.0
             result = Math.min(1.0, averageTackLikelihood * likelihoodOfOppositeCluster *
-                    (1.0 + BOOST_FACTOR_FOR_FULL_JIBE_CLUSTER_LIKELIHOOD * tackJibeLikelihoodBasedOnSpeedRatioAndAverageManeuverAngle +
+                    (1.0 + BOOST_FACTOR_FOR_FULL_JIBE_CLUSTER_LIKELIHOOD * jibeClusterLikelihood +
                             BOOST_FACTOR_FOR_FULL_HEAD_UP_BEAR_AWAY_CLUSTER_LIKELIHOOD * starboardHeadUpBearAwayClusterLikelihood +
                             BOOST_FACTOR_FOR_FULL_HEAD_UP_BEAR_AWAY_CLUSTER_LIKELIHOOD * portHeadUpBearAwayClusterLikelihood));
         } else {
@@ -527,11 +536,10 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      * @see #getLikelihoodOfClusterBasedOnDistanceFromExpected(double, Bearing, Cluster)
      */
     private double getLikelihoodOfBestFittingHeadUpBearAwayCluster(
-            Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> cluster,
-            Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters,
+            Stream<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters,
             final Bearing expectedAverageMiddleCOG) {
         final Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> starboardTackHeadUpAndBearAwayCluster =
-                clusters.stream().filter((c)->c!=cluster).min((a, b)->(int) Math.signum(
+                clusters.max((a, b)->(int) Math.signum(
                         getLikelihoodOfClusterBasedOnDistanceFromExpected(EXPECTED_AVERAGE_HEAD_UP_AND_BEAR_AWAY_MANEUVER_ANGLE_DEG, expectedAverageMiddleCOG, a)-
                         getLikelihoodOfClusterBasedOnDistanceFromExpected(EXPECTED_AVERAGE_HEAD_UP_AND_BEAR_AWAY_MANEUVER_ANGLE_DEG, expectedAverageMiddleCOG, b))).
             orElse(null);
@@ -650,13 +658,14 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     private double getLikelihoodOfBeingJibeCluster(
             Speed tackClusterWeightedAverageSpeed,
             Stream<ManeuverClassification> jibeClustersContent,
-            BoatClass boatClass) {
+            BoatClass boatClass, Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters) {
         final int[] count = new int[1];
         final double[] likelihoodSum = new double[1];
         final ScalableBearing[] scaledAverageDownwindCOG = new ScalableBearing[1];
+        final double[] scaledAbsJibingAngleSum = new double[1];
         Stream<ManeuverClassification> jibeClustersContentPeeker = jibeClustersContent.peek((mc)->{
             count[0]++;
-            final Double likelihood = mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.JIBE).getA();
+            final double likelihood = mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.JIBE).getA();
             likelihoodSum[0] += likelihood;
             final ScalableBearing scaledCOG = new ScalableBearing(mc.getMiddleManeuverCourse()).multiply(likelihood);
             if (scaledAverageDownwindCOG[0] == null) {
@@ -664,9 +673,11 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             } else {
                 scaledAverageDownwindCOG[0] = scaledAverageDownwindCOG[0].add(scaledCOG);
             }
+            scaledAbsJibingAngleSum[0] += likelihood * Math.abs(mc.getManeuverAngleDeg());
         });
         Speed jibeClusterWeightedAverageSpeed = getWeightedAverageSpeed(jibeClustersContentPeeker, ManeuverType.JIBE);
         Bearing averageDownwindCOG = scaledAverageDownwindCOG[0] == null ? null : scaledAverageDownwindCOG[0].divide(likelihoodSum[0]);
+        double absWeightedAverageJibingAbgle = scaledAbsJibingAngleSum[0] / likelihoodSum[0];
         final double result;
         if (jibeClusterWeightedAverageSpeed != null) {
             double tackJibeSpeedRatioLikelihood = polarService.getConfidenceForTackJibeSpeedRatio(
@@ -674,13 +685,16 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             if (count[0] > 0) {
                 double averageJibeLikelihood = likelihoodSum[0] / count[0];
                 // Now search for head-up/bear-away cluster(s) to port and to starboard of cluster's weighted middle COG
-                // TODO continue here...
-//                final Bearing expectedUpwindStarboardTackCOG = averageDownwindCOG.add(new DegreeBearingImpl(-averageJibingAngleDeg/2.));
-//                double starboardHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(cluster, clusters, expectedUpwindStarboardTackCOG);
-//                final Bearing expectedUpwindPortTackCOG = averageDownwindCOG.add(new DegreeBearingImpl(averageJibingAngleDeg/2.));
-//                double portHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(cluster, clusters, expectedUpwindPortTackCOG);
-
-                result = averageJibeLikelihood * tackJibeSpeedRatioLikelihood;
+                final Bearing expectedDownwindStarboardTackCOG = averageDownwindCOG.add(new DegreeBearingImpl(+absWeightedAverageJibingAbgle/2.));
+                double starboardHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(
+                        clusters.stream(), expectedDownwindStarboardTackCOG);
+                final Bearing expectedDownwindPortTackCOG = averageDownwindCOG.add(new DegreeBearingImpl(-absWeightedAverageJibingAbgle/2.));
+                double portHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(
+                        clusters.stream(), expectedDownwindPortTackCOG);
+                result = Math.min(1.0, averageJibeLikelihood
+                        * (1.0 + BOOST_FACTOR_FOR_JIBE_TACK_SPEED_RATIO_LIKELIHOOD * tackJibeSpeedRatioLikelihood +
+                                BOOST_FACTOR_FOR_FULL_HEAD_UP_BEAR_AWAY_CLUSTER_LIKELIHOOD * starboardHeadUpBearAwayClusterLikelihood +
+                                BOOST_FACTOR_FOR_FULL_HEAD_UP_BEAR_AWAY_CLUSTER_LIKELIHOOD * portHeadUpBearAwayClusterLikelihood));
             } else {
                 throw new RuntimeException("Internal error: no maneuvers in jibe cluster candidate but still a valid weighted average speed "+jibeClusterWeightedAverageSpeed);
             }
