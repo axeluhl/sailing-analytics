@@ -2,13 +2,8 @@
 <!-- Could not determine the version of your GWT SDK; using the module DTD from GWT 1.6.4. You may want to change this. -->
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
 <module>
-  <stylesheet src="../base.css" />
-
   <!-- Inherit the core Web Toolkit stuff. -->
   <inherits name='com.google.gwt.user.User' />
-  <inherits name='com.google.gwt.user.theme.clean.Clean'/>
-  
-  <stylesheet src="../Login.css" />
   
   <inherits name='com.google.gwt.debug.Debug' />
   <inherits name="com.google.gwt.resources.Resources" />
