@@ -1,6 +1,7 @@
 package com.sap.sse.filestorage.impl;
 
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
@@ -24,6 +25,8 @@ import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
  */
 public class FileStorageManagementServiceImpl implements FileStorageManagementService,
     ServiceTrackerCustomizer<FileStorageService, FileStorageService> {
+    private final Logger logger = Logger.getLogger(FileStorageManagementServiceImpl.class.getName());
+    
     private FileStorageService active;
 
     private final TypeBasedServiceFinder<FileStorageService> serviceFinder;
@@ -80,6 +83,7 @@ public class FileStorageManagementServiceImpl implements FileStorageManagementSe
     @Override
     public FileStorageService addingService(ServiceReference<FileStorageService> reference) {
         FileStorageService service = context.getService(reference);
+        logger.info("Found new FileStorageService: adding properties to " + service.getName());
         for (Entry<String, String> property : propertyStore.readAllProperties(service.getName()).entrySet()) {
             service.setProperty(property.getKey(), property.getValue());
         }

@@ -5,8 +5,6 @@ import java.util.Map;
 /**
  * Store that can save property values of {@link FileStorageService}s.
  * 
- * TODO mongo store, register it, change startup level of filestorage bundle, replication
- * 
  * @author Fredrik Teschke
  *
  */
