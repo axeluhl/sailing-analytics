@@ -653,18 +653,33 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             BoatClass boatClass) {
         final int[] count = new int[1];
         final double[] likelihoodSum = new double[1];
+        final ScalableBearing[] scaledAverageDownwindCOG = new ScalableBearing[1];
         Stream<ManeuverClassification> jibeClustersContentPeeker = jibeClustersContent.peek((mc)->{
             count[0]++;
-            likelihoodSum[0] += mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.JIBE).getA();
+            final Double likelihood = mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.JIBE).getA();
+            likelihoodSum[0] += likelihood;
+            final ScalableBearing scaledCOG = new ScalableBearing(mc.getMiddleManeuverCourse()).multiply(likelihood);
+            if (scaledAverageDownwindCOG[0] == null) {
+                scaledAverageDownwindCOG[0] = scaledCOG;
+            } else {
+                scaledAverageDownwindCOG[0] = scaledAverageDownwindCOG[0].add(scaledCOG);
+            }
         });
         Speed jibeClusterWeightedAverageSpeed = getWeightedAverageSpeed(jibeClustersContentPeeker, ManeuverType.JIBE);
+        Bearing averageDownwindCOG = scaledAverageDownwindCOG[0] == null ? null : scaledAverageDownwindCOG[0].divide(likelihoodSum[0]);
         final double result;
         if (jibeClusterWeightedAverageSpeed != null) {
             double tackJibeSpeedRatioLikelihood = polarService.getConfidenceForTackJibeSpeedRatio(
                     tackClusterWeightedAverageSpeed, jibeClusterWeightedAverageSpeed, boatClass);
             if (count[0] > 0) {
                 double averageJibeLikelihood = likelihoodSum[0] / count[0];
-                // TODO search for head-up/bear-away cluster(s) to port and to starboard of cluster's weighted middle COG
+                // Now search for head-up/bear-away cluster(s) to port and to starboard of cluster's weighted middle COG
+                // TODO continue here...
+//                final Bearing expectedUpwindStarboardTackCOG = averageDownwindCOG.add(new DegreeBearingImpl(-averageJibingAngleDeg/2.));
+//                double starboardHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(cluster, clusters, expectedUpwindStarboardTackCOG);
+//                final Bearing expectedUpwindPortTackCOG = averageDownwindCOG.add(new DegreeBearingImpl(averageJibingAngleDeg/2.));
+//                double portHeadUpBearAwayClusterLikelihood = getLikelihoodOfBestFittingHeadUpBearAwayCluster(cluster, clusters, expectedUpwindPortTackCOG);
+
                 result = averageJibeLikelihood * tackJibeSpeedRatioLikelihood;
             } else {
                 throw new RuntimeException("Internal error: no maneuvers in jibe cluster candidate but still a valid weighted average speed "+jibeClusterWeightedAverageSpeed);

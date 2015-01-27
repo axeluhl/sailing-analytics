@@ -82,7 +82,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("OBMR 2012", "event_20121031_OBMR-OBMR_2012_VR_Fr_Fleet_1_2");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(222, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
+        assertEquals(222, average.getFrom().getDegrees(), 5.0);
     }
 
     @Test
@@ -91,7 +91,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_Race_2");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(235, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
+        assertEquals(235, average.getFrom().getDegrees(), 5.0);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_Race_3");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(245, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
+        assertEquals(245, average.getFrom().getDegrees(), 5.0);
     }
 
     @Test
@@ -109,7 +109,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_race_4");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(275, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
+        assertEquals(262, average.getFrom().getDegrees(), 5.0);
     }
     
     @Test
