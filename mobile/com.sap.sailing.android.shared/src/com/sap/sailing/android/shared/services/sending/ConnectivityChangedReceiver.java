@@ -35,7 +35,9 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
      */
     @Override
     public void onReceive(Context context, Intent intent) {
-        NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+        ConnectivityManager cService = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = (NetworkInfo) cService.getActiveNetworkInfo();
         if (!networkInfo.isConnected())
             return;
         context.startService(MessageSendingService.createSendDelayedIntent(context));

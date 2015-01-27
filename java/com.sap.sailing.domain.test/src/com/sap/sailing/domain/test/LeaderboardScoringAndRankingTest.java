@@ -72,11 +72,11 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     private ArrayList<Series> series;

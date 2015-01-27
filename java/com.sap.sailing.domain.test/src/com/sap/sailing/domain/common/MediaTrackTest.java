@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.common;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -7,8 +10,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import static org.junit.Assert.*;
 
 public class MediaTrackTest {
     

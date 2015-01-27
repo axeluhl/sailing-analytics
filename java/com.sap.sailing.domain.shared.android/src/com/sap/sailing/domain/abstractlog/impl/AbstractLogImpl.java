@@ -28,7 +28,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
  * {@link Track} implementation for {@link AbstractLogEvent}s.

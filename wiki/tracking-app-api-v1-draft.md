@@ -200,11 +200,13 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 * **course** Bearing in degrees.
 
 
-## Get Team Information (including team image)
+## Get Team Information of competitor (including team image)
+
+**This Rest-Endpoint is not in the master-branch yet**
 
 Allows to retrieve team information for the team of a certain competitor
 
-**Path:** ``team/{competitor-id}``
+**Path:** ``{competitor-id}/team``
 
 **Verb:** ``GET``
 
@@ -228,15 +230,25 @@ Allows to retrieve team information for the team of a certain competitor
 
 ## Set Team Image
 
+**This Rest-Endpoint is not in the master-branch yet**
+
 Set the team image of a certain competitor
 
-**Path:** ``team/{competitor-id}/image``
+**Path:** ``competitors/{competitor-id}/team/image``
 
 **Verb:** ``POST``
 
-**Request:**
+Binary data (not multipart) with ``Content-Type`` of ``image/jpeg`` or ``image/png``
+
+e.g.
+```
+$ curl -H "Content-Type:image/jpeg" --data-binary @<path-to-jpeg> \
+   http://127.0.0.1:8888/sailingserver/api/v1/competitors/<competitor-id>/team/image
+```
+
+**Response:**
 ```
 {
-  "imageUri":"http://images.forbes.com/media/lists/companies/google_200x200.jpg"
+  "teamImageUri" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
 }
 ```

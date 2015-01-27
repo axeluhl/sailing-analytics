@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class ArrayListNavigableSetTest {
     @Test

@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -36,6 +35,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

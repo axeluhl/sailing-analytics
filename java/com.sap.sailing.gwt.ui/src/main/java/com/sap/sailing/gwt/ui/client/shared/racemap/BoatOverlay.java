@@ -7,7 +7,6 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -16,6 +15,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 
 /**
@@ -155,19 +155,14 @@ public class BoatOverlay extends CanvasOverlayV3 {
     public Util.Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
         // the minimum boat length is related to the hull of the boat, not the overall length 
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
-
         double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection,
                 LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg), boatClass.getHullLengthInMeters());
-        
-        if(boatHullLengthInPixel < minBoatHullLengthInPx) {
+        if (boatHullLengthInPixel < minBoatHullLengthInPx) {
             boatHullLengthInPixel = minBoatHullLengthInPx;
         }
-
         double boatSizeScaleFactor = boatHullLengthInPixel / (boatVectorGraphics.getHullLengthInPx());
-
         // as the canvas contains the whole boat the canvas size relates to the overall length, not the hull length 
         double scaledCanvasSize = (boatVectorGraphics.getOverallLengthInPx()) * boatSizeScaleFactor; 
-
         return new Util.Pair<Double, Size>(boatSizeScaleFactor, Size.newInstance(scaledCanvasSize + scaledCanvasSize / 2.0, scaledCanvasSize + scaledCanvasSize / 2.0));
     }
 }

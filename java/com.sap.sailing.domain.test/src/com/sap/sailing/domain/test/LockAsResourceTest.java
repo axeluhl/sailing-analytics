@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.sap.sailing.util.AutoCloseableReadLock;
-import com.sap.sailing.util.AutoCloseableWriteLock;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.AutoCloseableReadLock;
+import com.sap.sse.util.AutoCloseableWriteLock;
 
 public class LockAsResourceTest {
     @Test

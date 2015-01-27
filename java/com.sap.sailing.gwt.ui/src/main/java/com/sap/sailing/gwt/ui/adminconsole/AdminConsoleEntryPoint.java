@@ -19,8 +19,6 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -40,19 +38,17 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     private Set<LeaderboardsDisplayer> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
 
-    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
     
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         createUI();
     }
      
     private void createUI() {
-        AdminConsolePanel panel = new AdminConsolePanel(getUserService(), sailingService, persistentAlertLabel,
+        AdminConsolePanel panel = new AdminConsolePanel(getUserService(), sailingService, 
                 getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this, SecurityStylesheetResources.INSTANCE.css());
         BetterDateTimeBox.initialize();
         regattasDisplayers = new HashSet<>();

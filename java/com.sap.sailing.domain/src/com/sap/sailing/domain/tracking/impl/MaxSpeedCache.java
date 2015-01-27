@@ -12,12 +12,12 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
  * Re-calculating the maximum speed over a {@link GPSFixTrack} is time consuming. When the track grows the way it

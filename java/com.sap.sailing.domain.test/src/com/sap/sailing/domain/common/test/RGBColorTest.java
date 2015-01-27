@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.RGBColor;
+import com.sap.sse.common.impl.RGBColor;
 
 public class RGBColorTest {
     /**

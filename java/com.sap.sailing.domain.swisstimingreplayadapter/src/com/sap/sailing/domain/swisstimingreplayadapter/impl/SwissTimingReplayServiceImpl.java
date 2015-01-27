@@ -24,7 +24,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.util.ByteArrayOutputStreamWithVisibleBuffer;
+import com.sap.sse.util.ByteArrayOutputStreamWithVisibleBuffer;
 
 public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
 

@@ -18,7 +18,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeed;
@@ -44,6 +43,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
  * Receives Igtimi {@link Fix}es and tries to generate a {@link Wind} object from each {@link AWS} fix. For this to
