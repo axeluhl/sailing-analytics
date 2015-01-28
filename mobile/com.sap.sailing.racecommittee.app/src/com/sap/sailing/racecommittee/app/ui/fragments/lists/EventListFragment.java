@@ -5,6 +5,7 @@ import java.util.Collection;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 
+import android.os.Bundle;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -13,6 +14,11 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 public class EventListFragment extends NamedListFragment<EventBase> {
+
+    public static EventListFragment newInstance() {
+        EventListFragment fragment = new EventListFragment();
+        return fragment;
+    }
 
     @Override
     protected ItemSelectedListener<EventBase> attachListener(Activity activity) {
@@ -23,11 +29,6 @@ public class EventListFragment extends NamedListFragment<EventBase> {
 
         throw new IllegalStateException(String.format("%s cannot be attached to a instance of %s",
                 EventListFragment.class.getName(), activity.getClass().getName()));
-    }
-
-    @Override
-    protected String getHeaderText() {
-        return getString(R.string.label_login_events);
     }
 
     @Override

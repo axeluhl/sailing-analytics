@@ -96,7 +96,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {
             update(state);
-        };
+        }
 
         public void update(ReadonlyRaceState state) {
             dataChanged(state);
@@ -107,16 +107,16 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
     public NavigationDrawerFragment() {
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
-        mManagedRacesById = new HashMap<Serializable, ManagedRace>();
-        mRacesByGroup = new TreeMap<BoatClassSeriesFleet, List<ManagedRace>>(new BoatClassSeriesDataFleetComparator());
-        mViewItems = new ArrayList<RaceListDataType>();
+        mManagedRacesById = new HashMap<>();
+        mRacesByGroup = new TreeMap<>(new BoatClassSeriesDataFleetComparator());
+        mViewItems = new ArrayList<>();
     }
 
     private void dataChanged(ReadonlyRaceState changedState) {
         List<RaceListDataType> adapterItems = mAdapter.getItems();
-        for (int i = 0; i < adapterItems.size(); ++i) {
-            if (adapterItems.get(i) instanceof RaceListDataTypeRace) {
-                RaceListDataTypeRace raceView = (RaceListDataTypeRace) adapterItems.get(i);
+        for (RaceListDataType adapterItem : adapterItems) {
+            if (adapterItem instanceof RaceListDataTypeRace) {
+                RaceListDataTypeRace raceView = (RaceListDataTypeRace) adapterItem;
                 ManagedRace race = raceView.getRace();
                 if (changedState != null && race.getState().equals(changedState)) {
                     boolean allowUpdateIndicator = !raceView.getRace().equals(mSelectedRace);
@@ -128,7 +128,6 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         mAdapter.notifyDataSetChanged();
     }
 
-    @SuppressWarnings("deprecation")
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void filterChanged() {
         mAdapter.sort(new RaceListDataTypeComparator());
@@ -149,7 +148,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
             Drawable drawable = getResources().getDrawable(R.drawable.nav_drawer_tab_button);
             switch (getFilterMode()) {
             case ALL:
-                mAll.setTextColor(getResources().getColor(R.color.white));
+                mAll.setTextColor(getResources().getColor(R.color.orange));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     mAll.setBackground(drawable);
                 } else {

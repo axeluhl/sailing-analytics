@@ -12,10 +12,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AnticipateOvershootInterpolator;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.Button;
 import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -54,64 +51,72 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
     private final static String TAG = LoginActivity.class.getName();
-
-    // oben links
+    private final int RQS_GooglePlayServices = 1;
+    private final PositionListFragment positionFragment;
+    private Button sign_in;
+    private String eventName = null;
+    private String courseName = null;
+    private String positionName = null;
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
             final Serializable eventId = event.getId();
+            eventName = event.getName();
             ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
             preferences.setEventID(eventId);
             setupDataManager(eventId);
             showCourseAreaListFragment(eventId);
         }
     };
-
-    // oben rechts
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
 
         public void itemSelected(Fragment sender, CourseArea courseArea) {
+            courseName = courseArea.getName();
             ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
             ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
             selectCourseArea(courseArea.getId());
         }
     };
-
-    private final int RQS_GooglePlayServices = 1;
-    private PositionListFragment mPositionListFragment;
-    private ProgressBar mProgressSpinner;
     private Serializable mSelectedEvent;
     private UUID mSelectedCourseAreaUUID;
 
     public LoginActivity() {
-        // mLoginDialog = new LoginDialog();
-        mPositionListFragment = new PositionListFragment();
-        // mSelectedCourseArea = null;
+        positionFragment = PositionListFragment.newInstance();
     }
 
     private void addAreaPositionListFragment() {
+        positionName = null;
+        if (sign_in != null) {
+            sign_in.setEnabled(false);
+        }
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.login_view_bottom_container, mPositionListFragment, AreaPositionListFragmentTag);
+        transaction.replace(R.id.position_fragment, positionFragment, AreaPositionListFragmentTag);
         transaction.commitAllowingStateLoss();
         ExLog.i(this, "LoginActivity", "PositionFragment created.");
     }
 
     private void addCourseAreaListFragment(Serializable eventId) {
-        Bundle args = new Bundle();
-        args.putSerializable(AppConstants.EventIdTag, eventId);
+        courseName = null;
+        positionName = null;
+        if (sign_in != null) {
+            sign_in.setEnabled(false);
+        }
         mSelectedEvent = eventId;
-        hideAreaPositionListFragment();
-        Fragment fragment = new CourseAreaListFragment();
-        fragment.setArguments(args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.login_view_right_container, fragment, CourseAreaListFragmentTag);
+        transaction.replace(R.id.area_fragment, CourseAreaListFragment.newInstance(eventId), CourseAreaListFragmentTag);
         transaction.commitAllowingStateLoss();
         ExLog.i(this, "LoginActivity", "CourseFragment created.");
     }
 
     private void addEventListFragment() {
+        eventName = null;
+        courseName = null;
+        positionName = null;
+        if (sign_in != null) {
+            sign_in.setEnabled(false);
+        }
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.login_view_left_container, new EventListFragment());
+        transaction.replace(R.id.event_fragment, EventListFragment.newInstance());
         transaction.commitAllowingStateLoss();
     }
 
@@ -123,16 +128,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         return eventSelectionListener;
     }
 
-    private void hideAreaPositionListFragment() {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.login_view_bottom_container, new Fragment(), AreaPositionListFragmentTag);
-        transaction.commitAllowingStateLoss();
-        ExLog.i(this, "LoginActivity", "PositionFragment created.");
-    }
-
-    /**
-     * Called when the activity is first created.
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,7 +135,21 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         setContentView(R.layout.login_view);
         setSupportProgressBarIndeterminateVisibility(false);
 
-//        addEventListFragment();
+        sign_in = (Button) findViewById(R.id.login_submit);
+        if (sign_in != null) {
+            sign_in.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    preferences.isSetUp(true);
+                    Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
+                    intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
+                    intent.putExtra(AppConstants.EventIdTag, mSelectedEvent);
+                    startActivity(intent);
+                }
+            });
+        }
+
+        addEventListFragment();
 
         UUID courseUUID = preferences.getCourseUUID();
         if (courseUUID != new UUID(0, 0)) {
@@ -150,15 +159,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         Serializable eventId = preferences.getEventID();
         if (eventId != null) {
             mSelectedEvent = eventId;
-            // setupDataManager(eventId);
-            // showCourseAreaListFragment(eventId);
         }
-
-        // // on first create add event list fragment
-        // if (savedInstanceState == null) {
-        // ExLog.i(this, TAG, "Seems to be first start. Creating event fragment.");
-        // addEventListFragment();
-        // }
 
         // sets up the global configuration and adds it to the preferences
         setupDataManager(null);
@@ -213,13 +214,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
 
         preferences.setLoginType(type);
-        preferences.isSetUp(true);
 
-        ExLog.i(LoginActivity.this, TAG, "mSelectedEvent : " + mSelectedEvent);
-        Intent message = new Intent(LoginActivity.this, RacingActivity.class);
-        message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-        message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
-        fadeActivity(message);
+        positionName = positionFragment.getAuthor().getName();
+        if (sign_in != null) {
+            sign_in.setEnabled(true);
+        }
     }
 
     @Override
@@ -318,4 +317,15 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         addCourseAreaListFragment(eventId);
     }
 
+    public String getEventName() {
+        return eventName;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public String getPositionName() {
+        return positionName;
+    }
 }

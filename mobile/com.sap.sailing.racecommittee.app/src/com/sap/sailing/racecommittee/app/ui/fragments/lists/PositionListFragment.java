@@ -8,9 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -19,16 +17,21 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSe
 
 public class PositionListFragment extends LoggableListFragment {
 
-    private LoginType selectedLoginType;
     private LogEventAuthorImpl author;
     private AppPreferences preferences;
 
     private PositionSelectedListenerHost host;
 
+    public PositionListFragment() {}
+
+    public static PositionListFragment newInstance() {
+        PositionListFragment fragment = new PositionListFragment();
+        return fragment;
+    }
+
     @Override
     public void onResume() {
-
-        final ArrayList<String> values = new ArrayList<String>();
+        final ArrayList<String> values = new ArrayList<>();
         values.add(getString(R.string.login_type_officer_on_start_vessel));
         values.add(getString(R.string.login_type_officer_on_finish_vessel));
         values.add(getString(R.string.login_type_shore_control));
@@ -36,51 +39,28 @@ public class PositionListFragment extends LoggableListFragment {
 
         this.preferences = AppPreferences.on(getActivity().getApplicationContext());
 
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity().getBaseContext(),
-                R.layout.login_list_item, R.id.txt_list_item, values);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getBaseContext(),
+                R.layout.login_list_item, R.id.list_item, values);
         setListAdapter(adapter);
+        getListView().setDivider(null);
 
-        if (getActivity() instanceof PositionSelectedListenerHost) {
-            this.host = (PositionSelectedListenerHost) getActivity();
-        }
+        host = (PositionSelectedListenerHost) getActivity();
 
         super.onResume();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
+        View view = super.onCreateView(inflater, container, savedInstanceState);
         ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
-        parent.addView(v, 1);
-        TextView txt_header = (TextView) parent.findViewById(R.id.txt_listHeader);
-        if (txt_header != null) {
-            txt_header.setText(getHeaderText());
-            txt_header.setVisibility(View.VISIBLE);
-        } else {
-            ExLog.i(getActivity(), 1, "oh noes txt_listHeader is null!");
-        }
+        parent.addView(view, 1);
         return parent;
     }
-
-    // @Override
-    // public void onViewCreated(View view, Bundle savedInstanceState) {
-    // TextView txt_header = (TextView) view.findViewById(R.id.txt_listHeader);
-    // if ( txt_header != null ){
-    // txt_header.setText(getHeaderText());
-    // txt_header.setVisibility(View.VISIBLE);
-    // } else {
-    // ExLog.i(getActivity(), 1, "oh noes txt_listHeader is null!");
-    // }
-    //
-    //
-    // super.onViewCreated(view, savedInstanceState);
-    // }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
 
-        // ExLog.i(getActivity(),position, "PositionListFragment");
-
+        LoginType selectedLoginType;
         switch (position) {
         // see loginTypeDescriptions for the indices of the login types
         case 0:
@@ -108,15 +88,12 @@ public class PositionListFragment extends LoggableListFragment {
             break;
         }
         preferences.setAuthor(author);
-        host.onPositionSelected(selectedLoginType);
+        if (host != null) {
+            host.onPositionSelected(selectedLoginType);
+        }
     }
 
     public LogEventAuthorImpl getAuthor() {
         return author;
     }
-
-    protected String getHeaderText() {
-        return getString(R.string.label_login_position);
-    }
-
 }

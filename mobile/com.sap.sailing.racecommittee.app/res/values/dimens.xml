@@ -9,5 +9,10 @@
 	<dimen name="listview_row_padding">20dp</dimen>
 	
 	<dimen name="preference_margin">0dp</dimen>
-    
+
+    <dimen name="thin_line">1dp</dimen>
+    <dimen name="thick_line">2dp</dimen>
+
+    <dimen name="default_padding">25dp</dimen>
+
 </resources>

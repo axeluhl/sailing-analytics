@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -36,28 +35,20 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     private ItemSelectedListener<T> listener;
     private NamedArrayAdapter<T> listAdapter;
-    private TextView txt_header;
 
     private View lastSelected;
     private int mSelectedIndex = -1;
 
     protected ArrayList<T> namedList;
 
-    protected void addHeader() {
-        txt_header.setText(getHeaderText());
-        txt_header.setVisibility(View.VISIBLE);
-    }
-
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
 
     protected NamedArrayAdapter<T> createAdapter(Context context, ArrayList<T> items) {
-        return new NamedArrayAdapter<T>(context, items);
+        return new NamedArrayAdapter<>(context, items);
     }
 
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(
             ReadonlyDataManager manager);
-
-    protected abstract String getHeaderText();
 
     private void loadItems() {
         setListShown(false);
@@ -68,9 +59,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        addHeader();
-
-        namedList = new ArrayList<T>();
+        namedList = new ArrayList<>();
         listAdapter = createAdapter(getActivity(), namedList);
         if (savedInstanceState != null) {
             mSelectedIndex = savedInstanceState.getInt("position", -1);
@@ -95,10 +84,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
+        View view = super.onCreateView(inflater, container, savedInstanceState);
         ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
-        parent.addView(v, 1);
-        txt_header = (TextView) parent.findViewById(R.id.txt_listHeader);
+        parent.addView(view, 1);
         return parent;
     }
 
@@ -152,25 +140,16 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     private void setStyleClicked(View v) {
         // reset last styles:
         if (lastSelected != null) {
-            TextView lastText = (TextView) lastSelected.findViewById(R.id.txt_list_item);
+            TextView lastText = (TextView) lastSelected.findViewById(R.id.list_item);
             if (lastText != null) {
                 lastText.setTypeface(Typeface.DEFAULT);
-            }
-
-            ImageView lastImg = (ImageView) lastSelected.findViewById(R.id.iv_check);
-            if (lastImg != null) {
-                lastImg.setVisibility(View.INVISIBLE);
             }
         }
 
         // set new styles
-        TextView txt_listitem = (TextView) v.findViewById(R.id.txt_list_item);
+        TextView txt_listitem = (TextView) v.findViewById(R.id.list_item);
         if (txt_listitem != null) {
             txt_listitem.setTypeface(Typeface.DEFAULT_BOLD);
-        }
-        ImageView iv_check = (ImageView) v.findViewById(R.id.iv_check);
-        if (iv_check != null) {
-            iv_check.setVisibility(View.VISIBLE);
         }
 
         lastSelected = v;

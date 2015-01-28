@@ -24,10 +24,18 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
 
     private Serializable parentEventId;
 
+    public static CourseAreaListFragment newInstance(Serializable eventId) {
+        CourseAreaListFragment fragment = new CourseAreaListFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(AppConstants.EventIdTag, eventId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.parentEventId = getArguments().getSerializable(AppConstants.EventIdTag);
+        parentEventId = getArguments().getSerializable(AppConstants.EventIdTag);
     }
     
     @Override
@@ -44,11 +52,6 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
 
         throw new IllegalStateException(String.format("%s cannot be attached to a instance of %s",
                 CourseAreaListFragment.class.getName(), activity.getClass().getName()));
-    }
-
-    @Override
-    protected String getHeaderText() {
-        return getString(R.string.label_login_course_area);
     }
 
     @Override

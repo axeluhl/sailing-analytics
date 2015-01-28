@@ -275,4 +275,6 @@
     <string name="login_text" translatable="false">Welcome to SAP Sailing\nRace Committee App</string>
     <string name="login_sub_text" translatable="false">Where are you?</string>
     <string name="empty"></string>
+    <string name="sign_up" translatable="false">Sign Me Up</string>
+
 </resources>
