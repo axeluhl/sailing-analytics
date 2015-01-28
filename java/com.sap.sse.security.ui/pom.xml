@@ -10,9 +10,6 @@
 	</parent>
 	<artifactId>com.sap.sse.security.ui</artifactId>
 	<packaging>eclipse-plugin</packaging>
-        <properties>
-            <gwt.version>2.6.1</gwt.version>
-        </properties>
 	<dependencies>
 		<dependency>
 			<groupId>javax.validation</groupId>
