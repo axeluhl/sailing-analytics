@@ -65,6 +65,7 @@
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xmlexport</module>
+		<module>com.sap.sailing.xmlexport.test</module>
 		<module>com.google.gwt.osgi</module>
 		<module>com.tractrac.clientmodule</module>
 		<module>org.json.simple</module>

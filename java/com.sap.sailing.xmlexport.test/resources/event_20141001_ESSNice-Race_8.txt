@@ -1,0 +1,656 @@
+stored-uri:datafiles/event_20141001_ESSNice-Race_8.mtb
+StartReplay:1
+
+// Input from params_static:
+
+// Input from event_parameters:
+
+DefaultPanel:
+ReCalcDirAndSpeed:1
+CompMarkerUUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+CodanIsSponsor:0
+DefaultTailLength:60
+APzoomChangeTime:2500
+disableAutoProduce:0
+autoProduce:0
+APstartLineShowOfLeg:0.25
+APsideOfStartLine:0.30
+APstartSwitch:0.8
+APwholeLegBehindMarks:0.15
+APmarkSwitch:0.13
+APmarkZoomBehindMarks:0.10
+APmarkZoomInFrontOfMarks:0.20
+PopupMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+ManualUrl:http://www.tractrac.com/files/userguide_sailing.pdf
+//live-uri:tcp://192.168.1.203:4400
+//stored-uri:tcp://192.168.1.203:4401
+Marker1UUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+Marker1Type:RGBMarkerFactory
+Marker1Directional:1
+Marker1Image:markers/boat_FF0000_big.png
+Marker1Length:5
+Marker1MinPixelSize:30
+Startlocation:7.269026586914038,43.68669104379883
+MaxDiffTime:1200
+MaxMetersPerSecond:20
+PrecisionMeters:20
+ShortAvgTime:180
+LongAvgTime:900
+TimeZone:2
+CompMarkerTimeout:60
+FramesPerSecond:8
+replayspeedup:5
+MatchRaceClock:0
+MatchRaceClockNo:3
+MatchRaceClockSpacing:300
+Minimap:1
+MinimapUseLayers:2
+Minimapgeorect:7.241326904296898,43.705766636035165,7.296516491699208,43.67209091170523
+MinimapMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4UUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4Type:RGBmarkerFactory
+Marker4Directional:1
+Marker4Image:markers/boat_FF0000_small.png
+MetersPerPixel:18
+MetersPerPixelMax:30
+MetersPerPixelMin:0.2
+isMatchRace:0
+DefaultDistanceUnits:meters
+weatherEnabled:0
+DefaultSpeedUnits:KmH
+showRaceClock:1
+BackGroundImage:graphics/background.jpg
+DisableRotation:0
+ControlPointMarkerRadius:13
+disableselection:0
+disableleaderline:0
+DisableChangeRace:0
+PopUpRow1Name:
+PopUpRow1Type:Name
+PopUpRow2Name:Knots
+PopUpRow2Type:BoatSpeed
+PopUpRow3Name:Ranking
+PopUpRow3Type:RowNumber
+PopUpRow4Name:Sail
+PopUpRow4Type:Ini
+PopUpRow5Name:After
+PopUpRow5Type:BoatAfter
+WindEstimator:0
+MapUrl:http://tile.traclive.dk/ttm
+ResultColumn1Name:#
+ResultColumn1Size:20
+ResultColumn1Type:RowNumber
+ResultColumn2Name:sail
+ResultColumn2Size:45
+ResultColumn2Type:Ini
+ResultColumn3Name:name
+ResultColumn3Size:110
+ResultColumn3Type:Name
+ResultColumn4Name:after
+ResultColumn4Size:45
+ResultColumn4Type:BoatAfter
+ResultColumn5Name:kts
+ResultColumn5Size:40
+ResultColumn5Type:BoatSpeed
+DisableLeaderboard:0
+DisableAnalysis:0
+TableFontSize:11
+compInitialsFontSize:11
+AutoRotate:0
+MassStart:0
+SegmentFile:segments.php
+StartType:Mass
+RaceHandicapSystem:NONE
+TeamCompetitionType:NONE
+LiveDelaySecs: 6
+
+//-------- AUTO GENERATED PARAMETERS START ----------------
+
+EventID:8638bc00-2aad-0132-18bc-448a5b8481d8
+EventName:ESS Nice 2014
+EventDB:event_20141001_ESSNice
+EventStartTime:2014-09-30 22:00:00
+EventEndTime:2014-10-05 21:00:00
+EventType:a1b74ca0-fdd8-11dc-8811-005056c00008
+
+RaceID:1f2d92c0-2bc6-0132-1fba-10b11c4ed8fd
+RaceName:Race 8
+RaceStartTime:2014-10-02 15:28:56
+RaceEndTime:
+RaceTrackingStartTime:2014-10-02 15:22:10
+RaceTrackingEndTime:2014-10-02 15:47:13
+RaceDefaultRouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+RaceHandicapSystem:NONE
+
+Image1UUID:64a7b348-83db-11e2-88c0-10bf48d758ce
+Image1Type:Logo
+Image1Description:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/SUI.gif
+Image1Image:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/SUI.gif
+
+Image2UUID:64c3a8fa-83db-11e2-88c0-10bf48d758ce
+Image2Type:Logo
+Image2Description:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/NZL.gif
+Image2Image:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/NZL.gif
+
+Image3UUID:651130a2-83db-11e2-88c0-10bf48d758ce
+Image3Type:Logo
+Image3Description:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/KOR.gif
+Image3Image:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/KOR.gif
+
+Image4UUID:653c1ab0-83db-11e2-88c0-10bf48d758ce
+Image4Type:Logo
+Image4Description:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/AUT.gif
+Image4Image:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/AUT.gif
+
+Image5UUID:65637da8-83db-11e2-88c0-10bf48d758ce
+Image5Type:Logo
+Image5Description:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/DEN.gif
+Image5Image:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/DEN.gif
+
+Image6UUID:65875138-83db-11e2-88c0-10bf48d758ce
+Image6Type:Logo
+Image6Description:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/OMN.gif
+Image6Image:http://germanmaster.traclive.dk/events/event_20100806_SailforGol/images/OMN.gif
+
+Class1UUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Class1Name:Extreme40
+
+Team1UUID:649f1dbe-83db-11e2-88c0-10bf48d758ce
+Team1Name:TeamA
+Team1Comp1UUID:648bd4f2-83db-11e2-88c0-10bf48d758ce
+
+Team2UUID:64bf0854-83db-11e2-88c0-10bf48d758ce
+Team2Name:TeamB
+Team2Comp1UUID:64bbff7e-83db-11e2-88c0-10bf48d758ce
+
+Team3UUID:64dd7988-83db-11e2-88c0-10bf48d758ce
+Team3Name:TeamC
+Team3Comp1UUID:64da7c24-83db-11e2-88c0-10bf48d758ce
+
+Team4UUID:64ffc402-83db-11e2-88c0-10bf48d758ce
+Team4Name:TeamD
+
+Team5UUID:65351d82-83db-11e2-88c0-10bf48d758ce
+Team5Name:TeamE
+Team5Comp1UUID:65322500-83db-11e2-88c0-10bf48d758ce
+
+Team6UUID:655ed82a-83db-11e2-88c0-10bf48d758ce
+Team6Name:TeamF
+Team6Comp1UUID:655bd56c-83db-11e2-88c0-10bf48d758ce
+
+Team7UUID:65829fa8-83db-11e2-88c0-10bf48d758ce
+Team7Name:TeamG
+Team7Comp1UUID:657fa5a0-83db-11e2-88c0-10bf48d758ce
+
+Team8UUID:e4459a20-83db-11e2-88c0-10bf48d758ce
+Team8Name:TeamH
+
+Team9UUID:a73aabc0-d6d6-0130-8be2-60a44ce903c3
+Team9Name:TeamI
+Team9Comp1UUID:93085e80-7ad9-0131-e5b3-60a44ce903c3
+
+Team10UUID:bbf81f60-d6d6-0130-8be3-60a44ce903c3
+Team10Name:TeamJ
+Team10Comp1UUID:f097f4f0-7ad9-0131-e5b4-60a44ce903c3
+
+Team11UUID:65659280-eda3-0130-c5c0-10b11c4ed8fd
+Team11Name:TeamK
+Team11Comp1UUID:19dc3eb0-7ada-0131-e5b5-60a44ce903c3
+
+Team12UUID:9ee14560-77af-0131-e5af-60a44ce903c3
+Team12Name:TeamL
+Team12Comp1UUID:5e15e7c0-7ada-0131-e5b6-60a44ce903c3
+
+Team13UUID:b9677300-7ad7-0131-e5b0-60a44ce903c3
+Team13Name:TeamM
+Team13Comp1UUID:84e68b70-7ada-0131-e5b7-60a44ce903c3
+
+Team14UUID:c9689a00-7ad7-0131-e5b1-60a44ce903c3
+Team14Name:TeamN
+
+Team15UUID:d5712f30-7ad7-0131-e5b2-60a44ce903c3
+Team15Name:TeamO
+
+Comp1UUID:648bd4f2-83db-11e2-88c0-10bf48d758ce
+Comp1Name:Alinghi
+Comp1NameShort:Alinghi
+Comp1Color:00FF00
+Comp1Nationality:SUI
+Comp1Description:
+Comp1Handicap:1.0000000000
+Comp1HandicapDistance:0.00000
+Comp1StartTime:2014-10-02 15:28:56
+Comp1PictureUUID:64a7b348-83db-11e2-88c0-10bf48d758ce
+Comp1ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp1RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp2UUID:64bbff7e-83db-11e2-88c0-10bf48d758ce
+Comp2Name:GAC Pindar
+Comp2NameShort:GAC Pindar
+Comp2Color:000080
+Comp2Nationality:AUS
+Comp2Description:
+Comp2Handicap:1.0000000000
+Comp2HandicapDistance:0.00000
+Comp2StartTime:2014-10-02 15:28:56
+Comp2PictureUUID:64c3a8fa-83db-11e2-88c0-10bf48d758ce
+Comp2ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp2RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp3UUID:64da7c24-83db-11e2-88c0-10bf48d758ce
+Comp3Name:Realteam by Realstone
+Comp3NameShort:Realstone
+Comp3Color:000000
+Comp3Nationality:AFG
+Comp3Description:
+Comp3Handicap:1.0000000000
+Comp3HandicapDistance:0.00000
+Comp3StartTime:2014-10-02 15:28:56
+Comp3PictureUUID:64a7b348-83db-11e2-88c0-10bf48d758ce
+Comp3ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp3RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp4UUID:65322500-83db-11e2-88c0-10bf48d758ce
+Comp4Name:Red Bull Sailing Team
+Comp4NameShort:Red Bull
+Comp4Color:008080
+Comp4Nationality:AUT
+Comp4Description:
+Comp4Handicap:1.0000000000
+Comp4HandicapDistance:0.00000
+Comp4StartTime:2014-10-02 15:28:56
+Comp4PictureUUID:653c1ab0-83db-11e2-88c0-10bf48d758ce
+Comp4ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp4RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp5UUID:655bd56c-83db-11e2-88c0-10bf48d758ce
+Comp5Name:SAP Extreme Sailing Team
+Comp5NameShort:SAP
+Comp5Color:FFFFFF
+Comp5Nationality:DEN
+Comp5Description:
+Comp5Handicap:1.0000000000
+Comp5HandicapDistance:0.00000
+Comp5StartTime:2014-10-02 15:28:56
+Comp5PictureUUID:65637da8-83db-11e2-88c0-10bf48d758ce
+Comp5ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp5RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp6UUID:657fa5a0-83db-11e2-88c0-10bf48d758ce
+Comp6Name:The Wave, Muscat
+Comp6NameShort:The Wave
+Comp6Color:800080
+Comp6Nationality:OMA
+Comp6Description:
+Comp6Handicap:1.0000000000
+Comp6HandicapDistance:0.00000
+Comp6StartTime:2014-10-02 15:28:56
+Comp6PictureUUID:65875138-83db-11e2-88c0-10bf48d758ce
+Comp6ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp6RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp7UUID:93085e80-7ad9-0131-e5b3-60a44ce903c3
+Comp7Name:Emirates Team New Zealand
+Comp7NameShort:Emirates NZ
+Comp7Color:CC9900
+Comp7Nationality:NZL
+Comp7Description:
+Comp7Handicap:1.0000000000
+Comp7HandicapDistance:0.00000
+Comp7StartTime:2014-10-02 15:28:56
+Comp7PictureUUID:64c3a8fa-83db-11e2-88c0-10bf48d758ce
+Comp7ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp7RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp8UUID:f097f4f0-7ad9-0131-e5b4-60a44ce903c3
+Comp8Name:Gazprom Team Russia
+Comp8NameShort:Team Russia
+Comp8Color:999900
+Comp8Nationality:RUS
+Comp8Description:
+Comp8Handicap:1.0000000000
+Comp8HandicapDistance:0.00000
+Comp8StartTime:2014-10-02 15:28:56
+Comp8ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp8RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp9UUID:19dc3eb0-7ada-0131-e5b5-60a44ce903c3
+Comp9Name:Groupama sailing team
+Comp9NameShort:Groupama
+Comp9Color:33CC00
+Comp9Nationality:AFG
+Comp9Description:
+Comp9Handicap:1.0000000000
+Comp9HandicapDistance:0.00000
+Comp9StartTime:2014-10-02 15:28:56
+Comp9ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp9RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp10UUID:5e15e7c0-7ada-0131-e5b6-60a44ce903c3
+Comp10Name:J.P. Morgan BAR
+Comp10NameShort:J.P. Morgan
+Comp10Color:CCFF00
+Comp10Nationality:GBR
+Comp10Description:
+Comp10Handicap:1.0000000000
+Comp10HandicapDistance:0.00000
+Comp10StartTime:2014-10-02 15:28:56
+Comp10ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp10RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+Comp11UUID:84e68b70-7ada-0131-e5b7-60a44ce903c3
+Comp11Name:Oman Air
+Comp11NameShort:Oman Air
+Comp11Color:CCFF99
+Comp11Nationality:OMA
+Comp11Description:
+Comp11Handicap:1.0000000000
+Comp11HandicapDistance:0.00000
+Comp11StartTime:2014-10-02 15:28:56
+Comp11PictureUUID:65875138-83db-11e2-88c0-10bf48d758ce
+Comp11ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
+Comp11RouteUUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+
+ControlPoint1UUID:1100ea60-7adb-0131-e5b8-60a44ce903c3
+ControlPoint1Name:Red-Green
+ControlPoint1HasTwoPoints:1
+ControlPoint1ShortName:RG
+ControlPoint1DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Red###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Red###BREAKLINE###P1.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Green###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Green###BREAKLINE###P2.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint1Mark1Lon:7.271370
+ControlPoint1Mark1Lat:43.688202
+ControlPoint1Mark2Lon:7.271297
+ControlPoint1Mark2Lat:43.686710
+
+ControlPoint2UUID:1286f15e-83be-11e2-88c0-10bf48d758ce
+ControlPoint2Name:Blue
+ControlPoint2HasTwoPoints:0
+ControlPoint2ShortName:Bl
+ControlPoint2DataSheet:Name=Blue###BREAKLINE###Type=Buoy###BREAKLINE###Color=Blue###BREAKLINE###Shape=Conical
+ControlPoint2Mark1Lon:7.269017
+ControlPoint2Mark1Lat:43.687584
+
+ControlPoint3UUID:1a94c6a0-7adc-0131-e5f4-60a44ce903c3
+ControlPoint3Name:Black Conical-Blue
+ControlPoint3HasTwoPoints:1
+ControlPoint3ShortName:BB
+ControlPoint3DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Blue###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Blue###BREAKLINE###P2.UUID=1286f15e-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint3Mark1Lon:7.272550
+ControlPoint3Mark1Lat:43.691948
+ControlPoint3Mark2Lon:7.269017
+ControlPoint3Mark2Lat:43.687584
+
+ControlPoint4UUID:2ce99970-2c47-0132-20ce-10b11c4ed8fd
+ControlPoint4Name:Black Conical-White P
+ControlPoint4HasTwoPoints:1
+ControlPoint4ShortName:F
+ControlPoint4DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=White###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=White P###BREAKLINE###P2.UUID=e9ec42f8-83bd-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint4Mark1Lon:7.272550
+ControlPoint4Mark1Lat:43.691948
+ControlPoint4Mark2Lon:7.271143
+ControlPoint4Mark2Lat:43.692238
+
+ControlPoint5UUID:2dc7d9d0-7b84-0131-b9c3-10b11c4ed8fd
+ControlPoint5Name:Black Cylinder - Black Conical
+ControlPoint5HasTwoPoints:1
+ControlPoint5ShortName:BB
+ControlPoint5DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Cylinder###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Cylinder###BREAKLINE###P1.UUID=b153dfd6-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Black###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Pattern=Checkered###BREAKLINE###P2.Name=Black Conical###BREAKLINE###P2.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce
+ControlPoint5Mark1Lon:7.268249
+ControlPoint5Mark1Lat:43.692211
+ControlPoint5Mark2Lon:7.272550
+ControlPoint5Mark2Lat:43.691948
+
+ControlPoint6UUID:2e37b410-7adc-0131-e5fe-60a44ce903c3
+ControlPoint6Name:Black Conical-Yellow
+ControlPoint6HasTwoPoints:1
+ControlPoint6ShortName:BY
+ControlPoint6DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Yellow###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Yellow###BREAKLINE###P2.UUID=3fdd2402-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint6Mark1Lon:7.272550
+ControlPoint6Mark1Lat:43.691948
+ControlPoint6Mark2Lon:7.268165
+ControlPoint6Mark2Lat:43.692177
+
+ControlPoint7UUID:3240586c-83c0-11e2-88c0-10bf48d758ce
+ControlPoint7Name:Finish Pole
+ControlPoint7HasTwoPoints:0
+ControlPoint7ShortName:F
+ControlPoint7DataSheet:Color=Black###BREAKLINE###Type=Landmark###BREAKLINE###Name=Finish Pole
+ControlPoint7Mark1Lon:7.271467
+ControlPoint7Mark1Lat:43.694897
+
+ControlPoint8UUID:37cb36e0-7adb-0131-e5c2-60a44ce903c3
+ControlPoint8Name:Red-Blue
+ControlPoint8HasTwoPoints:1
+ControlPoint8ShortName:RB
+ControlPoint8DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Red###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Red###BREAKLINE###P1.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Blue###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Blue###BREAKLINE###P2.UUID=1286f15e-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint8Mark1Lon:7.271370
+ControlPoint8Mark1Lat:43.688202
+ControlPoint8Mark2Lon:7.269017
+ControlPoint8Mark2Lat:43.687584
+
+ControlPoint9UUID:3e6c1c94-83bf-11e2-88c0-10bf48d758ce
+ControlPoint9Name:Race Committee
+ControlPoint9HasTwoPoints:0
+ControlPoint9ShortName:RC
+ControlPoint9DataSheet:Type=StartBoat###BREAKLINE###Name=Race Committee
+ControlPoint9Mark1Lon:7.268253
+ControlPoint9Mark1Lat:43.692215
+
+ControlPoint10UUID:3fdd2402-83be-11e2-88c0-10bf48d758ce
+ControlPoint10Name:Yellow
+ControlPoint10HasTwoPoints:0
+ControlPoint10ShortName:Y
+ControlPoint10DataSheet:Type=Buoy###BREAKLINE###Color=Yellow###BREAKLINE###Shape=Conical###BREAKLINE###Name=Yellow
+ControlPoint10Mark1Lon:7.268165
+ControlPoint10Mark1Lat:43.692177
+
+ControlPoint11UUID:4c304720-7adc-0131-e608-60a44ce903c3
+ControlPoint11Name:Black Conical-Red
+ControlPoint11HasTwoPoints:1
+ControlPoint11ShortName:BR
+ControlPoint11DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Red###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Red###BREAKLINE###P2.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint11Mark1Lon:7.272550
+ControlPoint11Mark1Lat:43.691948
+ControlPoint11Mark2Lon:7.271370
+ControlPoint11Mark2Lat:43.688202
+
+ControlPoint12UUID:4e0c2a90-7adb-0131-e5cc-60a44ce903c3
+ControlPoint12Name:Red-Yellow
+ControlPoint12HasTwoPoints:1
+ControlPoint12ShortName:RY
+ControlPoint12DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Red###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Red###BREAKLINE###P1.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Yellow###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Yellow###BREAKLINE###P2.UUID=3fdd2402-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint12Mark1Lon:7.271370
+ControlPoint12Mark1Lat:43.688202
+ControlPoint12Mark2Lon:7.268165
+ControlPoint12Mark2Lat:43.692177
+
+ControlPoint13UUID:5427c7d2-83be-11e2-88c0-10bf48d758ce
+ControlPoint13Name:Red
+ControlPoint13HasTwoPoints:0
+ControlPoint13ShortName:R
+ControlPoint13DataSheet:Type=Buoy###BREAKLINE###Color=Red###BREAKLINE###Shape=Conical###BREAKLINE###Name=Red
+ControlPoint13Mark1Lon:7.271370
+ControlPoint13Mark1Lat:43.688202
+
+ControlPoint14UUID:621831d0-7adc-0131-e612-60a44ce903c3
+ControlPoint14Name:Black Conical-Green
+ControlPoint14HasTwoPoints:1
+ControlPoint14ShortName:BG
+ControlPoint14DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Green###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Green###BREAKLINE###P2.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint14Mark1Lon:7.272550
+ControlPoint14Mark1Lat:43.691948
+ControlPoint14Mark2Lon:7.271297
+ControlPoint14Mark2Lat:43.686710
+
+ControlPoint15UUID:72425960-2c60-0132-218a-10b11c4ed8fd
+ControlPoint15Name:Black Conical-White S
+ControlPoint15HasTwoPoints:1
+ControlPoint15ShortName:S
+ControlPoint15DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=White###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=White S###BREAKLINE###P2.UUID=bf6777e6-83bd-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint15Mark1Lon:7.272550
+ControlPoint15Mark1Lat:43.691948
+ControlPoint15Mark2Lon:7.268643
+ControlPoint15Mark2Lat:43.692245
+
+ControlPoint16UUID:77b9e620-7adb-0131-e5d6-60a44ce903c3
+ControlPoint16Name:Green-Blue
+ControlPoint16HasTwoPoints:1
+ControlPoint16ShortName:GB
+ControlPoint16DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Green###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Green###BREAKLINE###P1.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Blue###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Blue###BREAKLINE###P2.UUID=1286f15e-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint16Mark1Lon:7.271297
+ControlPoint16Mark1Lat:43.686710
+ControlPoint16Mark2Lon:7.269017
+ControlPoint16Mark2Lat:43.687584
+
+ControlPoint17UUID:785c3e44-83be-11e2-88c0-10bf48d758ce
+ControlPoint17Name:Green
+ControlPoint17HasTwoPoints:0
+ControlPoint17ShortName:G
+ControlPoint17DataSheet:Type=Buoy###BREAKLINE###Color=Green###BREAKLINE###Shape=Conical###BREAKLINE###Name=Green
+ControlPoint17Mark1Lon:7.271297
+ControlPoint17Mark1Lat:43.686710
+
+ControlPoint18UUID:7d9d1730-b3e8-0131-1d10-10b11c4ed8fd
+ControlPoint18Name:Race Committee - Finish Pole
+ControlPoint18HasTwoPoints:1
+ControlPoint18ShortName:RF
+ControlPoint18DataSheet:P1.Type=StartBoat###BREAKLINE###P1.Name=Race Committee###BREAKLINE###P1.UUID=3e6c1c94-83bf-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Color=Black###BREAKLINE###P2.Type=Landmark###BREAKLINE###P2.Name=Finish Pole###BREAKLINE###P2.UUID=3240586c-83c0-11e2-88c0-10bf48d758ce
+ControlPoint18Mark1Lon:7.268253
+ControlPoint18Mark1Lat:43.692215
+ControlPoint18Mark2Lon:7.271342
+ControlPoint18Mark2Lat:43.694851
+
+ControlPoint19UUID:88ef6d40-7adc-0131-e61c-60a44ce903c3
+ControlPoint19Name:Finish Pole-Cylinder
+ControlPoint19HasTwoPoints:1
+ControlPoint19ShortName:F
+ControlPoint19DataSheet:P1.Color=Black###BREAKLINE###P1.Type=Landmark###BREAKLINE###P1.Name=Finish Pole###BREAKLINE###P1.UUID=3240586c-83c0-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Black###BREAKLINE###P2.Shape=Cylinder###BREAKLINE###P2.Pattern=Checkered###BREAKLINE###P2.Name=Black Cylinder###BREAKLINE###P2.UUID=b153dfd6-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint19Mark1Lon:7.271342
+ControlPoint19Mark1Lat:43.694851
+ControlPoint19Mark2Lon:7.268249
+ControlPoint19Mark2Lat:43.692211
+
+ControlPoint20UUID:8f9a4ee0-7adb-0131-e5e0-60a44ce903c3
+ControlPoint20Name:Green-Yellow
+ControlPoint20HasTwoPoints:1
+ControlPoint20ShortName:GY
+ControlPoint20DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Green###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Green###BREAKLINE###P1.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Yellow###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Yellow###BREAKLINE###P2.UUID=3fdd2402-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint20Mark1Lon:7.271297
+ControlPoint20Mark1Lat:43.686710
+ControlPoint20Mark2Lon:7.268165
+ControlPoint20Mark2Lat:43.692177
+
+ControlPoint21UUID:a0f71190-7adb-0131-e5ea-60a44ce903c3
+ControlPoint21Name:Blue-Yellow
+ControlPoint21HasTwoPoints:1
+ControlPoint21ShortName:BY
+ControlPoint21DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Blue###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Blue###BREAKLINE###P1.UUID=1286f15e-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Yellow###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Yellow###BREAKLINE###P2.UUID=3fdd2402-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint21Mark1Lon:7.269017
+ControlPoint21Mark1Lat:43.687584
+ControlPoint21Mark2Lon:7.268165
+ControlPoint21Mark2Lat:43.692177
+
+ControlPoint22UUID:a68c6350-7adc-0131-e626-60a44ce903c3
+ControlPoint22Name:RC-Black Conical
+ControlPoint22HasTwoPoints:1
+ControlPoint22ShortName:S
+ControlPoint22DataSheet:P1.Type=StartBoat###BREAKLINE###P1.Name=Race Committee###BREAKLINE###P1.UUID=3e6c1c94-83bf-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Black###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Pattern=Checkered###BREAKLINE###P2.Name=Black Conical###BREAKLINE###P2.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint22Mark1Lon:7.268253
+ControlPoint22Mark1Lat:43.692215
+ControlPoint22Mark2Lon:7.272550
+ControlPoint22Mark2Lat:43.691948
+
+ControlPoint23UUID:b153dfd6-83be-11e2-88c0-10bf48d758ce
+ControlPoint23Name:Black Cylinder
+ControlPoint23HasTwoPoints:0
+ControlPoint23ShortName:B
+ControlPoint23DataSheet:Type=Buoy###BREAKLINE###Color=Black###BREAKLINE###Shape=Cylinder###BREAKLINE###Pattern=Checkered###BREAKLINE###Name=Black Cylinder
+ControlPoint23Mark1Lon:7.268249
+ControlPoint23Mark1Lat:43.692211
+
+ControlPoint24UUID:b62e0bf0-7adc-0131-e630-60a44ce903c3
+ControlPoint24Name:RC-Black Cylinder
+ControlPoint24HasTwoPoints:1
+ControlPoint24ShortName:S
+ControlPoint24DataSheet:P1.Type=StartBoat###BREAKLINE###P1.Name=Race Committee###BREAKLINE###P1.UUID=3e6c1c94-83bf-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Black###BREAKLINE###P2.Shape=Cylinder###BREAKLINE###P2.Pattern=Checkered###BREAKLINE###P2.Name=Black Cylinder###BREAKLINE###P2.UUID=b153dfd6-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint24Mark1Lon:7.268253
+ControlPoint24Mark1Lat:43.692215
+ControlPoint24Mark2Lon:7.268249
+ControlPoint24Mark2Lat:43.692211
+
+ControlPoint25UUID:bd1fc330-7c10-0131-9c24-10b11c4ed8fd
+ControlPoint25Name:Black Cylinder-Yellow
+ControlPoint25HasTwoPoints:1
+ControlPoint25ShortName:S
+ControlPoint25DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Cylinder###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Cylinder###BREAKLINE###P1.UUID=b153dfd6-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Yellow###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Yellow###BREAKLINE###P2.UUID=3fdd2402-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint25Mark1Lon:7.268249
+ControlPoint25Mark1Lat:43.692211
+ControlPoint25Mark2Lon:7.268165
+ControlPoint25Mark2Lat:43.692177
+
+ControlPoint26UUID:bf6777e6-83bd-11e2-88c0-10bf48d758ce
+ControlPoint26Name:White S
+ControlPoint26HasTwoPoints:0
+ControlPoint26ShortName:W
+ControlPoint26DataSheet:Type=Buoy###BREAKLINE###Color=White###BREAKLINE###Shape=Conical###BREAKLINE###Name=White S
+ControlPoint26Mark1Lon:7.268643
+ControlPoint26Mark1Lat:43.692245
+
+ControlPoint27UUID:cd3c1dc0-7c11-0131-9c2e-10b11c4ed8fd
+ControlPoint27Name:Finish Pole-Conical
+ControlPoint27HasTwoPoints:1
+ControlPoint27ShortName:S
+ControlPoint27DataSheet:P1.Color=Black###BREAKLINE###P1.Type=Landmark###BREAKLINE###P1.Name=Finish Pole###BREAKLINE###P1.UUID=3240586c-83c0-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Black###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Pattern=Checkered###BREAKLINE###P2.Name=Black Conical###BREAKLINE###P2.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint27Mark1Lon:7.271342
+ControlPoint27Mark1Lat:43.694851
+ControlPoint27Mark2Lon:7.272550
+ControlPoint27Mark2Lat:43.691948
+
+ControlPoint28UUID:d39a0d00-7adc-0131-e63a-60a44ce903c3
+ControlPoint28Name:White Gate
+ControlPoint28HasTwoPoints:1
+ControlPoint28ShortName:W
+ControlPoint28DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=White###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=White S###BREAKLINE###P1.UUID=bf6777e6-83bd-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=White###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=White P###BREAKLINE###P2.UUID=e9ec42f8-83bd-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint28Mark1Lon:7.268643
+ControlPoint28Mark1Lat:43.692245
+ControlPoint28Mark2Lon:7.271143
+ControlPoint28Mark2Lat:43.692238
+
+ControlPoint29UUID:d78695ea-83be-11e2-88c0-10bf48d758ce
+ControlPoint29Name:Black Conical
+ControlPoint29HasTwoPoints:0
+ControlPoint29ShortName:B
+ControlPoint29DataSheet:Type=Buoy###BREAKLINE###Color=Black###BREAKLINE###Shape=Conical###BREAKLINE###Pattern=Checkered###BREAKLINE###Name=Black Conical
+ControlPoint29Mark1Lon:7.272550
+ControlPoint29Mark1Lat:43.691948
+
+ControlPoint30UUID:e9ec42f8-83bd-11e2-88c0-10bf48d758ce
+ControlPoint30Name:White P
+ControlPoint30HasTwoPoints:0
+ControlPoint30ShortName:W
+ControlPoint30DataSheet:Type=Buoy###BREAKLINE###Color=White###BREAKLINE###Shape=Conical###BREAKLINE###Name=White P
+ControlPoint30Mark1Lon:7.271143
+ControlPoint30Mark1Lat:43.692238
+
+ControlPoint31UUID:eff23330-7b84-0131-b9d2-10b11c4ed8fd
+ControlPoint31Name:RC-Red
+ControlPoint31HasTwoPoints:1
+ControlPoint31ShortName:S
+ControlPoint31DataSheet:P1.Type=StartBoat###BREAKLINE###P1.Name=Race Committee###BREAKLINE###P1.UUID=3e6c1c94-83bf-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Red###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Red###BREAKLINE###P2.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
+ControlPoint31Mark1Lon:7.268253
+ControlPoint31Mark1Lat:43.692215
+ControlPoint31Mark2Lon:7.271370
+ControlPoint31Mark2Lat:43.688202
+
+SegmentFile:segments.php
+Route1UUID:1f29b8f0-2bc6-0132-1fb9-10b11c4ed8fd
+Route1Description:Race 8
+Route1Length:0
+Route1DataSheet:CourseDiagram=Course###BREAKLINE###Seq.1=Line###BREAKLINE###Seq.2=Port###BREAKLINE###Seq.3=Port###BREAKLINE###Seq.4=Gate###BREAKLINE###Seq.5=Port###BREAKLINE###Seq.6=Line###BREAKLINE###
+Route1ControlPoint1UUID:d39a0d00-7adc-0131-e63a-60a44ce903c3
+Route1ControlPoint2UUID:1286f15e-83be-11e2-88c0-10bf48d758ce
+Route1ControlPoint3UUID:5427c7d2-83be-11e2-88c0-10bf48d758ce
+Route1ControlPoint4UUID:2ce99970-2c47-0132-20ce-10b11c4ed8fd
+Route1ControlPoint5UUID:785c3e44-83be-11e2-88c0-10bf48d758ce
+Route1ControlPoint6UUID:2ce99970-2c47-0132-20ce-10b11c4ed8fd
+
+//-------- AUTO GENERATED PARAMETERS END ------------------
