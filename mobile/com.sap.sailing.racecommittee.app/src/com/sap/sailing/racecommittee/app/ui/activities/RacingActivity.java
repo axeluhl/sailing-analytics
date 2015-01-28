@@ -124,9 +124,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                         public void onClick(DialogInterface dialog, int id) {
                             setSupportProgressBarIndeterminateVisibility(true);
 
-                            // ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
-                            // getLoaderManager().restartLoader(RacesLoaderId, null,
-                            // dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
                             dialog.cancel();
                         }
                     }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -270,7 +267,12 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void loadWindFragment() {
         // check if the fragment is actively shown already, otherwise show it
         if ((windFragment != null && !windFragment.isFragmentUIActive()) || windFragment == null) {
-            windFragment = new WindFragment();
+            if ( selectedRace != null ){
+                windFragment = new WindFragment(selectedRace);
+            } else {
+                windFragment = new WindFragment();
+            }
+
             getFragmentManager().beginTransaction()
                     // .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                     .replace(R.id.racing_view_container, windFragment)

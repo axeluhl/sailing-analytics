@@ -1,46 +1,39 @@
 package com.sap.sailing.racecommittee.app.services.polling;
 
+import android.content.Context;
+import android.os.AsyncTask;
+
+import com.sap.sailing.android.shared.data.http.HttpJsonGetRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest;
+import com.sap.sse.common.Util;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
 
-import android.content.Context;
-import android.os.AsyncTask;
+public class RacePositionsPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, PollingResult, Void> {
 
-import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
-import com.sap.sailing.android.shared.data.http.HttpRequest;
-import com.sap.sse.common.Util;
-
-public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, PollingResult, Void> {
-
-    public interface PollingResultListener {
-        public void onPollingResult(PollingResult result);
-        public void onPollingFinished();
-    }
-    
     private final PollingResultListener listener;
     private final Context context;
 
-    public RaceLogPollerTask(PollingResultListener listener, Context context) {
+    public RacePositionsPollerTask(PollingResultListener listener, Context context) {
         this.listener = listener;
         this.context = context;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected Void doInBackground(Util.Pair<Serializable, URL>... queries) {
         for (Util.Pair<Serializable, URL> query : queries) {
             if (isCancelled()) {
                 return null;
             }
-            
-            HttpRequest request = new HttpJsonPostRequest(query.getB(), context);
-            InputStream responseStream = null;
+
+            HttpRequest request = new HttpJsonGetRequest(query.getB(), context);
             try {
-                responseStream = request.execute();
-                publishProgress(new PollingResult(true, 
-                        new Util.Pair<Serializable, InputStream>(query.getA(), responseStream)));
+                InputStream responseStream = request.execute();
+                publishProgress(new PollingResult(true,
+                        new Util.Pair<>(query.getA(), responseStream)));
             } catch (IOException e) {
                 // don't need to close responseStream as it still must
                 // be null because the only call that may throw an
@@ -60,5 +53,11 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, P
     @Override
     protected void onPostExecute(Void result) {
         listener.onPollingFinished();
+    }
+
+    public interface PollingResultListener {
+        public void onPollingResult(PollingResult result);
+
+        public void onPollingFinished();
     }
 }

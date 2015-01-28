@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.domain;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -50,6 +51,13 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
      */
     public Collection<Competitor> getCompetitors();
 
+    /**
+     * returns the list of markers to display on the racemap
+     *
+     * @return list of Markers
+     */
+    public List<MapMarker> getMapMarkers();
+
     public CourseBase getCourseOnServer();
 
     public void setCourseOnServer(CourseBase course);
@@ -62,4 +70,14 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
      *            the retrieved list of competitors for this race
      */
     public void setCompetitors(Collection<Competitor> competitors);
+
+
+    /**
+     * sets the list of mapItems ( buoys, other boats ) for a race. As the mapItems are retrieved later from the backend, the list of
+     * mapItems has to be settable.
+     *
+     * @param markers
+     *            the retrieved list of mapItems for this race
+     */
+    public void setMapMarkers(List<MapMarker> markers);
 }

@@ -437,4 +437,13 @@ public class MessageSendingService extends Service implements MessageSendingList
 			apiConnectivityListener.setUnsentGPSFixesCount(getDelayedIntentsCount());
 		}
 	}
+
+    public static String getRacePositionsUrl(Context context, final String regattaName,
+                                             final String raceName) throws UnsupportedEncodingException {
+        String url = String.format("%s/sailingserver/api/v1/regattas/%s/races/%s/marks/positions",//+
+                PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
+                URLEncoder.encode(regattaName, charsetName).replace("+", "%20"),
+                URLEncoder.encode(raceName, charsetName.replace("+", "%20")));//,
+        return url;
+    }
 }
