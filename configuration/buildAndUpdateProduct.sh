@@ -607,10 +607,11 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
-        ANDROID_SDK_VERSION="r24.0.2"
-        BUILD_TOOLS="21.1.2"
-        TARGET_API="21"
-        ANDROID_ABI="x86_64"
+        ANDROID_SDK_VERSION=r24.0.2
+        BUILD_TOOLS=21.1.2
+        TARGET_API=21
+        TEST_API=18
+        ANDROID_ABI=armeabi-v7a
         echo "Updating Android SDK...."
         echo yes | android update sdk --filter platform-tools --no-ui --force > /dev/null
         echo yes | android update sdk --filter build-tools-${BUILD_TOOLS} --no-ui --force > /dev/null
@@ -623,15 +624,18 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         fi
         if [ $testing -eq 1 ]; then
             echo "Downloading and installing emulator image..."
-            echo yes | android update sdk -u -a -t sys-img-${ANDROID_ABI}-android-${TARGET_API} > /dev/null
-            echo no | android create avd --force -n androidTest -t android-${TARGET_API} --abi ${ANDROID_ABI}
+            echo yes | android update sdk -u -a -t sys-img-${ANDROID_ABI}-android-${TEST_API} > /dev/null
+            echo no | android create avd --force -n androidTest -t android-${TEST_API} --abi ${ANDROID_ABI}
             emulator -avd androidTest -no-skin -no-audio -no-window &
             echo "Waiting for device to start..."
             adb wait-for-device
+            echo "Waiting 10 seconds to complete startup..."
+            sleep 10
             adb shell input keyevent 82 &
             ./gradlew deviceCheck connectedCheck
             if [[ $? != 0 ]]; then
               exit 101
+              adb emu kill
             fi
             adb emu kill
         fi
