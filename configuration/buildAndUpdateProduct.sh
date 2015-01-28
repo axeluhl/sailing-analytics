@@ -633,10 +633,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             sleep 10
             adb shell input keyevent 82 &
             ./gradlew deviceCheck connectedCheck
-            if [[ $? != 0 ]]; then
-              exit 101
-              adb emu kill
-            fi
             adb emu kill
         fi
     else
