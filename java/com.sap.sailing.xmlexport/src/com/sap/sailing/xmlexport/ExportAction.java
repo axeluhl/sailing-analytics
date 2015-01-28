@@ -1,6 +1,7 @@
 package com.sap.sailing.xmlexport;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.regex.Matcher;
@@ -41,11 +42,21 @@ public abstract class ExportAction {
     private HttpServletResponse res;
 
     private RacingEventService service;
-
+    private Leaderboard leaderboard;
+    protected final boolean useProvidedLeaderboard;
+    private String resultingXMLData;
+    
     public ExportAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
         this.req = req;
         this.res = res;
         this.service = service;
+        this.leaderboard = null;
+        this.useProvidedLeaderboard = false;
+    }
+    
+    public ExportAction(Leaderboard leaderboard) {
+        this.leaderboard = leaderboard;
+        this.useProvidedLeaderboard = true;
     }
 
     public String getAttribute(String name) {
@@ -55,15 +66,21 @@ public abstract class ExportAction {
     public RacingEventService getService() {
         return service;
     }
+    
+    public String getResultXML() {
+        return resultingXMLData;
+    }
 
     public Leaderboard getLeaderboard() throws IOException, ServletException {
-        final String leaderboardName = getAttribute("name");
-        if (leaderboardName == null) {
-            throw new ServletException("Use the name= parameter to specify the leaderboard");
-        }
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName); 
-        if (leaderboard == null) {
-            throw new ServletException("Leaderboard " + leaderboardName + " not found.");
+        if (!useProvidedLeaderboard) {
+            final String leaderboardName = getAttribute("name");
+            if (leaderboardName == null) {
+                throw new ServletException("Use the name= parameter to specify the leaderboard");
+            }
+            leaderboard = getService().getLeaderboardByName(leaderboardName); 
+            if (leaderboard == null) {
+                throw new ServletException("Leaderboard " + leaderboardName + " not found.");
+            }
         }
         return leaderboard;
     }
@@ -315,13 +332,22 @@ public abstract class ExportAction {
         format.setEncoding("UTF-8");
         XMLOutputter xmlOutputter = new XMLOutputter(format);
         
-        res.setContentType("text/xml");
-        res.addHeader("Content-Disposition", "attachment; filename=" + fileName);
-        
-        try {
-            xmlOutputter.output(element, res.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!useProvidedLeaderboard) {
+            res.setContentType("text/xml");
+            res.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+            try {
+                xmlOutputter.output(element, res.getOutputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            StringWriter resultStringWriter = new StringWriter();
+            try {
+                xmlOutputter.output(element, resultStringWriter);
+                resultingXMLData = resultStringWriter.toString();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
