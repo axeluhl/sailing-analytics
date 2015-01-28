@@ -236,11 +236,6 @@
 						<reportsDirectory>${reportsdirectory}</reportsDirectory>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>gwt-maven-plugin</artifactId>
-					<version>${gwt.version}</version>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 
