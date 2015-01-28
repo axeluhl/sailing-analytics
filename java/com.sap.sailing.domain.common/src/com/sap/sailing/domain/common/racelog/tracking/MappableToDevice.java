@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
+import java.io.Serializable;
+
 /**
  * Marker interface that can be applied to DTOs that represent domain objects
  * that can be mapped to a device for racelog-tracking (see {@link DeviceMapping}.
@@ -9,5 +11,5 @@ package com.sap.sailing.domain.common.racelog.tracking;
  *
  */
 public interface MappableToDevice {
-
+    String getIdAsString();
 }

@@ -79,8 +79,8 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ClientResources;
@@ -121,8 +121,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -309,6 +311,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
     private final boolean showViewSimulation;
+    
+    private static final String GET_POLAR_CATEGORY = "getPolar";
+    
+    /**
+     * Tells about the availability of polar / VPP data for this race. If available, the simulation feature can be
+     * offered to the user.
+     */
+    private boolean hasPolar;
+    
     private final RegattaAndRaceIdentifier raceIdentifier;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -338,6 +349,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
         this.showViewSimulation = showViewSimulation;
+        this.hasPolar = false;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
@@ -375,7 +387,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               // simplify road display
               mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
               // set water color
-              mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), -35, -34);
+              // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
+              // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
+              // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
+              mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), 0, -70);
               
               MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
               mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
@@ -470,9 +485,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               }
 
               if (showViewSimulation) {
+            	  // determine availability of polar diagram
+            	  setHasPolar();
                   // initialize simulation canvas
-                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
+                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor);
                   simulationOverlay.addToMap();
+                  simulationOverlay.setVisible(false);
               }
               
               createHeaderPanel(map);
@@ -485,6 +503,25 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         };
 
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
+    }
+    
+    private void setHasPolar() {
+        GetPolarAction getPolar = new GetPolarAction(sailingService, raceIdentifier);
+        asyncActionsExecutor.execute(getPolar, GET_POLAR_CATEGORY,
+                new MarkedAsyncCallback<>(new AsyncCallback<Boolean>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorDeterminingPolarAvailability(
+                                raceIdentifier.getRaceName(), caught.getMessage()), /* silent */ true);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        // store results
+                    	hasPolar = result.booleanValue();
+                    }
+                }));
+
     }
 
     /**
@@ -637,7 +674,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                     switch (windSource.getType()) {
                                         case EXPEDITION:
-                                            // we filter out measured wind sources with a very little confidence
+                                            // we filter out measured wind sources with vary low confidence
                                             if (windTrackInfoDTO.minWindConfidence > 0.0001) {
                                                 windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                                             }
@@ -710,6 +747,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
                 if (map != null && raceMapDataDTO != null) {
                     quickRanks = raceMapDataDTO.quickRanks;
+                    if (showViewSimulation && settings.isShowSimulationOverlay()) {
+                    	simulationOverlay.updateLeg(getCurrentLeg(), newTime, /* clearCanvas */ false);
+                    }
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
                         startedProcessingRequestID = requestID;
@@ -735,22 +775,26 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         showAdvantageLine(competitorsToShow, newTime);
                             
                         // Rezoom the map
-                        // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
+                        Bounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
-                            Bounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
-                            zoomMapToNewBounds(bounds);
-                            mapFirstZoomDone = true;
-                        } else if (!mapFirstZoomDone) { // Zoom once to the marks
-                            zoomMapToNewBounds(new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this));
-                            mapFirstZoomDone = true;
+                            zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
+                            if (zoomToBounds == null && !mapFirstZoomDone) {
+                                zoomToBounds = getDefaultZoomBounds(); // the user-specified zoom couldn't find what it was looking for; try defaults once
+                            }
+                        } else if (!mapFirstZoomDone) { // Zoom once to the marks if marks exist
+                            zoomToBounds = new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this);
+                            if (zoomToBounds == null) {
+                                zoomToBounds = getDefaultZoomBounds(); // use default zoom, e.g., 
+                            }
                             /*
                              * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
                              * the map was just zoomed to the bounds of the marks, it was not a zoom or pan
                              * triggered by the user. As a consequence the
                              * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
                              */
-                            // TODO bug 494: consider initial user-specific zoom settings
                         }
+                        zoomMapToNewBounds(zoomToBounds);
+                        mapFirstZoomDone = true;
                     }
                 } else {
                     lastTimeChangeBeforeInitialization = newTime;
@@ -1918,7 +1962,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent() {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.showViewSimulation);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.showViewSimulation && this.hasPolar);
     }
 
     @Override
@@ -1981,7 +2025,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
-            simulationOverlay.timeChanged(timer.getTime(), null);
+            simulationOverlay.updateLeg(getCurrentLeg(), timer.getTime(), true);
         }
         if (requiredRedraw) {
             redraw();
@@ -2186,6 +2230,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         return result;
     }
+    
+    public int getCurrentLeg() {
+        com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leaderWithLeg = this
+                .getLeadingVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
+        if (leaderWithLeg == null) {
+            return 0;
+        } else {
+            return leaderWithLeg.getA();
+        }
+    }
 
     private Image createSAPLogo() {
         ImageResource sapLogoResource = resources.sapLogoOverlay();
@@ -2203,5 +2257,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public String getDependentCssClassName() {
         return "raceMap";
+    }
+
+    /**
+     * The default zoom bounds are defined by the boats
+     */
+    private Bounds getDefaultZoomBounds() {
+        return new BoatsBoundsCalculator().calculateNewBounds(RaceMap.this);
     }
 }

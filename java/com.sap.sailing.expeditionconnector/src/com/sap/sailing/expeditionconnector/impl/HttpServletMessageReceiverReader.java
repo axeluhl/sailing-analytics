@@ -7,9 +7,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.common.Base64Utils;
 import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
 import com.sap.sailing.expeditionconnector.impl.HttpServletMessageReceiver.Receiver;
+import com.sap.sse.common.Base64Utils;
 
 public class HttpServletMessageReceiverReader implements Runnable {
     private static final Logger logger = Logger.getLogger(HttpServletMessageReceiverReader.class.getName());

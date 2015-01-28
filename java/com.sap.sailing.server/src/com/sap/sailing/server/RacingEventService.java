@@ -56,6 +56,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -139,7 +140,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * <p>
      * 
      * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable
-     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop() stopped}.
+     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop(boolean) stopped}.
      * 
      * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
      * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its

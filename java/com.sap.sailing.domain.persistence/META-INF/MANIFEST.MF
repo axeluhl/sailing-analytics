@@ -11,9 +11,10 @@ Require-Bundle: com.sap.sse.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain.common,
  com.sap.sailing.domain.shared.android,
- com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
+ com.sap.sailing.server.gateway.serialization,
  com.sap.sse.common,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sailing.server.gateway.serialization.shared.android
 Export-Package: com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.persistence.impl;
   x-friends:="com.sap.sailing.domain.persistence.test,
@@ -21,7 +22,8 @@ Export-Package: com.sap.sailing.domain.persistence,
    com.sap.sailing.mongodb.test,
    com.sap.sailing.server.gateway.test,
    com.sap.sailing.domain.racelogtrackingadapter.testsupport,
-   com.sap.sailing.domain.racelogtrackingadapter.test",
+   com.sap.sailing.domain.racelogtrackingadapter.test,
+   com.sap.sailing.server",
  com.sap.sailing.domain.persistence.media,
  com.sap.sailing.domain.persistence.racelog.tracking,
  com.sap.sailing.domain.persistence.racelog.tracking.impl;

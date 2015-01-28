@@ -1,71 +1,63 @@
 package com.sap.sailing.polars.regression;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.polars.mining.IncrementalRegressionProcessor;
-import com.sap.sailing.polars.regression.impl.IncrementalLeastSquaresProcessor;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
- * Combines two linear regression processors. One with the angle to the wind as the x axis and the other with the wind
- * speed on the x axis. Both y axis represent the boat speed.
+ * Supplies incremental arithmetic mean for confidence and speed.
+ * <p>
  * 
- * {@link #estimateSpeed(double, double)} returns the average of the estimation of both regressions.
+ * {@link #estimateSpeed(double, double)} returns the average of the speed.
+ * <p>
  * 
- * Note that this class should only be used for a small interval on a polar sheet. The
+ * Note that this class should only be used for a small wind interval on a polar sheet. The
  * {@link IncrementalRegressionProcessor} is one example for that. It has one instance of the {@link BoatSpeedEstimator}
- * for each wind speed level and rounded angle combination.
+ * for each wind boatclass, speed level and rounded angle combination.
  * 
  * @author Frederik Petersen (D054528)
  * 
  */
-public class BoatSpeedEstimator {
+public class BoatSpeedEstimator implements Serializable {
 
-    private IncrementalLinearRegressionProcessor angleRegression = new IncrementalLeastSquaresProcessor();
+    private static final long serialVersionUID = -254184914347332658L;
 
-    private IncrementalLinearRegressionProcessor windSpeedRegression = new IncrementalLeastSquaresProcessor();
+    private double speedSumInKnots = 0;
 
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
-
+    private transient NamedReentrantReadWriteLock lock = createLock();
+    
     private double confidenceSum = 0;
     
     private int dataCount = 0;
 
     /**
-     * 
-     * @param windSpeed
-     * @param angleToTheWind
-     * @param useLinearRegression if false mean of wind interval is used, otherwise lin. regression
-     * @return
-     * @throws NotEnoughDataHasBeenAddedException
+     * @param useLinearRegression if false mean of wind interval is used, otherwise linear regression
      */
-    public double estimateSpeed(double windSpeed, double angleToTheWind, boolean useLinearRegression) throws NotEnoughDataHasBeenAddedException {
-        lock.readLock().lock();
-        double result;
-        try {
-            if (useLinearRegression) {
-                double angleEstimated = angleRegression.getEstimatedY(angleToTheWind);
-                double windSpeedEstimated = windSpeedRegression.getEstimatedY(windSpeed);
-
-                result = (angleEstimated + windSpeedEstimated) / 2.0;
-            } else {
-                //Return average for that wind interval
-                result = windSpeedRegression.getMeanOfY();
-            }
-        } finally {
-            lock.readLock().unlock();
+    public Speed estimateSpeed(double windSpeed, double angleToTheWind) throws NotEnoughDataHasBeenAddedException {
+        LockUtil.lockForRead(lock);
+        if (dataCount < 1) {
+            throw new NotEnoughDataHasBeenAddedException();
         }
-        return result;
+        try {
+            return new KnotSpeedImpl(speedSumInKnots / dataCount);
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
     }
 
-    public void addData(double windSpeed, double angleToTheWind, double boatSpeed, double confidence) {
-        lock.writeLock().lock();
+    public void addData(Speed boatSpeed, double confidence) {
+        LockUtil.lockForWrite(lock);
         try {
-            angleRegression.addMeasuredPoint(angleToTheWind, boatSpeed);
-            windSpeedRegression.addMeasuredPoint(windSpeed, boatSpeed);
+            speedSumInKnots = speedSumInKnots + boatSpeed.getKnots();
             dataCount++;
             confidenceSum  = confidenceSum + confidence;
         } finally {
-            lock.writeLock().unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
@@ -75,6 +67,14 @@ public class BoatSpeedEstimator {
 
     public double getConfidence() {
         return confidenceSum / dataCount;
+    }
+    
+    private void readObject(ObjectInputStream ois) {
+        lock = createLock();
+    }
+    
+    private NamedReentrantReadWriteLock createLock() {
+        return new NamedReentrantReadWriteLock(getClass().getName(), true);
     }
 
 }

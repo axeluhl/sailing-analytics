@@ -1,20 +1,12 @@
 package com.sap.sailing.domain.abstractlog.regatta;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.WithID;
-
 /**
- * Special kind of {@link Track} for recording {@link RegattaLogEvent}s.
- * 
- * <p>
- * Use {@link RaceLog#getRawFixes()} to receive all events in a {@link RaceLog}.
- * </p>
- * 
- * <p>
- * Implementations should use the {@link RegattaLogEventComparator} for sorting its content.
- * </p>
+ * This log gathers information for regattas. {@link FlexibleLeaderboard}s are considered
+ * workarounds for regattas in special cases. To expose a uniform interface, every {@link Leaderboard}
+ * therefore can be asked for its {@link Leaderboard#getRegattaLog RegattaLog}. A {@link RegattaLeaderboard}
+ * uses the log supplied by its {@code Regatta}, whereas a {@link FlexibleLeaderboard} manages the log itself.
  */
 public interface RegattaLog extends AbstractLog<RegattaLogEvent, RegattaLogEventVisitor>, WithID {
 

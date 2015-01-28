@@ -4,11 +4,11 @@ Bundle-Name: com.sap.sailing.domain.shared.android
 Bundle-SymbolicName: com.sap.sailing.domain.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
- com.sap.sse.datamining.shared;bundle-version="1.0.0",
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: com.sap.sailing.domain.common,
+ com.sap.sse.datamining.shared,
  com.sap.sse.common,
- com.sap.sse
+ com.sap.sse.shared.android
 Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.impl,
  com.sap.sailing.domain.abstractlog.race,
@@ -30,10 +30,13 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl,
  com.sap.sailing.domain.abstractlog.race.tracking,
  com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl,
- com.sap.sailing.domain.abstractlog.race.tracking.events,
  com.sap.sailing.domain.abstractlog.race.tracking.impl,
  com.sap.sailing.domain.abstractlog.regatta,
+ com.sap.sailing.domain.abstractlog.regatta.events,
+ com.sap.sailing.domain.abstractlog.regatta.events.impl,
  com.sap.sailing.domain.abstractlog.regatta.impl,
+ com.sap.sailing.domain.abstractlog.shared.analyzing,
+ com.sap.sailing.domain.abstractlog.shared.events,
  com.sap.sailing.domain.base,
  com.sap.sailing.domain.base.configuration,
  com.sap.sailing.domain.base.configuration.impl,
@@ -41,6 +44,7 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.base.impl,
  com.sap.sailing.domain.base.racegroup,
  com.sap.sailing.domain.base.racegroup.impl,
+ com.sap.sailing.domain.racelogtracking,
+ com.sap.sailing.domain.racelogtracking.impl,
  com.sap.sailing.domain.tracking,
- com.sap.sailing.domain.tracking.impl,
- com.sap.sailing.util.impl
+ com.sap.sailing.domain.tracking.impl

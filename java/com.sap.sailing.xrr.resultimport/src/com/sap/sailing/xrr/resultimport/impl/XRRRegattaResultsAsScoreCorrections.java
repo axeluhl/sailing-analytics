@@ -13,10 +13,11 @@ import java.util.TreeMap;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
-import com.sap.sailing.xrr.resultimport.schema.Division;
-import com.sap.sailing.xrr.resultimport.schema.Event;
-import com.sap.sailing.xrr.resultimport.schema.Race;
-import com.sap.sailing.xrr.resultimport.schema.RaceResult;
+import com.sap.sailing.xrr.schema.Division;
+import com.sap.sailing.xrr.schema.Event;
+import com.sap.sailing.xrr.schema.Race;
+import com.sap.sailing.xrr.schema.RaceResult;
+
 
 public class XRRRegattaResultsAsScoreCorrections implements RegattaScoreCorrections {
     private final Event event;

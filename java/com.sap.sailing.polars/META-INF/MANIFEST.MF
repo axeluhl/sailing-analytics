@@ -11,13 +11,17 @@ Export-Package:
  com.sap.sailing.polars.analysis,
  com.sap.sailing.polars.data,
  com.sap.sailing.polars.factory,
- com.sap.sailing.polars.regression
+ com.sap.sailing.polars.regression,
+ com.sap.sailing.polars.windestimation
 Bundle-ActivationPolicy: lazy
 Require-Bundle: 
  com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain,
  com.sap.sse.datamining,
- com.sap.sse.datamining.shared;bundle-version="1.0.0"
+ com.sap.sse.datamining.shared;bundle-version="1.0.0",
+ com.sap.sse.common,
+ com.sap.sse,
+ com.sap.sse.shared.android
 Import-Package: 
  com.sap.sailing.util,
  com.sap.sse.common

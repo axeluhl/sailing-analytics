@@ -5,14 +5,14 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImportProgress;
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * This lock is used to allow only one master data import operation be performed at once. It also keeps information
@@ -33,7 +33,7 @@ import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgr
  * @author Frederik Petersen (D054528)
  * 
  */
-public class DataImportLockWithProgress extends ReentrantLock {
+public class DataImportLockWithProgress extends NamedReentrantReadWriteLock {
     /**
      * Defaults to 60s (60000ms).
      */
@@ -43,12 +43,12 @@ public class DataImportLockWithProgress extends ReentrantLock {
 
     private final Map<UUID, DataImportProgress> progressPerId;
 
-    private final ReentrantReadWriteLock mapLock;
+    private final NamedReentrantReadWriteLock mapLock;
 
     public DataImportLockWithProgress() {
-        super(true);
+        super(DataImportLockWithProgress.class.getName(), true);
         progressPerId = new HashMap<UUID, DataImportProgress>();
-        mapLock = new ReentrantReadWriteLock();
+        mapLock = new NamedReentrantReadWriteLock("mapLock in "+getClass().getName(), /* fair */ false);
     }
 
     /**
@@ -60,11 +60,11 @@ public class DataImportLockWithProgress extends ReentrantLock {
         TimerTask deleteTask = new TimerTask() {
             @Override
             public void run() {
-                mapLock.writeLock().lock();
+                LockUtil.lockForWrite(mapLock);
                 try {
                     progressPerId.remove(progressIDToDelete);
                 } finally {
-                    mapLock.writeLock().unlock();
+                    LockUtil.unlockAfterWrite(mapLock);
                 }
             }
         };
@@ -78,21 +78,21 @@ public class DataImportLockWithProgress extends ReentrantLock {
      */
     public DataImportProgress getProgress(UUID operationId) {
         DataImportProgress progress;
-        mapLock.readLock().lock();
+        LockUtil.lockForRead(mapLock);
         try {
             progress = progressPerId.get(operationId);
         } finally {
-            mapLock.readLock().unlock();
+            LockUtil.unlockAfterRead(mapLock);
         }
         return progress;
     }
 
     public void addProgress(UUID operationId, DataImportProgress progress) {
-        mapLock.writeLock().lock();
+        LockUtil.lockForWrite(mapLock);
         try {
             progressPerId.put(operationId, progress);
         } finally {
-            mapLock.writeLock().unlock();
+            LockUtil.unlockAfterWrite(mapLock);
         }
     }
 

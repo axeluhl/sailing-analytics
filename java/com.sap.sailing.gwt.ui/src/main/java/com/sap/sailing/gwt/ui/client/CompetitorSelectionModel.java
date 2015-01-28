@@ -8,10 +8,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.ColorMap;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;

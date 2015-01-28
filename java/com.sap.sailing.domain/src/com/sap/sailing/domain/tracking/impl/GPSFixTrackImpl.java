@@ -42,10 +42,10 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.WithValidityCache;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
     private static final Logger logger = Logger.getLogger(GPSFixTrackImpl.class.getName());
@@ -528,19 +528,14 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                         if (fromPos == null) {
                             result = Distance.NULL;
                         } else {
-                            lockForRead();
-                            try {
-                                NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
-                                /* fromInclusive */false, new DummyGPSFix(to),
-                                /* toInclusive */false);
-                                for (GPSFix fix : subset) {
-                                    double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(
-                                            fix.getPosition()).getNauticalMiles();
-                                    distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
-                                    fromPos = fix.getPosition();
-                                }
-                            } finally {
-                                unlockAfterRead();
+                            NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
+                            /* fromInclusive */false, new DummyGPSFix(to),
+                            /* toInclusive */false);
+                            for (GPSFix fix : subset) {
+                                double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(
+                                        fix.getPosition()).getNauticalMiles();
+                                distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
+                                fromPos = fix.getPosition();
                             }
                             Position toPos = getEstimatedPosition(to, false);
                             distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
@@ -1065,8 +1060,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
         if (logger.isLoggable(Level.FINEST)) {
             FixType last;
+            lockForRead();
             try {
-                lockForRead();
                 if (logger.isLoggable(Level.FINEST)) {
                     logger.finest("GPS fix "+fix+" for "+getTrackedItem()+", isValid="+isValid(getInternalRawFixes(), fix)+
                             ", time/distance/speed from last: "+

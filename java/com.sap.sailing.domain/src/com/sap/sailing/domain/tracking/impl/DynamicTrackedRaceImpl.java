@@ -54,11 +54,11 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
@@ -290,7 +290,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 for (WindSource windSource : getWindSources()) {
                     if (windSource.getType().canBeStored()) {
                         WindTrack windTrack = getOrCreateWindTrack(windSource);
-                        // replicate all wind fixed that may have been loaded by the wind store
+                        // replicate all wind fixes that may have been loaded by the wind store
                         windTrack.lockForRead();
                         try {
                             for (Wind wind : windTrack.getRawFixes()) {
@@ -605,8 +605,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived) {
-        if ((getStartOfTracking() == null) != (startOfTrackingReceived == null)
-                || (startOfTrackingReceived != null && !getStartOfTracking().equals(startOfTrackingReceived))) {
+        if (!Util.equalsWithNull(startOfTrackingReceived, getStartOfTracking())) {
             super.setStartOfTrackingReceived(startOfTrackingReceived);
             notifyListenersStartOfTrackingChanged(getStartOfTracking());
         }
@@ -614,8 +613,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setEndOfTrackingReceived(TimePoint endOfTrackingReceived) {
-        if ((getEndOfTracking() == null) != (endOfTrackingReceived == null)
-                || (endOfTrackingReceived != null && !getEndOfTracking().equals(endOfTrackingReceived))) {
+        if (!Util.equalsWithNull(endOfTrackingReceived, getEndOfTracking())) {
             super.setEndOfTrackingReceived(endOfTrackingReceived);
             notifyListenersEndOfTrackingChanged(getEndOfTracking());
         }

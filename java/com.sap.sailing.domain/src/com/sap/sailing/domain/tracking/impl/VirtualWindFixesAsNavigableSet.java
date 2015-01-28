@@ -10,19 +10,23 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl.DummyWind;
-import com.sap.sailing.util.impl.AbstractUnmodifiableNavigableSet;
-import com.sap.sailing.util.impl.DescendingNavigableSet;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.AbstractUnmodifiableNavigableSet;
+import com.sap.sse.util.impl.DescendingNavigableSet;
 
 /**
  * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}. Subclasses have to specify a resolution and a
- * way to compute a wind fix for a given time point. If not constrained by a {@link #from} and/or a {@link #to} time
- * point, an equidistant time field is assumed, starting at {@link TrackedRace#getStart()} and leading up to
- * {@link TrackedRace#getTimePointOfNewestEvent()}. If {@link TrackedRace#getStart()} returns <code>null</code>,
- * {@link Long#MAX_VALUE} is used as the {@link #from} time point, pushing the start to the more or less infinite future
- * ("end of the universe"). If no event was received yet and hence {@link TrackedRace#getTimePointOfNewestEvent()}
- * returns <code>null</code>, the {@link #to} end is assumed to be the beginning of the epoch (1970-01-01T00:00:00).
+ * way to compute a wind fix for a given time point in the form of an implementation of the
+ * {@link #getWind(Position, TimePoint)} method.
+ * <p>
+ * 
+ * If not constrained by a {@link #from} and/or a {@link #to} time point, an equidistant time field is assumed, starting
+ * at {@link TrackedRace#getStart()} and leading up to {@link TrackedRace#getTimePointOfNewestEvent()}. If
+ * {@link TrackedRace#getStart()} returns <code>null</code>, {@link Long#MAX_VALUE} is used as the {@link #from} time
+ * point, pushing the start to the more or less infinite future ("end of the universe"). If no event was received yet
+ * and hence {@link TrackedRace#getTimePointOfNewestEvent()} returns <code>null</code>, the {@link #to} end is assumed
+ * to be the beginning of the epoch (1970-01-01T00:00:00).
  * 
  * @author Axel Uhl (d043530)
  * 

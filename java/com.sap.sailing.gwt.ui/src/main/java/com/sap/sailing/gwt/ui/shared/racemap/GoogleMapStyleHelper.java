@@ -4,7 +4,7 @@ import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleElementType;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
 import com.google.gwt.maps.client.maptypes.MapTypeStyler;
-import com.sap.sailing.domain.common.impl.RGBColor;
+import com.sap.sse.common.impl.RGBColor;
 
 public class GoogleMapStyleHelper {
 
@@ -19,7 +19,7 @@ public class GoogleMapStyleHelper {
     public static MapTypeStyle createColorStyle(MapTypeStyleFeatureType featureType, RGBColor color, int saturation, int lightness) {
         return createElementStyleWithColor(featureType, MapTypeStyleElementType.ALL, color, saturation, lightness);
     }
-    
+
     public static MapTypeStyle createElementStyleWithColor(MapTypeStyleFeatureType featureType, MapTypeStyleElementType elementType,
             RGBColor rgbColor, int saturation, int ligthness) {
         MapTypeStyle result = MapTypeStyle.newInstance();
@@ -31,7 +31,6 @@ public class GoogleMapStyleHelper {
         typeStylers[1] = MapTypeStyler.newSaturationStyler(saturation);
         typeStylers[2] = MapTypeStyler.newLightnessStyler(ligthness);
         result.setStylers(typeStylers);
-
         return result;
     }
 

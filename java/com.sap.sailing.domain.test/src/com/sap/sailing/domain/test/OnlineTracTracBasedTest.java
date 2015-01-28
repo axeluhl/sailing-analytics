@@ -24,8 +24,10 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -34,6 +36,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -108,11 +111,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws InterruptedException {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null, new DynamicRaceDefinitionSet() {
-            @Override
-            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-            }
-        },
+        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null, createRaceDefinitionSet(),
                 /* trackedRegattaRegistry */null,
                 /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
                 getEventSubscriber(), getRaceSubscriber(), receiverTypes)) {
@@ -124,6 +123,31 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             
             @Override
             public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
+                TrackedRaceStatusImpl lastStatus;
+                switch (storedDataEvent.getType()) {
+                case Begin:
+                    logger.info("Stored data begin");
+                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0);
+                    if (getTrackedRace() != null) {
+                        getTrackedRace().setStatus(lastStatus);
+                    }
+                    break;
+                case End:
+                    logger.info("Stored data end");
+                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
+                    if (getTrackedRace() != null) {
+                        getTrackedRace().setStatus(lastStatus);
+                    }
+                    break;
+                case Progress:
+                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, storedDataEvent.getProgress());
+                    if (getTrackedRace() != null) {
+                        getTrackedRace().setStatus(lastStatus);
+                    }
+                    break;
+                default:
+                    break;
+                }
                 if (storedDataEvent.getProgress() == 1.0) {
                     synchronized (semaphor) {
                         storedDataLoaded = true;
@@ -163,6 +187,18 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         trackedRace = (DynamicTrackedRaceImpl) getTrackedRegatta().getTrackedRace(race);
     }
 
+    /**
+     * Creates a race definition set that receives a call-back when the tracked race has been created. Subclasses may override this
+     * in order to be informed at the point in time when the race creation happens.
+     */
+    protected DynamicRaceDefinitionSet createRaceDefinitionSet() {
+        return new DynamicRaceDefinitionSet() {
+            @Override
+            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+            }
+        };
+    }
+
     private void setStoredDataLoaded(boolean storedDataLoaded) {
         this.storedDataLoaded = storedDataLoaded;
     }
@@ -183,7 +219,8 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
-        domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */ null);
+        domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
+                getTracTracRace(), /* trackedRegattaRegistry */ null);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     

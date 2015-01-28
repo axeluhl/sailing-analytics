@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -101,11 +102,12 @@ public interface DomainFactory {
      * boat class exists yet.
      * @param trackedRegattaRegistry TODO
      */
-    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, IRace race, TrackedRegattaRegistry trackedRegattaRegistry);
+    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            IRace race, TrackedRegattaRegistry trackedRegattaRegistry);
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
-     * data from there. Receiving continues until {@link TracTracRaceTracker#stop()} is called.
+     * data from there. Receiving continues until {@link TracTracRaceTracker#stop(boolean)} is called.
      * <p>
      * 
      * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
@@ -132,20 +134,24 @@ public interface DomainFactory {
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
      */
-    TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, 
-            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException, CreateModelException, SubscriberInitializationException;
+    TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
+            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
      * a predefined {@link Regatta} is used to hold the resulting races.
      */
-    RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException, CreateModelException, SubscriberInitializationException;
+    RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
+            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
+            SubscriberInitializationException;
 
     BoatClass getOrCreateBoatClass(String competitorClassName);
 
@@ -244,8 +250,9 @@ public interface DomainFactory {
 
     Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race);
     
-    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore,
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
+            URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the

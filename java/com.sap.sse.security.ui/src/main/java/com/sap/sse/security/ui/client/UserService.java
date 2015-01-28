@@ -65,7 +65,7 @@ public class UserService {
         Storage.addStorageEventHandler(new Handler() {
             @Override
             public void onStorageChange(StorageEvent event) {
-                logger.info("Received storage event { key: "+event.getKey()+", newValue: "+event.getNewValue()+", oldValue: "+
+                logger.finest("Received storage event { key: "+event.getKey()+", newValue: "+event.getNewValue()+", oldValue: "+
                         event.getOldValue()+", url: "+event.getUrl()+", storageArea: "+event.getStorageArea());
                 // ignore update events coming from this object itself
                 if (LOCAL_STORAGE_UPDATE_KEY.equals(event.getKey()) && event.getNewValue() != null

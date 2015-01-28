@@ -1,0 +1,2127 @@
+stored-uri:datafiles/event_20140619_KieleWoche-R1_Blue_Laser.mtb
+StartReplay:1
+
+// Input from params_static:
+
+// Input from event_parameters:
+
+DefaultPanel:
+ReCalcDirAndSpeed:1
+CompMarkerUUID:1
+CodanIsSponsor:0
+DefaultTailLength:60
+APzoomChangeTime:2500
+disableAutoProduce:0
+autoProduce:0
+APstartLineShowOfLeg:0.25
+APsideOfStartLine:0.30
+APstartSwitch:0.8
+APwholeLegBehindMarks:0.15
+APmarkSwitch:0.13
+APmarkZoomBehindMarks:0.10
+APmarkZoomInFrontOfMarks:0.20
+PopupMarkerUUID:2
+ManualUrl:http://www.tractrac.com/files/userguide_sailing.pdf
+Marker1UUID:1
+Marker1Type:RGBMarkerFactory
+Marker1Directional:1
+Marker1Image:markers/boat_FF0000_big.png
+Marker1Length:5
+Marker1MinPixelSize:30
+Startlocation:10.1728504394531,54.4302732999683
+MaxDiffTime:1200
+MaxMetersPerSecond:20
+PrecisionMeters:20
+ShortAvgTime:180
+LongAvgTime:900
+TimeZone:2
+CompMarkerTimeout:60
+FramesPerSecond:8
+replayspeedup:5
+MatchRaceClock:0
+MatchRaceClockNo:3
+MatchRaceClockSpacing:300
+Minimap:1
+MinimapUseLayers:2
+Minimapgeorect:10.092279052734398,54.503669743575486,10.34693916015624,54.39754773601768
+MinimapMarkerUUID:2
+Marker4UUID:2
+Marker4Type:RGBmarkerFactory
+Marker4Directional:1
+Marker4Image:markers/boat_FF0000_small.png
+MetersPerPixel:18
+MetersPerPixelMax:30
+MetersPerPixelMin:0.2
+isMatchRace:0
+DefaultDistanceUnits:meters
+weatherEnabled:0
+DefaultSpeedUnits:KmH
+showRaceClock:1
+BackGroundImage:graphics/background.jpg
+DisableRotation:0
+ControlPointMarkerRadius:13
+disableselection:0
+disableleaderline:0
+DisableChangeRace:0
+PopUpRow1Name:
+PopUpRow1Type:Name
+PopUpRow2Name:Knots
+PopUpRow2Type:BoatSpeed
+PopUpRow3Name:Ranking
+PopUpRow3Type:RowNumber
+PopUpRow4Name:Sail
+PopUpRow4Type:Ini
+PopUpRow5Name:After
+PopUpRow5Type:BoatAfter
+WindEstimator:0
+//live-uri:tcp://secondary.traclive.dk:4400
+//stored-uri:tcp://secondary.traclive.dk:4401
+ResultColumn1Name:#
+ResultColumn1Size:20
+ResultColumn1Type:RowNumber
+ResultColumn2Name:sail
+ResultColumn2Size:70
+ResultColumn2Type:Ini
+ResultColumn3Name:name
+ResultColumn3Size:110
+ResultColumn3Type:Name
+ResultColumn4Name:after
+ResultColumn4Size:45
+ResultColumn4Type:BoatAfter
+ResultColumn5Name:kts
+ResultColumn5Size:40
+ResultColumn5Type:BoatSpeed
+DisableLeaderboard:0
+DisableAnalysis:0
+TableFontSize:11
+compInitialsFontSize:11
+AutoRotate:0
+MassStart:0
+SegmentFile:segments.php
+StartType:Mass
+RaceHandicapSystem:NONE
+TeamCompetitionType:NONE
+LiveDelaySecs: 20
+
+//-------- AUTO GENERATED PARAMETERS START ----------------
+
+EventID:ee57b790-d9a6-0131-7af9-60a44ce903c3
+EventName:Kiele Woche 2014 - Olympic Week
+EventDB:event_20140619_KieleWoche
+EventStartTime:2014-06-19 22:00:00
+EventEndTime:2014-06-29 21:00:00
+EventType:a1b74ca0-fdd8-11dc-8811-005056c00008
+
+RaceID:c06467d0-dad9-0131-82a6-60a44ce903c3
+RaceName:R1 Blue (Laser)
+RaceStartTime:2014-06-21 10:30:00
+RaceEndTime:
+RaceTrackingStartTime:2014-06-21 10:25:00
+RaceTrackingEndTime:2014-06-21 11:21:26
+RaceDefaultRouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+RaceHandicapSystem:NONE
+
+Class1UUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Class1Name:LSR
+
+Team1UUID:d304ab40-dc51-0131-a7d5-60a44ce903c3
+Team1Name:Agata Barwinska
+
+Team2UUID:287cfd60-dc15-0131-a00f-60a44ce903c3
+Team2Name:Albin GIPPERTH
+
+Team3UUID:26e78690-dc15-0131-9fb1-60a44ce903c3
+Team3Name:Aleksander ARIAN
+Team3Comp1UUID:0416dae6-a8ee-462c-b7a7-f056391b2aa8
+
+Team4UUID:286fe670-dc15-0131-a004-60a44ce903c3
+Team4Name:Alessio SPADONI
+
+Team5UUID:28993ca0-dc15-0131-a01c-60a44ce903c3
+Team5Name:Alexander NUIJA
+Team5Comp1UUID:71cd3e38-cfd5-488a-9da1-05c2856b5c12
+
+Team6UUID:23e18a00-dc15-0131-9f43-60a44ce903c3
+Team6Name:Alexey SELIVANOV
+
+Team7UUID:23b41f00-dc15-0131-9f2e-60a44ce903c3
+Team7Name:Alican BASEGMEZ
+
+Team8UUID:23965480-dc15-0131-9f23-60a44ce903c3
+Team8Name:Alican KAYNAR
+
+Team9UUID:d3773870-dc51-0131-a819-60a44ce903c3
+Team9Name:Alisa KIRILYUK
+
+Team10UUID:e7892170-dba5-0131-9858-60a44ce903c3
+Team10Name:Allan NØRREGAARD
+
+Team11UUID:26df89a0-dc15-0131-9fae-60a44ce903c3
+Team11Name:Alp RONA
+Team11Comp1UUID:57521ca6-2ee0-4be5-93e2-94ff0945686a
+
+Team12UUID:e6e4c570-dba5-0131-9824-60a44ce903c3
+Team12Name:Amoros EMILE
+
+Team13UUID:286be760-dc15-0131-a001-60a44ce903c3
+Team13Name:Anders KARLSSON
+Team13Comp1UUID:0e6a4516-98d2-4ca6-b182-ac12042adeae
+
+Team14UUID:23a9f580-dc15-0131-9f2b-60a44ce903c3
+Team14Name:Anders PEDERSEN
+
+Team15UUID:e855a250-dba5-0131-9895-60a44ce903c3
+Team15Name:Andrea BREWSTER
+
+Team16UUID:d16242c0-dc51-0131-a778-60a44ce903c3
+Team16Name:Andrzej PUCHALSKI
+
+Team17UUID:d2dc3dd0-dc51-0131-a7ce-60a44ce903c3
+Team17Name:Ania WEINZIEHER
+
+Team18UUID:e89143b0-dba5-0131-98b1-60a44ce903c3
+Team18Name:Ann Kristin WEDEMEYER
+
+Team19UUID:d31b6be0-dc51-0131-a7e7-60a44ce903c3
+Team19Name:Anna BRZOZOWSKA
+
+Team20UUID:d2dd7850-dc51-0131-a7cf-60a44ce903c3
+Team20Name:Anna POHLAK
+
+Team21UUID:e796aa40-dba5-0131-9864-60a44ce903c3
+Team21Name:Anne-Line Lyngsø THOMSEN
+
+Team22UUID:d30fe480-dc51-0131-a7de-60a44ce903c3
+Team22Name:Annegret UNNUK
+
+Team23UUID:e8644450-dba5-0131-989b-60a44ce903c3
+Team23Name:Annemiek BEKKERING
+
+Team24UUID:d373ac40-dc51-0131-a816-60a44ce903c3
+Team24Name:Annika BOCHMANN
+
+Team25UUID:d3705da0-dc51-0131-a813-60a44ce903c3
+Team25Name:Annina WAGNER
+
+Team26UUID:28831530-dc15-0131-a014-60a44ce903c3
+Team26Name:Antoine DEVINEAU
+
+Team27UUID:d2b58180-daf6-0131-87d4-60a44ce903c3
+Team27Name:ARG
+
+Team28UUID:d3151ce0-dc51-0131-a7e2-60a44ce903c3
+Team28Name:Aukse DVILEVICIUTE
+
+Team29UUID:e879c600-dba5-0131-98a2-60a44ce903c3
+Team29Name:Aura MIQUEL MOLONS
+
+Team30UUID:d29ada70-daf6-0131-87b7-60a44ce903c3
+Team30Name:AUS
+
+Team31UUID:d2e76ce0-daf6-0131-8802-60a44ce903c3
+Team31Name:AUT
+
+Team32UUID:d14444b0-dc51-0131-a76b-60a44ce903c3
+Team32Name:Barend KOL
+
+Team33UUID:f442ddf0-daf7-0131-888f-60a44ce903c3
+Team33Name:BEL
+
+Team34UUID:e6d5fe50-dba5-0131-9818-60a44ce903c3
+Team34Name:Ben Goodwin
+
+Team35UUID:2886a890-dc15-0131-a017-60a44ce903c3
+Team35Name:Ben WALKEMEYER
+
+Team36UUID:e4eb1510-dba5-0131-97d1-60a44ce903c3
+Team36Name:Benjamin BILDSTEIN
+
+Team37UUID:e6e6e840-dba5-0131-9826-60a44ce903c3
+Team37Name:Benjamin GREZ
+
+Team38UUID:e51f4fe0-dba5-0131-97e6-60a44ce903c3
+Team38Name:Bertheau SIMON
+
+Team39UUID:23979a70-dc15-0131-9f24-60a44ce903c3
+Team39Name:Björn ALLANSSON
+
+Team40UUID:467320e0-daf8-0131-8902-60a44ce903c3
+Team40Name:BLR
+
+Team41UUID:f43b1260-daf7-0131-888d-60a44ce903c3
+Team41Name:BRA
+
+Team42UUID:4a8dc6f0-daf7-0131-886c-60a44ce903c3
+Team42Name:CAN
+
+Team43UUID:e6da7290-dba5-0131-981c-60a44ce903c3
+Team43Name:Carlos PAZ BLANCO
+
+Team44UUID:d3727a80-dc51-0131-a815-60a44ce903c3
+Team44Name:Carrie SMITH
+
+Team45UUID:e87adb70-dba5-0131-98a3-60a44ce903c3
+Team45Name:Cecile JANMAAT
+
+Team46UUID:d317aad0-dc51-0131-a7e4-60a44ce903c3
+Team46Name:Céline CARLSEN
+
+Team47UUID:714b2f70-daf8-0131-891d-60a44ce903c3
+Team47Name:CHI
+
+Team48UUID:d30ea730-dc51-0131-a7dd-60a44ce903c3
+Team48Name:Chiara STEINMÜLLER
+
+Team49UUID:e5064b10-dba5-0131-97e0-60a44ce903c3
+Team49Name:Chris TAYLOR
+
+Team50UUID:d157cfe0-dc51-0131-a770-60a44ce903c3
+Team50Name:Christer FRENNERT
+
+Team51UUID:d3a78270-dc51-0131-a82e-60a44ce903c3
+Team51Name:Christian BAUER
+
+Team52UUID:d15e9ed0-dc51-0131-a775-60a44ce903c3
+Team52Name:Christian BODLER
+
+Team53UUID:287e2ee0-dc15-0131-a010-60a44ce903c3
+Team53Name:Christian GULDBERG ROST
+
+Team54UUID:289a0c80-dc15-0131-a01d-60a44ce903c3
+Team54Name:CHRISTIANSEN Andre
+
+Team55UUID:26d13af0-dc15-0131-9faa-60a44ce903c3
+Team55Name:Claes TÖRNSTEN
+Team55Comp1UUID:dd9393f0-03d9-471d-b84d-cd427e4dce43
+
+Team56UUID:d3068cd0-dc51-0131-a7d7-60a44ce903c3
+Team56Name:Constanze STOLZ
+
+Team57UUID:d15d4e70-dc51-0131-a774-60a44ce903c3
+Team57Name:Cor DE GRAAFF
+
+Team58UUID:23df1910-dc15-0131-9f41-60a44ce903c3
+Team58Name:Cornelius SCHOLLMAYER
+
+Team59UUID:f43e1350-daf7-0131-888e-60a44ce903c3
+Team59Name:CRO
+
+Team60UUID:28b0f2d0-dc15-0131-a029-60a44ce903c3
+Team60Name:Cyrill KNECHT
+Team60Comp1UUID:730a9156-14d7-4e25-a1b7-8d1cf1b10d28
+
+Team61UUID:a55fe290-daf8-0131-89be-60a44ce903c3
+Team61Name:CZE
+
+Team62UUID:d16ff5b0-dc51-0131-a781-60a44ce903c3
+Team62Name:Daniel BINA
+
+Team63UUID:26c74ff0-dc15-0131-9fa8-60a44ce903c3
+Team63Name:Daniel BIRGMARK
+
+Team64UUID:d30d5f60-dc51-0131-a7dc-60a44ce903c3
+Team64Name:Danielle MAMAN
+
+Team65UUID:e4fe7a20-dba5-0131-97da-60a44ce903c3
+Team65Name:Dante BIANCHI
+
+Team66UUID:e798fd70-dba5-0131-9866-60a44ce903c3
+Team66Name:David BONDÌ
+
+Team67UUID:e4e7c640-dba5-0131-97cf-60a44ce903c3
+Team67Name:David Evans
+
+Team68UUID:e4f05bb0-dba5-0131-97d4-60a44ce903c3
+Team68Name:David GILMOUR
+
+Team69UUID:e87d2de0-dba5-0131-98a5-60a44ce903c3
+Team69Name:Dawn LIU
+
+Team70UUID:e8809350-dba5-0131-98a8-60a44ce903c3
+Team70Name:Deborah CAPOZZI
+
+Team71UUID:d2bc1380-daf6-0131-87db-60a44ce903c3
+Team71Name:DEN
+
+Team72UUID:237e35c0-dc15-0131-9f1f-60a44ce903c3
+Team72Name:DENISS KARPAK
+
+Team73UUID:23d73650-dc15-0131-9f3e-60a44ce903c3
+Team73Name:Denny JESCHULL
+
+Team74UUID:2701e0d0-dc15-0131-9fc3-60a44ce903c3
+Team74Name:Dharmender SINGH
+Team74Comp1UUID:99304e14-c52c-4473-80df-5e18cdd45e17
+
+Team75UUID:e6e049b0-dba5-0131-9820-60a44ce903c3
+Team75Name:Dominik BUKSAK
+
+Team76UUID:e51c0cf0-dba5-0131-97e4-60a44ce903c3
+Team76Name:Dorian HEITZIG
+
+Team77UUID:e7a1a1e0-dba5-0131-986d-60a44ce903c3
+Team77Name:Doris HUNG
+
+Team78UUID:e7a635e0-dba5-0131-9871-60a44ce903c3
+Team78Name:Eckart KAPHENGST
+
+Team79UUID:23b1a6c0-dc15-0131-9f2c-60a44ce903c3
+Team79Name:Eike MARTENS
+
+Team80UUID:26cb7710-dc15-0131-9fa9-60a44ce903c3
+Team80Name:Emil BENGTSON
+Team80Comp1UUID:a991f873-2006-482e-ae0c-ff6cb6483dea
+
+Team81UUID:23a724a0-dc15-0131-9f2a-60a44ce903c3
+Team81Name:Enrico VOLTOLLINI
+
+Team82UUID:e4e9bae0-dba5-0131-97d0-60a44ce903c3
+Team82Name:Erik HEIL
+
+Team83UUID:e8621290-dba5-0131-9899-60a44ce903c3
+Team83Name:Erin RAFUSE
+
+Team84UUID:e6bd4fe0-dba5-0131-9816-60a44ce903c3
+Team84Name:Erwan Fischer
+
+Team85UUID:d2bfa970-daf6-0131-87df-60a44ce903c3
+Team85Name:ESP
+
+Team86UUID:46658d40-daf8-0131-88fe-60a44ce903c3
+Team86Name:EST
+
+Team87UUID:2881e2c0-dc15-0131-a013-60a44ce903c3
+Team87Name:Etienne Le Pen
+
+Team88UUID:d30c06a0-dc51-0131-a7db-60a44ce903c3
+Team88Name:Eva-Maria SCHIMAK
+
+Team89UUID:e79f5950-dba5-0131-986b-60a44ce903c3
+Team89Name:Evan WALKER
+
+Team90UUID:e8892680-dba5-0131-98af-60a44ce903c3
+Team90Name:Ewa BARTOSIEWICZ
+
+Team91UUID:26ee7b00-dc15-0131-9fb6-60a44ce903c3
+Team91Name:Fabian GIELEN
+
+Team92UUID:287bd020-dc15-0131-a00e-60a44ce903c3
+Team92Name:Fabian KASÜSKE
+Team92Comp1UUID:3d3008cb-d87e-47eb-9f4e-5abc1722ecac
+
+Team93UUID:23ddd260-dc15-0131-9f40-60a44ce903c3
+Team93Name:Fabian LEMMEL
+
+Team94UUID:e7a3e300-dba5-0131-986f-60a44ce903c3
+Team94Name:Federica SALVÀ
+
+Team95UUID:e6b52cc0-dba5-0131-9810-60a44ce903c3
+Team95Name:Federico ALONSO
+
+Team96UUID:d1650700-dc51-0131-a77a-60a44ce903c3
+Team96Name:Felipe Ignacio FAUNER
+
+Team97UUID:e51db7c0-dba5-0131-97e5-60a44ce903c3
+Team97Name:Felipe ZAEYEN
+
+Team98UUID:d1679630-dc51-0131-a77b-60a44ce903c3
+Team98Name:Felix Andres FAUNER
+
+Team99UUID:28796750-dc15-0131-a00c-60a44ce903c3
+Team99Name:Filip CISZKIEWICZ
+Team99Comp1UUID:9cf8fe6b-2b63-431b-a426-db65b3aa7e82
+
+Team100UUID:23814c40-dc15-0131-9f20-60a44ce903c3
+Team100Name:Filippo Baldassari
+
+Team101UUID:4a8a4270-daf7-0131-8868-60a44ce903c3
+Team101Name:FIN
+
+Team102UUID:e792f170-dba5-0131-9861-60a44ce903c3
+Team102Name:Finn HEEG
+
+Team103UUID:e7a07a80-dba5-0131-986c-60a44ce903c3
+Team103Name:Flora VIRAG
+
+Team104UUID:f4381470-daf7-0131-888c-60a44ce903c3
+Team104Name:FRA
+
+Team105UUID:26fae7a0-dc15-0131-9fbd-60a44ce903c3
+Team105Name:Francesco MARRAI
+
+Team106UUID:e791ccd0-dba5-0131-9860-60a44ce903c3
+Team106Name:Francesco SABATINI
+
+Team107UUID:e6de0810-dba5-0131-981e-60a44ce903c3
+Team107Name:Francisco ANDRADE
+
+Team108UUID:e6e28a20-dba5-0131-9822-60a44ce903c3
+Team108Name:Frederick STRAMMER
+
+Team109UUID:e6dc3d70-dba5-0131-981d-60a44ce903c3
+Team109Name:Frithjof SCHWERDT
+
+Team110UUID:e6b7a610-dba5-0131-9812-60a44ce903c3
+Team110Name:Fritiof HEDSTRÖM
+
+Team111UUID:28857a50-dc15-0131-a016-60a44ce903c3
+Team111Name:Gajender SINGH
+Team111Comp1UUID:02d8b082-3ade-48d5-bd03-70a8d9912e9f
+
+Team112UUID:4a869740-daf7-0131-8864-60a44ce903c3
+Team112Name:GBR
+
+Team113UUID:e887ed60-dba5-0131-98ae-60a44ce903c3
+Team113Name:Genevieve TULLOCH
+
+Team114UUID:d29e21f0-daf6-0131-87bb-60a44ce903c3
+Team114Name:GER
+Team114Comp1UUID:d81a5620-daf8-0131-8a5e-60a44ce903c3
+
+Team115UUID:28b350f0-dc15-0131-a02b-60a44ce903c3
+Team115Name:GER205198X
+
+Team116UUID:2398cac0-dc15-0131-9f25-60a44ce903c3
+Team116Name:giorgio POGGI
+
+Team117UUID:e8765e60-dba5-0131-989f-60a44ce903c3
+Team117Name:Giulia CONTI
+
+Team118UUID:d1559870-dc51-0131-a76e-60a44ce903c3
+Team118Name:Guus BIJLARD
+
+Team119UUID:d168d5d0-dc51-0131-a77c-60a44ce903c3
+Team119Name:Hans-Peter REICHL
+
+Team120UUID:23bd2dc0-dc15-0131-9f34-60a44ce903c3
+Team120Name:Hartmut DUISBERG
+
+Team121UUID:2875f4c0-dc15-0131-a009-60a44ce903c3
+Team121Name:Hector SIMPSON
+
+Team122UUID:d1421290-dc51-0131-a76a-60a44ce903c3
+Team122Name:Heiko KRÖGER
+
+Team123UUID:d147c560-dc51-0131-a76d-60a44ce903c3
+Team123Name:HELENA LUCAS
+
+Team124UUID:e894a1a0-dba5-0131-98b4-60a44ce903c3
+Team124Name:Helene NÆSS
+
+Team125UUID:26c3f950-dc15-0131-9fa6-60a44ce903c3
+Team125Name:Henrik BEGBY
+
+Team126UUID:26fd4c10-dc15-0131-9fbf-60a44ce903c3
+Team126Name:Henrik ERIKSSON
+Team126Comp1UUID:a24c4ffd-a166-45ac-a2ae-5436ed80f1b5
+
+Team127UUID:d1712420-dc51-0131-a782-60a44ce903c3
+Team127Name:Henrik JOHNSSON
+
+Team128UUID:e6e92780-dba5-0131-9828-60a44ce903c3
+Team128Name:Henry LLOYD WILLIAMS
+
+Team129UUID:28737350-dc15-0131-a007-60a44ce903c3
+Team129Name:Henry WETHERELL
+
+Team130UUID:286ebe20-dc15-0131-a003-60a44ce903c3
+Team130Name:Hermann TOMASGAARD
+Team130Comp1UUID:2db80e93-9653-4be5-8461-c3a4e58d3ad3
+
+Team131UUID:d2a4af90-daf6-0131-87c2-60a44ce903c3
+Team131Name:HKG
+
+Team132UUID:d2f06ef0-daf6-0131-880c-60a44ce903c3
+Team132Name:HUN
+
+Team133UUID:2716bd10-dc15-0131-9fcd-60a44ce903c3
+Team133Name:Hussain AL JABRI
+Team133Comp1UUID:55d3ecbf-0a66-4245-a210-39d36d7b4d90
+
+Team134UUID:28a85420-dc15-0131-a022-60a44ce903c3
+Team134Name:Iain MCLAUGHLAN
+
+Team135UUID:e89a5350-dba5-0131-98b6-60a44ce903c3
+Team135Name:Ida Marie Baad NIELSEN
+
+Team136UUID:e78c3b80-dba5-0131-985b-60a44ce903c3
+Team136Name:Ida SVENSSON
+
+Team137UUID:4a3c23a0-daf7-0131-882f-60a44ce903c3
+Team137Name:IND
+
+Team138UUID:4a2660b0-daf7-0131-881f-60a44ce903c3
+Team138Name:IRL
+
+Team139UUID:4a948480-daf7-0131-8873-60a44ce903c3
+Team139Name:ISV
+
+Team140UUID:d27c59b0-daf6-0131-87ac-60a44ce903c3
+Team140Name:ITA
+
+Team141UUID:28aacb40-dc15-0131-a024-60a44ce903c3
+Team141Name:Ivan SVENTUKHOUSKI
+Team141Comp1UUID:2671476e-ba9b-4bf0-9658-bde12d667b12
+
+Team142UUID:e4fc1dd0-dba5-0131-97d8-60a44ce903c3
+Team142Name:Jack HAWKINS
+
+Team143UUID:2874c4f0-dc15-0131-a008-60a44ce903c3
+Team143Name:Jack WETHERELL
+
+Team144UUID:23b97ef0-dc15-0131-9f31-60a44ce903c3
+Team144Name:Jacob STACHELHAUS
+
+Team145UUID:e6b26e20-dba5-0131-980e-60a44ce903c3
+Team145Name:Jacopo PLAZZI
+
+Team146UUID:d37c02a0-dc51-0131-a81d-60a44ce903c3
+Team146Name:Jacqueline GURR
+
+Team147UUID:239d3720-dc15-0131-9f27-60a44ce903c3
+Team147Name:Jake LILLEY
+
+Team148UUID:e790ae70-dba5-0131-985f-60a44ce903c3
+Team148Name:Jakob LENZ
+
+Team149UUID:e6e3a4e0-dba5-0131-9823-60a44ce903c3
+Team149Name:Jakob MEGGENDORFER
+
+Team150UUID:27031db0-dc15-0131-9fc4-60a44ce903c3
+Team150Name:Jakub ROSLON
+Team150Comp1UUID:316f09e3-c701-411d-979e-876b4f4fe067
+
+Team151UUID:e50540b0-dba5-0131-97df-60a44ce903c3
+Team151Name:James PETERS
+
+Team152UUID:e4f345a0-dba5-0131-97d6-60a44ce903c3
+Team152Name:Jan Hauke ERICHSEN
+
+Team153UUID:28a6f5c0-dc15-0131-a021-60a44ce903c3
+Team153Name:Jan Paul MUCH
+Team153Comp1UUID:360a4faf-6689-4f4d-abad-f21846153965
+
+Team154UUID:d16c4560-dc51-0131-a77e-60a44ce903c3
+Team154Name:Jan Peter RISCHARD
+
+Team155UUID:23bbf500-dc15-0131-9f33-60a44ce903c3
+Team155Name:Jan-Dietmar DELLAS
+
+Team156UUID:26f530c0-dc15-0131-9fb9-60a44ce903c3
+Team156Name:Jasvir SINGH
+Team156Comp1UUID:72ec3142-77d9-418f-bafb-6500151b04b8
+
+Team157UUID:e85717e0-dba5-0131-9896-60a44ce903c3
+Team157Name:Jena Mai Hansen
+
+Team158UUID:d3a514b0-dc51-0131-a82d-60a44ce903c3
+Team158Name:Jens KROKER
+
+Team159UUID:23d02f90-dc15-0131-9f38-60a44ce903c3
+Team159Name:Jeremi ZIMNY
+
+Team160UUID:27176480-dc15-0131-9fce-60a44ce903c3
+Team160Name:Jeremy O'CONNELL
+Team160Comp1UUID:8dbce876-2db5-4a17-9618-8c70b85611a9
+
+Team161UUID:e6bae980-dba5-0131-9814-60a44ce903c3
+Team161Name:Joel TURNER
+
+Team162UUID:28b22230-dc15-0131-a02a-60a44ce903c3
+Team162Name:Johann KAMINSKI
+Team162Comp1UUID:652c4d0d-f080-4538-9c94-6271d521fab0
+
+Team163UUID:271915d0-dc15-0131-9fd1-60a44ce903c3
+Team163Name:Johann KOHLHOFF
+
+Team164UUID:26fe7cf0-dc15-0131-9fc0-60a44ce903c3
+Team164Name:Johannes PETTERSSON
+
+Team165UUID:289ae3e0-dc15-0131-a01e-60a44ce903c3
+Team165Name:John DIEDRICHS
+
+Team166UUID:e4ef35d0-dba5-0131-97d3-60a44ce903c3
+Team166Name:John FERGUSON
+
+Team167UUID:e5028900-dba5-0131-97dd-60a44ce903c3
+Team167Name:Jon LADHA
+
+Team168UUID:287a9f60-dc15-0131-a00d-60a44ce903c3
+Team168Name:Jonasz STELMASZYK
+
+Team169UUID:e6b8c170-dba5-0131-9813-60a44ce903c3
+Team169Name:Jorge LIMA
+
+Team170UUID:28b5aba0-dc15-0131-a02d-60a44ce903c3
+Team170Name:Jose GUTIERREZ
+
+Team171UUID:e87498b0-dba5-0131-989d-60a44ce903c3
+Team171Name:Jule GÖRGE
+
+Team172UUID:e87e53e0-dba5-0131-98a6-60a44ce903c3
+Team172Name:Julia GROSS
+
+Team173UUID:d3113050-dc51-0131-a7df-60a44ce903c3
+Team173Name:Julia STEFANIAK
+
+Team174UUID:e6d71bd0-dba5-0131-9819-60a44ce903c3
+Team174Name:Julian RAMM
+
+Team175UUID:270927d0-dc15-0131-9fc7-60a44ce903c3
+Team175Name:Julian-Samuel GEBÜHR
+Team175Comp1UUID:cc6ad016-1ebf-4947-8997-8d111d7800ba
+
+Team176UUID:e797d910-dba5-0131-9865-60a44ce903c3
+Team176Name:Justin LIU
+
+Team177UUID:e6b66500-dba5-0131-9811-60a44ce903c3
+Team177Name:Justus SCHMIDT
+
+Team178UUID:d1610880-dc51-0131-a777-60a44ce903c3
+Team178Name:Jürgen FREIHEIT
+
+Team179UUID:23e2bda0-dc15-0131-9f44-60a44ce903c3
+Team179Name:Jørgen SVENDSEN
+
+Team180UUID:26e444c0-dc15-0131-9fb0-60a44ce903c3
+Team180Name:Kaarel KRUUSMÄGI
+Team180Comp1UUID:0fa99080-2f2d-4caf-836c-0ed6c374c75d
+
+Team181UUID:23e3eac0-dc15-0131-9f45-60a44ce903c3
+Team181Name:Kai FALKENTHAL
+
+Team182UUID:28723810-dc15-0131-a006-60a44ce903c3
+Team182Name:Kaptan GUNEY
+
+Team183UUID:28961d20-dc15-0131-a018-60a44ce903c3
+Team183Name:Karl-Martin RAMMO
+Team183Comp1UUID:6cad5027-80f2-4bff-b230-068d28adc5f4
+
+Team184UUID:26ea10c0-dc15-0131-9fb3-60a44ce903c3
+Team184Name:Karolis JANULIONIS
+
+Team185UUID:d158f8a0-dc51-0131-a771-60a44ce903c3
+Team185Name:Kevin Cantin
+
+Team186UUID:e6e17110-dba5-0131-9821-60a44ce903c3
+Team186Name:Kim Niclas HOLSTE
+
+Team187UUID:270e1940-dc15-0131-9fcb-60a44ce903c3
+Team187Name:Kornelijus PUPKUS
+
+Team188UUID:e88ef250-dba5-0131-98b0-60a44ce903c3
+Team188Name:Kristen LANE
+
+Team189UUID:26ffa2e0-dc15-0131-9fc1-60a44ce903c3
+Team189Name:Kristian RAUS
+Team189Comp1UUID:217fdb5a-0ddc-4a9b-8900-557eed9c0aef
+
+Team190UUID:26f0d610-dc15-0131-9fb8-60a44ce903c3
+Team190Name:Lander Balcaen
+Team190Comp1UUID:102e0440-d0ff-4c3a-a0a7-4667f21885df
+
+Team191UUID:d36e9fb0-dc51-0131-a812-60a44ce903c3
+Team191Name:Lara VADIAN
+
+Team192UUID:23babfa0-dc15-0131-9f32-60a44ce903c3
+Team192Name:Lars HAVERLAND
+
+Team193UUID:23cdc890-dc15-0131-9f36-60a44ce903c3
+Team193Name:Lars Johan Brodtkorb
+
+Team194UUID:d1467110-dc51-0131-a76c-60a44ce903c3
+Team194Name:Lasse KLÖTZING
+
+Team195UUID:d312a5e0-dc51-0131-a7e0-60a44ce903c3
+Team195Name:Laura KRAGH FREDERIKSEN
+
+Team196UUID:d2e03900-dc51-0131-a7d1-60a44ce903c3
+Team196Name:Laura Louise VAN VEEN
+
+Team197UUID:d3090a10-dc51-0131-a7d9-60a44ce903c3
+Team197Name:Laura PARRE
+
+Team198UUID:e8631ed0-dba5-0131-989a-60a44ce903c3
+Team198Name:Laura SCHÖFEGGER
+
+Team199UUID:239a06f0-dc15-0131-9f26-60a44ce903c3
+Team199Name:Lauri VÄINSALU
+
+Team200UUID:289bfad0-dc15-0131-a01f-60a44ce903c3
+Team200Name:Leah-Noel Gonseth
+
+Team201UUID:d31f2990-dc51-0131-a7ea-60a44ce903c3
+Team201Name:Lena HAVERLAND
+
+Team202UUID:e6d95720-dba5-0131-981b-60a44ce903c3
+Team202Name:Lennart BRIESENICK-PUDENZ
+
+Team203UUID:e6df2a80-dba5-0131-981f-60a44ce903c3
+Team203Name:Levi SLAP
+
+Team204UUID:d313e370-dc51-0131-a7e1-60a44ce903c3
+Team204Name:Liise KÖÖSEL
+
+Team205UUID:e78d55b0-dba5-0131-985c-60a44ce903c3
+Team205Name:Lin Ea CENHOLT
+
+Team206UUID:d2ea2930-dc51-0131-a7d2-60a44ce903c3
+Team206Name:Line Flem HÖST
+
+Team207UUID:d2d5be20-dc51-0131-a7c9-60a44ce903c3
+Team207Name:Lisa FASSELT
+
+Team208UUID:26e8d320-dc15-0131-9fb2-60a44ce903c3
+Team208Name:Loïc Queroux
+Team208Comp1UUID:06e224b1-4356-46cc-9328-4e009505e7b5
+
+Team209UUID:d37868b0-dc51-0131-a81a-60a44ce903c3
+Team209Name:Lorena BRUNNHUBER
+
+Team210UUID:26fc1e80-dc15-0131-9fbe-60a44ce903c3
+Team210Name:Lorenzo Brando CHIAVARINI
+Team210Comp1UUID:ffe21eb5-1c56-4e7a-9c12-c66e1ed1a8c9
+
+Team211UUID:e7a2c460-dba5-0131-986e-60a44ce903c3
+Team211Name:LORENZO BRESSANI
+
+Team212UUID:e7883f50-dba5-0131-9857-60a44ce903c3
+Team212Name:Lorenzo BRESSANI
+
+Team213UUID:46689b60-daf8-0131-88ff-60a44ce903c3
+Team213Name:LTU
+
+Team214UUID:28ae8aa0-dc15-0131-a027-60a44ce903c3
+Team214Name:Luciano ANTONIETTI
+Team214Comp1UUID:d613b497-3931-4f97-88f4-6452433bf952
+
+Team215UUID:d37acdc0-dc51-0131-a81c-60a44ce903c3
+Team215Name:Lucy SHEPHARD
+
+Team216UUID:287f6c40-dc15-0131-a011-60a44ce903c3
+Team216Name:Lukas BERGMAN
+Team216Comp1UUID:0d25b8be-a187-4e65-bac2-1d7ccd2853b0
+
+Team217UUID:270cd7c0-dc15-0131-9fca-60a44ce903c3
+Team217Name:Lukas FEUERHERDT
+
+Team218UUID:23ea7dd0-dc15-0131-9f48-60a44ce903c3
+Team218Name:Lukasz Lesinski
+
+Team219UUID:e5042c60-dba5-0131-97de-60a44ce903c3
+Team219Name:Lukasz PRZYBYTEK
+
+Team220UUID:2382fa90-dc15-0131-9f21-60a44ce903c3
+Team220Name:Mads BENDIX
+
+Team221UUID:e8851790-dba5-0131-98ac-60a44ce903c3
+Team221Name:Magdalena PLANTING
+
+Team222UUID:28989480-dc15-0131-a01b-60a44ce903c3
+Team222Name:Magnus-Paul SIMON
+
+Team223UUID:e8926030-dba5-0131-98b2-60a44ce903c3
+Team223Name:Maiken FOGHT SCHÜTT
+
+Team224UUID:27044bc0-dc15-0131-9fc5-60a44ce903c3
+Team224Name:Mantas MAROZAS
+Team224Comp1UUID:c40b5bd8-d85f-4f4d-b8e8-aafd914f70ea
+
+Team225UUID:e6ecfe70-dba5-0131-982b-60a44ce903c3
+Team225Name:Marco Grael
+
+Team226UUID:2880aa30-dc15-0131-a012-60a44ce903c3
+Team226Name:Marcus MAGNUSSON
+Team226Comp1UUID:dfbbc56c-ffc1-43d6-84fd-baa0ad0538b3
+
+Team227UUID:e886cd40-dba5-0131-98ad-60a44ce903c3
+Team227Name:Maria CANTERO IZQUIERDO
+
+Team228UUID:d3760cd0-dc51-0131-a818-60a44ce903c3
+Team228Name:Marjaliisa UMB
+
+Team229UUID:26dbcd20-dc15-0131-9fac-60a44ce903c3
+Team229Name:Mark Spearman
+
+Team230UUID:26efa520-dc15-0131-9fb7-60a44ce903c3
+Team230Name:Martin Aamann JESSEN
+Team230Comp1UUID:2ec02f0f-29d6-4fad-9acc-1284358ff0e9
+
+Team231UUID:23cc9470-dc15-0131-9f35-60a44ce903c3
+Team231Name:Martin BOIDIN
+
+Team232UUID:26d42480-dc15-0131-9fab-60a44ce903c3
+Team232Name:Martis PAJARSKAS
+
+Team233UUID:26e21b60-dc15-0131-9faf-60a44ce903c3
+Team233Name:Mathias MOLLATT
+
+Team234UUID:e5205e20-dba5-0131-97e7-60a44ce903c3
+Team234Name:Mathieu MELLOU
+
+Team235UUID:23d14f30-dc15-0131-9f39-60a44ce903c3
+Team235Name:Matthias WOLFF
+
+Team236UUID:287851f0-dc15-0131-a00b-60a44ce903c3
+Team236Name:Maxim NIKOLAEV
+Team236Comp1UUID:015d41ce-4d8f-428b-8636-060858dff142
+
+Team237UUID:e87f7b70-dba5-0131-98a7-60a44ce903c3
+Team237Name:Mayumi ROLLER
+
+Team238UUID:e8789ac0-dba5-0131-98a1-60a44ce903c3
+Team238Name:MEYER Leonie
+
+Team239UUID:26c64180-dc15-0131-9fa7-60a44ce903c3
+Team239Name:Michael HANSEN
+Team239Comp1UUID:eb174b0c-b886-4e01-8416-012db3f420cb
+
+Team240UUID:d3aa0eb0-dc51-0131-a830-60a44ce903c3
+Team240Name:Michael KERN
+
+Team241UUID:23cf0070-dc15-0131-9f37-60a44ce903c3
+Team241Name:Michael KLUEGEL
+
+Team242UUID:23b58670-dc15-0131-9f2f-60a44ce903c3
+Team242Name:Michael MAIER
+
+Team243UUID:23e05740-dc15-0131-9f42-60a44ce903c3
+Team243Name:Michal JODLOWSKI
+
+Team244UUID:28710ef0-dc15-0131-a005-60a44ce903c3
+Team244Name:Mike BULLOT
+
+Team245UUID:23ebbd40-dc15-0131-9f49-60a44ce903c3
+Team245Name:Milan Vujasinovic
+
+Team246UUID:d305b3d0-dc51-0131-a7d6-60a44ce903c3
+Team246Name:Milda EIDUKEVICIUTE
+
+Team247UUID:27160f40-dc15-0131-9fcc-60a44ce903c3
+Team247Name:Moritz BURMESTER
+
+Team248UUID:d374df70-dc51-0131-a817-60a44ce903c3
+Team248Name:Nadine BÖHM
+
+Team249UUID:4a22b850-daf7-0131-881b-60a44ce903c3
+Team249Name:NED
+
+Team250UUID:d318eb00-dc51-0131-a7e5-60a44ce903c3
+Team250Name:nethra KUMANAN
+
+Team251UUID:d31ca900-dc51-0131-a7e8-60a44ce903c3
+Team251Name:Nethra Kumanan
+
+Team252UUID:e6d837f0-dba5-0131-981a-60a44ce903c3
+Team252Name:Nic ASHER
+
+Team253UUID:e7943870-dba5-0131-9862-60a44ce903c3
+Team253Name:Nicholas Fadler MARTINSEN
+
+Team254UUID:e6bc2330-dba5-0131-9815-60a44ce903c3
+Team254Name:Nico Luca Marc DELLE KARTH
+
+Team255UUID:2707e420-dc15-0131-9fc6-60a44ce903c3
+Team255Name:Nicolas KOTTMEIER
+Team255Comp1UUID:dc1036f4-8e6f-498c-b322-08e3049a41f9
+
+Team256UUID:2717fa80-dc15-0131-9fcf-60a44ce903c3
+Team256Name:Nik Willem
+Team256Comp1UUID:954da0aa-5a06-47d4-a86e-5f4bd05714be
+
+Team257UUID:d2df0140-dc51-0131-a7d0-60a44ce903c3
+Team257Name:Niki BLÄSSAR
+
+Team258UUID:289d5460-dc15-0131-a020-60a44ce903c3
+Team258Name:Nils THEUNINCK
+
+Team259UUID:e8754c10-dba5-0131-989e-60a44ce903c3
+Team259Name:Noora RUSKOLA
+
+Team260UUID:d2c68fc0-daf6-0131-87e3-60a44ce903c3
+Team260Name:NOR
+
+Team261UUID:d16ec7b0-dc51-0131-a780-60a44ce903c3
+Team261Name:Norbert WARICH
+
+Team262UUID:28a991f0-dc15-0131-a023-60a44ce903c3
+Team262Name:NOVOTNS Stepan
+
+Team263UUID:713a2570-daf8-0131-8919-60a44ce903c3
+Team263Name:NZL
+
+Team264UUID:e6ee2be0-dba5-0131-982c-60a44ce903c3
+Team264Name:Ole Kuck
+
+Team265UUID:26de42d0-dc15-0131-9fad-60a44ce903c3
+Team265Name:Ole NIETIEDT
+
+Team266UUID:e86568d0-dba5-0131-989c-60a44ce903c3
+Team266Name:Olivia PRICE
+
+Team267UUID:465b19f0-daf8-0131-88fb-60a44ce903c3
+Team267Name:OMA
+
+Team268UUID:23d27090-dc15-0131-9f3a-60a44ce903c3
+Team268Name:Ondrej TEPLY
+
+Team269UUID:d3206460-dc51-0131-a7eb-60a44ce903c3
+Team269Name:Oren JACOBS
+
+Team270UUID:e6e808a0-dba5-0131-9827-60a44ce903c3
+Team270Name:Oscar SILÉN
+
+Team271UUID:e8937cc0-dba5-0131-98b3-60a44ce903c3
+Team271Name:Paris HENKEN
+
+Team272UUID:28afc3c0-dc15-0131-a028-60a44ce903c3
+Team272Name:Pau Schilt Catafal
+
+Team273UUID:e78e6bf0-dba5-0131-985d-60a44ce903c3
+Team273Name:Paul DARMANIN
+
+Team274UUID:e7a50c30-dba5-0131-9870-60a44ce903c3
+Team274Name:Paul Kohlhoff
+
+Team275UUID:d2eb6a90-dc51-0131-a7d3-60a44ce903c3
+Team275Name:Paulina CZUBACHOWSKA
+
+Team276UUID:d2db0b50-dc51-0131-a7cd-60a44ce903c3
+Team276Name:Pauline LIEBIG
+
+Team277UUID:28ac0890-dc15-0131-a025-60a44ce903c3
+Team277Name:Paulius VARŽAITIS
+
+Team278UUID:e6d431c0-dba5-0131-9817-60a44ce903c3
+Team278Name:Pavle KOSTOV
+
+Team279UUID:d15697a0-dc51-0131-a76f-60a44ce903c3
+Team279Name:Per AHRBOM
+
+Team280UUID:d16d8690-dc51-0131-a77f-60a44ce903c3
+Team280Name:Peter CERMAK
+
+Team281UUID:23d3a870-dc15-0131-9f3b-60a44ce903c3
+Team281Name:Peter SCHEUERL
+
+Team282UUID:23e82010-dc15-0131-9f46-60a44ce903c3
+Team282Name:Petter HARTMAN
+
+Team283UUID:28844b60-dc15-0131-a015-60a44ce903c3
+Team283Name:Philip CLAESSON
+
+Team284UUID:26f9b1e0-dc15-0131-9fbc-60a44ce903c3
+Team284Name:Philipp Buhl
+Team284Comp1UUID:5ce3ffdf-0a3e-4194-ba5a-32be1aca1ad7
+
+Team285UUID:e4ffa610-dba5-0131-97db-60a44ce903c3
+Team285Name:Philipp MÜLLER
+
+Team286UUID:23a011b0-dc15-0131-9f28-60a44ce903c3
+Team286Name:Phillip KASÜSKE
+
+Team287UUID:d2d9d4e0-dc51-0131-a7cc-60a44ce903c3
+Team287Name:Pia KUHLMANN
+
+Team288UUID:23a5ff00-dc15-0131-9f29-60a44ce903c3
+Team288Name:Piotr KULA
+
+Team289UUID:d15ac9e0-dc51-0131-a772-60a44ce903c3
+Team289Name:Piotr NOWAK
+
+Team290UUID:4a1bc5b0-daf7-0131-8817-60a44ce903c3
+Team290Name:POL
+
+Team291UUID:e6e5d300-dba5-0131-9825-60a44ce903c3
+Team291Name:Pontus DACKHAMMAR
+
+Team292UUID:28973590-dc15-0131-a019-60a44ce903c3
+Team292Name:Pontus Dolfei
+Team292Comp1UUID:ca9e5276-5759-4e9c-b6c9-425009a94b56
+
+Team293UUID:f42ae830-daf7-0131-888a-60a44ce903c3
+Team293Name:POR
+
+Team294UUID:e78b1fe0-dba5-0131-985a-60a44ce903c3
+Team294Name:Porro FRANCESCO
+
+Team295UUID:e882d300-dba5-0131-98aa-60a44ce903c3
+Team295Name:Ragna AGERUP
+
+Team296UUID:23d4d810-dc15-0131-9f3c-60a44ce903c3
+Team296Name:Rainer Wolff
+
+Team297UUID:270ba2b0-dc15-0131-9fc9-60a44ce903c3
+Team297Name:Ralf MARTEN
+
+Team298UUID:23d85a10-dc15-0131-9f3f-60a44ce903c3
+Team298Name:Ralf-Udo LEMKE
+
+Team299UUID:e4fd50c0-dba5-0131-97d9-60a44ce903c3
+Team299Name:Remy OOMENS
+
+Team300UUID:23d61270-dc15-0131-9f3d-60a44ce903c3
+Team300Name:RESZKA Jakub
+
+Team301UUID:d16a0a40-dc51-0131-a77d-60a44ce903c3
+Team301Name:Rolf SCHRAMA
+
+Team302UUID:e5170ab0-dba5-0131-97e1-60a44ce903c3
+Team302Name:Rory HUNTER
+
+Team303UUID:d307cc00-dc51-0131-a7d8-60a44ce903c3
+Team303Name:Runa KAPPEL
+
+Team304UUID:466b68e0-daf8-0131-8900-60a44ce903c3
+Team304Name:RUS
+
+Team305UUID:e6b3d540-dba5-0131-980f-60a44ce903c3
+Team305Name:Ryan SEATON
+
+Team306UUID:d15c08e0-dc51-0131-a773-60a44ce903c3
+Team306Name:Ryszard SZUMOWSKI
+
+Team307UUID:e79b5530-dba5-0131-9868-60a44ce903c3
+Team307Name:Sandra SANDQVIST
+
+Team308UUID:e78a1e20-dba5-0131-9859-60a44ce903c3
+Team308Name:Santiago LANGE
+
+Team309UUID:d3714ef0-dc51-0131-a814-60a44ce903c3
+Team309Name:Sasha RYAN
+
+Team310UUID:d3799840-dc51-0131-a81b-60a44ce903c3
+Team310Name:simge SERIM
+
+Team311UUID:23b2e7f0-dc15-0131-9f2d-60a44ce903c3
+Team311Name:Simon GORGELS
+
+Team312UUID:e898dc90-dba5-0131-98b5-60a44ce903c3
+Team312Name:Simona BOROSOVA
+
+Team313UUID:4a632840-daf7-0131-884b-60a44ce903c3
+Team313Name:SIN
+
+Team314UUID:d163ca90-dc51-0131-a779-60a44ce903c3
+Team314Name:Stefan KASTE
+
+Team315UUID:d15fd3f0-dc51-0131-a776-60a44ce903c3
+Team315Name:Stefan KLÖTZING
+
+Team316UUID:e7a74690-dba5-0131-9872-60a44ce903c3
+Team316Name:Stefan RUMPF
+
+Team317UUID:28ad6100-dc15-0131-a026-60a44ce903c3
+Team317Name:Steffen PÖHLMANN
+Team317Comp1UUID:66134a51-517f-4c69-99ce-99cfdaee6bd3
+
+Team318UUID:e78f8a80-dba5-0131-985e-60a44ce903c3
+Team318Name:Stephanie HUDSON
+
+Team319UUID:23b6b790-dc15-0131-9f30-60a44ce903c3
+Team319Name:Stig STEINFURTH
+
+Team320UUID:46605eb0-daf8-0131-88fd-60a44ce903c3
+Team320Name:SUI
+
+Team321UUID:d2f46180-dc51-0131-a7d4-60a44ce903c3
+Team321Name:Svenja WEGER
+
+Team322UUID:4ab93ca0-daf7-0131-8886-60a44ce903c3
+Team322Name:SVK
+
+Team323UUID:d2b20970-daf6-0131-87d0-60a44ce903c3
+Team323Name:SWE
+
+Team324UUID:d31661e0-dc51-0131-a7e3-60a44ce903c3
+Team324Name:Tabea ROTH VON SZEPESBELA
+
+Team325UUID:e79c8100-dba5-0131-9869-60a44ce903c3
+Team325Name:Tat Choi FUNG
+
+Team326UUID:d2d76cb0-dc51-0131-a7ca-60a44ce903c3
+Team326Name:Tatiana DROZDOVSKAYA
+
+Team327UUID:e8777cc0-dba5-0131-98a0-60a44ce903c3
+Team327Name:Tess LLOYD
+
+Team328UUID:26ec8210-dc15-0131-9fb5-60a44ce903c3
+Team328Name:Theodor BAUER
+
+Team329UUID:e500da20-dba5-0131-97dc-60a44ce903c3
+Team329Name:Thomas BARROWS, III
+
+Team330UUID:d3a8c6d0-dc51-0131-a82f-60a44ce903c3
+Team330Name:Thomas BEER
+
+Team331UUID:e7957900-dba5-0131-9863-60a44ce903c3
+Team331Name:Thomas HAUPT
+
+Team332UUID:28b48020-dc15-0131-a02c-60a44ce903c3
+Team332Name:Thomas MÜLLER-HARTBURG
+
+Team333UUID:e7864e30-dba5-0131-9855-60a44ce903c3
+Team333Name:Thomas ZAJAC
+
+Team334UUID:2897f240-dc15-0131-a01a-60a44ce903c3
+Team334Name:Thorbjørn SCHIERUP
+
+Team335UUID:e6eb5c40-dba5-0131-982a-60a44ce903c3
+Team335Name:Tim FISCHER
+
+Team336UUID:e79e3a00-dba5-0131-986a-60a44ce903c3
+Team336Name:Tim SHUWALOW
+
+Team337UUID:e8611050-dba5-0131-9898-60a44ce903c3
+Team337Name:Tina LUTZ
+
+Team338UUID:270a5fb0-dc15-0131-9fc8-60a44ce903c3
+Team338Name:Tobias GRAF
+
+Team339UUID:e6ea4360-dba5-0131-9829-60a44ce903c3
+Team339Name:Tobias HEMDORFF
+
+Team340UUID:286d7510-dc15-0131-a002-60a44ce903c3
+Team340Name:Tolbias Schadewaldt
+Team340Comp1UUID:aae1e546-f8bb-480e-9ee3-9a7d341e1be3
+
+Team341UUID:e5194490-dba5-0131-97e2-60a44ce903c3
+Team341Name:Tom MARTIN
+
+Team342UUID:e51a60e0-dba5-0131-97e3-60a44ce903c3
+Team342Name:Tom METHVEN
+
+Team343UUID:23939190-dc15-0131-9f22-60a44ce903c3
+Team343Name:Tomas VIKA
+
+Team344UUID:e4f45de0-dba5-0131-97d7-60a44ce903c3
+Team344Name:Tomasz JANUSZEWSKI
+
+Team345UUID:23e95fe0-dc15-0131-9f47-60a44ce903c3
+Team345Name:Tomasz KOSMICKI
+
+Team346UUID:4674e050-daf8-0131-8903-60a44ce903c3
+Team346Name:TUN
+
+Team347UUID:466e5940-daf8-0131-8901-60a44ce903c3
+Team347Name:TUR
+
+Team348UUID:26f75c30-dc15-0131-9fba-60a44ce903c3
+Team348Name:Urban NYHAMMAR
+Team348Comp1UUID:fea1fac9-1b58-4ba2-a2be-dd043f903d90
+
+Team349UUID:d2ab51b0-daf6-0131-87c9-60a44ce903c3
+Team349Name:USA
+
+Team350UUID:e883f710-dba5-0131-98ab-60a44ce903c3
+Team350Name:Varsha GAUTHAM
+
+Team351UUID:a523efd0-daf8-0131-8993-60a44ce903c3
+Team351Name:VEN
+
+Team352UUID:d31de710-dc51-0131-a7e9-60a44ce903c3
+Team352Name:Veronika KOZELSKA FENCLOVA
+
+Team353UUID:e6ef5310-dba5-0131-982d-60a44ce903c3
+Team353Name:Victor SILÉN
+
+Team354UUID:26f88da0-dc15-0131-9fbb-60a44ce903c3
+Team354Name:Victor THURØE
+Team354Comp1UUID:ec149cb7-3434-4122-8ce8-979f4081974b
+
+Team355UUID:d31a1f80-dc51-0131-a7e6-60a44ce903c3
+Team355Name:Victoria HEIÅS
+
+Team356UUID:e85fdb20-dba5-0131-9897-60a44ce903c3
+Team356Name:Victoria JURCZOK
+
+Team357UUID:e881b3e0-dba5-0131-98a9-60a44ce903c3
+Team357Name:Vikki PAYNE
+
+Team358UUID:26c18e40-dc15-0131-9fa5-60a44ce903c3
+Team358Name:Viktor TEPLY
+
+Team359UUID:d2d8a030-dc51-0131-a7cb-60a44ce903c3
+Team359Name:Viktorija ANDRULYTE
+
+Team360UUID:27188a10-dc15-0131-9fd0-60a44ce903c3
+Team360Name:Vincent Laborn
+
+Team361UUID:e79a2090-dba5-0131-9867-60a44ce903c3
+Team361Name:Vincenzo Sorrentino
+
+Team362UUID:e78758b0-dba5-0131-9856-60a44ce903c3
+Team362Name:Vittorio BISSARO
+
+Team363UUID:e4ec50c0-dba5-0131-97d2-60a44ce903c3
+Team363Name:Will PHILLIPS
+
+Team364UUID:26eb49c0-dc15-0131-9fb4-60a44ce903c3
+Team364Name:William BATES
+Team364Comp1UUID:20228d71-7c4d-41de-a852-944a432483ae
+
+Team365UUID:2700bb20-dc15-0131-9fc2-60a44ce903c3
+Team365Name:XAVI Tous
+
+Team366UUID:e4f18a80-dba5-0131-97d5-60a44ce903c3
+Team366Name:Yannick LEFEBVRE
+
+Team367UUID:28772b70-dc15-0131-a00a-60a44ce903c3
+Team367Name:Youssef Akrout
+Team367Comp1UUID:62457b70-53f1-497c-aec0-02ec895e0d35
+
+Team368UUID:d30aa5b0-dc51-0131-a7da-60a44ce903c3
+Team368Name:Zofia URBA?
+
+Team369UUID:e87c0480-dba5-0131-98a4-60a44ce903c3
+Team369Name:Zuzanna RYBICKA
+
+Comp1UUID:d81a5620-daf8-0131-8a5e-60a44ce903c3
+Comp1Name: GER 205198
+Comp1NameShort: GER 205198
+Comp1Color:808000
+Comp1Nationality:GER
+Comp1Description:
+Comp1Handicap:1.0000000000
+Comp1HandicapDistance:0.00000
+Comp1StartTime:2014-06-21 10:30:00
+Comp1ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp1RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp2UUID:eb174b0c-b886-4e01-8416-012db3f420cb
+Comp2Name:Michael HANSEN
+Comp2NameShort:DEN 203067
+Comp2Color:800000
+Comp2Nationality:DEN
+Comp2Description:Laser
+Comp2Handicap:1.0000000000
+Comp2HandicapDistance:0.00000
+Comp2DataSheet:Gender: Men / BoatID: 'eb174b0c-b886-4e01-8416-012db3f420cb'
+Comp2StartTime:2014-06-21 10:30:00
+Comp2ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp2RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp3UUID:a991f873-2006-482e-ae0c-ff6cb6483dea
+Comp3Name:Emil BENGTSON
+Comp3NameShort:SWE 201727
+Comp3Color:000000
+Comp3Nationality:SWE
+Comp3Description:Laser
+Comp3Handicap:1.0000000000
+Comp3HandicapDistance:0.00000
+Comp3DataSheet:Gender: Men / BoatID: 'a991f873-2006-482e-ae0c-ff6cb6483dea'
+Comp3StartTime:2014-06-21 10:30:00
+Comp3ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp3RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp4UUID:dd9393f0-03d9-471d-b84d-cd427e4dce43
+Comp4Name:Claes TÖRNSTEN
+Comp4NameShort:SWE 201729
+Comp4Color:800080
+Comp4Nationality:SWE
+Comp4Description:Laser
+Comp4Handicap:1.0000000000
+Comp4HandicapDistance:0.00000
+Comp4DataSheet:Gender: Men / BoatID: 'dd9393f0-03d9-471d-b84d-cd427e4dce43'
+Comp4StartTime:2014-06-21 10:30:00
+Comp4ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp4RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp5UUID:57521ca6-2ee0-4be5-93e2-94ff0945686a
+Comp5Name:Alp RONA
+Comp5NameShort:TUR 191821
+Comp5Color:008080
+Comp5Nationality:TUR
+Comp5Description:Laser
+Comp5Handicap:1.0000000000
+Comp5HandicapDistance:0.00000
+Comp5DataSheet:Gender: Men / BoatID: '57521ca6-2ee0-4be5-93e2-94ff0945686a'
+Comp5StartTime:2014-06-21 10:30:00
+Comp5ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp5RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp6UUID:0fa99080-2f2d-4caf-836c-0ed6c374c75d
+Comp6Name:Kaarel KRUUSMÄGI
+Comp6NameShort:EST 192655
+Comp6Color:00FF00
+Comp6Nationality:EST
+Comp6Description:Laser
+Comp6Handicap:1.0000000000
+Comp6HandicapDistance:0.00000
+Comp6DataSheet:Gender: Men / BoatID: '0fa99080-2f2d-4caf-836c-0ed6c374c75d'
+Comp6StartTime:2014-06-21 10:30:00
+Comp6ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp6RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp7UUID:0416dae6-a8ee-462c-b7a7-f056391b2aa8
+Comp7Name:Aleksander ARIAN
+Comp7NameShort:POL 207103
+Comp7Color:808000
+Comp7Nationality:POL
+Comp7Description:Laser
+Comp7Handicap:1.0000000000
+Comp7HandicapDistance:0.00000
+Comp7DataSheet:Gender: Men / BoatID: '0416dae6-a8ee-462c-b7a7-f056391b2aa8'
+Comp7StartTime:2014-06-21 10:30:00
+Comp7ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp7RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp8UUID:06e224b1-4356-46cc-9328-4e009505e7b5
+Comp8Name:Loïc Queroux
+Comp8NameShort:FRA 205657
+Comp8Color:FFFF00
+Comp8Nationality:FRA
+Comp8Description:Laser
+Comp8Handicap:1.0000000000
+Comp8HandicapDistance:0.00000
+Comp8DataSheet:Gender: Men / BoatID: '06e224b1-4356-46cc-9328-4e009505e7b5'
+Comp8StartTime:2014-06-21 10:30:00
+Comp8ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp8RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp9UUID:20228d71-7c4d-41de-a852-944a432483ae
+Comp9Name:William BATES
+Comp9NameShort:AUS 206012
+Comp9Color:800000
+Comp9Nationality:AUS
+Comp9Description:Laser
+Comp9Handicap:1.0000000000
+Comp9HandicapDistance:0.00000
+Comp9DataSheet:Gender: Men / BoatID: '20228d71-7c4d-41de-a852-944a432483ae'
+Comp9StartTime:2014-06-21 10:30:00
+Comp9ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp9RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp10UUID:2ec02f0f-29d6-4fad-9acc-1284358ff0e9
+Comp10Name:Martin Aamann JESSEN
+Comp10NameShort:DEN 206945
+Comp10Color:800080
+Comp10Nationality:DEN
+Comp10Description:Laser
+Comp10Handicap:1.0000000000
+Comp10HandicapDistance:0.00000
+Comp10DataSheet:Gender: Men / BoatID: '2ec02f0f-29d6-4fad-9acc-1284358ff0e9'
+Comp10StartTime:2014-06-21 10:30:00
+Comp10ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp10RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp11UUID:102e0440-d0ff-4c3a-a0a7-4667f21885df
+Comp11Name:Lander Balcaen
+Comp11NameShort:BEL 191112
+Comp11Color:FF00FF
+Comp11Nationality:BEL
+Comp11Description:Laser
+Comp11Handicap:1.0000000000
+Comp11HandicapDistance:0.00000
+Comp11DataSheet:Gender: Men / BoatID: '102e0440-d0ff-4c3a-a0a7-4667f21885df'
+Comp11StartTime:2014-06-21 10:30:00
+Comp11ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp11RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp12UUID:72ec3142-77d9-418f-bafb-6500151b04b8
+Comp12Name:Jasvir SINGH
+Comp12NameShort:IND 202239
+Comp12Color:191970
+Comp12Nationality:IND
+Comp12Description:Laser
+Comp12Handicap:1.0000000000
+Comp12HandicapDistance:0.00000
+Comp12DataSheet:Gender: Men / BoatID: '72ec3142-77d9-418f-bafb-6500151b04b8'
+Comp12StartTime:2014-06-21 10:30:00
+Comp12ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp12RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp13UUID:fea1fac9-1b58-4ba2-a2be-dd043f903d90
+Comp13Name:Urban NYHAMMAR
+Comp13NameShort:SWE 206969
+Comp13Color:0000FF
+Comp13Nationality:SWE
+Comp13Description:Laser
+Comp13Handicap:1.0000000000
+Comp13HandicapDistance:0.00000
+Comp13DataSheet:Gender: Men / BoatID: 'fea1fac9-1b58-4ba2-a2be-dd043f903d90'
+Comp13StartTime:2014-06-21 10:30:00
+Comp13ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp13RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp14UUID:ec149cb7-3434-4122-8ce8-979f4081974b
+Comp14Name:Victor THURØE
+Comp14NameShort:DEN 197182
+Comp14Color:008080
+Comp14Nationality:DEN
+Comp14Description:Laser
+Comp14Handicap:1.0000000000
+Comp14HandicapDistance:0.00000
+Comp14DataSheet:Gender: Men / BoatID: 'ec149cb7-3434-4122-8ce8-979f4081974b'
+Comp14StartTime:2014-06-21 10:30:00
+Comp14ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp14RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp15UUID:5ce3ffdf-0a3e-4194-ba5a-32be1aca1ad7
+Comp15Name:Philipp Buhl
+Comp15NameShort:GER 206479
+Comp15Color:008000
+Comp15Nationality:GER
+Comp15Description:Laser
+Comp15Handicap:1.0000000000
+Comp15HandicapDistance:0.00000
+Comp15DataSheet:Gender: Men / BoatID: '5ce3ffdf-0a3e-4194-ba5a-32be1aca1ad7'
+Comp15StartTime:2014-06-21 10:30:00
+Comp15ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp15RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp16UUID:ffe21eb5-1c56-4e7a-9c12-c66e1ed1a8c9
+Comp16Name:L. B. CHIAVARINI
+Comp16NameShort:GBR 202453
+Comp16Color:808000
+Comp16Nationality:GBR
+Comp16Description:Laser
+Comp16Handicap:1.0000000000
+Comp16HandicapDistance:0.00000
+Comp16DataSheet:Gender: Men / BoatID: 'ffe21eb5-1c56-4e7a-9c12-c66e1ed1a8c9'
+Comp16StartTime:2014-06-21 10:30:00
+Comp16ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp16RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp17UUID:a24c4ffd-a166-45ac-a2ae-5436ed80f1b5
+Comp17Name:Henrik ERIKSSON
+Comp17NameShort:SWE 205113
+Comp17Color:FFFF00
+Comp17Nationality:SWE
+Comp17Description:Laser
+Comp17Handicap:1.0000000000
+Comp17HandicapDistance:0.00000
+Comp17DataSheet:Gender: Men / BoatID: 'a24c4ffd-a166-45ac-a2ae-5436ed80f1b5'
+Comp17StartTime:2014-06-21 10:30:00
+Comp17ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp17RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp18UUID:217fdb5a-0ddc-4a9b-8900-557eed9c0aef
+Comp18Name:Kristian RAUS
+Comp18NameShort:EST 196340
+Comp18Color:800000
+Comp18Nationality:EST
+Comp18Description:Laser
+Comp18Handicap:1.0000000000
+Comp18HandicapDistance:0.00000
+Comp18DataSheet:Gender: Men / BoatID: '217fdb5a-0ddc-4a9b-8900-557eed9c0aef'
+Comp18StartTime:2014-06-21 10:30:00
+Comp18ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp18RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp19UUID:99304e14-c52c-4473-80df-5e18cdd45e17
+Comp19Name:Dharmender SINGH
+Comp19NameShort:IND 202240
+Comp19Color:000000
+Comp19Nationality:IND
+Comp19Description:Laser
+Comp19Handicap:1.0000000000
+Comp19HandicapDistance:0.00000
+Comp19DataSheet:Gender: Men / BoatID: '99304e14-c52c-4473-80df-5e18cdd45e17'
+Comp19StartTime:2014-06-21 10:30:00
+Comp19ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp19RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp20UUID:316f09e3-c701-411d-979e-876b4f4fe067
+Comp20Name:Jakub ROSLON
+Comp20NameShort:POL 207099
+Comp20Color:800080
+Comp20Nationality:POL
+Comp20Description:Laser
+Comp20Handicap:1.0000000000
+Comp20HandicapDistance:0.00000
+Comp20DataSheet:Gender: Men / BoatID: '316f09e3-c701-411d-979e-876b4f4fe067'
+Comp20StartTime:2014-06-21 10:30:00
+Comp20ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp20RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp21UUID:c40b5bd8-d85f-4f4d-b8e8-aafd914f70ea
+Comp21Name:Mantas MAROZAS
+Comp21NameShort:LTU 193676
+Comp21Color:FF00FF
+Comp21Nationality:LTU
+Comp21Description:Laser
+Comp21Handicap:1.0000000000
+Comp21HandicapDistance:0.00000
+Comp21DataSheet:Gender: Men / BoatID: 'c40b5bd8-d85f-4f4d-b8e8-aafd914f70ea'
+Comp21StartTime:2014-06-21 10:30:00
+Comp21ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp21RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp22UUID:dc1036f4-8e6f-498c-b322-08e3049a41f9
+Comp22Name:Nicolas KOTTMEIER
+Comp22NameShort:GER 197188
+Comp22Color:191970
+Comp22Nationality:GER
+Comp22Description:Laser
+Comp22Handicap:1.0000000000
+Comp22HandicapDistance:0.00000
+Comp22DataSheet:Gender: Men / BoatID: 'dc1036f4-8e6f-498c-b322-08e3049a41f9'
+Comp22StartTime:2014-06-21 10:30:00
+Comp22ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp22RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp23UUID:cc6ad016-1ebf-4947-8997-8d111d7800ba
+Comp23Name:Julian-Samuel GEBÜHR
+Comp23NameShort:GER 200041
+Comp23Color:0000FF
+Comp23Nationality:GER
+Comp23Description:Laser
+Comp23Handicap:1.0000000000
+Comp23HandicapDistance:0.00000
+Comp23DataSheet:Gender: Men / BoatID: 'cc6ad016-1ebf-4947-8997-8d111d7800ba'
+Comp23StartTime:2014-06-21 10:30:00
+Comp23ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp23RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp24UUID:55d3ecbf-0a66-4245-a210-39d36d7b4d90
+Comp24Name:Hussain AL JABRI
+Comp24NameShort:OMA 1
+Comp24Color:FF8C00
+Comp24Nationality:OMA
+Comp24Description:Laser
+Comp24Handicap:1.0000000000
+Comp24HandicapDistance:0.00000
+Comp24DataSheet:Gender: Men / BoatID: '55d3ecbf-0a66-4245-a210-39d36d7b4d90'
+Comp24StartTime:2014-06-21 10:30:00
+Comp24ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp24RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp25UUID:8dbce876-2db5-4a17-9618-8c70b85611a9
+Comp25Name:Jeremy O'CONNELL
+Comp25NameShort:AUS 206382
+Comp25Color:800000
+Comp25Nationality:AUS
+Comp25Description:Laser
+Comp25Handicap:1.0000000000
+Comp25HandicapDistance:0.00000
+Comp25DataSheet:Gender: Men / BoatID: '8dbce876-2db5-4a17-9618-8c70b85611a9'
+Comp25StartTime:2014-06-21 10:30:00
+Comp25ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp25RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp26UUID:954da0aa-5a06-47d4-a86e-5f4bd05714be
+Comp26Name:Nik Willem
+Comp26NameShort:GER 201971
+Comp26Color:FF0000
+Comp26Nationality:GER
+Comp26Description:Laser
+Comp26Handicap:1.0000000000
+Comp26HandicapDistance:0.00000
+Comp26DataSheet:Gender: Men / BoatID: '954da0aa-5a06-47d4-a86e-5f4bd05714be'
+Comp26StartTime:2014-06-21 10:30:00
+Comp26ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp26RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp27UUID:0e6a4516-98d2-4ca6-b182-ac12042adeae
+Comp27Name:Anders KARLSSON
+Comp27NameShort:SWE 205123
+Comp27Color:FF00FF
+Comp27Nationality:SWE
+Comp27Description:Laser
+Comp27Handicap:1.0000000000
+Comp27HandicapDistance:0.00000
+Comp27DataSheet:Gender: Men / BoatID: '0e6a4516-98d2-4ca6-b182-ac12042adeae'
+Comp27StartTime:2014-06-21 10:30:00
+Comp27ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp27RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp28UUID:aae1e546-f8bb-480e-9ee3-9a7d341e1be3
+Comp28Name:Tolbias SCHADEWALDT
+Comp28NameShort:GER 206482
+Comp28Color:191970
+Comp28Nationality:GER
+Comp28Description:Laser
+Comp28Handicap:1.0000000000
+Comp28HandicapDistance:0.00000
+Comp28DataSheet:Gender: Men / BoatID: 'aae1e546-f8bb-480e-9ee3-9a7d341e1be3'
+Comp28StartTime:2014-06-21 10:30:00
+Comp28ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp28RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp29UUID:2db80e93-9653-4be5-8461-c3a4e58d3ad3
+Comp29Name:Hermann TOMASGAARD
+Comp29NameShort:NOR 201111
+Comp29Color:0000FF
+Comp29Nationality:NOR
+Comp29Description:Laser
+Comp29Handicap:1.0000000000
+Comp29HandicapDistance:0.00000
+Comp29DataSheet:Gender: Men / BoatID: '2db80e93-9653-4be5-8461-c3a4e58d3ad3'
+Comp29StartTime:2014-06-21 10:30:00
+Comp29ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp29RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp30UUID:62457b70-53f1-497c-aec0-02ec895e0d35
+Comp30Name:Youssef Akrout
+Comp30NameShort:TUN 172850
+Comp30Color:800000
+Comp30Nationality:TUN
+Comp30Description:Laser
+Comp30Handicap:1.0000000000
+Comp30HandicapDistance:0.00000
+Comp30DataSheet:Gender: Men / BoatID: '62457b70-53f1-497c-aec0-02ec895e0d35'
+Comp30StartTime:2014-06-21 10:30:00
+Comp30ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp30RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp31UUID:015d41ce-4d8f-428b-8636-060858dff142
+Comp31Name:Maxim NIKOLAEV
+Comp31NameShort:RUS 171513
+Comp31Color:FF0000
+Comp31Nationality:RUS
+Comp31Description:Laser
+Comp31Handicap:1.0000000000
+Comp31HandicapDistance:0.00000
+Comp31DataSheet:Gender: Men / BoatID: '015d41ce-4d8f-428b-8636-060858dff142'
+Comp31StartTime:2014-06-21 10:30:00
+Comp31ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp31RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp32UUID:9cf8fe6b-2b63-431b-a426-db65b3aa7e82
+Comp32Name:Filip CISZKIEWICZ
+Comp32NameShort:POL 189010
+Comp32Color:000000
+Comp32Nationality:POL
+Comp32Description:Laser
+Comp32Handicap:1.0000000000
+Comp32HandicapDistance:0.00000
+Comp32DataSheet:Gender: Men / BoatID: '9cf8fe6b-2b63-431b-a426-db65b3aa7e82'
+Comp32StartTime:2014-06-21 10:30:00
+Comp32ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp32RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp33UUID:3d3008cb-d87e-47eb-9f4e-5abc1722ecac
+Comp33Name:Fabian KASÜSKE
+Comp33NameShort:GER 204362
+Comp33Color:FF00FF
+Comp33Nationality:GER
+Comp33Description:Laser
+Comp33Handicap:1.0000000000
+Comp33HandicapDistance:0.00000
+Comp33DataSheet:Gender: Men / BoatID: '3d3008cb-d87e-47eb-9f4e-5abc1722ecac'
+Comp33StartTime:2014-06-21 10:30:00
+Comp33ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp33RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp34UUID:0d25b8be-a187-4e65-bac2-1d7ccd2853b0
+Comp34Name:Lukas BERGMAN
+Comp34NameShort:SWE 197345
+Comp34Color:008080
+Comp34Nationality:SWE
+Comp34Description:Laser
+Comp34Handicap:1.0000000000
+Comp34HandicapDistance:0.00000
+Comp34DataSheet:Gender: Men / BoatID: '0d25b8be-a187-4e65-bac2-1d7ccd2853b0'
+Comp34StartTime:2014-06-21 10:30:00
+Comp34ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp34RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp35UUID:dfbbc56c-ffc1-43d6-84fd-baa0ad0538b3
+Comp35Name:Marcus MAGNUSSON
+Comp35NameShort:SWE 204751
+Comp35Color:008000
+Comp35Nationality:SWE
+Comp35Description:Laser
+Comp35Handicap:1.0000000000
+Comp35HandicapDistance:0.00000
+Comp35DataSheet:Gender: Men / BoatID: 'dfbbc56c-ffc1-43d6-84fd-baa0ad0538b3'
+Comp35StartTime:2014-06-21 10:30:00
+Comp35ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp35RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp36UUID:02d8b082-3ade-48d5-bd03-70a8d9912e9f
+Comp36Name:Gajender SINGH
+Comp36NameShort:IND 202241
+Comp36Color:FF8C00
+Comp36Nationality:IND
+Comp36Description:Laser
+Comp36Handicap:1.0000000000
+Comp36HandicapDistance:0.00000
+Comp36DataSheet:Gender: Men / BoatID: '02d8b082-3ade-48d5-bd03-70a8d9912e9f'
+Comp36StartTime:2014-06-21 10:30:00
+Comp36ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp36RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp37UUID:6cad5027-80f2-4bff-b230-068d28adc5f4
+Comp37Name:Karl-Martin RAMMO
+Comp37NameShort:EST 203724
+Comp37Color:FF0000
+Comp37Nationality:EST
+Comp37Description:Laser
+Comp37Handicap:1.0000000000
+Comp37HandicapDistance:0.00000
+Comp37DataSheet:Gender: Men / BoatID: '6cad5027-80f2-4bff-b230-068d28adc5f4'
+Comp37StartTime:2014-06-21 10:30:00
+Comp37ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp37RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp38UUID:ca9e5276-5759-4e9c-b6c9-425009a94b56
+Comp38Name:Pontus Dolfei
+Comp38NameShort:SWE 203187
+Comp38Color:000000
+Comp38Nationality:SWE
+Comp38Description:Laser
+Comp38Handicap:1.0000000000
+Comp38HandicapDistance:0.00000
+Comp38DataSheet:Gender: Men / BoatID: 'ca9e5276-5759-4e9c-b6c9-425009a94b56'
+Comp38StartTime:2014-06-21 10:30:00
+Comp38ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp38RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp39UUID:71cd3e38-cfd5-488a-9da1-05c2856b5c12
+Comp39Name:Alexander NUIJA
+Comp39NameShort:SWE 195803
+Comp39Color:191970
+Comp39Nationality:SWE
+Comp39Description:Laser
+Comp39Handicap:1.0000000000
+Comp39HandicapDistance:0.00000
+Comp39DataSheet:Gender: Men / BoatID: '71cd3e38-cfd5-488a-9da1-05c2856b5c12'
+Comp39StartTime:2014-06-21 10:30:00
+Comp39ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp39RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp40UUID:360a4faf-6689-4f4d-abad-f21846153965
+Comp40Name:Jan Paul MUCH
+Comp40NameShort:GER 197189
+Comp40Color:808000
+Comp40Nationality:GER
+Comp40Description:Laser
+Comp40Handicap:1.0000000000
+Comp40HandicapDistance:0.00000
+Comp40DataSheet:Gender: Men / BoatID: '360a4faf-6689-4f4d-abad-f21846153965'
+Comp40StartTime:2014-06-21 10:30:00
+Comp40ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp40RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp41UUID:2671476e-ba9b-4bf0-9658-bde12d667b12
+Comp41Name:Ivan SVENTUKHOUSKI
+Comp41NameShort:BLR 194973
+Comp41Color:800000
+Comp41Nationality:BLR
+Comp41Description:Laser
+Comp41Handicap:1.0000000000
+Comp41HandicapDistance:0.00000
+Comp41DataSheet:Gender: Men / BoatID: '2671476e-ba9b-4bf0-9658-bde12d667b12'
+Comp41StartTime:2014-06-21 10:30:00
+Comp41ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp41RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp42UUID:66134a51-517f-4c69-99ce-99cfdaee6bd3
+Comp42Name:Steffen PÖHLMANN
+Comp42NameShort:GER 106287
+Comp42Color:000000
+Comp42Nationality:GER
+Comp42Description:Laser
+Comp42Handicap:1.0000000000
+Comp42HandicapDistance:0.00000
+Comp42DataSheet:Gender: Men / BoatID: '66134a51-517f-4c69-99ce-99cfdaee6bd3'
+Comp42StartTime:2014-06-21 10:30:00
+Comp42ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp42RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp43UUID:d613b497-3931-4f97-88f4-6452433bf952
+Comp43Name:Luciano ANTONIETTI
+Comp43NameShort:SUI 205671
+Comp43Color:800080
+Comp43Nationality:SUI
+Comp43Description:Laser
+Comp43Handicap:1.0000000000
+Comp43HandicapDistance:0.00000
+Comp43DataSheet:Gender: Men / BoatID: 'd613b497-3931-4f97-88f4-6452433bf952'
+Comp43StartTime:2014-06-21 10:30:00
+Comp43ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp43RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp44UUID:730a9156-14d7-4e25-a1b7-8d1cf1b10d28
+Comp44Name:Cyrill KNECHT
+Comp44NameShort:SUI 200287
+Comp44Color:191970
+Comp44Nationality:SUI
+Comp44Description:Laser
+Comp44Handicap:1.0000000000
+Comp44HandicapDistance:0.00000
+Comp44DataSheet:Gender: Men / BoatID: '730a9156-14d7-4e25-a1b7-8d1cf1b10d28'
+Comp44StartTime:2014-06-21 10:30:00
+Comp44ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp44RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+Comp45UUID:652c4d0d-f080-4538-9c94-6271d521fab0
+Comp45Name:Johann KAMINSKI
+Comp45NameShort:GER 197210
+Comp45Color:0000FF
+Comp45Nationality:GER
+Comp45Description:Laser
+Comp45Handicap:1.0000000000
+Comp45HandicapDistance:0.00000
+Comp45DataSheet:Gender: Men / BoatID: '652c4d0d-f080-4538-9c94-6271d521fab0'
+Comp45StartTime:2014-06-21 10:30:00
+Comp45ClassUUID:4c473f80-dc1c-0131-a1d2-60a44ce903c3
+Comp45RouteUUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+
+ControlPoint1UUID:06fb7c80-db5e-0131-9032-60a44ce903c3
+ControlPoint1Name:H-Start new
+ControlPoint1HasTwoPoints:1
+ControlPoint1ShortName:St
+ControlPoint1Mark1Lon:10.225569
+ControlPoint1Mark1Lat:54.446835
+ControlPoint1Mark2Lon:10.223828
+ControlPoint1Mark2Lat:54.443233
+
+ControlPoint2UUID:088318b0-dc52-0131-a83d-60a44ce903c3
+ControlPoint2Name:A-Res2
+ControlPoint2HasTwoPoints:0
+ControlPoint2ShortName:R2
+ControlPoint2Mark1Lon:10.169720
+ControlPoint2Mark1Lat:54.428776
+
+ControlPoint3UUID:109814d0-dad8-0131-81c3-60a44ce903c3
+ControlPoint3Name:H-4
+ControlPoint3HasTwoPoints:1
+ControlPoint3ShortName:H4
+ControlPoint3Mark1Lon:10.223629
+ControlPoint3Mark1Lat:54.446178
+ControlPoint3Mark2Lon:10.223558
+ControlPoint3Mark2Lat:54.445740
+
+ControlPoint4UUID:14c85020-dba9-0131-98e3-60a44ce903c3
+ControlPoint4Name:J-RES 2
+ControlPoint4HasTwoPoints:0
+ControlPoint4ShortName:R2
+ControlPoint4Mark1Lon:10.234766
+ControlPoint4Mark1Lat:54.459160
+
+ControlPoint5UUID:1662c860-db4e-0131-8aad-60a44ce903c3
+ControlPoint5Name:Gate_test
+ControlPoint5HasTwoPoints:1
+ControlPoint5ShortName:
+ControlPoint5Mark1Lon:10.169671
+ControlPoint5Mark1Lat:54.428680
+ControlPoint5Mark2Lon:10.169683
+ControlPoint5Mark2Lat:54.428715
+
+ControlPoint6UUID:202a32a0-dc51-0131-a75d-60a44ce903c3
+ControlPoint6Name:A-Start
+ControlPoint6HasTwoPoints:1
+ControlPoint6ShortName:ST
+ControlPoint6Mark1Lon:10.169768
+ControlPoint6Mark1Lat:54.428814
+ControlPoint6Mark2Lon:10.169720
+ControlPoint6Mark2Lat:54.428753
+
+ControlPoint7UUID:2360ab80-dba9-0131-98e6-60a44ce903c3
+ControlPoint7Name:J-RES 1
+ControlPoint7HasTwoPoints:0
+ControlPoint7ShortName:R1
+ControlPoint7Mark1Lon:10.213808
+ControlPoint7Mark1Lat:54.464031
+
+ControlPoint8UUID:28d64c40-dad7-0131-81a7-60a44ce903c3
+ControlPoint8Name:TV-3
+ControlPoint8HasTwoPoints:1
+ControlPoint8ShortName:3
+ControlPoint8Mark1Lon:10.204177
+ControlPoint8Mark1Lat:54.435547
+ControlPoint8Mark2Lon:10.204099
+ControlPoint8Mark2Lat:54.435158
+
+ControlPoint9UUID:42524510-dad8-0131-81cb-60a44ce903c3
+ControlPoint9Name:H-Finish
+ControlPoint9HasTwoPoints:1
+ControlPoint9ShortName:HF
+ControlPoint9Mark1Lon:10.225566
+ControlPoint9Mark1Lat:54.446846
+ControlPoint9Mark2Lon:10.222542
+ControlPoint9Mark2Lat:54.444744
+
+ControlPoint10UUID:4d167c30-dba9-0131-98e9-60a44ce903c3
+ControlPoint10Name:TV-REP
+ControlPoint10HasTwoPoints:0
+ControlPoint10ShortName:RP
+ControlPoint10Mark1Lon:10.207401
+ControlPoint10Mark1Lat:54.435764
+
+ControlPoint11UUID:5d948fb0-dad7-0131-81ab-60a44ce903c3
+ControlPoint11Name:TV-4 old
+ControlPoint11HasTwoPoints:1
+ControlPoint11ShortName:4
+ControlPoint11Mark1Lon:10.203912
+ControlPoint11Mark1Lat:54.429962
+ControlPoint11Mark2Lon:10.203941
+ControlPoint11Mark2Lat:54.429493
+
+ControlPoint12UUID:5f32ffe0-dba9-0131-98ec-60a44ce903c3
+ControlPoint12Name:TV-Res 1
+ControlPoint12HasTwoPoints:0
+ControlPoint12ShortName:R1
+ControlPoint12Mark1Lon:10.207365
+ControlPoint12Mark1Lat:54.435776
+
+ControlPoint13UUID:6f9716a0-dba9-0131-98ef-60a44ce903c3
+ControlPoint13Name:TV-Res 2
+ControlPoint13HasTwoPoints:0
+ControlPoint13ShortName:R2
+ControlPoint13Mark1Lon:10.207371
+ControlPoint13Mark1Lat:54.435780
+
+ControlPoint14UUID:91fd35b0-dc51-0131-a761-60a44ce903c3
+ControlPoint14Name:A-1
+ControlPoint14HasTwoPoints:0
+ControlPoint14ShortName:A
+ControlPoint14Mark1Lon:10.169783
+ControlPoint14Mark1Lat:54.428757
+
+ControlPoint15UUID:935b2280-dad7-0131-81af-60a44ce903c3
+ControlPoint15Name:TV-Start
+ControlPoint15HasTwoPoints:1
+ControlPoint15ShortName:TS
+ControlPoint15Mark1Lon:10.207275
+ControlPoint15Mark1Lat:54.435760
+ControlPoint15Mark2Lon:10.204865
+ControlPoint15Mark2Lat:54.433346
+
+ControlPoint16UUID:999010e0-db4e-0131-8ab1-60a44ce903c3
+ControlPoint16Name:Mark_test
+ControlPoint16HasTwoPoints:0
+ControlPoint16ShortName:
+ControlPoint16Mark1Lon:10.169705
+ControlPoint16Mark1Lat:54.428741
+
+ControlPoint17UUID:a8763bd0-dad8-0131-81d8-60a44ce903c3
+ControlPoint17Name:J-1
+ControlPoint17HasTwoPoints:0
+ControlPoint17ShortName:J1
+ControlPoint17Mark1Lon:10.213117
+ControlPoint17Mark1Lat:54.463909
+
+ControlPoint18UUID:a9df22e0-dad7-0131-81b3-60a44ce903c3
+ControlPoint18Name:TV-Finish
+ControlPoint18HasTwoPoints:1
+ControlPoint18ShortName:TF
+ControlPoint18Mark1Lon:10.211611
+ControlPoint18Mark1Lat:54.432667
+ControlPoint18Mark2Lon:10.211626
+ControlPoint18Mark2Lat:54.432281
+
+ControlPoint19UUID:b6e8e7f0-dc51-0131-a765-60a44ce903c3
+ControlPoint19Name:A-2
+ControlPoint19HasTwoPoints:1
+ControlPoint19ShortName:2
+ControlPoint19Mark1Lon:10.169714
+ControlPoint19Mark1Lat:54.428806
+ControlPoint19Mark2Lon:10.169714
+ControlPoint19Mark2Lat:54.428715
+
+ControlPoint20UUID:bb238ba0-db86-0131-95df-60a44ce903c3
+ControlPoint20Name:J-REP
+ControlPoint20HasTwoPoints:0
+ControlPoint20ShortName:1
+ControlPoint20Mark1Lon:10.213626
+ControlPoint20Mark1Lat:54.463844
+
+ControlPoint21UUID:bd9a5470-dad8-0131-81db-60a44ce903c3
+ControlPoint21Name:J-4
+ControlPoint21HasTwoPoints:1
+ControlPoint21ShortName:J4
+ControlPoint21Mark1Lon:10.232202
+ControlPoint21Mark1Lat:54.458923
+ControlPoint21Mark2Lon:10.231483
+ControlPoint21Mark2Lat:54.458603
+
+ControlPoint22UUID:c544ad10-dad6-0131-81a1-60a44ce903c3
+ControlPoint22Name:TV-1
+ControlPoint22HasTwoPoints:0
+ControlPoint22ShortName:1
+ControlPoint22Mark1Lon:10.185509
+ControlPoint22Mark1Lat:54.440639
+
+ControlPoint23UUID:c97349f0-dba9-0131-98f2-60a44ce903c3
+ControlPoint23Name:H-RES 2
+ControlPoint23HasTwoPoints:0
+ControlPoint23ShortName:R2
+ControlPoint23Mark1Lon:10.169559
+ControlPoint23Mark1Lat:54.428776
+
+ControlPoint24UUID:cc6fb0e0-dad8-0131-81df-60a44ce903c3
+ControlPoint24Name:J-Start
+ControlPoint24HasTwoPoints:1
+ControlPoint24ShortName:JS
+ControlPoint24Mark1Lon:10.234750
+ControlPoint24Mark1Lat:54.459156
+ControlPoint24Mark2Lon:10.234829
+ControlPoint24Mark2Lat:54.458576
+
+ControlPoint25UUID:db54c920-dba8-0131-98dd-60a44ce903c3
+ControlPoint25Name:H-REP
+ControlPoint25HasTwoPoints:0
+ControlPoint25ShortName:Re
+ControlPoint25Mark1Lon:10.209084
+ControlPoint25Mark1Lat:54.449261
+
+ControlPoint26UUID:defb8950-dad6-0131-81a4-60a44ce903c3
+ControlPoint26Name:TV-2
+ControlPoint26HasTwoPoints:0
+ControlPoint26ShortName:2
+ControlPoint26Mark1Lon:10.186220
+ControlPoint26Mark1Lat:54.433666
+
+ControlPoint27UUID:e082a3d0-dad8-0131-81e3-60a44ce903c3
+ControlPoint27Name:J-Finish
+ControlPoint27HasTwoPoints:1
+ControlPoint27ShortName:JF
+ControlPoint27Mark1Lon:10.234753
+ControlPoint27Mark1Lat:54.459152
+ControlPoint27Mark2Lon:10.234569
+ControlPoint27Mark2Lat:54.458649
+
+ControlPoint28UUID:e54dc890-dc51-0131-a837-60a44ce903c3
+ControlPoint28Name:A-Rep1
+ControlPoint28HasTwoPoints:0
+ControlPoint28ShortName:R
+ControlPoint28Mark1Lon:10.169702
+ControlPoint28Mark1Lat:54.428753
+
+ControlPoint29UUID:ed29e030-dba8-0131-98e0-60a44ce903c3
+ControlPoint29Name:H-RES 1
+ControlPoint29HasTwoPoints:0
+ControlPoint29ShortName:R1
+ControlPoint29Mark1Lon:10.209118
+ControlPoint29Mark1Lat:54.449287
+
+ControlPoint30UUID:f750f790-dc51-0131-a83a-60a44ce903c3
+ControlPoint30Name:A-Res1
+ControlPoint30HasTwoPoints:0
+ControlPoint30ShortName:R1
+ControlPoint30Mark1Lon:10.169754
+ControlPoint30Mark1Lat:54.428703
+
+ControlPoint31UUID:f9899960-dad7-0131-81c0-60a44ce903c3
+ControlPoint31Name:H-1
+ControlPoint31HasTwoPoints:0
+ControlPoint31ShortName:H1
+ControlPoint31Mark1Lon:10.206626
+ControlPoint31Mark1Lat:54.449089
+
+ControlPoint32UUID:fc034750-db66-0131-90ee-60a44ce903c3
+ControlPoint32Name:TV-4 new
+ControlPoint32HasTwoPoints:1
+ControlPoint32ShortName:4
+ControlPoint32Mark1Lon:10.203933
+ControlPoint32Mark1Lat:54.429932
+ControlPoint32Mark2Lon:10.203954
+ControlPoint32Mark2Lat:54.429466
+
+SegmentFile:segments.php
+Route1UUID:c063bd00-dad9-0131-82a5-60a44ce903c3
+Route1Description:R1 Blue (Laser)
+Route1Length:0
+Route1ControlPoint1UUID:935b2280-dad7-0131-81af-60a44ce903c3
+Route1ControlPoint2UUID:c544ad10-dad6-0131-81a1-60a44ce903c3
+Route1ControlPoint3UUID:28d64c40-dad7-0131-81a7-60a44ce903c3
+Route1ControlPoint4UUID:c544ad10-dad6-0131-81a1-60a44ce903c3
+Route1ControlPoint5UUID:defb8950-dad6-0131-81a4-60a44ce903c3
+Route1ControlPoint6UUID:5d948fb0-dad7-0131-81ab-60a44ce903c3
+Route1ControlPoint7UUID:a9df22e0-dad7-0131-81b3-60a44ce903c3
+
+//-------- AUTO GENERATED PARAMETERS END ------------------

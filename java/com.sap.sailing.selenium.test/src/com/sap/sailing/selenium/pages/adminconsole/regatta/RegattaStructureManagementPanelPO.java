@@ -29,9 +29,7 @@ public class RegattaStructureManagementPanelPO extends PageArea {
     
     public RegattaCreateDialogPO startRegattaCreation() {
         this.addRegattaButton.click();
-        
         WebElement dialog = findElementBySeleniumId(this.driver, "RegattaCreateDialog"); //$NON-NLS-1$
-        
         return new RegattaCreateDialogPO(this.driver, dialog);
     }
     

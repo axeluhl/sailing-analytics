@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.util.ArrayList;
+import java.util.stream.Stream;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -8,18 +11,35 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+
+import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
+import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
+import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.kmeans.Cluster;
 
 /**
  * Right now this service is only used for quick debugging and testing of the polar api. It used plain text responses.
@@ -35,14 +55,14 @@ public class PolarResource extends AbstractSailingServerResource {
     @Produces("text/plain;charset=UTF-8")
     @Path("{boatClassName}")
     public Response getSpeed(@PathParam("boatClassName") String boatClassName, @QueryParam("angle") double angle,
-            @QueryParam("windspeed") double windSpeed) {
+            @QueryParam("windspeedInKnots") double windSpeed) {
         BoatClass boatClass = getService().getDomainObjectFactory().getBaseDomainFactory()
                 .getOrCreateBoatClass(boatClassName);
         SpeedWithConfidence<Void> speedWithConfidence;
         ResponseBuilder responseBuilder;
         try {
             speedWithConfidence = getService().getPolarDataService().getSpeed(boatClass, new KnotSpeedImpl(windSpeed),
-                    new DegreeBearingImpl(angle), true);
+                    new DegreeBearingImpl(angle));
             String resultString = "Speed: " + speedWithConfidence.getObject().getKnots() + "kn; Confidence: "
                     + speedWithConfidence.getConfidence();
             responseBuilder = Response.ok(resultString, MediaType.TEXT_PLAIN);
@@ -57,7 +77,7 @@ public class PolarResource extends AbstractSailingServerResource {
     @Produces("text/plain;charset=UTF-8")
     @Path("average/{boatClassName}")
     public Response getAverageSpeedAndBearing(@PathParam("boatClassName") String boatClassName,
-            @QueryParam("windspeed") double wSpeed, @QueryParam("legtype") LegType legType, @QueryParam("tack") Tack tack) {
+            @QueryParam("windspeedInKnots") double wSpeed, @QueryParam("legtype") LegType legType, @QueryParam("tack") Tack tack) {
         BoatClass boatClass = getService().getDomainObjectFactory().getBaseDomainFactory()
                 .getOrCreateBoatClass(boatClassName);
         ResponseBuilder responseBuilder;
@@ -67,14 +87,89 @@ public class PolarResource extends AbstractSailingServerResource {
             SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithBearing(boatClass,
                     windSpeed, legType, tack);
             String resultString = "Speed: " + speedWithBearing.getObject().getKnots() + "kn; Angle: "
-                    + speedWithBearing.getObject().getBearing().getDegrees() + "°; Confidence: "
+                    + speedWithBearing.getObject().getBearing().getDegrees() + "Â°; Confidence: "
                     + speedWithBearing.getConfidence();
             responseBuilder = Response.ok(resultString, MediaType.TEXT_PLAIN);
         } catch (NotEnoughDataHasBeenAddedException e) {
             responseBuilder = Response.noContent();
         }
-
         return responseBuilder.build();
     }
 
+    private Response getBadRegattaErrorResponse(String regattaName) {
+        return  Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getBadRaceErrorResponse(String regattaName, String raceName) {
+        return Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "' in regatta '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("windestimation/{regattaname}/races/{racename}")
+    public Response getCompetitorPositions(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) throws NotEnoughDataHasBeenAddedException {
+        Regatta regatta = findRegattaByName(regattaName);
+        Response response;
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {     
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                JSONArray resultAsJson = new JSONArray();
+                WindJsonSerializer serializer = new WindJsonSerializer(new PositionJsonSerializer());
+                PolarDataService service = getService().getPolarDataService();
+                ManeuverBasedWindEstimationTrackImpl maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
+                        service, trackedRace, /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ false);
+                maneuverBasedWindEstimationTrackImpl.lockForRead();
+                try {
+                    for (Wind wind : maneuverBasedWindEstimationTrackImpl.getFixes()) {
+                        resultAsJson.add(serializer.serialize(wind));
+                    }
+                } finally {
+                    maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
+                }
+                response = Response.ok(resultAsJson.toJSONString(), MediaType.APPLICATION_JSON).build();
+            }
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("text/plain;charset=UTF-8")
+    @Path("maneuvers/{regattaname}/races/{racename}")
+    public Response getManeuvers(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @QueryParam("cluster") String cluster)
+            throws NotEnoughDataHasBeenAddedException {
+        Regatta regatta = findRegattaByName(regattaName);
+        Response response;
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {     
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                PolarDataService service = getService().getPolarDataService();
+                ManeuverBasedWindEstimationTrackImpl maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
+                        service, trackedRace, /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ false);
+                final Stream<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters;
+                if ("tack".equals(cluster)) {
+                    clusters = maneuverBasedWindEstimationTrackImpl.getTackClusters().stream();
+                } else if ("jibe".equals(cluster)) {
+                    clusters = maneuverBasedWindEstimationTrackImpl.getJibeClusters().stream();
+                } else if (cluster != null && cluster.matches("[0-9][0-9]*")) {
+                    clusters = Stream.of(new ArrayList<>(maneuverBasedWindEstimationTrackImpl.getClusters()).get(Integer.valueOf(cluster)));
+                } else {
+                    clusters = maneuverBasedWindEstimationTrackImpl.getClusters().stream();
+                }
+                response = Response.ok(maneuverBasedWindEstimationTrackImpl.getStringRepresentation(clusters, /* waitForLatest */ true),
+                        MediaType.TEXT_PLAIN).build();
+            }
+        }
+        return response;
+    }
 }

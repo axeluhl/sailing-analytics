@@ -10,8 +10,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureFactory;
@@ -169,7 +169,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
 
     @Override
     public void setAdditionalScoringInformationEnabled(TimePoint timePoint, boolean enable, AdditionalScoringInformationType informationType) {
-        final AdditionalScoringInformationEvent event = new AdditionalScoringInformationFinder(raceLog).analyze(/*filterBy*/informationType);
+        final RaceLogAdditionalScoringInformationEvent event = new AdditionalScoringInformationFinder(raceLog).analyze(/*filterBy*/informationType);
         if (enable) {
             if (event == null) {
                 raceLog.add(factory.createAdditionalScoringInformationEvent(timePoint, UUID.randomUUID(), author, raceLog.getCurrentPassId(), informationType));
@@ -188,7 +188,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     
     @Override
     public boolean isAdditionalScoringInformationEnabled(AdditionalScoringInformationType informationType) {
-        final AdditionalScoringInformationEvent event = new AdditionalScoringInformationFinder(raceLog).analyze(/*filterBy*/informationType);
+        final RaceLogAdditionalScoringInformationEvent event = new AdditionalScoringInformationFinder(raceLog).analyze(/*filterBy*/informationType);
         return event != null;
     }
 

@@ -16,6 +16,7 @@
 	<modules>
 		<module>com.sap.sse</module>
 		<module>com.sap.sse.common</module>
+		<module>com.sap.sse.shared.android</module>
 		<module>com.sap.sse.mongodb</module>
 		<module>com.sap.sse.gateway</module>
 		<module>com.sap.sse.gwt</module>
@@ -62,6 +63,7 @@
 		<module>com.sap.sailing.server.gateway</module>
 		<module>com.sap.sailing.server.gateway.ess40</module>
 		<module>com.sap.sailing.server.gateway.serialization</module>
+		<module>com.sap.sailing.server.gateway.serialization.shared.android</module>
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xmlexport</module>
@@ -76,7 +78,10 @@
 		<module>com.sap.sailing.resultimport</module>
 		<module>com.sap.sailing.kiworesultimport</module>
 		<module>com.sap.sailing.ess40.resultimport</module>
+		<module>com.sap.sailing.xrr.schema</module>
 		<module>com.sap.sailing.xrr.resultimport</module>
+		<module>com.sap.sailing.xrr.structureimport</module>
+		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>org.openqa.selenium.osgi</module>
 		<module>com.sap.sailing.monitoring</module>
@@ -104,7 +109,6 @@
 		<module>com.googlecode.java-diff-utils.test</module>
 		<module>com.sap.sailing.kiworesultimport.test</module>
 		<module>com.sap.sailing.ess40.resultimport.test</module>
-		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
 		<module>com.sap.sailing.barbados.resultimport</module>
 		<module>com.sap.sailing.barbados.resultimport.test</module>
@@ -122,6 +126,7 @@
 		<module>com.sap.sailing.autoload</module>
 		<module>com.sap.sailing.feature.p2build</module>
 		<module>com.sap.sailing.polars</module>
+		<module>com.sap.sailing.polars.test</module>
 		<!-- com.sap.sailing.targetplatform.base left out on purpose: only invoke maven manually to build target platform -->
 	</modules>
 	
@@ -136,7 +141,7 @@
                     If so the IP of the host would be the same for all profiles.
 		-->
         <parameters.common>
-		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest -DspatialWind=true
+		  -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
         </parameters.common>
 		<parameters.vm-settings>
           -ea -Xmx1024m -XX:PermSize=256m -XX:+UseG1GC

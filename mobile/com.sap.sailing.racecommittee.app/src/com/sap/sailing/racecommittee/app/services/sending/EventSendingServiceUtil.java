@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +26,7 @@ public class EventSendingServiceUtil {
      * @return the intent that shall be sent to the EventSendingService
      */
     public static Intent createEventIntent(Context context, ManagedRace race, Serializable eventId, String serializedEventAsJson,
-            Class<? extends ServerReplyCallback> callbackClass) {
+            Class<? extends ServerReplyCallback> callbackClass) throws UnsupportedEncodingException {
         String url = MessageSendingService.getRaceLogEventSendAndReceiveUrl(context, 
                 race.getRaceGroup().getName(), race.getName(), race.getFleet().getName());
         return MessageSendingService.createMessageIntent(context, url, race.getId(), eventId, serializedEventAsJson, callbackClass);

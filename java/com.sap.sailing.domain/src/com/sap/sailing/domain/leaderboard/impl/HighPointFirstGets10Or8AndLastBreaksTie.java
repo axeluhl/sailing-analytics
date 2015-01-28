@@ -5,8 +5,8 @@ import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
-import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
+import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -16,7 +16,7 @@ import com.sap.sse.common.Util;
 
 /**
  * {@link HighPointFirstGetsFixedScore} scheme that in most cases applies
- * 10 points for the winner. Iff for one race column a {@link AdditionalScoringInformationEvent}
+ * 10 points for the winner. Iff for one race column a {@link RaceLogAdditionalScoringInformationEvent}
  * is found then 8 points are applied for the winner.
  * 
  * From Phil, Race Director, on 12.09.2014: "If there is a tie in the regatta score between two or more boats at any time, the tie
@@ -98,7 +98,7 @@ public class HighPointFirstGets10Or8AndLastBreaksTie extends HighPointFirstGetsF
         for (Fleet fleet : raceColumn.getFleets()) {
             RaceLog raceLog = raceColumn.getRaceLog(fleet);
             AdditionalScoringInformationFinder finder = new AdditionalScoringInformationFinder(raceLog);
-            AdditionalScoringInformationEvent event = finder.analyze(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
+            RaceLogAdditionalScoringInformationEvent event = finder.analyze(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
             if (event != null) {
                 if (rank == 0) {
                     result = null;

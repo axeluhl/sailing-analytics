@@ -15,6 +15,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -95,6 +96,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         }
     }
     
-    
-
+    @Override
+    public IsRegattaLike getRegattaLike() {
+        return regatta;
+    }
 }

@@ -58,6 +58,8 @@ public class PolarDataMinerTest {
         PolarDataMiner miner = new PolarDataMiner();
 
         BoatClass mockedBoatClass = mock(BoatClass.class);
+        
+        when(mockedBoatClass.getName()).thenReturn("49ER");
 
         GPSFixMoving fix1_1 = createMockedFix(13, 00, 54.431952, 10.186767, 45, 10.5);
         GPSFixMoving fix1_2 = createMockedFix(13, 30, 54.485034, 10.538303, 44.8, 10.6);
@@ -107,17 +109,17 @@ public class PolarDataMinerTest {
         }
 
         SpeedWithConfidence<Void> estimatedSpeed1 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
-                new DegreeBearingImpl(44.9), true);
+                new DegreeBearingImpl(44.9));
         assertThat(estimatedSpeed1, is(notNullValue()));
         assertThat(estimatedSpeed1.getObject().getKnots(), is(closeTo(10.55, EPSILON)));
 
         SpeedWithConfidence<Void> estimatedSpeed2 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
-                new DegreeBearingImpl(42), true);
+                new DegreeBearingImpl(42));
         assertThat(estimatedSpeed2, is(notNullValue()));
         assertThat(estimatedSpeed2.getObject().getKnots(), is(closeTo(10.05, EPSILON)));
 
         SpeedWithConfidence<Void> estimatedSpeed3 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
-                new DegreeBearingImpl(42.8), true);
+                new DegreeBearingImpl(42.8));
         assertThat(estimatedSpeed3, is(notNullValue()));
         assertThat(estimatedSpeed3.getObject().getKnots(), is(closeTo(10, EPSILON)));
     }

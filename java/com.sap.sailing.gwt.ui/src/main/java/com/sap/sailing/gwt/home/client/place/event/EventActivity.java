@@ -52,18 +52,26 @@ public class EventActivity extends AbstractActivity {
         panel.setWidget(new Placeholder());
 
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-        UUID eventUUID = UUID.fromString(eventPlace.getEventUuidAsString());
-        clientFactory.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
-            @Override
-            public void onSuccess(final EventDTO event) {
-                loadRegattaStructureAndCreateEventView(panel, clientTimeWhenRequestWasSent, event);
-            }
+        try {
+            final UUID eventUUID = UUID.fromString(eventPlace.getEventUuidAsString());
+            clientFactory.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
+                @Override
+                public void onSuccess(final EventDTO event) {
+                    if(event != null) {
+                        loadRegattaStructureAndCreateEventView(panel, clientTimeWhenRequestWasSent, event);
+                    } else {
+                        createErrorView("No such event with UUID " + eventUUID, null, panel);
+                    }
+                }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                createErrorView("Error while loading the event with service getEventById()", caught, panel);
-            }
-        }); 
+                @Override
+                public void onFailure(Throwable caught) {
+                    createErrorView("Error while loading the event with service getEventById()", caught, panel);
+                }
+            }); 
+        } catch (IllegalArgumentException e) {
+            createErrorView("Could not parse a valid UUID from the parameter 'eventID'.", null, panel);
+        }
     }
 
     private void loadRegattaStructureAndCreateEventView(final AcceptsOneWidget panel, final long clientTimeWhenRequestWasSent, final EventDTO event) {

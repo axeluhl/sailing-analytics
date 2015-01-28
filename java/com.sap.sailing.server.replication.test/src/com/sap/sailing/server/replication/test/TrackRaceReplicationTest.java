@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -84,9 +85,11 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
                 }
             }
         });
-        trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE.createTrackingConnectivityParameters(paramURL,
-                liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
+        trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE
+                .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
+                        startOfTracking, endOfTracking, /* delayToLiveInMillis */
+                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE,
+                        EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -194,7 +197,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Override
     public void tearDown() throws Exception {
         if (racesHandle != null) {
-            racesHandle.getRaceTracker().stop();
+            racesHandle.getRaceTracker().stop(/* preemptive */ false);
         }
         super.tearDown();
     }

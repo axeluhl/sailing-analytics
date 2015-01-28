@@ -45,7 +45,6 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -55,14 +54,13 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
-import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoUtils;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -81,9 +79,10 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     public void setUp() {
         now = MillisecondsTimePoint.now();
         mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
-        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
-        leaderboard = new FlexibleLeaderboardImpl(raceLogStore, leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
+        domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(),
+                DomainFactory.INSTANCE);
+        leaderboard = new FlexibleLeaderboardImpl(getRaceLogStore(), getRegattaLogStore(), leaderboardName,
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         leaderboard.addRaceColumn(raceColumnName, /* medalRace */false);
     }

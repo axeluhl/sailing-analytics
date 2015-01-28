@@ -1,7 +1,5 @@
 package com.sap.sse.gwt.client.controls.listedit;
 
-import java.util.List;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -13,6 +11,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.StringMessages;
 
 public class StringListEditorComposite extends ListEditorComposite<String> {
@@ -48,13 +47,13 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
         }
 
         @Override
-        protected String getCollapsedValueText(List<String> value) {
+        protected String getCollapsedValueText(Iterable<String> value) {
             StringBuilder valuesText = new StringBuilder();
-            for (int i = 0; i < value.size(); i++) {
+            for (int i = 0; i < Util.size(value); i++) {
                 if (i > 0) {
                     valuesText.append(',');
                 }
-                valuesText.append(value.get(i));
+                valuesText.append(Util.get(value, i));
             }
             String condensedValue = valuesText.toString();
             return condensedValue;

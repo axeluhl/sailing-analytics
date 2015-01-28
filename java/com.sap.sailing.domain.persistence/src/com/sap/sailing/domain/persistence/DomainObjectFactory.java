@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -115,6 +117,8 @@ public interface DomainObjectFactory {
     Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry);
 
     RaceLog loadRaceLog(RaceLogIdentifier identifier);
+
+    RegattaLog loadRegattaLog(RegattaLikeIdentifier identifier);
     
     /**
      * Loads all competitors, and resolves them via the domain factory.
