@@ -11,9 +11,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.FileStorageServicePropertyStore;
-import com.sap.sse.filestorage.common.FileStorageManagementService;
-import com.sap.sse.filestorage.common.FileStorageService;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 
 /**

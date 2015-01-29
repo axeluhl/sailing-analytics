@@ -1,4 +1,4 @@
-package com.sap.sse.filestorage.common;
+package com.sap.sse.filestorage;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +33,7 @@ public interface FileStorageService {
      */
     void removeFile(URI uri) throws OperationFailedException, InvalidPropertiesException;
 
-    FileStorageServiceProperty[] getProperties();
+    Property[] getProperties();
 
     /**
      * Should not be called directly, but through {@link FileStorageManagementService#setFileStorageServiceProperty}

@@ -26,5 +26,5 @@ Require-Bundle: com.sap.sailing.server,
  org.mockito.mockito-core;bundle-version="1.9.5",
  com.sap.sailing.domain.shared.android,
  com.sap.sse.replication.testsupport,
- com.sap.sse.filestorage.common,
+ com.sap.sse.filestorage;bundle-version="1.0.0",
  com.sap.sse.shared.android

@@ -72,8 +72,8 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
-import com.sap.sse.filestorage.common.FileStorageManagementService;
-import com.sap.sse.filestorage.common.FileStorageService;
+import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
 /**

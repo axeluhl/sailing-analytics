@@ -45,7 +45,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.operationaltransformation,
  com.sap.sse,
  com.sap.sse.security.common,
- com.sap.sse.filestorage.common
+ com.sap.sse.filestorage;bundle-version="1.0.0"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.polars,

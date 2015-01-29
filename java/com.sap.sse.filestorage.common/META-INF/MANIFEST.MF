@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Sse File storage Common (shared with GWT)
-Bundle-SymbolicName: com.sap.sse.filestorage.common
-Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: com.sap.sse.filestorage.common
-Require-Bundle: com.sap.sse.common

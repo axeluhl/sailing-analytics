@@ -19,10 +19,10 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.filestorage.common.FileStorageService;
-import com.sap.sse.filestorage.common.FileStorageServiceProperty;
-import com.sap.sse.filestorage.common.InvalidPropertiesException;
-import com.sap.sse.filestorage.common.OperationFailedException;
+import com.sap.sse.filestorage.FileStorageService;
+import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.filestorage.Property;
 
 /**
  * For testing purposes configure the access credentials as follows: To link this service to an AWS account, create the
@@ -42,20 +42,20 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
     private static final String retrievalProtocol = "http";
     // private static final String bucketName = "ftes-sap-sailing";
 
-    private final FileStorageServicePropertyImpl accessId = new FileStorageServicePropertyImpl("accessId", false,
+    private final PropertyImpl accessId = new PropertyImpl("accessId", false,
             "Access ID (leave blank to use ~/.aws/credentials instead)");
-    private final FileStorageServicePropertyImpl accessKey = new FileStorageServicePropertyImpl("accessKey", false,
+    private final PropertyImpl accessKey = new PropertyImpl("accessKey", false,
             "Secret Access Key (leave blank to use ~/.aws/credentials instead)");
-    private final FileStorageServicePropertyImpl bucketName = new FileStorageServicePropertyImpl("bucketName", true,
+    private final PropertyImpl bucketName = new PropertyImpl("bucketName", true,
             "Name of Bucket to use (has to already exist, and user needs sufficient permissions)");
-    private final Map<String, FileStorageServicePropertyImpl> properties = new HashMap<>();
+    private final Map<String, PropertyImpl> properties = new HashMap<>();
 
     public AmazonS3FileStorageServiceImpl() {
         addProperties(accessId, accessKey, bucketName);
     }
 
-    private void addProperties(FileStorageServicePropertyImpl... properties) {
-        for (FileStorageServicePropertyImpl p : properties) {
+    private void addProperties(PropertyImpl... properties) {
+        for (PropertyImpl p : properties) {
             this.properties.put(p.getName(), p);
         }
     }
@@ -107,15 +107,15 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
                 .withCannedAcl(CannedAccessControlList.PublicRead);
         final AmazonS3Client s3Client = createS3Client();
 
-        new Thread() {
-            public void run() {
-                try {
-                    s3Client.putObject(request);
-                } catch (AmazonClientException e) {
-                    logger.log(Level.WARNING, "Could not store file", e);
-                }
-            };
-        }.run();
+            new Thread() {
+                public void run() {
+                    try {
+                        s3Client.putObject(request);
+                    } catch (AmazonClientException e) {
+                        logger.log(Level.WARNING, "Could not store file", e);
+                    }
+                };
+            }.run();
         URI uri = getUri(key);
         logger.info("Stored file " + uri);
         return uri;
@@ -134,8 +134,8 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public FileStorageServiceProperty[] getProperties() {
-        return new FileStorageServiceProperty[] { accessId, accessKey, bucketName };
+    public Property[] getProperties() {
+        return new Property[] { accessId, accessKey, bucketName };
     }
 
     @Override
@@ -166,12 +166,14 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
             s3.doesBucketExist(bucketName.getValue());
         } catch (Exception e) {
             throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket", e,
-                    new Pair<>(accessId, "seems to be invalid"), new Pair<>(accessKey, "seems to be invalid"));
+                    new Pair<Property, String>(accessId, "seems to be invalid"), new Pair<Property, String>(accessKey,
+                            "seems to be invalid"));
         }
 
         // test if bucket exists
         if (!s3.doesBucketExist(bucketName.getValue())) {
-            throw new InvalidPropertiesException("invalid bucket", new Pair<>(bucketName, "bucket does not exist"));
+            throw new InvalidPropertiesException("invalid bucket", new Pair<Property, String>(bucketName,
+                    "bucket does not exist"));
         }
     }
 }

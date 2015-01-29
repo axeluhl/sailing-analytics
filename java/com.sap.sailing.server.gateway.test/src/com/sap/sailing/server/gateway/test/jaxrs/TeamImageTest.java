@@ -26,9 +26,9 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.server.gateway.jaxrs.api.CompetitorsResource;
-import com.sap.sse.filestorage.common.FileStorageService;
-import com.sap.sse.filestorage.common.InvalidPropertiesException;
-import com.sap.sse.filestorage.common.OperationFailedException;
+import com.sap.sse.filestorage.FileStorageService;
+import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
 
 public class TeamImageTest extends AbstractJaxRsApiTest {    

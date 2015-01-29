@@ -8,9 +8,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.FileStorageServicePropertyStore;
-import com.sap.sse.filestorage.common.FileStorageManagementService;
-import com.sap.sse.filestorage.common.FileStorageService;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 
 public class Activator implements BundleActivator {
