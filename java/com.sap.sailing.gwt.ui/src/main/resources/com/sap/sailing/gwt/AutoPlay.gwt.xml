@@ -60,6 +60,9 @@
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 	
+	<set-configuration-property name="CssResource.enableGss" value="true" />
+	<set-configuration-property name="CssResource.legacy" value="true" />
+	
 	<source path='ui/common' />
 	<source path='ui/client' />
 	<source path='ui/shared' />
