@@ -20,6 +20,11 @@ import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
  * Implements {@link ServiceTrackerCustomizer} so that all {@link FileStorageServices} announced in the
  * registry can receive their stored properties.
  * 
+ * TODO implements Replicable, build Operations
+ *      add fully qualified classname of Replicable to java/target/env.sh
+ *      register as Replicable OSGi service (com.sap.sse.security.impl.Activator#83)
+ * TODO store active selection
+ * 
  * @author Fredrik Teschke
  *
  */
@@ -77,7 +82,7 @@ public class FileStorageManagementServiceImpl implements FileStorageManagementSe
             throws NoCorrespondingServiceRegisteredException, IllegalArgumentException {
         //TODO replicate
         propertyStore.writeProperty(serviceName, propertyName, propertyValue);
-        serviceFinder.findService(serviceName).setProperty(propertyName, propertyValue);
+        serviceFinder.findService(serviceName).internalSetProperty(propertyName, propertyValue);
     }
 
     @Override
@@ -85,7 +90,7 @@ public class FileStorageManagementServiceImpl implements FileStorageManagementSe
         FileStorageService service = context.getService(reference);
         logger.info("Found new FileStorageService: adding properties to " + service.getName());
         for (Entry<String, String> property : propertyStore.readAllProperties(service.getName()).entrySet()) {
-            service.setProperty(property.getKey(), property.getValue());
+            service.internalSetProperty(property.getKey(), property.getValue());
         }
         return service;
     }

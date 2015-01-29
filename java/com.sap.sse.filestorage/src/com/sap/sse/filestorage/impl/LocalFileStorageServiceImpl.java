@@ -82,7 +82,7 @@ public class LocalFileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public void setProperty(String name, String value) throws IllegalArgumentException {
+    public void internalSetProperty(String name, String value) throws IllegalArgumentException {
         // TODO Auto-generated method stub
         
     }

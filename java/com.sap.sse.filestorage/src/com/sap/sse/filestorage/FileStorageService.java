@@ -41,7 +41,7 @@ public interface FileStorageService {
      * @throws IllegalArgumentException
      *             if {@code name} is not a valid property name
      */
-    void setProperty(String name, String value) throws IllegalArgumentException;
+    void internalSetProperty(String name, String value) throws IllegalArgumentException;
 
     String getName();
 

@@ -139,7 +139,7 @@ public class AmazonS3FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public void setProperty(String name, String value) {
+    public void internalSetProperty(String name, String value) {
         if (!properties.containsKey(name)) {
             throw new IllegalArgumentException("Property " + name + " does not exist");
         }

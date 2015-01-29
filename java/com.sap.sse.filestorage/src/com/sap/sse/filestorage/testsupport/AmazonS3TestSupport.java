@@ -10,9 +10,9 @@ public class AmazonS3TestSupport {
     
     public static AmazonS3FileStorageServiceImpl createService() throws InvalidPropertiesException {
         AmazonS3FileStorageServiceImpl service = new AmazonS3FileStorageServiceImpl();
-        service.setProperty("accessId", s3AccessId);
-        service.setProperty("accessKey", s3AccessKey);
-        service.setProperty("bucketName", s3BucketName);
+        service.internalSetProperty("accessId", s3AccessId);
+        service.internalSetProperty("accessKey", s3AccessKey);
+        service.internalSetProperty("bucketName", s3BucketName);
         service.testProperties();
         return service;
     }
