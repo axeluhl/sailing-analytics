@@ -15,6 +15,7 @@ import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 
 public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl implements FileStorageService {
+    private static final long serialVersionUID = -8661781258137340835L;
     private static final String NAME = "Local Storage";
     private static final String DESCRIPTION = "";
     

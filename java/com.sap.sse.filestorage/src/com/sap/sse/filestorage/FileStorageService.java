@@ -2,6 +2,7 @@ package com.sap.sse.filestorage;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URI;
 
 import com.sap.sse.common.IsManagedByCache;
@@ -21,7 +22,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
  * @author Fredrik Teschke
  *
  */
-public interface FileStorageService extends IsManagedByCache<FileStorageServiceResolver> {
+public interface FileStorageService extends IsManagedByCache<FileStorageServiceResolver>, Serializable {
     /**
      * @param originalFileExtension
      *            may be {@code null}

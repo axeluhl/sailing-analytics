@@ -1,4 +1,4 @@
-package com.sap.sse.filestorage.test;
+package com.sap.sse.filestorage.services.test;
 
 import java.io.IOException;
 import java.io.InputStream;

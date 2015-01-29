@@ -9,6 +9,7 @@ import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.FileStorageServiceResolver;
 
 public abstract class BaseFileStorageServiceImpl implements FileStorageService {
+    private static final long serialVersionUID = 7787261863522200165L;
     private final String name;
     private final String description;
     protected final Map<String, FileStorageServicePropertyImpl> propertiesByNameInInsertionOrder = new LinkedHashMap<>();

@@ -3,6 +3,7 @@ package com.sap.sse.filestorage.impl;
 import com.sap.sse.filestorage.FileStorageServiceProperty;
 
 public class FileStorageServicePropertyImpl implements FileStorageServiceProperty {
+    private static final long serialVersionUID = -8418630141746910125L;
     private final boolean isRequired;
     private final String name;
     private final String description;

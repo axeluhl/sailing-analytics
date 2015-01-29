@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -24,7 +22,6 @@ import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.FileStorageServicePropertyStore;
 import com.sap.sse.filestorage.FileStorageServiceResolver;
-import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -38,7 +35,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
  *
  */
 public class FileStorageManagementServiceImpl implements ReplicableFileStorageManagementService,
-        ServiceTrackerCustomizer<FileStorageService, FileStorageService> {
+        ServiceAddedListener<FileStorageService> {
     private final Logger logger = Logger.getLogger(FileStorageManagementServiceImpl.class.getName());
 
     private FileStorageService active;
@@ -53,13 +50,11 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
      * Is set to an {@link EmptyFileStorageServicePropertyStoreImpl} on replicas.
      */
     private FileStorageServicePropertyStore propertyStore;
-    private final BundleContext context;
     private final FileStorageServiceResolver serviceResolver;
 
-    public FileStorageManagementServiceImpl(BundleContext context, FileStorageServicePropertyStore propertyStore) {
-        this.context = context;
-        serviceFinder = new CachedOsgiTypeBasedServiceFinderFactory(context)
-                .createServiceFinder(FileStorageService.class);
+    public FileStorageManagementServiceImpl(TypeBasedServiceFinder<FileStorageService> serviceFinder,
+            FileStorageServicePropertyStore propertyStore) {
+        this.serviceFinder = serviceFinder;
         this.propertyStore = propertyStore;
         serviceResolver = new FileStorageServiceResolverAgainstOsgiRegistryImpl(serviceFinder);
         active = getFileStorageService(propertyStore.readActiveServiceName());
@@ -93,25 +88,13 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
             throws NoCorrespondingServiceRegisteredException, IllegalArgumentException {
         apply(s -> s.internalSetFileStorageServiceProperty(service, propertyName, propertyValue));
     }
-
+    
     @Override
-    public FileStorageService addingService(ServiceReference<FileStorageService> reference) {
-        FileStorageService service = context.getService(reference);
+    public void onServiceAdded(FileStorageService service) {
         logger.info("Found new FileStorageService: adding properties to " + service.getName());
         for (Entry<String, String> property : propertyStore.readAllProperties(service.getName()).entrySet()) {
             service.internalSetProperty(property.getKey(), property.getValue());
         }
-        return service;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<FileStorageService> reference, FileStorageService service) {
-        // file storage service has been modified: ignore
-    }
-
-    @Override
-    public void removedService(ServiceReference<FileStorageService> reference, FileStorageService service) {
-        // file storage service has been removed: ignore
     }
 
     @Override

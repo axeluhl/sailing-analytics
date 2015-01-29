@@ -30,7 +30,7 @@ TypeBasedServiceFinder<ServiceType> {
     @Override
     public ServiceType findService(String type)
             throws NoCorrespondingServiceRegisteredException {
-        if (type.equals(this.type)) return service;
+        if (this.type.equals(type)) return service;
         if (fallback != null) return fallback;
         throw new NoCorrespondingServiceRegisteredException("Only one service registered", type, service.getClass().getSimpleName());
     }

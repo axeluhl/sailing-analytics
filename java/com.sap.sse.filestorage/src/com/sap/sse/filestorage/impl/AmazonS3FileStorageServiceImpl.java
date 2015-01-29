@@ -33,6 +33,7 @@ import com.sap.sse.filestorage.OperationFailedException;
  *
  */
 public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl implements FileStorageService {
+    private static final long serialVersionUID = -2406798172882732531L;
     public static final String NAME = "Amazon S3";
     public static final String DESCRIPTION = "Store files on Amazon S3. The resulting file name is a random UUID plus the original file ending.";
     
