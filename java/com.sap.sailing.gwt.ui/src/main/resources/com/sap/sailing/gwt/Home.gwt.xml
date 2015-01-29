@@ -74,7 +74,9 @@
 	<set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
 	<set-configuration-property name="devModeRedirectEnabled" value="true" />
     <set-property name="compiler.useSourceMaps" value="true" />
-	
+    
+    <set-configuration-property name="CssResource.enableGss" value="true" />
+    <set-configuration-property name="CssResource.legacy" value="true" />
 	
 	<source path='home' />
 	<source path='common' />
