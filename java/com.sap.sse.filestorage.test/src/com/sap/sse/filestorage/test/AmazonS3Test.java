@@ -9,9 +9,9 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.filestorage.FileStorageService;
-import com.sap.sse.filestorage.InvalidPropertiesException;
-import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.filestorage.common.FileStorageService;
+import com.sap.sse.filestorage.common.InvalidPropertiesException;
+import com.sap.sse.filestorage.common.OperationFailedException;
 import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
 
 public class AmazonS3Test {

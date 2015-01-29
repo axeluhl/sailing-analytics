@@ -11,9 +11,9 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sse.filestorage.FileStorageService;
-import com.sap.sse.filestorage.InvalidPropertiesException;
-import com.sap.sse.filestorage.Property;
+import com.sap.sse.filestorage.common.FileStorageService;
+import com.sap.sse.filestorage.common.FileStorageServiceProperty;
+import com.sap.sse.filestorage.common.InvalidPropertiesException;
 
 public class LocalFileStorageServiceImpl implements FileStorageService {
     private static final Logger logger = Logger.getLogger(LocalFileStorageServiceImpl.class.getName());
@@ -76,7 +76,7 @@ public class LocalFileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public Property[] getProperties() {
+    public FileStorageServiceProperty[] getProperties() {
         // TODO Auto-generated method stub
         return null;
     }

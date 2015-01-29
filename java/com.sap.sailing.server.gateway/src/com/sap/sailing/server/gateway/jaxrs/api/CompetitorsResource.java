@@ -29,8 +29,8 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
-import com.sap.sse.filestorage.InvalidPropertiesException;
-import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.filestorage.common.InvalidPropertiesException;
+import com.sap.sse.filestorage.common.OperationFailedException;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {

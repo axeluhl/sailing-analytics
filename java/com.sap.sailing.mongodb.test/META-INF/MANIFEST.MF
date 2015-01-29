@@ -27,7 +27,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.operationaltransformation,
  com.sap.sse.replication,
  com.sap.sse,
- com.sap.sse.filestorage
+ com.sap.sse.filestorage.common
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.common.racelog,

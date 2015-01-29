@@ -1,4 +1,4 @@
-package com.sap.sse.filestorage;
+package com.sap.sse.filestorage.common;
 
 public class OperationFailedException extends Exception {
     private static final long serialVersionUID = 3361800673687196602L;

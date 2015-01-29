@@ -1,4 +1,4 @@
-package com.sap.sse.filestorage;
+package com.sap.sse.filestorage.common;
 
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 

@@ -1,6 +1,6 @@
 package com.sap.sse.filestorage.testsupport;
 
-import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.common.InvalidPropertiesException;
 import com.sap.sse.filestorage.impl.AmazonS3FileStorageServiceImpl;
 
 public class AmazonS3TestSupport {

@@ -1,11 +1,11 @@
-package com.sap.sse.filestorage;
+package com.sap.sse.filestorage.common;
 
 /**
  * Property of a file storage service.
  * @author Fredrik Teschke
  *
  */
-public interface Property {
+public interface FileStorageServiceProperty {
     boolean isRequired();
     String getName();
     

@@ -1,18 +1,19 @@
 package com.sap.sse.filestorage.impl;
 
-import com.sap.sse.filestorage.Property;
+import com.sap.sse.filestorage.common.FileStorageServiceProperty;
 
-public class PropertyImpl implements Property {
+
+public class FileStorageServicePropertyImpl implements FileStorageServiceProperty {
     private final boolean isRequired;
     private final String name;
     private final String description;
     private String value;
     
-    public PropertyImpl(String name, boolean isRequired, String description) {
+    public FileStorageServicePropertyImpl(String name, boolean isRequired, String description) {
         this(name, isRequired, description, null);
     }
     
-    public PropertyImpl(String name, boolean isRequired, String description, String value) {
+    public FileStorageServicePropertyImpl(String name, boolean isRequired, String description, String value) {
         this.name = name;
         this.description = description;
         this.value = value;
