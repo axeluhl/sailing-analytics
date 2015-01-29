@@ -1,6 +1,6 @@
 .eventregattaraces {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .eventregattaraces_phase {
   margin: 2em 0;
@@ -168,7 +168,7 @@
 .eventregattarace_features_list,
 .eventregattarace_legs_list {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .eventregattarace_features {
   min-height: 0;
@@ -252,7 +252,7 @@
 }
 .regattanavigation {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
   text-align: center;
   border-bottom: 1px solid #ddd;
 }
@@ -276,4 +276,12 @@
 .regattanavigation_linkactive:hover,
 .regattanavigation_linkactive:focus {
   border-bottom-color: #d89a00;
+}
+@media (min-width: 25em) {
+  .eventregattarace_nameshort {
+    float: left;
+  }
+  .eventregattarace_flag {
+    display: inline-block;
+  }
 }
