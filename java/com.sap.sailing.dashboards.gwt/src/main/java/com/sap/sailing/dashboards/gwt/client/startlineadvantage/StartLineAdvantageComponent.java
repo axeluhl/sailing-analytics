@@ -23,12 +23,15 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
     private StartLineAdvantageComponentState startLineAdvantageComponentState;
     private StartLineAdvantageComponentStateShowsAdvantageByWind startLineAdvantageComponentStateShowsAdvantageByWind;
     private StartLineAdvantageComponentStateShowsAdvantageByGeometry startLineAdvantageComponentStateShowsAdvantageByGeometry;
-
+    
+    private static final String HEADER_ADVANTAGE_BY_WIND = "Startline advantage by wind";
+    private static final String HEADER_ADVANTAGE_BY_GEOMETRY = "Startline advantage by geometry";
+    
     public StartLineAdvantageComponent() {
         super();
         initAndSetStartLineAdvantageStates();
         StartLineAdvantageComponentRessources.INSTANCE.css().ensureInjected();
-        this.header.setInnerText("Startline advantage by wind");
+        this.header.setInnerText(HEADER_ADVANTAGE_BY_WIND);
         this.header.addClassName(StartLineAdvantageComponentRessources.INSTANCE.css()
                 .startLineAdvantageComponent_header());
         liveAveragePanel.getElement().addClassName(
@@ -110,7 +113,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
         @Override
         public void changeStartLineAdvatageComponentsStateToOtherState(
                 StartLineAdvantageComponent startLineAdvantageComponent) {
-            startLineAdvantageComponent.header.setInnerText("Startline advantage by geometry");
+            startLineAdvantageComponent.header.setInnerText(HEADER_ADVANTAGE_BY_GEOMETRY);
             startLineAdvantageComponent.startLineAdvantageComponentState = startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry;
             startLineAdvantageComponent.liveNumber
                     .setInnerText(startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry
@@ -143,7 +146,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
         @Override
         public void changeStartLineAdvatageComponentsStateToOtherState(
                 StartLineAdvantageComponent startLineAdvantageComponent) {
-            startLineAdvantageComponent.header.setInnerText("Startline advantage by wind");
+            startLineAdvantageComponent.header.setInnerText(HEADER_ADVANTAGE_BY_WIND);
             startLineAdvantageComponent.startLineAdvantageComponentState = startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind;
             startLineAdvantageComponent.liveNumber
                     .setInnerText(startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind
