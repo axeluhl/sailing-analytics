@@ -22,4 +22,5 @@ Require-Bundle: org.apache.servicemix.bundles.aws-java-sdk;bundle-version="1.9.8
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sse.replication,
  com.sap.sse.operationaltransformation,
- com.sap.sse
+ com.sap.sse,
+ org.apache.commons.io

@@ -32,6 +32,10 @@ public class Activator implements BundleActivator {
         Dictionary<String, String> dict = new Hashtable<>();
         dict.put(TypeBasedServiceFinder.TYPE, AmazonS3FileStorageServiceImpl.NAME);
         context.registerService(FileStorageService.class, new AmazonS3FileStorageServiceImpl(), dict);
+        
+        Dictionary<String, String> localStorageDict = new Hashtable<>();
+        localStorageDict.put(TypeBasedServiceFinder.TYPE, LocalFileStorageServiceImpl.NAME);
+        context.registerService(FileStorageService.class, new LocalFileStorageServiceImpl(), localStorageDict);
 
         // register mgmt service
         FileStorageManagementServiceImpl mgmtService = new FileStorageManagementServiceImpl(

@@ -11,31 +11,56 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
+
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.filestorage.FileStorageService;
+import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+
+/**
+ * Service for storing files in the local file system. Files get stored in localPath+fileName and can be accessed at
+ * baseUrl+fileName Note that the content lying in baseUrl must therefore be accessible remotely. This can for example
+ * be achieved by mounting a remote file system for example from static.sapsailing.com on the replicas to localPath.
+ * 
+ * The accessibility of the files is ensured prior to activating the local file storage service by saving a testfile in
+ * localPath, which is then accessed via basePath.
+ * 
+ * For testing purposes the baseUrl can be set to a file url: e.g. file://localhost/home/jan/sailing_test
+ * and the local path subsequently: /home/jan/sailing_test
+ * 
+ * @author Jan Broß
+ *
+ */
+
 
 public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl implements FileStorageService {
     private static final long serialVersionUID = -8661781258137340835L;
-    private static final String NAME = "Local Storage";
-    private static final String DESCRIPTION = "";
+    private static final String testFile = "Bundesliga2014_Regatta6_eventteaser.jpg";
+    public static final String NAME = "Local Storage";
+    public static final  String DESCRIPTION = "Service for storing files in the local file system. Files get stored in localPath+fileName and can be accessed at baseUrl+fileName Note that the content lying in baseUrl must therefore be accessible remotely. This can for examplebe achieved by mounting a remote file system for example from static.sapsailing.com on the replicas to localPath.";
+    
+    private static final Logger logger = Logger.getLogger(LocalFileStorageServiceImpl.class.getName());
+
+    private final FileStorageServicePropertyImpl baseURL = new FileStorageServicePropertyImpl("baseURL", true,
+            "Base URL: Base URL + fileName = URL where uploaded file will be accessible");
+    private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, "Local Path to use for file storage");
+
     
     protected LocalFileStorageServiceImpl() {
         super(NAME, DESCRIPTION);
-        //addProperties(...);
+        addProperties(baseURL, localPath);
     }
-
-    private static final Logger logger = Logger.getLogger(LocalFileStorageServiceImpl.class.getName());
-
-    private static final String host = "media.sapsailing.com";
-    private static final String path = "images";
-    private static final String retrievalProtocol = "http";
 
     @Override
     public URI storeFile(InputStream is, String fileExtension, long lengthInBytes) throws IOException {
         OutputStream outputStream = null;
-        String pathToFile = path + "/" + getKey(fileExtension);
+        String fileName = getKey(fileExtension);
+        String pathToFile = localPath.getValue() + "/" + fileName;
 
-        outputStream = new FileOutputStream(new File(pathToFile));
+        File outputFile = new File(pathToFile);
+        logger.log(Level.FINE, "Storing file in " + outputFile.getAbsolutePath());
+        outputStream = new FileOutputStream(outputFile);
 
         try {
             int read = 0;
@@ -55,7 +80,7 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
             }
         }
 
-        return getUri(pathToFile);
+        return getUri(fileName);
     }
 
     private static String getKey(String fileEnding) {
@@ -64,9 +89,9 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
         return key;
     }
 
-    private static URI getUri(String pathToFile) {
+    private URI getUri(String pathToFile) {
         try {
-            return new URI(retrievalProtocol, host, pathToFile, null);
+            return new URI(baseURL.getValue() + "/" + pathToFile);
         } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "Could not create URI for uploaded file with path " + pathToFile, e);
             return null;
@@ -76,23 +101,74 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     @Override
     public void removeFile(URI uri) {
         String filePath = uri.getPath();
-        File file = new File(filePath);
-        
-        if(!file.delete()){
-            logger.warning("Could not delete file with path "+filePath);
+        String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+        File file = new File(localPath + "/" + fileName);
+
+        if (!file.delete()) {
+            logger.warning("Could not delete file with path " + filePath);
         }
     }
 
     @Override
-    public String getDescription() {
-        // TODO Auto-generated method stub
-        return null;
+    public void internalSetProperty(String name, String value) {
+        if (!propertiesByNameInInsertionOrder.containsKey(name)) {
+            throw new IllegalArgumentException("Property " + name + " does not exist");
+        }
+        
+        // as all properties are paths, we can remove the trailing / here, if it exists
+        value = removeTrailingSlash(value);
+        propertiesByNameInInsertionOrder.get(name).setValue(value);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     @Override
     public void testProperties() throws InvalidPropertiesException {
-        // TODO Auto-generated method stub
-        
+        // write file to localPath and read file via http operation and check content
+        URI testFileURI;
+        try {
+            InputStream stream = getClass().getClassLoader().getResourceAsStream(testFile);
+            long length = stream.available();
+            testFileURI = storeFile(stream, ".test", length);
+        } catch (IOException e) {
+            throw new InvalidPropertiesException("Could not write test file", new Pair<FileStorageServiceProperty, String>(localPath,
+                    "incorrect path or not writeable"));
+        }
+
+        InputStream downloadStream;
+        try {
+            downloadStream = testFileURI.toURL().openStream();
+        } catch (Exception e) {
+            throw new InvalidPropertiesException("Could not open stream to " + testFileURI,  new Pair<FileStorageServiceProperty, String>(baseURL,
+                    "a test file uploaded to localpath can't be found on baseUrl"));
+        }
+
+        InputStream originalInput = getClass().getClassLoader().getResourceAsStream(testFile);
+        try {
+            IOUtils.contentEquals(downloadStream, originalInput);
+        } catch (IOException e) {
+            throw new InvalidPropertiesException("Could not compare original file with uploaded file", new Pair<FileStorageServiceProperty, String>(baseURL,
+                    "unknown error"), new Pair<FileStorageServiceProperty, String>(localPath,
+                            "unknown error"));
+        } finally {
+            try {
+                downloadStream.close();
+                originalInput.close();
+            } catch (IOException e) {
+                logger.warning("Closing Streams failed.");
+            }
+        }
+
+        removeFile(testFileURI);
     }
 
+    private String removeTrailingSlash(String value) {
+        if (value.endsWith("/")) {
+            value = value.substring(0, value.length() - 1);
+        }
+        return value;
+    }
 }
