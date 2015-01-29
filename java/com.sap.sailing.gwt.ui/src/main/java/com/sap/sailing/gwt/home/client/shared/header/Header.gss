@@ -22,7 +22,7 @@
   line-height: 4.333333333333333em;
   color: #f6f9fc;
 }
-@media (min-width: 61em) {
+@media (min-width: 50em) {
   .logotitle {
     display: inline;
   }
