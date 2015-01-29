@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**
@@ -20,7 +21,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
  * @author Fredrik Teschke
  *
  */
-public interface FileStorageService {
+public interface FileStorageService extends IsManagedByCache<FileStorageServiceResolver> {
     /**
      * @param originalFileExtension
      *            may be {@code null}
@@ -33,7 +34,7 @@ public interface FileStorageService {
      */
     void removeFile(URI uri) throws OperationFailedException, InvalidPropertiesException;
 
-    Property[] getProperties();
+    FileStorageServiceProperty[] getProperties();
 
     /**
      * Should not be called directly, but through {@link FileStorageManagementService#setFileStorageServiceProperty}

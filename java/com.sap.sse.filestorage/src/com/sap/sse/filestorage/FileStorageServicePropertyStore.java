@@ -12,4 +12,8 @@ public interface FileStorageServicePropertyStore {
     Map<String, String> readAllProperties(String serviceName);
     
     void writeProperty(String serviceName, String propertyName, String propertyValue);
+    
+    String readActiveServiceName();
+    
+    void writeActiveService(String serviceName);
 }

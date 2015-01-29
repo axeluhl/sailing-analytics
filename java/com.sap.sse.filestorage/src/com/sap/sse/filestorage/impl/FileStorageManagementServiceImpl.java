@@ -1,57 +1,68 @@
 package com.sap.sse.filestorage.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TypeBasedServiceFinder;
-import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
+import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.FileStorageServicePropertyStore;
+import com.sap.sse.filestorage.FileStorageServiceResolver;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 
 /**
- * Implements {@link ServiceTrackerCustomizer} so that all {@link FileStorageServices} announced in the
- * registry can receive their stored properties.
- * 
- * TODO implements Replicable, build Operations
- *      add fully qualified classname of Replicable to java/target/env.sh
- *      register as Replicable OSGi service (com.sap.sse.security.impl.Activator#83)
- * TODO store active selection
+ * Implements {@link ServiceTrackerCustomizer} so that all {@link FileStorageServices} announced in the registry can
+ * receive their stored properties.
  * 
  * @author Fredrik Teschke
  *
  */
-public class FileStorageManagementServiceImpl implements FileStorageManagementService,
-    ServiceTrackerCustomizer<FileStorageService, FileStorageService> {
+public class FileStorageManagementServiceImpl implements ReplicableFileStorageManagementService,
+        ServiceTrackerCustomizer<FileStorageService, FileStorageService> {
     private final Logger logger = Logger.getLogger(FileStorageManagementServiceImpl.class.getName());
-    
-    private FileStorageService active;
 
+    private FileStorageService active;
     private final TypeBasedServiceFinder<FileStorageService> serviceFinder;
-    private final FileStorageServicePropertyStore propertyStore;
-    private final BundleContext context;
     
+    private final Map<OperationExecutionListener<ReplicableFileStorageManagementService>, OperationExecutionListener<ReplicableFileStorageManagementService>> operationExecutionListeners = new ConcurrentHashMap<>();
+    private final Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication = new HashSet<>();
+    private ReplicationMasterDescriptor replicationMasterDescriptor;
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    
+    /**
+     * Is set to an {@link EmptyFileStorageServicePropertyStoreImpl} on replicas.
+     */
+    private FileStorageServicePropertyStore propertyStore;
+    private final BundleContext context;
+    private final FileStorageServiceResolver serviceResolver;
+
     public FileStorageManagementServiceImpl(BundleContext context, FileStorageServicePropertyStore propertyStore) {
         this.context = context;
         serviceFinder = new CachedOsgiTypeBasedServiceFinderFactory(context)
                 .createServiceFinder(FileStorageService.class);
         this.propertyStore = propertyStore;
-        
-        context.addServiceListener(new ServiceListener() {
-            
-            @Override
-            public void serviceChanged(ServiceEvent event) {
-                // TODO Auto-generated method stub
-                
-            }
-        });
+        serviceResolver = new FileStorageServiceResolverAgainstOsgiRegistryImpl(serviceFinder);
+        active = getFileStorageService(propertyStore.readActiveServiceName());
     }
 
     @Override
@@ -64,7 +75,7 @@ public class FileStorageManagementServiceImpl implements FileStorageManagementSe
 
     @Override
     public void setActiveFileStorageService(FileStorageService service) {
-        active = service;
+        apply(s -> s.internalSetActiveFileStorageService(service));
     }
 
     @Override
@@ -74,15 +85,13 @@ public class FileStorageManagementServiceImpl implements FileStorageManagementSe
 
     @Override
     public FileStorageService getFileStorageService(String name) {
-        return serviceFinder.findService(name);
+        return serviceResolver.getFileStorageService(name);
     }
 
     @Override
-    public void setFileStorageServiceProperty(String serviceName, String propertyName, String propertyValue)
+    public void setFileStorageServiceProperty(FileStorageService service, String propertyName, String propertyValue)
             throws NoCorrespondingServiceRegisteredException, IllegalArgumentException {
-        //TODO replicate
-        propertyStore.writeProperty(serviceName, propertyName, propertyValue);
-        serviceFinder.findService(serviceName).internalSetProperty(propertyName, propertyValue);
+        apply(s -> s.internalSetFileStorageServiceProperty(service, propertyName, propertyValue));
     }
 
     @Override
@@ -97,11 +106,133 @@ public class FileStorageManagementServiceImpl implements FileStorageManagementSe
 
     @Override
     public void modifiedService(ServiceReference<FileStorageService> reference, FileStorageService service) {
-        //ignore
+        // file storage service has been modified: ignore
     }
 
     @Override
     public void removedService(ServiceReference<FileStorageService> reference, FileStorageService service) {
-        //ignore
+        // file storage service has been removed: ignore
+    }
+
+    @Override
+    public Void internalSetFileStorageServiceProperty(FileStorageService service, String propertyName,
+            String propertyValue) throws NoCorrespondingServiceRegisteredException, IllegalArgumentException {
+        propertyStore.writeProperty(service.getName(), propertyName, propertyValue);
+        service.internalSetProperty(propertyName, propertyValue);
+        return null;
+    }
+
+    @Override
+    public Void internalSetActiveFileStorageService(FileStorageService service) {
+        propertyStore.writeActiveService(service == null ? null : service.getName());
+        active = service;
+        return null;
+    }
+
+    @Override
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+        return new ObjectInputStreamResolvingAgainstFileStorageServiceResolver(is, serviceResolver);
+    }
+
+    @Override
+    public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
+            InterruptedException {
+        logger.info("Initializing file storage mgmt service state from initial load");
+
+        // use empty property store (does not connect to MongoDB) on replicas
+        propertyStore = EmptyFileStorageServicePropertyStoreImpl.INSTANCE;
+
+        // FileStorageServices are resolved against the OSGi registry by their name so that we
+        // get the correct instances from the object stream
+        FileStorageService activeService = (FileStorageService) is.readObject();
+        logger.info("Setting active file storage service: " + activeService);
+        internalSetActiveFileStorageService(activeService);
+
+        @SuppressWarnings("unchecked")
+        Map<FileStorageService, FileStorageServiceProperty[]> properties = (Map<FileStorageService, FileStorageServiceProperty[]>) is
+                .readObject();
+        for (FileStorageService service : properties.keySet()) {
+            for (FileStorageServiceProperty property : properties.get(service)) {
+                logger.info("Setting file storage service property for " + service + ": " + property);
+                internalSetFileStorageServiceProperty(service, property.getName(), property.getValue());
+            }
+        }
+    }
+
+    @Override
+    public void serializeForInitialReplicationInternal(ObjectOutputStream os) throws IOException {
+        os.writeObject(active);
+
+        // The FileStorageService keys of the map are resolved on the replica by the stream resolving
+        // against the OSGi registry. This means the property values would be lost, which is why they
+        // are added separately in this map.
+        Map<FileStorageService, FileStorageServiceProperty[]> properties = new HashMap<>();
+        for (FileStorageService service : getAvailableFileStorageServices()) {
+            properties.put(service, service.getProperties());
+        }
+        os.writeObject(properties);
+    }
+
+    @Override
+    public void addOperationExecutionListener(
+            OperationExecutionListener<ReplicableFileStorageManagementService> listener) {
+        operationExecutionListeners.put(listener, listener);
+    }
+
+    @Override
+    public void removeOperationExecutionListener(
+            OperationExecutionListener<ReplicableFileStorageManagementService> listener) {
+        operationExecutionListeners.remove(listener);
+    }
+
+    @Override
+    public Iterable<OperationExecutionListener<ReplicableFileStorageManagementService>> getOperationExecutionListeners() {
+        return operationExecutionListeners.keySet();
+    }
+    
+    @Override
+    public void addOperationSentToMasterForReplication(
+            OperationWithResultWithIdWrapper<ReplicableFileStorageManagementService, ?> operationWithResultWithIdWrapper) {
+        operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
+    }
+    
+    @Override
+    public boolean hasSentOperationToMaster(OperationWithResult<ReplicableFileStorageManagementService, ?> operation) {
+        return operationsSentToMasterForReplication.remove(operation);
+    }
+    
+    @Override
+    public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
+        //don't need to clear anything - only know about file storage services, and these will live on anyway
+    }
+    
+    @Override
+    public Serializable getId() {
+        return getClass().getName();
+    }
+    
+    @Override
+    public ReplicationMasterDescriptor getMasterDescriptor() {
+        return replicationMasterDescriptor;
+    }
+    
+    @Override
+    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
+        replicationMasterDescriptor = master;
+    }
+    
+    @Override
+    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
+        replicationMasterDescriptor = null;
+    }
+
+    @Override
+    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean b) {
+        currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(b);
+    }
+    
+    @Override
+    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
+        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
     }
 }

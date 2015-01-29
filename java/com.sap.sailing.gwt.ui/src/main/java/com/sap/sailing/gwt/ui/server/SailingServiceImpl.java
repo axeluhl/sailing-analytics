@@ -5446,7 +5446,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (Entry<String, String> p : properties.entrySet()) {
             try {
                 getService().getFileStorageManagementService()
-                    .setFileStorageServiceProperty(serviceName, p.getKey(), p.getValue());
+                    .setFileStorageServiceProperty(getFileStorageService(serviceName), p.getKey(), p.getValue());
             } catch (NoCorrespondingServiceRegisteredException | IllegalArgumentException e) {
                 //ignore, doing refresh afterwards anyways
             }

@@ -12,6 +12,7 @@ import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.FileStorageServicePropertyStore;
 import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.replication.Replicable;
 
 public class Activator implements BundleActivator {
     private ServiceTracker<FileStorageService, FileStorageService> tracker;
@@ -20,7 +21,9 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         MongoDBConfiguration dbConfig = MongoDBConfiguration.getDefaultConfiguration();
         dbConfig.getService().registerExclusively(MongoFileStorageServicePropertyStoreImpl.class,
-                MongoFileStorageServicePropertyStoreImpl.COLLECTION_NAME);
+                MongoFileStorageServicePropertyStoreImpl.PROPERTIES_COLLECTION_NAME);
+        dbConfig.getService().registerExclusively(MongoFileStorageServicePropertyStoreImpl.class,
+                MongoFileStorageServicePropertyStoreImpl.ACTIVE_SERVICE_COLLECTION_NAME);
 
         FileStorageServicePropertyStore propertyStore = new MongoFileStorageServicePropertyStoreImpl(
                 dbConfig.getService());
@@ -29,8 +32,14 @@ public class Activator implements BundleActivator {
         dict.put(TypeBasedServiceFinder.TYPE, AmazonS3FileStorageServiceImpl.NAME);
         context.registerService(FileStorageService.class, new AmazonS3FileStorageServiceImpl(), dict);
 
+        //register mgmt service
         FileStorageManagementServiceImpl mgmtService = new FileStorageManagementServiceImpl(context, propertyStore);
         context.registerService(FileStorageManagementService.class, mgmtService, null);
+        
+        //register mgmt service as replicable
+        Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, mgmtService.getId().toString());
+        context.registerService(Replicable.class.getName(), mgmtService, replicableServiceProperties);
 
         // track all FileStorageServices, so that their properties can be set from the database when added to the OSGi
         // registry

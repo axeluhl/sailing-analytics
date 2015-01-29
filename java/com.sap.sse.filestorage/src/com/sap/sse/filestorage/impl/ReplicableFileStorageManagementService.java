@@ -2,7 +2,7 @@ package com.sap.sse.filestorage.impl;
 
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.filestorage.FileStorageManagementService;
-import com.sap.sse.filestorage.common.FileStorageService;
+import com.sap.sse.filestorage.FileStorageService;
 
 /**
  * Publishes those methods of {@link FileStorageManagementService} that are required by operations implemented as lambda
@@ -13,9 +13,9 @@ import com.sap.sse.filestorage.common.FileStorageService;
  * @author Fredrik Teschke
  *
  */
-public interface ReplicableFileStorageManagementService {
-    void internalSetFileStorageServiceProperty(String serviceName, String propertyName, String propertyValue)
+public interface ReplicableFileStorageManagementService extends FileStorageManagementService {
+    Void internalSetFileStorageServiceProperty(FileStorageService service, String propertyName, String propertyValue)
             throws NoCorrespondingServiceRegisteredException, IllegalArgumentException;
 
-    void internalSetActiveFileStorageService(FileStorageService service);
+    Void internalSetActiveFileStorageService(FileStorageService service);
 }

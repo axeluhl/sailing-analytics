@@ -7,7 +7,7 @@ import com.sap.sse.common.Util.Pair;
 
 public class InvalidPropertiesException extends Exception {
     private static final long serialVersionUID = -7328897153875728802L;
-    private final Map<Property, String> perPropertyMessages = new HashMap<>();
+    private final Map<FileStorageServiceProperty, String> perPropertyMessages = new HashMap<>();
 
     public InvalidPropertiesException(String message) {
         super(message);
@@ -19,15 +19,15 @@ public class InvalidPropertiesException extends Exception {
 
     @SafeVarargs
     public InvalidPropertiesException(String message,
-            Pair<Property, String>... perPropertyMessages) {
+            Pair<FileStorageServiceProperty, String>... perPropertyMessages) {
         this(message, null, perPropertyMessages);
     }
 
     @SafeVarargs
     public InvalidPropertiesException(String message, Throwable cause,
-           Pair<Property, String>... perPropertyMessages) {
+           Pair<FileStorageServiceProperty, String>... perPropertyMessages) {
         super(message, cause);
-        for (Pair<Property, String> pair : perPropertyMessages) {
+        for (Pair<FileStorageServiceProperty, String> pair : perPropertyMessages) {
             this.perPropertyMessages.put(pair.getA(), pair.getB());
         }
     }
@@ -40,7 +40,7 @@ public class InvalidPropertiesException extends Exception {
         return super.getMessage();
     }
 
-    public Map<Property, String> getPerPropertyMessage() {
+    public Map<FileStorageServiceProperty, String> getPerPropertyMessage() {
         return perPropertyMessages;
     }
 }

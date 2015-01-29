@@ -5,7 +5,7 @@ package com.sap.sse.filestorage;
  * @author Fredrik Teschke
  *
  */
-public interface Property {
+public interface FileStorageServiceProperty {
     boolean isRequired();
     String getName();
     

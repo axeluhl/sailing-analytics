@@ -13,9 +13,16 @@ import java.util.logging.Logger;
 
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
-import com.sap.sse.filestorage.Property;
 
-public class LocalFileStorageServiceImpl implements FileStorageService {
+public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl implements FileStorageService {
+    private static final String NAME = "Local Storage";
+    private static final String DESCRIPTION = "";
+    
+    protected LocalFileStorageServiceImpl() {
+        super(NAME, DESCRIPTION);
+        //addProperties(...);
+    }
+
     private static final Logger logger = Logger.getLogger(LocalFileStorageServiceImpl.class.getName());
 
     private static final String host = "media.sapsailing.com";
@@ -73,24 +80,6 @@ public class LocalFileStorageServiceImpl implements FileStorageService {
         if(!file.delete()){
             logger.warning("Could not delete file with path "+filePath);
         }
-    }
-
-    @Override
-    public Property[] getProperties() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void internalSetProperty(String name, String value) throws IllegalArgumentException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public String getName() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
