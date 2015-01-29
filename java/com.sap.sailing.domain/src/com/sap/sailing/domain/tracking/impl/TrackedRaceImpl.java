@@ -82,7 +82,6 @@ import com.sap.sailing.domain.common.impl.CourseChangeImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
@@ -3037,7 +3036,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final Bearing differenceToCombinedWind;
             final NauticalSide advantageousSideWhileApproachingLine;
             final Distance distanceAdvantage;
-            final Distance geometricAdvantage = calculateGeometricLineAdvantage(starboardMarkPositionWhileApproachingLine, portMarkPositionWhileApproachingLine, timePoint);
             Wind combinedWind = getWind(starboardMarkPositionWhileApproachingLine, timePoint);
             if (combinedWind != null) {
                 differenceToCombinedWind = portMarkPositionWhileApproachingLine.getBearingGreatCircle(
@@ -3080,24 +3078,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             result = new LineDetailsImpl(timePoint, waypoint,
                     portMarkPositionWhileApproachingLine.getDistance(starboardMarkPositionWhileApproachingLine),
                     differenceToCombinedWind, advantageousSideWhileApproachingLine, distanceAdvantage,
-                    portMarkWhileApproachingLine, starboardMarkWhileApproachingLine, geometricAdvantage);
+                    portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
         }
         return result;
-    }
-
-    private Distance calculateGeometricLineAdvantage(Position starboardMarkPositionWhileApproachingLine,
-            Position portMarkPositionWhileApproachingLine, TimePoint timePoint) {
-        Position firstLegFirstMarkPosition = getOrCreateTrack(
-                getRace().getCourse().getFirstLeg().getTo().getMarks().iterator().next()).getEstimatedPosition(
-                timePoint, false);
-        final Distance geometricAdvantage;
-        Distance starboardStartLineBoyFirstMark = starboardMarkPositionWhileApproachingLine
-                .getDistance(firstLegFirstMarkPosition);
-        Distance portStartLineBoyFirstMark = portMarkPositionWhileApproachingLine
-                .getDistance(firstLegFirstMarkPosition);
-        geometricAdvantage = new MeterDistance(starboardStartLineBoyFirstMark.getMeters()
-                - portStartLineBoyFirstMark.getMeters());
-        return geometricAdvantage;
     }
 
     /**

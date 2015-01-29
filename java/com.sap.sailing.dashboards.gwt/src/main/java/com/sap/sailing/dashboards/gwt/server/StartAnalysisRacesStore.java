@@ -262,7 +262,7 @@ public class StartAnalysisRacesStore {
     private WindAndAdvantagesInfoForStartLineDTO createStartAnalysisWindAndLineData(TrackedRace trackedRace) {
         WindAndAdvantagesInfoForStartLineDTO startAnalysisWindLineInfoDTO = new WindAndAdvantagesInfoForStartLineDTO();
         LineDetails startline = trackedRace.getStartLine(trackedRace.getStartTimeReceived());
-        startAnalysisWindLineInfoDTO.startLineAdvantageByGeometry = startline.getGeometricAdvantage().getMeters();
+        startAnalysisWindLineInfoDTO.startLineAdvantageByGeometry = startline.getAdvantage().getMeters();
         startAnalysisWindLineInfoDTO.startLineAdvantageAtPinEnd = startline.getAdvantage().getMeters();
         Position portMarkPosition = trackedRace.getOrCreateTrack(
                 trackedRace.getStartLine(trackedRace.getStartTimeReceived()).getStarboardMarkWhileApproachingLine())
