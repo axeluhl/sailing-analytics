@@ -28,9 +28,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
 import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyDTO;
 import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrors;
-import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class FileStoragePanel extends FlowPanel {
@@ -41,6 +41,7 @@ public class FileStoragePanel extends FlowPanel {
     private final ListBox servicesListBox;
     private CellTable<FileStorageServicePropertyDTO> propertiesTable;
     private final Label serviceDescriptionLabel;
+    private final Label propertiesErrorLabel;
 
     private final List<FileStorageServicePropertyDTO> properties;
     private final Map<String, FileStorageServiceDTO> availableServices = new HashMap<>();
@@ -128,6 +129,10 @@ public class FileStoragePanel extends FlowPanel {
         
         editServicePanelContent.add(propertiesTable);
         
+        propertiesErrorLabel = new Label();
+        propertiesErrorLabel.setStyleName("errorLabel");
+        editServicePanelContent.add(propertiesErrorLabel);        
+        
         HorizontalPanel buttonsPanel = new HorizontalPanel();
         
         Button saveAndTestPropertiesButton = new Button(stringMessages.save());
@@ -174,6 +179,7 @@ public class FileStoragePanel extends FlowPanel {
                             public void onSuccess(FileStorageServicePropertyErrors result) {
                                 if (result != null) {
                                     perPropertyErrors.putAll(result.perPropertyMessages);
+                                    propertiesErrorLabel.setText(result.message);
                                 } else {
                                     if (callback != null) {
                                         callback.onSuccess(null);
@@ -238,6 +244,7 @@ public class FileStoragePanel extends FlowPanel {
         servicesListBox.clear();
         servicesListBox.addItem("");
         availableServices.clear();
+        propertiesErrorLabel.setText("");
         onServiceSelectionChanged();
 
         sailingService.getActiveFileStorageServiceName(new AsyncCallback<String>() {
