@@ -11,20 +11,8 @@ public interface SharedResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/home/main.css")
     MainCss mainCss();
 
-    @Source("com/sap/sailing/gwt/home/media.css")
+    @Source("com/sap/sailing/gwt/home/media.gss")
     MediaCss mediaCss();
-
-    public interface MinWidth25emCss extends MediaCss {
-    }
-
-    @Source("com/sap/sailing/gwt/home/medium.css")
-    MinWidth25emCss mediumCss();
-
-    public interface MinWidth50emCss extends MediaCss {
-    }
-
-    @Source("com/sap/sailing/gwt/home/large.css")
-    MinWidth50emCss largeCss();
 
     @Shared 
     public interface MainCss extends CssResource {
