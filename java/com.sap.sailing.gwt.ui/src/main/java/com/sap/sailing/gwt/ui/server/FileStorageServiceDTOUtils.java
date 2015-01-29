@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrors;
+import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
 import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
@@ -18,12 +18,12 @@ public class FileStorageServiceDTOUtils {
         return new FileStorageServicePropertyDTO(p.isRequired(), p.getName(), p.getValue(), p.getDescription());
     }
     
-    public static FileStorageServicePropertyErrors convert(InvalidPropertiesException e) {
+    public static FileStorageServicePropertyErrorsDTO convert(InvalidPropertiesException e) {
         Map<FileStorageServicePropertyDTO, String> msgs = new HashMap<>();
         for (Entry<FileStorageServiceProperty, String> entry : e.getPerPropertyMessage().entrySet()) {
             msgs.put(convert(entry.getKey()), entry.getValue());
         }
-        return new FileStorageServicePropertyErrors(e.getMessage(), msgs);
+        return new FileStorageServicePropertyErrorsDTO(e.getMessage(), msgs);
     }
     
     public static FileStorageServiceDTO convert(FileStorageService s) {

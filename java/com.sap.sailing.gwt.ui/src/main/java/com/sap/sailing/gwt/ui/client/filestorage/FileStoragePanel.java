@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
 import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrors;
+import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class FileStoragePanel extends FlowPanel {
@@ -174,9 +174,9 @@ public class FileStoragePanel extends FlowPanel {
             @Override
             public void onSuccess(Void result) {
                 sailingService.testFileStorageServiceProperties(getSelectedServiceName(),
-                        new AsyncCallback<FileStorageServicePropertyErrors>() {
+                        new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
                             @Override
-                            public void onSuccess(FileStorageServicePropertyErrors result) {
+                            public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
                                 if (result != null) {
                                     perPropertyErrors.putAll(result.perPropertyMessages);
                                     propertiesErrorLabel.setText(result.message);
