@@ -170,6 +170,8 @@ public class FileStoragePanel extends FlowPanel {
                 new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
                     @Override
                     public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
+                        perPropertyErrors.clear();
+                        propertiesErrorLabel.setText("");
                         if (result != null) {
                             perPropertyErrors.putAll(result.perPropertyMessages);
                             propertiesErrorLabel.setText(result.message);
@@ -266,6 +268,7 @@ public class FileStoragePanel extends FlowPanel {
         servicesListBox.addItem("");
         availableServices.clear();
         propertiesErrorLabel.setText("");
+        perPropertyErrors.clear();
         onServiceSelectionChanged();
 
         sailingService.getActiveFileStorageServiceName(new AsyncCallback<String>() {
