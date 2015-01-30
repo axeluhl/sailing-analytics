@@ -16,13 +16,13 @@ When opening an entry point page you will see a popup while the Java code is com
 When changing some frontend code the compile will be much faster on refresh, as Super Dev Mode incrementally compiles only what changed.
 
 You can add "GWT.debugger();" statements to your Java code.
-his will force the JavaScript debugger to stop at this statement.
+This will force the JavaScript debugger to stop at this statement.
 So you don't have to manually open the file in the dev tools and set a break point.
 
 ## Using Eclipse debugger for GWT SuperDevMode
 
 Debugging Java Code in the browser is very inconvenient (e.g. you have to manually open the files you already opened in Eclipse).
-Using Using Eclipse debugger for GWT SuperDevMode [[SDBG|http://sdbg.github.io/]] you can use Eclipse to debug SDM code running in Chrome.
+Using Using Eclipse debugger for GWT SuperDevMode [[SDBG|http://sdbg.github.io/]] you can use Eclipse to debug SDM code running in Chrome. We have created an update site that does daily checks for new master commits on the Github project. So, for the couraged among you, use http://p2.sapsailing.com/p2/sdbg as your update site. All others will probably want to use http://sdbg.github.io/p2.
 
 ### Starting a SDM debug session in Eclipse
 
