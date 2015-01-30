@@ -161,10 +161,33 @@ public class FileStoragePanel extends FlowPanel {
     }
 
     private String getSelectedServiceName() {
-        return servicesListBox.getItemText(servicesListBox.getSelectedIndex());
+        int i = servicesListBox.getSelectedIndex();
+        return i < 0 ? "" : servicesListBox.getItemText(i);
+    }
+    
+    private void testProperties(final Callback<Void, Void> callback) {
+        sailingService.testFileStorageServiceProperties(getSelectedServiceName(),
+                new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
+                    @Override
+                    public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
+                        if (result != null) {
+                            perPropertyErrors.putAll(result.perPropertyMessages);
+                            propertiesErrorLabel.setText(result.message);
+                        }
+                        if (callback != null) {
+                            callback.onSuccess(null);
+                        }
+                        propertiesListDataProvider.refresh();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Could not test properties: " + caught.getMessage());
+                    }
+                });
     }
 
-    private void saveAndTestProperties(final Callback<Void, Void> callback) {
+    private void saveProperties(final Callback<Void, Void> callback) {
         Map<String, String> values = new HashMap<String, String>();
         for (FileStorageServicePropertyDTO p : properties) {
             values.put(p.name, p.value);
@@ -173,31 +196,27 @@ public class FileStoragePanel extends FlowPanel {
         sailingService.setFileStorageServiceProperties(getSelectedServiceName(), values, new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
-                sailingService.testFileStorageServiceProperties(getSelectedServiceName(),
-                        new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
-                            @Override
-                            public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
-                                if (result != null) {
-                                    perPropertyErrors.putAll(result.perPropertyMessages);
-                                    propertiesErrorLabel.setText(result.message);
-                                } else {
-                                    if (callback != null) {
-                                        callback.onSuccess(null);
-                                    }
-                                }
-                                propertiesListDataProvider.refresh();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Could not test properties: " + caught.getMessage());
-                            }
-                        });
+                if (callback != null) {
+                    callback.onSuccess(null);
+                }
             }
 
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Could not set service properties: " + caught.getMessage());
+            }
+        });
+    }
+    
+    private void saveAndTestProperties(final Callback<Void, Void> callback) {
+        saveProperties(new Callback<Void, Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                testProperties(callback);
+            }
+            
+            @Override
+            public void onFailure(Void reason) {
             }
         });
     }
@@ -209,7 +228,7 @@ public class FileStoragePanel extends FlowPanel {
                 sailingService.setActiveFileStorageService(getSelectedServiceName(), new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
-                        refresh();
+                        activeServiceLabel.setText(getSelectedServiceName());
                     }
                     
                     @Override
@@ -241,6 +260,8 @@ public class FileStoragePanel extends FlowPanel {
     }
 
     private void refresh() {
+        String oldSelectedService = getSelectedServiceName();
+        
         servicesListBox.clear();
         servicesListBox.addItem("");
         availableServices.clear();
@@ -273,5 +294,14 @@ public class FileStoragePanel extends FlowPanel {
                 errorReporter.reportError("Could not load available file storage services: " + caught.getMessage());
             }
         });
+        
+        for (int i=0; i<servicesListBox.getItemCount(); i++) {
+            if (servicesListBox.getItemText(i).equals(oldSelectedService)) {
+                servicesListBox.setSelectedIndex(i);
+            }
+        }
+        onServiceSelectionChanged();
+        
+        testProperties(null);
     }
 }
