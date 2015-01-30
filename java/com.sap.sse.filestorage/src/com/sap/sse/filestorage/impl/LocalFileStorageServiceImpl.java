@@ -111,18 +111,9 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
 
     @Override
     public void internalSetProperty(String name, String value) {
-        if (!propertiesByNameInInsertionOrder.containsKey(name)) {
-            throw new IllegalArgumentException("Property " + name + " does not exist");
-        }
-        
         // as all properties are paths, we can remove the trailing / here, if it exists
         value = removeTrailingSlash(value);
-        propertiesByNameInInsertionOrder.get(name).setValue(value);
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
+        super.internalSetProperty(name, value);
     }
 
     @Override
