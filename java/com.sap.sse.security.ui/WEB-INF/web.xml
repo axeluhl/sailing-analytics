@@ -13,6 +13,10 @@
 			<param-name>dirAllowed</param-name>
 			<param-value>false</param-value>
 		</init-param>
+		<init-param>
+	   		<param-name>useFileMappedBuffer</param-name>
+	   		<param-value>false</param-value>
+	 	</init-param>
 	</servlet>
     
 	<!-- Apache Shiro -->

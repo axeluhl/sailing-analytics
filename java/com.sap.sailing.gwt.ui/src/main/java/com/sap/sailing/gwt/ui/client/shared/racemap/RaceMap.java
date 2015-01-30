@@ -674,7 +674,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                     switch (windSource.getType()) {
                                         case EXPEDITION:
-                                            // we filter out measured wind sources with a very little confidence
+                                            // we filter out measured wind sources with vary low confidence
                                             if (windTrackInfoDTO.minWindConfidence > 0.0001) {
                                                 windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                                             }
