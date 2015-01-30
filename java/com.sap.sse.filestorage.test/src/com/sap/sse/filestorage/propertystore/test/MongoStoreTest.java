@@ -40,6 +40,7 @@ public class MongoStoreTest {
         store.writeProperty("s1", "p1", "1");
         store.writeProperty("s1", "p2", "2");
         store.writeProperty("s2", "p3", "3");
+        store.writeActiveService("active");
 
         Map<String, String> properties = store.readAllProperties("s1");
         assertThat("two properties read for service 1", properties.size(), equalTo(2));
@@ -47,6 +48,15 @@ public class MongoStoreTest {
 
         properties = store.readAllProperties("s2");
         assertThat("one property read for service 2", properties.size(), equalTo(1));
+
+        assertThat("active service written", store.readActiveServiceName(), equalTo("active"));
+        
+        //change some things
+        store.writeProperty("s1", "p1", "10");
+        store.writeActiveService("newActive");
+        properties = store.readAllProperties("s1");
+        assertThat("new property 1 is read correctly for service 1", properties.get("p1"), equalTo("10"));
+        assertThat("new active service correct", store.readActiveServiceName(), equalTo("newActive"));
     }
 
     @Test

@@ -26,10 +26,8 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
         DBObject index = new BasicDBObjectBuilder().add(FieldNames.SERVICE_NAME.name(), true)
                 .add(FieldNames.PROPERTY_NAME.name(), true).get();
         propertiesCollection.ensureIndex(index, "unique service name/property name combination", true);
-        
+
         activeServiceCollection = dbService.getDB().getCollection(ACTIVE_SERVICE_COLLECTION_NAME);
-        index = new BasicDBObjectBuilder().add(FieldNames.SERVICE_NAME.name(), true).get();
-        activeServiceCollection.ensureIndex(index, "unique service name", true);
     }
 
     @Override
@@ -37,7 +35,7 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
         DBObject query = new BasicDBObject(FieldNames.SERVICE_NAME.name(), serviceName);
         DBCursor cursor = propertiesCollection.find(query);
         Map<String, String> properties = new HashMap<>();
-        
+
         for (DBObject property : cursor) {
             String name = (String) property.get(FieldNames.PROPERTY_NAME.name());
             String value = (String) property.get(FieldNames.PROPERTY_VALUE.name());
@@ -51,7 +49,9 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
         DBObject obj = new BasicDBObjectBuilder().add(FieldNames.SERVICE_NAME.name(), serviceName)
                 .add(FieldNames.PROPERTY_NAME.name(), propertyName)
                 .add(FieldNames.PROPERTY_VALUE.name(), propertyValue).get();
-        propertiesCollection.insert(obj);
+        DBObject query = new BasicDBObjectBuilder().add(FieldNames.SERVICE_NAME.name(), serviceName)
+                .add(FieldNames.PROPERTY_NAME.name(), propertyName).get();
+        propertiesCollection.update(query, obj, /*upsert*/ true, /*multi*/ false);
     }
 
     @Override
@@ -65,8 +65,9 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
 
     @Override
     public void writeActiveService(String serviceName) {
-        DBObject obj = new BasicDBObject(FieldNames.SERVICE_NAME.name(), serviceName);
-        activeServiceCollection.insert(obj);
+        DBObject obj = new BasicDBObjectBuilder().add(FieldNames.SERVICE_NAME.name(), serviceName).get();
+        DBObject query = new BasicDBObject();
+        activeServiceCollection.update(query, obj, /*upsert*/ true, /*multi*/ false);
     }
 
 }
