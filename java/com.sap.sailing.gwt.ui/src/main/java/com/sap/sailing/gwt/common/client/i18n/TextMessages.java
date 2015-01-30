@@ -40,6 +40,7 @@ public interface TextMessages extends Messages {
     String overview();
     String sapSailing();
     String search();
+    String startSimulator();
     
     String countdownDays();
     String countdownHours();

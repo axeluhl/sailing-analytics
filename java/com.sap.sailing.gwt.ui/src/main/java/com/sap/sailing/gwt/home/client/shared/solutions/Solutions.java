@@ -45,6 +45,8 @@ public class Solutions extends Composite {
 
     @UiField Anchor sailingAnalyticsDetailsAnchor;
     @UiField Anchor raceCommitteeAppDetailsAnchor;
+    @UiField Anchor simulatorStartAnchor;
+    @UiField Anchor simulatorAppDetailsAnchor;
 
     private final PlaceNavigation<SolutionsPlace> sailingAnalyticsNavigation; 
     private final PlaceNavigation<SolutionsPlace> raceCommitteeAppNavigation; 
@@ -56,6 +58,7 @@ public class Solutions extends Composite {
     
     private final PlaceNavigation<WhatsNewPlace> sailingAnalyticsDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppDetailsNavigation;
+    private final PlaceNavigation<WhatsNewPlace> simulatorAppDetailsNavigation;
     private final HomePlacesNavigator placesNavigator;
     
     public Solutions(SolutionsNavigationTabs navigationTab, HomePlacesNavigator placesNavigator) {
@@ -71,9 +74,12 @@ public class Solutions extends Composite {
         
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceCommiteeApp);
+        simulatorAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator);
         
         sailingAnalyticsDetailsAnchor.setHref(sailingAnalyticsDetailsNavigation.getTargetUrl());
         raceCommitteeAppDetailsAnchor.setHref(raceCommitteeAppDetailsNavigation.getTargetUrl());
+        simulatorAppDetailsAnchor.setHref(simulatorAppDetailsNavigation.getTargetUrl());
+        simulatorStartAnchor.setHref(placesNavigator.getSimulatorURL());
 
         sailingAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
         raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceCommiteeApp);
@@ -131,7 +137,12 @@ public class Solutions extends Composite {
     public void sailingAnalyticsDetailsClicked(ClickEvent e) {
         handleClickEventWithPlaceController(e, sailingAnalyticsDetailsNavigation);
     }
-    
+
+    @UiHandler("simulatorAppDetailsAnchor")
+    public void simulatorAppDetailsAnchorClicked(ClickEvent e) {
+        handleClickEventWithPlaceController(e, simulatorAppDetailsNavigation);
+    }
+
     private void scrollToView(SolutionsNavigationTabs navigationTab) {
         switch (navigationTab) {
             case SailingAnalytics:
