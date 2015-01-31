@@ -12,7 +12,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: WEB-INF/classes/
 Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.sse.gwt,
- com.google.gwt.osgi;bundle-version="2.6.1",
+ com.google.gwt.osgi;bundle-version="2.7.0",
  com.sap.sse.security,
  org.json.simple,
  com.sap.sailing.domain.common,
