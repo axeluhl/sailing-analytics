@@ -35,6 +35,10 @@ import com.sap.sse.filestorage.OperationFailedException;
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(CompetitorsResource.class.getName());
+    
+    /**
+     * The maximum size of an image uploaded by a user as a team image, in megabytes (1024*1024 bytes)
+     */
     private static final int MAX_SIZE_IN_MB = 5;
 
     public static JSONObject getCompetitorJSON(Competitor competitor) {
