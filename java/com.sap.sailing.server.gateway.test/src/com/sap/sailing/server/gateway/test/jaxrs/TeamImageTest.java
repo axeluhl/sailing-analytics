@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.server.gateway.jaxrs.api.CompetitorsResource;
+import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
@@ -46,7 +48,9 @@ public class TeamImageTest extends AbstractJaxRsApiTest {
         super.setUp();
         racingEventService = spy(racingEventService);
         storageService = AmazonS3TestSupport.createService();
-        doReturn(storageService).when(racingEventService).getFileStorageManagementService().getActiveFileStorageService();
+        FileStorageManagementService fsmsMock = mock(FileStorageManagementService.class);
+        doReturn(fsmsMock).when(racingEventService).getFileStorageManagementService();
+        doReturn(storageService).when(fsmsMock).getActiveFileStorageService();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(
                 nationality), null, null)), null);
         DynamicBoat boat = new BoatImpl(null, new BoatClassImpl(boatClassName, false), sailID);
