@@ -57,3 +57,56 @@ Be aware that some of the Eclipse debugger features do NOT work with this kind o
 * Variable naming is not 1:1 what you expect in the Java world
 * Stacks look different but clicking on Stack elements should
 * [[Stack Traces logged in Chrome do not use source maps|https://code.google.com/p/chromium/issues/detail?id=357958]], so you see the JavaScript Stack Trace instead.
+
+## Debugging SDM on Android devices
+
+### Requirements
+
+To enable [[https://developer.chrome.com/devtools/docs/remote-debugging|remote debugging for your Android device]] do the following steps:
+
+* Go to the System settings
+* If you do not see the "Developer options" menu, go to "About the device" and tap multiple times on "Build number" until a message appears
+* Go to the "Developer options" menu 
+* Activate "USB debugging"
+* A notification apears in the system notification center while USB-debugging is turned on
+
+Other requirements:
+
+* You need Android 4.0+ to make remote debugging work
+* You need a recent version of Chrome installed on both, the Android device and your development system
+
+To be able to discover your Chrome browser running on the Android device from your development system you need to do the following:
+
+* Connect your device with USB-debugging turned on to your development system
+* Open Chrome on the Android device
+
+### Debugging via Desktop Chrome
+
+Do the following to start a debugging session via Chrome installed on your development system:
+
+* Open Chrome on your development system and navigate to [[chrome://inspect/#devices]]
+* Only the first time you need to configure the needed ports:
+  * Check "Discover USB Devices
+  * Click the button "Port forwarding ..."
+  * Add an Entry for Port "8888" for address "localhost:8888"
+  * Add an Entry for Port "9876" for address "localhost:9876"
+  * Close the dialog
+* Enter the URL (e.g. [[http://localhost:8888/gwt/Home.html]]) nearby the connected Chrome browser of your device and press open
+* The specified URL will be opended in a new tab on your android device
+* A new window with an instance of the developer tools will appear on the development system
+  * If it doesn't open automatically press "inspect" for the browser tab
+* You can now go to "Sources" and debug the source-mapped JS source as it is a local browser tab
+
+### Debugging via SDBG
+
+To debug SDM on your Android Chrome via SDBG do the following:
+
+* Get to know your Device ID
+  * Navigate to [[chrome://inspect/#devices]] using your desktop Chrome while the device is connected with USB-Debugging turned on
+  * The Device ID is shown next to the device name
+  * Take the Device ID without the prefixed "#"
+* Copy the launch configuration templates "Debug SailingGWT SDM on Android.launch.template" and "Forward SailingGWT Ports for Android.launch.template" as *.launch files
+* Replace <YOUR-DEVICE> with your concrete Device ID
+* Launch "Forward SailingGWT Ports for Android.launch"
+* Launch "Debug SailingGWT SDM on Android.launch"
+* You should now be able to debug in Eclipse as described above

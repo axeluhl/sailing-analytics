@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.github.sdbg.debug.core.chromeMobileConnLaunchConfig">
+<stringAttribute key="applicationName" value=""/>
+<stringAttribute key="device" value="<YOUR-DEVICE>"/>
+<booleanAttribute key="launchFile" value="false"/>
+<booleanAttribute key="launchTabWithUrl" value="true"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/com.sap.sailing.gwt.ui"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+<stringAttribute key="projectName" value="com.sap.sailing.gwt.ui"/>
+<stringAttribute key="url" value="http://localhost:8888/gwt/Home.html"/>
+</launchConfiguration>
