@@ -30,8 +30,10 @@ public interface FileStorageManagementService extends
             throws NoCorrespondingServiceRegisteredException, IllegalArgumentException;
 
     /**
+     * Get the currently configured {@link FileStorageService}.
+     * 
      * @throws NoCorrespondingServiceRegisteredException
-     *             if no service has been selected so far.
+     *             if no service has been activated
      */
     FileStorageService getActiveFileStorageService() throws NoCorrespondingServiceRegisteredException;
 

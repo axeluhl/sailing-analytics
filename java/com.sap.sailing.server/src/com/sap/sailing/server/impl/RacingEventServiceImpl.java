@@ -2993,11 +2993,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public FileStorageService getActiveFileStorageService() {
-        return getFileStorageManagementService().getActiveFileStorageService();
-    }
-
-    @Override
     public FileStorageManagementService getFileStorageManagementService() {
         ServiceReference<FileStorageManagementService> ref = bundleContext
                 .getServiceReference(FileStorageManagementService.class);

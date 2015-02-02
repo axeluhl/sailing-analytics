@@ -578,12 +578,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
 
     /**
-     * Get the currently configured {@link FileStorageService}.
-     * @throws NoCorrespondingServiceRegisteredException if no service has been activated
-     */
-    FileStorageService getActiveFileStorageService() throws NoCorrespondingServiceRegisteredException;
-    
-    /**
      * @return {@code null} if no service can be found in the OSGi registry
      */
     FileStorageManagementService getFileStorageManagementService();
