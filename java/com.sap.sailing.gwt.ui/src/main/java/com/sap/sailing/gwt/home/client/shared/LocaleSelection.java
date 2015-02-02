@@ -20,7 +20,9 @@ public class LocaleSelection extends Composite {
     ListBox localeSelection;
 
     public LocaleSelection() {
-        localeSelection = new ListBox(false);
+        localeSelection = new ListBox();
+        localeSelection.setMultipleSelect(false);
+
         localeSelection.addItem("Deutsch");
         localeSelection.addItem("English");
         initWidget(uiBinder.createAndBindUi(this));

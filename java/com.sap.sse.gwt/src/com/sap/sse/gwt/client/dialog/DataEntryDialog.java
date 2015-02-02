@@ -419,7 +419,8 @@ public abstract class DataEntryDialog<T> {
     }
     
     public ListBox createListBox(boolean isMultipleSelect) {
-        ListBox result = new ListBox(isMultipleSelect);
+        ListBox result = new ListBox();
+        result.setMultipleSelect(isMultipleSelect);
         result.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
