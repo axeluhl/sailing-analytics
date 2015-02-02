@@ -4526,21 +4526,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) {
     	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
-    	//new competitor
+    	final CompetitorDTO result;
+    	// new competitor
     	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty()) {
     	    BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
     	    DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
     	    DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
     	    DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
-    	    return getBaseDomainFactory().convertToCompetitorDTO(getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(), competitor.getColor(),
-    				team, boat));
-    	}
-    	
-    	Competitor oldC = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
-    	        competitor.getIdAsString());
-        return getBaseDomainFactory().convertToCompetitorDTO(
-                getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
-                competitor.getColor(), competitor.getSailID(), nationality, oldC.getTeam().getImage())));
+            result = getBaseDomainFactory().convertToCompetitorDTO(
+                    getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
+                            competitor.getColor(), team, boat));
+        } else {
+            Competitor oldC = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+                    competitor.getIdAsString());
+            result = getBaseDomainFactory().convertToCompetitorDTO(
+                    getService().apply(
+                            new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
+                                    .getColor(), competitor.getSailID(), nationality, oldC.getTeam().getImage())));
+        }
+        return result;
     }
 
     @Override
