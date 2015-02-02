@@ -52,7 +52,7 @@
 .regattalink:hover .regatta_intro_image {
   opacity: 0.9;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
-  filter: literal("alpha(opacity=90)");
+  filter: alpha(opacity=90);
 }
 .regattalink:nth-child\(even\) {
   background-color: #f8f8f8;
