@@ -48,7 +48,6 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -82,6 +81,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -274,7 +274,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             private static final long serialVersionUID = 1234L;
             @Override
             public RegattaAndRaceIdentifier getRaceIdentifier() {
-                return new RegattaNameAndRaceName("Kieler Woche (29erXX)", "Yellow Race 2");
+                return new RegattaNameAndRaceName("Kieler Woche (29ERXX)", "Yellow Race 2");
             }
             @Override
             public DynamicTrackedRegatta getTrackedRegatta() {
@@ -306,7 +306,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         
         // load new RacingEventService including regatta and leaderboard
         RacingEventService resForLoading = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
-        Regatta loadedRegatta = resForLoading.getRegattaByName("Kieler Woche (29erXX)");
+        Regatta loadedRegatta = resForLoading.getRegattaByName("Kieler Woche (29ERXX)");
         assertNotNull(loadedRegatta);
         assertEquals(regatta.getName(), loadedRegatta.getName());
         assertEquals(Util.size(regatta.getSeries()), Util.size(loadedRegatta.getSeries()));

@@ -4,7 +4,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
-import com.sap.sailing.domain.common.Color;
+import com.sap.sse.common.Color;
 
 public class ColorColumn<T> extends Column<T, SafeHtml> {
     public interface ColorRetriever<T> {

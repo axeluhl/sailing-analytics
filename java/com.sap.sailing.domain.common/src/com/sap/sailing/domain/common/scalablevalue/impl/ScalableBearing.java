@@ -3,9 +3,10 @@ package com.sap.sailing.domain.common.scalablevalue.impl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
-import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
+import com.sap.sse.common.scalablevalue.ScalableValue;
+import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 
-public class ScalableBearing implements ScalableValue<DoublePair, Bearing> {
+public class ScalableBearing implements ScalableValueWithDistance<DoublePair, Bearing> {
     private final double sin;
     private final double cos;
     
@@ -20,13 +21,13 @@ public class ScalableBearing implements ScalableValue<DoublePair, Bearing> {
     }
     
     @Override
-    public ScalableValue<DoublePair, Bearing> multiply(double factor) {
+    public ScalableBearing multiply(double factor) {
         DoublePair pair = getValue();
         return new ScalableBearing(factor*pair.getA(), factor*pair.getB());
     }
 
     @Override
-    public ScalableValue<DoublePair, Bearing> add(ScalableValue<DoublePair, Bearing> t) {
+    public ScalableBearing add(ScalableValue<DoublePair, Bearing> t) {
         DoublePair value = getValue();
         DoublePair tValue = t.getValue();
         return new ScalableBearing(value.getA()+tValue.getA(), value.getB()+tValue.getB());
@@ -56,5 +57,31 @@ public class ScalableBearing implements ScalableValue<DoublePair, Bearing> {
     @Override
     public DoublePair getValue() {
         return new DoublePair(sin, cos);
+    }
+
+    @Override
+    public double getDistance(Bearing other) {
+        return Math.abs(divide(1).getDifferenceTo(other).getDegrees());
+    }
+
+    /**
+     * Computing the difference to a {@link bearing}, as implemented by {@link #getDistance(Bearing)} is correct but
+     * slow because the {@link Math#atan2(double)} function is used to {@link ScalableBearing#divide(double) bring the
+     * scalable bearing down to a bearing}. A less precise, yet much faster to compute and still monotonous distance
+     * measure computes the length of the line segment connecting this bearing's projection onto a circle with the
+     * projection of the bearing <code>a</code> to the same circle. The distance returned by this method will provide
+     * almost equal values for very small differences (below 1deg) but significantly smaller values for big differences.
+     * 
+     * @return an approximate difference in degrees, fairly accurate for small differences, but returning 360.0/PI
+     *         (approximately 114) instead of 180 for the maximum difference
+     */
+    public double getApproximateDegreeDistanceTo(Bearing a) {
+        double scale = Math.sqrt(sin*sin + cos*cos);
+        double x = cos/scale;
+        double y = sin/scale;
+        double ax = Math.cos(a.getRadians());
+        double ay = Math.sin(a.getRadians());
+        double normalDistance = Math.sqrt((x-ax)*(x-ax) + (y-ay)*(y-ay));
+        return normalDistance / Math.PI * 180.;
     }
 }

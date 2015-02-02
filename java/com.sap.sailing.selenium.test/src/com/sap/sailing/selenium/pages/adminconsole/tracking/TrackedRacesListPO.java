@@ -13,6 +13,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.google.common.base.Function;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
@@ -58,26 +59,25 @@ public class TrackedRacesListPO extends PageArea {
 
         @Override
         public boolean equals(Object object) {
-            if (this == object)
+            if (this == object) {
                 return true;
-            
-            if (object == null)
+            }
+            if (object == null) {
                 return false;
-            
-            if (getClass() != object.getClass())
+            }
+            if (getClass() != object.getClass()) {
                 return false;
-            
+            }
             TrackedRaceDescriptor other = (TrackedRaceDescriptor) object;
-            
-            if(!Objects.equals(this.regatta, other.regatta))
+            if (!Objects.equals(this.regatta, other.regatta)) {
                 return false;
-            
-            if(!Objects.equals(this.boatClass, other.boatClass))
+            }
+            if (!Objects.equals(BoatClassMasterdata.resolveBoatClass(this.boatClass), BoatClassMasterdata.resolveBoatClass(other.boatClass))) {
                 return false;
-            
-            if(!Objects.equals(this.race, other.race))
+            }
+            if (!Objects.equals(this.race, other.race)) {
                 return false;
-            
+            }
             return true;
         }
     }
@@ -223,8 +223,9 @@ public class TrackedRacesListPO extends PageArea {
                 try {
                     refresh();
                     for (Status status : getStatus(races)) {
-                        if (status != statusToWaitFor)
+                        if (status != statusToWaitFor) {
                             return Boolean.FALSE;
+                        }
                     }
                 } catch (TimeoutException exception) {
                     return Boolean.FALSE;

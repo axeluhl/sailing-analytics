@@ -16,6 +16,7 @@
 	<modules>
 		<module>com.sap.sse</module>
 		<module>com.sap.sse.common</module>
+		<module>com.sap.sse.shared.android</module>
 		<module>com.sap.sse.mongodb</module>
 		<module>com.sap.sse.gateway</module>
 		<module>com.sap.sse.gwt</module>
@@ -62,9 +63,11 @@
 		<module>com.sap.sailing.server.gateway</module>
 		<module>com.sap.sailing.server.gateway.ess40</module>
 		<module>com.sap.sailing.server.gateway.serialization</module>
+		<module>com.sap.sailing.server.gateway.serialization.shared.android</module>
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xmlexport</module>
+		<module>com.sap.sailing.xmlexport.test</module>
 		<module>com.google.gwt.osgi</module>
 		<module>com.tractrac.clientmodule</module>
 		<module>org.json.simple</module>
@@ -129,7 +132,7 @@
 	
 	<properties>
 		<tycho-version>0.21.0</tycho-version>
-       		<gwt.version>2.6.1</gwt.version> 
+       		<gwt.version>2.7.0</gwt.version> 
 		<p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile-->
 		<!--
           QUESTION: Which properties or settings are system dependent and differ across
@@ -138,7 +141,7 @@
                     If so the IP of the host would be the same for all profiles.
 		-->
         <parameters.common>
-		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest -DspatialWind=true
+		  -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
         </parameters.common>
 		<parameters.vm-settings>
           -ea -Xmx1024m -XX:PermSize=256m -XX:+UseG1GC

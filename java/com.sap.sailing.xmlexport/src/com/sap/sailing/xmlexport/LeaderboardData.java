@@ -74,6 +74,10 @@ public class LeaderboardData extends ExportAction {
     public LeaderboardData(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
         super(req, res, service);
     }
+    
+    public LeaderboardData(Leaderboard leaderboard) {
+        super(leaderboard);
+    }
 
     /**
      *  Creates XML for a leaderboard. Expects a list of generated competitors and races XML elements that are associated with the leaderboard.
@@ -907,6 +911,7 @@ public class LeaderboardData extends ExportAction {
             }
         }
         log.info("Finished XML export of leaderboard " + leaderboard.getName() + " in " + MillisecondsTimePoint.now().minus(timeSpent.asMillis()).asMillis() + " milliseconds");
-        sendDocument(createLeaderboardXML(leaderboard, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages), leaderboard.getName() + ".xml");
+        Element dataToExport = createLeaderboardXML(leaderboard, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages);
+        sendDocument(dataToExport, leaderboard.getName() + ".xml");
     }
 }

@@ -12,10 +12,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Color;
 import com.sap.sse.gwt.client.controls.listedit.ExpandedListEditorUi;
 
 public class FleetListEditableEditorComposite extends FleetListEditorComposite {
@@ -100,7 +100,8 @@ public class FleetListEditableEditorComposite extends FleetListEditorComposite {
         }
 
         private ListBox createColorListBox(final TextBox nameBox, final IntegerBox orderNoBox, final Color color) {
-            final ListBox colorListBox = new ListBox(false);
+            final ListBox colorListBox = new ListBox();
+            colorListBox.setMultipleSelect(false);
             colorListBox.addChangeHandler(new ChangeHandler() {
                 @Override
                 public void onChange(ChangeEvent event) {

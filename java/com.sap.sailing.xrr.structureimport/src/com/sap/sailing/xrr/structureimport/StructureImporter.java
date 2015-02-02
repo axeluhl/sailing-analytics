@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
@@ -30,10 +29,8 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.impl.AbstractColor;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
@@ -50,7 +47,9 @@ import com.sap.sailing.xrr.structureimport.buildstructure.GuessFleetOrderingStra
 import com.sap.sailing.xrr.structureimport.buildstructure.RegattaStructure;
 import com.sap.sailing.xrr.structureimport.buildstructure.Series;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberStrategy;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sapsailing.xrr.structureimport.eventimport.EventImport;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
@@ -94,12 +93,11 @@ public class StructureImporter {
             BuildStructure buildStructure = new BuildStructure(races);
             final TimePoint startDate = null; // TODO can regatta start time be inferred from XRR document?
             final TimePoint endDate = null; // TODO can regatta end time be inferred from XRR document?
-            RegattaImpl regatta = new RegattaImpl(
-                    RegattaImpl.getDefaultName(event.getTitle(), ((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
-                    new BoatClassImpl(((Division) event.getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle(), true),
-                    startDate, endDate,
-                    getSeries(buildStructure), false, this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(),
-                    null);
+            RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
+                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
+                    baseDomainFactory.getOrCreateBoatClass(((Division) event.getRaceOrDivisionOrRegattaSeriesResult()
+                            .get(0)).getTitle()), startDate, endDate, getSeries(buildStructure), false,
+                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null);
             addSpecificRegattas.add(regatta);
         }
         return addSpecificRegattas;

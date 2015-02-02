@@ -126,7 +126,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
@@ -397,7 +396,7 @@ import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.impl.PolarDiagramCSV;
+import com.sap.sailing.simulator.impl.PolarDiagramGPS;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -408,6 +407,7 @@ import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.BuildVersion;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -456,7 +456,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
     deviceIdentifierStringSerializationHandlerTracker;
-
+    
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
     private final DomainObjectFactory domainObjectFactory;
@@ -465,7 +465,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
 
-    private final com.sap.sailing.domain.common.CountryCodeFactory countryCodeFactory;
+    private final com.sap.sse.common.CountryCodeFactory countryCodeFactory;
 
     private final Executor executor;
     
@@ -516,7 +516,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         .getTracTracDomainFactory());
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
-        countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
+        countryCodeFactory = com.sap.sse.common.CountryCodeFactory.INSTANCE;
         leaderboardDifferenceCacheByIdPair = new LinkedHashMap<com.sap.sse.common.Util.Pair<String, String>, IncrementalLeaderboardDTO>(LEADERBOARD_DIFFERENCE_CACHE_SIZE, 0.75f, /* accessOrder */ true) {
             private static final long serialVersionUID = 3775119859130148488L;
             @Override
@@ -1048,7 +1048,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
                     raceRecord.getTrackingStartTime().asDate(), 
                     raceRecord
-                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(),
+                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime() == null ? null : raceRecord.getRaceStartTime().asDate(),
                     raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getRaceVisibility(), raceRecord.getJsonURL().toString(),
                     hasRememberedRegatta(raceRecord.getID())));
         }
@@ -1479,6 +1479,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public Boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier) {
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        BoatClass boatClass = trackedRace.getRace().getBoatClass();
+        PolarDataService polarData = getService().getPolarDataService();
+        PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarData);
+        return new Boolean(polarDiagram != null);
+    };
+
+    @Override
     public SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         SimulatorResultsDTO result = null;
@@ -1491,13 +1500,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (trackedLeg == null) {
                 return result;
             }
-            
-            Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();
-            Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, fromTimePoint);
+            Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();            
             
             // get next mark as end-position
             Waypoint toWaypoint = trackedLeg.getLeg().getTo();
-            Position endPosition = trackedRace.getApproximatePosition(toWaypoint, fromTimePoint);
 
             TimePoint startTimePoint = null;
             TimePoint endTimePoint = null;
@@ -1514,9 +1520,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
+            Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
+            Position endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
 
             if (startTimePoint.asDate().equals(prevStartTime)) {
-                return new SimulatorResultsDTO(startTimePoint.asDate(), 0, null, null, null, null);
+                return new SimulatorResultsDTO(startTimePoint.asDate(), 0, 0, null, null, null, null);
             }
             
             // determine legtype upwind/downwind/reaching
@@ -1537,14 +1545,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<Position> course = new ArrayList<Position>();
             course.add(startPosition);
             course.add(endPosition);
-            String csvFilePath = "PolarDiagram49STG.csv";
-            PolarDiagram polarDiagram = null;
-            try {
-                polarDiagram = new PolarDiagramCSV(csvFilePath);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            BoatClass boatClass = trackedRace.getRace().getBoatClass();
+            PolarDataService polarData = getService().getPolarDataService();
+            PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarData);
             SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField, SailingSimulatorConstants.ModeEvent, true, true);
             
             // for upwind/downwind, run simulation with start-time, start-position, end-position and windfield
@@ -1578,7 +1581,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
                 posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
                 rcDTO.coursePositions.waypointPositions.add(posDTO);
-                result = new SimulatorResultsDTO(startTimePoint.asDate(), legDuration, rcDTO, pathDTOs, null, null);
+                result = new SimulatorResultsDTO(startTimePoint.asDate(), timeStep.asMillis(), legDuration, rcDTO, pathDTOs, null, null);
             }
         }
         
@@ -5347,23 +5350,71 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
         List<Pair<Double, Double>> pointsForUpwindStarboardAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
         List<Pair<Double, Double>> pointsForUpwindStarboardAverageConfidence = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForUpwindPortAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForUpwindPortAverageConfidence = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForDownwindStarboardAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForDownwindStarboardAverageConfidence = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForDownwindPortAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
+        List<Pair<Double, Double>> pointsForDownwindPortAverageConfidence = new ArrayList<Pair<Double, Double>>();
         for (double windInKnots = 0.1; windInKnots < 30; windInKnots = windInKnots + 0.1) {
             try {
-
-                SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService().getPolarDataService()
-                        .getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots), LegType.UPWIND,
-                                Tack.STARBOARD);
+                SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService()
+                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
+                                LegType.UPWIND, Tack.STARBOARD);
                 pointsForUpwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
                         averageUpwindStarboardMovingAverage.getObject().getKnots()));
-                
+
                 pointsForUpwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
                         averageUpwindStarboardMovingAverage.getConfidence()));
-
             } catch (NotEnoughDataHasBeenAddedException e) {
                 // Do not add a point to the result
             }
+
+            try {
+                SpeedWithBearingWithConfidence<Void> averageUpwindPortMovingAverage = getService()
+                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
+                                LegType.UPWIND, Tack.PORT);
+                pointsForUpwindPortAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
+                        averageUpwindPortMovingAverage.getObject().getKnots()));
+
+                pointsForUpwindPortAverageConfidence.add(new Pair<Double, Double>(windInKnots,
+                        averageUpwindPortMovingAverage.getConfidence()));
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                // Do not add a point to the result
+            }
+
+            try {
+                SpeedWithBearingWithConfidence<Void> averageDownwindStarboardMovingAverage = getService()
+                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
+                                LegType.DOWNWIND, Tack.STARBOARD);
+                pointsForDownwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
+                        averageDownwindStarboardMovingAverage.getObject().getKnots()));
+
+                pointsForDownwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
+                        averageDownwindStarboardMovingAverage.getConfidence()));
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                // Do not add a point to the result
+            }
+
+            try {
+                SpeedWithBearingWithConfidence<Void> averageDownwindPortMovingAverage = getService()
+                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
+                                LegType.DOWNWIND, Tack.PORT);
+                pointsForDownwindPortAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
+                        averageDownwindPortMovingAverage.getObject().getKnots()));
+
+                pointsForDownwindPortAverageConfidence.add(new Pair<Double, Double>(windInKnots,
+                        averageDownwindPortMovingAverage.getConfidence()));
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                // Do not add a point to the result
+            }
+
         }
-        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(pointsForUpwindStarboardAverageSpeedMovingAverage, pointsForUpwindStarboardAverageConfidence);
+        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(
+                pointsForUpwindStarboardAverageSpeedMovingAverage, pointsForUpwindStarboardAverageConfidence,
+                pointsForUpwindPortAverageSpeedMovingAverage, pointsForUpwindPortAverageConfidence,
+                pointsForDownwindStarboardAverageSpeedMovingAverage, pointsForDownwindStarboardAverageConfidence,
+                pointsForDownwindPortAverageSpeedMovingAverage, pointsForDownwindPortAverageConfidence);
 
         return data;
     }

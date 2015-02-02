@@ -2,8 +2,8 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+import com.sap.sse.common.Color;
 
 public interface CompetitorDTO extends Serializable, MappableToDevice {
     

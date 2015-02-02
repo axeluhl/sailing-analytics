@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sse.gwt.adminconsole
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Require-Bundle: com.google.gwt.osgi;bundle-version="2.6.1",
+Require-Bundle: com.google.gwt.osgi;bundle-version="2.7.0",
  com.sap.sse.gwt,
  com.sap.sse.security.ui,
  com.sap.sse.security,

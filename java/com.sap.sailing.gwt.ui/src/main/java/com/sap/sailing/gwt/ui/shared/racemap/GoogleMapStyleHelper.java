@@ -4,7 +4,7 @@ import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleElementType;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
 import com.google.gwt.maps.client.maptypes.MapTypeStyler;
-import com.sap.sailing.domain.common.impl.RGBColor;
+import com.sap.sse.common.impl.RGBColor;
 
 public class GoogleMapStyleHelper {
 

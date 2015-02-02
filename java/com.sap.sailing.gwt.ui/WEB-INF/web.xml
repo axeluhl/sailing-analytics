@@ -4,6 +4,7 @@
 	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 
+    
 	<!-- Disable directory listing: -->
 	<servlet>
 		<servlet-name>default</servlet-name>
@@ -13,6 +14,10 @@
 			<param-name>dirAllowed</param-name>
 			<param-value>false</param-value>
 		</init-param>
+		<init-param>
+	   		<param-name>useFileMappedBuffer</param-name>
+	   		<param-value>false</param-value>
+	 	</init-param>
 	</servlet>
 
 	<!-- Apache Shiro -->

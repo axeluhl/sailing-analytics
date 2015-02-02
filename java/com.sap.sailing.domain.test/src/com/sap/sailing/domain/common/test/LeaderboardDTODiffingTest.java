@@ -23,8 +23,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Cloner;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
@@ -37,9 +35,11 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.test.StoredTrackBasedTest;
-import com.sap.sailing.util.ClonerImpl;
+import com.sap.sse.common.Cloner;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.ClonerImpl;
 
 /**
  * Tests the compressing / de-compressing functionality of {@link LeaderboardDTO} and {@link IncrementalLeaderboardDTO}.

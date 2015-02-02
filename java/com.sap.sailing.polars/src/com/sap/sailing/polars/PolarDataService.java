@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Public Facade interface granting clients access to the polar sheets of {@link BoatClass}es. A boat's "polar sheet"
@@ -31,6 +33,7 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
  * which also returns the average angle for the parameters provided.
  * 
  * @author Frederik Petersen (D054528)
+ * @autho Axel Uhl (D043530)
  * 
  */
 public interface PolarDataService {
@@ -128,9 +131,37 @@ public interface PolarDataService {
     int[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
 
     /**
-     * From a boat's speed over ground and assuming values for <code>boatClass</code>, the <code>tack</code>
-     * the boat is currently sailing on, and the <code>legType</code>, this method estimates the
-     * true wind speed at which the boat may most likely have been sailing under these conditions.
+     * From a boat's speed over ground and assuming values for <code>boatClass</code>, the <code>tack</code> the boat is
+     * currently sailing on, and the <code>legType</code>, this method estimates the true wind speed candidates at which
+     * the boat may most likely have been sailing under these conditions.
+     * 
+     * The confidence of the returned candidates is derived from the average confidence of the underlying fixes,
+     * distance measures and the amount of underlying data.
+     * 
+     * Multiple candidates are possible, because we cannot guarantee a reversible function (boatspeed over windspeed).
+     * 
+     * @return set of wind candidates with confidence, empty set if no were found (due to insufficient underlying data)
      */
-    SpeedWithBearingWithConfidence<Void> getAverageTrueWindSpeedAndAngle(BoatClass boatClass, Speed speedOverGround, LegType legType, Tack tack);
+    Set<SpeedWithBearingWithConfidence<Void>> getAverageTrueWindSpeedAndAngleCandidates(BoatClass boatClass, Speed speedOverGround, LegType legType, Tack tack);
+
+    /**
+     * @param intoTackSpeed speed before the tack maneuver
+     * @param intoJibeSpeed speed before the jibe maneuver
+     * @param boatClass the boat class for which to calculate the confidence
+     * @return the likelihood of the ratio between tack and jibe speed, measured at the beginning
+     * of the maneuver; for example, if the tack speed is much faster than the jibe speed, this seems
+     * suspicious and will for most polar sheets for most boat classes result in a very low confidence.
+     * However, if the tack/jibe speed ratio matches up well with what the polar diagram says, a high
+     * probability will result. The resulting value will be between 0..1 (inclusive).
+     */
+    double getConfidenceForTackJibeSpeedRatio(Speed intoTackSpeed, Speed intoJibeSpeed, BoatClass boatClass);
+
+    /**
+     * Assuming a boat of the <code>boatClass</code> sailed at <code>speedOverGround</code> and during the maneuver
+     * changed course by <code>courseChange</code>, how likely was that a maneuver of type <code>maneuverType</code>?
+     * 
+     * @return a probability between 0..1 (inclusive) in the {@link Pair#getA() first} component, and the true wind
+     *         speed and true wind angle in the {@link Pair#getB() second} component.
+     */
+    Pair<Double, SpeedWithBearingWithConfidence<Void>> getManeuverLikelihoodAndTwsTwa(BoatClass boatClass, Speed speedOverGround, double courseChangeDeg, ManeuverType maneuverType);
 }

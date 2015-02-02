@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class MessagePersistenceManager {
         return !persistedMessages.isEmpty();
     }
 
-    public void persistIntent(Intent intent) {
+    public void persistIntent(Intent intent) throws UnsupportedEncodingException {
         Bundle extras = intent.getExtras();
         String callbackPayload = extras.getString(MessageSendingService.CALLBACK_PAYLOAD);
         String url = extras.getString(MessageSendingService.URL);
@@ -47,7 +48,7 @@ public class MessagePersistenceManager {
         persistMessage(url, callbackPayload, payload, callbackClass);
     }
 
-    private void persistMessage(String url, String callbackPayload, String payload, String callbackClass) {
+    private void persistMessage(String url, String callbackPayload, String payload, String callbackClass) throws UnsupportedEncodingException {
         String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
         ExLog.i(context, TAG, String.format("Persisting message \"%s\".", messageLine));
         if (persistedMessages.contains(messageLine)) {
@@ -59,15 +60,17 @@ public class MessagePersistenceManager {
 
     /**
      * @param payload will be URL-encoded to ensure that the resulting string does not contain newlines
+     * @throws UnsupportedEncodingException 
      */
     private String getSerializedIntentForPersistence(String url, String callbackPayload, 
-            String payload, String callbackClass) {
-        String messageLine = String.format("%s;%s;%s;%s", callbackPayload, URLEncoder.encode(payload), 
+            String payload, String callbackClass) throws UnsupportedEncodingException {
+        String messageLine = String.format("%s;%s;%s;%s", callbackPayload, URLEncoder.encode(payload,
+                MessageSendingService.charsetName), 
                 url, callbackClass);
         return messageLine;
     }
 
-    public void removeIntent(Intent intent) {
+    public void removeIntent(Intent intent) throws UnsupportedEncodingException {
         Bundle extras = intent.getExtras();
         String url = extras.getString(MessageSendingService.URL);
         String callbackPayload = extras.getString(MessageSendingService.CALLBACK_PAYLOAD);
@@ -76,7 +79,7 @@ public class MessagePersistenceManager {
         removeMessage(url, callbackPayload, payload, callbackClass);
     }
 
-    private void removeMessage(String url, String callbackPayload, String payload, String callbackClass) {
+    private void removeMessage(String url, String callbackPayload, String payload, String callbackClass) throws UnsupportedEncodingException {
         if (!persistedMessages.isEmpty()) {
             ExLog.i(context, TAG, String.format("Removing message \"%s\".", payload));
             String messageLine = getSerializedIntentForPersistence(url, callbackPayload, payload, callbackClass);
@@ -112,13 +115,13 @@ public class MessagePersistenceManager {
         void restoreMessage(Context context, Intent messageIntent);
     }
 
-    public List<Intent> restoreMessages() {
+    public List<Intent> restoreMessages() throws UnsupportedEncodingException {
         List<Intent> delayedIntents = new ArrayList<Intent>();
         for (String persistedMessage : persistedMessages) {
             String[] lineParts = persistedMessage.split(";");
             String url = lineParts[2];
             String callbackPayload = lineParts[0];
-            String payload = URLDecoder.decode(lineParts[1]);
+            String payload = URLDecoder.decode(lineParts[1], MessageSendingService.charsetName);
             String callbackClassString = lineParts[3];
 
             Class<? extends ServerReplyCallback> callbackClass = null;

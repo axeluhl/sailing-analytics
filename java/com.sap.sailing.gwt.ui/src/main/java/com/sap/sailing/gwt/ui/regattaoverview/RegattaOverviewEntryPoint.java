@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -18,12 +16,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
-import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.URLEncoder;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
@@ -38,13 +32,9 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     private RaceDetailPanel detailPanel;
     private RegattaOverviewPanel regattaPanel;
 
-    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
-
     @Override
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
-
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         containerPanel = new DockLayoutPanel(Unit.PX);

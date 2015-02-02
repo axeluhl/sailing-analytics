@@ -15,11 +15,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.util.SmartFutureCache;
-import com.sap.sailing.util.SmartFutureCache.EmptyUpdateInterval;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.SmartFutureCache;
+import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
 /**
  * When the thread reading a value from the cache holds a fair read lock, and another thread is trying to obtain the
