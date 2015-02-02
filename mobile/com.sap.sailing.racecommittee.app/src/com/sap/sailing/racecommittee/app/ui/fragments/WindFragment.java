@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
-import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -12,6 +11,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,15 +19,8 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.NumberPicker;
+import android.widget.*;
 import android.widget.NumberPicker.OnValueChangeListener;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -57,7 +50,6 @@ import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -75,18 +67,17 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-public class WindFragment extends LoggableFragment implements
-        CompassDirectionListener, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener, OnClickListener,
-        OnMarkerDragListener, OnMapClickListener, OnRaceUpdatedListener,
+public class WindFragment extends LoggableFragment
+        implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        LocationListener, OnClickListener, OnMarkerDragListener, OnMapClickListener, OnRaceUpdatedListener,
         TextView.OnEditorActionListener, OnFocusChangeListener {
-
 
     private final static String TAG = WindFragment.class.getName();
     private final static int FIVE_SEC = 5000;
     private final static int EVERY_POSITION_CHANGE = 0;
     private final static int MAX_KTS = 50;
 
+    private RacingActivity activity;
     private CompassView compassView;
     private EditText windBearingEditText;
     private EditText windSpeedEditText;
@@ -126,6 +117,7 @@ public class WindFragment extends LoggableFragment implements
 
     /**
      * creates the string array that represents the numbers in the windspeed numberpicker
+     *
      * @return
      */
     private static String[] generateNumbers() {
@@ -147,6 +139,7 @@ public class WindFragment extends LoggableFragment implements
 
     /**
      * set the color of the text of a numberpicker
+     *
      * @param numberPicker
      * @param color
      * @return boolean if successful
@@ -158,11 +151,9 @@ public class WindFragment extends LoggableFragment implements
             View child = numberPicker.getChildAt(i);
             if (child instanceof EditText) {
                 try {
-                    Field selectorWheelPaintField = numberPicker.getClass()
-                            .getDeclaredField("mSelectorWheelPaint");
+                    Field selectorWheelPaintField = numberPicker.getClass().getDeclaredField("mSelectorWheelPaint");
                     selectorWheelPaintField.setAccessible(true);
-                    ((Paint) selectorWheelPaintField.get(numberPicker))
-                            .setColor(color);
+                    ((Paint) selectorWheelPaintField.get(numberPicker)).setColor(color);
                     ((EditText) child).setTextColor(color);
                     numberPicker.invalidate();
                     return true;
@@ -184,47 +175,36 @@ public class WindFragment extends LoggableFragment implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View windFragmentView = inflater.inflate(R.layout.wind_view, container,
-                false);
-        compassView = (CompassView) windFragmentView
-                .findViewById(R.id.compassView);
-        windBearingEditText = (EditText) windFragmentView
-                .findViewById(R.id.editTextWindDirection);
-        windSpeedEditText = (EditText) windFragmentView
-                .findViewById(R.id.editTextWindSpeed);
-        np_windSpeed = (NumberPicker) windFragmentView
-                .findViewById(R.id.np_windSpeed);
-        btn_sendButton = (Button) windFragmentView
-                .findViewById(R.id.btn_wind_send);
-        txt_waitingForGPS = (TextView) windFragmentView
-                .findViewById(R.id.txt_waitingForGPS);
-        ll_topContainer = (LinearLayout) windFragmentView
-                .findViewById(R.id.ll_topContainer);
-        rl_gpsOverlay = (RelativeLayout) windFragmentView
-                .findViewById(R.id.rl_gpsOverlay);
-        et_location = (EditText) windFragmentView
-                .findViewById(R.id.et_location);
+        View view = inflater.inflate(R.layout.wind_view, container, false);
+        compassView = (CompassView) view.findViewById(R.id.compassView);
+        windBearingEditText = (EditText) view.findViewById(R.id.editTextWindDirection);
+        windSpeedEditText = (EditText) view.findViewById(R.id.editTextWindSpeed);
+        np_windSpeed = (NumberPicker) view.findViewById(R.id.np_windSpeed);
+        btn_sendButton = (Button) view.findViewById(R.id.btn_wind_send);
+        txt_waitingForGPS = (TextView) view.findViewById(R.id.txt_waitingForGPS);
+        ll_topContainer = (LinearLayout) view.findViewById(R.id.ll_topContainer);
+        rl_gpsOverlay = (RelativeLayout) view.findViewById(R.id.rl_gpsOverlay);
+        et_location = (EditText) view.findViewById(R.id.et_location);
 
-        btn_set_manual_position = (Button) windFragmentView
-                .findViewById(R.id.btn_set_manual_position);
-        btn_position_set = (Button) windFragmentView
-                .findViewById(R.id.btn_position_set);
+        btn_set_manual_position = (Button) view.findViewById(R.id.btn_set_manual_position);
+        btn_position_set = (Button) view.findViewById(R.id.btn_position_set);
 
-        return windFragmentView;
+        return view;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        activity = (RacingActivity) getActivity();
 
         setupButtons();
-
         setupWindSpeedPicker();
 
         if (race != null) {
@@ -236,7 +216,9 @@ public class WindFragment extends LoggableFragment implements
 
         setInstanceState(savedInstanceState);
 
-        super.onActivityCreated(savedInstanceState);
+        if (activity != null) {
+            activity.setRightPanelVisibility(View.GONE);
+        }
     }
 
     /**
@@ -262,18 +244,16 @@ public class WindFragment extends LoggableFragment implements
     }
 
     /**
-     * configures the windspeedpicker views and attatches all relevant listener functions to them
+     * configures the windspeedpicker views and attaches all relevant listener functions to them
      */
     public void setupWindSpeedPicker() {
-        AppPreferences preferences = AppPreferences.on(getActivity()
-                .getApplicationContext());
+        AppPreferences preferences = AppPreferences.on(activity.getApplicationContext());
         String nums[] = generateNumbers();
         np_windSpeed.setMaxValue(nums.length - 1);
         np_windSpeed.setMinValue(0);
         np_windSpeed.setWrapSelectorWheel(false);
         np_windSpeed.setDisplayedValues(nums);
-        np_windSpeed
-                .setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        np_windSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
         np_windSpeed.setOnValueChangedListener(new OnValueChangeListener() {
             @Override
@@ -285,14 +265,11 @@ public class WindFragment extends LoggableFragment implements
         });
         windBearingEditText.setOnFocusChangeListener(this);
         setNumberPickerTextColor(np_windSpeed, Color.BLACK);
-        DecimalFormat speedFormat = new DecimalFormat("#0.0", new DecimalFormatSymbols(
-                Locale.US));
-        bearingFormat = new DecimalFormat("###", new DecimalFormatSymbols(
-                Locale.US));
+        DecimalFormat speedFormat = new DecimalFormat("#0.0", new DecimalFormatSymbols(Locale.US));
+        bearingFormat = new DecimalFormat("###", new DecimalFormatSymbols(Locale.US));
 
         double enteredWindSpeed = preferences.getWindSpeed();
-        double enteredWindBearingFrom = preferences
-                .getWindBearingFromDirection();
+        double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
 
         if (race != null) {
             Wind enteredWind = race.getState().getWindFix();
@@ -304,10 +281,8 @@ public class WindFragment extends LoggableFragment implements
 
         windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
 
-
         compassView.setDirection((float) enteredWindBearingFrom);
-        windBearingEditText.setText(bearingFormat
-                .format(enteredWindBearingFrom));
+        windBearingEditText.setText(bearingFormat.format(enteredWindBearingFrom));
         np_windSpeed.setValue(((int) (enteredWindSpeed * 2)));
     }
 
@@ -315,19 +290,16 @@ public class WindFragment extends LoggableFragment implements
      * adds the polling for buoy data to the polled races, also registers a callback
      */
     public void setupPositionPoller() {
-        RacePositionsPoller positionPoller = new RacePositionsPoller(getActivity()
-                .getApplicationContext());
+        RacePositionsPoller positionPoller = new RacePositionsPoller(activity.getApplicationContext());
         positionPoller.register(race, this);
-        ExLog.i(getActivity(), TAG, "registering race " + race.getRaceName());
+        ExLog.i(activity, TAG, "registering race " + race.getRaceName());
     }
 
     /**
      * configures the WindMap-View, including the input field for the position of ones own boat
      */
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public void setupMap() {
-        AppPreferences preferences = AppPreferences.on(getActivity()
-                .getApplicationContext());
+        AppPreferences preferences = AppPreferences.on(activity.getApplicationContext());
         // map location search input
         et_location.setOnEditorActionListener(this);
 
@@ -335,7 +307,7 @@ public class WindFragment extends LoggableFragment implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             fragmentManager = getChildFragmentManager();
         } else {
-            fragmentManager = getActivity().getFragmentManager();
+            fragmentManager = activity.getFragmentManager();
         }
         windMap = (WindMap) fragmentManager.findFragmentById(R.id.windMap);
 
@@ -349,17 +321,16 @@ public class WindFragment extends LoggableFragment implements
 
         // center the map
         LatLng enteredWindLocation = preferences.getWindPosition();
-        if (enteredWindLocation.latitude != 0
-                && enteredWindLocation.longitude != 0) {
+        if (enteredWindLocation.latitude != 0 && enteredWindLocation.longitude != 0) {
             windMap.movePositionMarker(enteredWindLocation);
             btn_position_set.setEnabled(true);
             windMap.centerMap(enteredWindLocation);
         }
-
     }
 
     /**
      * function to restore the instanceState via savedInstanceState bundle
+     *
      * @param savedInstanceState said bundle
      */
     public void setInstanceState(Bundle savedInstanceState) {
@@ -371,12 +342,9 @@ public class WindFragment extends LoggableFragment implements
             if (bigMap) {
                 showBigMap();
                 if (savedInstanceState.getDouble("lat", -1) != -1) {
-                    windMap.centerMap(savedInstanceState.getDouble("lat"),
-                            savedInstanceState.getDouble("lng"),
-                            savedInstanceState.getFloat("zoom"));
+                    windMap.centerMap(savedInstanceState.getDouble("lat"), savedInstanceState.getDouble("lng"), savedInstanceState.getFloat("zoom"));
                     if (markerLat != -1) {
-                        windMap.movePositionMarker(new LatLng(markerLat,
-                                savedInstanceState.getDouble("markerLng")));
+                        windMap.movePositionMarker(new LatLng(markerLat, savedInstanceState.getDouble("markerLng")));
                     }
                 }
 
@@ -398,14 +366,12 @@ public class WindFragment extends LoggableFragment implements
         }
         apiClient.disconnect();
 
-        Fragment fragment = (getFragmentManager()
-                .findFragmentById(R.id.windMap));
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.windMap);
 
         if (fragment != null) {
-            FragmentTransaction ft = getActivity().getFragmentManager()
-                    .beginTransaction();
-            ft.remove(fragment);
-            ft.commit();
+            FragmentTransaction transaction = activity.getFragmentManager().beginTransaction();
+            transaction.remove(fragment);
+            transaction.commit();
         }
 
         super.onPause();
@@ -423,17 +389,13 @@ public class WindFragment extends LoggableFragment implements
         outState.putBoolean("bigMap", bigMap);
         if (windMap != null) {
             if (windMap.getMap() != null) {
-                outState.putDouble("lat",
-                        windMap.getMap().getCameraPosition().target.latitude);
-                outState.putDouble("lng",
-                        windMap.getMap().getCameraPosition().target.longitude);
+                outState.putDouble("lat", windMap.getMap().getCameraPosition().target.latitude);
+                outState.putDouble("lng", windMap.getMap().getCameraPosition().target.longitude);
                 outState.putFloat("zoom", windMap.getMap().getCameraPosition().zoom);
             }
             if (windMap.windMarker != null) {
-                outState.putDouble("markerLat",
-                        windMap.windMarker.getPosition().latitude);
-                outState.putDouble("markerLng",
-                        windMap.windMarker.getPosition().longitude);
+                outState.putDouble("markerLat", windMap.windMarker.getPosition().latitude);
+                outState.putDouble("markerLng", windMap.windMarker.getPosition().longitude);
             }
         }
     }
@@ -466,18 +428,14 @@ public class WindFragment extends LoggableFragment implements
         try {
             Wind wind = getResultingWindFix();
             if (wind == null) {
-                Toast.makeText(getActivity(),
-                        R.string.wind_location_or_fields_not_valid,
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(activity, R.string.wind_location_or_fields_not_valid, Toast.LENGTH_LONG).show();
                 return;
             }
             saveEntriesInPreferences(wind);
-            ((RacingActivity) getActivity()).onWindEntered(wind);
+            activity.onWindEntered(wind);
         } catch (NumberFormatException nfe) {
-            Toast.makeText(getActivity(),
-                    R.string.wind_speed_direction_not_a_valid_number,
-                    Toast.LENGTH_LONG).show();
-            ExLog.i(getActivity(), this.getClass().getCanonicalName(),
+            Toast.makeText(activity, R.string.wind_speed_direction_not_a_valid_number, Toast.LENGTH_LONG).show();
+            ExLog.i(activity, this.getClass().getCanonicalName(),
                     nfe.getMessage());
         }
     }
@@ -515,10 +473,8 @@ public class WindFragment extends LoggableFragment implements
         windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
         currentLocation = new Location("set");
         currentLocation.setLatitude(windMap.windMarker.getPosition().latitude);
-        currentLocation
-                .setLongitude(windMap.windMarker.getPosition().longitude);
-        AppPreferences preferences = AppPreferences.on(getActivity()
-                .getApplicationContext());
+        currentLocation.setLongitude(windMap.windMarker.getPosition().longitude);
+        AppPreferences preferences = AppPreferences.on(activity.getApplicationContext());
         preferences.setWindPosition(windMap.windMarker.getPosition());
         txt_waitingForGPS.setTextColor(Color.GRAY);
         btn_sendButton.setEnabled(true);
@@ -530,8 +486,7 @@ public class WindFragment extends LoggableFragment implements
         btn_position_set.setVisibility(View.GONE);
         windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
         windMap.windMarker.setDraggable(false);
-        windMap.centerMap(currentLocation.getLatitude(),
-                currentLocation.getLongitude());
+        windMap.centerMap(currentLocation.getLatitude(), currentLocation.getLongitude());
     }
 
     /**
@@ -552,7 +507,8 @@ public class WindFragment extends LoggableFragment implements
 
     /**
      * animates a view out of its existance ( fade out )
-     * @param v the view to fade
+     *
+     * @param v                 the view to fade
      * @param animationDuration the duration of the fade
      */
     private void hideView(final View v, int animationDuration) {
@@ -579,7 +535,8 @@ public class WindFragment extends LoggableFragment implements
 
     /**
      * animates a view back into existance ( fade in )
-     * @param v the view to fade
+     *
+     * @param v                 the view to fade
      * @param animationDuration the duration of the fade
      */
     private void showView(final View v, int animationDuration) {
@@ -609,18 +566,18 @@ public class WindFragment extends LoggableFragment implements
             if (windBearingText.length() > 0) {
                 compassView.setDirection(Float.valueOf(windBearingText));
             }
-
         }
     }
 
     /**
      * function gets called after inputting the location where you want to the map to zoom to
+     *
      * @param v the view where the location was entered
      */
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
-            new GeoCodeTask().execute(v.getText() + "");
+            new GeoCodeTask().execute("" + v.getText());
         }
         return false;
     }
@@ -634,8 +591,7 @@ public class WindFragment extends LoggableFragment implements
         currentLocation = new Location("set");
         currentLocation.setLatitude(marker.getPosition().latitude);
         currentLocation.setLongitude(marker.getPosition().longitude);
-        AppPreferences preferences = AppPreferences.on(getActivity()
-                .getApplicationContext());
+        AppPreferences preferences = AppPreferences.on(activity.getApplicationContext());
         preferences.setWindPosition(marker.getPosition());
 
     }
@@ -652,14 +608,12 @@ public class WindFragment extends LoggableFragment implements
 
     @Override
     public void onConnectionFailed(ConnectionResult arg0) {
-        ExLog.e(getActivity(), TAG,
-                "Failed to connect to Google Play Services for location updates");
+        ExLog.e(activity, TAG, "Failed to connect to Google Play Services for location updates");
     }
 
     @Override
     public void onConnected(Bundle arg0) {
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                apiClient, locationRequest, this);
+        LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, locationRequest, this);
     }
 
     @Override
@@ -674,32 +628,27 @@ public class WindFragment extends LoggableFragment implements
     }
 
     private Wind getResultingWindFix() throws NumberFormatException {
-        if (currentLocation == null
-                || windSpeedEditText.getText().toString().isEmpty()
-                || windBearingEditText.getText().toString().isEmpty()) {
+        if (currentLocation == null || TextUtils.isEmpty(windSpeedEditText.getText())
+                || TextUtils.isEmpty(windBearingEditText.getText())) {
             return null;
         }
 
-        Position currentPosition = new DegreePosition(
-                currentLocation.getLatitude(), currentLocation.getLongitude());
-        double windSpeed = Double.valueOf(windSpeedEditText.getText()
-                .toString().replace(",", "."));
-        double windBearing = Double.valueOf(windBearingEditText.getText()
-                .toString());
+        Position currentPosition = new DegreePosition(currentLocation.getLatitude(), currentLocation.getLongitude());
+        double windSpeed = Double.valueOf(windSpeedEditText.getText().toString().replace(",", "."));
+        double windBearing = Double.valueOf(windBearingEditText.getText().toString());
         Bearing bearing_from = new DegreeBearingImpl(windBearing);
         // this is not a standard bearing but the direction where the wind comes
         // from, needs to be converted
         // to match the assumption that a bearing is always the direction the
         // wind flows to
-        SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed,
-                bearing_from.reverse());
-        return new WindImpl(currentPosition, MillisecondsTimePoint.now(),
-                speedBearing);
+        SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing_from.reverse());
+        return new WindImpl(currentPosition, MillisecondsTimePoint.now(), speedBearing);
     }
 
     /**
      * saves the last entered wind in the preferences, so next time wind has to be entered
      * those saved presets get loaded ( unless there was a wind entered for that race already )
+     *
      * @param wind the wind to save
      */
     protected void saveEntriesInPreferences(Wind wind) {
@@ -707,10 +656,8 @@ public class WindFragment extends LoggableFragment implements
         // that direction
         // But for this app we need to display the direction the wind is coming
         // from
-        AppPreferences preferences = AppPreferences.on(getActivity()
-                .getApplicationContext());
-        preferences.setWindBearingFromDirection(wind.getBearing().reverse()
-                .getDegrees());
+        AppPreferences preferences = AppPreferences.on(activity.getApplicationContext());
+        preferences.setWindBearingFromDirection(wind.getBearing().reverse().getDegrees());
         preferences.setWindSpeed(wind.getKnots());
     }
 
@@ -735,19 +682,17 @@ public class WindFragment extends LoggableFragment implements
                 URI website = new URI(getString(R.string.url_google_geocoder)
                         + URLEncoder.encode(location, "UTF-8")
                         + getString(R.string.urlpart_google_geocoder_sensor));
-                ExLog.i(getActivity(), 1, website.toString());
+                ExLog.i(activity, 1, website.toString());
                 request.setURI(website);
                 HttpResponse response = httpclient.execute(request);
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        response.getEntity().getContent()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
                 String line;
                 while ((line = in.readLine()) != null) {
                     responseBody.append(line);
                 }
                 JSONObject jObject = new JSONObject(responseBody + "");
-                locJSON = jObject.getJSONArray("results").getJSONObject(0)
-                        .getJSONObject("geometry").getJSONObject("location");
+                locJSON = jObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -758,20 +703,15 @@ public class WindFragment extends LoggableFragment implements
 
         protected void onPostExecute(JSONObject locJSON) {
             if (locJSON == null) {
-                ExLog.i(getActivity(), this.getClass().getCanonicalName(),
+                ExLog.i(activity, this.getClass().getCanonicalName(),
                         "No Location found for " + location);
-                Toast.makeText(getActivity(), R.string.no_location_found,
+                Toast.makeText(activity, R.string.no_location_found,
                         Toast.LENGTH_SHORT).show();
                 return;
             }
             try {
-                ExLog.i(getActivity(),
-                        this.getClass().getCanonicalName(),
-                        "Location found for " + location + ": "
-                                + locJSON.getDouble("lat") + ","
-                                + locJSON.getDouble("lng"));
-                windMap.centerMap(locJSON.getDouble("lat"),
-                        locJSON.getDouble("lng"));
+                ExLog.i(activity, this.getClass().getCanonicalName(), "Location found for " + location + ": " + locJSON.getDouble("lat") + "," + locJSON.getDouble("lng"));
+                windMap.centerMap(locJSON.getDouble("lat"), locJSON.getDouble("lng"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }

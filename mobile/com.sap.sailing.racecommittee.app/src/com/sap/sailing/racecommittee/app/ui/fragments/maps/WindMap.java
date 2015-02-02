@@ -109,12 +109,14 @@ public class WindMap extends MapFragment {
      * @param zoom float: zoom, usually a number between 1 and 14, the bigger the number the closer
      */
     public void centerMap(double lat, double lng, float zoom) {
-        CameraUpdate center = CameraUpdateFactory
-                .newLatLng(new LatLng(lat, lng));
-        CameraUpdate czoom = CameraUpdateFactory.zoomTo(zoom);
-        getMap().moveCamera(center);
-        getMap().animateCamera(czoom);
-        movePositionMarker(new LatLng(lat, lng));
+        if (getMap() != null) {
+            CameraUpdate center = CameraUpdateFactory
+                    .newLatLng(new LatLng(lat, lng));
+            CameraUpdate czoom = CameraUpdateFactory.zoomTo(zoom);
+            getMap().moveCamera(center);
+            getMap().animateCamera(czoom);
+            movePositionMarker(new LatLng(lat, lng));
+        }
     }
 
     /**

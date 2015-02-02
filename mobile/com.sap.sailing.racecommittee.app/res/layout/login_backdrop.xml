@@ -1,69 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <ImageView android:contentDescription="@string/empty"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:src="@drawable/login_backdrop"
-               android:scaleType="centerCrop"/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/empty"
+        android:scaleType="centerCrop"
+        android:src="@drawable/login_backdrop" />
 
-    <ImageView android:layout_width="150dp"
-               android:layout_height="150dp"
-               android:contentDescription="@string/empty"
-               android:src="@drawable/sap_logo"
-               android:layout_alignParentTop="true"
-               android:layout_alignParentLeft="true"
-               android:layout_alignParentStart="true"
-               android:layout_marginLeft="50dp"
-               android:layout_marginStart="50dp"
-               android:layout_marginTop="25dp"
-               android:id="@+id/imageView"/>
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="50dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="25dp"
+        android:contentDescription="@string/empty"
+        android:src="@drawable/sap_logo" />
 
-    <View android:layout_width="match_parent"
-          android:layout_height="300dp"
-          android:background="@drawable/gradient"
-          android:layout_alignBottom="@+id/view"
-          android:layout_alignParentLeft="true"
-          android:layout_alignParentStart="true"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignBottom="@+id/view"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="@drawable/gradient" />
 
-    <TextView android:id="@+id/backdrop_title"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="@string/login_text"
-              android:textSize="40sp"
-              android:layout_above="@+id/view"
-              android:textColor="@color/white"
-              android:layout_alignLeft="@+id/imageView"
-              android:layout_alignStart="@+id/imageView"
-              android:layout_marginBottom="28dp"/>
+    <TextView
+        android:id="@+id/backdrop_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/view"
+        android:layout_alignLeft="@+id/imageView"
+        android:layout_alignStart="@+id/imageView"
+        android:layout_marginBottom="28dp"
+        android:text="@string/login_text"
+        android:textColor="@color/white"
+        android:textSize="@dimen/textsize_big" />
 
-    <LinearLayout android:id="@+id/backdrop_subtitle"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal"
-                  android:alpha="0"
-                  android:layout_alignBottom="@+id/backdrop_title"
-                  android:layout_centerHorizontal="true">
+    <TextView
+        android:id="@+id/backdrop_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/backdrop_title"
+        android:layout_centerInParent="true"
+        android:alpha="0"
+        android:drawableLeft="@drawable/ic_assignment_white_48dp"
+        android:drawablePadding="@dimen/default_padding_half"
+        android:drawableStart="@drawable/ic_assignment_white_48dp"
+        android:text="@string/login_sub_text"
+        android:textColor="@color/white"
+        android:textSize="@dimen/textsize_big" />
 
-        <ImageView android:contentDescription="@string/empty"
-                   android:layout_width="50dp"
-                   android:layout_height="50dp"
-                   android:src="@drawable/boat"/>
-
-        <TextView
-                android:text="@string/login_sub_text"
-                android:textSize="40sp"
-                android:textColor="@color/white"
-                android:layout_gravity="center_vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <View android:layout_width="match_parent"
-          android:layout_height="2dp"
-          android:background="@color/orange"
-          android:layout_alignParentBottom="true"
-          android:id="@+id/view"/>
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/orange" />
 </RelativeLayout>

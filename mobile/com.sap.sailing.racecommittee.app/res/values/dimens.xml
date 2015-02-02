@@ -3,16 +3,29 @@
 
     <dimen name="navigation_drawer_image_height">200dp</dimen>
     <dimen name="navigation_drawer_width">300dp</dimen>
-	<dimen name="navigation_drawer_right_box">150dp</dimen>
-	
-	<dimen name="listview_side_padding">100dp</dimen>
-	<dimen name="listview_row_padding">20dp</dimen>
-	
-	<dimen name="preference_margin">0dp</dimen>
+    <dimen name="navigation_drawer_right_box">150dp</dimen>
+
+    <dimen name="listview_side_padding">100dp</dimen>
+    <dimen name="listview_row_padding">20dp</dimen>
+    <dimen name="selector_header_height">100dp</dimen>
+
+    <dimen name="preference_margin">0dp</dimen>
 
     <dimen name="thin_line">1dp</dimen>
     <dimen name="thick_line">2dp</dimen>
 
+    <dimen name="textsize_big">40sp</dimen>
+
+    <dimen name="default_padding_half">12dp</dimen>
     <dimen name="default_padding">25dp</dimen>
+    <dimen name="default_padding_twice">50dp</dimen>
+
+    <dimen name="default_margin_half">@dimen/default_padding_half</dimen>
+    <dimen name="default_margin">@dimen/default_padding</dimen>
+    <dimen name="default_margin_twice">@dimen/default_padding_twice</dimen>
+
+    <dimen name="side_button_width">200dp</dimen>
+    <dimen name="side_button_textsize">20sp</dimen>
+    <dimen name="side_button_image_size">100dp</dimen>
 
 </resources>

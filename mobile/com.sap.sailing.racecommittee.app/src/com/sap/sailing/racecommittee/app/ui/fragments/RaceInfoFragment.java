@@ -28,6 +28,7 @@ import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -43,7 +44,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private TextView fleetInfoHeader;
     private TextView raceInfoHeader;
     private TextView courseInfoHeader;
-    private Button windInfoHeader;
+    private TextView windInfoHeader;
 
     private View resetRaceDialogView;
 
@@ -67,7 +68,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
         courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
         // windInfoHeader = (TextView) getView().findViewById(R.id.windInfoHeader);
-        windInfoHeader = (Button) getActivity().findViewById(R.id.windButton);
+        windInfoHeader = (TextView) getActivity().findViewById(R.id.wind_value);
 
         // windInfoHeader.setText(getString(R.string.wind_unknown));
         fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet()

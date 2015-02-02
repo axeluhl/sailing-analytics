@@ -3,15 +3,11 @@
     android:id="@+id/loginLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
     android:baselineAligned="false"
-    android:orientation="horizontal" >
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="0px"
-        android:layout_height="0px"
-        android:focusable="true"
-        android:focusableInTouchMode="true" />
+    <include layout="@layout/toolbar" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,7 +15,7 @@
         android:background="@color/welter_extralight_gray_transparent"
         android:baselineAligned="false"
         android:orientation="horizontal"
-        android:padding="12dp" >
+        android:padding="12dp">
 
         <!-- Below nesting of layouts is needed to prevent the list from pushing the button outside the screen bounds -->
 
@@ -28,13 +24,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:orientation="vertical"
-            android:padding="12dp" >
+            android:padding="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.1"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
 
                 <ListView
                     android:id="@+id/results_capturing_view_list"
@@ -52,7 +48,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content">
 
                 <Button
                     android:id="@+id/results_capturing_view_button_add_photo"
@@ -73,7 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:orientation="vertical"
-            android:padding="12dp" >
+            android:padding="12dp">
 
             <TextView
                 android:layout_width="match_parent"

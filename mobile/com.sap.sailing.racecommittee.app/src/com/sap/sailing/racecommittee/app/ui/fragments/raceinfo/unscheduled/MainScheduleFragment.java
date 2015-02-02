@@ -41,11 +41,16 @@ public class MainScheduleFragment extends RaceFragment implements OnClickListene
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mHeaderText = (TextView) getView().findViewById(R.id.header_text);
         String serie = managedRace.getSeries().getName();
         String fleet = managedRace.getFleet().getName();
         String race = managedRace.getRaceName();
-        mHeaderText.setText(serie + " - " + fleet + " - " + race);
+        View view = getView();
+        if (view != null) {
+            mHeaderText = (TextView) view.findViewById(R.id.header_text);
+            if (mHeaderText != null) {
+                mHeaderText.setText(serie + " - " + fleet + " - " + race);
+            }
+        }
 
         if (savedInstanceState != null) {
             try {

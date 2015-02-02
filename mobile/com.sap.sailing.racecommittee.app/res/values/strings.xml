@@ -3,8 +3,8 @@
 
     <string-array name="empty_array" tools:ignore="UnusedResources" />
 
-    <string name="url_google_geocoder" translatable="false">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
-    <string name="urlpart_google_geocoder_sensor" translatable="false">\?sensor=true</string>
+    <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
+    <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
     <string name="service_info">SAP Race Committee Service</string>
@@ -117,7 +117,7 @@
     <string name="results_capturing_view_list_empty">No photos yet</string>
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Results for race %s are attached.</string>
-    
+
     <!-- WIND FRAGMENT -->
     <string name="wind_direction_degrees">Wind direction from (degrees)</string>
     <string name="enter_wind_direction">Direction (from)</string>
@@ -160,7 +160,7 @@
     <string name="set_course_layout">Set the course layout</string>
     <string name="loading_failure">Load failure</string>
     <string name="wind_unknown">(click to set wind)</string>
-    <string name="wind_info">(%1$s kn, %2$s)</string>
+    <string name="wind_info">%2$s / %1$s kn</string>
     <string name="login">Login</string>
     <string name="please_select_a_login_type">Please select a login type.</string>
     <string name="race_list_filter_show_all">Show all</string>
@@ -201,7 +201,7 @@
     <string name="update_app_header">Force update</string>
     <string name="update_app_description">Force an update from the server. It\'s a better idea to use the synchronize option.</string>
     <string name="preference_wakelock_header">Stay screen on</string>
-	<string name="preference_wakelock_summary">Force the screen to stay awake. Caution: Uses more battery.</string>
+    <string name="preference_wakelock_summary">Force the screen to stay awake. Caution: Uses more battery.</string>
     <string name="options_menu_info">Expert Information</string>
     <string name="auto_update_install">Install</string>
     <string name="auto_update_install_anyway">Install anyway</string>
@@ -238,17 +238,17 @@
     <string name="toggle_group_race_mode_off">No Group Racing</string>
     <string name="toggle_group_race_mode_on">Group Racing</string>
 
-    <string name="confirm_start_time" translatable="false">Confirm Start Time</string>
-	<string name="confirm_start_mode" translatable="false">Confirm Start Mode</string>
-	
-	<string name="start_procedure_change" translatable="false">Change Start Procedure</string>
-	<string name="start_procedure_confirm" translatable="false">Confirm Start Procedure</string>
-	<string name="start_procedure_line_start" translatable="false">Line Start</string>
-	<string name="start_procedure_gate_start" translatable="false">Gate Start</string>
-	<string name="start_procedure_ess" translatable="false">ESS</string>
-	<string name="start_procedure_simplified" translatable="false">Simplified</string>
-    <string name="nav_drawer_open" translatable="false">Open Navigation Drawer</string>
-    <string name="nav_drawer_close" translatable="false">Close Navigation Drawer</string>
+    <string name="confirm_start_time">Confirm Start Time</string>
+    <string name="confirm_start_mode">Confirm Start Mode</string>
+
+    <string name="start_procedure_change">Change Start Procedure</string>
+    <string name="start_procedure_confirm">Confirm Start Procedure</string>
+    <string name="start_procedure_line_start">Line Start</string>
+    <string name="start_procedure_gate_start">Gate Start</string>
+    <string name="start_procedure_ess">ESS</string>
+    <string name="start_procedure_simplified">Simplified</string>
+    <string name="nav_drawer_open">Open Navigation Drawer</string>
+    <string name="nav_drawer_close">Close Navigation Drawer</string>
 
     <string name="available_races">Available Races</string>
 
@@ -260,21 +260,28 @@
     <string name="race_show_all">show all</string>
     <string name="race_show_less">show less</string>
 
-    <string name="nav_header" translatable="false">#EVENT#\n#AREA# / #AUTHOR#</string>
+    <string name="nav_header">#EVENT#\n#AREA# / #AUTHOR#</string>
     <string name="races_current">CURRENT RACES</string>
     <string name="races_all">ALL RACES</string>
 
     <string name="welcome">WELCOME</string>
     <string name="change">CHANGE</string>
-    
-    <string name="start_procedure" translatable="false">Start Procedure</string>
-    <string name="start_mode" translatable="false">Start Mode</string>
-    <string name="course" translatable="false">Course</string>
+
+    <string name="start_procedure">PROCEDURE</string>
+    <string name="start_mode">MODE</string>
+    <string name="course">COURSE</string>
+    <string name="wind">WIND</string>
     <string name="loading_events_succeded">Events loaded.</string>
 
-    <string name="login_text" translatable="false">Welcome to SAP Sailing\nRace Committee App</string>
-    <string name="login_sub_text" translatable="false">Where are you?</string>
+    <string name="login_text">Welcome to SAP Sailing\nRace Committee App</string>
+    <string name="login_sub_text">Where are you?</string>
     <string name="empty"></string>
-    <string name="sign_up" translatable="false">Sign Me Up</string>
+    <string name="sign_up">Sign Me Up</string>
+    <string name="wind_display">dd</string>
+    <string name="flags_abandon">Abandon</string>
+    <string name="flags_recall">Recall</string>
+    <string name="flags_course">Course</string>
+    <string name="flags_more">More</string>
+    <string name="flags_postpone">Postpone</string>
 
 </resources>

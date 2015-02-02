@@ -1,76 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <RelativeLayout android:id="@+id/event_header" android:layout_width="match_parent" android:layout_height="100dp">
-        <TextView android:id="@+id/label_event" android:paddingLeft="@dimen/default_padding"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content" android:textColor="@color/white"
-                  android:textAppearance="?android:attr/textAppearanceLarge"
-                  android:layout_centerVertical="true" android:text="@string/label_login_events"/>
-        <ImageView android:id="@+id/icon_event" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                   android:src="@drawable/ic_expand_more_white_18dp" android:layout_centerVertical="true"
-                   android:contentDescription="@string/empty"
-                   android:layout_alignParentRight="true" android:paddingRight="@dimen/default_padding"/>
-        <TextView android:id="@+id/selected_event" android:layout_width="wrap_content" android:textColor="@color/white"
-                  android:textAppearance="?android:attr/textAppearanceMedium"
-                  android:layout_height="wrap_content" android:layout_toLeftOf="@id/icon_event"
-                  android:paddingRight="@dimen/default_padding"
-                  android:layout_centerVertical="true"/>
+    <RelativeLayout
+        android:id="@+id/event_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height">
+
+        <TextView
+            android:id="@+id/label_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingLeft="@dimen/default_padding"
+            android:text="@string/label_login_events"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/icon_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/empty"
+            android:paddingRight="@dimen/default_padding"
+            android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
+
+        <TextView
+            android:id="@+id/selected_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/icon_event"
+            android:paddingRight="@dimen/default_padding"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/white" />
     </RelativeLayout>
-    <View android:id="@+id/event_line" android:layout_width="match_parent" android:layout_height="@dimen/thick_line"
-          android:layout_below="@id/event_header" android:background="@color/black"/>
-    <FrameLayout android:id="@+id/event_fragment" android:layout_width="match_parent" android:layout_height="0dp"
-                 android:background="@color/black_light"
-                 android:layout_below="@id/event_line"/>
 
-    <RelativeLayout android:id="@+id/area_header" android:layout_width="match_parent" android:layout_height="100dp"
-                    android:layout_below="@id/event_fragment">
-        <TextView android:id="@+id/label_area" android:paddingLeft="@dimen/default_padding"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content" android:textColor="@color/white"
-                  android:textAppearance="?android:attr/textAppearanceLarge"
-                  android:layout_centerVertical="true" android:text="@string/label_login_course_area"/>
-        <ImageView android:id="@+id/icon_area" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                   android:src="@drawable/ic_expand_more_white_18dp" android:layout_centerVertical="true"
-                   android:contentDescription="@string/empty"
-                   android:layout_alignParentRight="true" android:paddingRight="@dimen/default_padding"/>
-        <TextView android:id="@+id/selected_area" android:layout_width="wrap_content" android:textColor="@color/white"
-                  android:textAppearance="?android:attr/textAppearanceMedium"
-                  android:layout_height="wrap_content" android:layout_toLeftOf="@id/icon_area"
-                  android:paddingRight="@dimen/default_padding"
-                  android:layout_centerVertical="true"/>
+    <View
+        android:id="@+id/event_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thick_line"
+        android:layout_below="@id/event_header"
+        android:background="@color/black" />
+
+    <FrameLayout
+        android:id="@+id/event_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/event_line"
+        android:background="@color/black_light" />
+
+    <RelativeLayout
+        android:id="@+id/area_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:layout_below="@id/event_fragment">
+
+        <TextView
+            android:id="@+id/label_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingLeft="@dimen/default_padding"
+            android:text="@string/label_login_course_area"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/icon_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/empty"
+            android:paddingRight="@dimen/default_padding"
+            android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
+
+        <TextView
+            android:id="@+id/selected_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/icon_area"
+            android:paddingRight="@dimen/default_padding"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/white" />
     </RelativeLayout>
-    <View android:id="@+id/area_line" android:layout_width="match_parent" android:layout_height="@dimen/thick_line"
-          android:layout_below="@id/area_header" android:background="@color/black"/>
-    <FrameLayout android:id="@+id/area_fragment" android:layout_width="match_parent" android:layout_height="0dp"
-                 android:background="@color/black_light"
-                 android:layout_below="@id/area_line"/>
 
-    <RelativeLayout android:id="@+id/position_header" android:layout_width="match_parent" android:layout_height="100dp"
-                    android:layout_below="@id/area_fragment">
-        <TextView android:id="@+id/label_position" android:paddingLeft="@dimen/default_padding"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content" android:textColor="@color/white"
-                  android:textAppearance="?android:attr/textAppearanceLarge"
-                  android:layout_centerVertical="true" android:text="@string/label_login_position"/>
-        <ImageView android:id="@+id/icon_position" android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:src="@drawable/ic_expand_more_white_18dp" android:layout_centerVertical="true"
-                   android:contentDescription="@string/empty"
-                   android:layout_alignParentRight="true" android:paddingRight="@dimen/default_padding"/>
-        <TextView android:id="@+id/selected_position" android:layout_width="wrap_content"
-                  android:textColor="@color/white" android:textAppearance="?android:attr/textAppearanceMedium"
-                  android:layout_height="wrap_content" android:layout_toLeftOf="@id/icon_position"
-                  android:paddingRight="@dimen/default_padding"
-                  android:layout_centerVertical="true"/>
+    <View
+        android:id="@+id/area_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thick_line"
+        android:layout_below="@id/area_header"
+        android:background="@color/black" />
+
+    <FrameLayout
+        android:id="@+id/area_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/area_line"
+        android:background="@color/black_light" />
+
+    <RelativeLayout
+        android:id="@+id/position_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:layout_below="@id/area_fragment">
+
+        <TextView
+            android:id="@+id/label_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingLeft="@dimen/default_padding"
+            android:text="@string/label_login_position"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/icon_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/empty"
+            android:paddingRight="@dimen/default_padding"
+            android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
+
+        <TextView
+            android:id="@+id/selected_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/icon_position"
+            android:paddingRight="@dimen/default_padding"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/white" />
     </RelativeLayout>
-    <View android:id="@+id/position_line" android:layout_width="match_parent" android:layout_height="@dimen/thick_line"
-          android:layout_below="@id/position_header" android:background="@color/black"/>
-    <FrameLayout android:id="@+id/position_fragment" android:layout_width="match_parent" android:layout_height="0dp"
-                 android:background="@color/black_light"
-                 android:layout_below="@id/position_line"/>
 
-    <include layout="@layout/login_button"/>
+    <View
+        android:id="@+id/position_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thick_line"
+        android:layout_below="@id/position_header"
+        android:background="@color/black" />
+
+    <FrameLayout
+        android:id="@+id/position_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/position_line"
+        android:background="@color/black_light" />
+
+    <include layout="@layout/signup_button"/>
 </RelativeLayout>

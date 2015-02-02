@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="70dp"
-        android:background="@color/grey"
-        android:gravity="center_vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="70dp"
+    android:background="@color/grey"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
 
     <RelativeLayout
-            android:gravity="center_vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:paddingLeft="@dimen/default_padding"
-            android:paddingRight="@dimen/default_padding">
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/default_padding"
+        android:paddingRight="@dimen/default_padding">
 
         <TextView
-                android:id="@+id/list_item"
-                android:textColor="@color/white"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:layout_centerVertical="true"
-                android:layout_alignParentLeft="true"/>
+            android:id="@+id/list_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
         <TextView
-                android:id="@+id/list_item_subtitle"
-                android:textColor="@color/grey_light"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@id/list_item"
-                android:visibility="gone"/>
+            android:id="@+id/list_item_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/list_item"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/grey_light"
+            android:visibility="gone" />
     </RelativeLayout>
 
     <View
-            android:layout_marginLeft="@dimen/default_padding"
-            android:layout_marginRight="@dimen/default_padding"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@color/grey_dark"/>
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginLeft="@dimen/default_padding"
+        android:layout_marginRight="@dimen/default_padding"
+        android:background="@color/grey_dark" />
 
 </LinearLayout>

@@ -11,7 +11,9 @@ import android.hardware.Camera.PictureCallback;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -55,9 +57,9 @@ public class ResultsCapturingActivity extends SessionActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupActionBar();
 
         setContentView(R.layout.results_capturing_view);
+        setupActionBar();
 
         currentImageIndex = 0;
         createAndAdvanceImageFile();
@@ -172,9 +174,27 @@ public class ResultsCapturingActivity extends SessionActivity {
         listView.setAdapter(photoList);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void setupActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(getString(R.string.results_capturing_title));
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setTitle(getString(R.string.results_capturing_title));
+        }
     }
 
     private static File createFinisherImageFile(int index, Context context) {

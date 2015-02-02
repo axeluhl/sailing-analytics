@@ -56,6 +56,4 @@ public class FileHandlerUtils {
     public static File getExternalCacheFolder(Context context) {
         return new File(context.getExternalCacheDir().getPath() + "/");
     }
-    
-    
 }

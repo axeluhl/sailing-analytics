@@ -2,19 +2,19 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary" >
+    android:background="@color/colorPrimary">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize" >
+        android:minHeight="?attr/actionBarSize">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
             android:layout_gravity="end"
             android:gravity="center"
             android:minHeight="?attr/actionBarSize"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <ProgressBar
                 android:id="@+id/progress_spinner"
@@ -41,66 +41,10 @@
         </LinearLayout>
     </android.support.v7.widget.Toolbar>
 
-    <LinearLayout
-        android:id="@+id/toolbar_extended"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/thick_line"
         android:layout_below="@id/toolbar"
-        android:orientation="vertical"
-        android:visibility="gone" >
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:contentDescription="@string/empty"
-            android:src="@color/orange" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:minHeight="?attr/actionBarSize"
-            android:orientation="horizontal" >
-
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1" >
-
-                <Button
-                    android:id="@+id/currentTime"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:drawableLeft="@drawable/ic_access_time_white_36dp"
-                    android:drawableStart="@drawable/ic_access_time_white_36dp"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
-            </RelativeLayout>
-
-            <ImageView
-                android:layout_width="2dp"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/empty"
-                android:src="@color/orange" />
-
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1" >
-
-                <Button
-                    android:id="@+id/windButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:drawableLeft="@drawable/ic_call_made_white_36dp"
-                    android:drawableStart="@drawable/ic_call_made_white_36dp"
-                    android:text="@string/wind_unknown"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
-            </RelativeLayout>
-        </LinearLayout>
-    </LinearLayout>
+        android:background="@color/orange" />
 
 </RelativeLayout>

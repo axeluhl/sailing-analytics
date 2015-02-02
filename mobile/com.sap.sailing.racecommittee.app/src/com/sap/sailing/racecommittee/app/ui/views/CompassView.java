@@ -29,21 +29,21 @@ public class CompassView extends RelativeLayout {
 
     public CompassView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        inflate(context);
+        inflate();
     }
 
     public CompassView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        inflate(context);
+        inflate();
     }
 
     public CompassView(Context context) {
         super(context);
-        inflate(context);
+        inflate();
     }
 
-    private void inflate(Context context) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    private void inflate() {
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.compass_view, this);
     }
 
@@ -55,7 +55,6 @@ public class CompassView extends RelativeLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
         float rotateX = event.getX() - needleView.getX() - getNeedlePivotX();
         float rotateY = (-1) * (event.getY() - needleView.getY() - getNeedlePivotY());
 

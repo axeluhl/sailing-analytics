@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grey"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/panel_left"
+        android:layout_width="@dimen/side_button_width"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/start_procedure"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/start_procedure_marker"
+                android:layout_width="@dimen/thick_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/black_orange" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/start_procedure"
+                android:textSize="@dimen/side_button_textsize" />
+
+            <TextView
+                android:id="@+id/start_procedure_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="@dimen/default_margin_twice"
+                android:gravity="center_horizontal"
+                android:text="@string/start_procedure_line_start"
+                android:textColor="@color/white"
+                android:textSize="@dimen/side_button_textsize" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/thick_line"
+                android:layout_alignParentBottom="true"
+                android:background="@color/black" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/start_mode"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/start_mode_marker"
+                android:layout_width="@dimen/thick_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/black_orange" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/start_mode"
+                android:textSize="@dimen/side_button_textsize" />
+
+            <ImageView
+                android:id="@+id/start_mode_flag"
+                android:layout_width="@dimen/side_button_image_size"
+                android:layout_height="@dimen/side_button_image_size"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="@dimen/default_margin"
+                android:src="@drawable/papa_flag" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/thick_line"
+                android:layout_alignParentBottom="true"
+                android:background="@color/black" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/course"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/course_marker"
+                android:layout_width="@dimen/thick_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/black_orange" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/course"
+                android:textSize="@dimen/side_button_textsize" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/thick_line"
+                android:layout_alignParentBottom="true"
+                android:background="@color/black" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/wind"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/wind_marker"
+                android:layout_width="@dimen/thick_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/black_orange" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/wind"
+                android:textSize="@dimen/side_button_textsize" />
+
+            <TextView
+                android:id="@+id/wind_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="@dimen/default_margin_twice"
+                android:gravity="center_horizontal"
+                android:text="@string/wind_unknown"
+                android:textColor="@color/white"
+                android:textSize="@dimen/side_button_textsize" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/racing_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toEndOf="@id/panel_left"
+        android:layout_toLeftOf="@id/panel_right"
+        android:layout_toRightOf="@id/panel_left"
+        android:layout_toStartOf="@id/panel_right"
+        android:background="@color/black" />
+
+    <LinearLayout
+        android:id="@+id/panel_right"
+        android:layout_width="@dimen/side_button_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/abandon_flags"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/abandon_flags_marker"
+                android:layout_width="@dimen/thick_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/black_orange" />
+
+            <ImageView
+                android:layout_width="@dimen/side_button_image_size"
+                android:layout_height="@dimen/side_button_image_size"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/flags_abandon" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/default_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/flags_abandon"
+                android:textSize="@dimen/side_button_textsize" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/thick_line"
+                android:layout_alignParentBottom="true"
+                android:background="@color/black" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/recall_flags"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/recall_flags_marker"
+                android:layout_width="@dimen/thick_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/black_orange" />
+
+            <ImageView
+                android:layout_width="@dimen/side_button_image_size"
+                android:layout_height="@dimen/side_button_image_size"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/flags_recall" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/default_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/flags_recall"
+                android:textSize="@dimen/side_button_textsize" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/thick_line"
+                android:layout_alignParentBottom="true"
+                android:background="@color/black" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/postpone_flags"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/postpone_flags_marker"
+                android:layout_width="@dimen/thick_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/black_orange" />
+
+            <ImageView
+                android:layout_width="@dimen/side_button_image_size"
+                android:layout_height="@dimen/side_button_image_size"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/flags_postpone" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/default_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/flags_postpone"
+                android:textSize="@dimen/side_button_textsize" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/thick_line"
+                android:layout_alignParentBottom="true"
+                android:background="@color/black" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/course_flags"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/course_flags_marker"
+                android:layout_width="@dimen/thick_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/black_orange" />
+
+            <ImageView
+                android:layout_width="@dimen/side_button_image_size"
+                android:layout_height="@dimen/side_button_image_size"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/flags_course" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/default_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/flags_course"
+                android:textSize="@dimen/side_button_textsize" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/thick_line"
+                android:layout_alignParentBottom="true"
+                android:background="@color/black" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/more_flags"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/more_flags_marker"
+                android:layout_width="@dimen/thick_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/black_orange" />
+
+            <ImageView
+                android:layout_width="@dimen/side_button_image_size"
+                android:layout_height="@dimen/side_button_image_size"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/flags_more" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/default_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/flags_more"
+                android:textSize="@dimen/side_button_textsize" />
+        </RelativeLayout>
+    </LinearLayout>
+</RelativeLayout>

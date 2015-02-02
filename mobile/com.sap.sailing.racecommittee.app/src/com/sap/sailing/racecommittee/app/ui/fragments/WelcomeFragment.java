@@ -23,17 +23,7 @@ public class WelcomeFragment extends Fragment implements OnClickListener {
     private static final String EVENT = "event";
     private static final String AUTHOR = "eventAuthor";
 
-    private CourseArea mCourseArea;
-    private EventBase mEvent;
-    private AbstractLogEventAuthor mEventAuthor;
-
-    public WelcomeFragment() {
-        if (getArguments() != null) {
-            mCourseArea = (CourseArea) getArguments().getSerializable(COURSE);
-            mEvent = (EventBase) getArguments().getSerializable(EVENT);
-            mEventAuthor = (AbstractLogEventAuthor) getArguments().getSerializable(AUTHOR);
-        }
-    }
+    public WelcomeFragment() { }
 
     public static WelcomeFragment newInstance(EventBase event, CourseArea course,
                               AbstractLogEventAuthor raceLogEventAuthor) {
@@ -48,24 +38,29 @@ public class WelcomeFragment extends Fragment implements OnClickListener {
 
     @Override
     public void onClick(View v) {
-        ((RacingActivity) getActivity()).logout();
+        RacingActivity activity = (RacingActivity) getActivity();
+        if (activity != null) {
+            activity.logout();
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.welcome_fragment, container, false);
 
-        TextView event_name = ViewHolder.get(view, R.id.event_name);
-        if (event_name != null && mEvent != null) {
-            event_name.setText(mEvent.getName());
-        }
-        TextView area_name = ViewHolder.get(view, R.id.area_name);
-        if (area_name != null && mCourseArea != null) {
-            area_name.setText(mCourseArea.getName());
-        }
-        TextView position = ViewHolder.get(view, R.id.position);
-        if (position != null && mEventAuthor != null) {
-            position.setText(mEventAuthor.getName());
+        if (getArguments() != null) {
+            TextView event_name = ViewHolder.get(view, R.id.event_name);
+            if (event_name != null && getArguments().getSerializable(EVENT) != null) {
+                event_name.setText(((EventBase) getArguments().getSerializable(EVENT)).getName());
+            }
+            TextView area_name = ViewHolder.get(view, R.id.area_name);
+            if (area_name != null && getArguments().getSerializable(COURSE) != null) {
+                area_name.setText(((CourseArea) getArguments().getSerializable(COURSE)).getName());
+            }
+            TextView position = ViewHolder.get(view, R.id.position);
+            if (position != null && getArguments().getSerializable(AUTHOR) != null) {
+                position.setText(((AbstractLogEventAuthor) getArguments().getSerializable(AUTHOR)).getName());
+            }
         }
 
         Button logout = ViewHolder.get(view, R.id.logout);

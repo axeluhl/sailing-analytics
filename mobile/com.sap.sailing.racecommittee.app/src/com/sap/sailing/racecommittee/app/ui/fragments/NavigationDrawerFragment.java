@@ -11,9 +11,11 @@ import java.util.TreeMap;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.renderscript.Type;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -101,7 +103,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         public void update(ReadonlyRaceState state) {
             dataChanged(state);
             filterChanged();
-        };
+        }
     };
 
     public NavigationDrawerFragment() {
@@ -175,7 +177,6 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
     @Override
     public void notifyTick() {
         if (mAdapter != null && mAdapter.getCount() >= 0 && mUpdateList) {
-            ExLog.i(getActivity(), TAG, "notifyTick() on mAdapter called");
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -214,6 +215,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
 
         mCurrent = (Button) view.findViewById(R.id.races_current);
         if (mCurrent != null) {
+            mCurrent.setTypeface(Typeface.DEFAULT_BOLD);
             mCurrent.setOnClickListener(new OnClickListener() {
 
                 @Override
@@ -226,6 +228,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
 
         mAll = (Button) view.findViewById(R.id.races_all);
         if (mAll != null) {
+            mAll.setTypeface(Typeface.DEFAULT_BOLD);
             mAll.setOnClickListener(new OnClickListener() {
 
                 @Override
@@ -378,7 +381,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
 
         mManagedRacesById.clear();
         mViewItems.clear();
-        List<ManagedRace> raceList = (List<ManagedRace>) races;
+        List<ManagedRace> raceList = new ArrayList<>(races);
         Collections.sort(raceList, new ManagedRaceStartTimeComparator());
         for (ManagedRace managedRace : raceList) {
             mManagedRacesById.put(managedRace.getId(), managedRace);

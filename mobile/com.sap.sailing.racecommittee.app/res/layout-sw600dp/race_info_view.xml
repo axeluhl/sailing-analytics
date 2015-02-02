@@ -3,8 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@color/welter_extralight_gray_transparent"
-    android:orientation="vertical"
-    android:padding="6dp" >
+    android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/InnerRelativeLayout"
@@ -15,14 +14,14 @@
         android:layout_marginRight="5dip"
         android:layout_marginTop="10dip"
         android:gravity="fill_horizontal"
-        android:visibility="gone" >
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/regattaGroupInfoHeader"
@@ -34,7 +33,7 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/raceInfoHeader"
@@ -42,27 +41,27 @@
                     android:layout_height="wrap_content"
                     android:text="@string/empty"
                     android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
-                
+
                 <LinearLayout
-                	android:layout_width="wrap_content"
-                	android:layout_height="wrap_content"
-                	android:orientation="vertical" >
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-                	<TextView
-                    	android:id="@+id/courseInfoHeader"
-                    	android:layout_width="wrap_content"
-                    	android:layout_height="wrap_content"
-                    	android:paddingLeft="6dp"
-                    	android:text="@string/empty"
-                    	android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+                    <TextView
+                        android:id="@+id/courseInfoHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="6dp"
+                        android:text="@string/empty"
+                        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
 
-                	<TextView
-                    	android:id="@+id/windInfoHeader"
-                    	android:layout_width="wrap_content"
-                    	android:layout_height="wrap_content"
-                    	android:paddingLeft="6dp"
-                    	android:text="@string/empty"
-                    	android:textAppearance="@style/TextAppearance.Welter.BigTitleLabelLink" />
+                    <TextView
+                        android:id="@+id/windInfoHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="6dp"
+                        android:text="@string/empty"
+                        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabelLink" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -71,13 +70,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
+
             <Button
-           		android:id="@+id/btnResetRace"
-            	android:layout_width="wrap_content"
-            	android:layout_height="wrap_content"
-            	android:layout_marginRight="10dp"
-            	android:text="@string/reset_race" />
+                android:id="@+id/btnResetRace"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="@string/reset_race" />
         </LinearLayout>
 
         <LinearLayout
@@ -86,8 +86,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:orientation="horizontal" >
-			
+            android:orientation="horizontal">
+
             <TextView
                 android:id="@+id/currentTimeLabel"
                 android:layout_width="wrap_content"
@@ -107,11 +107,16 @@
 
     </RelativeLayout>
 
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        layout="@layout/race_content_header" />
+
     <FrameLayout
         android:id="@+id/infoContainer"
         android:layout_width="fill_parent"
-        android:layout_height="0dip"
-        android:layout_weight="0.1" >
-    </FrameLayout>
+        android:layout_height="0dp"
+        android:layout_weight="3" />
 
 </LinearLayout>

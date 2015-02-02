@@ -64,7 +64,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             eventName = event.getName();
             ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
             preferences.setEventID(eventId);
-            setupDataManager(eventId);
+            setupDataManager();
             showCourseAreaListFragment(eventId);
         }
     };
@@ -79,6 +79,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     };
     private Serializable mSelectedEvent;
     private UUID mSelectedCourseAreaUUID;
+    private ProgressDialog progressDialog;
 
     public LoginActivity() {
         positionFragment = PositionListFragment.newInstance();
@@ -162,7 +163,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
 
         // sets up the global configuration and adds it to the preferences
-        setupDataManager(null);
+        setupDataManager();
 
         new AutoUpdater(this).notifyAfterUpdate();
 
@@ -251,6 +252,15 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
+    }
+
     private void selectCourseArea(UUID courseAreaUUID) {
         // mSelectedCourseArea = courseArea;
         mSelectedCourseAreaUUID = courseAreaUUID;
@@ -258,16 +268,15 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         showAreaPositionListFragment();
     }
 
-    private void setupDataManager(Serializable eventId) {
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+    private void setupDataManager() {
+        progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.loading_configuration));
         progressDialog.setCancelable(false);
         progressDialog.setIndeterminate(true);
         progressDialog.show();
 
-        ReadonlyDataManager dataManager = DataManager.create(LoginActivity.this);
-        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(
-                getApplicationContext()).getDeviceIdentifier());
+        ReadonlyDataManager dataManager = DataManager.create(this);
+        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
 
         LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier,
                 new LoadClient<DeviceConfiguration>() {
@@ -280,13 +289,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                         if (reason instanceof FileNotFoundException) {
                             Toast.makeText(getApplicationContext(),
                                     getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
-                            ExLog.w(LoginActivity.this,
-                                    TAG,
-                                    String.format("There seems to be no configuration for this device: %s",
-                                            reason.toString()));
+                            ExLog.w(LoginActivity.this, TAG,
+                                    String.format("There seems to be no configuration for this device: %s", reason.toString()));
                         } else {
-                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed),
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                             ExLog.ex(LoginActivity.this, TAG, reason);
                         }
                     }
@@ -299,8 +305,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                         // this is our 'global' configuration, let's store it in app preferences
                         PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
 
-                        Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded),
-                                Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                         // showCourseAreaListFragment(eventId);
                     }
                 });

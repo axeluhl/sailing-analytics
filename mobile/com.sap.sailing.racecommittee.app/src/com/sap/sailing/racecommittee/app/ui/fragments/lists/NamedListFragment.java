@@ -162,7 +162,8 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     private void showLoadFailedDialog(String message) {
         FragmentManager manager = getFragmentManager();
         FragmentAttachedDialogFragment dialog = LoadFailedDialog.create(message);
-        dialog.setTargetFragment(this, 0);
+        //FIXME this can't be the real solution for the autologin
+        dialog.setTargetFragment(null, -1);
         // We cannot use DialogFragment#show here because we need to commit the transaction
         // allowing a state loss, because we are effectively in Loader#onLoadFinished()
         manager.beginTransaction().add(dialog, "failedDialog").commitAllowingStateLoss();
