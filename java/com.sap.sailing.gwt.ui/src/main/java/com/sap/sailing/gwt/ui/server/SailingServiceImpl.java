@@ -4524,11 +4524,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) {
+        Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
     	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
     	final CompetitorDTO result;
     	// new competitor
-    	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty()) {
+    	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
     	    BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
     	    DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
     	    DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
@@ -4537,12 +4538,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
                             competitor.getColor(), team, boat));
         } else {
-            Competitor oldC = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
-                    competitor.getIdAsString());
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
-                                    .getColor(), competitor.getSailID(), nationality, oldC.getTeam().getImage())));
+                                    .getColor(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
         }
         return result;
     }
