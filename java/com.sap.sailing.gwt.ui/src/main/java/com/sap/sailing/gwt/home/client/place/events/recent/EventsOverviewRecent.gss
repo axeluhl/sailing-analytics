@@ -58,11 +58,11 @@
   border-bottom: 1px solid #ccc;
   transiton: opacity 0.1s;
 }
-.eventsoverviewrecent_year:nth-child\(even\) {
+.eventsoverviewrecent_year:nth-child(even) {
   background: #f8f8f8;
 }
-.eventsoverviewrecent_year:nth-child\(even\) .eventsoverviewrecent_year_header:hover,
-.eventsoverviewrecent_year:nth-child\(even\) .eventsoverviewrecent_year_header:focus {
+.eventsoverviewrecent_year:nth-child(even) .eventsoverviewrecent_year_header:hover,
+.eventsoverviewrecent_year:nth-child(even) .eventsoverviewrecent_year_header:focus {
   background-color: #f3f3f3;
 }
 .eventsoverviewrecent_yearcollapsed .eventsoverviewrecent_year_header_info_arrow_image {
