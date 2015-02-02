@@ -61,8 +61,8 @@ public class MapMarkerImpl implements MapMarker {
     }
 
     @Override
-    public Color getColor() {
-        String name = this.name.toLowerCase();
+    public Color getColor(Context context) {
+        String name = this.name.toLowerCase(context.getResources().getConfiguration().locale);
         if (name.startsWith("white")) {
             return Color.WHITE;
         } else if (name.startsWith("gray")) {
@@ -99,7 +99,7 @@ public class MapMarkerImpl implements MapMarker {
 
     @Override
     public BitmapDescriptor getMarkerIcon(Context context) {
-        String name = this.name.toLowerCase();
+        String name = this.name.toLowerCase(context.getResources().getConfiguration().locale);
         // buoys
         if (name.startsWith("white")) {
             return BitmapDescriptorFactory.fromResource(R.drawable.buoy_white_grey);

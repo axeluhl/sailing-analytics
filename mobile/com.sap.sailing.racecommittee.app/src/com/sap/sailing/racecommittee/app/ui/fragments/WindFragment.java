@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -298,6 +299,7 @@ public class WindFragment extends LoggableFragment
     /**
      * configures the WindMap-View, including the input field for the position of ones own boat
      */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void setupMap() {
         AppPreferences preferences = AppPreferences.on(activity.getApplicationContext());
         // map location search input
@@ -347,7 +349,6 @@ public class WindFragment extends LoggableFragment
                         windMap.movePositionMarker(new LatLng(markerLat, savedInstanceState.getDouble("markerLng")));
                     }
                 }
-
             }
         }
     }
@@ -512,7 +513,8 @@ public class WindFragment extends LoggableFragment
      * @param animationDuration the duration of the fade
      */
     private void hideView(final View v, int animationDuration) {
-        v.animate().alpha(0f).setDuration(animationDuration)
+        v.animate().alpha(0f)
+                .setDuration(animationDuration)
                 .setListener(new AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {
@@ -593,7 +595,6 @@ public class WindFragment extends LoggableFragment
         currentLocation.setLongitude(marker.getPosition().longitude);
         AppPreferences preferences = AppPreferences.on(activity.getApplicationContext());
         preferences.setWindPosition(marker.getPosition());
-
     }
 
     @Override
@@ -602,8 +603,9 @@ public class WindFragment extends LoggableFragment
 
     @Override
     public void onMapClick(LatLng arg0) {
-        if (bigMap)
+        if (bigMap) {
             windMap.movePositionMarker(arg0);
+        }
     }
 
     @Override

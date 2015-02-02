@@ -16,7 +16,7 @@ public interface MapMarker {
     public ArrayList<TrackMeasurement> getTrack();
     public UUID getID();
     public MarkType getType();
-    public Color getColor();
+    public Color getColor(Context context);
     public Marker getMarker();
     public void setMarker(Marker m);
     public BitmapDescriptor getMarkerIcon(Context context);
