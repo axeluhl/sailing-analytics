@@ -22,7 +22,7 @@
 .eventteaser:hover .eventteaser_image {
   opacity: 0.9;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
-  filter: literal("alpha(opacity=90)");
+  filter: alpha(opacity=90);
 }
 .eventteaser_image {
   position: relative;
