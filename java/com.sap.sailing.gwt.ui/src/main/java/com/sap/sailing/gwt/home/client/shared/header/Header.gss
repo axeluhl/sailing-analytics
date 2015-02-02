@@ -107,7 +107,7 @@
 .searchsmall .search_textfield {
   opacity: 0;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-  filter: literal("alpha(opacity=0)");
+  filter: alpha(opacity=0);
   pointer-events: none;
   -webkit-transition: height 0.1s ease;
   -moz-transition: height 0.1s ease;
