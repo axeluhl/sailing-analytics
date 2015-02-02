@@ -166,7 +166,7 @@ public class EventHeader extends AbstractEventComposite {
             seriesLeaderboardAnchor.setHref(seriesAnalyticsNavigation.getTargetUrl());
             
             StrippedLeaderboardDTO leaderboardFittingToEvent = findLeaderboardWithSameCourseArea(event);
-            if(leaderboardFittingToEvent != null) {
+            if (leaderboardFittingToEvent != null) {
                 regattaNameInSeriesDiv.setInnerText(leaderboardFittingToEvent.displayName);
             } else {
                 regattaNameInSeriesDiv.getStyle().setDisplay(Display.NONE);
