@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>root</artifactId>
+		<groupId>com.sap.sailing</groupId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>com.sap.sse.gwt.theme</artifactId>
+	<packaging>eclipse-plugin</packaging>
+	<dependencies>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.0.0.GA</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.0.0.GA</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.sailing</groupId>
+			<artifactId>com.sap.sse.common</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.sailing</groupId>
+			<artifactId>com.sap.sse.gwt</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-source-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<executions>
+					<execution>
+						<id>plugin-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>plugin-source</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>${gwt.version}</version>
+				<executions>
+					<!-- GWT version detected from dependencyManagement -->
+					<execution>
+						<configuration>
+							<extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
+							<!-- <userAgents>chrome</userAgents> -->
+							<modules>
+								<module>com.sap.sse.gwt.theme.Theme</module>
+							</modules>
+							<gen>${basedir}/.generated</gen>
+							<localWorkers>7</localWorkers>
+							<webappDirectory>${basedir}</webappDirectory>
+							<warSourceDirectory>${basedir}/src/main/resources
+							</warSourceDirectory>
+						</configuration>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>debug.no-gwt-compile</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<version>${gwt.version}</version>
+						<executions>
+							<execution>
+								<configuration combine.self="override">
+									<modules>
+									</modules>
+								</configuration>
+								<goals>
+									<goal>help</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

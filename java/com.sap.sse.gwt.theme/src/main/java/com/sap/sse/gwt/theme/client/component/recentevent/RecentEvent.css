@@ -1,0 +1,47 @@
+.eventteasercontainer {
+  font-size: 1rem;
+  text-align: center;
+  width: 100%;
+  height: 24em;
+}
+.eventteaser {
+  font-size: 1rem;
+  display: inline-block;
+  margin-bottom: 3em;
+  text-align: left;
+  max-width: 100%;
+  width: 100%;
+}
+.eventteaser:hover {
+  text-decoration: none;
+}
+.eventteaser:hover .eventteaser_name {
+  text-decoration: underline;
+}
+.eventteaser:hover .eventteaser_image {
+  opacity: 0.9;
+}
+.eventteaser_image {
+	position: relative;
+    display: inline-block;
+    max-width: 100%;
+    width: 100%;
+    height: 240px;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.eventteaser_series {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.eventteaser_name {
+	font-size: 1.466666666666667em;
+    font-weight: bold;
+    color: #008fcc;
+    margin-top: 0.333333333333333em;
+}
+.eventteaser_location {
+  color: #222;
+}

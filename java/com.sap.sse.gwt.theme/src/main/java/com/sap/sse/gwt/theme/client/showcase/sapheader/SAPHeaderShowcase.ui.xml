@@ -1,0 +1,29 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:ux="urn:import:com.sap.sse.gwt.theme.client.showcase"
+	xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapheader">
+	<ui:style>
+	.holder {
+		width: 400px;
+		display: block;
+		magin: 10px;
+		
+	}
+	</ui:style>
+	<ux:ComponentShowCase name="SAP Header" >
+		<ux:description>
+			<g:HTMLPanel>
+				A simple header with SAP logo and title.
+				<p>Import: xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapheader"</p>
+			</g:HTMLPanel>
+		</ux:description>
+		<ux:component>
+			<g:HTMLPanel>
+				<div class="{style.holder}">
+					<sap:SAPHeader ui:field="sapHeader"></sap:SAPHeader>
+				</div>
+			</g:HTMLPanel>
+		</ux:component>
+	</ux:ComponentShowCase>
+</ui:UiBinder> 

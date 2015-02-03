@@ -1,0 +1,35 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:ux="urn:import:com.sap.sse.gwt.theme.client.showcase"
+	xmlns:ubi="urn:import:com.sap.sse.gwt.theme.client.component.recentevent">
+	<ui:style>
+	.holder {
+		width: 400px;
+		display: block;
+		magin: 10px;
+		
+	}
+	</ui:style>
+	<ux:ComponentShowCase name="Recent Event" >
+		<ux:description>
+			<g:HTMLPanel>
+				This is a very cool recent event widget.
+				<p>Import: xmlns:ubi="urn:import:com.sap.sse.gwt.theme.client.sailing"</p>
+			</g:HTMLPanel>
+		</ux:description>
+		<ux:component>
+			<g:HTMLPanel>
+				<p style="clear: both;">FINISHED:</p>
+				<div class="{style.holder}">
+					<ubi:RecentEvent ui:field="finishedItem"></ubi:RecentEvent>
+				</div>
+				
+				<p style="clear: both;">LIVE:</p>
+				<div class="{style.holder}">
+					<ubi:RecentEvent ui:field="liveItem"></ubi:RecentEvent>
+				</div>
+			</g:HTMLPanel>
+		</ux:component>
+	</ux:ComponentShowCase>
+</ui:UiBinder> 
