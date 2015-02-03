@@ -84,6 +84,11 @@
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
+                                    <id>com.sap.sse.filestorage</id>
+                                    <level>3</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
                                     <id>com.sap.sse.security</id>
                                     <level>3</level>
                                     <autoStart>true</autoStart>
