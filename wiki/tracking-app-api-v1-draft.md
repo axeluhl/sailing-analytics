@@ -202,8 +202,6 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 
 ## Get Team Information of competitor (including team image)
 
-**This Rest-Endpoint is not in the master-branch yet**
-
 Allows to retrieve team information for the team of a certain competitor
 
 **Path:** ``{competitor-id}/team``
@@ -229,8 +227,6 @@ Allows to retrieve team information for the team of a certain competitor
 ```
 
 ## Set Team Image
-
-**This Rest-Endpoint is not in the master-branch yet**
 
 Set the team image of a certain competitor
 
