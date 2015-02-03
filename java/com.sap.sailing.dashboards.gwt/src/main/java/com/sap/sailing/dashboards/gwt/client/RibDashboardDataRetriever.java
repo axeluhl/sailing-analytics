@@ -42,7 +42,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
         TimeListener, RaceSelectionProvider {
 
     private int numberOfChachedStartAnalysisDTOs;
-    private String leaderboardGroupName;
+    private String leaderboardName;
     private ArrayList<RibDashboardDataRetrieverListener> dataRetrieverListener;
     private ArrayList<NewStartAnalysisListener> newStartAnalysisListeners;
     private ArrayList<RaceSelectionChangeListener> raceSelectionChangeListener;
@@ -62,7 +62,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
 
     private static RibDashboardDataRetriever INSTANCE = null;
 
-    private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardName";
+    private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
     private static final String KEY_SLECTED_TEAM_COOKIE = "selectedTeam";
     private static final int SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS = 60 * 1000 * 60 * 5;
 
@@ -72,7 +72,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
         initRacingNotYetStartedPopup();
         MUTEX = new Object();
         ribDashboardService = GWT.create(RibDashboardService.class);
-        this.leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
+        this.leaderboardName = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
         numberOfChachedStartAnalysisDTOs = 0;
         competitorSelectionPopup = new CompetitorSelectionPopup();
         selectedTeamName = Cookies.getCookie(KEY_SLECTED_TEAM_COOKIE);
@@ -106,7 +106,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
     }
 
     private void loadLiveRaceInfoFromRibDashboadService() {
-        ribDashboardService.getLiveRaceInfo(leaderboardGroupName, selectedTeamName,
+        ribDashboardService.getLiveRaceInfo(leaderboardName, selectedTeamName,
                 new AsyncCallback<RibDashboardRaceInfoDTO>() {
                     @Override
                     public void onSuccess(RibDashboardRaceInfoDTO result) {

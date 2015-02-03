@@ -8,6 +8,6 @@ import com.sap.sailing.domain.common.NoWindException;
 @RemoteServiceRelativePath("ribdashboards")
 public interface RibDashboardService extends RemoteService {
 
-    RibDashboardRaceInfoDTO getLiveRaceInfo(String leaderboardGroupName, String competitorName) throws NoWindException;
+    RibDashboardRaceInfoDTO getLiveRaceInfo(String leaderboardName, String competitorName) throws NoWindException;
     
 }

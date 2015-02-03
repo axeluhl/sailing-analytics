@@ -5,6 +5,6 @@ import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 
 public interface RibDashboardServiceAsync {
 
-    void getLiveRaceInfo(String leaderboardGroupName, String competitorName, AsyncCallback<RibDashboardRaceInfoDTO> callback);
+    void getLiveRaceInfo(String leaderboardName, String competitorName, AsyncCallback<RibDashboardRaceInfoDTO> callback);
 
 }

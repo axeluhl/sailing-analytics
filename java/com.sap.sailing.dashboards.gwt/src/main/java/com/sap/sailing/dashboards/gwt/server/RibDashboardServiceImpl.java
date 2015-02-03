@@ -102,18 +102,18 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     }
 
     /**
-     * <param>leaderboardGroupName</param> is used to retrieve the live running race with the method
+     * <param>leaderboardName</param> is used to retrieve the live running race with the method
      * {@link #getLiveRaceFromLeaderboardName(String)}. <param>competitorName</param> If competitorName is null, the
      * response contains only a list of competitors in the live race. Otherwise the parameter is used to return the
      * right startanalysis for a specific competitor with in the returned {@link RibDashboardRaceInfoDTO}.
      * @throws NoWindException 
      * */
     @Override
-    public RibDashboardRaceInfoDTO getLiveRaceInfo(String leaderboardGroupName, String competitorName) throws NoWindException {
+    public RibDashboardRaceInfoDTO getLiveRaceInfo(String leaderboardName, String competitorName) throws NoWindException {
         RibDashboardRaceInfoDTO lRInfo = new RibDashboardRaceInfoDTO();
-        if (leaderboardGroupName != null) {
+        if (leaderboardName != null) {
             TimePoint timePointOfRequest = MillisecondsTimePoint.now();
-            if (checkIfRaceIsStillRunning(timePointOfRequest, leaderboardGroupName)) {
+            if (checkIfRaceIsStillRunning(timePointOfRequest, leaderboardName)) {
                 if (competitorName == null) {
                     fillLiveRaceInfoDTOWithRaceData(lRInfo, timePointOfRequest);
                     logger.log(Level.INFO, "No Competitor selected");
@@ -157,9 +157,9 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     }
 
     // returns true if race is still live
-    private boolean checkIfRaceIsStillRunning(TimePoint now, String leaderboardGroupName) {
+    private boolean checkIfRaceIsStillRunning(TimePoint now, String leaderboardName) {
         if (runningRace == null || !(runningRace.isLive(now))) {
-            runningRace = getLiveRaceFromLeaderboardName(leaderboardGroupName);
+            runningRace = getLiveRaceFromLeaderboardName(leaderboardName);
             if (runningRace == null) {
                 return false;
             } else {
@@ -171,9 +171,9 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         }
     }
 
-    private TrackedRace getLiveRaceFromLeaderboardName(String leaderboardGroupName) {
+    private TrackedRace getLiveRaceFromLeaderboardName(String leaderboardName) {
         TrackedRace result = null;
-        Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardGroupName);
+        Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardName);
         if (lb != null) {
             for (RaceColumn column : lb.getRaceColumns()) {
                 for (Fleet fleet : column.getFleets()) {
