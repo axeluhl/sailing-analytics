@@ -2,39 +2,40 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+  <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.header.HeaderResources" />
-	<g:HTMLPanel>
-		<header class="{local_res.css.siteheader}">
-		  <div class="{res.mediaCss.grid}">
-		    <div class="{res.mediaCss.small2} {res.mediaCss.large3} {res.mediaCss.columns}">
-		        <a href="http://sapsponsorships.com">
-					<g:Image resource="{local_res.logo}" pixelSize="80, 40" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
-				</a>					
-				<p class="{local_res.css.logotitle}">Sailing Analytics</p>
-		    </div>
-		    <div class="{res.mediaCss.small9} {res.mediaCss.medium7} {res.mediaCss.large6} {res.mediaCss.columns}">
-				<nav class="{local_res.css.sitenavigation}">
-					<g:Anchor ui:field="startPageLink"
-						styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" />
-					<g:Anchor ui:field="eventsPageLink"
-						styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
-					<g:Anchor ui:field="solutionsPageLink"
-						styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
-					<!-- 
-					<g:Anchor ui:field="sponsoringPageLink"
-						styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" />
-					 -->
-				</nav>
-		    </div>
-		    <span class="{local_res.css.sitenavigation_search} {res.mediaCss.small1} {res.mediaCss.medium3} {res.mediaCss.columns}">
-	          <div class="{local_res.css.search}">
-	            <g:Button ui:field="searchButton" text="Search" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />
-	            <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />
-	          </div>		        
-      		</span>
-		  </div>
-		</header>
-	</g:HTMLPanel>
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.header.HeaderResources" />
+  <g:HTMLPanel>
+    <!-- Website header-->
+    <header class="{local_res.css.siteheader}">
+      <div class="{res.mediaCss.grid}">
+        <div class="{local_res.css.siteheader_logo} {res.mediaCss.small2} {res.mediaCss.medium2} {res.mediaCss.large3} {res.mediaCss.columns}">
+          <a href="http://sapsponsorships.com">
+            <img src="{local_res.logo.getSafeUri}" alt="{i18n.headerLogo}" class="{local_res.css.siteheader_logo_image}"></img>
+            <p class="{local_res.css.siteheader_logo_title}">
+              <ui:text from='{i18n.headerLogo}' />
+            </p>
+          </a>
+        </div>
+        <nav class="{local_res.css.sitenavigation} {res.mediaCss.small10} {res.mediaCss.medium10} {res.mediaCss.large9} {res.mediaCss.columns}">
+          <g:Anchor ui:field="startPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" />
+          <g:Anchor ui:field="eventsPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
+          <g:Anchor ui:field="solutionsPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
+          <!-- 
+          <g:Anchor ui:field="sponsoringPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" />
+          -->
+          <!-- IF siteNavigation.current -->
+          <span class="{local_res.css.search} {local_res.css.sitenavigation_search}">
+            <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />
+            <g:Button ui:field="searchButton" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />
+          </span>
+          <!-- IFEND siteNavigation.current -->
+        </nav>
+      </div>
+    </header>
+  </g:HTMLPanel>
 </ui:UiBinder>
