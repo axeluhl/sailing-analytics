@@ -6,21 +6,21 @@
 		<g:layer left="0" width="200">
 			<ux:ShowcaseStackLayoutPanel ui:field="stackLayoutPanelUi" unit="EM">
 				<ux:stack>
-					<ux:header size="3">Styleguide</ux:header>
-					<ux:Section>
-						<ux:item name="Typeface Open Sans">
-							<g:HTMLPanel>tbd.</g:HTMLPanel>					
-						</ux:item>
-					</ux:Section>
-				</ux:stack>
-				<ux:stack>
 					<ux:header size="3">Components</ux:header>
 					<ux:Section>
 						<ux:item name="SAP Header">
 							<ux:sapheader.SAPHeaderShowcase />
 						</ux:item>
-						<ux:item name="Recent Event">
-							<ux:recentevent.RecentEventShowcase />
+						<ux:item name="SAP Footer">
+							<ux:sapfooter.SAPFooterShowcase />
+						</ux:item>
+					</ux:Section>
+				</ux:stack>
+				<ux:stack>
+					<ux:header size="3">Styleguide</ux:header>
+					<ux:Section>
+						<ux:item name="Typeface Open Sans">
+							<g:HTMLPanel>tbd.</g:HTMLPanel>					
 						</ux:item>
 					</ux:Section>
 				</ux:stack>

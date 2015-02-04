@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:ux="urn:import:com.sap.sse.gwt.theme.client.showcase"
-	xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapheader">
+	xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapfooter">
 	<ui:style>
 	.showcase_content {
 		width: 100%;
@@ -10,16 +10,16 @@
 		margin: 10px;
 	}
 	</ui:style>
-	<ux:ComponentShowCase name="SAP Header" >
+	<ux:ComponentShowCase name="SAP Footer" >
 		<ux:description>
 			<g:HTMLPanel>
-				A simple header with SAP logo and title.
-				<p>Import: xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapheader"</p>
+				A SAP footer.
+				<p>Import: xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapfooter"</p>
 			</g:HTMLPanel>
 		</ux:description>
 		<ux:component>
 			<g:HTMLPanel styleName="{style.showcase_content}">
-				<sap:SAPHeader ui:field="sapHeader"></sap:SAPHeader>
+				<sap:SAPFooter ui:field="sapFooter"></sap:SAPFooter>
 			</g:HTMLPanel>
 		</ux:component>
 	</ux:ComponentShowCase>

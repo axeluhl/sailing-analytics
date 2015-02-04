@@ -7,4 +7,11 @@ public interface TextMessages extends Messages {
     public static final TextMessages INSTANCE = GWT.create(TextMessages.class);
 
     String chooseALanguage();
+    
+    String footerCopyright();
+    String footerLanguage();
+    String footerLegal();
+    String footerPrivacy();
+    String footerFeedback();
+
 }
