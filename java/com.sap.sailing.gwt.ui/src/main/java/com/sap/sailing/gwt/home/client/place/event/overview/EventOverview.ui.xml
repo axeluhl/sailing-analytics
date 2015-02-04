@@ -11,7 +11,7 @@
 			
 <!-- Ubilabs has to cut this page into partials 
 <div class="{local_res.css.eventoverview}">
-  <div class="{res.mainCss.grid}">
+  <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
       <div class="{local_res.css.eventlivebox}">
         <figure class="{local_res.css.eventlivebox_video} {local_res.css.videowrapper}">
@@ -33,7 +33,7 @@
           <button class="{local_res.css.latestraceresults_refresh} {res.mainCss.button} {res.mainCss.buttonrefresh}">refresh</button>
         </h3>{#if result.details}
         <div class="{local_res.css.latestraceresults_detail}">
-          <div class="{res.mainCss.grid}">
+          <div class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.latestraceresults_detail_title}">{result.title}
             </div>
             <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.latestraceresults_detail_raceCount}">Result after&nbsp;{result.totalRaces}&nbsp;races
@@ -47,11 +47,11 @@
               </div>
             </div>
           </div>
-          <div class="{res.mainCss.grid} {local_res.css.latestraceresults_detail_wrapper}">
+          <div class="{res.mediaCss.grid} {local_res.css.latestraceresults_detail_wrapper}">
             <div class="{res.mediaCss.small3} {res.mediaCss.columns}"><img src="{result.details.thumb.url}" alt="{result.details.thumb.altText}" class="{local_res.css.latestraceresults_detail_wrapper_thumb}"></img></div>
             <div class="{res.mediaCss.small9} {res.mediaCss.columns}">
               <div data-rank="{competitor.rank}" class="{local_res.css.leaderboardcompetitor} {local_res.css.leaderboardcompetitorshort}">
-                <div class="{res.mainCss.grid}">
+                <div class="{res.mediaCss.grid}">
                   <div class="{res.mediaCss.small1} {res.mediaCss.columns} {local_res.css.leaderboardcompetitor_itemcenter}">
                     <div class="{local_res.css.leaderboardcompetitor_rank}">{competitor.rank}</div>
                   </div>
@@ -64,11 +64,11 @@
               <div class="{local_res.css.latestraceresults_detail_wrapper_more}"><a href="{result.details.moreLink}" class="{res.mainCss.button}"> Leaderboard</a></div>
             </div>
           </div>
-        </div>{else}<a href="{result.link}" class="{local_res.css.latestraceresults_link}"><span class="{res.mainCss.grid}"><span class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.latestraceresults_link_title}">{result.title}</span><span class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.latestraceresults_link_raceCount}">Result after&nbsp;{result.totalRaces}&nbsp;races</span><span class="{res.mediaCss.small6} {res.mediaCss.columns}"><span data-labeltype="new" class="{res.mainCss.label}">New</span><span data-labeltype="updated" class="{res.mainCss.label}">Updated</span><span class="{local_res.css.latestraceresults_link_datetime}">{result.time}</span><span class="{local_res.css.latestraceresults_link_datetime}">{result.date}</span></span></span></a>{/if result.details}
+        </div>{else}<a href="{result.link}" class="{local_res.css.latestraceresults_link}"><span class="{res.mediaCss.grid}"><span class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.latestraceresults_link_title}">{result.title}</span><span class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.latestraceresults_link_raceCount}">Result after&nbsp;{result.totalRaces}&nbsp;races</span><span class="{res.mediaCss.small6} {res.mediaCss.columns}"><span data-labeltype="new" class="{res.mainCss.label}">New</span><span data-labeltype="updated" class="{res.mainCss.label}">Updated</span><span class="{local_res.css.latestraceresults_link_datetime}">{result.time}</span><span class="{local_res.css.latestraceresults_link_datetime}">{result.date}</span></span></span></a>{/if result.details}
       </div>
       <div class="{local_res.css.mediateaser} {local_res.css.mediateaserphotos}">
         <h3 class="{local_res.css.mediateaser_title}"><a href="event-media.html" class="{local_res.css.mediateaser_title_link}">Photos&nbsp;<span class="{local_res.css.mediateaser_title_value}">({event.photosCount})</span></a></h3>
-        <div class="{res.mainCss.grid} {local_res.css.lightbox}">
+        <div class="{res.mediaCss.grid} {local_res.css.lightbox}">
           <div class="{local_res.css.lightbox_data}">{event.photos[0].thumb},{event.photos[0].file},{event.photos[0].title};{event.photos[1].thumb},{event.photos[1].file},{event.photos[1].title};{event.photos[2].thumb},{event.photos[2].file},{event.photos[2].title};
           </div>
           <div class="{res.mediaCss.small9} {res.mediaCss.columns}">
@@ -110,7 +110,7 @@
         <div class="{local_res.css.weathershort_title}">
           <h3>Weather</h3>
         </div>
-        <div class="{res.mainCss.grid}">
+        <div class="{res.mediaCss.grid}">
           <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.weathershort_data} {local_res.css.weathershort_datawindspeed}"><span class="{local_res.css.weathershort_data_value}">{event.weather.windSpeed}</span><span class="{local_res.css.weathershort_data_unit}">&nbsp;KTS</span></div>
           <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.weathershort_data} {local_res.css.weathershort_datawinddirection}"><span class="{local_res.css.weathershort_data_value}">{event.weather.windDirection}</span>°</div>
           <div data-currentweather="{event.weather.current}" class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.weathershort_data} {local_res.css.weathershort_datatemperature}"><span class="{local_res.css.weathershort_data_value}">{event.weather.temperature}</span>°</div>

@@ -8,7 +8,7 @@
     <g:HTMLPanel>
 <div class="{local_res.css.eventsoverviewrecent_year}">
   <g:HTMLPanel ui:field="headerDiv" styleName="{local_res.css.eventsoverviewrecent_year_header}">
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.medium2} {res.mediaCss.columns}">
         <h3 class="{local_res.css.eventsoverviewrecent_year_header_title}"><span ui:field="year" /></h3>
       </div>
@@ -38,7 +38,7 @@
     </div>
   </g:HTMLPanel>
   <g:HTMLPanel ui:field="contentDiv" styleName="{local_res.css.eventsoverviewrecent_year_content}">
-    <div ui:field="recentEventsTeaserPanel" class="{res.mainCss.grid}">
+    <div ui:field="recentEventsTeaserPanel" class="{res.mediaCss.grid}">
     </div>
   </g:HTMLPanel>
 </div>

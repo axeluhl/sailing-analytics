@@ -12,7 +12,7 @@
 	</ui:style>
    	<g:HTMLPanel>
 		<div class="{style.events-overview-navigation} {res.mainCss.navbar}">
-		  <div class="{res.mainCss.grid}">
+		  <div class="{res.mediaCss.grid}">
 		    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 		        <g:Anchor href="javascript:;" ui:field="recentEventsLink" styleName="{res.mainCss.navbar_button} {res.mainCss.navbar_buttonactive}" ><ui:text from='{i18n.eventOverviewRecentEvents}'/></g:Anchor>
 		        <g:Anchor href="javascript:;" ui:field="upcomingEventsLink" styleName="{res.mainCss.navbar_button}" ><ui:text from='{i18n.eventOverviewUpcomingSchedule}'/></g:Anchor>

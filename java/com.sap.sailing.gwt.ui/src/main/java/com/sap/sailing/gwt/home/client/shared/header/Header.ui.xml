@@ -7,7 +7,7 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.header.HeaderResources" />
 	<g:HTMLPanel>
 		<header class="{local_res.css.siteheader}">
-		  <div class="{res.mainCss.grid}">
+		  <div class="{res.mediaCss.grid}">
 		    <div class="{res.mediaCss.small2} {res.mediaCss.large3} {res.mediaCss.columns}">
 		        <a href="http://sapsponsorships.com">
 					<g:Image resource="{local_res.logo}" pixelSize="80, 40" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>

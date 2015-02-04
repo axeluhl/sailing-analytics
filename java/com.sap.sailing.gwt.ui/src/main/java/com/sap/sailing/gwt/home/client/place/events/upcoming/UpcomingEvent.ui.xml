@@ -6,7 +6,7 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.events.upcoming.EventsOverviewUpcomingResources" />
     <g:HTMLPanel styleName="{local_res.css.eventslist_event}">
-        <g:Anchor ui:field="eventOverviewLink" styleName="{res.mainCss.grid} {local_res.css.eventslist_event_link}">
+        <g:Anchor ui:field="eventOverviewLink" styleName="{res.mediaCss.grid} {local_res.css.eventslist_event_link}">
 	        <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.eventslist_event_item}"><span ui:field='eventStartDate' /></div>
 	        <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.eventslist_event_item} {local_res.css.eventslist_event_itemname}"><span ui:field='eventName' /></div>
 	        <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.eventslist_event_item}"><span ui:field='venueName' /></div>

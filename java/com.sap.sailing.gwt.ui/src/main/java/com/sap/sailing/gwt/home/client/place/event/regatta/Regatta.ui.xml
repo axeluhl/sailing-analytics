@@ -8,14 +8,14 @@
     <g:HTMLPanel>
 <!-- A view, introducing a regatta-->
 <div ui:field="regattaDiv" class="{local_res.css.regatta}" data-labeltype="">
-  <div class="{res.mainCss.grid}">
+  <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.regatta_intro}">
           <div>
 	          <g:Image ui:field="boatClassImage" height="140" width="140" styleName="{local_res.css.regatta_intro_image}"></g:Image>
           </div>
         <div class="{local_res.css.regatta_intro_header}">
-          <div class="{res.mainCss.grid}">
+          <div class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
 			  <h3 ui:field="regattaNameHeading" class="{local_res.css.regatta_intro_header_name}"></h3>
               <div ui:field="isLiveDiv" data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>

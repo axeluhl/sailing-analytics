@@ -10,14 +10,14 @@
 <!-- The races of races for a day-->
 <s:regatta.Regatta ui:field="regatta" />
 <div class="{local_res.css.regattanavigation}">
-  <div class="{res.mainCss.grid}">
+  <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <g:HTMLPanel ui:field="regattaPhasesNavigationPanel" />
     </div>
   </div>
 </div>
 <div class="{local_res.css.eventregattaraces}">
-  <div class="{res.mainCss.grid}">
+  <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.eventregattaraces_legend}">
         <div class="{local_res.css.eventregattaraces_legend_item} {local_res.css.eventregattaraces_legend_itemgps}"><ui:text from='{i18n.eventRegattaRacesLegendGps}'/></div>

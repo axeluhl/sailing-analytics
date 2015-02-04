@@ -27,7 +27,7 @@
         <!-- The header of an event including the event navigation-->
 <div ui:field="eventHeaderWrapperDiv" data-navigationtype="normal" class="{local_res.css.eventheaderwrapper}">
   <div class="{local_res.css.eventheader}">
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small9} {res.mediaCss.large8} {res.mediaCss.columns}">
         <div class="{local_res.css.eventheader_intro}">
           <div class="{local_res.css.eventheader_intro_logo}"><img ui:field="eventLogo" alt="" class="{local_res.css.eventheader_intro_logo_image}"></img></div>
@@ -60,7 +60,7 @@
     </div>
   </div>
   <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompact}">
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.columns}">
             <g:Anchor ui:field="regattasLink">
               	<img ui:field='eventLogo2' alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
@@ -73,7 +73,7 @@
   </div>
   <!-- 
   <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompactfloating}">
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.columns}">{#if navigation.isEvent}<a href="event-overview.html"><img src="images/{event.logo}" alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img></a><a href="event-overview.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">{event.name}</a>{/if navigation.isEvent}{#if navigation.isSeries}<a href="series-overview.html"><img src="images/{event.logo}" alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img></a><a href="series-overview.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">{event.name}</a>
       </div></s>
     </div>

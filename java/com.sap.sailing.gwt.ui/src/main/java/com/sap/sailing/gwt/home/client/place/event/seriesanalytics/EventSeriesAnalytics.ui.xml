@@ -9,7 +9,7 @@
     <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalyticsResources" />
 	<g:HTMLPanel>
 		<s:header.CompactEventHeader ui:field='eventHeader'/>
-		<div class="{res.mainCss.grid} {local_res.css.regattaleaderboard}">
+		<div class="{res.mediaCss.grid} {local_res.css.regattaleaderboard}">
 		  <div class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.regattaleaderboard_meta}">
 		    <h3 class="{local_res.css.regattaleaderboard_meta_title}">
 		        <span style="color:darkgrey;"><ui:text from='{i18n.series}'/></span>

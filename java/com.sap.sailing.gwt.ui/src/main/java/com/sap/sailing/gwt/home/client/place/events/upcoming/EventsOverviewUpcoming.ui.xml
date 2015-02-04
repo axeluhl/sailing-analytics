@@ -10,13 +10,13 @@
 <!-- Page displays all upcoming events-->
 <div class="{local_res.css.eventsoverviewupcoming}">
   <div class="{local_res.css.eventsoverviewupcoming}">
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.seriesHeaderUpcoming}'/></h2>
       </div>
     </div>
     <div class="{local_res.css.eventslist_header}">
-      <div class="{res.mainCss.grid}">
+      <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.eventslist_header_item}"><ui:text from='{i18n.eventOverviewUpcomingDate}'/></div>
         <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.eventslist_header_item}"><ui:text from='{i18n.eventOverviewUpcomingEvent}'/></div>
         <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.eventslist_header_item}"><ui:text from='{i18n.eventOverviewUpcomingLocation}'/></div>
@@ -28,7 +28,7 @@
     </g:HTMLPanel>
     </div>
   <div class="{local_res.css.eventsoverviewupcoming_teaser}">
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><ui:text from='{i18n.eventOverviewUpcomingTeaser}'/></div>
     </div>
   </div>

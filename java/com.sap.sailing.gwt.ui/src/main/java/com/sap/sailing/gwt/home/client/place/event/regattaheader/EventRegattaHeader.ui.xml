@@ -11,7 +11,7 @@
 <div class="{local_res.css.eventregattaheader}">
 
   <div class="{local_res.css.regatta}">
-    <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
           <div class="{local_res.css.regatta_intro}"><img src="images/home/regatta-boatclass_sample.png" alt="" height="140" width="140" class="{local_res.css.regatta_intro_image}"></img>
           <div class="{local_res.css.regatta_intro_header}">
@@ -46,7 +46,7 @@
 </div>
 <!-- 
 <div class="{local_res.css.regattanavigation}">
-  <div class="{res.mainCss.grid}">
+  <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="event-regatta-schedule.html" class="{local_res.css.regattanavigation_link}"><ui:text from='{i18n.eventRegattaHeaderRaceSchedule}'/></a>
     </div>
   </div>
