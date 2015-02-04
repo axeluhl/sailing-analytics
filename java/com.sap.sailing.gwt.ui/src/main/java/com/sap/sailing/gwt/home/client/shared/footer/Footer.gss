@@ -1,6 +1,6 @@
 .sitefooter {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
   background: #333;
   border-top: 5px solid #fff;
   color: #fff;
@@ -34,4 +34,18 @@
   display: inline-block;
   cursor: pointer;
   margin-left: 0.666666666666667em;
+}
+@media (min-width: 25em) {
+  .sitefooter {
+    line-height: 4.666666666666667em;
+  }
+  .sitefooter_copyright {
+    float: left;
+  }
+  .sitefooter_links_link {
+    display: inline-block;
+  }
+  .sitefooter_language {
+    text-align: right;
+  }
 }

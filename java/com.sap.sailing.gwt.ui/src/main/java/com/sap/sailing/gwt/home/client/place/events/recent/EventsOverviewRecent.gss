@@ -1,13 +1,13 @@
 .eventteasercontainer {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
   text-align: center;
   width: 100%;
   height: 24em;
 }
 .eventteaser {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
   display: inline-block;
   margin-bottom: 3em;
   text-align: left;
@@ -22,7 +22,7 @@
 .eventteaser:hover .eventteaser_image {
   opacity: 0.9;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
-  filter: literal("alpha(opacity=90)");
+  filter: alpha(opacity=90);
 }
 .eventteaser_image {
   position: relative;
@@ -45,24 +45,24 @@
 }
 .eventsoverviewnavigation {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .eventsoverviewnavigation .gridalternator {
   overflow: visible;
 }
 .eventsoverviewrecent {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .eventsoverviewrecent_year {
   border-bottom: 1px solid #ccc;
   transiton: opacity 0.1s;
 }
-.eventsoverviewrecent_year:nth-child\(even\) {
+.eventsoverviewrecent_year:nth-child(even) {
   background: #f8f8f8;
 }
-.eventsoverviewrecent_year:nth-child\(even\) .eventsoverviewrecent_year_header:hover,
-.eventsoverviewrecent_year:nth-child\(even\) .eventsoverviewrecent_year_header:focus {
+.eventsoverviewrecent_year:nth-child(even) .eventsoverviewrecent_year_header:hover,
+.eventsoverviewrecent_year:nth-child(even) .eventsoverviewrecent_year_header:focus {
   background-color: #f3f3f3;
 }
 .eventsoverviewrecent_yearcollapsed .eventsoverviewrecent_year_header_info_arrow_image {

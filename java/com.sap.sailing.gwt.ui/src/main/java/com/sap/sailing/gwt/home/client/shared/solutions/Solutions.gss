@@ -1,6 +1,6 @@
 .solutions {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
   padding-top: 3.4em;
 }
 .solutions_nav {
@@ -44,10 +44,10 @@
   position: relative;
   z-index: 2;
 }
-.solutions_content:nth-child\(odd\) {
+.solutions_content:nth-child(odd) {
   background-color: #f8f8f8;
 }
-.solutions_content:nth-child\(even\) {
+.solutions_content:nth-child(even) {
   background-color: #fff;
 }
 .solutions_content .parallax {
@@ -77,14 +77,14 @@
 }
 .solutions_contentrace {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .solutions_contentrace .gridalternator {
   padding: 2.666666666666667em 0 10%;
 }
 .solutions_contentrace .parallax {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .solutions_contentrace .parallax .background {
   margin: auto;
@@ -105,7 +105,7 @@
 }
 .solutions_contentpost {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .solutions_contentpost .gridalternator {
   background-repeat: no-repeat;
@@ -118,14 +118,14 @@
 }
 .solutions_contenttraining {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .solutions_contenttraining .gridalternator {
   padding-top: 5em;
 }
 .solutions_contenttraining .parallax {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .solutions_contenttraining .parallax .background {
   margin: auto;
@@ -143,7 +143,7 @@
 }
 .solutions_contentsimulator {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
 }
 .solutions_contentsimulator .gridalternator {
   background-repeat: no-repeat;
@@ -157,4 +157,57 @@
 .solutions_content_linkappstore {
   display: inline-block;
   margin-top: 2.666666666666667em;
+}
+
+@media (min-width: 25em) {
+  .solutions_nav_link {
+    margin-right: 1em;
+  }
+  .solutions_content .gridalternator {
+    padding: 5em 0;
+  }
+  .solutions_contentsap .gridalternator {
+    padding: 5em 0 5.666666666666667em;
+  }
+  .solutions_contentrace .gridalternator {
+    padding: 4em 0 15%;
+  }
+  .solutions_contentrace .parallax .background {
+    background-position: center 16.666666666666668em;
+  }
+  .solutions_contentpost .gridalternator {
+    padding: 3.333333333333333em 0;
+  }
+  .solutions_contenttraining .gridalternator {
+    padding-top: 6.666666666666667em;
+  }
+  .solutions_contentsimulator .gridalternator {
+    padding: 5em 0 6.666666666666667em;
+  }
+}
+@media (min-width: 50em) {
+  .solutions_nav_link {
+    margin-right: 2em;
+  }
+  .solutions_content .gridalternator {
+    padding: 6.666666666666667em 0;
+  }
+  .solutions_contentsap .gridalternator {
+    padding: 6.666666666666667em 0 12em;
+  }
+  .solutions_contentrace .gridalternator {
+    padding: 4em 0 20%;
+  }
+  .solutions_contentrace .parallax .background {
+    background-position: center 13.333333333333334em;
+  }
+  .solutions_contentpost .gridalternator {
+    padding: 5em 0;
+  }
+  .solutions_contenttraining .gridalternator {
+    padding-top: 8.333333333333334em;
+  }
+  .solutions_contentsimulator .gridalternator {
+    padding: 6.666666666666667em 0 13.333333333333334em;
+  }
 }
