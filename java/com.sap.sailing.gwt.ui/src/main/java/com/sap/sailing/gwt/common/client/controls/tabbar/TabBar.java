@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.controls.tabbar;
+package com.sap.sailing.gwt.common.client.controls.tabbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class TabBar extends Widget implements HasSelectionHandlers<Class<Place>>
 
     private final Style style = getResources().style();
 
-    private final List<Class<Place>> places = new ArrayList<>();
+    private final List<Class<Place>> knownPlaceClasses = new ArrayList<>();
     private final DivElement tabBarDiv;
     
     public TabBar() {
@@ -82,8 +82,8 @@ public class TabBar extends Widget implements HasSelectionHandlers<Class<Place>>
                         event.stopPropagation();
                         event.preventDefault();
                         // the specific tab was clicked -> fire SelectionEvent with the associated place
-                        GWT.log("Found " + places.get(i));
-                        SelectionEvent.fire(this, places.get(i));
+                        GWT.log("Found " + knownPlaceClasses.get(i));
+                        SelectionEvent.fire(this, knownPlaceClasses.get(i));
                         break;
                     }
                 }
@@ -99,16 +99,16 @@ public class TabBar extends Widget implements HasSelectionHandlers<Class<Place>>
      * @param place
      *            the place that should get selected.
      */
-    public void select(Class<Place> place) {
-        GWT.log("Should activate: " + place.getName());
+    public void select(Place place) {
+        GWT.log("Should activate: " + place.getClass().getName());
         // remove all previous selections
         for (int i = 0; i < tabBarDiv.getChildCount(); i++) {
             Element.as(tabBarDiv.getChild(i)).removeClassName(style.selected());
         }
         // find the tab that has to be selected for the given place
-        for (int i = 0; i < places.size(); i++) {
-            if (place.equals(places.get(i))) {
-                GWT.log("Activate: " + place.getName());
+        for (int i = 0; i < knownPlaceClasses.size(); i++) {
+            if (place.getClass().equals(knownPlaceClasses.get(i))) {
+                GWT.log("Activate: " + place.getClass().getName());
                 // found the associated tab -> set the selected style.
                 Element.as(tabBarDiv.getChild(i)).addClassName(style.selected());
             }
@@ -132,7 +132,7 @@ public class TabBar extends Widget implements HasSelectionHandlers<Class<Place>>
         tabElement.addClassName(style.tab());
 
         tabBarDiv.appendChild(tabElement);
-        places.add(place);
+        knownPlaceClasses.add(place);
     }
 
     /** {@inheritDoc} */

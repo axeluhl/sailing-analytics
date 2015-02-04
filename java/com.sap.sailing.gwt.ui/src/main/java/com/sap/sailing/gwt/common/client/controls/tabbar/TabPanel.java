@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.controls.tabbar;
+package com.sap.sailing.gwt.common.client.controls.tabbar;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,7 +106,7 @@ public class TabPanel<PLACECONTEXT> extends Composite {
             if (currentTab != null) {
                 currentTab.stop();
             }
-            fireEvent(new TabPanelPlaceSelectionEvent(selectedTabActivity));
+            fireEvent(new TabPanelPlaceSelectionEvent<PLACECONTEXT>(selectedTabActivity));
         }
 
     }
@@ -124,7 +124,7 @@ public class TabPanel<PLACECONTEXT> extends Composite {
             final TabActivity<Place, PLACECONTEXT> newTabActivity = knownTabs.get(placeToGo.getClass());
 
             newTabActivity.start(placeToGo, tabContentPanelUi);
-            tabBar.select((Class<Place>) placeToGo.getClass());
+            tabBar.select(placeToGo);
 
             currentTab = newTabActivity;
 

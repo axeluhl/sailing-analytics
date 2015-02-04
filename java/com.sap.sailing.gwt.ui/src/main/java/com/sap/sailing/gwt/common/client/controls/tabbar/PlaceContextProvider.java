@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.controls.tabbar;
+package com.sap.sailing.gwt.common.client.controls.tabbar;
 
 public interface PlaceContextProvider<PLACECONTEXT> {
     

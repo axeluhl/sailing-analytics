@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.controls.tabbar;
+package com.sap.sailing.gwt.common.client.controls.tabbar;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
