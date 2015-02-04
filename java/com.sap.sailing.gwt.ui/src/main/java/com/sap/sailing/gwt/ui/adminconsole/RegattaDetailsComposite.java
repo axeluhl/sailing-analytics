@@ -10,7 +10,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
@@ -33,7 +32,6 @@ import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -54,7 +52,6 @@ public class RegattaDetailsComposite extends Composite {
     private final Label endDate;
     private final Label boatClassName;
     private final Label scoringSystem;
-    private final Anchor dashboardURL;
     private final Label defaultCourseArea;
     private final Label useStartTimeInference;
     private final Label configuration;
@@ -76,7 +73,7 @@ public class RegattaDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 10;
+        int rows = 9;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
@@ -90,7 +87,7 @@ public class RegattaDetailsComposite extends Composite {
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
-        dashboardURL = createAnchorAndValueWidget(grid, currentRow++, "Dashboard URL", "DashboardURLAnchor");
+        
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
@@ -104,15 +101,6 @@ public class RegattaDetailsComposite extends Composite {
         seriesListDataProvider.addDataDisplay(seriesTable);
         vPanel.add(seriesTable);
         initWidget(mainPanel);
-    }
-    
-    private Anchor createAnchorAndValueWidget(Grid grid, int row, String label, String debugId) {
-        Anchor valueAnchor = new Anchor();
-        valueAnchor.setTarget("_blank");
-        valueAnchor.ensureDebugId(debugId);
-        grid.setWidget(row , 0, new Label(label + ":"));
-        grid.setWidget(row , 1, valueAnchor);
-        return valueAnchor;
     }
 
     private Label createLabelAndValueWidget(Grid grid, int row, String label, String debugId) {
@@ -396,25 +384,8 @@ public class RegattaDetailsComposite extends Composite {
             ScoringSchemeType scoringScheme = regatta.scoringScheme;
             String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               
             scoringSystem.setText(scoringSystemText);
-            String encodedDashboardURL = DashboardURLBuilder.getDashboardURLFrom(regatta.getName());
-            dashboardURL.setText(encodedDashboardURL);
-            dashboardURL.setHref(encodedDashboardURL);
             seriesListDataProvider.getList().clear();
             seriesListDataProvider.getList().addAll(regatta.series);
         } 
-    }
-    
-    private static class DashboardURLBuilder {
-        
-        private DashboardURLBuilder(){}
-        
-        private static String getDashboardURLFrom(String leaderboardName) {
-            leaderboardName = URLEncoder.encode(leaderboardName);
-            String moduleBaseURL = GWT.getModuleBaseURL();
-            String baseURL = moduleBaseURL.substring(0,
-                    moduleBaseURL.indexOf('/', moduleBaseURL.indexOf('/', moduleBaseURL.indexOf('/') + 1) + 1) + 1);
-            String dashboardURL = baseURL+"dashboards/RibDashboard.html?leaderboardName="+leaderboardName;
-            return dashboardURL;
-        }
     }
 }
