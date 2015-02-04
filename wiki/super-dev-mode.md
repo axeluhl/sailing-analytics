@@ -19,6 +19,8 @@ You can add "GWT.debugger();" statements to your Java code.
 his will force the JavaScript debugger to stop at this statement.
 So you don't have to manually open the file in the dev tools and set a break point.
 
+In addition, there's a composite launch configuration "SailingGWT All SDM.launch" that will start SDM for the SailingGWT modules as well as the Security UI modules.
+
 ## Using Eclipse debugger for GWT SuperDevMode
 
 Debugging Java Code in the browser is very inconvenient (e.g. you have to manually open the files you already opened in Eclipse).
@@ -29,16 +31,12 @@ Using Using Eclipse debugger for GWT SuperDevMode [[SDBG|http://sdbg.github.io/]
 To start SDM debugging in Eclipse, do the following:
 
 * Start the backend as you would always do.
-* Start GWT Super Dev Mode by launching "SailingGWT sdm.launch".
+* Start GWT Super Dev Mode by launching "SailingGWT sdm.launch" or "SailingGWT All SDM.launch".
 * Do not Click on the URLs provided in "Development view"!
-* Copy one of the URLs instead
-* Go to Run -> Run Configurations ...
-* Create a new configuration of type "Launch Chrome"
-* Paste the URL and select the UI project you launched SDM for
-* Save and run => A new instance of Chrome is started and you will see a debug session running in Eclipse
+* Run "Debug SailingGWT SDM on Chrome.launch"
+* A new instance of Chrome is started and you will see a debug session running in Eclipse
 * Your Eclipse break points will now work in the running debug session.
-
-The created and save run configuration can be used for subsequent launches.
+* You are free to change the URL or navigate to other pages in the automatically openend browser window (debugging will go on)
 
 ### Noteworthy information & Troubleshooting
 
