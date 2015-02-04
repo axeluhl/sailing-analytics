@@ -3,9 +3,10 @@
 <booleanAttribute key="com.google.gdt.eclipse.core.RUN_SERVER" value="false"/>
 <stringAttribute key="com.google.gdt.eclipse.suiteMainTypeProcessor.PREVIOUSLY_SET_MAIN_TYPE_NAME" value="com.google.gwt.dev.GWTShell"/>
 <booleanAttribute key="com.google.gdt.eclipse.suiteWarArgumentProcessor.IS_WAR_FROM_PROJECT_PROPERTIES" value="true"/>
+<stringAttribute key="com.google.gwt.eclipse.core.CODE_SERVER_PORT" value="9875"/>
 <listAttribute key="com.google.gwt.eclipse.core.ENTRY_POINT_MODULES">
-<listEntry value="com.sap.sse.security.ui.Login"/>
 <listEntry value="com.sap.sse.security.ui.EditProfile"/>
+<listEntry value="com.sap.sse.security.ui.Login"/>
 <listEntry value="com.sap.sse.security.ui.EmailValidation"/>
 </listAttribute>
 <booleanAttribute key="com.google.gwt.eclipse.core.SUPERDEVMODE_ENABLED" value="true"/>
