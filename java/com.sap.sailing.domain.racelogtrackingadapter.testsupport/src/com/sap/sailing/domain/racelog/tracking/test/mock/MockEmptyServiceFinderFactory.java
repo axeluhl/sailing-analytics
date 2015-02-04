@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking.test.mock;
 
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
+import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 
 /**
  * A simplified implementation of the {@link TypeBasedServiceFinder} interface that, when the device type

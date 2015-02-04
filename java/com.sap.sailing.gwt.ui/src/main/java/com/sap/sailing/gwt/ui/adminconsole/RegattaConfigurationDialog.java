@@ -62,7 +62,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
 
     public RegattaConfigurationDialog(DeviceConfigurationDTO.RegattaConfigurationDTO regattaConfiguration,
             StringMessages messages, DataEntryDialog.DialogCallback<RegattaConfigurationDTO> callback) {
-        super(messages.racingProcedureConfiguration(), "", messages.save(), messages.cancel(), null, callback);
+        super(messages.racingProcedureConfiguration(), "", messages.save(), messages.cancel(), /* validator */ null, callback);
         this.stringMessages = messages;
         this.originalConfiguration = regattaConfiguration;
     }
@@ -118,7 +118,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
 
     private void setupCourseDesignerListBox(Grid grid, int gridRow) {
         designerModeEntryListBox = new ListBox();
-        racingProcedureListBox.setMultipleSelect(false);
+        designerModeEntryListBox.setMultipleSelect(false);
 
         designerModeEntryListBox.setWidth("100%");
         ListBoxUtils.setupCourseDesignerModeListBox(designerModeEntryListBox,

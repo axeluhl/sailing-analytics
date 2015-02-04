@@ -39,7 +39,6 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
-import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -56,6 +55,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
+import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
@@ -85,6 +86,7 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
@@ -585,4 +587,27 @@ public interface SailingService extends RemoteService {
     
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
+    
+    FileStorageServiceDTO[] getAvailableFileStorageServices();
+
+    /**
+     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
+     */
+    FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName) throws NoCorrespondingServiceRegisteredException;
+
+    /**
+     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
+     */
+    void setActiveFileStorageService(String serviceName) throws NoCorrespondingServiceRegisteredException;
+
+    /**
+     * @return may be {@code null}
+     */
+    String getActiveFileStorageServiceName();
+    
+    /**
+     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
+     * @throws IllegalArgumentException if the property with name {@code propertyName} doesn't exist for the service
+     */
+    void setFileStorageServiceProperties(String serviceName, Map<String, String> properties);
 }
