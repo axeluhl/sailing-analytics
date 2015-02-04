@@ -14,6 +14,7 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
     public static final String ACTION_EDIT = "ACTION_EDIT";
     public static final String ACTION_CONFIGURE_URL = "ACTION_CONFIGURE_URL";
     public static final String ACTION_EXPORT_XML = "ACTION_EXPORT_XML";
+    public static final String ACTION_OPEN_COACH_DASHBOARD = "ACTION_OPEN_COACH_DASHBOARD";
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private final StringMessages stringMessages;
     
@@ -35,6 +36,7 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
                 new ImageSpec(ACTION_EDIT_COMPETITORS, stringMessages.actionEditCompetitors(), makeImagePrototype(resources.competitorsIcon())),
                 new ImageSpec(ACTION_CONFIGURE_URL, stringMessages.actionConfigureUrl(), makeImagePrototype(resources.settingsActionIcon())),
                 new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(resources.removeIcon())),
-                new ImageSpec(ACTION_EXPORT_XML, stringMessages.actionExportXML(), makeImagePrototype(resources.exportXMLIcon())));
+                new ImageSpec(ACTION_EXPORT_XML, stringMessages.actionExportXML(), makeImagePrototype(resources.exportXMLIcon())),
+                new ImageSpec(ACTION_OPEN_COACH_DASHBOARD, stringMessages.actionOpenDashboard(), makeImagePrototype(resources.openCoachDashboard())));
     }
 }
