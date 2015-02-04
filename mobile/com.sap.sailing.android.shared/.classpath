@@ -10,5 +10,6 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry exported="true" kind="lib" path="libs/json-simple-1.1.1.jar"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.sap.sailing.server.gateway.serialization.shared.android"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.sap.sse.shared.android"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
