@@ -19,16 +19,18 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     private String twoLetterIsoCountryCode;
     private String threeLetterIocCountryCode;
     private Color color;
+    private String email;
     private String sailID;
     private String idAsString;
     private BoatClassDTO boatClass;
     
     public CompetitorDTOImpl() {}
     
-    public CompetitorDTOImpl(String name, Color color, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
+    public CompetitorDTOImpl(String name, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String sailID, String idAsString, BoatClassDTO boatClass) {
         super(name);
         this.color = color;
+        this.email = email;
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
@@ -45,6 +47,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         result = prime * result + ((idAsString == null) ? 0 : idAsString.hashCode());
         result = prime * result + ((sailID == null) ? 0 : sailID.hashCode());
         result = prime * result + ((color == null) ? 0 : color.hashCode());
+        result = prime * result + ((email == null) ? 0 : email.hashCode());
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
         return result;
     }
@@ -82,6 +85,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
             if (other.color != null)
                 return false;
         } else if (!color.equals(other.color))
+            return false;
+        if (email == null) {
+            if (other.email != null)
+                return false;
+        } else if (!email.equals(other.email))
             return false;
         return true;
     }
@@ -123,5 +131,13 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
 
     public Color getColor() {
         return color;
+    }
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public String email(){
+        return email;
     }
 }

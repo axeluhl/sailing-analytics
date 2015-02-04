@@ -350,7 +350,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final DomainFactory domainFactory = new DomainFactoryImpl();
         // create the competitor through the competitor store/factory here so that the DomainObjectFactory finds it and
         // resolves the score corrections appropriate
-        Competitor competitor = domainFactory.getOrCreateCompetitor(123, "$$$Dr. Wolfgang+Hunger$$$", Color.RED, new TeamImpl("STG", Collections.singleton(
+        Competitor competitor = domainFactory.getOrCreateCompetitor(123, "$$$Dr. Wolfgang+Hunger$$$", Color.RED, "someone@nowhere.de", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));

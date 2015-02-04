@@ -4536,12 +4536,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	    DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
-                            competitor.getColor(), team, boat));
+                            competitor.getColor(), competitor.getEmail(), team, boat));
         } else {
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
-                                    .getColor(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
+                                    .getColor(), competitor.getEmail(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
         }
         return result;
     }

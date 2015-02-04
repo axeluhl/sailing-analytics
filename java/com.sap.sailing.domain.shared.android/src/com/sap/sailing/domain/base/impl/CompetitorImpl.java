@@ -20,6 +20,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     private String name;
     private Color color;
     private transient Set<CompetitorChangeListener> listeners;
+    private String email;
     
     public CompetitorImpl(Serializable id, String name, Color color, DynamicTeam team, DynamicBoat boat) {
         this.id = id;
@@ -73,7 +74,7 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public Competitor resolve(SharedDomainFactory domainFactory) {
-        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getColor(), getTeam(), getBoat());
+        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getTeam(), getBoat());
         return result;
     }
 
@@ -113,5 +114,18 @@ public class CompetitorImpl implements DynamicCompetitor {
         synchronized (listeners) {
             return new HashSet<CompetitorChangeListener>(listeners);
         }
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String eMail) {
+        //TODO: add E-Mail verification from SecurityServiceImpl
+        this.email = eMail;
+    }
+    
+    public boolean hasEmail(){
+        return !email.isEmpty();
     }
 }

@@ -1137,4 +1137,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String error();
     String setAsActive();
     String fileStorage();
+    String email();
+    String pleaseEnterAnEmail();
 }

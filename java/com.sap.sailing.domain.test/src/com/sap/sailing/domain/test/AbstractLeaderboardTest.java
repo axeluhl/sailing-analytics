@@ -24,7 +24,7 @@ public abstract class AbstractLeaderboardTest {
     }
 
     public static Competitor createCompetitor(String competitorName, CompetitorFactory competitorFactory) {
-        return competitorFactory.getOrCreateCompetitor(competitorName, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
+        return competitorFactory.getOrCreateCompetitor(competitorName, competitorName, Color.RED, "someone@nobody.de", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),

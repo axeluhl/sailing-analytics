@@ -9,4 +9,5 @@ public interface DynamicCompetitor extends Competitor, Renamable {
     DynamicTeam getTeam();
     
     void setColor(Color displayColor);
+    void setEmail(String email);
 }
