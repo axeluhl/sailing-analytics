@@ -1,0 +1,58 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' 
+	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar">
+
+	<ui:style>
+	.header {
+		width: 100%;
+		background-color: #f2f2f2;
+		position: relative;
+	}
+	
+	.headerContent {
+		width: 100%;
+		max-width: 80rem;
+		list-style: none;
+		margin: 0 auto;
+
+	}
+	
+	.back {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: 1em;
+		background-color: #dedede;
+		background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAgCAYAAAAffCjxAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo4OTE2QjZFRjZCRDkxMUU0ODU5N0U1MEE0MjExRjhEMiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo4OTE2QjZGMDZCRDkxMUU0ODU5N0U1MEE0MjExRjhEMiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjg5MTZCNkVENkJEOTExRTQ4NTk3RTUwQTQyMTFGOEQyIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjg5MTZCNkVFNkJEOTExRTQ4NTk3RTUwQTQyMTFGOEQyIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+HQ7CmgAAAOBJREFUeNqs1VEHwzAQB/At3bcre5iyMUpf2m80xp7GpqOv/U77DKPsQkLEJbm73PGnqfoJTe724zjuhHWE3N1zfxAiHWSGNG79NAqIrc1oIJDJKCAXyGoUkMUujAZCgVLINURKUA75xB8bDSQFsREMEiExlEL6EhJCOeRNOWgWamsRD90QZOAgHmqQ9z9uS7DQ5Hbhy8IvyJkLre7eVGH+ry21WHiOqrD4ZIsx7K6JsNTtz2EdB8phM4aVOiQZo/RsEkadIkWMM9dyWMudtCnsIZn9GLZJII+dIF+X4S/AAIE7WYYFvsDQAAAAAElFTkSuQmCC");
+  		background-position: center center;
+  		background-repeat: no-repeat;
+  		background-size: 50%;
+  		-webkit-transition: background-color 0.2s, border-color 0.2s;
+          transition: background-color 0.2s, border-color 0.2s;
+	}
+	
+	.content {
+		width: 100%;
+		height: 100%;
+	}
+	
+	.tabs {
+		clear: both;
+		padding-top: 1rem;
+	}
+	</ui:style>
+
+	<g:FlowPanel>
+		<g:HTMLPanel addStyleNames="{style.header}">
+			<a class="{style.back}" ui:field="back" style="display: none;"></a>
+			<div class="{style.headerContent}">
+				<g:SimplePanel ui:field="additionalHeader" />
+
+				<c:TabBar ui:field="tabBar" addStyleNames="{style.tabs}" />
+			</div>
+		</g:HTMLPanel>
+		<g:SimplePanel ui:field="tabContentPanelUi"
+			addStyleNames="{style.content}" />
+	</g:FlowPanel>
+</ui:UiBinder>
