@@ -185,7 +185,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(5, 2);
+        Grid result = new Grid(6, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
