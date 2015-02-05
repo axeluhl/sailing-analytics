@@ -101,9 +101,4 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     public IsRegattaLike getRegattaLike() {
         return regatta;
     }
-
-    @Override
-    public Iterable<Competitor> getAllCompetitors() {
-        return regatta.getAllCompetitors();
-    }
 }
