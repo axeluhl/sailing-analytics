@@ -132,25 +132,17 @@
 	top: 85pt;
 }
 
-.startanalysis_card_line_data {
+.startanalysis_card_line_advantage {
 	top: 0pt;
 	left: 55pt;
-	width: 110pt;
-	text-align: left;
-	padding-left: 7pt;
-}
-
-.startanalysis_card_line_data_wind {
-	top: 0pt;
-	left: 165pt;
-	width: 85pt;
+	width: 215pt;
 	text-align: left;
 	padding-left: 7pt;
 }
 
 .startanalysis_card_line_data_geo {
 	top: 0pt;
-	left: 250pt;
+	left: 220pt;
 	width: 100pt;
 	text-align: left;
 }

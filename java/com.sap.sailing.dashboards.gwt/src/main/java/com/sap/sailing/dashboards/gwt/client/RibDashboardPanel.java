@@ -61,9 +61,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     public StartLineAdvantageComponent startLineCAComponent;
 
     @UiField
-    public DivElement hint;
-
-    @UiField
     public DivElement windloadinghintleft;
 
     @UiField

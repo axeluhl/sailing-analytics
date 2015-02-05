@@ -14,6 +14,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardService;
+import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
 import com.sap.sailing.dashboards.gwt.shared.ResponseMessage;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
@@ -190,14 +191,39 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     private void fillLiveRaceInfoDTOWithStartLineAdavantageData(RibDashboardRaceInfoDTO lRInfo, TimePoint timePoint) throws NoWindException {
         if (runningRace != null && timePoint != null) {
             StartLineAdvantageDTO startLineAdvantageDTO = new StartLineAdvantageDTO();
-            startLineAdvantageDTO.legTypeOfFirstLegInTrackedRace = getFirstLegTypeOfTrackedRaceAtTimePoint(runningRace, timePoint);
-            startLineAdvantageDTO.liveWindStartLineAdvantage = getWindStartLineAdvantageAtTimePoint(runningRace,
-                    timePoint);
-            startLineAdvantageDTO.liveGeometricStartLineAdvantage = getWindStartLineAdvantageAtTimePoint(
-                    runningRace, timePoint);
-            startLineAdvantageDTO.averageWindStartLineAdvantage = averageStartLineAdvantageByWind.getAverage();
-            startLineAdvantageDTO.averageGeometricStartLineAdvantage = averageStartLineAdvantageByGeometry.getAverage();
+            StartlineAdvantageType startlineAdvantageType = getStartlineAdvantageType(runningRace, timePoint);
+            if(startlineAdvantageType == null || startlineAdvantageType == StartlineAdvantageType.WIND){
+                startLineAdvantageDTO.startLineAdvatageType = StartlineAdvantageType.WIND;
+                double startlineAdvantage = runningRace.getStartLine(timePoint).getAdvantage().getMeters();
+                startLineAdvantageDTO.startLineAdvantage = startlineAdvantage;
+                averageStartLineAdvantageByWind.add(startlineAdvantage);
+                startLineAdvantageDTO.startlineAdvantageAverage = averageStartLineAdvantageByWind.getAverage();
+            }else if(startlineAdvantageType == StartlineAdvantageType.GEOMETRIC){
+                startLineAdvantageDTO.startLineAdvatageType = StartlineAdvantageType.GEOMETRIC;
+                double startlineAdvantage = runningRace.getStartLine(timePoint).getAdvantage().getMeters();
+                startLineAdvantageDTO.startLineAdvantage = startlineAdvantage;
+                averageStartLineAdvantageByGeometry.add(startlineAdvantage);
+                startLineAdvantageDTO.startlineAdvantageAverage = averageStartLineAdvantageByGeometry.getAverage();
+            }
             lRInfo.startLineAdvantageDTO = startLineAdvantageDTO;
+        }
+    }
+    
+    private StartlineAdvantageType getStartlineAdvantageType(TrackedRace trackedRace, TimePoint timePoint) {
+        try {
+            LegType typeOfFirstLeg;
+            typeOfFirstLeg = getFirstLegTypeOfTrackedRaceAtTimePoint(trackedRace, timePoint);
+            switch (typeOfFirstLeg) {
+            case UPWIND:
+                return StartlineAdvantageType.WIND;
+            case REACHING:
+                return StartlineAdvantageType.GEOMETRIC;
+            default:
+                return StartlineAdvantageType.WIND;
+            }
+        } catch (NoWindException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -209,12 +235,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         }else{
             return null;
         }
-    }
-
-    private double getWindStartLineAdvantageAtTimePoint(TrackedRace trackedRace, TimePoint timePoint) {
-        double result = trackedRace.getStartLine(timePoint).getAdvantage().getMeters();
-        averageStartLineAdvantageByWind.add(result);
-        return result;
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {

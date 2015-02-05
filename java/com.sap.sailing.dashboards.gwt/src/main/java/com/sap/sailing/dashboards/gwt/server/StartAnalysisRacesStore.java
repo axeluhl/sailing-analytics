@@ -10,7 +10,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.dashboards.gwt.client.RibDashboardEntryPoint;
+import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.rankingtable.StartAnalysisStartRankTable;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisCompetitorDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisRankingTableEntryDTO;
@@ -30,6 +32,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
@@ -262,8 +265,10 @@ public class StartAnalysisRacesStore {
     private WindAndAdvantagesInfoForStartLineDTO createStartAnalysisWindAndLineData(TrackedRace trackedRace) {
         WindAndAdvantagesInfoForStartLineDTO startAnalysisWindLineInfoDTO = new WindAndAdvantagesInfoForStartLineDTO();
         LineDetails startline = trackedRace.getStartLine(trackedRace.getStartTimeReceived());
-        startAnalysisWindLineInfoDTO.startLineAdvantageByGeometry = startline.getAdvantage().getMeters();
-        startAnalysisWindLineInfoDTO.startLineAdvantageAtPinEnd = startline.getAdvantage().getMeters();
+        StartLineAdvantageDTO startLineAdvantageDTO = new StartLineAdvantageDTO();
+        startLineAdvantageDTO.startLineAdvatageType = getStartlineAdvantageType(trackedRace, new MillisecondsTimePoint(new Date()));
+        startLineAdvantageDTO.startLineAdvantage = startline.getAdvantage().getMeters();
+        startAnalysisWindLineInfoDTO.startLineAdvantage = startLineAdvantageDTO;
         Position portMarkPosition = trackedRace.getOrCreateTrack(
                 trackedRace.getStartLine(trackedRace.getStartTimeReceived()).getStarboardMarkWhileApproachingLine())
                 .getEstimatedPosition(trackedRace.getStartTimeReceived(), /* extrapolate */
@@ -272,6 +277,24 @@ public class StartAnalysisRacesStore {
         startAnalysisWindLineInfoDTO.windDirectionInDegrees = windAtStart.getBearing().getDegrees();
         startAnalysisWindLineInfoDTO.windSpeedInKnots = windAtStart.getKnots();
         return startAnalysisWindLineInfoDTO;
+    }
+
+    private StartlineAdvantageType getStartlineAdvantageType(TrackedRace trackedRace, TimePoint timePoint) {
+        try {
+            LegType typeOfFirstLeg;
+            typeOfFirstLeg = getFirstLegTypeOfTrackedRaceAtTimePoint(trackedRace, timePoint);
+            switch (typeOfFirstLeg) {
+            case UPWIND:
+                return StartlineAdvantageType.WIND;
+            case REACHING:
+                return StartlineAdvantageType.GEOMETRIC;
+            default:
+                return StartlineAdvantageType.WIND;
+            }
+        } catch (NoWindException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public void notifyListernersAboutStartAnalysisDTOChange() {
@@ -365,6 +388,17 @@ public class StartAnalysisRacesStore {
                 : createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated);
     }
 
+    private LegType getFirstLegTypeOfTrackedRaceAtTimePoint(TrackedRace trackedRace, TimePoint timePoint)
+            throws NoWindException {
+        Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
+        if (trackedLegs != null && trackedLegs.iterator().hasNext()) {
+            TrackedLeg firstLegInTrackedRace = trackedLegs.iterator().next();
+            return firstLegInTrackedRace.getLegType(timePoint);
+        } else {
+            return null;
+        }
+    }
+
     private StartAnalysisCompetitorDTO createStartAnalysisCompetitorDTO(TrackedRace trackedRace, int rank,
             Competitor competitor) {
         StartAnalysisCompetitorDTO startAnalysisCompetitorDTOsForRace = new StartAnalysisCompetitorDTO();
@@ -419,8 +453,7 @@ public class StartAnalysisRacesStore {
             if (markPassings.iterator().hasNext()) {
                 if (getIndexOfMarkPassingMark(markPassings, trackedRace) == 1) {
                     logger.log(Level.INFO, "Received Mark Passing " + competitor.getName() + " Mark 1");
-                    if (!getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace)
-                            .contains(competitor)) {
+                    if (!getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).contains(competitor)) {
                         getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).add(competitor);
                         logger.log(Level.INFO, "Received Mark Passing " + competitor.getName() + " RankingList Size"
                                 + getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size());
@@ -451,5 +484,5 @@ public class StartAnalysisRacesStore {
             }
         }
     }
-    
+
 }

@@ -53,13 +53,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     DivElement startanalysis_card_wind_data_speed;
 
     @UiField
-    DivElement startanalysis_card_line_data;
-    
-    @UiField
-    DivElement startanalysis_card_line_data_geo;
-
-    @UiField
-    DivElement startanalysis_card_line_data_wind;
+    DivElement startanalysis_card_line_advantage;
 
     Canvas winddirectionContainer;
     Image windarrow;
@@ -101,17 +95,14 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
         if (startAnalysisDTO.startAnalysisWindLineInfoDTO != null) {
             String winddirectionformatted = NumberFormat.getFormat("#0").format(
                     startAnalysisDTO.startAnalysisWindLineInfoDTO.windDirectionInDegrees-90);
-            this.windarrow.getElement().getStyle()
+            windarrow.getElement().getStyle()
                     .setProperty("transform", "rotate(" + winddirectionformatted + "deg)");
-            this.windarrow.getElement().getStyle().setProperty("webkitTransform", "rotate(" + winddirectionformatted + "deg)");
-            this.startanalysis_card_wind_data_direction
+            windarrow.getElement().getStyle().setProperty("webkitTransform", "rotate(" + winddirectionformatted + "deg)");
+            startanalysis_card_wind_data_direction
                     .setInnerHTML(NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.windDirectionInDegrees) + "°");
-            this.startanalysis_card_wind_data_speed
+            startanalysis_card_wind_data_speed
                     .setInnerHTML(NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.windSpeedInKnots) + " kts");
-            this.startanalysis_card_line_data
-            .setInnerHTML("Startline Advantage:");
-            this.startanalysis_card_line_data_wind.setInnerHTML("<b>Wind:</b> "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageAtPinEnd) + " m");
-            this.startanalysis_card_line_data_geo.setInnerHTML("<b>Geometry:</b> "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantageByGeometry) + " m");
+            startanalysis_card_line_advantage.setInnerHTML(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType.getDisplayName()+": "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantage)+" m");
         }
     }
 

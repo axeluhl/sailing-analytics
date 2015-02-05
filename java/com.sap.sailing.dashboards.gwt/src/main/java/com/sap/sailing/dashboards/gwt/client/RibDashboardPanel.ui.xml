@@ -35,10 +35,6 @@
 						<g:HTMLPanel styleName="{style.startlineadvantagepanel}">
 							<startlineadvantage:StartLineAdvantageComponent
 								ui:field="startLineCAComponent"></startlineadvantage:StartLineAdvantageComponent>
-							<g:HTML styleName="{style.hintpanel}">
-								<div class="{style.hint}" ui:field="hint">Tap to change startline
-									advantage type</div>
-							</g:HTML>
 						</g:HTMLPanel>
 					</g:HTMLPanel>
 				</mgwtpanel:Panel>
