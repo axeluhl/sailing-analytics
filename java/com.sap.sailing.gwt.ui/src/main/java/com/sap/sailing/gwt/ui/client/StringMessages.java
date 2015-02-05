@@ -1137,4 +1137,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String error();
     String setAsActive();
     String fileStorage();
+    String couldNotTestProperties();
+    String couldNotSetProperties();
+    String couldNotSetActiveService();
+    String couldNotLoadActiveService();
+    String couldNotLoadAvailableServices();
 }

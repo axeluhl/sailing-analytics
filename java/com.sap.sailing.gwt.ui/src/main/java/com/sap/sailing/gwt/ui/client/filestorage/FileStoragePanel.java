@@ -16,7 +16,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -36,8 +35,8 @@ import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
- * Provides a management interface for {@link FileStorageService}s. Allows choosing which
- * service to use, and setting the configuration properties of the available services.
+ * Provides a management interface for {@link FileStorageService}s. Allows choosing which service to use, and setting
+ * the configuration properties of the available services.
  * 
  * Essentially, this provides a UI for interfacing with the {@link FileStorageManagementService}.
  * 
@@ -45,6 +44,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
  *
  */
 public class FileStoragePanel extends FlowPanel {
+    private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
 
@@ -63,6 +63,7 @@ public class FileStoragePanel extends FlowPanel {
             StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
 
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
@@ -72,12 +73,12 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         add(refreshButton);
-        
+
         CaptionPanel activeServicePanel = new CaptionPanel(stringMessages.active());
         activeServiceLabel = new Label();
         activeServicePanel.add(activeServiceLabel);
         add(activeServicePanel);
-        
+
         CaptionPanel editServicePanel = new CaptionPanel(stringMessages.edit());
         VerticalPanel editServicePanelContent = new VerticalPanel();
         editServicePanel.add(editServicePanelContent);
@@ -89,7 +90,7 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         editServicePanelContent.add(servicesListBox);
-        
+
         serviceDescriptionLabel = new Label();
         editServicePanelContent.add(serviceDescriptionLabel);
 
@@ -106,7 +107,8 @@ public class FileStoragePanel extends FlowPanel {
         };
         propertiesTable.addColumn(nameColumn, stringMessages.name());
 
-        Column<FileStorageServicePropertyDTO, String> inputColumn = new Column<FileStorageServicePropertyDTO, String>(new TextInputCell()) {
+        Column<FileStorageServicePropertyDTO, String> inputColumn = new Column<FileStorageServicePropertyDTO, String>(
+                new TextInputCell()) {
             @Override
             public String getValue(FileStorageServicePropertyDTO object) {
                 return object.value;
@@ -137,15 +139,15 @@ public class FileStoragePanel extends FlowPanel {
         };
         errorColumn.setCellStyleNames("errorLabel");
         propertiesTable.addColumn(errorColumn, stringMessages.error());
-        
+
         editServicePanelContent.add(propertiesTable);
-        
+
         propertiesErrorLabel = new Label();
         propertiesErrorLabel.setStyleName("errorLabel");
-        editServicePanelContent.add(propertiesErrorLabel);        
-        
+        editServicePanelContent.add(propertiesErrorLabel);
+
         HorizontalPanel buttonsPanel = new HorizontalPanel();
-        
+
         Button saveAndTestPropertiesButton = new Button(stringMessages.save());
         saveAndTestPropertiesButton.addClickHandler(new ClickHandler() {
             @Override
@@ -154,7 +156,7 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         buttonsPanel.add(saveAndTestPropertiesButton);
-        
+
         Button setAsActiveServiceButton = new Button(stringMessages.setAsActive());
         setAsActiveServiceButton.addClickHandler(new ClickHandler() {
             @Override
@@ -163,11 +165,11 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         buttonsPanel.add(setAsActiveServiceButton);
-        
+
         editServicePanelContent.add(buttonsPanel);
-        
+
         add(editServicePanel);
-        
+
         refresh();
     }
 
@@ -175,10 +177,11 @@ public class FileStoragePanel extends FlowPanel {
         int i = servicesListBox.getSelectedIndex();
         return i < 0 ? "" : servicesListBox.getItemText(i);
     }
-    
+
     /**
-     * Test the properties using {@link FileStorageService#testProperties()}, and display
-     * global errors and per-property errors in the according label and table cells.
+     * Test the properties using {@link FileStorageService#testProperties()}, and display global errors and per-property
+     * errors in the according label and table cells.
+     * 
      * @param callback
      */
     private void testProperties(final Callback<Void, Void> callback) {
@@ -200,7 +203,7 @@ public class FileStoragePanel extends FlowPanel {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Could not test properties: " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.couldNotTestProperties() + ": " + caught.getMessage());
                     }
                 });
     }
@@ -221,18 +224,18 @@ public class FileStoragePanel extends FlowPanel {
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not set service properties: " + caught.getMessage());
+                errorReporter.reportError(stringMessages.couldNotSetProperties() + ": " + caught.getMessage());
             }
         });
     }
-    
+
     private void saveAndTestProperties(final Callback<Void, Void> callback) {
         saveProperties(new Callback<Void, Void>() {
             @Override
             public void onSuccess(Void result) {
                 testProperties(callback);
             }
-            
+
             @Override
             public void onFailure(Void reason) {
             }
@@ -248,17 +251,17 @@ public class FileStoragePanel extends FlowPanel {
                     public void onSuccess(Void result) {
                         activeServiceLabel.setText(getSelectedServiceName());
                     }
-                    
+
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Could not set new active service: " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.couldNotSetActiveService() + ": "
+                                + caught.getMessage());
                     }
                 });
             }
-            
+
             @Override
             public void onFailure(Void reason) {
-                Window.alert("Cannot activate service with errors");
             }
         });
 
@@ -279,7 +282,7 @@ public class FileStoragePanel extends FlowPanel {
 
     private void refresh() {
         String oldSelectedService = getSelectedServiceName();
-        
+
         servicesListBox.clear();
         servicesListBox.addItem("");
         availableServices.clear();
@@ -295,7 +298,7 @@ public class FileStoragePanel extends FlowPanel {
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load active file storage service: " + caught.getMessage());
+                errorReporter.reportError(stringMessages.couldNotLoadActiveService() + ": " + caught.getMessage());
             }
         });
 
@@ -310,17 +313,17 @@ public class FileStoragePanel extends FlowPanel {
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load available file storage services: " + caught.getMessage());
+                errorReporter.reportError(stringMessages.couldNotLoadAvailableServices() + ": " + caught.getMessage());
             }
         });
-        
-        for (int i=0; i<servicesListBox.getItemCount(); i++) {
+
+        for (int i = 0; i < servicesListBox.getItemCount(); i++) {
             if (servicesListBox.getItemText(i).equals(oldSelectedService)) {
                 servicesListBox.setSelectedIndex(i);
             }
         }
         onServiceSelectionChanged();
-        
+
         testProperties(null);
     }
 }
