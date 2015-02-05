@@ -6,19 +6,14 @@
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.header.EventHeaderResources" />
   <g:HTMLPanel>
-    <!-- The header of an event including the event navigation-->
-    <!-- navigation rendering, for simulating view state-->
-    <div class="{local_res.css.eventheader}">
-      <a href="TODO event.venue.name" class="{local_res.css.eventheader_breadcrumbback}"></a>
-      <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small12} {res.mediaCss.large9} {res.mediaCss.columns}">
-            <t:BreadcrumbPane ui:field="breadcrumbs" addStyleNames="{local_res.css.eventheader_breadcrumb}" />
+          <t:BreadcrumbPane ui:field="breadcrumbs" addStyleNames="{local_res.css.eventheader_breadcrumb}" />
           <div class="{local_res.css.eventheader_intro}">
             <div class="{local_res.css.eventheader_intro_logo}">
               <img src="TODO event.logo" alt="TODO event.name" class="{local_res.css.eventheader_intro_logo_image}" />
             </div>
             <h2 class="{local_res.css.eventheader_intro_name}">
-              <!-- event.name -->
+              Special Event<!-- TODO event.name -->
               <!-- IF event.state === 'live' -->
               <div data-labeltype="live" class="{res.mainCss.label}">
                 live<!-- <ui:text from='{i18n.eventHeader.event.live}' /> -->
@@ -28,31 +23,31 @@
             <div class="{local_res.css.eventheader_intro_details}">
               <!-- IF event.venue && event.eventType !== 'multi-regatta-event' -->
               <div class="{local_res.css.eventheader_intro_details_item}">
-                <!-- event.date -->
+                September 18 - 22, 2013<!-- TODO event.date -->
               </div>
               <div class="{local_res.css.eventheader_intro_details_item}">
                 <img src="images/home/location-icon.png" class="{local_res.css.locationicon}"></img>
                 <span>
-                  <!-- event.venue.name -->,
-                  <!-- event.venue.country -->
+                  Somwhere<!-- event.venue.name -->,
+                  Australia<!-- event.venue.country -->
                 </span>
               </div>
               <a href="TODO event.website" title="TODO event.website" class="{local_res.css.eventheader_intro_details_item}">
-                <!-- event.website -->
+                sapsailing.com<!-- TODO event.website -->
               </a>
               <!-- IFEND event.venue && event.eventType !== 'multi-regatta-event' -->
               <!-- IF event.eventType === 'multi-regatta-event' -->
               <div class="{local_res.css.eventheader_intro_details_item}">
                 <!-- event.statistics.competitorsCount -->
-                5<!-- TODO <ui:text from='{i18n.eventHeader.competitorsCount}' /> -->
+                5 Competitors<!-- TODO <ui:text from='{i18n.eventHeader.competitorsCount}' /> -->
               </div>
               <div class="{local_res.css.eventheader_intro_details_item}">
                 <!-- event.statistics.racesCount -->
-                7<!-- TODO <ui:text from='{i18n.eventHeader.racesCount}' /> -->
+                7 Races<!-- TODO <ui:text from='{i18n.eventHeader.racesCount}' /> -->
               </div>
               <div class="{local_res.css.eventheader_intro_details_item}">
                 <!-- event.statistics.trackedCount -->
-                4<!-- TODO <ui:text from='{i18n.eventHeader.trackedRacesCount}' /> -->
+                4 Tracked races<!-- TODO <ui:text from='{i18n.eventHeader.trackedRacesCount}' /> -->
               </div>
               <div class="{local_res.css.eventheader_intro_details_item}">
                 <!-- event.category -->
@@ -68,7 +63,5 @@
             <a href="https://www.facebook.com/dialog/feed?app_id=145634995501895&amp;display=page&amp;caption=Lorem%20ipsum%20dolor%20sit%20amet%2C%20consectetuer%20adipiscing%20elit.%20Aenean%20commodo%20ligula%20eget%20dolor.&amp;link=https%3A%2F%2Fstorage.ubidev.net%3Asap-sailing-analytics%3A6120578021%3Adev%3Aindex.html&amp;redirect_uri=https%3A%2F%2Fstorage.ubidev.net%3Asap-sailing-analytics%3A6120578021%3Adev%3Aindex.html" title="undefined" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a>
           </div>
         </div>
-      </div>
-    </div>
   </g:HTMLPanel>
 </ui:UiBinder>

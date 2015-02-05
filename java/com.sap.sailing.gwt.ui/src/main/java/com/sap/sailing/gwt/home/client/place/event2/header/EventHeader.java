@@ -35,6 +35,7 @@ public class EventHeader extends Composite {
         
         this.placeNavigator = placeNavigator;
         
+        EventHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
 }
