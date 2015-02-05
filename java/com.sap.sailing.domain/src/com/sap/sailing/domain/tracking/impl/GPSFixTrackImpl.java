@@ -612,8 +612,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     }
                 }
             }
-            if (logger.isLoggable(Level.FINE) && (estimatedSpeedCacheHits + estimatedSpeedCacheMisses) % 1000 == 0) {
-                logger.fine("estimated speed cache hits/misses: "+estimatedSpeedCacheHits+"/"+estimatedSpeedCacheMisses);
+            if (logger.isLoggable(Level.FINEST) && (estimatedSpeedCacheHits + estimatedSpeedCacheMisses) % 1000 == 0) {
+                logger.finest("estimated speed cache hits/misses: "+estimatedSpeedCacheHits+"/"+estimatedSpeedCacheMisses);
             }
             return result;
         } finally {
