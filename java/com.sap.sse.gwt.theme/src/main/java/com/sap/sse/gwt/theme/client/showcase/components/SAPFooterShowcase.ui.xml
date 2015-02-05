@@ -3,22 +3,16 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:ux="urn:import:com.sap.sse.gwt.theme.client.showcase"
 	xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapfooter">
-	<ui:style>
-	.showcase_content {
-		width: 100%;
-		display: block;
-		margin: 10px;
-	}
-	</ui:style>
+	<ui:with field="res" type="com.sap.sse.gwt.theme.client.showcase.ShowCaseResources" />
 	<ux:ComponentShowCase name="SAP Footer" >
 		<ux:description>
-			<g:HTMLPanel>
+			<g:HTMLPanel styleName="{res.css.showcaseHeader}">
 				A SAP footer.
 				<p>Import: xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapfooter"</p>
 			</g:HTMLPanel>
 		</ux:description>
 		<ux:component>
-			<g:HTMLPanel styleName="{style.showcase_content}">
+			<g:HTMLPanel styleName="{res.css.showcaseContent}">
 				<sap:SAPFooter ui:field="sapFooter"></sap:SAPFooter>
 			</g:HTMLPanel>
 		</ux:component>

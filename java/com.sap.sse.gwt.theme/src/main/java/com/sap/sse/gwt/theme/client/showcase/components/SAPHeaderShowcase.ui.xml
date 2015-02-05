@@ -3,22 +3,16 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:ux="urn:import:com.sap.sse.gwt.theme.client.showcase"
 	xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapheader">
-	<ui:style>
-	.showcase_content {
-		width: 100%;
-		display: block;
-		margin: 10px;
-	}
-	</ui:style>
+	<ui:with field="res" type="com.sap.sse.gwt.theme.client.showcase.ShowCaseResources" />
 	<ux:ComponentShowCase name="SAP Header" >
 		<ux:description>
-			<g:HTMLPanel>
+			<g:HTMLPanel styleName="{res.css.showcaseHeader}">
 				A simple header with SAP logo and title.
 				<p>Import: xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.sapheader"</p>
 			</g:HTMLPanel>
 		</ux:description>
 		<ux:component>
-			<g:HTMLPanel styleName="{style.showcase_content}">
+			<g:HTMLPanel styleName="{res.css.showcaseContent}">
 				<sap:SAPHeader ui:field="sapHeader"></sap:SAPHeader>
 			</g:HTMLPanel>
 		</ux:component>

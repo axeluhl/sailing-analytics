@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.theme.client.showcase.sapheader;
+package com.sap.sse.gwt.theme.client.showcase.components;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

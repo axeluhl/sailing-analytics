@@ -25,6 +25,5 @@
 		</g:SimplePanel>
 		<g:SimplePanel ui:field="componentPanelUi">
 		</g:SimplePanel>
-	
 	</g:HTMLPanel>
 </ui:UiBinder> 

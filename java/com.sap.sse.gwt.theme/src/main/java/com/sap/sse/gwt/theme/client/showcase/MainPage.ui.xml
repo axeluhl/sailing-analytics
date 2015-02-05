@@ -9,10 +9,10 @@
 					<ux:header size="3">Components</ux:header>
 					<ux:Section>
 						<ux:item name="SAP Header">
-							<ux:sapheader.SAPHeaderShowcase />
+							<ux:components.SAPHeaderShowcase />
 						</ux:item>
 						<ux:item name="SAP Footer">
-							<ux:sapfooter.SAPFooterShowcase />
+							<ux:components.SAPFooterShowcase />
 						</ux:item>
 					</ux:Section>
 				</ux:stack>
@@ -20,7 +20,7 @@
 					<ux:header size="3">Styleguide</ux:header>
 					<ux:Section>
 						<ux:item name="Typeface Open Sans">
-							<g:HTMLPanel>tbd.</g:HTMLPanel>					
+							<ux:styleguide.TypefaceStyleguide />
 						</ux:item>
 					</ux:Section>
 				</ux:stack>
