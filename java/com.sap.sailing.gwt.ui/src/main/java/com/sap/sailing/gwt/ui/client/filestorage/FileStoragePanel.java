@@ -31,8 +31,19 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
 import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyDTO;
 import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
+import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.gwt.client.ErrorReporter;
 
+/**
+ * Provides a management interface for {@link FileStorageService}s. Allows choosing which
+ * service to use, and setting the configuration properties of the available services.
+ * 
+ * Essentially, this provides a UI for interfacing with the {@link FileStorageManagementService}.
+ * 
+ * @author Fredrik Teschke
+ *
+ */
 public class FileStoragePanel extends FlowPanel {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -165,6 +176,11 @@ public class FileStoragePanel extends FlowPanel {
         return i < 0 ? "" : servicesListBox.getItemText(i);
     }
     
+    /**
+     * Test the properties using {@link FileStorageService#testProperties()}, and display
+     * global errors and per-property errors in the according label and table cells.
+     * @param callback
+     */
     private void testProperties(final Callback<Void, Void> callback) {
         sailingService.testFileStorageServiceProperties(getSelectedServiceName(),
                 new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
