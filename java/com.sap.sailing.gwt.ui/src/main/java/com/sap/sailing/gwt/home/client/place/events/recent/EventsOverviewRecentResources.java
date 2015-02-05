@@ -11,12 +11,6 @@ public interface EventsOverviewRecentResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
-        String eventteasercontainer();
-        String eventteaser();
-        String eventteaser_name();
-        String eventteaser_image();
-        String eventteaser_series();
-        String eventteaser_location();
         String eventsoverviewnavigation();
         String gridalternator();
         String eventsoverviewrecent();
