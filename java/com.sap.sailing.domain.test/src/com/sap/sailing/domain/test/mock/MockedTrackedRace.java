@@ -290,7 +290,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public Iterable<Competitor> getCompetitors() {
+                    public Iterable<Competitor> getAllCompetitors() {
                         return null;
                     }
 
