@@ -5,12 +5,14 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasOneWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.recentevent.RecentEvent;
@@ -28,8 +30,8 @@ public class EventsOverviewRecentYear extends Composite {
 //    @UiField SpanElement countriesCount;
 //    @UiField SpanElement sailorsCount;
 //    @UiField SpanElement trackedRacesCount;
-    @UiField DivElement recentEventsTeaserPanel;
-    @UiField HTMLPanel contentDiv;
+    @UiField HasOneWidget recentEventsTeaserPanel;
+    @UiField DivElement contentDiv;
     @UiField HTMLPanel headerDiv;
     
     private boolean isContentVisible;
@@ -44,7 +46,7 @@ public class EventsOverviewRecentYear extends Composite {
 //        this.trackedRacesCount.setInnerText("tbd.");
         for (EventBaseDTO eventDTO : events) {
             RecentEvent recentEvent = new RecentEvent(navigator, eventDTO);
-            recentEventsTeaserPanel.appendChild(recentEvent.getElement());
+            recentEventsTeaserPanel.setWidget(recentEvent);
         }
         isContentVisible = true;
         headerDiv.addDomHandler(new ClickHandler() {
@@ -71,10 +73,11 @@ public class EventsOverviewRecentYear extends Composite {
     }
     
     private void updateContentVisibility() {
-        contentDiv.setVisible(isContentVisible);
         if(isContentVisible) {
+            contentDiv.getStyle().clearDisplay();
             headerDiv.getElement().removeClassName(EventsOverviewRecentResources.INSTANCE.css().eventsoverviewrecent_yearcollapsed());
         } else {
+            contentDiv.getStyle().setDisplay(Display.NONE);
             headerDiv.getElement().addClassName(EventsOverviewRecentResources.INSTANCE.css().eventsoverviewrecent_yearcollapsed());
         }
     }
