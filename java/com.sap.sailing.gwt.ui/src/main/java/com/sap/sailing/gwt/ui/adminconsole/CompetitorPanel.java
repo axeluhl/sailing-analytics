@@ -85,6 +85,35 @@ public class CompetitorPanel extends SimplePanel {
 			}
 		});
         buttonPanel.add(addCompetitorButton);
+
+        final Button inviteCompetitorsButton = new Button(stringMessages.inviteCompetitors());
+        inviteCompetitorsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                //TODO: check, whether all have an email attached and send email
+                Iterable<CompetitorDTO> Competitors = competitorTable.getAllCompetitors();
+                boolean emailProvidedForAll = isEmailProvidedForAll(Competitors);
+                
+                if (emailProvidedForAll){
+                    Window.alert("Sending successfull");
+                } else {
+                    Window.alert(stringMessages.notAllCompetitorsProvideEmail());
+                }
+            }
+
+            private boolean isEmailProvidedForAll(Iterable<CompetitorDTO> allCompetitors) {
+                for (CompetitorDTO competitor : allCompetitors){
+                    if (!competitor.hasEmail()){
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+        });
+        buttonPanel.add(inviteCompetitorsButton);
+        
+        
         competitorsPanel.add(buttonPanel);
 
         
@@ -117,16 +146,19 @@ public class CompetitorPanel extends SimplePanel {
             refreshCompetitorList();
         }
     }
-    
+
     private void allowUpdate(final Iterable<CompetitorDTO> competitors) {
         List<CompetitorDTO> serializableSingletonList = new ArrayList<CompetitorDTO>();
         Util.addAll(competitors, serializableSingletonList);
         sailingService.allowCompetitorResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
-            @Override public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to allow resetting competitors "+competitors
-                        +" to defaults: "+caught.getMessage());
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to allow resetting competitors " + competitors
+                        + " to defaults: " + caught.getMessage());
             }
-            @Override public void onSuccess(Void result) {
+
+            @Override
+            public void onSuccess(Void result) {
                 Window.alert(stringMessages.successfullyAllowedCompetitorReset(competitors.toString()));
             }
         });
@@ -143,7 +175,7 @@ public class CompetitorPanel extends SimplePanel {
                 sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to update competitor: "+caught.getMessage());
+                        errorReporter.reportError("Error trying to update competitor: " + caught.getMessage());
                     }
 
                     @Override
@@ -158,7 +190,7 @@ public class CompetitorPanel extends SimplePanel {
             }
         }).show();
     }
-    
+
     public void refreshCompetitorList() {
         competitorTable.refreshCompetitorList(leaderboardName);
     }

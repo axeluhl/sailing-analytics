@@ -140,4 +140,9 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     public String email(){
         return email;
     }
+
+    @Override
+    public boolean hasEmail() {
+        return !email.isEmpty();
+    }
 }

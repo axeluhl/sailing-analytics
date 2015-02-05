@@ -103,4 +103,9 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
     public CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
         return previousVersion.competitors.get(indexInPreviousCompetitorList);
     }
+
+    @Override
+    public boolean hasEmail() {
+        return false;
+    }
 }
