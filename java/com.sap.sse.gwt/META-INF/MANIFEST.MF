@@ -6,7 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.google.gwt.osgi;bundle-version="2.7.0",
- com.sap.sse.common;bundle-version="1.0.0"
+ com.sap.sse.common,
+ com.sap.sse.filestorage
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",
@@ -31,5 +32,6 @@ Export-Package: com.sap.sse.gwt.client,
  com.sap.sse.gwt.client.player,
  com.sap.sse.gwt.client.useragent,
  com.sap.sse.gwt.server,
+ com.sap.sse.gwt.server.filestorage,
  com.sap.sse.gwt.shared,
  com.sap.sse.gwt.shared.filestorage
