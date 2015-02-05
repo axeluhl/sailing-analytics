@@ -298,12 +298,7 @@ public class ReplicationReceiver implements Runnable {
     }
     
     private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                replicable.applyReceivedReplicated(operation);
-            }
-        };
+        Runnable runnable = () -> replicable.applyReceivedReplicated(operation);
         if (operation.requiresSynchronousExecution()) {
             runnable.run();
         } else {
