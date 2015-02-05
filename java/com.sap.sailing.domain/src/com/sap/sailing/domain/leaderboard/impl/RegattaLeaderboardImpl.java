@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -97,6 +98,24 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         }
     }
     
+    @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        //FIXME: this is a dirty hack for now, until I know, why the tracked competitors do not appear on the regattaLog.getAllCompetitors!
+        
+        HashSet<Competitor> competitors = new HashSet<Competitor>();
+        
+        
+        for(Competitor competitor : super.getAllCompetitors()){
+            competitors.add(competitor);
+        }
+        
+        for(Competitor competitor : regatta.getAllCompetitors()){
+            competitors.add(competitor);
+        }
+        
+        return competitors; 
+    }
+
     @Override
     public IsRegattaLike getRegattaLike() {
         return regatta;

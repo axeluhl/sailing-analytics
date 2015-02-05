@@ -90,12 +90,22 @@ public class CompetitorPanel extends SimplePanel {
         inviteCompetitorsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                //TODO: check, whether all have an email attached and send email
-                Iterable<CompetitorDTO> Competitors = competitorTable.getAllCompetitors();
-                boolean emailProvidedForAll = isEmailProvidedForAll(Competitors);
+                Iterable<CompetitorDTO> competitors = competitorSelectionModel.getSelectedSet();
+                boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
                 
                 if (emailProvidedForAll){
-                    Window.alert("Sending successfull");
+                        sailingService.sendInvitationEmailToCompetitors(competitors, new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.sendingMailsFailed()+caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Window.alert(stringMessages.sendingMailsSuccessfull());
+                            }
+                        });
                 } else {
                     Window.alert(stringMessages.notAllCompetitorsProvideEmail());
                 }

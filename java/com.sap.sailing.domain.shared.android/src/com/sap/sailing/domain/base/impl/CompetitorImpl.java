@@ -126,6 +126,9 @@ public class CompetitorImpl implements DynamicCompetitor {
     }
     
     public boolean hasEmail(){
+        if (email == null){
+            return false;
+        }
         return !email.isEmpty();
     }
 }

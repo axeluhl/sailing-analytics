@@ -90,6 +90,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.security.shared.MailException;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
@@ -599,4 +600,6 @@ public interface SailingService extends RemoteService {
      * @throws IllegalArgumentException if the property with name {@code propertyName} doesn't exist for the service
      */
     void setFileStorageServiceProperties(String serviceName, Map<String, String> properties);
+    
+    void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors) throws MailException;
 }

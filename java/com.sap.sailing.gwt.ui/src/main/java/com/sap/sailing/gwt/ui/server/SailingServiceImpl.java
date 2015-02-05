@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -46,6 +49,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
 import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
@@ -54,6 +64,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.Revokable;
@@ -428,6 +439,7 @@ import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.security.shared.MailException;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
 /**
@@ -493,6 +505,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final SwissTimingReplayService swissTimingReplayService;
 
     private final QuickRanksLiveCache quickRanksLiveCache;
+    
+    private final Properties mailProperties;
+    
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
@@ -543,6 +558,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
+        
+        final String jettyHome = System.getProperty("jetty.home", "configuration");
+        final File propertiesDir = new File(jettyHome).getParentFile();
+        File propertiesfile = new File(propertiesDir, "security.properties");
+        mailProperties = new Properties();
+        try {
+            mailProperties.load(new FileReader(propertiesfile));
+        } catch (IOException ioe) {
+            try {
+                logger.log(Level.SEVERE, "Couldn't read security properties from "+propertiesfile.getCanonicalPath(), ioe);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Couldn't read security properties and could net fetch canonical path");
+            }
+        }
     }
     
     /**
@@ -5480,6 +5509,52 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return getService().getFileStorageManagementService().getActiveFileStorageService().getName();
         } catch (NoCorrespondingServiceRegisteredException e) {
             return null;
+        }
+    }
+
+    
+    private class SMTPAuthenticator extends javax.mail.Authenticator {
+
+        public PasswordAuthentication getPasswordAuthentication() {
+           String username = mailProperties.getProperty("mail.smtp.user");
+           String password = mailProperties.getProperty("mail.smtp.password");
+           return new PasswordAuthentication(username, password);
+        }
+    }
+    
+    @Override
+    public void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors) throws MailException {
+        if (!(this.mailProperties != null && this.mailProperties.containsKey("mail.transport.protocol"))) {
+            Window.alert("Check this, not implemented yet!");
+            return;
+        }
+        
+        StringBuilder occuredExceptions = new StringBuilder();
+        
+        for (CompetitorDTO competitor : competitors){
+            final String toAddress = competitor.getEmail();
+            if (toAddress != null) {
+                Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
+                MimeMessage msg = new MimeMessage(session);
+                try {
+                    msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
+                    msg.setSubject("Invitation to a SAP Sailing Analytics event"); //FIXME: I18N?
+                    msg.setContent("Test", "text/plain");
+                    msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
+                    Transport ts = session.getTransport();
+                    ts.connect();
+                    ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
+                    ts.close();
+                    logger.info("mail sent to competitor " + competitor.getName() + " with e-mail address " + toAddress);
+                } catch (MessagingException  e) {
+                    logger.log(Level.SEVERE, "Error trying to send mail to user " + competitor.getName()
+                            + " with e-mail address " + toAddress, e);
+                    occuredExceptions.append(e.getMessage()+"\r\n");
+                }
+            }
+        }
+        if (!(occuredExceptions.length() == 0)){
+            throw new MailException(occuredExceptions.toString());
         }
     }
 }

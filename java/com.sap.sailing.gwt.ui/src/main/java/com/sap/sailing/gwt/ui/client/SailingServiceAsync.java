@@ -696,6 +696,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void setActiveFileStorageService(String serviceName, AsyncCallback<Void> callback);
 
-    void getActiveFileStorageServiceName(AsyncCallback<String> callback); 
+    void getActiveFileStorageServiceName(AsyncCallback<String> callback);
+
+    void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> callback); 
 
 }

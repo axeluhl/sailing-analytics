@@ -1141,4 +1141,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String pleaseEnterAnEmail();
     String inviteCompetitors();
     String notAllCompetitorsProvideEmail();
+    String sendingMailsFailed();
+    String sendingMailsSuccessfull();
 }
