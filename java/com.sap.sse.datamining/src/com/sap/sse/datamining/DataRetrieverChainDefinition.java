@@ -6,8 +6,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
+import com.sap.sse.i18n.ServerStringMessages;
 
 public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
     
@@ -17,7 +17,7 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
     
     public Class<DataType> getRetrievedDataType();
     
-    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages);
+    public String getLocalizedName(Locale locale, ServerStringMessages stringMessages);
 
     public <ResultType> void startWith(Class<Processor<DataSourceType, ResultType>> retrieverType, Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey);
 

@@ -15,12 +15,12 @@ import org.junit.Test;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.datamining.data.ClusterGroup;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.i18n.ServerStringMessages;
 
 public class TestFixClusterGroup {
 
-    private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessages();
+    private static final ServerStringMessages stringMessages = TestsUtil.getTestStringMessages();
     
     private static final Comparator<Integer> comparator = new ComparableComparator<Integer>();
     private Cluster<Integer> clusterLowerThanZero;

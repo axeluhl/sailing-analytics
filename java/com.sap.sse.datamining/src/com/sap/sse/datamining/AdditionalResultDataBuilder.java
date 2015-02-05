@@ -3,8 +3,8 @@ package com.sap.sse.datamining;
 import java.util.Locale;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.AdditionalResultData;
+import com.sap.sse.i18n.ServerStringMessages;
 
 /**
  * These builders are used to collect the additional result data from different sources (e.g. the Processors)
@@ -12,7 +12,7 @@ import com.sap.sse.datamining.shared.AdditionalResultData;
  */
 public interface AdditionalResultDataBuilder {
 
-    public AdditionalResultData build(long calculationTimeInNanos, DataMiningStringMessages stringMessages, Locale locale);
+    public AdditionalResultData build(long calculationTimeInNanos, ServerStringMessages stringMessages, Locale locale);
 
     public void setRetrievedDataAmount(int retrievedDataAmount);
     

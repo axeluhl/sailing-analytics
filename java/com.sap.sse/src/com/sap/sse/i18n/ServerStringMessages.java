@@ -1,10 +1,10 @@
-package com.sap.sse.datamining.i18n;
+package com.sap.sse.i18n;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public interface DataMiningStringMessages {
+public interface ServerStringMessages {
 
     public String getResourceBaseName();
 

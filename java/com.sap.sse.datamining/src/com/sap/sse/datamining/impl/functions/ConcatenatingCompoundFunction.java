@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Locale;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.i18n.ServerStringMessages;
 
 public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
@@ -86,7 +86,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     }
 
     @Override
-    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+    public String getLocalizedName(Locale locale, ServerStringMessages stringMessages) {
         if (name != null && !name.isEmpty()) {
             return name;
         }
@@ -107,7 +107,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         return false;
     }
 
-    private String buildLocalizedNameChain(Locale locale, DataMiningStringMessages stringMessages) {
+    private String buildLocalizedNameChain(Locale locale, ServerStringMessages stringMessages) {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         for (Function<?> function : functions) {

@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.i18n;
+package com.sap.sse.i18n.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,27 +10,27 @@ import java.util.MissingResourceException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.i18n.ServerStringMessages;
 
-public class CompoundDataMiningStringMessages implements DataMiningStringMessages {
+public class CompoundServerStringMessages implements ServerStringMessages {
     
-    private static final Logger LOGGER = Logger.getLogger(CompoundDataMiningStringMessages.class.getSimpleName());
+    private static final Logger LOGGER = Logger.getLogger(CompoundServerStringMessages.class.getSimpleName());
     
-    private final Collection<DataMiningStringMessages> stringMessages;
+    private final Collection<ServerStringMessages> stringMessages;
     
-    public CompoundDataMiningStringMessages() {
+    public CompoundServerStringMessages() {
         stringMessages = new HashSet<>();
     }
 
-    public CompoundDataMiningStringMessages(Collection<DataMiningStringMessages> stringMessages) {
+    public CompoundServerStringMessages(Collection<ServerStringMessages> stringMessages) {
         this.stringMessages = new HashSet<>(stringMessages);
     }
     
-    public void addStringMessages(DataMiningStringMessages stringMessages) {
+    public void addStringMessages(ServerStringMessages stringMessages) {
         this.stringMessages.add(stringMessages);
     }
     
-    public void removeStringMessages(DataMiningStringMessages stringMessages) {
+    public void removeStringMessages(ServerStringMessages stringMessages) {
         this.stringMessages.remove(stringMessages);
     }
     
@@ -41,8 +41,8 @@ public class CompoundDataMiningStringMessages implements DataMiningStringMessage
     
     @Override
     public String get(Locale locale, String messageKey, String... parameters) {
-        Map<DataMiningStringMessages, String> messages = new HashMap<>();
-        for (DataMiningStringMessages stringMessages : this.stringMessages) {
+        Map<ServerStringMessages, String> messages = new HashMap<>();
+        for (ServerStringMessages stringMessages : this.stringMessages) {
             try {
                 messages.put(stringMessages, stringMessages.get(locale, messageKey, parameters));
             } catch (MissingResourceException e) {
@@ -51,10 +51,10 @@ public class CompoundDataMiningStringMessages implements DataMiningStringMessage
         return getBestMessageAndLogConflicts(messageKey, messages);
     }
 
-    private String getBestMessageAndLogConflicts(String messageKey, Map<DataMiningStringMessages, String> messages) throws MissingResourceException {
+    private String getBestMessageAndLogConflicts(String messageKey, Map<ServerStringMessages, String> messages) throws MissingResourceException {
         String bestMessageResourceBaseName = null;
         String bestMessage = null;
-        for (Entry<DataMiningStringMessages, String> messagesEntry : messages.entrySet()) {
+        for (Entry<ServerStringMessages, String> messagesEntry : messages.entrySet()) {
             String message = messagesEntry.getValue();
             if (message != null) {
                 if (bestMessage == null) {
@@ -74,7 +74,7 @@ public class CompoundDataMiningStringMessages implements DataMiningStringMessage
     }
 
     private void logPossibleConflicts(String messageKey, String bestMessageResourceBaseName, String bestMessage,
-            Entry<DataMiningStringMessages, String> messagesEntry) {
+            Entry<ServerStringMessages, String> messagesEntry) {
         String messageResourceBaseName = messagesEntry.getKey().getResourceBaseName();
         String message = messagesEntry.getValue();
         

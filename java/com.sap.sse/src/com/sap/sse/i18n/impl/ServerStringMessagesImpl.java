@@ -1,11 +1,11 @@
-package com.sap.sse.datamining.impl.i18n;
+package com.sap.sse.i18n.impl;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.i18n.ServerStringMessages;
 
-public class DataMiningStringMessagesImpl implements DataMiningStringMessages {
+public class ServerStringMessagesImpl implements ServerStringMessages {
     
     private static final String MESSAGE_PARAMETER_START = "\\{";
     private static final String MESSAGE_PARAMETER_END = "\\}";
@@ -13,7 +13,7 @@ public class DataMiningStringMessagesImpl implements DataMiningStringMessages {
     private final String resourceBaseName;
     private final ClassLoader resourceClassLoader;
     
-    public DataMiningStringMessagesImpl(String resourceBaseName, ClassLoader resourceClassLoader) {
+    public ServerStringMessagesImpl(String resourceBaseName, ClassLoader resourceClassLoader) {
         this.resourceBaseName = resourceBaseName;
         this.resourceClassLoader = resourceClassLoader;
     }
