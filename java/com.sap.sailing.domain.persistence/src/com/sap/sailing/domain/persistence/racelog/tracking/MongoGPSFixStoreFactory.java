@@ -3,10 +3,10 @@ package com.sap.sailing.domain.persistence.racelog.tracking;
 import java.net.UnknownHostException;
 
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoGPSFixStoreFactoryImpl;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 
 public interface MongoGPSFixStoreFactory {
     MongoGPSFixStoreFactory INSTANCE = new MongoGPSFixStoreFactoryImpl();

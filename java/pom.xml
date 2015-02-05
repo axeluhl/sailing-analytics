@@ -35,6 +35,9 @@
 		<module>com.sap.sse.replication</module>
 		<module>com.sap.sse.replication.testsupport</module>
 		<module>com.sap.sse.common.test</module>
+		<module>com.sap.sse.filestorage</module>
+		<module>com.sap.sse.filestorage.test</module>
+		<module>com.sap.sse.osgi</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
@@ -134,7 +137,7 @@
 	
 	<properties>
 		<tycho-version>0.21.0</tycho-version>
-       		<gwt.version>2.6.1</gwt.version> 
+       		<gwt.version>2.7.0</gwt.version> 
 		<p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile-->
 		<!--
           QUESTION: Which properties or settings are system dependent and differ across

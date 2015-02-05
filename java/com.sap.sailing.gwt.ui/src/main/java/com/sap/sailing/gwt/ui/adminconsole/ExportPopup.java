@@ -44,14 +44,18 @@ public class ExportPopup extends DialogBox {
         formPanel.setWidget(mainPanel);
         add(formPanel);
 
-        ListBox lbFormat = new ListBox(false);
+        ListBox lbFormat = new ListBox();
+        lbFormat.setMultipleSelect(false);
+
         lbFormat.setName(TrackFilesExportParameters.FORMAT);
         lbFormat.setVisibleItemCount(1);
         for (TrackFilesFormat format : TrackFilesFormat.values())
             lbFormat.addItem(format.name());
         mainPanel.add(lbFormat);
 
-        ListBox lbData = new ListBox(true);
+        ListBox lbData = new ListBox();
+        lbData.setMultipleSelect(true);
+
         lbData.setName(TrackFilesExportParameters.DATA);
         for (TrackFilesDataSource dataSource : TrackFilesDataSource.values()) {
             lbData.addItem(dataSource.name());

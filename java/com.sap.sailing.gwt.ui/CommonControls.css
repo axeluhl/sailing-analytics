@@ -1,3 +1,5 @@
+@import url("SettingsDialog.css");
+
 body ::-webkit-scrollbar {
     width: 16px;
     height: 10px;
@@ -828,45 +830,13 @@ body ::-webkit-scrollbar-track {
   line-height: 1.4;
 }
 
-/* Dialogs */
-.SettingsDialogComponent {
-    padding: 0 0 15px 0;
-}
-
-.SettingsDialogComponent .dialogInnerHeadline {
-    border: 1px solid #CCCCCC;
-    font-family: OpenSansSemiBold,Arial,Verdana,sans-serif;
-    height: 21px;
-    padding: 2px 0 0 7px;
-    border-radius: 3px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -o-border-radius: 3px;
-    -ms-border-radius: 3px;
-    margin: 0 0 10px 0;
-}
-
-.SettingsDialogComponent .dialogInnerContent {
-  padding: 0 9px 0 5px;
-}
-
 .timingSettings .dialogInnerContent {
     padding: 0 9px 0 9px;
-}
-
-.SettingsDialogComponent .gwt-CheckBox {
-  padding: 0 10px 0 0;
 }
 
 .timingSettings .gwt-Label {
   float: left;
   padding: 0 10px 0 0;
-}
-
-.dialogInnerHeadlineOther {
-  font-family: OpenSansSemiBold, Arial, Verdana, sans-serif;
-  color: #e84a1a;
-  padding-left: 9px;
 }
 
 .helpPanel {
