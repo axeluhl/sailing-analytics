@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
 	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
-	xmlns:tabs="urn:import:com.sap.sailing.gwt.home.client.place.event2.tabs">
+	xmlns:tabs="urn:import:com.sap.sailing.gwt.home.client.place.event2.tabs" xmlns:h="urn:import:com.sap.sailing.gwt.home.client.place.event2.header">
 	<ui:style>
 		.header {
 		position: relative;
@@ -46,13 +46,7 @@
 	<g:HTMLPanel>
 		<c:TabPanel ui:field="tabPanelUi">
 			<c:header>
-				<g:HTMLPanel addStyleNames="{style.header}">
-					<div class="{style.mainHeader}">
-						<c:BreadcrumbPane ui:field="breadcrumb"
-							addStyleNames="{style.breadcrumb}" />
-
-					</div>
-				</g:HTMLPanel>
+				<h:EventHeader ui:field="eventHeader" />
 			</c:header>
 			<c:tabcontent title="Overview">
 				<tabs:overview.EventOverviewWidgetAndActivity />

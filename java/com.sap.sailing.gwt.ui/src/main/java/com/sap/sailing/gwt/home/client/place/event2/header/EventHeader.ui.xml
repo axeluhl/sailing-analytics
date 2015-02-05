@@ -1,0 +1,74 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared" xmlns:t="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.header.EventHeaderResources" />
+  <g:HTMLPanel>
+    <!-- The header of an event including the event navigation-->
+    <!-- navigation rendering, for simulating view state-->
+    <div class="{local_res.css.eventheader}">
+      <a href="TODO event.venue.name" class="{local_res.css.eventheader_breadcrumbback}"></a>
+      <div class="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.large9} {res.mediaCss.columns}">
+            <t:BreadcrumbPane ui:field="breadcrumbs" addStyleNames="{local_res.css.eventheader_breadcrumb}" />
+          <div class="{local_res.css.eventheader_intro}">
+            <div class="{local_res.css.eventheader_intro_logo}">
+              <img src="TODO event.logo" alt="TODO event.name" class="{local_res.css.eventheader_intro_logo_image}" />
+            </div>
+            <h2 class="{local_res.css.eventheader_intro_name}">
+              <!-- event.name -->
+              <!-- IF event.state === 'live' -->
+              <div data-labeltype="live" class="{res.mainCss.label}">
+                live<!-- <ui:text from='{i18n.eventHeader.event.live}' /> -->
+              </div>
+              <!-- IFEND event.state === 'live' -->
+            </h2>
+            <div class="{local_res.css.eventheader_intro_details}">
+              <!-- IF event.venue && event.eventType !== 'multi-regatta-event' -->
+              <div class="{local_res.css.eventheader_intro_details_item}">
+                <!-- event.date -->
+              </div>
+              <div class="{local_res.css.eventheader_intro_details_item}">
+                <img src="images/home/location-icon.png" class="{local_res.css.locationicon}"></img>
+                <span>
+                  <!-- event.venue.name -->,
+                  <!-- event.venue.country -->
+                </span>
+              </div>
+              <a href="TODO event.website" title="TODO event.website" class="{local_res.css.eventheader_intro_details_item}">
+                <!-- event.website -->
+              </a>
+              <!-- IFEND event.venue && event.eventType !== 'multi-regatta-event' -->
+              <!-- IF event.eventType === 'multi-regatta-event' -->
+              <div class="{local_res.css.eventheader_intro_details_item}">
+                <!-- event.statistics.competitorsCount -->
+                5<!-- TODO <ui:text from='{i18n.eventHeader.competitorsCount}' /> -->
+              </div>
+              <div class="{local_res.css.eventheader_intro_details_item}">
+                <!-- event.statistics.racesCount -->
+                7<!-- TODO <ui:text from='{i18n.eventHeader.racesCount}' /> -->
+              </div>
+              <div class="{local_res.css.eventheader_intro_details_item}">
+                <!-- event.statistics.trackedCount -->
+                4<!-- TODO <ui:text from='{i18n.eventHeader.trackedRacesCount}' /> -->
+              </div>
+              <div class="{local_res.css.eventheader_intro_details_item}">
+                <!-- event.category -->
+              </div>
+              <!-- IFEND event.eventType === 'multi-regatta-event' -->
+            </div>
+          </div>
+        </div>
+        <div class="{res.mediaCss.showonlarge} {res.mediaCss.large3} {res.mediaCss.columns}">
+          <div class="{local_res.css.eventheader_sharing}">
+            <a href="mailto:?&amp;subject=Lorem%20Ipsum%20Delorem&amp;body=Lorem%20ipsum%20dolor%20sit%20amet%2C%20consectetuer%20adipiscing%20elit.%20Aenean%20commodo%20ligula%20eget%20dolor.%20https%3A%2F%2Fstorage.ubidev.net%3Asap-sailing-analytics%3A6120578021%3Adev%3Aindex.html" title="undefined" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itememail}"></a>
+            <a href="https://twitter.com/intent/tweet?text=Lorem%20ipsum%20dolor%20sit%20amet%2C%20consectetuer%20adipiscing%20elit.%20Aenean%20commodo%20ligula%20eget%20dolor.&amp;url=https%3A%2F%2Fwww.ubilabs.net&amp;short_url_length=8" title="undefined" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></a>
+            <a href="https://www.facebook.com/dialog/feed?app_id=145634995501895&amp;display=page&amp;caption=Lorem%20ipsum%20dolor%20sit%20amet%2C%20consectetuer%20adipiscing%20elit.%20Aenean%20commodo%20ligula%20eget%20dolor.&amp;link=https%3A%2F%2Fstorage.ubidev.net%3Asap-sailing-analytics%3A6120578021%3Adev%3Aindex.html&amp;redirect_uri=https%3A%2F%2Fstorage.ubidev.net%3Asap-sailing-analytics%3A6120578021%3Adev%3Aindex.html" title="undefined" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

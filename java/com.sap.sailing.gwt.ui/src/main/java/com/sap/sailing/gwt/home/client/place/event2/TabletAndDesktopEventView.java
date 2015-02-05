@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.PlaceContextProvider;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.client.place.event2.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 
 public class TabletAndDesktopEventView extends Composite implements EventView {
@@ -23,23 +24,26 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
 
     @UiField(provided = true)
     TabPanel<EventContext> tabPanelUi;
+    
+    @UiField
+    EventHeader eventHeader;
 
     public TabletAndDesktopEventView() {
-        tabPanelUi = new TabPanel<EventContext>(new PlaceContextProvider<EventContext>() {
-
-            @Override
-            public EventContext getContext() {
-
-                return currentPresenter.getCtx();
-            }
-        }, historyMapper);
-
-        initWidget(uiBinder.createAndBindUi(this));
     }
 
     @Override
-    public void registerPresenter(Presenter currentPresenter) {
+    public void registerPresenter(final Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
+        tabPanelUi = new TabPanel<EventContext>(new PlaceContextProvider<EventContext>() {
+            
+            @Override
+            public EventContext getContext() {
+                
+                return currentPresenter.getCtx();
+            }
+        }, historyMapper);
+        
+        initWidget(uiBinder.createAndBindUi(this));
 
     }
 

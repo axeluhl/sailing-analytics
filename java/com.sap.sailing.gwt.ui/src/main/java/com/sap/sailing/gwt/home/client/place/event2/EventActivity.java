@@ -25,8 +25,8 @@ public class EventActivity extends AbstractActivity implements EventView.Present
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         // simple workflow: set widget, register ourself with the view, trigger tab navigation
-        panel.setWidget(currentView);
         currentView.registerPresenter(this);
+        panel.setWidget(currentView);
 
         if (currentPlace.getCtx().getEventDTO() != null) {
             ctx.updateContext(currentPlace.getCtx().getEventDTO());
