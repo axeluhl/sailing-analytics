@@ -148,7 +148,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                 }
             });
         }
-        logger.fine("Received "+Util.size(awsFixes)+" wind fixes");
+        logger.finest("Received "+Util.size(awsFixes)+" wind fixes");
         boolean loggedWindFixGenerationProblem = false;
         for (AWS aws : awsFixes) {
             try {
