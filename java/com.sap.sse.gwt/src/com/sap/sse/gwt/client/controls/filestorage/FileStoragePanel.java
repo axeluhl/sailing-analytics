@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.filestorage;
+package com.sap.sse.gwt.client.controls.filestorage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,15 +25,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
-import com.sap.sse.filestorage.FileStorageManagementService;
-import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.TabbingTextInputCell;
+import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyDTO;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
 /**
  * Provides a management interface for {@link FileStorageService}s. Allows choosing which service to use, and setting
@@ -45,8 +42,8 @@ import com.sap.sse.gwt.client.controls.TabbingTextInputCell;
  *
  */
 public class FileStoragePanel extends FlowPanel {
-    private final StringMessages stringMessages;
-    private final SailingServiceAsync sailingService;
+    private final StringMessages stringMessages = StringMessages.INSTANCE;
+    private final FileStorageManagementGwtServiceAsync sailingService;
     private final ErrorReporter errorReporter;
 
     private final Label activeServiceLabel;
@@ -60,11 +57,9 @@ public class FileStoragePanel extends FlowPanel {
     private final Map<FileStorageServicePropertyDTO, String> perPropertyErrors = new HashMap<>();
     private final ListDataProvider<FileStorageServicePropertyDTO> propertiesListDataProvider;
 
-    public FileStoragePanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            StringMessages stringMessages) {
+    public FileStoragePanel(FileStorageManagementGwtServiceAsync sailingService, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.stringMessages = stringMessages;
 
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
