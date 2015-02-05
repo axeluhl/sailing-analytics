@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -15,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
 import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.TabbingTextInputCell;
 
 /**
  * Provides a management interface for {@link FileStorageService}s. Allows choosing which service to use, and setting
@@ -95,6 +96,7 @@ public class FileStoragePanel extends FlowPanel {
         editServicePanelContent.add(serviceDescriptionLabel);
 
         propertiesTable = new CellTable<>();
+        propertiesTable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED); //allow for default tabbing behaviour
         propertiesListDataProvider = new ListDataProvider<>(new ArrayList<FileStorageServicePropertyDTO>());
         properties = propertiesListDataProvider.getList();
         propertiesListDataProvider.addDataDisplay(propertiesTable);
@@ -108,7 +110,7 @@ public class FileStoragePanel extends FlowPanel {
         propertiesTable.addColumn(nameColumn, stringMessages.name());
 
         Column<FileStorageServicePropertyDTO, String> inputColumn = new Column<FileStorageServicePropertyDTO, String>(
-                new TextInputCell()) {
+                new TabbingTextInputCell()) {
             @Override
             public String getValue(FileStorageServicePropertyDTO object) {
                 return object.value;
