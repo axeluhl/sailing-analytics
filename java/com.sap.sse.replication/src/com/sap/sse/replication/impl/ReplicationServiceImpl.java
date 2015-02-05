@@ -514,7 +514,12 @@ public class ReplicationServiceImpl implements ReplicationService {
             final GZIPInputStream gzipInputStream = new GZIPInputStream(rabbitInputStreamProvider.getInputStream());
             for (Replicable<?, ?> replicable : getReplicables()) {
                 logger.info("Starting to receive initial load for "+replicable.getId());
-                replicable.initiallyFillFrom(gzipInputStream);
+                try {
+                    replicable.initiallyFillFrom(gzipInputStream);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Exception trying to reveice initial load for "+replicable.getId(), e);
+                    throw e;
+                }
                 logger.info("Done receiving initial load for "+replicable.getId());
             }
             logger.info("Resuming replicator to apply queues");
