@@ -21,11 +21,14 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class LeaderboardUrlConfigurationDialog extends SettingsDialog<LeaderboardUrlSettings> {
-
     public LeaderboardUrlConfigurationDialog(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
         super(new ProxyLeaderboardUrlComponent(stringMessages, leaderboard), stringMessages, /* animationEnabled */ false);
     }
 
+    public LeaderboardUrlConfigurationDialog(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard, DialogCallback<LeaderboardUrlSettings> callback) {
+        super(new ProxyLeaderboardUrlComponent(stringMessages, leaderboard), stringMessages, callback);
+    }
+    
     private static class ProxyLeaderboardUrlComponent implements Component<LeaderboardUrlSettings> {
         private final StringMessages stringMessages;
         private final LeaderboardUrlConfigurationDialogComponent settingsDialogComponent;
@@ -94,7 +97,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private final String leaderboardDisplayName;
         
         private final LeaderboardType leaderboardType; 
-
+        
         public LeaderboardUrlConfigurationDialogComponent(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
             this.stringMessages = stringMessages;
             this.leaderboardType = leaderboard.type;

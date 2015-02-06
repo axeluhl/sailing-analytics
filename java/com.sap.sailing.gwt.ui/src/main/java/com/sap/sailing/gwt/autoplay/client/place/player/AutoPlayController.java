@@ -86,7 +86,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             UserService userService, ErrorReporter errorReporter, boolean isfullscreenMode,
             String leaderboardGroupName, String leaderboardName, final String leaderboardZoom,
             UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails,
-            RaceBoardViewConfiguration raceboardViewConfig, PlayerView playerView) {
+            RaceBoardViewConfiguration raceboardViewConfig, PlayerView playerView, LeaderboardSettings leaderboardSettings) {
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -99,11 +99,15 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
         this.playerView = playerView;
+        this.leaderboardSettings = leaderboardSettings;
+        
+        if(this.leaderboardSettings == null) {
+            this.leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true);
+        }
         
         asyncActionsExecutor = new AsyncActionsExecutor();
         showWindChart = false;
         leaderboard = null;
-        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true); 
         
         leaderboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
         leaderboardTimer.setLivePlayDelayInMillis(delayToLiveInMillis);

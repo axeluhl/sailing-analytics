@@ -8,6 +8,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.sap.sailing.gwt.autoplay.client.AutoPlayEntryPoint;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
@@ -49,7 +50,7 @@ public class PlayerActivity extends AbstractActivity {
                         .getMediaService(), clientFactory.getUserService(), clientFactory.getErrorReporter(), playerPlace
                         .isFullscreen(), /* leaderboardGroupName */"", playerPlace.getLeaderboardIdAsNameString(),
                         playerPlace.getLeaderboardZoom(), userAgent, delayToLiveMillis, showRaceDetails,
-                        readRaceboardConfiguration, view);
+                        readRaceboardConfiguration, view, AutoPlayEntryPoint.leaderboardSettings);
                 autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
             }
 

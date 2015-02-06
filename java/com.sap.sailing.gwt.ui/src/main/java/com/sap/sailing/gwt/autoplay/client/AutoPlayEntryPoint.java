@@ -9,10 +9,12 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayAppHistoryMapper;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
 public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages> {
+    public static LeaderboardSettings leaderboardSettings = null;
 
     @Override
     public void doOnModuleLoad() {

@@ -1,11 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
@@ -25,7 +22,6 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -38,8 +34,6 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
-    private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
-
     private String leaderboardName;
     private String leaderboardGroupName;
     private LeaderboardType leaderboardType;
@@ -149,7 +143,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
         Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
-        final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
+        final LeaderboardSettings leaderboardSettings = LeaderboardSettings.createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
         if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, goes "live" and "playing" if an auto-refresh
         } // interval has been specified
@@ -187,82 +181,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             result = new RegattaNameAndRaceName(parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).get(0), parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).get(0));
         } else {
             result = null;
-        }
-        return result;
-    }
-
-    /**
-     * Constructs {@link LeaderboardSettings} from the URL parameters found
-     */
-    private LeaderboardSettings createLeaderboardSettingsFromURLParameters(Map<String, List<String>> parameterMap) {
-        LeaderboardSettings result;
-        Long refreshIntervalMillis = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REFRESH_INTERVAL_MILLIS) ? Long
-                .valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_REFRESH_INTERVAL_MILLIS).get(0)) : null;
-        RaceColumnSelectionStrategies raceColumnSelectionStrategy;
-        final Integer numberOfLastRacesToShow;
-        if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_NAME_LAST_N)) {
-            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
-            numberOfLastRacesToShow = Integer.valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_NAME_LAST_N).get(0));
-        } else if (isSmallWidth()) {
-            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
-            int width = Window.getClientWidth();
-            numberOfLastRacesToShow = (width-275)/40;
-        } else {
-            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
-            numberOfLastRacesToShow = null;
-        }
-        if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME) || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_DETAIL) ||
-                parameterMap.containsKey(LeaderboardUrlSettings.PARAM_LEG_DETAIL) || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_MANEUVER_DETAIL) ||
-                parameterMap.containsKey(LeaderboardUrlSettings.PARAM_OVERALL_DETAIL) || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES) ||
-                parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED)) {
-            List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_MANEUVER_DETAIL));
-            List<DetailType> raceDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_DETAIL));
-            List<DetailType> overallDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_OVERALL_DETAIL));
-            List<DetailType> legDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_LEG_DETAIL));
-            List<String> namesOfRacesToShow = getStringListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME));
-            boolean showAddedScores = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES) ? 
-                    Boolean.valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES).get(0)) : false;
-            boolean showOverallColumnWithNumberOfRacesSailedPerCompetitor = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED) ?
-                    Boolean.valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED).get(0)) : false;
-            boolean autoExpandPreSelectedRace = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_PRESELECTED_RACE) ?
-                    Boolean.valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_PRESELECTED_RACE).get(0)) :
-                        (namesOfRacesToShow != null && namesOfRacesToShow.size() == 1);
-            result = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
-                    /* namesOfRaceColumnsToShow */ null,
-                    namesOfRacesToShow, numberOfLastRacesToShow,
-                    autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
-                                    namesOfRacesToShow.get(0) : null,
-                            /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
-                                    raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor);
-
-        } else {
-            final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
-            result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
-                    /* overallDetails */ overallDetails, null,
-                    /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                    raceColumnSelectionStrategy);
-        }
-        return result;
-    }
-
-    private List<DetailType> getDetailTypeListFromParamValue(List<String> list) {
-        List<DetailType> result = new ArrayList<DetailType>();
-        if (list != null) {
-            for (String entry : list) {
-                try {
-                    result.add(DetailType.valueOf(entry));
-                } catch (IllegalArgumentException e) {
-                    logger.info("Can't find detail type "+entry+". Ignoring.");
-                }
-            }
-        }
-        return result;
-    }
-
-    private List<String> getStringListFromParamValue(List<String> list) {
-        List<String> result = new ArrayList<String>();
-        if (list != null) {
-            result.addAll(list);
         }
         return result;
     }

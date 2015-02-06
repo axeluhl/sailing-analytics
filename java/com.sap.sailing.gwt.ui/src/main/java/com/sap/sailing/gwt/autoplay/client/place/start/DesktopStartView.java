@@ -24,13 +24,18 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.autoplay.client.AutoPlayEntryPoint;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlConfigurationDialog;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 
 public class DesktopStartView extends Composite implements StartView {
@@ -48,10 +53,11 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField CheckBox autoSelectMediaBox;
     @UiField TextBox leaderboardZoomBox;
     @UiField Button startAutoPlayButton;
-    @UiField DivElement leaderboardSelectionDiv;
+    @UiField DivElement leaderboardSelectionUi;
     @UiField DivElement leaderboardZoomDiv;
     @UiField DivElement leaderboardAutoZoomDiv;
-
+    @UiField DivElement screenConfiguraionUi;
+    
     @UiField Button leaderboardSettingsButton;
     @UiField Button mapInRaceboardSettingsButton;
     @UiField Button leaderboardInRaceboardSettingsButton;
@@ -68,7 +74,7 @@ public class DesktopStartView extends Composite implements StartView {
     private Map<String, String> leaderboardParameters;
     
     private final int defaultTimeToStartTimeInSeconds = 180;
-    
+
     public DesktopStartView(PlaceNavigator navigator, EventBus eventBus) {
         super();
         this.navigator = navigator;
@@ -107,9 +113,11 @@ public class DesktopStartView extends Composite implements StartView {
         autoSwitchToRaceboard.setValue(true);
         timeToRaceStartInSeconds.setValue(String.valueOf(defaultTimeToStartTimeInSeconds));
 
-        leaderboardSelectionDiv.getStyle().setVisibility(Visibility.HIDDEN);
-
+        leaderboardSelectionUi.getStyle().setVisibility(Visibility.HIDDEN);
+        screenConfiguraionUi.getStyle().setVisibility(Visibility.HIDDEN);
+        
         componentConfigurationTabPanel.getTabBar().selectTab(0);
+        componentConfigurationTabPanel.setVisible(false);
         
         startAutoPlayButton.setEnabled(false);
         startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
@@ -138,7 +146,7 @@ public class DesktopStartView extends Composite implements StartView {
                 }
             }
         }
-        leaderboardSelectionDiv.getStyle().setVisibility(selectedEvent != null ? Visibility.VISIBLE : Visibility.HIDDEN);
+        leaderboardSelectionUi.getStyle().setVisibility(selectedEvent != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
 
     @UiHandler("leaderboardSelectionBox")
@@ -147,12 +155,13 @@ public class DesktopStartView extends Composite implements StartView {
         if(selectedLeaderboardName != null) {
             startAutoPlayButton.setEnabled(true);
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+
         } else {
             startAutoPlayButton.setEnabled(false);
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
         }
-        leaderboardZoomDiv.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
-        leaderboardAutoZoomDiv.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
+        componentConfigurationTabPanel.setVisible(selectedLeaderboardName != null);
+        screenConfiguraionUi.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
     
     @UiHandler("localeSelectionBox") 
@@ -173,7 +182,7 @@ public class DesktopStartView extends Composite implements StartView {
             leaderboardParameters.put(PlayerPlace.PARAM_LEADEROARD_ZOOM, leaderboardZoom);
             leaderboardParameters.put(PlayerPlace.PARAM_LEADEROARD_NAME, selectedLeaderboardName);
             raceboardParameters.put(PlayerPlace.PARAM_RACEBOARD_AUTOSELECT_MEDIA, String.valueOf(isAutoSelectMedia));
-            
+
             navigator.goToPlayer(selectedEvent.id.toString(), startInFullscreenModeBox.getValue(), 
                     leaderboardParameters, raceboardParameters);
         }
@@ -181,12 +190,32 @@ public class DesktopStartView extends Composite implements StartView {
 
     @UiHandler("leaderboardSettingsButton")
     void handleLeaderboardSettingsClick(ClickEvent e) {
-        Window.alert("Not implemented yet.");
+        EventDTO selectedEvent = getSelectedEvent();
+        String selectedLeaderboardName = getSelectedLeaderboardName();
+        for(LeaderboardGroupDTO leaderboardGroup: selectedEvent.getLeaderboardGroups()) {
+            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
+                if(leaderboard.name.equals(selectedLeaderboardName)) {
+                    LeaderboardUrlConfigurationDialog dialog = new LeaderboardUrlConfigurationDialog(StringMessages.INSTANCE, leaderboard, 
+                            new DialogCallback<LeaderboardUrlSettings>() {
+                        @Override
+                        public void cancel() {
+                        }
+    
+                        @Override
+                        public void ok(LeaderboardUrlSettings newSettings) {
+                            AutoPlayEntryPoint.leaderboardSettings = newSettings.getLeaderboardSettings();
+                        }
+                    });
+                    dialog.show();
+                }
+            }
+        }
     }
 
     @UiHandler("mapInRaceboardSettingsButton")
     void handleMapInRaceboardSettingsClick(ClickEvent e) {
-        Window.alert("Not implemented yet.");
+//        RaceMapSettings s = new RaceMapSettings();
+//        RaceMapSettingsDialogComponent dialog = new RaceMapSettingsDialogComponent(s, StringMessages.INSTANCE, false);
     }
 
     @UiHandler("leaderboardInRaceboardSettingsButton")

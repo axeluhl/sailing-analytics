@@ -43,7 +43,7 @@
 				<g:ListBox ui:field="eventSelectionBox" />
 	        </div>
 		</div>
-		<div ui:field="leaderboardSelectionDiv" class="{res.mainCss.grid}  {style.row}">
+		<div ui:field="leaderboardSelectionUi" class="{res.mainCss.grid}  {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 			    <span>Leaderboard:</span>
 	        </div>
@@ -53,7 +53,7 @@
 		</div>
 		
 		<div class="{res.mainCss.grid} {style.row}">
-			<div class="{res.mediaCss.columns}">
+			<div ui:field="screenConfiguraionUi" class="{res.mediaCss.columns}">
 				Screen configuration
 			</div>
 			<div class="{res.mediaCss.columns}">
@@ -63,13 +63,16 @@
 					    	<g:HTMLPanel ui:field="leaderboardConfigPanel" styleName="{style.configTabContent}">
 								<div class="{res.mainCss.grid} {style.row}">
 									<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-									    <span>Settings:</span>
+									    <span>Data settings:</span>
 							        </div>
 								    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 							    		<g:Button ui:field="leaderboardSettingsButton" text="Configure" styleName="{res.mainCss.button}" />
 							        </div>
 								</div>
 								<div ui:field="leaderboardAutoZoomDiv" class="{res.mainCss.grid} {style.row}">
+									<div class="{res.mediaCss.columns} {style.row}">
+										Screen settings
+									</div>
 									<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 									    <span>Auto-Zoom:</span>
 							        </div>
