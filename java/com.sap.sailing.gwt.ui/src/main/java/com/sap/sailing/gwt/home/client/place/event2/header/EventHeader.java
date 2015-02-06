@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -13,11 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
-import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 
@@ -31,6 +28,7 @@ public class EventHeader extends Composite {
     
     @UiField BreadcrumbPane breadcrumbs;
     
+    @UiField ImageElement eventLogo;
     @UiField SpanElement eventName;
     @UiField DivElement live;
     @UiField DivElement eventDate;
@@ -47,21 +45,16 @@ public class EventHeader extends Composite {
     @UiField DivElement eventCategory;
 
     private final HomePlacesNavigator placeNavigator;
-    private PlaceNavigation<SeriesPlace> seriesAnalyticsNavigation = null; 
-    private PlaceNavigation<EventPlace> regattasNavigation = null;
-
-    private final EventPlaceNavigator pageNavigator;
 
     private EventDTO event;
     
     public EventHeader(EventDTO event) {
-        this(event, null, null, null);
+        this(event, null, null);
     }
     
-    public EventHeader(EventDTO event, EventView.Presenter presenter, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
+    public EventHeader(EventDTO event, EventView.Presenter presenter, HomePlacesNavigator placeNavigator) {
         this.event = event;
         this.placeNavigator = placeNavigator;
-        this.pageNavigator = pageNavigator;
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -71,6 +64,9 @@ public class EventHeader extends Composite {
     }
 
     private void initFields() {
+        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
+        eventLogo.setSrc(logoUrl);
+        eventLogo.setAlt(event.getName());
         eventName.setInnerText(event.getName());
         if(!event.isRunning()) {
             hide(live);
@@ -133,7 +129,7 @@ public class EventHeader extends Composite {
 //                placeNavigator.getEventsNavigation().getPlace()
             }
         });
-        breadcrumbs.addBreadcrumbItem("TODO" /* event.getName() */, "TODO", new Runnable() {
+        breadcrumbs.addBreadcrumbItem(event.getName(), "TODO", new Runnable() {
             @Override
             public void run() {
                 // TODO

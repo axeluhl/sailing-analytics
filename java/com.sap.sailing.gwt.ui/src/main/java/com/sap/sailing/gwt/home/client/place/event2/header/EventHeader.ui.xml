@@ -10,10 +10,10 @@
           <t:BreadcrumbPane ui:field="breadcrumbs" addStyleNames="{local_res.css.eventheader_breadcrumb}" />
           <div class="{local_res.css.eventheader_intro}">
             <div class="{local_res.css.eventheader_intro_logo}">
-              <img src="TODO event.logo" alt="TODO event.name" class="{local_res.css.eventheader_intro_logo_image}" />
+              <img ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" />
             </div>
             <h2 class="{local_res.css.eventheader_intro_name}">
-              <span ui:field="eventName">Some Event</span>
+              <span ui:field="eventName"></span>
               <!-- IF event.state === 'live' -->
               <div ui:field="live" data-labeltype="live" class="{res.mainCss.label}">
                 live<!-- TODO <ui:text from='{i18n.eventHeader.event.live}' /> -->
@@ -28,7 +28,7 @@
               <div ui:field="eventVenue" class="{local_res.css.eventheader_intro_details_item}">
                 <img src="images/home/location-icon.png" class="{local_res.css.locationicon}"></img>
                 <span>
-                  <span ui:field="eventVenueName">Somewhere</span>,
+                  <span ui:field="eventVenueName"></span>,
                   <span ui:field="eventVenueCountry">Australia</span>
                 </span>
               </div>
