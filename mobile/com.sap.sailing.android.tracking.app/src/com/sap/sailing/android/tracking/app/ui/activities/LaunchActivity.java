@@ -139,9 +139,9 @@ public class LaunchActivity extends BaseActivity {
             }
             prefs.setServerURL(server);
             
-            String leaderboard = uri.getQueryParameter(DeviceMappingConstants.LEADERBOARD_NAME);
-            String competitorIdAsString = uri.getQueryParameter(DeviceMappingConstants.COMPETITOR_ID_AS_STRING);
-            String markIdAsString = uri.getQueryParameter(DeviceMappingConstants.MARK_ID_AS_STRING);
+            String leaderboard = uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME);
+            String competitorIdAsString = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
+            String markIdAsString = uri.getQueryParameter(DeviceMappingConstants.URL_MARK_ID_AS_STRING);
             DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(prefs.getDeviceIdentifier()));
             TimePoint from = MillisecondsTimePoint.now();
             String itemId = null;
@@ -149,15 +149,15 @@ public class LaunchActivity extends BaseActivity {
             
             JSONObject mappingStart = new JSONObject();
             try {
-                mappingStart.put(DeviceMappingConstants.DEVICE_UUID, device.getStringRepresentation());
-                mappingStart.put(DeviceMappingConstants.FROM_MILLIS, from.asMillis());
-                mappingStart.put(DeviceMappingConstants.DEVICE_TYPE, "android");
+                mappingStart.put(DeviceMappingConstants.JSON_DEVICE_UUID, device.getStringRepresentation());
+                mappingStart.put(DeviceMappingConstants.JSON_FROM_MILLIS, from.asMillis());
+                mappingStart.put(DeviceMappingConstants.JSON_DEVICE_TYPE, "android");
                 if (competitorIdAsString != null) {
-                    mappingStart.put(DeviceMappingConstants.PUSH_DEVICE_ID, "<push_device_id_not_known_on_android>");
-                    mappingStart.put(DeviceMappingConstants.COMPETITOR_ID_AS_STRING, competitorIdAsString);
+                    mappingStart.put(DeviceMappingConstants.JSON_PUSH_DEVICE_ID, "<push_device_id_not_known_on_android>");
+                    mappingStart.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitorIdAsString);
                     itemType = "competitor";
                 } else if (markIdAsString != null) {
-                    mappingStart.put(DeviceMappingConstants.MARK_ID_AS_STRING, markIdAsString);
+                    mappingStart.put(DeviceMappingConstants.JSON_MARK_ID_AS_STRING, markIdAsString);
                     itemType = "mark";
                 }
             } catch (IllegalArgumentException e) {

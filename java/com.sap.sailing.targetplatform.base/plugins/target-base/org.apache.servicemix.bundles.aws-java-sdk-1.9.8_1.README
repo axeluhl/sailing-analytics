@@ -1,0 +1,2 @@
+OSGI-ified version of AWS Java SDK from http://mvnrepository.com/artifact/org.apache.servicemix.bundles/org.apache.servicemix.bundles.aws-java-sdk
+Due to bug (https://issues.apache.org/jira/browse/SMX4-1921): add awssdk_config_default.json (obtained from original AWS Java SDK) to downloaded jar

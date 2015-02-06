@@ -165,7 +165,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
                     @Override
                     public void cancel() {
                     }
-                }).show();;
+                }).show();
             }
         });
         

@@ -2337,10 +2337,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
                 if (c instanceof RaceColumn<?>) {
                     RaceColumn<?> rc = (RaceColumn<?>) c;
-                    // If the new leaderboard no longer contains the column, getLegCount will return -1, causing the
-                    // column
-                    // to be collapsed if it was expanded. This is correct because otherwise, removing it would no
-                    // longer
+                    // If the new leaderboard no longer contains the column, getLegCount will return -1, causing the column
+                    // to be collapsed if it was expanded. This is correct because otherwise, removing it would no longer
                     // know the correct leg count.
                     if (!rc.isTogglingInProcess() && rc.isExpanded()) {
                         int oldLegCount = getLeaderboard().getLegCount(rc.getRaceColumnName(), preSelectedRace);
