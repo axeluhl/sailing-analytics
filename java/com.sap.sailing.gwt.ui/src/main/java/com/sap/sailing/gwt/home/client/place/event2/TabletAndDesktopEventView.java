@@ -25,7 +25,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
     @UiField(provided = true)
     TabPanel<EventContext> tabPanelUi;
     
-    @UiField
+    @UiField(provided = true)
     EventHeader eventHeader;
 
     public TabletAndDesktopEventView() {
@@ -42,6 +42,8 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
                 return currentPresenter.getCtx();
             }
         }, historyMapper);
+        
+        eventHeader = new EventHeader(currentPresenter.getCtx().getEventDTO());
         
         initWidget(uiBinder.createAndBindUi(this));
 
