@@ -1,6 +1,11 @@
 package com.sap.sailing.gwt.home.client.place.event2.header;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -14,6 +19,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.VenueDTO;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -21,11 +27,24 @@ public class EventHeader extends Composite {
     interface EventHeaderUiBinder extends UiBinder<Widget, EventHeader> {
     }
     
-    @UiField
-    TextMessages i18n;
+    @UiField TextMessages i18n;
     
-    @UiField
-    BreadcrumbPane breadcrumbs;
+    @UiField BreadcrumbPane breadcrumbs;
+    
+    @UiField SpanElement eventName;
+    @UiField DivElement live;
+    @UiField DivElement eventDate;
+    @UiField DivElement eventVenue;
+    @UiField SpanElement eventVenueName;
+    @UiField SpanElement eventVenueCountry;
+    @UiField AnchorElement eventLink;
+    @UiField DivElement competitors;
+    @UiField SpanElement competitorsCount;
+    @UiField DivElement races;
+    @UiField SpanElement racesCount;
+    @UiField DivElement trackedRaces;
+    @UiField SpanElement trackedRacesCount;
+    @UiField DivElement eventCategory;
 
     private final HomePlacesNavigator placeNavigator;
     private PlaceNavigation<SeriesPlace> seriesAnalyticsNavigation = null; 
@@ -35,8 +54,8 @@ public class EventHeader extends Composite {
 
     private EventDTO event;
     
-    public EventHeader() {
-        this(null, null, null, null);
+    public EventHeader(EventDTO event) {
+        this(event, null, null, null);
     }
     
     public EventHeader(EventDTO event, EventView.Presenter presenter, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
@@ -48,6 +67,53 @@ public class EventHeader extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         initBreadCrumbs();
+        initFields();
+    }
+
+    private void initFields() {
+        eventName.setInnerText(event.getName());
+        if(!event.isRunning()) {
+            hide(live);
+        }
+        VenueDTO venue = event.venue;
+        if(venue != null && event.regattas.size() <=1) {
+//            TODO eventDate
+            eventVenueName.setInnerText(venue.getName());
+//            TODO eventVenueCountry
+            if(event.getOfficialWebsiteURL() != null) {
+                String title = event.getOfficialWebsiteURL();
+                if(title.startsWith("http://")) {
+                    title = title.substring("http://".length(), title.length());
+                }
+                if(title.length() > 35) {
+                    title = TextMessages.INSTANCE.officalEventWebsite();
+                }
+                eventLink.setInnerText(title);
+                eventLink.setHref(event.getOfficialWebsiteURL());
+            } else {
+                hide(eventLink);
+            }
+        } else {
+            hide(eventDate, eventVenue);
+        }
+        if(event.regattas.size() > 1) {
+//            TODO competitorsCount.setInnerText(text);
+//            TODO racesCount;
+//            TODO eventCategory.setInnerText(event.get);
+            if(event.isFinished()) {
+//                TODO trackedRacesCount;
+            } else {
+                hide(trackedRaces);
+            }
+        } else {
+            hide(competitors, races, trackedRaces);
+        }
+    }
+
+    private void hide(Element... elementsToHide) {
+        for (Element element : elementsToHide) {
+            element.getStyle().setDisplay(Display.NONE);
+        }
     }
 
     private void initBreadCrumbs() {

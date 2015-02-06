@@ -13,43 +13,41 @@
               <img src="TODO event.logo" alt="TODO event.name" class="{local_res.css.eventheader_intro_logo_image}" />
             </div>
             <h2 class="{local_res.css.eventheader_intro_name}">
-              Special Event<!-- TODO event.name -->
+              <span ui:field="eventName">Some Event</span>
               <!-- IF event.state === 'live' -->
-              <div data-labeltype="live" class="{res.mainCss.label}">
-                live<!-- <ui:text from='{i18n.eventHeader.event.live}' /> -->
+              <div ui:field="live" data-labeltype="live" class="{res.mainCss.label}">
+                live<!-- TODO <ui:text from='{i18n.eventHeader.event.live}' /> -->
               </div>
               <!-- IFEND event.state === 'live' -->
             </h2>
             <div class="{local_res.css.eventheader_intro_details}">
               <!-- IF event.venue && event.eventType !== 'multi-regatta-event' -->
-              <div class="{local_res.css.eventheader_intro_details_item}">
-                September 18 - 22, 2013<!-- TODO event.date -->
+              <div ui:field="eventDate" class="{local_res.css.eventheader_intro_details_item}">
+                <!-- TODO event.date -->
               </div>
-              <div class="{local_res.css.eventheader_intro_details_item}">
+              <div ui:field="eventVenue" class="{local_res.css.eventheader_intro_details_item}">
                 <img src="images/home/location-icon.png" class="{local_res.css.locationicon}"></img>
                 <span>
-                  Somwhere<!-- event.venue.name -->,
-                  Australia<!-- event.venue.country -->
+                  <span ui:field="eventVenueName">Somewhere</span>,
+                  <span ui:field="eventVenueCountry">Australia</span>
                 </span>
               </div>
-              <a href="TODO event.website" title="TODO event.website" class="{local_res.css.eventheader_intro_details_item}">
-                sapsailing.com<!-- TODO event.website -->
-              </a>
+              <a ui:field="eventLink" class="{local_res.css.eventheader_intro_details_item}"></a>
               <!-- IFEND event.venue && event.eventType !== 'multi-regatta-event' -->
               <!-- IF event.eventType === 'multi-regatta-event' -->
-              <div class="{local_res.css.eventheader_intro_details_item}">
-                <!-- event.statistics.competitorsCount -->
-                5 Competitors<!-- TODO <ui:text from='{i18n.eventHeader.competitorsCount}' /> -->
+              <div ui:field="competitors" class="{local_res.css.eventheader_intro_details_item}">
+                <span ui:field="competitorsCount">5</span>
+                Competitors<!-- TODO <ui:text from='{i18n.eventHeader.competitorsCount}' /> -->
               </div>
-              <div class="{local_res.css.eventheader_intro_details_item}">
-                <!-- event.statistics.racesCount -->
-                7 Races<!-- TODO <ui:text from='{i18n.eventHeader.racesCount}' /> -->
+              <div ui:field="races" class="{local_res.css.eventheader_intro_details_item}">
+                <span ui:field="racesCount">7</span>
+                Races<!-- TODO <ui:text from='{i18n.eventHeader.racesCount}' /> -->
               </div>
-              <div class="{local_res.css.eventheader_intro_details_item}">
-                <!-- event.statistics.trackedCount -->
-                4 Tracked races<!-- TODO <ui:text from='{i18n.eventHeader.trackedRacesCount}' /> -->
+              <div ui:field="trackedRaces" class="{local_res.css.eventheader_intro_details_item}">
+                <span ui:field="trackedRacesCount">4</span>
+                Tracked races<!-- TODO <ui:text from='{i18n.eventHeader.trackedRacesCount}' /> -->
               </div>
-              <div class="{local_res.css.eventheader_intro_details_item}">
+              <div ui:field="eventCategory" class="{local_res.css.eventheader_intro_details_item}">
                 <!-- event.category -->
               </div>
               <!-- IFEND event.eventType === 'multi-regatta-event' -->
