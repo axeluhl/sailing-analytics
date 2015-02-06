@@ -736,7 +736,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     /**
      * @return all possible ways to pass a waypoint, described as a position and a bearing. The line out of those two
-     *         muss be crossed.
+     *         must be crossed.
      */
     private Iterable<Util.Pair<Position, Bearing>> getCrossingInformation(Waypoint w, TimePoint t) {
         List<Util.Pair<Position, Bearing>> result = new ArrayList<>();
@@ -746,10 +746,10 @@ public class CandidateFinderImpl implements CandidateFinder {
             Position portPosition = null;
             Bearing b = null;
             Mark portMark = marks.getA();
-            Mark startBoardMark = marks.getB();
-            if (portMark != null && startBoardMark != null) {
+            Mark starBoardMark = marks.getB();
+            if (portMark != null && starBoardMark != null) {
                 portPosition = race.getOrCreateTrack(portMark).getEstimatedPosition(t, false);
-                Position starboardPosition = race.getOrCreateTrack(startBoardMark).getEstimatedPosition(t, false);
+                Position starboardPosition = race.getOrCreateTrack(starBoardMark).getEstimatedPosition(t, false);
                 if (portPosition != null && starboardPosition != null) {
                     b = portPosition.getBearingGreatCircle(starboardPosition);
                     result.add(new Util.Pair<Position, Bearing>(portPosition, b));

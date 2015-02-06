@@ -698,7 +698,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
 			EventDTO newEvent, AsyncCallback<Void> asyncCallback);
-			
+
     void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, Integer indexOfWaypoint,
             Date dateOfMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);
 

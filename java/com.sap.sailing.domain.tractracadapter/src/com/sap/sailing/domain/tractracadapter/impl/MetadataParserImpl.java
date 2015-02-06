@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
 
 /**
@@ -82,10 +83,11 @@ public class MetadataParserImpl implements MetadataParser {
      * Parses the route metadata for additional course information
      * The 'passing side' for each course waypoint is encoded like this...
      * <pre>
-     *  Seq.1=GATE
-     *  Seq.2=PORT
-     *  Seq.3=GATE
-     *  Seq.4=STARBOARD
+     *  Seq.0=LINE
+     *  Seq.1=PORT
+     *  Seq.2=GATE
+     *  Seq.3=STARBOARD
+     *  Seq.4=LINE
      * </pre>
      */
     @Override
@@ -93,16 +95,14 @@ public class MetadataParserImpl implements MetadataParser {
         Map<Integer, PassingInstruction> result = new HashMap<Integer, PassingInstruction>();
         if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            int i = 1;
-            for (TracTracControlPoint controlPoint : controlPoints) {
+            for (int i = 0; i<Util.size(controlPoints); i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
-                if (!controlPoint.getHasTwoPoints() && seqValue != null) {
+                if (seqValue != null) {
                     final PassingInstruction passingInstructions = PassingInstruction.valueOfIgnoringCase(seqValue);
                     if (passingInstructions != null) {
                         result.put(i, passingInstructions);
                     }
                 }
-                i++;
             }
         }
         return result;
