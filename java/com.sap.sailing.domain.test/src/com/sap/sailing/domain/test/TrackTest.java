@@ -254,6 +254,48 @@ public class TrackTest {
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
                 getB().getKnots(), 0.001);
     }
+
+    @Test
+    public void testMaxSpeedForMovingTrackWithFixAtIntervalBoundary() {
+        DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(
+                1, new DegreeBearingImpl(123)));
+        track.addGPSFix(fix1);
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000), new KnotSpeedWithBearingImpl(
+                2, new DegreeBearingImpl(123)));
+        track.addGPSFix(fix2);
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(7200000), new KnotSpeedWithBearingImpl(
+                1, new DegreeBearingImpl(123)));
+        track.addGPSFix(fix3);
+        assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
+                getB().getKnots(), 0.001); // produces a cache entry that ends 
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(10800000), new KnotSpeedWithBearingImpl(
+                1, new DegreeBearingImpl(123)));
+        track.addGPSFix(fix4);
+        assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
+                getB().getKnots(), 0.001);
+    }
+    
+    @Test
+    public void testMaxSpeedForMovingTrackWithFixAtIntervalBoundaryAfterQuery() {
+        DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(
+                1, new DegreeBearingImpl(123)));
+        track.addGPSFix(fix1);
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000), new KnotSpeedWithBearingImpl(
+                2, new DegreeBearingImpl(123)));
+        track.addGPSFix(fix2);
+        assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
+                getB().getKnots(), 0.001); // produces a cache entry that ends 
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(7200000), new KnotSpeedWithBearingImpl(
+                1, new DegreeBearingImpl(123)));
+        track.addGPSFix(fix3);
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(10800000), new KnotSpeedWithBearingImpl(
+                1, new DegreeBearingImpl(123)));
+        track.addGPSFix(fix4);
+        assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
+                getB().getKnots(), 0.001);
+    }
     
     /**
      * The DistanceCache must not contain any intervals pointing backwards because otherwise an endless recursion will
