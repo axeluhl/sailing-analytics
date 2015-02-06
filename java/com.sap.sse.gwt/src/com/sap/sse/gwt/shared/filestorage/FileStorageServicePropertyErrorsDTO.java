@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sse.gwt.shared.filestorage;
 
 import java.io.Serializable;
 import java.util.Map;
