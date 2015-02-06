@@ -46,7 +46,7 @@ public class ApplicationActivityMapper implements ActivityMapper {
 
             // return new EventActivityProxy((EventPlace) place, clientFactory);
 
-            return new EventActivity(new EventOverviewPlace(""), clientFactory);
+            return new EventActivity(new EventOverviewPlace(((EventPlace)place).getEventUuidAsString()), clientFactory);
         } else if (place instanceof EventsPlace) {
             return new EventsActivityProxy((EventsPlace) place, clientFactory);
         } else if (place instanceof StartPlace) {
