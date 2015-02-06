@@ -15,10 +15,12 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
@@ -49,6 +51,14 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField DivElement leaderboardSelectionDiv;
     @UiField DivElement leaderboardZoomDiv;
     @UiField DivElement leaderboardAutoZoomDiv;
+
+    @UiField Button leaderboardSettingsButton;
+    @UiField Button mapInRaceboardSettingsButton;
+    @UiField Button leaderboardInRaceboardSettingsButton;
+    
+    @UiField CheckBox autoSwitchToRaceboard;
+    @UiField TextBox timeToRaceStartInSeconds;
+    @UiField TabPanel componentConfigurationTabPanel;
     
     private final PlaceNavigator navigator;
     private final EventBus eventBus;
@@ -56,6 +66,8 @@ public class DesktopStartView extends Composite implements StartView {
     
     private Map<String, String> raceboardParameters;
     private Map<String, String> leaderboardParameters;
+    
+    private final int defaultTimeToStartTimeInSeconds = 180;
     
     public DesktopStartView(PlaceNavigator navigator, EventBus eventBus) {
         super();
@@ -92,10 +104,12 @@ public class DesktopStartView extends Composite implements StartView {
         leaderboardAutoZoomBox.setValue(true);
         leaderboardZoomBox.setEnabled(false);
         startInFullscreenModeBox.setValue(true);
+        autoSwitchToRaceboard.setValue(true);
+        timeToRaceStartInSeconds.setValue(String.valueOf(defaultTimeToStartTimeInSeconds));
 
         leaderboardSelectionDiv.getStyle().setVisibility(Visibility.HIDDEN);
-        leaderboardZoomDiv.getStyle().setVisibility(Visibility.HIDDEN);
-        leaderboardAutoZoomDiv.getStyle().setVisibility(Visibility.HIDDEN);
+
+        componentConfigurationTabPanel.getTabBar().selectTab(0);
         
         startAutoPlayButton.setEnabled(false);
         startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
@@ -163,6 +177,21 @@ public class DesktopStartView extends Composite implements StartView {
             navigator.goToPlayer(selectedEvent.id.toString(), startInFullscreenModeBox.getValue(), 
                     leaderboardParameters, raceboardParameters);
         }
+    }
+
+    @UiHandler("leaderboardSettingsButton")
+    void handleLeaderboardSettingsClick(ClickEvent e) {
+        Window.alert("Not implemented yet.");
+    }
+
+    @UiHandler("mapInRaceboardSettingsButton")
+    void handleMapInRaceboardSettingsClick(ClickEvent e) {
+        Window.alert("Not implemented yet.");
+    }
+
+    @UiHandler("leaderboardInRaceboardSettingsButton")
+    void handleLeaderboardInRaceboardSettingsClick(ClickEvent e) {
+        Window.alert("Not implemented yet.");
     }
 
     @UiHandler("leaderboardAutoZoomBox")
