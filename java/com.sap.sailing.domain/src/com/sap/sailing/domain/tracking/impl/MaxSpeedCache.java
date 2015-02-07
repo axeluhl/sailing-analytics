@@ -72,6 +72,13 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         cache = new HashMap<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>>();
         lock = new NamedReentrantReadWriteLock(MaxSpeedCache.class.getSimpleName()+" for track of "+track.getTrackedItem(), /* fair */ false);
     }
+    
+    /**
+     * For testing purposes, mainly. Subclasses may use this to create, manage and monitor specific locking states.
+     */
+    protected NamedReentrantReadWriteLock getLock() {
+        return lock;
+    }
 
     /**
      * Find the invalidation interval such that getFixesRelevantForSpeedEstimation, when passed any time point from that
@@ -221,7 +228,11 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         return result;
     }
 
-    private void cache(TimePoint from, TimePoint to, Util.Pair<FixType, Speed> fixAtMaxSpeed) {
+    /**
+     * This method is protected mostly for testing reasons such that a test can subclass this method to intercept
+     * and react or suspend the caching at an interesting point in time to force a certain ordering of things.
+     */
+    protected void cache(TimePoint from, TimePoint to, Util.Pair<FixType, Speed> fixAtMaxSpeed) {
         LockUtil.lockForWrite(lock);
         try {
             addEntryToMap(from, to, fixAtMaxSpeed, cache);
@@ -248,9 +259,11 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
     }
     
     /**
+     * This method is protected for test subclasses to intercept calls.
+     * 
      * @return <code>null</code>, if no fix exists in the interval specified
      */
-    private Util.Pair<FixType, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
+    protected Util.Pair<FixType, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
         track.lockForRead();
         try {
             // fetch all fixes on this leg so far and determine their maximum speed

@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,10 +50,13 @@ import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.MaxSpeedCache;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.concurrent.LockUtil;
 
 public class TrackTest {
     private DynamicGPSFixTrack<Boat, GPSFixMoving> track;
@@ -223,6 +228,103 @@ public class TrackTest {
             track.addGPSFix(fix1);
             now = now.plus(1000);
         }
+    }
+
+    /**
+     * See bug 2626; this test tries to provoke a race condition by subclassing {@link MaxSpeedCache} and overriding
+     * {@link MaxSpeedCache#cache} so that it can synchronize fix additions to the track with a
+     * {@link MaxSpeedCache#getMaxSpeed(TimePoint, TimePoint)} call to the cache.
+     */
+    @Test
+    public void testMaxSpeedCacheRaceCondition() throws InterruptedException, BrokenBarrierException {
+        final CyclicBarrier computeMaxSpeedDoneBarrier = new CyclicBarrier(2);
+        final CyclicBarrier cacheBarrier = new CyclicBarrier(2);
+        final CyclicBarrier gpsFixReceivedBarrier = new CyclicBarrier(2);
+        
+        DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected MaxSpeedCache<Object, GPSFixMoving> createMaxSpeedCache() {
+                return new MaxSpeedCache<Object, GPSFixMoving>(this) {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    protected Pair<GPSFixMoving, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
+                        Pair<GPSFixMoving, Speed> result = super.computeMaxSpeed(from, to);
+                        try {
+                            computeMaxSpeedDoneBarrier.await();
+                        } catch (InterruptedException | BrokenBarrierException e) {
+                            throw new RuntimeException(e);
+                        }
+                        return result;
+                    }
+
+                    @Override
+                    protected void cache(TimePoint from, TimePoint to, Pair<GPSFixMoving, Speed> fixAtMaxSpeed) {
+                        try {
+                            cacheBarrier.await();
+                        } catch (InterruptedException | BrokenBarrierException e) {
+                            throw new RuntimeException(e);
+                        }
+                        super.cache(from, to, fixAtMaxSpeed);
+                    }
+
+                    @Override
+                    public void gpsFixReceived(GPSFixMoving fix, Object item, boolean firstFixInTrack) {
+                        LockUtil.lockForWrite(getLock());
+                        try {
+                            // trigger the barrier after having acquired the cache write lock; this is what the
+                            // super.gpsFixReceived(...) method will also do (reentrantly), but this way we can
+                            // assert to already hold the lock in the current thread when triggering the barrier.
+                            gpsFixReceivedBarrier.await();
+                            super.gpsFixReceived(fix, item, firstFixInTrack);
+                        } catch (InterruptedException | BrokenBarrierException e) {
+                            throw new RuntimeException(e);
+                        } finally {
+                            LockUtil.unlockAfterWrite(getLock());
+                        }
+                    }
+                };
+            }
+        };
+        new Thread(()->{
+            GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(
+                1, new DegreeBearingImpl(123)));
+            track.addGPSFix(fix1);
+        }).start();
+        gpsFixReceivedBarrier.await(); // releasing gpsFixReceived execution
+        new Thread(()->
+            assertEquals(1., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
+                getB().getKnots(), 0.001)).start(); // produces a cache entry that ends
+        // now don't release the cacheBarrier as yet but add more fixes
+        computeMaxSpeedDoneBarrier.await();
+        new Thread(() -> {
+            GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000),
+                    new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(123)));
+            track.addGPSFix(fix2);
+        }).start();
+        gpsFixReceivedBarrier.await(); // releasing gpsFixReceived execution
+        new Thread(() -> {
+            GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(7200000),
+                    new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(123)));
+            track.addGPSFix(fix3);
+        }).start();
+        gpsFixReceivedBarrier.await(); // releasing gpsFixReceived execution
+        new Thread(() -> {
+            GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(10800000),
+                    new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(123)));
+            track.addGPSFix(fix4);
+        }).start();
+        gpsFixReceivedBarrier.await();
+        cacheBarrier.await(); // releasing the creation of the cache entry from way above; this would now add a stale entry
+        // that would have been invalidated by all the GPS fixes above
+        new Thread(() -> {
+            assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
+                    getB().getKnots(), 0.001);
+        }).start();
+        computeMaxSpeedDoneBarrier.await();
+        cacheBarrier.await();
     }
 
     @Test
