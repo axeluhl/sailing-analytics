@@ -200,7 +200,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
         });
 
         // Button for suppressing
-        suppressPassingsButton = new Button("Suppress after selected");
+        suppressPassingsButton = new Button("Suppress starting with selected");
         suppressPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
