@@ -247,6 +247,9 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     private void processNewWaypoint(Waypoint w, Waypoint firstWaypoint, Waypoint lastWaypoint) {
         PassingInstruction instruction = w.getPassingInstructions();
+        if ((w.equals(firstWaypoint) || w.equals(lastWaypoint)) && instruction == PassingInstruction.Gate) {
+            instruction = PassingInstruction.Line;
+        }
         if (instruction == PassingInstruction.None || instruction == null) {
             if (w.equals(firstWaypoint) || w.equals(lastWaypoint)) {
                 instruction = PassingInstruction.Line;
