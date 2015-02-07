@@ -57,7 +57,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private CheckBox showAddedScoresCheckBox;
     private CheckBox showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox;
     
-    protected LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
+    public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection,
             List<DetailType> overallDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,

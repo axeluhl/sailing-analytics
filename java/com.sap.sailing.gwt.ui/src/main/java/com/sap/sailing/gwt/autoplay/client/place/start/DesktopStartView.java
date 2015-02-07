@@ -30,8 +30,8 @@ import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlConfigurationDialog;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -195,15 +195,15 @@ public class DesktopStartView extends Composite implements StartView {
         for(LeaderboardGroupDTO leaderboardGroup: selectedEvent.getLeaderboardGroups()) {
             for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
                 if(leaderboard.name.equals(selectedLeaderboardName)) {
-                    LeaderboardUrlConfigurationDialog dialog = new LeaderboardUrlConfigurationDialog(StringMessages.INSTANCE, leaderboard, 
-                            new DialogCallback<LeaderboardUrlSettings>() {
+                    LeaderboardSettingsDialog dialog = new LeaderboardSettingsDialog(StringMessages.INSTANCE, leaderboard, 
+                            new DialogCallback<LeaderboardSettings>() {
                         @Override
                         public void cancel() {
                         }
     
                         @Override
-                        public void ok(LeaderboardUrlSettings newSettings) {
-                            AutoPlayEntryPoint.leaderboardSettings = newSettings.getLeaderboardSettings();
+                        public void ok(LeaderboardSettings newSettings) {
+                            AutoPlayEntryPoint.leaderboardSettings = newSettings;
                         }
                     });
                     dialog.show();
@@ -214,8 +214,19 @@ public class DesktopStartView extends Composite implements StartView {
 
     @UiHandler("mapInRaceboardSettingsButton")
     void handleMapInRaceboardSettingsClick(ClickEvent e) {
-//        RaceMapSettings s = new RaceMapSettings();
-//        RaceMapSettingsDialogComponent dialog = new RaceMapSettingsDialogComponent(s, StringMessages.INSTANCE, false);
+        RaceMapSettings settings = AutoPlayEntryPoint.raceMapSettings != null ? AutoPlayEntryPoint.raceMapSettings : new RaceMapSettings();
+        RaceMapSettingsDialog dialog = new RaceMapSettingsDialog(settings, StringMessages.INSTANCE, 
+                new DialogCallback<RaceMapSettings>() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(RaceMapSettings newSettings) {
+                AutoPlayEntryPoint.raceMapSettings = newSettings;
+            }
+        });
+        dialog.show();
     }
 
     @UiHandler("leaderboardInRaceboardSettingsButton")
