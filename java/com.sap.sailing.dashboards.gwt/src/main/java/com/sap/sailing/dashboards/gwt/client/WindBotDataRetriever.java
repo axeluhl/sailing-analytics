@@ -4,19 +4,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 
@@ -24,7 +19,6 @@ public class WindBotDataRetriever implements TimeListener, RaceSelectionChangeLi
 
     private AsyncActionsExecutor asyncActionsExecutor;
     private final SailingServiceAsync sailingService;
-    private final String RIBDASHBOARD_WEB_CONTEXT_PATH = "dashboards";
     private RegattaAndRaceIdentifier currentLiveRace;
     private List<NumberOfWindBotsChangeListener> numberOfWindBotsChangeListeners;
     private List<WindBotDataRetrieverListener> windBotDataRetrieverListeners;
@@ -34,12 +28,10 @@ public class WindBotDataRetriever implements TimeListener, RaceSelectionChangeLi
     public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
     private boolean didInitialLoading;
 
-    public WindBotDataRetriever() {
+    public WindBotDataRetriever(SailingServiceAsync sailingService) {
+        this.sailingService = sailingService;
         currentLiveRace = null;
         didInitialLoading = false;
-        sailingService = GWT.create(SailingService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RIBDASHBOARD_WEB_CONTEXT_PATH,
-                RemoteServiceMappingConstants.sailingServiceRemotePath);
         asyncActionsExecutor = new AsyncActionsExecutor();
         numberOfWindBotsChangeListeners = new ArrayList<NumberOfWindBotsChangeListener>();
         windBotDataRetrieverListeners = new ArrayList<WindBotDataRetrieverListener>(); 

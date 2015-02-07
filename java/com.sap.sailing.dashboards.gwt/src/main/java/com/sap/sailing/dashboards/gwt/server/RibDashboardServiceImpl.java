@@ -39,9 +39,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Alexander Ries (D062114)
  *
  */
-@SuppressWarnings("serial")
 public class RibDashboardServiceImpl extends RemoteServiceServlet implements RibDashboardService,
         StartAnalysisRacesStoreListener {
+
+    private static final long serialVersionUID = 7710545186662632126L;
 
     /**
      * Variable contains last {@link TrackedRace} that is or was live

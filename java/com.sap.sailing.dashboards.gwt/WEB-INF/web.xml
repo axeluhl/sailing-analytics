@@ -12,7 +12,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>RibDashboardService</servlet-name>
-		<url-pattern>/com.sap.sailing.dashboards.gwt.RibDashboard/ribdashboards
+		<url-pattern>/service/ribdashboard
 		</url-pattern>
 	</servlet-mapping>
 

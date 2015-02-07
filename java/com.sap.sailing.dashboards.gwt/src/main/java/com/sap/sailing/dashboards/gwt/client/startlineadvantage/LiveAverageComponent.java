@@ -69,7 +69,6 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
     int sizeForUnit;
 
     public LiveAverageComponent() {
-
         initWidget(uiBinder.createAndBindUi(this));
     }
 

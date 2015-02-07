@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -43,7 +42,7 @@ import com.sap.sse.gwt.client.player.TimeListener;
 public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListener, CompetitorSelectionPopupListener,
         TimeListener, RaceSelectionProvider {
 
-    private int numberOfChachedStartAnalysisDTOs;
+    private int numberOfCachedStartAnalysisDTOs;
     private String leaderboardName;
     private ArrayList<RibDashboardDataRetrieverListener> dataRetrieverListener;
     private ArrayList<NewStartAnalysisListener> newStartAnalysisListeners;
@@ -70,14 +69,13 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
     private static final String KEY_SLECTED_TEAM_COOKIE = "selectedTeam";
     private static final int SLECTED_TEAM_COOKIE_EXPIRE_TIME_IN_MILLIS = 60 * 1000 * 60 * 5;
 
-
-    public RibDashboardDataRetriever() {
+    public RibDashboardDataRetriever(RibDashboardServiceAsync ribDashboardService) {
         initNonFinalMemberVariablesWithNoArgumentConstructor();
         initRacingNotYetStartedPopup();
         MUTEX = new Object();
-        ribDashboardService = GWT.create(RibDashboardService.class);
+        this.ribDashboardService = ribDashboardService;
         this.leaderboardName = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
-        numberOfChachedStartAnalysisDTOs = 0;
+        numberOfCachedStartAnalysisDTOs = 0;
         competitorSelectionPopup = new CompetitorSelectionPopup();
         selectedCompetitorName = Cookies.getCookie(KEY_SLECTED_TEAM_COOKIE);
         asyncActionsExecutor = new AsyncActionsExecutor();
@@ -85,10 +83,13 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
         initBottomNotification();
     }
 
-    public static RibDashboardDataRetriever getInstance() {
+    public static RibDashboardDataRetriever getInstance(RibDashboardServiceAsync ribDashboardService) {
         synchronized (Location.class) {
             if (INSTANCE == null) {
-                INSTANCE = new RibDashboardDataRetriever();
+                if (ribDashboardService == null) {
+                    throw new RuntimeException("Can not initialize data retriever without reference to ribdashboard service");
+                }
+                INSTANCE = new RibDashboardDataRetriever(ribDashboardService);
             }
         }
         return INSTANCE;
@@ -123,9 +124,9 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
                     setSelection(singletonList);
                     if (result.startAnalysisDTOList != null) {
                         int numberOfReceivedStartAnalysisDTOs = result.startAnalysisDTOList.size();
-                        if (numberOfChachedStartAnalysisDTOs != numberOfReceivedStartAnalysisDTOs || shouldReloadStartAnalysis == true) {
+                        if (numberOfCachedStartAnalysisDTOs != numberOfReceivedStartAnalysisDTOs || shouldReloadStartAnalysis == true) {
                             shouldReloadStartAnalysis = false;
-                            numberOfChachedStartAnalysisDTOs = numberOfReceivedStartAnalysisDTOs;
+                            numberOfCachedStartAnalysisDTOs = numberOfReceivedStartAnalysisDTOs;
                             notifyNewStartAnalysisListener(result.startAnalysisDTOList, selectedCompetitorName);
                         }
                     }
@@ -152,7 +153,7 @@ public class RibDashboardDataRetriever implements RacingNotYetStartedPopupListen
                     }
                     break;
                 case NO_RACE_LIVE:
-                    if (numberOfChachedStartAnalysisDTOs == 0) {
+                    if (numberOfCachedStartAnalysisDTOs == 0) {
                         popupRacingNotYetStarted.showWithMessageAndImageAndButtonText("Racing not yet started",
                                 RibDashboardImageResources.INSTANCE.watch(), "Retry");
                     } else {

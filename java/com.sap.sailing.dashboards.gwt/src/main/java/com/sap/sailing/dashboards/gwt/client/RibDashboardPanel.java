@@ -75,11 +75,11 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     private BottomNotification bottomNotification;
     private List<WindBotComponent> windBotComponents;
 
-    public RibDashboardPanel() {
+    public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService) {
         windBotComponents = new ArrayList<WindBotComponent>();
-        RibDashboardDataRetriever.getInstance().addDataObserver(this);
+        RibDashboardDataRetriever.getInstance(ribDashboardService).addDataObserver(this);
         initBottomNotification();
-        startanalysisComponent = new StartlineAnalysisComponent(bottomNotification);
+        startanalysisComponent = new StartlineAnalysisComponent(bottomNotification, ribDashboardService);
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
     }

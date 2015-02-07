@@ -42,7 +42,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
                 StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_averagePanel());
         this.liveLabel.setInnerHTML("live");
         this.averageLabel.setInnerHTML("average<br>(1 hour)");
-        RibDashboardDataRetriever.getInstance().addDataObserver(this);
+        RibDashboardDataRetriever.getInstance(null).addDataObserver(this);
     }
 
     private void initAndSetStartLineAdvantageStates() {

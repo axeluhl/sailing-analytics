@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardDataRetriever;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
+import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
 import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotification;
 import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotificationClickListener;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
@@ -94,11 +95,11 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets,
      * The class requires a {@link BottomNotification} to inform the user when a new {@link StartlineAnalysisCard} gets
      * added.
      * */
-    public StartlineAnalysisComponent(BottomNotification bottomNotification) {
+    public StartlineAnalysisComponent(BottomNotification bottomNotification, RibDashboardServiceAsync ribDashboardService) {
         this.bottomNotification = bottomNotification;
         pageChangeListener = new ArrayList<StartAnalysisPageChangeListener>();
         bottomNotification.addBottomNotificationClickListener(this);
-        RibDashboardDataRetriever.getInstance().addNewStartAnalysisListener(this);
+        RibDashboardDataRetriever.getInstance(ribDashboardService).addNewStartAnalysisListener(this);
         starts = new ArrayList<StartAnalysisDTO>();
         initWidget(uiBinder.createAndBindUi(this));
         initLeftRightButtons();
