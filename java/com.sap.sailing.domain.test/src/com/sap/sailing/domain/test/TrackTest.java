@@ -239,7 +239,9 @@ public class TrackTest {
     public void testMaxSpeedCacheRaceCondition() throws InterruptedException, BrokenBarrierException {
         final CyclicBarrier computeMaxSpeedDoneBarrier = new CyclicBarrier(2);
         final CyclicBarrier cacheBarrier = new CyclicBarrier(2);
+        final CyclicBarrier cacheDone = new CyclicBarrier(2);
         final CyclicBarrier gpsFixReceivedBarrier = new CyclicBarrier(2);
+        final CyclicBarrier gpsFixReceivedDone = new CyclicBarrier(2);
         
         DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
             private static final long serialVersionUID = 1L;
@@ -268,6 +270,11 @@ public class TrackTest {
                             throw new RuntimeException(e);
                         }
                         super.cache(from, to, fixAtMaxSpeed);
+                        try {
+                            cacheDone.await();
+                        } catch (InterruptedException | BrokenBarrierException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
 
                     @Override
@@ -279,6 +286,7 @@ public class TrackTest {
                             // assert to already hold the lock in the current thread when triggering the barrier.
                             gpsFixReceivedBarrier.await();
                             super.gpsFixReceived(fix, item, firstFixInTrack);
+                            gpsFixReceivedDone.await();
                         } catch (InterruptedException | BrokenBarrierException e) {
                             throw new RuntimeException(e);
                         } finally {
@@ -294,6 +302,8 @@ public class TrackTest {
             track.addGPSFix(fix1);
         }).start();
         gpsFixReceivedBarrier.await(); // releasing gpsFixReceived execution
+        gpsFixReceivedDone.await(); // releasing gpsFixReceived execution
+        // The following getMaximumSpeedOverGround call will trigger a computeMaxSpeed(...) and a cache(...) call
         new Thread(()->
             assertEquals(1., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
                 getB().getKnots(), 0.001)).start(); // produces a cache entry that ends
@@ -305,26 +315,43 @@ public class TrackTest {
             track.addGPSFix(fix2);
         }).start();
         gpsFixReceivedBarrier.await(); // releasing gpsFixReceived execution
+        gpsFixReceivedDone.await(); // releasing gpsFixReceived execution
         new Thread(() -> {
             GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(7200000),
                     new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(123)));
             track.addGPSFix(fix3);
         }).start();
         gpsFixReceivedBarrier.await(); // releasing gpsFixReceived execution
+        gpsFixReceivedDone.await(); // releasing gpsFixReceived execution
         new Thread(() -> {
             GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(10800000),
                     new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(123)));
             track.addGPSFix(fix4);
         }).start();
         gpsFixReceivedBarrier.await();
+        gpsFixReceivedDone.await(); // releasing gpsFixReceived execution
         cacheBarrier.await(); // releasing the creation of the cache entry from way above; this would now add a stale entry
         // that would have been invalidated by all the GPS fixes above
+        cacheDone.await(); // wait for the caching to have completed
+        final double maxSpeed[] = new double[1];
+        final CyclicBarrier testDone = new CyclicBarrier(2);
         new Thread(() -> {
-            assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
-                    getB().getKnots(), 0.001);
+            maxSpeed[0] = track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
+                    getB().getKnots();
+            try {
+                testDone.await();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }).start();
-        computeMaxSpeedDoneBarrier.await();
-        cacheBarrier.await();
+        while (computeMaxSpeedDoneBarrier.getNumberWaiting() > 0) {
+            computeMaxSpeedDoneBarrier.await();
+        }
+        while (cacheBarrier.getNumberWaiting() > 0) {
+            cacheBarrier.await();
+        }
+        testDone.await();
+        assertEquals(2., maxSpeed[0], 0.001);
     }
 
     @Test
