@@ -95,12 +95,13 @@ public class MetadataParserImpl implements MetadataParser {
         Map<Integer, PassingInstruction> result = new HashMap<Integer, PassingInstruction>();
         if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            for (int i = 0; i<Util.size(controlPoints); i++) {
+            int start = routeMetadata.containsKey("Seq." + 0) ? 0 : 1;
+            for (int i = start; i < start + Util.size(controlPoints); i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 if (seqValue != null) {
                     final PassingInstruction passingInstructions = PassingInstruction.valueOfIgnoringCase(seqValue);
                     if (passingInstructions != null) {
-                        result.put(i, passingInstructions);
+                        result.put(i - start, passingInstructions);
                     }
                 }
             }
