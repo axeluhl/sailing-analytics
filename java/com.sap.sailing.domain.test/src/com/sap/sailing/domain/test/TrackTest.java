@@ -56,7 +56,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.concurrent.LockUtil;
 
 public class TrackTest {
     private DynamicGPSFixTrack<Boat, GPSFixMoving> track;
@@ -279,7 +278,6 @@ public class TrackTest {
 
                     @Override
                     public void gpsFixReceived(GPSFixMoving fix, Object item, boolean firstFixInTrack) {
-                        LockUtil.lockForWrite(getLock());
                         try {
                             // trigger the barrier after having acquired the cache write lock; this is what the
                             // super.gpsFixReceived(...) method will also do (reentrantly), but this way we can
@@ -289,8 +287,6 @@ public class TrackTest {
                             gpsFixReceivedDone.await();
                         } catch (InterruptedException | BrokenBarrierException e) {
                             throw new RuntimeException(e);
-                        } finally {
-                            LockUtil.unlockAfterWrite(getLock());
                         }
                     }
                 };
