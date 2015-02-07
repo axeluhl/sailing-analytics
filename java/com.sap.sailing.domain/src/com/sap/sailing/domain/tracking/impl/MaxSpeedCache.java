@@ -180,16 +180,16 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         if (!to.before(from)) {
             result = cacheLookup(from, to);
             if (result == null) {
-//                LockUtil.lockForWrite(lock);
-//                try {
+                LockUtil.lockForWrite(lock);
+                try {
                     // need to run both, the re-calculation as well as the caching, under the write lock because otherwise
                     // an invocation of gpsFixReceived(...) may cut in between, obtain the write lock and perform invalidations
                     // that would have needed to invalidate the value recalculated.
                     result = computeMaxSpeed(from, to);
                     cache(from, to, result);
-//                } finally {
-//                    LockUtil.unlockAfterWrite(lock);
-//                }
+                } finally {
+                    LockUtil.unlockAfterWrite(lock);
+                }
             }
         }
         return result;
