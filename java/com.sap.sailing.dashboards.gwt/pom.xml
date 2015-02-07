@@ -26,6 +26,17 @@
 
   <dependencies>
     <dependency>
+       <groupId>javax.validation</groupId>
+       <artifactId>validation-api</artifactId>
+       <version>1.0.0.GA</version>
+    </dependency>
+    <dependency>
+       <groupId>javax.validation</groupId>
+       <artifactId>validation-api</artifactId>
+       <version>1.0.0.GA</version>
+       <classifier>sources</classifier>
+    </dependency>
+    <dependency>
 	    <!-- This dependency is required because the GWT Maven Plugin searches 
 		    other GWT modules only in Maven dependencies -->
 	    <groupId>com.github.branflake2267</groupId>
@@ -87,18 +98,18 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<version>2.6.1</version>
+                <version>${gwt.version}</version>
 				<executions>
 					<!-- GWT version detected from dependencyManagement -->
 					<execution>
 						<configuration>
-							<extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx4096m</extraJvmArgs>
+							<extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2048m</extraJvmArgs>
 							<!-- <userAgents>chrome</userAgents> -->
 							<modules>
 								<module>com.sap.sailing.dashboards.gwt.RibDashboard</module>
 							</modules>
 							<gen>${basedir}/.generated</gen>
-							<localWorkers>3</localWorkers>
+							<localWorkers>15</localWorkers>
 							<webappDirectory>${basedir}</webappDirectory>
 							<warSourceDirectory>${basedir}/src/main/resources
 							</warSourceDirectory>

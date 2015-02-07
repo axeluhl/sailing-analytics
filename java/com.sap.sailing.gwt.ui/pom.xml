@@ -130,7 +130,7 @@
 		        <module>com.sap.sailing.gwt.ui.RegattaOverview</module>
 		        <module>com.sap.sailing.gwt.ui.PolarSheets</module>
 		      </modules>
-		      <style>PRETTY</style>
+              <!--<style>PRETTY</style>-->
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>15</localWorkers>
 		      <webappDirectory>${basedir}</webappDirectory>
