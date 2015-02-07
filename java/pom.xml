@@ -18,7 +18,6 @@
 		<module>com.sap.sse.common</module>
 		<module>com.sap.sse.shared.android</module>
 		<module>com.sap.sse.mongodb</module>
-		<module>com.sap.sse.gateway</module>
 		<module>com.sap.sse.gwt</module>
 		<module>com.sap.sse.gwt.adminconsole</module>
 		<module>com.sap.sse.datamining</module>
@@ -37,7 +36,6 @@
 		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sse.filestorage</module>
 		<module>com.sap.sse.filestorage.test</module>
-		<module>com.sap.sse.osgi</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>

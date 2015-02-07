@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server;
+package com.sap.sse.gwt.server.filestorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
 import com.sap.sse.filestorage.FileStorageService;
-import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.FileStorageServiceProperty;
+import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyDTO;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
 public class FileStorageServiceDTOUtils {    
     public static FileStorageServicePropertyDTO convert(FileStorageServiceProperty p) {
