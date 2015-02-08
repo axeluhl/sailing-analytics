@@ -7,7 +7,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
  * For general information see {@link AdditionalResultDataBuilder}.<br />
@@ -35,11 +35,11 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     }
 
     @Override
-    public AdditionalResultData build(long calculationTimeInNanos, ServerStringMessages stringMessages, Locale locale) {
+    public AdditionalResultData build(long calculationTimeInNanos, ResourceBundleStringMessages stringMessages, Locale locale) {
         return new AdditionalResultDataImpl(retrievedDataAmount, buildResultSignifier(stringMessages, locale), unit, resultDecimals, calculationTimeInNanos);
     }
 
-    private String buildResultSignifier(ServerStringMessages stringMessages, Locale locale) {
+    private String buildResultSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
         if (extractionFunction == null || aggregationNameMessageKey == null) {
             return "";
         }

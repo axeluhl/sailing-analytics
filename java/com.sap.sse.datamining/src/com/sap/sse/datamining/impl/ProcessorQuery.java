@@ -20,7 +20,7 @@ import com.sap.sse.datamining.impl.components.OverwritingResultDataBuilder;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements Query<AggregatedType> {
     
@@ -31,7 +31,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
 
     private final ProcessResultReceiver resultReceiver;
     
-    private final ServerStringMessages stringMessages;
+    private final ResourceBundleStringMessages stringMessages;
     private final Locale locale;
 
     private final Object monitorObject = new Object();
@@ -50,7 +50,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     /**
      * Creates a query that returns a result with additional data.
      */
-    public ProcessorQuery(DataSourceType dataSource, ServerStringMessages stringMessages, Locale locale) {
+    public ProcessorQuery(DataSourceType dataSource, ResourceBundleStringMessages stringMessages, Locale locale) {
         this.dataSource = dataSource;
         this.stringMessages = stringMessages;
         this.locale = locale;

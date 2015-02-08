@@ -11,7 +11,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
  * Takes a dimension and groups the given elements by the dimensions {@link FunctionDTO}.
@@ -21,7 +21,7 @@ import com.sap.sse.i18n.ServerStringMessages;
 public class ParallelByDimensionGroupingProcessor<DataType> extends
         AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType> {
 
-    private final ServerStringMessages stringMessages;
+    private final ResourceBundleStringMessages stringMessages;
     private final Locale locale;
 
     private final FunctionDTOFactory functionDTOFactory;
@@ -30,7 +30,7 @@ public class ParallelByDimensionGroupingProcessor<DataType> extends
                                                 ExecutorService executor,
                                                 Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
                                                 Function<?> dimension,
-                                                ServerStringMessages stringMessages, Locale locale) {
+                                                ResourceBundleStringMessages stringMessages, Locale locale) {
         super(dataType, executor, resultReceivers, asIterable(dimension));
         this.stringMessages = stringMessages;
         this.locale = locale;

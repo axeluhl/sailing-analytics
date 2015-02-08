@@ -10,7 +10,7 @@ import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.annotations.Statistic;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
@@ -115,7 +115,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
     
     @Override
-    public String getLocalizedName(Locale locale, ServerStringMessages stringMessages) {
+    public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
         if (!isLocatable()) {
             return getSimpleName();
         }

@@ -9,7 +9,7 @@ import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class FunctionDTOFactory {
 
@@ -26,7 +26,7 @@ public class FunctionDTOFactory {
      * annotation.<br>
      * If the function has no message key, the function name is used as display name.
      */
-    public FunctionDTO createFunctionDTO(Function<?> function, ServerStringMessages stringMessages, Locale locale) {
+    public FunctionDTO createFunctionDTO(Function<?> function, ResourceBundleStringMessages stringMessages, Locale locale) {
         return createFunctionDTO(function, function.getLocalizedName(locale, stringMessages));
     }
     

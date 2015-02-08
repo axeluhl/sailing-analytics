@@ -10,14 +10,14 @@ import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.impl.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 
 public interface DataMiningServer {
     
     public ExecutorService getExecutorService();
 
-    public ServerStringMessages getStringMessages();
+    public ResourceBundleStringMessages getStringMessages();
     
     public FunctionProvider getFunctionProvider();
 

@@ -34,11 +34,11 @@ import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRaceWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestFunctionProvider {
     
-    private static final ServerStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
+    private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     
     private ExpectedFunctionRegistryUtil functionRegistryUtil;
     private FunctionRegistry functionRegistry;

@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implements
         DataRetrieverChainDefinition<DataSourceType, DataType> {
@@ -46,7 +46,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     }
     
     @Override
-    public String getLocalizedName(Locale locale, ServerStringMessages stringMessages) {
+    public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
         return stringMessages.get(locale, nameMessageKey);
     }
 

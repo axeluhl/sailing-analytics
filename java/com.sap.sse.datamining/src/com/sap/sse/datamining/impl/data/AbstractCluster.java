@@ -6,7 +6,7 @@ import java.util.Locale;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public abstract class AbstractCluster<ElementType> implements Cluster<ElementType> {
 
@@ -34,7 +34,7 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
     }
     
     @Override
-    public String getAsLocalizedString(Locale locale, ServerStringMessages stringMessages) {
+    public String getAsLocalizedString(Locale locale, ResourceBundleStringMessages stringMessages) {
         return stringMessages.get(locale, messageKey) + " " + getBoundariesAsString();
     }
     

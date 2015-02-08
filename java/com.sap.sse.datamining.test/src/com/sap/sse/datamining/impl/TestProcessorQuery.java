@@ -44,11 +44,11 @@ import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.BlockingProcessor;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 import com.sap.sse.datamining.test.util.components.Number;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestProcessorQuery {
     
-    private final static ServerStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
+    private final static ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     
     private ProcessorFactory processorFactory;
 
