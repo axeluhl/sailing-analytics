@@ -506,7 +506,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
     private void udapteRawWindFixes(WindInfoForRaceDTO result) {
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
-            if (e.getKey().getType() == WindSourceType.WEB || e.getKey().getType() == WindSourceType.EXPEDITION) {
+            if (e.getKey().getType() == WindSourceType.WEB || e.getKey().getType() == WindSourceType.WIND_SENSOR) {
                 windSourceLabel.setText(stringMessages.windSource() + ": " + e.getKey());
                 if (e.getKey().getType() == WindSourceType.WEB) {
                     // only the WEB wind source is editable, hence has a "Remove" column

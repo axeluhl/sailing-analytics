@@ -58,6 +58,11 @@ public class WindJsonGetServletRefactoringTest {
     private JSONObject getExpectedResult(String windSourceToRead, TrackedRace trackedRace, TimePoint from, TimePoint to) {
         JSONObject jsonWindTracks = new JSONObject();
         List<WindSource> windSources = servlet.getAvailableWindSources(trackedRace);
+        JSONArray jsonWindSourcesDisplayed = new JSONArray();
+        for (WindSource windSource : windSources) {
+            jsonWindSourcesDisplayed.add(windSource.getType() + (windSource.getId() != null ? "-"+windSource.getId() : ""));
+        }
+        jsonWindTracks.put("displayedWindSources", jsonWindSourcesDisplayed);
         for (WindSource windSource : windSources) {
             if("ALL".equals(windSourceToRead) || windSource.getType().name().equalsIgnoreCase(windSourceToRead)) {
                 JSONArray jsonWindArray = new JSONArray();
@@ -94,7 +99,7 @@ public class WindJsonGetServletRefactoringTest {
                 } finally {
                     windTrack.unlockAfterRead();
                 }
-                jsonWindTracks.put(windSource.toString(), jsonWindArray);
+                jsonWindTracks.put(windSource.toString()+(windSource.getId()!=null ? "-"+windSource.getId():""), jsonWindArray);
             }
         }
         return jsonWindTracks;
@@ -137,7 +142,8 @@ public class WindJsonGetServletRefactoringTest {
         stub(trackedRace.getWind(isA(Position.class), argThat(isNeitherTooEarlyNorTooLate))).toReturn(someCombinedWindFix);
         webWindTrack.add(new WindImpl(new DegreePosition(49, 3), now,
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))));
+        System.out.println(getExpectedResult(WindJsonGetServlet.ALL, trackedRace, earlier, later));
         assertEquals(getExpectedResult(WindJsonGetServlet.ALL, trackedRace, earlier, later),
-                servlet.getResult(WindJsonGetServlet.ALL, trackedRace, earlier, later));
+                servlet.getResult(WindJsonGetServlet.ALL, "", trackedRace, earlier, later));
     }
 }

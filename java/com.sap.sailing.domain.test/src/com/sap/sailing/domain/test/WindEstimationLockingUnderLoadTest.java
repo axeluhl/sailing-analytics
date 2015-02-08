@@ -63,7 +63,7 @@ public class WindEstimationLockingUnderLoadTest {
     
     @Before
     public void setUp() {
-        realWindSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, "1");
+        realWindSource = new WindSourceWithAdditionalID(WindSourceType.WIND_SENSOR, "1");
         measuredTrack = new WindTrackImpl(WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, /* useSpeed */ true, /* nameForReadWriteLock */ "Test wind track in "+getClass().getName());
         mockedTrackedRace = mockTrackedRace();
         estimationTrack = new TrackBasedEstimationWindTrackImpl(mockedTrackedRace, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 0.5);

@@ -119,7 +119,7 @@ public class ExpeditionWindTracker extends AbstractWindTracker implements Expedi
     }
 
     protected void sendWindToRace(Wind wind, String windSourceID) {
-        getTrackedRace().recordWind(wind, new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, windSourceID));
+        getTrackedRace().recordWind(wind, new WindSourceWithAdditionalID(WindSourceType.WIND_SENSOR, windSourceID));
     }
 
 }

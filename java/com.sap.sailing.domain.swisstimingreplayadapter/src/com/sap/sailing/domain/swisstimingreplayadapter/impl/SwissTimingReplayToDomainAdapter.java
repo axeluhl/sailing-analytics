@@ -123,7 +123,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     /**
      * If a wind speed and direction was transmitted with the last mark message, it is recorded for the mark. When the next
      * mark position tracker message is received, a look up in this map is performed. If a wind speed/direction is found, it is
-     * added to the tracked race's {@link WindSourceType#EXPEDITION} wind track.
+     * added to the tracked race's {@link WindSourceType#WIND_SENSOR} wind track.
      */
     private final Map<ControlPoint, SpeedWithBearing> windAtControlPoint;
 
@@ -342,7 +342,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 Entry<ControlPoint, SpeedWithBearing> controlPointWithWind = i.next();
                 if (Util.contains(controlPointWithWind.getKey().getMarks(), mark)) {
                     trackedRace.recordWind(new WindImpl(position, raceTimePoint, controlPointWithWind.getValue()),
-                            new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, mark.getName()));
+                            new WindSourceWithAdditionalID(WindSourceType.WIND_SENSOR, mark.getName()));
                     i.remove();
                 }
             }

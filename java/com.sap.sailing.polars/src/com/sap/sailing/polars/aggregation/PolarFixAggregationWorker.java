@@ -194,7 +194,7 @@ public class PolarFixAggregationWorker implements Runnable {
     
     private Collection<? extends Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> addAllWindsOfWindGaugesSplitOneByOne(
             GPSFixMoving fix) {
-        Iterable<WindSource> windGaugeSources = race.getWindSources(WindSourceType.EXPEDITION);
+        Iterable<WindSource> windGaugeSources = race.getWindSources(WindSourceType.WIND_SENSOR);
         List<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> windWithConfidenceList = new ArrayList<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>>();
         for (WindSource windGaugeSource : windGaugeSources) {
             Iterable<WindSource> allSources = race.getWindSources();
@@ -212,7 +212,7 @@ public class PolarFixAggregationWorker implements Runnable {
     }
     
     private String createWindGaugesString(TrackedRace race) {
-        Iterable<WindSource> gaugeWindSources = race.getWindSources(WindSourceType.EXPEDITION);
+        Iterable<WindSource> gaugeWindSources = race.getWindSources(WindSourceType.WIND_SENSOR);
         String gaugeIdString = "";
         for (WindSource source : gaugeWindSources) {
             if (gaugeIdString.isEmpty()) {

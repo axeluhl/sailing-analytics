@@ -12,8 +12,8 @@ public class WindSourceTypeFormatter {
             return stringMessages.courseBasedWindSourceTypeName();
         case TRACK_BASED_ESTIMATION:
             return stringMessages.trackBasedEstimationWindSourceTypeName();
-        case EXPEDITION:
-            return stringMessages.expeditionWindSourceTypeName();
+        case WIND_SENSOR:
+            return stringMessages.windSensorWindSourceTypeName();
         case WEB:
             return stringMessages.webWindSourceTypeName();
         case RACECOMMITTEE:
@@ -30,8 +30,8 @@ public class WindSourceTypeFormatter {
             return stringMessages.courseBasedWindSourceTypeTooltip();
         case TRACK_BASED_ESTIMATION:
             return stringMessages.trackBasedEstimationWindSourceTypeTooltip();
-        case EXPEDITION:
-            return stringMessages.expeditionWindSourceTypeTooltip();
+        case WIND_SENSOR:
+            return stringMessages.windSensorWindSourceTypeTooltip();
         case WEB:
             return stringMessages.webWindSourceTypeTooltip();
         case RACECOMMITTEE:

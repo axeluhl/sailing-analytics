@@ -17,7 +17,7 @@ public enum WindSourceType {
     /**
      * Measured using wind sensors
      */
-    EXPEDITION(true, 0.9, /* useSpeed */ true),
+    WIND_SENSOR(true, 0.9, /* useSpeed */ true),
     
     /**
      * Estimates wind conditions by analyzing the boat tracks; may not have results for all time points, e.g.,

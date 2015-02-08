@@ -33,6 +33,7 @@ public class WindJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -1408004464252437535L;
 
     private static final String PARAM_NAME_WINDSOURCE = "windsource";
+    private static final String PARAM_NAME_WINDSOURCE_ID = "windsourceid";
     private static final String PARAM_NAME_FROM_TIME = "fromtime";
     private static final String PARAM_NAME_FROM_TIME_MILLIS = "fromtimeasmillis";
     private static final String PARAM_NAME_TO_TIME = "totime";
@@ -50,6 +51,8 @@ public class WindJsonGetServlet extends AbstractJsonHttpServlet {
             } else {
                 String windSourceParam = req.getParameter(PARAM_NAME_WINDSOURCE);
                 String windSourceToRead = windSourceParam != null ? windSourceParam : ALL;         
+                String windSourceIdParam = req.getParameter(PARAM_NAME_WINDSOURCE_ID);
+                String windSourceIdToRead = windSourceIdParam != null ? windSourceIdParam : null;
 
                 TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
 
@@ -70,26 +73,29 @@ public class WindJsonGetServlet extends AbstractJsonHttpServlet {
                     return;
                 }
 
-                JSONObject jsonWindTracks = getResult(windSourceToRead, trackedRace, from, to);
+                JSONObject jsonWindTracks = getResult(windSourceToRead, windSourceIdToRead, trackedRace, from, to);
                 setJsonResponseHeader(resp);
                 jsonWindTracks.writeJSONString(resp.getWriter());
             }
         }
     }
 
-    JSONObject getResult(String windSourceToRead, TrackedRace trackedRace, TimePoint from, TimePoint to) {
-        Map<WindSource, List<Wind>> fixes = getRelevantFixes(windSourceToRead, trackedRace, from, to);
+    JSONObject getResult(String windSourceToRead, String windSourceIdToRead, TrackedRace trackedRace, TimePoint from, TimePoint to) {
+        Map<WindSource, List<Wind>> fixes = getRelevantFixes(windSourceToRead, windSourceIdToRead, trackedRace, from, to);
         JSONObject jsonWindTracks = getResultAsJsonObject(trackedRace, fixes);
         return jsonWindTracks;
     }
 
-    private Map<WindSource, List<Wind>> getRelevantFixes(String windSourceToRead, TrackedRace trackedRace, TimePoint from,
+    private Map<WindSource, List<Wind>> getRelevantFixes(String windSourceToRead, String windSourceIdToRead, TrackedRace trackedRace, TimePoint from,
             TimePoint to) {
         // quickly extract relevant fixes to hold locks as shortly as possible; process later
         List<WindSource> windSources = getAvailableWindSources(trackedRace);
         Map<WindSource, List<Wind>> fixes = new HashMap<>();
         for (WindSource windSource : windSources) {
             if (ALL.equals(windSourceToRead) || windSource.getType().name().equalsIgnoreCase(windSourceToRead)) {
+                if (windSourceIdToRead != null && windSource.getId() != null && !windSourceIdToRead.equalsIgnoreCase(windSource.getId().toString())) {
+                    continue;
+                }
                 ArrayList<Wind> fixesForWindSource = new ArrayList<>();
                 fixes.put(windSource, fixesForWindSource);
                 WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
@@ -114,6 +120,11 @@ public class WindJsonGetServlet extends AbstractJsonHttpServlet {
 
     private JSONObject getResultAsJsonObject(TrackedRace trackedRace, Map<WindSource, List<Wind>> fixes) {
         JSONObject jsonWindTracks = new JSONObject();
+        JSONArray jsonWindSourcesDisplayed = new JSONArray();
+        for (WindSource windSource : fixes.keySet()) {
+            jsonWindSourcesDisplayed.add(windSource.getType() + (windSource.getId() != null ? "-"+windSource.getId() : ""));
+        }
+        jsonWindTracks.put("displayedWindSources", jsonWindSourcesDisplayed);
         for (Map.Entry<WindSource, List<Wind>> e : fixes.entrySet()) {
             WindSource windSource = e.getKey();
             JSONArray jsonWindArray = new JSONArray();
@@ -136,7 +147,7 @@ public class WindJsonGetServlet extends AbstractJsonHttpServlet {
                 }
                 jsonWindArray.add(jsonWind);
             }
-            jsonWindTracks.put(windSource.toString(), jsonWindArray);
+            jsonWindTracks.put(windSource.toString()+(windSource.getId() != null ? "-"+windSource.getId().toString() : ""), jsonWindArray);
         }
         return jsonWindTracks;
     }
