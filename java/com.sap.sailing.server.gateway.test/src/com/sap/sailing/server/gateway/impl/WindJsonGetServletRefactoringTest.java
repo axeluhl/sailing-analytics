@@ -60,7 +60,10 @@ public class WindJsonGetServletRefactoringTest {
         List<WindSource> windSources = servlet.getAvailableWindSources(trackedRace);
         JSONArray jsonWindSourcesDisplayed = new JSONArray();
         for (WindSource windSource : windSources) {
-            jsonWindSourcesDisplayed.add(windSource.getType() + (windSource.getId() != null ? "-"+windSource.getId() : ""));
+            JSONObject windSourceInformation = new JSONObject();
+            windSourceInformation.put("typeName", windSource.getType().name());
+            windSourceInformation.put("id", windSource.getId() != null ? windSource.getId().toString() : "");
+            jsonWindSourcesDisplayed.add(windSourceInformation);
         }
         jsonWindTracks.put("displayedWindSources", jsonWindSourcesDisplayed);
         for (WindSource windSource : windSources) {
