@@ -44,7 +44,7 @@ public class IgtimiWindTrackerFactory implements WindTrackerFactory {
     }
 
     WindSource getWindSource(String deviceSerialNumber) {
-        return new WindSourceWithAdditionalID(WindSourceType.WIND_SENSOR, deviceSerialNumber);
+        return new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, deviceSerialNumber);
     }
 
 }

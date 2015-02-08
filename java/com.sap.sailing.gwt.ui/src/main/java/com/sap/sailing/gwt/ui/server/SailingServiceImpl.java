@@ -1195,7 +1195,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (windSources != null) {
                 windSourcesToDeliver.addAll(windSources);
             } else {
-                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.WIND_SENSOR));
+                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.EXPEDITION));
                 windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.WEB));
             }
             for (WindSource windSource : windSourcesToDeliver) {

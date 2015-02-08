@@ -654,7 +654,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // draw the wind into the map, get the combined wind
                     // TODO bug2057 also fetch wind for LEG_MIDDLE for all legs because this needs to be the basis for the advantage line display
                     List<String> windSourceTypeNames = new ArrayList<String>();
-                    windSourceTypeNames.add(WindSourceType.WIND_SENSOR.name());
+                    windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
                     GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames,
                             /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
@@ -673,7 +673,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                 for (WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                     switch (windSource.getType()) {
-                                        case WIND_SENSOR:
+                                        case EXPEDITION:
                                             // we filter out measured wind sources with vary low confidence
                                             if (windTrackInfoDTO.minWindConfidence > 0.0001) {
                                                 windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));

@@ -165,9 +165,9 @@ public class WindImportServlet extends SailingServerHttpServlet {
             UploadRequest uploadRequest = readRequest(request);
             WindSource windSource;
             if (uploadRequest.boatId == null) {
-                windSource = new WindSourceImpl(WindSourceType.WIND_SENSOR);
+                windSource = new WindSourceImpl(WindSourceType.EXPEDITION);
             } else {
-                windSource = new WindSourceWithAdditionalID(WindSourceType.WIND_SENSOR, uploadRequest.boatId);
+                windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, uploadRequest.boatId);
             }
 
             List<DynamicTrackedRace> trackedRaces = new ArrayList<DynamicTrackedRace>();

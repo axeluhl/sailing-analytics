@@ -196,7 +196,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         }
         
         // Measured wind sources data
-        statisticsDTO.measuredWindSourcesCount = Util.size(trackedRace.getWindSources(WindSourceType.WIND_SENSOR));
+        statisticsDTO.measuredWindSourcesCount = Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION));
         statisticsDTO.hasMeasuredWindData = statisticsDTO.measuredWindSourcesCount > 0; 
 
         // leg progress data

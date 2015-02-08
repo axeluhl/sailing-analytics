@@ -103,7 +103,7 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
             windSourcesToExclude.add(courseSource);
         }
 
-        Iterable<WindSource> expSources = race.getWindSources(WindSourceType.WIND_SENSOR);
+        Iterable<WindSource> expSources = race.getWindSources(WindSourceType.EXPEDITION);
         for (WindSource expSource : expSources) {
             windSourcesToExclude.add(expSource);
         }

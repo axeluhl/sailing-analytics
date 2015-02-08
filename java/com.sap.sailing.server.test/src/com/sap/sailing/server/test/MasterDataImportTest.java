@@ -612,7 +612,7 @@ public class MasterDataImportTest {
         TrackedRace trackedRace = new DummyTrackedRace(raceId, competitors, regatta, trackedRegatta, sourceService.getWindStore());
         regatta.addRace(trackedRace.getRace()); // make sure the competitor is serialized together with the regatta
         raceColumn.setTrackedRace(testFleet1, trackedRace);
-        WindSource windSource = new WindSourceWithAdditionalID(WindSourceType.WIND_SENSOR, "Igtimi1");
+        WindSource windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, "Igtimi1");
         WindTrack windTrackOnSource = trackedRace.getOrCreateWindTrack(windSource);
 
         Position p = new DegreePosition(54, 30);
