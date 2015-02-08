@@ -1136,4 +1136,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String error();
     String fileStorage();
     String active();
+    String scoringSchemeHighPointEssOverallDescription();
 }
