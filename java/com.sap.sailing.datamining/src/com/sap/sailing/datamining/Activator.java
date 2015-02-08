@@ -14,8 +14,8 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
-import com.sap.sse.i18n.ServerStringMessages;
-import com.sap.sse.i18n.impl.ServerStringMessagesImpl;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 public class Activator implements BundleActivator, DataMiningBundleService {
     
@@ -23,7 +23,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     
     private static Activator INSTANCE;
 
-    private final ServerStringMessages sailingServerStringMessages;
+    private final ResourceBundleStringMessages sailingServerStringMessages;
     private final SailingDataRetrieverChainDefinitions dataRetrieverChainDefinitions;
     private final SailingClusterGroups clusterGroups;
     
@@ -31,7 +31,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     
     public Activator() {
         dataRetrieverChainDefinitions = new SailingDataRetrieverChainDefinitions();
-        sailingServerStringMessages = new ServerStringMessagesImpl(STRING_MESSAGES_BASE_NAME, Activator.class.getClassLoader());
+        sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, Activator.class.getClassLoader());
         clusterGroups = new SailingClusterGroups();
     }
 
@@ -48,7 +48,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     }
     
     @Override
-    public ServerStringMessages getStringMessages() {
+    public ResourceBundleStringMessages getStringMessages() {
         return sailingServerStringMessages;
     }
 

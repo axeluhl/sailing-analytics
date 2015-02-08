@@ -3,9 +3,9 @@ package com.sap.sse.i18n.impl;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public class ServerStringMessagesImpl implements ServerStringMessages {
+public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMessages {
     
     private static final String MESSAGE_PARAMETER_START = "\\{";
     private static final String MESSAGE_PARAMETER_END = "\\}";
@@ -13,7 +13,7 @@ public class ServerStringMessagesImpl implements ServerStringMessages {
     private final String resourceBaseName;
     private final ClassLoader resourceClassLoader;
     
-    public ServerStringMessagesImpl(String resourceBaseName, ClassLoader resourceClassLoader) {
+    public ResourceBundleStringMessagesImpl(String resourceBaseName, ClassLoader resourceClassLoader) {
         this.resourceBaseName = resourceBaseName;
         this.resourceClassLoader = resourceClassLoader;
     }

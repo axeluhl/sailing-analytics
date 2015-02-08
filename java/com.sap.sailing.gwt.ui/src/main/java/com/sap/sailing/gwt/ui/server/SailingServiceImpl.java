@@ -425,7 +425,7 @@ import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -5440,7 +5440,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public FileStorageServiceDTO[] getAvailableFileStorageServices(String localeInfoName) {
-        Locale locale = ServerStringMessages.Util.getLocaleFor(localeInfoName);
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
         for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
             serviceDtos.add(FileStorageServiceDTOUtils.convert(s, locale));
@@ -5462,7 +5462,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) {
-        Locale locale = ServerStringMessages.Util.getLocaleFor(localeInfoName);
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         try {
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {

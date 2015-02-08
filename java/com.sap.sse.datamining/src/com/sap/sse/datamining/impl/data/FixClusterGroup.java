@@ -6,7 +6,7 @@ import java.util.Locale;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class FixClusterGroup<ElementType> implements ClusterGroup<ElementType> {
 
@@ -34,7 +34,7 @@ public class FixClusterGroup<ElementType> implements ClusterGroup<ElementType> {
     }
     
     @Override
-    public String getLocalizedName(Locale locale, ServerStringMessages stringMessages) {
+    public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
         return stringMessages.get(locale, messageKey);
     }
     

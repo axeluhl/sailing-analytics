@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
 import com.sap.sse.datamining.shared.Unit;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public interface Function<ReturnType> {
 
@@ -17,12 +17,12 @@ public interface Function<ReturnType> {
     public String getSimpleName();
     
     /**
-     * @return <code>true</code>, if the method {@link #getLocalizedName(Locale, ServerStringMessages) getLocalizedName} would return something
+     * @return <code>true</code>, if the method {@link #getLocalizedName(Locale, ResourceBundleStringMessages) getLocalizedName} would return something
      * other than the method {@link #getSimpleName()}.
      */
     public boolean isLocatable();
     
-    public String getLocalizedName(Locale locale, ServerStringMessages stringMessages);
+    public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages);
     
     /**
      * Tries to invoke the function for the given <code>instance</code> without parameters.

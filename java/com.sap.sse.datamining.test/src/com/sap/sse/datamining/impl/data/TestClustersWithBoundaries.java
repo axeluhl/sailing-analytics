@@ -11,13 +11,13 @@ import org.junit.Test;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.datamining.test.util.TestsUtil;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestClustersWithBoundaries {
 
     private static final char INFINITE = '\u221e';
     
-    private static final ServerStringMessages stringMessages = TestsUtil.getTestStringMessages();
+    private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessages();
 
     private static final Comparator<Integer> comparator = new ComparableComparator<Integer>();
     private static final ClusterBoundary<Integer> lowerBound = new ComparatorClusterBoundary<Integer>(comparator, 0, ComparisonStrategy.GREATER_EQUALS_THAN);

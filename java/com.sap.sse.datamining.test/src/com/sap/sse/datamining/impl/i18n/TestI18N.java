@@ -11,15 +11,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.test.util.TestsUtil;
-import com.sap.sse.i18n.ServerStringMessages;
-import com.sap.sse.i18n.impl.CompoundServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 
 public class TestI18N {
 
     private static final String SIMPLE_TEST_MESSAGE_KEY = "SimpleTestMessage";
     private static final String TEST_MESSAGE_WITH_PARAMETERS = "TestMessageWithParameters";
     
-    private ServerStringMessages testStringMessages;
+    private ResourceBundleStringMessages testStringMessages;
     
     @Before
     public void initializeBundleManager() {
@@ -40,7 +40,7 @@ public class TestI18N {
     
     @Test
     public void testDynamicCompoundStringMessages() {
-        CompoundServerStringMessages compoundStringMessages = new CompoundServerStringMessages();
+        CompoundResourceBundleStringMessages compoundStringMessages = new CompoundResourceBundleStringMessages();
         
         try {
             compoundStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY);
@@ -60,11 +60,11 @@ public class TestI18N {
     
     @Test
     public void testGetLocaleForLocaleInfoName() {
-        assertThat(ServerStringMessages.Util.getLocaleFor("default"), is(Locale.ENGLISH));
-        assertThat(ServerStringMessages.Util.getLocaleFor("en"), is(Locale.ENGLISH));
-        assertThat(ServerStringMessages.Util.getLocaleFor("de"), is(Locale.GERMAN));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("default"), is(Locale.ENGLISH));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("en"), is(Locale.ENGLISH));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("de"), is(Locale.GERMAN));
 
-        assertThat(ServerStringMessages.Util.getLocaleFor("Unsupported locale info name"), is(Locale.ENGLISH));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("Unsupported locale info name"), is(Locale.ENGLISH));
     }
     
     @Test(expected=MissingResourceException.class)

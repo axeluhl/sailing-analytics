@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public interface ServerStringMessages {
+/**
+ * Allow server-side internationalization similar to GWT client-side by using property files.
+ */
+public interface ResourceBundleStringMessages {
 
     public String getResourceBaseName();
 

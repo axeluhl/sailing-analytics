@@ -21,7 +21,7 @@ import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleD
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.components.AggregatorType;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class ProcessorFactory {
     
@@ -106,7 +106,7 @@ public class ProcessorFactory {
     @SuppressWarnings("unchecked")
     public <DataType> Collection<Processor<DataType, GroupedDataEntry<DataType>>> createGroupingExtractorsForDimensions(Class<DataType> dataType,
             Processor<GroupedDataEntry<Object>, ?> valueCollector, Iterable<Function<?>> dimensions,
-            ServerStringMessages stringMessages, Locale locale) {
+            ResourceBundleStringMessages stringMessages, Locale locale) {
         Collection<Processor<GroupedDataEntry<Object>, ?>> extractionResultReceivers = new ArrayList<>();
         extractionResultReceivers.add(valueCollector);
 

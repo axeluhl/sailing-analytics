@@ -26,7 +26,7 @@ import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class DataMiningServiceImpl extends RemoteServiceServlet implements DataMiningService {
     private static final long serialVersionUID = -7951930891674894528L;
@@ -96,8 +96,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     private Collection<FunctionDTO> functionsAsFunctionDTOs(Iterable<Function<?>> functions, String localeInfoName) {
-        Locale locale = ServerStringMessages.Util.getLocaleFor(localeInfoName);
-        ServerStringMessages ServerStringMessages = getDataMiningServer().getStringMessages();
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        ResourceBundleStringMessages ServerStringMessages = getDataMiningServer().getStringMessages();
         
         Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
         for (Function<?> function : functions) {
@@ -116,8 +116,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     private Collection<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
             Iterable<DataRetrieverChainDefinition<RacingEventService, ?>> dataRetrieverChainDefinitions, String localeInfoName) {
-        Locale locale = ServerStringMessages.Util.getLocaleFor(localeInfoName);
-        ServerStringMessages ServerStringMessages = getDataMiningServer().getStringMessages();
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        ResourceBundleStringMessages ServerStringMessages = getDataMiningServer().getStringMessages();
         
         Collection<DataRetrieverChainDefinitionDTO> DTOs = new ArrayList<>();
         for (DataRetrieverChainDefinition<RacingEventService, ?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
@@ -141,7 +141,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
             int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName) throws Exception {
         DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
         Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
-        Locale locale = ServerStringMessages.Util.getLocaleFor(localeInfoName);
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         Query<Set<Object>> dimensionValuesQuery = getDataMiningServer().createDimensionValuesQuery(getRacingEventService(), retrieverChainDefinition, retrieverLevel, dimensions, locale);
         QueryResult<Set<Object>> result = dimensionValuesQuery.run();
         return result;

@@ -10,27 +10,30 @@ import java.util.MissingResourceException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public class CompoundServerStringMessages implements ServerStringMessages {
+/**
+ * Combine several {@link ResourceBundleStringMessages}.
+ */
+public class CompoundResourceBundleStringMessages implements ResourceBundleStringMessages {
     
-    private static final Logger LOGGER = Logger.getLogger(CompoundServerStringMessages.class.getSimpleName());
+    private static final Logger LOGGER = Logger.getLogger(CompoundResourceBundleStringMessages.class.getSimpleName());
     
-    private final Collection<ServerStringMessages> stringMessages;
+    private final Collection<ResourceBundleStringMessages> stringMessages;
     
-    public CompoundServerStringMessages() {
+    public CompoundResourceBundleStringMessages() {
         stringMessages = new HashSet<>();
     }
 
-    public CompoundServerStringMessages(Collection<ServerStringMessages> stringMessages) {
+    public CompoundResourceBundleStringMessages(Collection<ResourceBundleStringMessages> stringMessages) {
         this.stringMessages = new HashSet<>(stringMessages);
     }
     
-    public void addStringMessages(ServerStringMessages stringMessages) {
+    public void addStringMessages(ResourceBundleStringMessages stringMessages) {
         this.stringMessages.add(stringMessages);
     }
     
-    public void removeStringMessages(ServerStringMessages stringMessages) {
+    public void removeStringMessages(ResourceBundleStringMessages stringMessages) {
         this.stringMessages.remove(stringMessages);
     }
     
@@ -41,8 +44,8 @@ public class CompoundServerStringMessages implements ServerStringMessages {
     
     @Override
     public String get(Locale locale, String messageKey, String... parameters) {
-        Map<ServerStringMessages, String> messages = new HashMap<>();
-        for (ServerStringMessages stringMessages : this.stringMessages) {
+        Map<ResourceBundleStringMessages, String> messages = new HashMap<>();
+        for (ResourceBundleStringMessages stringMessages : this.stringMessages) {
             try {
                 messages.put(stringMessages, stringMessages.get(locale, messageKey, parameters));
             } catch (MissingResourceException e) {
@@ -51,10 +54,10 @@ public class CompoundServerStringMessages implements ServerStringMessages {
         return getBestMessageAndLogConflicts(messageKey, messages);
     }
 
-    private String getBestMessageAndLogConflicts(String messageKey, Map<ServerStringMessages, String> messages) throws MissingResourceException {
+    private String getBestMessageAndLogConflicts(String messageKey, Map<ResourceBundleStringMessages, String> messages) throws MissingResourceException {
         String bestMessageResourceBaseName = null;
         String bestMessage = null;
-        for (Entry<ServerStringMessages, String> messagesEntry : messages.entrySet()) {
+        for (Entry<ResourceBundleStringMessages, String> messagesEntry : messages.entrySet()) {
             String message = messagesEntry.getValue();
             if (message != null) {
                 if (bestMessage == null) {
@@ -74,7 +77,7 @@ public class CompoundServerStringMessages implements ServerStringMessages {
     }
 
     private void logPossibleConflicts(String messageKey, String bestMessageResourceBaseName, String bestMessage,
-            Entry<ServerStringMessages, String> messagesEntry) {
+            Entry<ResourceBundleStringMessages, String> messagesEntry) {
         String messageResourceBaseName = messagesEntry.getKey().getResourceBaseName();
         String message = messagesEntry.getValue();
         

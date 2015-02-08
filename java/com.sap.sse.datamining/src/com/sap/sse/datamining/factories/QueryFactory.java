@@ -22,12 +22,12 @@ import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.NullaryFunctionValuesFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class QueryFactory {
 
     public <DataSourceType, DataType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, QueryDefinition<DataSourceType, DataType, ResultType> queryDefinition,
-                                                                            ServerStringMessages stringMessages, ExecutorService executor) {
+                                                                            ResourceBundleStringMessages stringMessages, ExecutorService executor) {
         return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale()) {
             @Override
             protected Processor<DataSourceType, ?> createFirstProcessor() {
@@ -80,7 +80,7 @@ public class QueryFactory {
     public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
             DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, int retrieverLevel,
             Iterable<Function<?>> dimensions, Locale locale,
-            ServerStringMessages stringMessages, ExecutorService executor) {
+            ResourceBundleStringMessages stringMessages, ExecutorService executor) {
         return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale) {
             @Override
             protected Processor<DataSource, ?> createFirstProcessor() {

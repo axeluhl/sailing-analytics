@@ -16,11 +16,11 @@ import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.test.util.TestsUtil;
-import com.sap.sse.i18n.ServerStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestFixClusterGroup {
 
-    private static final ServerStringMessages stringMessages = TestsUtil.getTestStringMessages();
+    private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessages();
     
     private static final Comparator<Integer> comparator = new ComparableComparator<Integer>();
     private Cluster<Integer> clusterLowerThanZero;
