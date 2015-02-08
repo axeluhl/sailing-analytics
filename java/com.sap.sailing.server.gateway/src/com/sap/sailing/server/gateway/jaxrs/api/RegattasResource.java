@@ -463,6 +463,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/races/{racename}/wind")
     public Response getWind(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
             @DefaultValue("COMBINED") @QueryParam("windsource") String windSource,
+            @QueryParam("windsourceid") String windSourceId,
             @QueryParam("fromtime") String fromtime, @QueryParam("fromtimeasmillis") Long fromtimeasmillis,
             @QueryParam("totime") String totime, @QueryParam("totimeasmillis") Long totimeasmillis) {
         Response response;
@@ -493,6 +494,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
                 TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(new DefaultWindTrackJsonSerializer());
                 serializer.setWindSource(windSource);
+                serializer.setWindSourceId(windSourceId);
                 serializer.setFromTime(from);
                 serializer.setToTime(to);
 

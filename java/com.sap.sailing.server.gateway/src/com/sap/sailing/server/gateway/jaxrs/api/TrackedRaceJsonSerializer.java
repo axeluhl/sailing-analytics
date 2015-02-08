@@ -23,6 +23,7 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
     public static final String ALL_WINDSOURCES = "ALL";
 
     private String windSourceToSerialize;
+    private String windSourceIdToSerialize;
     private TimePoint fromTime;
     private TimePoint toTime;
     private final WindTrackJsonSerializer windTrackSerializer;
@@ -42,8 +43,19 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
             JSONArray windTracks = new JSONArray();
 
             List<WindSource> windSources = getAvailableWindSources(trackedRace);
+            JSONArray jsonWindSourcesDisplayed = new JSONArray();
+            for (WindSource windSource : windSources) {
+                JSONObject windSourceInformation = new JSONObject();
+                windSourceInformation.put("typeName", windSource.getType().name());
+                windSourceInformation.put("id", windSource.getId() != null ? windSource.getId().toString() : "");
+                jsonWindSourcesDisplayed.add(windSourceInformation);
+            }
+            jsonRace.put("displayedWindSources", jsonWindSourcesDisplayed);
             for (WindSource windSource : windSources) {
                 if (ALL_WINDSOURCES.equals(windSourceToSerialize) || windSource.getType().name().equalsIgnoreCase(windSourceToSerialize)) {
+                    if (windSourceIdToSerialize != null && windSource.getId() != null && !windSource.getId().toString().equalsIgnoreCase(windSourceIdToSerialize)) {
+                        continue;
+                    }
                     windTrackSerializer.setFromTime(fromTime);
                     windTrackSerializer.setToTime(toTime);
                     windTrackSerializer.setWindSource(windSource);
@@ -81,5 +93,9 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
         }
         windSources.add(new WindSourceImpl(WindSourceType.COMBINED));
         return windSources;
+    }
+
+    public void setWindSourceId(String windSourceId) {
+        this.windSourceIdToSerialize = windSourceId;
     }   
 }
