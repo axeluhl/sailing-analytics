@@ -50,7 +50,7 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
                 windSourceInformation.put("id", windSource.getId() != null ? windSource.getId().toString() : "");
                 jsonWindSourcesDisplayed.add(windSourceInformation);
             }
-            jsonRace.put("displayedWindSources", jsonWindSourcesDisplayed);
+            jsonRace.put("availableWindSources", jsonWindSourcesDisplayed);
             for (WindSource windSource : windSources) {
                 if (ALL_WINDSOURCES.equals(windSourceToSerialize) || windSource.getType().name().equalsIgnoreCase(windSourceToSerialize)) {
                     if (windSourceIdToSerialize != null && windSource.getId() != null && !windSource.getId().toString().equalsIgnoreCase(windSourceIdToSerialize)) {

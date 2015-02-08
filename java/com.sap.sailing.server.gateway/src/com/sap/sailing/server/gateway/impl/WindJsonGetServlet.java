@@ -127,7 +127,7 @@ public class WindJsonGetServlet extends AbstractJsonHttpServlet {
             windSourceInformation.put("id", windSource.getId() != null ? windSource.getId().toString() : "");
             jsonWindSourcesDisplayed.add(windSourceInformation);
         }
-        jsonWindTracks.put("displayedWindSources", jsonWindSourcesDisplayed);
+        jsonWindTracks.put("availableWindSources", jsonWindSourcesDisplayed);
         for (Map.Entry<WindSource, List<Wind>> e : fixes.entrySet()) {
             WindSource windSource = e.getKey();
             JSONArray jsonWindArray = new JSONArray();

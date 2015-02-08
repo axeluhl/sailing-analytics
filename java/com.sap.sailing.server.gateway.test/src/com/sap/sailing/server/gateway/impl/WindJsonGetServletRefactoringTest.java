@@ -65,7 +65,7 @@ public class WindJsonGetServletRefactoringTest {
             windSourceInformation.put("id", windSource.getId() != null ? windSource.getId().toString() : "");
             jsonWindSourcesDisplayed.add(windSourceInformation);
         }
-        jsonWindTracks.put("displayedWindSources", jsonWindSourcesDisplayed);
+        jsonWindTracks.put("availableWindSources", jsonWindSourcesDisplayed);
         for (WindSource windSource : windSources) {
             if("ALL".equals(windSourceToRead) || windSource.getType().name().equalsIgnoreCase(windSourceToRead)) {
                 JSONArray jsonWindArray = new JSONArray();
