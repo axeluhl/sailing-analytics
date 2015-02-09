@@ -9,35 +9,19 @@ import android.widget.Button;
 
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.NextFragmentListener;
 
 public class CourseFragment extends RaceFragment {
-    
-    private NextFragmentListener mListener;
     
     public CourseFragment() {
         
     }
     
-    public CourseFragment(NextFragmentListener listener) {
-        mListener = listener;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_course, container, false);
         
         Button confirm = (Button) view.findViewById(R.id.confirm);
-        if (confirm != null) {
-            confirm.setOnClickListener(new OnClickListener() {
-                
-                @Override
-                public void onClick(View v) {
-                    mListener.nextFragment();
-                }
-            });
-        }
-        
+
         return view;
     }
 }

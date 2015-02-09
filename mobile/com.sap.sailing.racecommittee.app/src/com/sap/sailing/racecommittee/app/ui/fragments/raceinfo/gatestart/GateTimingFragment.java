@@ -7,18 +7,11 @@ import android.view.ViewGroup;
 
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.NextFragmentListener;
 
 public class GateTimingFragment extends RaceFragment {
     
-    private NextFragmentListener mListener;
-    
     public GateTimingFragment() {
         
-    }
-    
-    public GateTimingFragment(NextFragmentListener listener) {
-        mListener = listener;
     }
     
     @Override

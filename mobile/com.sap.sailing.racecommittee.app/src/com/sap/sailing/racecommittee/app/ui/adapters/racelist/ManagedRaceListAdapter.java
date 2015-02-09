@@ -72,6 +72,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private TextView race_name;
     private TextView flag_timer;
     private ImageView arrow_direction;
+    private SimpleDateFormat dateFormat;
 
     public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems,
             JuryFlagClickedListener juryListener) {
@@ -81,6 +82,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         mShownViewItems = viewItems;
         mInflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
         mResources = getContext().getResources();
+        dateFormat = new SimpleDateFormat("HH:mm", getContext().getResources().getConfiguration().locale);
     }
 
     public String fill2(int value) {
@@ -165,8 +167,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        RaceListDataType raceListElement = null;
-
+        RaceListDataType raceListElement;
         raceListElement = getItem(position);
 
         int type = getItemViewType(position);
@@ -183,8 +184,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (type == ViewType.HEADER.index) {
             // TODO
         } else if (type == ViewType.RACE.index) {
-            SimpleDateFormat format = new SimpleDateFormat("HH:mm",
-                    getContext().getResources().getConfiguration().locale);
             final RaceListDataTypeRace race = (RaceListDataTypeRace) raceListElement;
             resetValues(convertView);
 
@@ -204,7 +203,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (state != null) {
                 if (state.getStartTime() != null) {
                     race_started.setText(mResources.getString(R.string.race_started,
-                            format.format(state.getStartTime().asDate())));
+                            dateFormat.format(state.getStartTime().asDate())));
                     if (state.getFinishedTime() == null) {
                         time.setText(getDuration(state.getStartTime().asDate(), Calendar.getInstance().getTime()));
                     }
@@ -213,7 +212,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     time.setVisibility(View.GONE);
                     race_finished.setVisibility(View.VISIBLE);
                     race_finished.setText(mResources.getString(R.string.race_finished,
-                            format.format(state.getFinishedTime().asDate())));
+                            dateFormat.format(state.getFinishedTime().asDate())));
                 }
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
                     race_scheduled.setVisibility(View.GONE);

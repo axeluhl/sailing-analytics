@@ -7,7 +7,7 @@ import java.util.List;
 import android.widget.Filter;
 
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment.FilterMode;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.FilterMode;
 
 /**
  * Filters races by status.

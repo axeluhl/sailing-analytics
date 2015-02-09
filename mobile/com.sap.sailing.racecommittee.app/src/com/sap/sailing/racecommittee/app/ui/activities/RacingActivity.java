@@ -1,13 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.DrawerLayout;
@@ -15,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -29,6 +26,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -38,7 +36,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.*;
-import com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment.NavigationDrawerCallbacks;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
@@ -46,21 +44,26 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 
-public class RacingActivity extends SessionActivity implements RaceInfoListener, NavigationDrawerCallbacks,
+public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks,
         TickListener, OnClickListener {
+    private static final String TAG = RacingActivity.class.getName();
+    private static final String WIND = "wind";
+    private static final String RACE = "race";
+
     private static final int RacesLoaderId = 2;
     private static final int EventsLoaderId = 1;
     private static final int CourseLoaderId = 0;
-    private static final String TAG = RacingActivity.class.getName();
+
     private static ProgressBar mProgressSpinner;
+
     private TextView currentTime;
     private ReadonlyDataManager dataManager;
     private RaceInfoFragment infoFragment;
     private Wind mWind;
-    private NavigationDrawerFragment navDrawerFragment;
+    private RaceListFragment mRaceList;
     private RaceFragment raceFragment;
     private ManagedRace selectedRace;
     private RelativeLayout windButton;
@@ -84,9 +87,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private ImageView mWindMarker;
     private ImageView mAbandonFlagsMarker;
     private ImageView mRecallFlagsMarker;
-    private ImageView mPostpomeFlagsMarker;
+    private ImageView mPostponeFlagsMarker;
     private ImageView mCourseFlagsMarker;
     private ImageView mMoreFlagsMarker;
+    private SimpleDateFormat dateFormat;
 
     private void setupFragments() {
         Handler handler = new Handler();
@@ -94,7 +98,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             public void run() {
                 loadRaces(mCourseArea);
                 loadNavDrawer(mCourseArea, mEvent);
-                loadWelcomeFragment(mCourseArea, mEvent);
+                loadWelcomeFragment();
             }
         };
         handler.post(r);
@@ -102,33 +106,32 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
-            Log.e(getClass().getName(), "Expected an intent carrying event extras.");
+            ExLog.e(this, TAG, "Expected an intent carrying event extras.");
             return null;
         }
 
         final Serializable courseId = getIntent().getExtras().getSerializable(AppConstants.COURSE_AREA_UUID_KEY);
         if (courseId == null) {
-            Log.e(getClass().getName(), "Expected an intent carrying the course area id.");
+            ExLog.e(this, TAG, "Expected an intent carrying the course area id.");
             return null;
         }
         return courseId;
     }
 
-    private Serializable getEventIdFromItent() {
+    private Serializable getEventIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
-            Log.e(getClass().getName(), "Expected an intent carrying event extras.");
+            ExLog.e(this, TAG, "Expected an intent carrying event extras.");
         }
 
         final Serializable eventId = getIntent().getExtras().getSerializable(AppConstants.EventIdTag);
         if (eventId == null) {
-            Log.e(getClass().getName(), "Expected an intent carrying the event id.");
+            ExLog.e(this, TAG, "Expected an intent carrying the event id.");
             return null;
         }
         return eventId;
     }
 
     private void loadCourses(final EventBase event) {
-
         setSupportProgressBarIndeterminateVisibility(true);
         ExLog.i(this, TAG, "Issuing loading of courses from data manager");
         getLoaderManager().initLoader(CourseLoaderId, null,
@@ -170,13 +173,12 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         logoutSession();
     }
 
-    @SuppressLint("SimpleDateFormat")
     @Override
     public void notifyTick() {
         currentTime = (TextView) findViewById(R.id.current_time);
         if (currentTime != null) {
-            SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-            currentTime.setText(format.format(Calendar.getInstance().getTime()));
+            Date date = new Date();
+            currentTime.setText(dateFormat.format(date.getTime()));
         }
     }
 
@@ -226,13 +228,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         setContentView(R.layout.racing_view);
 
         dataManager = DataManager.create(this);
-        navDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mRaceList = (RaceListFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
+        dateFormat = new SimpleDateFormat("HH:mm:ss");
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
         mCourseAreaId = courseAreaId;
@@ -240,24 +243,11 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             throw new IllegalStateException("There was no course area id transmitted...");
         }
         ExLog.i(this, this.getClass().toString(), "trying to load courseArea via id: " + courseAreaId);
-        CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
-        mCourseArea = courseArea;
+        mCourseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
 
         getPanelWidgets();
 
-        if (savedInstanceState != null) {
-            mWind = (Wind) savedInstanceState.getSerializable("wind");
-            if (mWind != null) {
-                onWindEntered(mWind);
-            }
-            Bundle args = savedInstanceState.getBundle("childBundle");
-            if (args != null) {
-                infoFragment = new RaceInfoFragment();
-                infoFragment.setArguments(args);
-            }
-        }
-
-        Serializable eventId = getEventIdFromItent();
+        Serializable eventId = getEventIdFromIntent();
         if (eventId == null) {
             throw new IllegalStateException("There was no event id transmitted...");
         }
@@ -270,17 +260,16 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             // setupDataStore();
             // loadNavDrawer( courseAreaId, eventId);
         } else {
-            if (courseArea != null) {
-                loadRaces(courseArea);
+            if (mCourseArea != null) {
+                loadRaces(mCourseArea);
                 ExLog.i(this, this.getClass().toString(), "did load courseArea!");
             } else {
                 ExLog.i(this, this.getClass().toString(), "courseArea == null :(");
                 Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
             }
-            loadNavDrawer(courseArea, e);
-            loadWelcomeFragment(courseArea, e);
+            loadNavDrawer(mCourseArea, e);
+            loadWelcomeFragment();
         }
-
     }
 
     private void loadNavDrawer(CourseArea courseArea, EventBase event) {
@@ -289,18 +278,18 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         SpannableString header = new SpannableString(race);
         StyleSpan spanBold = new StyleSpan(Typeface.BOLD);
         header.setSpan(spanBold, 0, event.getName().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        navDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), header);
+        mRaceList.setUp((DrawerLayout) findViewById(R.id.drawer_layout), header);
     }
 
-    private void loadWelcomeFragment(CourseArea courseArea, EventBase event) {
+    private void loadWelcomeFragment() {
         getFragmentManager()
                 .beginTransaction()
-                .replace(R.id.racing_view_container, WelcomeFragment.newInstance(event, courseArea, preferences.getAuthor()))
+                .replace(R.id.racing_view_container, WelcomeFragment.newInstance())
                 .commit();
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(RaceListDataType selectedItem) {
+    public void onRaceListItemSelected(RaceListDataType selectedItem) {
         if (selectedItem instanceof RaceListDataTypeRace) {
             RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
             selectedElement.setUpdateIndicatorVisible(false);
@@ -317,13 +306,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     public void onRaceItemClicked(ManagedRace managedRace) {
+        selectedRace = managedRace;
         infoFragment = new RaceInfoFragment();
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
         getFragmentManager().beginTransaction()
                 // .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                 .replace(R.id.racing_view_container, infoFragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).addToBackStack(null).commit();
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
     }
 
     @Override
@@ -332,12 +322,29 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mWind = (Wind) savedInstanceState.getSerializable(WIND);
+        if (mWind != null) {
+            onWindEntered(mWind);
+        }
+
+/*
+        //TODO Implement reload after return
+        Serializable raceId  = savedInstanceState.getSerializable(RACE);
+        selectedRace = OnlineDataManager.create(this).getDataStore().getRace(raceId);
+        if (selectedRace != null) {
+            onRaceItemClicked(selectedRace);
+        }
+*/
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("wind", mWind);
-        if (infoFragment != null) {
-            outState.putBundle("childBundle", infoFragment.getArguments());
-        }
+        outState.putSerializable(WIND, mWind);
+        outState.putSerializable(RACE, selectedRace.getId());
     }
 
     @Override
@@ -438,33 +445,51 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private void getPanelWidgets() {
         // Left Panel
         mStartProcedureLayout = (RelativeLayout) findViewById(R.id.start_procedure);
-        mStartProcedureLayout.setOnClickListener(this);
+        if (mStartProcedureLayout != null) {
+            mStartProcedureLayout.setOnClickListener(this);
+        }
         mStartProcedureMarker = (ImageView) findViewById(R.id.start_procedure_marker);
         mStartModeLayout = (RelativeLayout) findViewById(R.id.start_mode);
-        mStartModeLayout.setOnClickListener(this);
+        if (mStartModeLayout != null) {
+            mStartModeLayout.setOnClickListener(this);
+        }
         mStartModeMarker = (ImageView) findViewById(R.id.start_mode_marker);
         mCourseLayout = (RelativeLayout) findViewById(R.id.course);
-        mCourseLayout.setOnClickListener(this);
+        if (mCourseLayout != null) {
+            mCourseLayout.setOnClickListener(this);
+        }
         mCourseMarker = (ImageView) findViewById(R.id.course_marker);
         mWindLayout = (RelativeLayout) findViewById(R.id.wind);
-        mWindLayout.setOnClickListener(this);
+        if (mWindLayout != null) {
+            mWindLayout.setOnClickListener(this);
+        }
         mWindMarker = (ImageView) findViewById(R.id.wind_marker);
 
         // Right Panel
         mAbandonFlagsLayout = (RelativeLayout) findViewById(R.id.abandon_flags);
-        mAbandonFlagsLayout.setOnClickListener(this);
+        if (mAbandonFlagsLayout != null) {
+            mAbandonFlagsLayout.setOnClickListener(this);
+        }
         mAbandonFlagsMarker = (ImageView) findViewById(R.id.abandon_flags_marker);
         mRecallFlagsLayout = (RelativeLayout) findViewById(R.id.recall_flags);
-        mRecallFlagsLayout.setOnClickListener(this);
+        if (mRecallFlagsLayout != null) {
+            mRecallFlagsLayout.setOnClickListener(this);
+        }
         mRecallFlagsMarker = (ImageView) findViewById(R.id.recall_flags_marker);
         mPostponeFlagsLayout = (RelativeLayout) findViewById(R.id.postpone_flags);
-        mPostponeFlagsLayout.setOnClickListener(this);
-        mPostpomeFlagsMarker = (ImageView) findViewById(R.id.postpone_flags_marker);
+        if (mPostponeFlagsLayout != null) {
+            mPostponeFlagsLayout.setOnClickListener(this);
+        }
+        mPostponeFlagsMarker = (ImageView) findViewById(R.id.postpone_flags_marker);
         mCourseFlagsLayout = (RelativeLayout) findViewById(R.id.course_flags);
-        mCourseFlagsLayout.setOnClickListener(this);
+        if (mCourseFlagsLayout != null) {
+            mCourseFlagsLayout.setOnClickListener(this);
+        }
         mCourseFlagsMarker = (ImageView) findViewById(R.id.course_flags_marker);
         mMoreFlagsLayout = (RelativeLayout) findViewById(R.id.more_flags);
-        mMoreFlagsLayout.setOnClickListener(this);
+        if (mMoreFlagsLayout != null) {
+            mMoreFlagsLayout.setOnClickListener(this);
+        }
         mMoreFlagsMarker = (ImageView) findViewById(R.id.more_flags_marker);
 
         resetMarker();
@@ -478,32 +503,38 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     public void showRightButtonCount(int count) {
-        setRightPanelVisibility(View.VISIBLE);
-
-        mAbandonFlagsLayout.setVisibility(View.VISIBLE);
-        mRecallFlagsLayout.setVisibility(View.VISIBLE);
-        mPostponeFlagsLayout.setVisibility(View.VISIBLE);
-        mCourseFlagsLayout.setVisibility(View.VISIBLE);
-        mMoreFlagsLayout.setVisibility(View.VISIBLE);
-
         switch (count) {
             case 2:
                 mAbandonFlagsLayout.setVisibility(View.GONE);
                 mRecallFlagsLayout.setVisibility(View.GONE);
+                mPostponeFlagsLayout.setVisibility(View.VISIBLE);
+                mCourseFlagsMarker.setVisibility(View.VISIBLE);
                 mMoreFlagsLayout.setVisibility(View.GONE);
                 break;
 
             case 3:
-                mPostponeFlagsLayout.setVisibility(View.GONE);
+                mAbandonFlagsLayout.setVisibility(View.VISIBLE);
+                mRecallFlagsLayout.setVisibility(View.VISIBLE);
+                mPostponeFlagsMarker.setVisibility(View.GONE);
                 mCourseFlagsLayout.setVisibility(View.GONE);
+                mMoreFlagsLayout.setVisibility(View.VISIBLE);
                 break;
 
             case 4:
+                mAbandonFlagsLayout.setVisibility(View.VISIBLE);
+                mRecallFlagsLayout.setVisibility(View.VISIBLE);
                 mPostponeFlagsLayout.setVisibility(View.GONE);
+                mCourseFlagsLayout.setVisibility(View.VISIBLE);
+                mMoreFlagsLayout.setVisibility(View.VISIBLE);
                 break;
 
             default:
-                setRightPanelVisibility(View.GONE);
+                mAbandonFlagsLayout.setVisibility(View.GONE);
+                mRecallFlagsLayout.setVisibility(View.GONE);
+                mPostponeFlagsLayout.setVisibility(View.GONE);
+                mCourseFlagsLayout.setVisibility(View.GONE);
+                mMoreFlagsLayout.setVisibility(View.GONE);
+                break;
         }
     }
 
@@ -517,7 +548,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         // Right Panel
         showMarker(mAbandonFlagsMarker, 0);
         showMarker(mRecallFlagsMarker, 0);
-        showMarker(mPostpomeFlagsMarker, 0);
+        showMarker(mPostponeFlagsMarker, 0);
         showMarker(mCourseFlagsMarker, 0);
         showMarker(mMoreFlagsMarker, 0);
     }
@@ -525,6 +556,12 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void showMarker(ImageView view, int level) {
         if (view != null) {
             view.setImageLevel(level);
+        }
+    }
+
+    public void openDrawer() {
+        if (mRaceList != null) {
+            mRaceList.openDrawer();
         }
     }
 
@@ -570,16 +607,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 lastSeenRaces = data;
 
                 registerOnService(data);
-                navDrawerFragment.setupOn(data);
+                mRaceList.setupOn(data);
 
                 Toast.makeText(RacingActivity.this,
                         String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
 
             setSupportProgressBarIndeterminateVisibility(false);
-
         }
-
     }
 
     private class EventLoadClient implements LoadClient<Collection<EventBase>> {
@@ -594,7 +629,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                     .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             setSupportProgressBarIndeterminateVisibility(true);
-
                             dialog.cancel();
                         }
                     }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -608,8 +642,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         @Override
         public void onLoadSucceded(Collection<EventBase> data, boolean isCached) {
             // TODO Auto-generated method stub
-            Toast.makeText(RacingActivity.this,
-                    String.format(getString(R.string.loading_events_succeded), data.size()), Toast.LENGTH_SHORT).show();
+            Toast.makeText(RacingActivity.this, getString(R.string.loading_events_succeded), Toast.LENGTH_SHORT).show();
             setSupportProgressBarIndeterminateVisibility(false);
 
             for (EventBase event : data) {
@@ -634,13 +667,11 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             setSupportProgressBarIndeterminateVisibility(false);
             ExLog.e(getApplicationContext(), TAG, "Errors loading CourseData");
             ExLog.e(getApplicationContext(), TAG, reason.getMessage());
-
         }
 
         @Override
         public void onLoadSucceded(Collection<CourseArea> data, boolean isCached) {
-            Toast.makeText(RacingActivity.this, String.format("Loading of CourseData succeeded", data.size()),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(RacingActivity.this, "Loading of CourseData succeeded", Toast.LENGTH_SHORT).show();
             setSupportProgressBarIndeterminateVisibility(false);
 
             for (CourseArea course : data) {

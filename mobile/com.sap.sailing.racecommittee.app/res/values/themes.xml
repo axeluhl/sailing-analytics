@@ -13,7 +13,7 @@
 
         <item name="drawerArrowStyle">@style/AppTheme.Widget.DrawerArrowStyle</item>
     </style>
-    
+
     <style name="AppTheme.Widget.NumberPicker" parent="@android:style/Theme.Holo.Light">
         <item name="android:divider">@color/colorAccent</item>
     </style>
@@ -25,5 +25,5 @@
     <style name="AppTheme.LargeText" parent="AppTheme.Base">
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
-    
+
 </resources>

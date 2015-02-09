@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -91,17 +92,17 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
+    public void onListItemClick(ListView listView, View view, int position, long id) {
+        super.onListItemClick(listView, view, position, id);
         listAdapter.setSelected(position);
-        setStyleClicked(v);
+        setStyleClicked(view);
 
         mSelectedIndex = position;
 
         // this unchecked cast here seems unavoidable.
         // even SDK example code does it...
         @SuppressWarnings("unchecked")
-        T item = (T) l.getItemAtPosition(position);
+        T item = (T) listView.getItemAtPosition(position);
         listener.itemSelected(this, item);
     }
 
@@ -137,22 +138,34 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         super.onSaveInstanceState(outState);
     }
 
-    private void setStyleClicked(View v) {
+    private void setStyleClicked(View view) {
+        TextView textView;
+        ImageView imageView;
+
         // reset last styles:
         if (lastSelected != null) {
-            TextView lastText = (TextView) lastSelected.findViewById(R.id.list_item);
-            if (lastText != null) {
-                lastText.setTypeface(Typeface.DEFAULT);
+            textView = (TextView) lastSelected.findViewById(R.id.list_item_subtitle);
+            if (textView != null) {
+                textView.setTextColor(getResources().getColor(R.color.grey_light));
+            }
+
+            imageView = (ImageView) lastSelected.findViewById(R.id.checked);
+            if (imageView != null) {
+                imageView.setVisibility(View.INVISIBLE);
             }
         }
 
         // set new styles
-        TextView txt_listitem = (TextView) v.findViewById(R.id.list_item);
-        if (txt_listitem != null) {
-            txt_listitem.setTypeface(Typeface.DEFAULT_BOLD);
+        textView = (TextView) view.findViewById(R.id.list_item_subtitle);
+        if (textView != null) {
+            textView.setTextColor(getResources().getColor(R.color.white));
+        }
+        imageView = (ImageView) view.findViewById(R.id.checked);
+        if (imageView != null) {
+            imageView.setVisibility(View.VISIBLE);
         }
 
-        lastSelected = v;
+        lastSelected = view;
     }
 
     public void setupLoader() {

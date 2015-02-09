@@ -12,7 +12,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceStartTimeFragment;
-import com.sap.sailing.racecommittee.app.utils.NextFragmentListener;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -20,16 +19,10 @@ public class LineStartFragment extends RaceFragment implements TickListener {
 
     private static final String TAG = LineStartFragment.class.getName();
     
-    private NextFragmentListener mListener;
-
     public LineStartFragment() {
         
     }
     
-    public LineStartFragment(NextFragmentListener listener) {
-        mListener = listener;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_procedure_line_start, container, false);
@@ -59,7 +52,7 @@ public class LineStartFragment extends RaceFragment implements TickListener {
         
         getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), RacingProcedureType.RRS26);
         
-        RaceFragment fragment = new RaceStartTimeFragment(mListener);
+        RaceFragment fragment = new RaceStartTimeFragment();
         fragment.setArguments(getArguments());
         getActivity().getFragmentManager().beginTransaction().replace(R.id.line_sub_fragment, fragment).commit();
     }

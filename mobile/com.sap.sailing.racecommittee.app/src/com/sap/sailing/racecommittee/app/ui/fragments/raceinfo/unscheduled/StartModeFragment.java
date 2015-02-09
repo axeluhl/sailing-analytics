@@ -20,7 +20,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.NextFragmentListener;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartModeFragment extends RaceFragment {
@@ -36,16 +35,11 @@ public class StartModeFragment extends RaceFragment {
     }
 
     private StartModeAdapter mAdapter;
-    private NextFragmentListener mListener;
     private ListView mListView;
     private RRS26RacingProcedure mProcedure;
 
     public StartModeFragment() {
 
-    }
-
-    public StartModeFragment(NextFragmentListener listener) {
-        mListener = listener;
     }
 
     @Override
@@ -76,7 +70,6 @@ public class StartModeFragment extends RaceFragment {
                     }
                     if (checkedItem != null) {
                         mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), checkedItem.getFlag());
-                        mListener.nextFragment();
                     } else {
                         Toast.makeText(getActivity(), "Please choose one start mode", Toast.LENGTH_LONG).show();
                     }

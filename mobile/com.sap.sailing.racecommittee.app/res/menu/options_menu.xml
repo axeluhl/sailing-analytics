@@ -6,16 +6,14 @@
         android:id="@+id/options_menu_reload"
         android:icon="@drawable/ic_menu_info_details"
         android:title="@string/options_menu_reload"
-        app:showAsAction=""/>
+        android:visible="false"/>
     <item
         android:id="@+id/options_menu_settings"
         android:icon="@drawable/settings_grey"
-        android:title="@string/options_menu_settings"
-        app:showAsAction=""/>
+        android:title="@string/options_menu_settings"/>
     <item
         android:id="@+id/options_menu_info"
         android:icon="@drawable/ic_menu_info_details"
-        android:title="@string/options_menu_info"
-        app:showAsAction=""/>
+        android:title="@string/options_menu_info"/>
 
 </menu>

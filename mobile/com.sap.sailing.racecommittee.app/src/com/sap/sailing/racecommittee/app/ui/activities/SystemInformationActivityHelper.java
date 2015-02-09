@@ -84,5 +84,4 @@ public class SystemInformationActivityHelper {
                     DateFormat.getTimeFormat(activity).format(installDate)));
         }
     }
-
 }

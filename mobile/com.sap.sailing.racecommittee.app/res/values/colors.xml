@@ -6,6 +6,7 @@
 
     <color name="black">#ff000000</color>
     <color name="black_light">#ff242424</color>
+    <color name="black_transparent">#99000000</color>
 
     <color name="red">#ffff0000</color>
 

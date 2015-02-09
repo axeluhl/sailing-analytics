@@ -16,19 +16,13 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceStartTimeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.gatestart.GateTimingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.gatestart.PathFinderFragment;
-import com.sap.sailing.racecommittee.app.utils.NextFragmentListener;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class GateStartFragment extends RaceFragment implements NextFragmentListener{
+public class GateStartFragment extends RaceFragment{
     
-    private NextFragmentListener mListener;
     private int mTab = -1;
     
     public GateStartFragment() {
-    }
-    
-    public GateStartFragment(NextFragmentListener listener) {
-        mListener = listener;
     }
     
     @Override
@@ -58,7 +52,6 @@ public class GateStartFragment extends RaceFragment implements NextFragmentListe
                 @Override
                 public void onClick(View v) {
                     mTab = -1;
-                    nextFragment();
                 }
             });
         }
@@ -70,7 +63,6 @@ public class GateStartFragment extends RaceFragment implements NextFragmentListe
                 @Override
                 public void onClick(View v) {
                     mTab = 0;
-                    nextFragment();
                 }
             });
         }
@@ -82,7 +74,6 @@ public class GateStartFragment extends RaceFragment implements NextFragmentListe
                 @Override
                 public void onClick(View v) {
                     mTab = 1;
-                    nextFragment();
                 }
             });
         }
@@ -95,7 +86,6 @@ public class GateStartFragment extends RaceFragment implements NextFragmentListe
         super.onActivityCreated(savedInstanceState);
         
         getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), RacingProcedureType.GateStart);
-        nextFragment();
     }
     
     private void replaceFragment(Fragment fragment) {
@@ -103,28 +93,5 @@ public class GateStartFragment extends RaceFragment implements NextFragmentListe
         fragment.setArguments(getArguments());
         transaction.replace(R.id.gate_sub_fragment, fragment);
         transaction.commit();
-    }
-
-    @Override
-    public void nextFragment() {
-        Fragment fragment;
-        
-        mTab++;
-        
-        switch (mTab) {
-        case 1:
-            fragment = new GateTimingFragment(this);
-            break;
-            
-        case 2:
-            fragment = new RaceStartTimeFragment(this);
-            break;
-
-        default:
-            fragment = new PathFinderFragment(this);
-            break;
-        }
-        
-        replaceFragment(fragment);
     }
 }

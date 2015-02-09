@@ -1,59 +1,321 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/header_text"
+    <RelativeLayout
+        android:id="@+id/start_time"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height">
+
+        <TextView
+            android:id="@+id/start_time_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
+            android:text="@string/set_time"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/start_time_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_marginRight="@dimen/default_margin"
+            android:contentDescription="@string/empty"
+            android:src="@drawable/ic_chevron_right_grey600_24dp" />
+
+        <TextView
+            android:id="@+id/start_time_value"
+            android:layout_width="@dimen/setup_text_width"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/default_margin"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_toEndOf="@id/start_time_caption"
+            android:layout_toLeftOf="@id/start_time_icon"
+            android:layout_toRightOf="@id/start_time_caption"
+            android:layout_toStartOf="@id/start_time_icon"
+            android:gravity="end"
+            android:text="11:00:00 / - 06:32"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thick_line"
+            android:layout_alignParentBottom="true"
+            android:background="@color/black" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/start_procedure"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:layout_below="@id/start_time">
+
+        <TextView
+            android:id="@+id/start_procedure_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
+            android:text="@string/start_procedure"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/start_procedure_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_marginRight="@dimen/default_margin"
+            android:contentDescription="@string/empty"
+            android:src="@drawable/ic_chevron_right_grey600_24dp" />
+
+        <TextView
+            android:id="@+id/start_procedure_value"
+            android:layout_width="@dimen/setup_text_width"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/default_margin"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_toEndOf="@id/start_procedure_caption"
+            android:layout_toLeftOf="@id/start_procedure_icon"
+            android:layout_toRightOf="@id/start_procedure_caption"
+            android:layout_toStartOf="@id/start_procedure_icon"
+            android:gravity="end"
+            android:text="@string/start_procedure_line_start"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thick_line"
+            android:layout_alignParentBottom="true"
+            android:background="@color/black" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/start_mode"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:layout_below="@id/start_procedure">
+
+        <TextView
+            android:id="@+id/start_mode_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
+            android:text="@string/start_mode"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/start_mode_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_marginRight="@dimen/default_margin"
+            android:contentDescription="@string/empty"
+            android:src="@drawable/ic_chevron_right_grey600_24dp" />
+
+        <ImageView
+            android:id="@+id/start_mode_flag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/default_margin_half"
+            android:layout_toLeftOf="@+id/start_mode_value"
+            android:layout_toStartOf="@+id/start_mode_value"
+            android:contentDescription="@string/empty"
+            android:focusableInTouchMode="false"
+            android:src="@drawable/flag_papa_48dp" />
+
+        <TextView
+            android:id="@+id/start_mode_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/start_mode_icon"
+            android:layout_marginRight="@dimen/default_margin"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_toLeftOf="@+id/start_mode_icon"
+            android:layout_toStartOf="@+id/start_mode_icon"
+            android:gravity="end"
+            android:singleLine="true"
+            android:text="Papa"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thick_line"
+            android:layout_alignParentBottom="true"
+            android:background="@color/black" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/start_course"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:layout_below="@id/start_mode">
+
+        <TextView
+            android:id="@+id/start_course_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
+            android:text="@string/course"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/start_course_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_marginRight="@dimen/default_margin"
+            android:contentDescription="@string/empty"
+            android:src="@drawable/ic_chevron_right_grey600_24dp" />
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/default_margin_half"
+            android:layout_toLeftOf="@+id/start_course_value"
+            android:layout_toStartOf="@+id/start_course_value"
+            android:contentDescription="@string/empty"
+            android:src="@drawable/papa_flag" />
+
+        <TextView
+            android:id="@+id/start_course_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginRight="@dimen/default_margin"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_toLeftOf="@+id/start_course_icon"
+            android:layout_toStartOf="@+id/start_course_icon"
+            android:gravity="end"
+            android:singleLine="true"
+            android:text="Triangle"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thick_line"
+            android:layout_alignParentBottom="true"
+            android:background="@color/black" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/wind"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:layout_below="@id/start_course">
+
+        <TextView
+            android:id="@+id/wind_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
+            android:text="@string/wind"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/wind_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_marginRight="@dimen/default_margin"
+            android:contentDescription="@string/empty"
+            android:src="@drawable/ic_chevron_right_grey600_24dp" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/default_margin_half"
+            android:layout_toLeftOf="@+id/wind_value"
+            android:layout_toStartOf="@+id/wind_value"
+            android:contentDescription="@string/empty"
+            android:src="@drawable/wind_on" />
+
+        <TextView
+            android:id="@+id/wind_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/default_margin"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:layout_toLeftOf="@id/wind_icon"
+            android:layout_toStartOf="@id/wind_icon"
+            android:gravity="end"
+            android:text="@string/wind_unknown"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thick_line"
+            android:layout_alignParentBottom="true"
+            android:background="@color/black" />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/start_race"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:padding="20dp"
-        android:gravity="center"
-        android:text="470 WOMEN - FLEET YELLOW - RACE 5"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/default_margin_twice"
+        android:background="@color/blue_light"
+        android:paddingTop="@dimen/default_padding"
+        android:paddingBottom="@dimen/default_padding"
+        android:paddingLeft="@dimen/default_padding_twice"
+        android:paddingRight="@dimen/default_padding_twice"
+        android:text="CONFIRM SETUP"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/white"
         android:textStyle="bold" />
-
-    <LinearLayout
-        android:id="@+id/race_schedule_buttons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/header_text"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/start_procedure"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:text="@string/start_procedure" />
-
-        <Button
-            android:id="@+id/start_mode"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:text="@string/start_mode" />
-
-        <Button
-            android:id="@+id/course"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:text="@string/course" />
-    </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/sub_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/race_schedule_buttons"
-        tools:layout="@layout/race_schedule_mode" />
-
 </RelativeLayout>

@@ -24,7 +24,7 @@
 
         <fragment
             android:id="@+id/navigation_drawer"
-            android:name="com.sap.sailing.racecommittee.app.ui.fragments.NavigationDrawerFragment"
+            android:name="com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment"
             android:layout_width="@dimen/navigation_drawer_width"
             android:layout_height="match_parent"
             android:layout_gravity="start" />

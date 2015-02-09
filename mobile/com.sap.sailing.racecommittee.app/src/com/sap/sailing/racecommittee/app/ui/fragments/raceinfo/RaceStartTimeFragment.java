@@ -24,7 +24,6 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl.
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
-import com.sap.sailing.racecommittee.app.utils.NextFragmentListener;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -34,16 +33,11 @@ public class RaceStartTimeFragment extends RaceFragment {
     
     private Button mDatePicker;
     private DatePickerFragment mDatePickerFragment;
-    private NextFragmentListener mListener;
     private TextView mTime;
     private TimePicker mTimePicker;
 
     public RaceStartTimeFragment() {
         
-    }
-    
-    public RaceStartTimeFragment(NextFragmentListener listener) {
-        mListener = listener;
     }
     
     private void addMinutes(int time) {
@@ -76,7 +70,6 @@ public class RaceStartTimeFragment extends RaceFragment {
 //                RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
 //                        new RaceChooseStartModeDialog(), getRace(), prerequisite);
 //                dialog.show(getFragmentManager(), "userActionRequiredDialog");
-                mListener.nextFragment();
             }
 
             @Override
@@ -154,7 +147,6 @@ public class RaceStartTimeFragment extends RaceFragment {
                 @Override
                 public void onClick(View v) {
                     // TODO Save data
-                    mListener.nextFragment();
                 }
             });
         }

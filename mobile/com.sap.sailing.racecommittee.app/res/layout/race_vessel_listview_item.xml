@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/vessel_position"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_marginTop="@dimen/default_margin"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginStart="@dimen/default_margin"
+        android:gravity="right"
+        android:text="10"
+        android:textSize="@dimen/textsize_normal" />
+
+    <ImageView
+        android:id="@+id/vessel_nationality"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin"
+        android:layout_toEndOf="@+id/vessel_position"
+        android:layout_toRightOf="@+id/vessel_position"
+        android:contentDescription="@string/empty"
+        android:src="@drawable/flag_de" />
+
+    <TextView
+        android:id="@+id/vessel_number"
+        android:text="GER 001"
+        android:textSize="@dimen/textsize_normal"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/vessel_nationality"
+        android:layout_toEndOf="@+id/vessel_nationality" />
+
+    <ImageView
+        android:id="@+id/line_marked"
+        android:src="@drawable/ic_check_white_18dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="@dimen/default_margin"/>
+
+    <TextView
+        android:id="@+id/vessel_crew"
+        android:text="Annita Wagner"
+        android:singleLine="true"
+        android:layout_width="200dp"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:textSize="@dimen/textsize_normal"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/vessel_number"
+        android:layout_toEndOf="@id/vessel_number"
+        android:layout_height="wrap_content" />
+</RelativeLayout>

@@ -14,7 +14,10 @@
     <dimen name="thin_line">1dp</dimen>
     <dimen name="thick_line">2dp</dimen>
 
+    <dimen name="textsize_normal">30sp</dimen>
     <dimen name="textsize_big">40sp</dimen>
+
+    <dimen name="setup_text_width">150dp</dimen>
 
     <dimen name="default_padding_half">12dp</dimen>
     <dimen name="default_padding">25dp</dimen>

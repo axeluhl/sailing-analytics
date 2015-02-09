@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.MainScheduleFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.StartTimeFragment;
 
 public abstract class RaceInfoFragmentChooser {
     private static final String TAG = RaceInfoFragmentChooser.class.getName();
@@ -35,7 +35,7 @@ public abstract class RaceInfoFragmentChooser {
     public RaceFragment choose(Context context, ManagedRace managedRace) {
         switch (managedRace.getStatus()) {
         case UNSCHEDULED:
-            return createInfoFragment(context, MainScheduleFragment.class, managedRace);
+            return createInfoFragment(StartTimeFragment.newInstance(false), managedRace);
         case SCHEDULED:
         case STARTPHASE:
             return createInfoFragment(context, getStartphaseFragment(), managedRace);
@@ -49,17 +49,23 @@ public abstract class RaceInfoFragmentChooser {
             return createInfoFragment(context, ErrorRaceFragment.class, managedRace);
         }
     }
-    
 
     protected RaceFragment createInfoFragment(Context context, Class<? extends RaceFragment> fragmentClass, ManagedRace managedRace) {
         try {
             RaceFragment fragment = fragmentClass.newInstance();
-            fragment.setArguments(RaceFragment.createArguments(managedRace));
-            return fragment;
+            return createInfoFragment(fragment, managedRace);
         } catch (Exception e) {
             ExLog.e(context, TAG, String.format("Exception while instantiating race info fragment:\n%s", e.toString()));
             return new ErrorRaceFragment();
         }
     }
 
+    protected RaceFragment createInfoFragment(RaceFragment fragment, ManagedRace managedRace) {
+        fragment.setArguments(RaceFragment.createArguments(managedRace));
+        return fragment;
+    }
+
+    public RaceFragment getStartFragment(Context context, ManagedRace managedRace) {
+        return createInfoFragment(context, getStartphaseFragment(), managedRace);
+    }
 }

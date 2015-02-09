@@ -178,11 +178,13 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                         final View bottomView = findViewById(R.id.login_listview);
                         View title = findViewById(R.id.backdrop_title);
                         View subTitle = findViewById(R.id.backdrop_subtitle);
+                        View settings = findViewById(R.id.settings_button);
                         subTitle.setAlpha(0f);
 
                         ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(view, "y", 0, -view.getHeight() + (view.getHeight() / 5));
                         ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
                         ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
+                        ObjectAnimator settingsAnimation = ObjectAnimator.ofFloat(settings, "alpha", 0f, 1f);
 
                         ValueAnimator heightAnimation = ValueAnimator.ofInt(0, view.getHeight() - (view.getHeight() / 5));
                         heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -196,7 +198,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                         });
 
                         AnimatorSet animatorSet = new AnimatorSet();
-                        animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation);
+                        animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, settingsAnimation);
                         animatorSet.setDuration(aniTime);
                         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
                         animatorSet.start();

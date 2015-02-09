@@ -11,35 +11,36 @@ import java.util.TreeMap;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.renderscript.Type;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
+import android.widget.*;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
+import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
+import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
@@ -51,7 +52,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogF
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
-public class NavigationDrawerFragment extends LoggableFragment implements OnItemClickListener, JuryFlagClickedListener,
+public class RaceListFragment extends LoggableFragment implements OnItemClickListener, JuryFlagClickedListener,
         OnItemSelectedListener, TickListener, OnScrollListener {
 
     public enum FilterMode {
@@ -69,13 +70,16 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         }
     }
 
-    public static interface NavigationDrawerCallbacks {
-        void onNavigationDrawerItemSelected(RaceListDataType selectedItem);
+    public static interface RaceListCallbacks {
+        void onRaceListItemSelected(RaceListDataType selectedItem);
     }
 
-    private final static String TAG = NavigationDrawerFragment.class.getName();
+    private final static String TAG = RaceListFragment.class.getName();
+    private final static String LAYOUT = "layout";
+    private final static String HEADER = "header";
+
     private ManagedRaceListAdapter mAdapter;
-    private NavigationDrawerCallbacks mCallbacks;
+    private RaceListCallbacks mCallbacks;
     private Button mCurrent;
     private Button mAll;
     private TextView mHeader;
@@ -106,12 +110,27 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         }
     };
 
-    public NavigationDrawerFragment() {
+    public RaceListFragment() {
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
         mManagedRacesById = new HashMap<>();
         mRacesByGroup = new TreeMap<>(new BoatClassSeriesDataFleetComparator());
         mViewItems = new ArrayList<>();
+    }
+
+    public static RaceListFragment newInstance(int layout) {
+        RaceListFragment fragment = new RaceListFragment();
+        Bundle args = new Bundle();
+        args.putInt(LAYOUT, layout);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static RaceListFragment newInstance(int layout, SpannableString header) {
+        RaceListFragment fragment = newInstance(layout);
+        Bundle args = fragment.getArguments();
+        args.putString(HEADER, header.toString());
+        return fragment;
     }
 
     private void dataChanged(ReadonlyRaceState changedState) {
@@ -200,7 +219,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         super.onAttach(activity);
 
         try {
-            mCallbacks = (NavigationDrawerCallbacks) activity;
+            mCallbacks = (RaceListCallbacks) activity;
         } catch (ClassCastException ex) {
             ExLog.ex(getActivity(), TAG, ex);
         }
@@ -208,7 +227,11 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.nav_drawer, container);
+        int layout = R.layout.race_list_vertical;
+        if (getArguments() != null && getArguments().getInt(LAYOUT) !=0) {
+            layout = getArguments().getInt(LAYOUT);
+        }
+        View view = inflater.inflate(layout, container, false);
 
         mListView = (ListView) view.findViewById(R.id.listView);
         mListView.setOnScrollListener(this);
@@ -240,6 +263,22 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         }
         
         mHeader = (TextView) view.findViewById(R.id.regatta_data);
+        if (getArguments() != null && getArguments().getString(HEADER) != null) {
+            mHeader.setText(getArguments().getString(HEADER));
+        }
+
+        ImageView imageView = (ImageView) view.findViewById(R.id.nav_button);
+        if (imageView != null) {
+            imageView.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    InMemoryDataStore.INSTANCE.reset();
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
+                    getActivity().startActivity(intent);
+                }
+            });
+        }
 
         return view;
     }
@@ -256,7 +295,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         ExLog.i(getActivity(), TAG, "Touched " + mAdapter.getItem(position).toString());
 
         mDrawerLayout.closeDrawers();
-        mCallbacks.onNavigationDrawerItemSelected(mAdapter.getItem(position));
+        mCallbacks.onRaceListItemSelected(mAdapter.getItem(position));
     }
 
     @Override
@@ -367,7 +406,7 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
             }
         });
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        
+
         if (mHeader != null) {
             mHeader.setText(header);
         }
@@ -394,6 +433,12 @@ public class NavigationDrawerFragment extends LoggableFragment implements OnItem
         filterChanged();
         mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.notifyDataSetChanged();
+    }
+
+    public void openDrawer() {
+        if (mDrawerLayout != null) {
+            mDrawerLayout.openDrawer(Gravity.LEFT);
+        }
     }
 
     private void unregisterOnAllRaces() {

@@ -1,152 +1,134 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import android.widget.Toast;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.NextFragmentListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
+import com.sap.sailing.racecommittee.app.utils.TickSingleton;
+import com.sap.sse.common.TimePoint;
 
-public class MainScheduleFragment extends RaceFragment implements OnClickListener, NextFragmentListener {
+import java.text.SimpleDateFormat;
+
+public class MainScheduleFragment extends RaceFragment implements View.OnClickListener {
 
     private static final String TAG = MainScheduleFragment.class.getName();
-    
-    private Button mCourse;
-    private RaceFragment mCurrent;
-    private TextView mHeaderText;
-    private Button mStartMode;
-    private Button mStartProcedure;
 
-    private int mTab = 0;
+    private TextView mStartTime;
+    private String mStartTimeString;
 
-    @Override
-    public void nextFragment() {
-        mTab++;
-
-        if (mTab > 2) {
-            mTab = 0;
-        }
-        openTabFragment();
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        String serie = managedRace.getSeries().getName();
-        String fleet = managedRace.getFleet().getName();
-        String race = managedRace.getRaceName();
-        View view = getView();
-        if (view != null) {
-            mHeaderText = (TextView) view.findViewById(R.id.header_text);
-            if (mHeaderText != null) {
-                mHeaderText.setText(serie + " - " + fleet + " - " + race);
-            }
-        }
-
-        if (savedInstanceState != null) {
-            try {
-                mCurrent = (RaceFragment) Class.forName(savedInstanceState.getString("fragment")).getConstructor(NextFragmentListener.class).newInstance(this);
-            } catch (Exception e) {
-                ExLog.ex(getActivity(), TAG, e);
-            }
-        }
-        if (mCurrent == null) {
-            openTabFragment();
-        } else {
-            openFragment();
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-        case R.id.start_procedure:
-            mTab = 0;
-            break;
-
-        case R.id.start_mode:
-            mTab = 1;
-            break;
-
-        case R.id.course:
-            mTab = 2;
-            break;
-        }
-
-        openTabFragment();
-    }
-    
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        
-        if (mCurrent != null) {
-            outState.putString("fragment", mCurrent.getClass().getName());
-        }
+    public static MainScheduleFragment newInstance() {
+        MainScheduleFragment fragment = new MainScheduleFragment();
+        return fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule, container, false);
 
-        mCourse = (Button) view.findViewById(R.id.course);
-        if (mCourse != null) {
-            mCourse.setOnClickListener(this);
+        RelativeLayout startTime = (RelativeLayout) view.findViewById(R.id.start_time);
+        if (startTime != null) {
+            startTime.setOnClickListener(this);
+        }
+        mStartTime = (TextView) view.findViewById(R.id.start_time_value);
+
+        RelativeLayout startProcedure = (RelativeLayout) view.findViewById(R.id.start_procedure);
+        if (startProcedure != null) {
+            startProcedure.setOnClickListener(this);
         }
 
-        mStartMode = (Button) view.findViewById(R.id.start_mode);
-        if (mStartMode != null) {
-            mStartMode.setOnClickListener(this);
+        RelativeLayout startMode = (RelativeLayout) view.findViewById(R.id.start_mode);
+        if (startMode != null) {
+            startMode.setOnClickListener(this);
         }
 
-        mStartProcedure = (Button) view.findViewById(R.id.start_procedure);
-        if (mStartProcedure != null) {
-            mStartProcedure.setOnClickListener(this);
+        RelativeLayout course = (RelativeLayout) view.findViewById(R.id.start_course);
+        if (course != null) {
+            course.setOnClickListener(this);
+        }
+
+        Button start = (Button) view.findViewById(R.id.start_race);
+        if (start != null) {
+            start.setOnClickListener(this);
         }
 
         return view;
     }
 
-    private void openFragment() {
-        mStartMode.setEnabled(true);
-        if (!(getRaceState().getTypedRacingProcedure() instanceof RRS26RacingProcedure)) {
-            mStartMode.setEnabled(false);
-        }
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        RacingActivity activity = (RacingActivity) getActivity();
-        activity.replaceFragment(mCurrent);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+        if (getRace() != null) {
+            if (getRace().getState() != null) {
+                TimePoint timePoint = getRace().getState().getProtestTime();
+                if (timePoint != null && mStartTime != null) {
+                    mStartTimeString = simpleDateFormat.format(timePoint.asDate());
+                }
+            }
+        }
     }
 
-    private void openTabFragment() {
-        switch (mTab) {
-        case 1:
-            mCurrent = new StartModeFragment(this);
-            break;
+    @Override
+    public void onResume() {
+        super.onResume();
 
-        case 2:
-            mCurrent = new CourseFragment(this);
-            break;
+        TickSingleton.INSTANCE.registerListener(this);
+    }
 
-        default:
-            if (getRaceState().getTypedRacingProcedure() instanceof RRS26RacingProcedure) {
-                mCurrent = new LineStartFragment(this);
-            } else {
-                mCurrent = new GateStartFragment(this);
-            }
-            break;
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        TickSingleton.INSTANCE.unregisterListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.start_mode:
+                break;
+
+            case R.id.start_procedure:
+                break;
+
+            case R.id.start_race:
+                RaceInfoFragmentChooser fragmentChooser = RaceInfoFragmentChooser.on(getRace().getState().getRacingProcedure().getType());
+                openFragment(fragmentChooser.getStartFragment(getActivity(), getRace()));
+                break;
+
+            case R.id.start_time:
+                openFragment(StartTimeFragment.newInstance(true));
+                break;
+
+            default:
+                Toast.makeText(getActivity(), "Clicked on " + v, Toast.LENGTH_SHORT).show();
         }
-        if (mCurrent != null) {
-            mCurrent.setArguments(getRecentArguments());
-            openFragment();
+    }
+
+    @Override
+    public void notifyTick() {
+        super.notifyTick();
+
+        if (mStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
+            mStartTime.setText(mStartTimeString);
         }
+    }
+
+    private void openFragment(RaceFragment fragment) {
+        fragment.setArguments(RaceFragment.createArguments(getRace()));
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.racing_view_container, fragment)
+                .commit();
     }
 }

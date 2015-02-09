@@ -249,7 +249,7 @@
     <string name="change">ÄNDERN</string>
     <string name="race_started">Gestartet %s</string>
     <string name="race_finished">Beendet %s</string>
-    <string name="wind">WIND</string>
+    <string name="wind">Wind</string>
     <string name="wind_display">dd</string>
     <string name="flags_abandon">Abandon</string>
     <string name="flags_recall">Recall</string>
@@ -259,7 +259,7 @@
     <string name="wind_info">%2$s / %1$s kn</string>
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
-    <string name="course">COURSE</string>
+    <string name="course">Course</string>
     <string name="confirm_start_time">Confirm Start Time</string>
     <string name="confirm_start_mode">Confirm Start Mode</string>
     <string name="login_sub_text">Where are you?</string>
@@ -268,13 +268,14 @@
     <string name="nav_drawer_open">Open Navigation Drawer</string>
     <string name="nav_header">#EVENT#\n#AREA# / #AUTHOR#</string>
     <string name="sign_up">Sign Me Up</string>
-    <string name="start_mode">MODE</string>
-    <string name="start_procedure">PROCEDURE</string>
+    <string name="start_mode">Mode</string>
+    <string name="start_procedure">Procedure</string>
     <string name="start_procedure_change">Change Start Procedure</string>
     <string name="start_procedure_confirm">Confirm Start Procedure</string>
     <string name="start_procedure_ess">ESS</string>
     <string name="start_procedure_gate_start">Gate Start</string>
     <string name="start_procedure_line_start">Line Start</string>
     <string name="start_procedure_simplified">Simplified</string>
+    <string name="race_select">Wähle ein Rennen</string>
 
 </resources>

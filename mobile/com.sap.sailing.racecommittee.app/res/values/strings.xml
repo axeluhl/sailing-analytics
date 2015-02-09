@@ -267,10 +267,10 @@
     <string name="welcome">WELCOME</string>
     <string name="change">CHANGE</string>
 
-    <string name="start_procedure">PROCEDURE</string>
-    <string name="start_mode">MODE</string>
-    <string name="course">COURSE</string>
-    <string name="wind">WIND</string>
+    <string name="start_procedure">Procedure</string>
+    <string name="start_mode">Mode</string>
+    <string name="course">Course</string>
+    <string name="wind">Wind</string>
     <string name="loading_events_succeded">Events loaded.</string>
 
     <string name="login_text">Welcome to SAP Sailing\nRace Committee App</string>
@@ -283,5 +283,6 @@
     <string name="flags_course">Course</string>
     <string name="flags_more">More</string>
     <string name="flags_postpone">Postpone</string>
+    <string name="race_select">Select a Race</string>
 
 </resources>

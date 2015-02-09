@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/navigation_drawer_image_height">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/nav_drawer_header" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/gradient" />
+
+    <ImageView
+        android:id="@+id/nav_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/default_margin"
+        android:background="@drawable/round_button"
+        android:padding="10dp"
+        android:contentDescription="@string/empty"
+        android:src="@drawable/ic_assignment_white_48dp" />
+
+    <TextView
+        android:id="@+id/regatta_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@id/nav_button"
+        android:layout_toStartOf="@id/nav_button"
+        android:padding="10dp"
+        android:text="@string/nav_header"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+</RelativeLayout>

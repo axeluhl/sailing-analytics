@@ -110,8 +110,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             Serializable raceId = getArguments().getSerializable(AppConstants.RACE_ID_KEY);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
             if (managedRace == null) {
-                throw new IllegalStateException(
-                        String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
+                throw new IllegalStateException(String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
             }
         } else {
             ExLog.i(getActivity(), TAG, "no arguments!?");

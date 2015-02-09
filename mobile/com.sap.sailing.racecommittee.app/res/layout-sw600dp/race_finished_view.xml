@@ -1,133 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/panel_left"
+        layout="@layout/race_panel_left" />
+
+    <include
+        android:id="@+id/panel_right"
+        layout="@layout/race_panel_right" />
 
     <LinearLayout
+        android:layout_toEndOf="@id/panel_left"
+        android:layout_toLeftOf="@id/panel_right"
+        android:layout_toRightOf="@id/panel_left"
+        android:layout_toStartOf="@id/panel_right"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0.2"
+        android:layout_height="match_parent"
         android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textFinishedRace"
+        <include
+            android:id="@+id/content_header"
+            layout="@layout/race_content_header"
+            android:layout_height="0dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:ems="10"
-            android:gravity="center_vertical|center_horizontal"
-            android:text="@string/race_finished_template"
-            android:textSize="16pt"
-            android:textStyle="bold" />
+            android:layout_weight="1"/>
 
+        <LinearLayout android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:orientation="vertical"
+            android:background="@color/grey">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="0.2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textFinishedRace"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ems="10"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/race_finished_template"
+                    android:textSize="16pt"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="0.2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textFinishedRaceStarted"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ems="10"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/empty"
+                    android:textSize="14pt" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="0.2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textFirstBoatFinished"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ems="10"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/empty"
+                    android:textSize="14pt" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="0.2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textFinishedRaceEnded"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ems="10"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/empty"
+                    android:textSize="14pt" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="0.2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textTimeLimit"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ems="10"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/empty"
+                    android:textSize="14pt" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="0.2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textProtestStartTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ems="10"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/empty"
+                    android:textSize="14pt" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="0.2"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/buttonPositioning"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.2"
+                    android:ems="10"
+                    android:text="@string/confirm_positionings"
+                    android:textSize="14pt"
+                    android:visibility="gone" />
+
+                <ImageButton
+                    android:id="@+id/buttonCamera"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.8"
+                    android:contentDescription="@string/snap"
+                    android:ems="10"
+                    android:src="@drawable/ic_menu_camera"
+                    android:text="@string/snap"
+                    android:textSize="14pt" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0.2"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textFinishedRaceStarted"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/empty"
-            android:textSize="14pt"
-            android:gravity="center_vertical|center_horizontal"
-            android:ems="10" />
-    </LinearLayout>
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0.2"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textFirstBoatFinished"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/empty"
-            android:textSize="14pt"
-            android:gravity="center_vertical|center_horizontal"
-            android:ems="10" />
-    </LinearLayout>
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0.2"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textFinishedRaceEnded"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/empty"
-            android:textSize="14pt"
-            android:gravity="center_vertical|center_horizontal"
-            android:ems="10" />
-    </LinearLayout>
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0.2"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textTimeLimit"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/empty"
-            android:textSize="14pt"
-            android:gravity="center_vertical|center_horizontal"
-            android:ems="10" />
-    </LinearLayout>
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0.2"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textProtestStartTime"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/empty"
-            android:textSize="14pt"
-            android:gravity="center_vertical|center_horizontal"
-            android:ems="10" />
-    </LinearLayout>
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0.2"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/buttonPositioning"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.2"
-            android:text="@string/confirm_positionings"
-            android:textSize="14pt"
-            android:ems="10"
-            android:visibility="gone" />
-        
-        <ImageButton
-            android:id="@+id/buttonCamera"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.8"
-            android:text="@string/snap"
-            android:src="@drawable/ic_menu_camera"
-            android:textSize="14pt"
-            android:ems="10"
-            android:contentDescription="@string/snap" />
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

@@ -36,21 +36,23 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
     private final static String TAG = RaceInfoFragment.class.getName();
 
-    private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
-
     private RaceInfoFragmentChooser infoFragmentChooser;
     private RaceFragment infoFragment;
 
     private TextView fleetInfoHeader;
     private TextView raceInfoHeader;
     private TextView courseInfoHeader;
-    private TextView windInfoHeader;
 
     private View resetRaceDialogView;
 
     public RaceInfoFragment() {
         this.infoFragmentChooser = null;
         this.infoFragment = null; // will be set later by switchToInfoFragment()
+    }
+
+    public static RaceInfoFragment newInstance() {
+        RaceInfoFragment fragment = new RaceInfoFragment();
+        return fragment;
     }
 
     @Override
@@ -67,10 +69,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
         raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
         courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
-        // windInfoHeader = (TextView) getView().findViewById(R.id.windInfoHeader);
-        windInfoHeader = (TextView) getActivity().findViewById(R.id.wind_value);
 
-        // windInfoHeader.setText(getString(R.string.wind_unknown));
         fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet()
                 .getName()));
         raceInfoHeader.setText(String.format("%s", getRace().getName()));
@@ -125,7 +124,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
     private void displayInfoFragment() {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
+//        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.infoContainer, infoFragment);
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.commit();
@@ -182,8 +181,11 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private void updateWindLabel() {
         Wind wind = getRaceState().getWindFix();
         if (wind != null) {
-            windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing()
-                    .reverse().toString()));
+            TextView windValue = (TextView) getActivity().findViewById(R.id.wind_value);
+            if (windValue != null) {
+                windValue.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing()
+                        .reverse().toString()));
+            }
         }
     }
 
@@ -194,12 +196,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
             throw new IllegalStateException(
                     String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
         }
-    }
-
-    public void onWindEntered(Wind windFix) {
-        getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
-        windInfoHeader.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing()
-                .reverse().toString()));
     }
 
     @Override
