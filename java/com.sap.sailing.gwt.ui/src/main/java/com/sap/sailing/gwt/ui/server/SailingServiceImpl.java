@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FilterInputStream;
@@ -25,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,10 +58,12 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
@@ -65,14 +71,20 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import javax.servlet.ServletContext;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.user.client.Window;
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.Revokable;
@@ -454,6 +466,7 @@ import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.security.shared.MailException;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
+
 
 /**
  * The server side implementation of the RPC service.
@@ -5467,12 +5480,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void inviteCompetitorsViaEmail(String serverUrlWithoutTrailingSlash, String eventId,
             String leaderboardName) throws MailException {
         if (!(this.mailProperties != null && this.mailProperties.containsKey("mail.transport.protocol"))) {
-            Window.alert("Check this, not implemented yet!");
+            logger.severe("Could not find valid email properties to send competitor invitation E-Mail");
             return;
         }
         
         //TODO check bug 2587
         Iterable<Competitor> competitors = getService().getLeaderboardByName(leaderboardName).getAllCompetitors();
+        
         
         StringBuilder occuredExceptions = new StringBuilder();
         

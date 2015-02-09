@@ -579,4 +579,27 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void inviteCompetitorsViaEmail(String serverUrlWithoutTrailingSlash, String eventId, String leaderboardName)
         throws MailException;
+        
+    FileStorageServiceDTO[] getAvailableFileStorageServices();
+
+    /**
+     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
+     */
+    FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName) throws NoCorrespondingServiceRegisteredException;
+
+    /**
+     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
+     */
+    void setActiveFileStorageService(String serviceName) throws NoCorrespondingServiceRegisteredException;
+
+    /**
+     * @return may be {@code null}
+     */
+    String getActiveFileStorageServiceName();
+    
+    /**
+     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
+     * @throws IllegalArgumentException if the property with name {@code propertyName} doesn't exist for the service
+     */
+    void setFileStorageServiceProperties(String serviceName, Map<String, String> properties);
 }

@@ -100,8 +100,6 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        //FIXME: this is a dirty hack for now, until I know, why the tracked competitors do not appear on the regattaLog.getAllCompetitors!
-        
         HashSet<Competitor> competitors = new HashSet<Competitor>();
         
         
