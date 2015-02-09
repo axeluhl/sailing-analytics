@@ -100,7 +100,8 @@ public class FleetListEditableEditorComposite extends FleetListEditorComposite {
         }
 
         private ListBox createColorListBox(final TextBox nameBox, final IntegerBox orderNoBox, final Color color) {
-            final ListBox colorListBox = new ListBox(false);
+            final ListBox colorListBox = new ListBox();
+            colorListBox.setMultipleSelect(false);
             colorListBox.addChangeHandler(new ChangeHandler() {
                 @Override
                 public void onChange(ChangeEvent event) {

@@ -11,8 +11,7 @@ Export-Package: com.sap.sse.replication,
  com.sap.sse.replication.impl
 Require-Bundle: com.sap.sse.common,
  com.sap.sse.operationaltransformation,
- com.sap.sse,
- com.sap.sse.gateway
+ com.sap.sse
 Bundle-ClassPath: .
 Web-ContextPath: /replication
 Import-Package: com.rabbitmq.client;version="2.8.4",

@@ -12,7 +12,7 @@
    <feature url="features/target-jsp/com.sap.sailing.target.jsp_1.0.0.jar" id="com.sap.sailing.target.jsp" version="1.0.0">
       <category name="RaceAnalysisTarget"/>
    </feature>
-   <feature url="features/target-restlet/com.sap.sailing.target.restlet_1.0.0.jar" id="com.sap.sailing.target.restlet" version="1.0.0">
+   <feature url="features/target-jackson/com.sap.sailing.target.jackson_1.0.0.jar" id="com.sap.sailing.target.jackson" version="1.0.0">
       <category name="RaceAnalysisTarget"/>
    </feature>
    <feature url="features/target-shiro/com.sap.sailing.target.shiro_1.0.0.jar" id="com.sap.sailing.target.shiro" version="1.0.0">

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -358,18 +359,21 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             requestObject = Helpers.toJSONObjectSafe(requestBody);
             logger.fine("JSON requestObject is: " + requestObject.toString());
         } catch (ParseException | JsonDeserializationException e) {
-            logger.warning(String.format("Exception while parsing post request:\n%s", e.toString()));
+            logger.log(Level.WARNING, "Exception while parsing post request", e);
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        String competitorId = (String) requestObject.get(DeviceMappingConstants.COMPETITOR_ID_AS_STRING);
-        String deviceUuid = (String) requestObject.get(DeviceMappingConstants.DEVICE_UUID);
-        Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.FROM_MILLIS);
-        String deviceType = (String) requestObject.get(DeviceMappingConstants.DEVICE_TYPE);
-        String pushDeviceId = (String) requestObject.get(DeviceMappingConstants.PUSH_DEVICE_ID);
-        if (competitorId == null || deviceUuid == null || fromMillis == null || deviceType == null
-                || pushDeviceId == null) {
+        String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
+        String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
+        Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
+        
+        //don't need the device type and push ID yet - important once we start add support for push notifications
+        //String deviceType = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_TYPE);
+        //String pushDeviceId = (String) requestObject.get(DeviceMappingConstants.JSON_PUSH_DEVICE_ID);
+        
+        if (competitorId == null || deviceUuid == null || fromMillis == null) {
+            // || deviceType == null
             logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();

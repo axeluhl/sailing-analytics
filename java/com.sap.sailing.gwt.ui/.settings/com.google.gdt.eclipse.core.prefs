@@ -1,6 +1,5 @@
-#Wed Jan 04 14:20:13 CET 2012
 eclipse.preferences.version=1
 jarsExcludedFromWebInfLib=
-lastWarOutDir=C\:/Users/D054527/git/sapsailingcapture/java/com.sap.sailing.gwt.ui
-launchConfigExternalUrlPrefix=gwt/
+lastWarOutDir=/Users/pgtaboada/workspaces/sap/java/com.sap.sailing.gwt.ui
+launchConfigExternalUrlPrefix=
 warSrcDirIsOutput=false

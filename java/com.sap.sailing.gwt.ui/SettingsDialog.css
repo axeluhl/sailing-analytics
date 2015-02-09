@@ -1,0 +1,31 @@
+/* settings dialogs styles */
+.SettingsDialogComponent {
+    padding: 0 0 15px 0;
+}
+
+.dialogInnerHeadline {
+    border: 1px solid #CCCCCC;
+    font-family: OpenSansSemiBold,Arial,Verdana,sans-serif;
+    height: 21px;
+    padding: 2px 0 0 7px;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -o-border-radius: 3px;
+    -ms-border-radius: 3px;
+    margin: 0 0 10px 0;
+}
+
+.dialogInnerHeadlineOther {
+  font-family: OpenSansSemiBold, Arial, Verdana, sans-serif;
+  color: #e84a1a;
+  padding-left: 9px;
+}
+
+.dialogInnerContent {
+  padding: 0 9px 0 5px;
+}
+
+.SettingsDialogComponent .gwt-CheckBox {
+  padding: 0 10px 0 0;
+}
