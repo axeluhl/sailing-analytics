@@ -71,7 +71,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.user.client.Window;
 import com.google.zxing.WriterException;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
@@ -446,14 +445,15 @@ import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.mail.MailException;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
-import com.sap.sse.security.shared.MailException;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
+
 
 /**
  * The server side implementation of the RPC service.
@@ -5467,12 +5467,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void inviteCompetitorsViaEmail(String serverUrlWithoutTrailingSlash, String eventId,
             String leaderboardName) throws MailException {
         if (!(this.mailProperties != null && this.mailProperties.containsKey("mail.transport.protocol"))) {
-            Window.alert("Check this, not implemented yet!");
+            logger.severe("Could not find valid email properties to send competitor invitation E-Mail");
             return;
         }
         
         //TODO check bug 2587
         Iterable<Competitor> competitors = getService().getLeaderboardByName(leaderboardName).getAllCompetitors();
+        
         
         StringBuilder occuredExceptions = new StringBuilder();
         

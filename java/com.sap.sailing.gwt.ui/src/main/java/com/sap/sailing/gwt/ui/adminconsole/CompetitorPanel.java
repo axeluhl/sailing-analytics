@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -43,8 +44,8 @@ public class CompetitorPanel extends SimplePanel {
         this(sailingService, null, stringMessages, errorReporter);
     }
 
-    public CompetitorPanel(final SailingServiceAsync sailingService, String leaderboardName, final StringMessages stringMessages,
-            final ErrorReporter errorReporter) {
+    public CompetitorPanel(final SailingServiceAsync sailingService, final String leaderboardName,
+            final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -79,11 +80,11 @@ public class CompetitorPanel extends SimplePanel {
         buttonPanel.add(allowReloadButton);
         Button addCompetitorButton = new Button(stringMessages.add());
         addCompetitorButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				openAddCompetitorDialog();
-			}
-		});
+            @Override
+            public void onClick(ClickEvent event) {
+                openAddCompetitorDialog();
+            }
+        });
         buttonPanel.add(addCompetitorButton);
 
         final Button inviteCompetitorsButton = new Button(stringMessages.inviteCompetitors());
@@ -92,42 +93,29 @@ public class CompetitorPanel extends SimplePanel {
             public void onClick(ClickEvent event) {
                 Iterable<CompetitorDTO> competitors = competitorSelectionModel.getSelectedSet();
                 boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
-                
-                if (emailProvidedForAll){
-                        sailingService.sendInvitationEmailToCompetitors(competitors, new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.sendingMailsFailed()+caught.getMessage());
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                Window.alert(stringMessages.sendingMailsSuccessfull());
-                            }
-                        });
+                if (emailProvidedForAll) {
+                    openChooseEventDialogAndSendMails(competitors);
                 } else {
                     Window.alert(stringMessages.notAllCompetitorsProvideEmail());
                 }
             }
 
             private boolean isEmailProvidedForAll(Iterable<CompetitorDTO> allCompetitors) {
-                for (CompetitorDTO competitor : allCompetitors){
-                    if (!competitor.hasEmail()){
+                for (CompetitorDTO competitor : allCompetitors) {
+                    if (!competitor.hasEmail()) {
                         return false;
                     }
                 }
-                
+
                 return true;
             }
         });
         buttonPanel.add(inviteCompetitorsButton);
-        
-        
+
         competitorsPanel.add(buttonPanel);
 
-        
-        //competitor table
+        // competitor table
         ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
                 new CompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
@@ -151,8 +139,8 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
         allowReloadButton.setEnabled(!competitorSelectionModel.getSelectedSet().isEmpty());
-        
-        if(leaderboardName != null) {
+
+        if (leaderboardName != null) {
             refreshCompetitorList();
         }
     }
@@ -199,6 +187,34 @@ public class CompetitorPanel extends SimplePanel {
             public void cancel() {
             }
         }).show();
+    }
+
+    private void openChooseEventDialogAndSendMails(final Iterable<CompetitorDTO> competitors) {
+        EventListCompositeDialog dialog = new EventListCompositeDialog(sailingService, stringMessages, errorReporter,
+                new DialogCallback<List<java.util.UUID>>() {
+
+                    @Override
+                    public void ok(List<UUID> eventsToInviteTo) {
+                        sailingService.sendInvitationEmailToCompetitors(competitors, leaderboardName, eventsToInviteTo, new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.sendingMailsFailed()+caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Window.alert(stringMessages.sendingMailsSuccessfull());
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
+        dialog.show();
     }
 
     public void refreshCompetitorList() {
