@@ -138,11 +138,10 @@
          unpack="false"/>
 
    <plugin
-      id="org.apache.servicemix.bundles.zxing"
-      download-size="0"
-      install-size="0"
-      version="3.0.1.1"
+         id="org.apache.servicemix.bundles.zxing"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.1"
          unpack="false"/>
-
 
 </feature>
