@@ -16,8 +16,8 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.VenueDTO;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -25,7 +25,7 @@ public class EventHeader extends Composite {
     interface EventHeaderUiBinder extends UiBinder<Widget, EventHeader> {
     }
     
-    @UiField TextMessages i18n;
+    @UiField StringMessages i18n;
     
     @UiField BreadcrumbPane breadcrumbs;
     
@@ -33,7 +33,6 @@ public class EventHeader extends Composite {
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
     @UiField DivElement eventDate;
-    @UiField DivElement eventVenue;
     @UiField SpanElement eventVenueName;
     @UiField SpanElement eventVenueCountry;
     @UiField AnchorElement eventLink;
@@ -80,27 +79,24 @@ public class EventHeader extends Composite {
             hide(eventState);
         }
         
-        VenueDTO venue = event.venue;
-        if(venue != null && event.regattas.size() <=1) {
-            eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
-            eventVenueName.setInnerText(venue.getName());
-//            TODO eventVenueCountry
-            if(event.getOfficialWebsiteURL() != null) {
-                String title = event.getOfficialWebsiteURL();
-                if(title.startsWith("http://")) {
-                    title = title.substring("http://".length(), title.length());
-                }
-                if(title.length() > 35) {
-                    title = TextMessages.INSTANCE.officalEventWebsite();
-                }
-                eventLink.setInnerText(title);
-                eventLink.setHref(event.getOfficialWebsiteURL());
-            } else {
-                hide(eventLink);
+        eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
+        eventVenueName.setInnerText(event.venue.getName());
+//        TODO eventVenueCountry
+        if(event.getOfficialWebsiteURL() != null) {
+            String title = event.getOfficialWebsiteURL();
+            if(title.startsWith("http://")) {
+                title = title.substring("http://".length(), title.length());
             }
+            if(title.length() > 35) {
+                title = TextMessages.INSTANCE.officalEventWebsite();
+            }
+            eventLink.setInnerText(title);
+            eventLink.setHref(event.getOfficialWebsiteURL());
         } else {
-            hide(eventDate, eventVenue);
+            hide(eventLink);
         }
+        
+        // Multi-Regatta-Event
         if(event.regattas.size() > 1) {
 //            TODO competitorsCount.setInnerText(text);
 //            TODO racesCount;
