@@ -14,7 +14,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
+import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -47,13 +49,16 @@ public class EventHeader extends Composite {
     private final HomePlacesNavigator placeNavigator;
 
     private EventDTO event;
+
+    private Presenter presenter;
     
-    public EventHeader(EventDTO event) {
-        this(event, null, null);
+    public EventHeader(EventView.Presenter presenter) {
+        this(presenter, null);
     }
     
-    public EventHeader(EventDTO event, EventView.Presenter presenter, HomePlacesNavigator placeNavigator) {
-        this.event = event;
+    public EventHeader(EventView.Presenter presenter, HomePlacesNavigator placeNavigator) {
+        this.event = presenter.getCtx().getEventDTO();
+        this.presenter = presenter;
         this.placeNavigator = placeNavigator;
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
@@ -124,6 +129,10 @@ public class EventHeader extends Composite {
     }
 
     private void initBreadCrumbs() {
+//        addBreadCrumbItem(i18n.home(), placeNavigator.getHomeNavigation());
+//        addBreadCrumbItem(i18n.events(), placeNavigator.getEventsNavigation());
+        // TODO series, event ...
+        // TODO dummy implementation
         breadcrumbs.addBreadcrumbItem(i18n.home(), "TODO" /* placeNavigator.getHomeNavigation().getTargetUrl() */, new Runnable() {
             @Override
             public void run() {
@@ -144,6 +153,15 @@ public class EventHeader extends Composite {
             @Override
             public void run() {
                 // TODO
+            }
+        });
+    }
+    
+    private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
+        breadcrumbs.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
+            @Override
+            public void run() {
+                presenter.navigateTo(placeNavigation.getPlace());
             }
         });
     }

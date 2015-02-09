@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.app.ApplicationClientFactory;
@@ -66,6 +67,12 @@ public class EventActivity extends AbstractActivity implements EventView.Present
     public EventContext getCtx() {
 
         return ctx;
+    }
+
+    @Override
+    public void navigateTo(Place place) {
+        // TODO Auto-generated method stub
+        
     }
 
 }
