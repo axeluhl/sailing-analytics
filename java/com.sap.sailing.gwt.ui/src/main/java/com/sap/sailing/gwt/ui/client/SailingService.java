@@ -88,8 +88,8 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
-import com.sap.sse.security.shared.MailException;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
+import com.sap.sse.security.shared.MailException;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
@@ -577,5 +577,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
     
-    void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors) throws MailException;
+    void inviteCompetitorsViaEmail(String serverUrlWithoutTrailingSlash, String eventId, String leaderboardName)
+        throws MailException;
 }
