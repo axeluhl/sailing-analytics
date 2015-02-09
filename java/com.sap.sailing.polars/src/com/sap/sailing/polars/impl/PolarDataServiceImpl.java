@@ -43,9 +43,6 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     private final PolarDataMiner polarDataMiner;
     
-
-
-
     public PolarDataServiceImpl(Executor executor) {
         this.polarDataMiner = new PolarDataMiner();
     }
