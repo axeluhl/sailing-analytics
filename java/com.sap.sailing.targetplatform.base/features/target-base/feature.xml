@@ -121,7 +121,13 @@
          id="org.apache.servicemix.bundles.aws-java-sdk"
          download-size="0"
          install-size="0"
-         version="1.9.8.1"
+         version="1.9.8.1"/>
+
+   <plugin
+         id="org.apache.servicemix.bundles.zxing"
+         download-size="0"
+         install-size="0"
+         version="3.0.1.1"
          unpack="false"/>
 
    <plugin
@@ -136,13 +142,4 @@
          install-size="0"
          version="1.9.4"
          unpack="false"/>
-
-   <plugin
-      id="org.apache.servicemix.bundles.zxing"
-      download-size="0"
-      install-size="0"
-      version="3.0.1.1"
-         unpack="false"/>
-
-
 </feature>

@@ -698,6 +698,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
-    void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> callback); 
+    void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors, String leaderboardName, List<UUID> eventsToInviteTo, AsyncCallback<Void> asyncCallback); 
 
 }

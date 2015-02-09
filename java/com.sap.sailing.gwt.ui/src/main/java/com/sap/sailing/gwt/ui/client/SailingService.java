@@ -600,6 +600,7 @@ public interface SailingService extends RemoteService {
      * @throws IllegalArgumentException if the property with name {@code propertyName} doesn't exist for the service
      */
     void setFileStorageServiceProperties(String serviceName, Map<String, String> properties);
-    
-    void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors) throws MailException;
+
+    void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors, String leaderboardName,
+            List<UUID> eventsToInviteTo) throws MailException;
 }

@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FilterInputStream;
@@ -25,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,22 +53,35 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import javax.imageio.ImageIO;
+import javax.mail.BodyPart;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.internet.MimeMultipart;
 import javax.servlet.ServletContext;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.user.client.Window;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.Revokable;
@@ -201,6 +218,7 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -441,6 +459,7 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.security.shared.MailException;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
+
 
 /**
  * The server side implementation of the RPC service.
@@ -5523,38 +5542,124 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors) throws MailException {
+    public void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors, String leaderboardName, List<UUID> eventsToInviteTo) throws MailException {
         if (!(this.mailProperties != null && this.mailProperties.containsKey("mail.transport.protocol"))) {
-            Window.alert("Check this, not implemented yet!");
+            logger.severe("Could not find valid email properties to send competitor invitation E-Mail");
             return;
+        }
+        
+        if (eventsToInviteTo.isEmpty()){
+            throw new MailException("Please select an event in order to invite competitors");
         }
         
         StringBuilder occuredExceptions = new StringBuilder();
         
-        for (CompetitorDTO competitor : competitors){
-            final String toAddress = competitor.getEmail();
-            if (toAddress != null) {
-                Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
-                MimeMessage msg = new MimeMessage(session);
-                try {
-                    msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
-                    msg.setSubject("Invitation to a SAP Sailing Analytics event"); //FIXME: I18N?
-                    msg.setContent("Test", "text/plain");
-                    msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
-                    Transport ts = session.getTransport();
-                    ts.connect();
-                    ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
-                    ts.close();
-                    logger.info("mail sent to competitor " + competitor.getName() + " with e-mail address " + toAddress);
-                } catch (MessagingException  e) {
-                    logger.log(Level.SEVERE, "Error trying to send mail to user " + competitor.getName()
-                            + " with e-mail address " + toAddress, e);
-                    occuredExceptions.append(e.getMessage()+"\r\n");
+        for (UUID eventToInviteTo : eventsToInviteTo){
+            for (CompetitorDTO competitor : competitors){
+                final String toAddress = competitor.getEmail();
+                if (toAddress != null) {
+                    
+                    //generate QR Code of form
+                    //http://<host>/tracking/checkin?event_id=<event-id>&leaderboard_name=<leaderboard-name>&competitor_id=<competitor-id>
+                    Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
+                    MimeMessage msg = new MimeMessage(session);
+                    try {
+                        msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
+                        msg.setSubject("Invitation to a SAP Sailing Analytics event"); //FIXME: I18N?
+                        msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
+                        
+                        MimeBodyPart messageBodyPart = new MimeBodyPart();
+                        messageBodyPart.setContent("<h3>Please scan the QR-Code with the SAP Sailing Tracking "
+                                + "App to join</h3><br><img src=\"cid:wr_code\"/>", "text/html");    
+
+                        String invitationUrl = generateInvitationUrl(eventToInviteTo,leaderboardName,competitor.getIdAsString());
+                        BodyPart qrCodeBodyPart = createInlineImagePart(createQRImage(invitationUrl));
+                        
+                        Multipart multipart = new MimeMultipart();
+                        multipart.addBodyPart(messageBodyPart);
+                        multipart.addBodyPart(qrCodeBodyPart);
+                        
+                        Transport ts = session.getTransport();
+                        ts.connect();
+                        ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
+                        ts.close();
+                        logger.info("mail sent to competitor " + competitor.getName() + " with e-mail address " + toAddress);
+                    } catch (MessagingException | WriterException | IOException  e) {
+                        logger.log(Level.SEVERE, "Error trying to send mail to user " + competitor.getName()
+                                + " with e-mail address " + toAddress, e);
+                        occuredExceptions.append(e.getMessage()+"\r\n");
+                    } 
                 }
             }
+            if (!(occuredExceptions.length() == 0)){
+                throw new MailException(occuredExceptions.toString());
+            }
         }
-        if (!(occuredExceptions.length() == 0)){
-            throw new MailException(occuredExceptions.toString());
+    }
+    
+    private String generateInvitationUrl(UUID eventToInviteTo, String leaderboardName, String competitorId) {
+        String encodedEventId = com.google.gwt.http.client.URL.encodePathSegment(eventToInviteTo.toString());
+        String encodedLeaderboardName = com.google.gwt.http.client.URL.encodePathSegment(leaderboardName.toString());
+        
+        return "http://127.0.0.1/" + DeviceMappingConstants.URL_BASE //FIXME: baseUrlWithTrailingSlash needed
+                + "?" + DeviceMappingConstants.URL_EVENT_ID + "=" + encodedEventId
+                + "&" + DeviceMappingConstants.URL_LEADERBOARD_NAME + "=" + encodedLeaderboardName
+                + "&" + competitorId;
+    }
+
+    private static ByteArrayOutputStream createQRImage(String qrCodeText) throws WriterException, IOException {
+           // Create the ByteMatrix for the QR-Code that encodes the given String
+           Hashtable<EncodeHintType,ErrorCorrectionLevel> hintMap = new Hashtable<>();
+           hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+           QRCodeWriter qrCodeWriter = new QRCodeWriter();
+           BitMatrix byteMatrix = qrCodeWriter.encode(qrCodeText,
+             BarcodeFormat.QR_CODE, 125, 125, hintMap);
+           // Make the BufferedImage that are to hold the QRCode
+           int matrixWidth = byteMatrix.getWidth();
+           BufferedImage image = new BufferedImage(matrixWidth, matrixWidth,
+             BufferedImage.TYPE_INT_RGB);
+           image.createGraphics();
+
+           Graphics2D graphics = (Graphics2D) image.getGraphics();
+           graphics.setColor(Color.WHITE);
+           graphics.fillRect(0, 0, matrixWidth, matrixWidth);
+           // Paint and save the image using the ByteMatrix
+           graphics.setColor(Color.BLACK);
+
+           for (int i = 0; i < matrixWidth; i++) {
+            for (int j = 0; j < matrixWidth; j++) {
+             if (byteMatrix.get(i, j)) {
+              graphics.fillRect(i, j, 1, 1);
+             }
+            }
+           }
+           ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+           ImageIO.write(image, "jpeg", outputStream);
+           return outputStream;
+    }
+    
+    private BodyPart createInlineImagePart(ByteArrayOutputStream outputStream)  {
+
+        MimeBodyPart imagePart =null;
+        try
+        {
+            Base64 base64 = new Base64();
+            byte[] bytearray = base64.encode(outputStream.toByteArray());
+            outputStream.close();
+
+            InternetHeaders headers = new InternetHeaders();
+            headers.addHeader("Content-Type", "image/jpeg");
+            headers.addHeader("Content-Transfer-Encoding", "base64");
+            imagePart = new MimeBodyPart(headers, bytearray);
+            imagePart.setDisposition(MimeBodyPart.INLINE);
+            imagePart.setContentID("&lt;qr_code&gt;");
+            imagePart.setFileName("qr_code.jpg");
         }
+        catch(Exception exp)
+        {
+            logger.warning("Could not create ImagePart for Competitor invitation");
+        }
+
+        return imagePart;
     }
 }
