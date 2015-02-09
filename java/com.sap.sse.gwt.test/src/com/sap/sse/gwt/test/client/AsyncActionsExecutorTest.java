@@ -24,10 +24,23 @@ public class AsyncActionsExecutorTest extends GWTTestCase {
         }
     };
     
-    private AsyncCallback<Void> voidAsyncCallbackWithNoTrigger = new AsyncCallback<Void>() {
+    private AsyncAction<Void> voidAsyncActionSuccessfullyCompleting = new AsyncAction<Void>() {
+        @Override
+        public void execute(AsyncCallback<Void> callback) {
+            callback.onSuccess(null);
+        }
+    };
+
+    private AsyncAction<Void> voidAsyncActionFailingToComplete = new AsyncAction<Void>() {
+        @Override
+        public void execute(AsyncCallback<Void> callback) {
+            callback.onFailure(new RuntimeException());
+        }
+    };
+    
+    private AsyncCallback<Void> voidAsyncCallbackWithNoCallbackAction = new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
-            // do nothing - just ignore
         }
         @Override
         public void onSuccess(Void result) {
@@ -35,18 +48,31 @@ public class AsyncActionsExecutorTest extends GWTTestCase {
     };
     
     @Test
-    public void testAsyncExecutionWithTimeout() {
-        executor = new AsyncActionsExecutor(/*maxPendingCalls*/4, /*maxPendingCallsPerType*/5,
+    public void testThatANonTriggeringActionLeadsToPendingCall() {
+        executor = new AsyncActionsExecutor(/*maxPendingCalls*/6, /*maxPendingCallsPerType*/5,
                 /*durationAfterToResetQueue*/Duration.ONE_SECOND);
-        /*
-         * We want to test that the executor resends jobs after a certain duration.
-         * In order to do this we need to make sure that the Executor never gets
-         * a call to callCompleted.
-         */
-        executor.execute(voidAsyncActionNotTriggeringCallCompleted, voidAsyncCallbackWithNoTrigger);
-        // now the executor should have one pending action of type Void
+        // add a job that will never execute successfully
+        executor.execute(voidAsyncActionNotTriggeringCallCompleted, voidAsyncCallbackWithNoCallbackAction);
+        // now the executor should have one pending action
         assertNotNull(executor.getNumberOfPendingActionsPerType(voidAsyncActionNotTriggeringCallCompleted.getClass().getName()));
         assertEquals(1, executor.getNumberOfPendingActionsPerType(voidAsyncActionNotTriggeringCallCompleted.getClass().getName()));
+    }
+    
+    @Test
+    public void testTriggeringActionsLeadingToEmptyPendingQueue() {
+        executor = new AsyncActionsExecutor(/*maxPendingCalls*/6, /*maxPendingCallsPerType*/6,
+                /*durationAfterToResetQueue*/Duration.ONE_HOUR);
+        // test completing jobs leading to empty pending queue
+        executor.execute(voidAsyncActionSuccessfullyCompleting, voidAsyncCallbackWithNoCallbackAction);
+        assertEquals(0, executor.getNumberOfPendingActionsPerType(voidAsyncActionSuccessfullyCompleting.getClass().getName()));
+        executor.execute(voidAsyncActionFailingToComplete, voidAsyncCallbackWithNoCallbackAction);
+        assertEquals(0, executor.getNumberOfPendingActionsPerType(voidAsyncActionFailingToComplete.getClass().getName()));
+        // test that max pending calls is being used
+        for (int i=0;i<=11;i++) {
+            executor.execute(voidAsyncActionNotTriggeringCallCompleted, voidAsyncCallbackWithNoCallbackAction);
+        }
+        assertEquals(6, executor.getNumberOfPendingActions());
+        assertEquals(6, executor.getNumberOfPendingActionsPerType(voidAsyncActionNotTriggeringCallCompleted.getClass().getName()));
     }
 
     @Override

@@ -91,6 +91,9 @@ public class AsyncActionsExecutor {
     }
     
     public AsyncActionsExecutor(int maxPendingCalls, int maxPendingCallsPerType, Duration durationAfterToResetQueue) {
+        if (maxPendingCalls < maxPendingCallsPerType) {
+            throw new RuntimeException("The number of max pending calls can not be lower than the number of max pending calls per type.");
+        }
         this.maxPendingCalls = maxPendingCalls;
         this.maxPendingCallsPerType = maxPendingCallsPerType;
         this.durationAfterToResetQueue = durationAfterToResetQueue;
@@ -107,7 +110,15 @@ public class AsyncActionsExecutor {
     }
     
     public int getNumberOfPendingActionsPerType(String type) {
-        return actionsPerTypeCounter.get(type);
+        int result = 0;
+        if (actionsPerTypeCounter != null) {
+            result = actionsPerTypeCounter.get(type);
+        }
+        return result;
+    }
+    
+    public int getNumberOfPendingActions() {
+        return numPendingCalls;
     }
     
     private void execute(ExecutionJob<?> job) {
