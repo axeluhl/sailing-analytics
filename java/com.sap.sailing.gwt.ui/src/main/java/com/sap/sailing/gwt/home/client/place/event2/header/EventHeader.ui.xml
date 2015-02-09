@@ -34,16 +34,16 @@
               <!-- IFEND event.venue && event.eventType !== 'multi-regatta-event' -->
               <!-- IF event.eventType === 'multi-regatta-event' -->
               <div ui:field="competitors" class="{local_res.css.eventheader_intro_details_item}">
-                <span ui:field="competitorsCount">5</span>
-                Competitors<!-- TODO <ui:text from='{i18n.eventHeader.competitorsCount}' /> -->
+                <span ui:field="competitorsCount"></span>
+                <ui:text from='{i18n.competitors}' />
               </div>
               <div ui:field="races" class="{local_res.css.eventheader_intro_details_item}">
-                <span ui:field="racesCount">7</span>
-                Races<!-- TODO <ui:text from='{i18n.eventHeader.racesCount}' /> -->
+                <span ui:field="racesCount"></span>
+                <ui:text from='{i18n.races}' />
               </div>
               <div ui:field="trackedRaces" class="{local_res.css.eventheader_intro_details_item}">
-                <span ui:field="trackedRacesCount">4</span>
-                Tracked races<!-- TODO <ui:text from='{i18n.eventHeader.trackedRacesCount}' /> -->
+                <span ui:field="trackedRacesCount"></span>
+                <ui:text from='{i18n.trackedRaces}' />
               </div>
               <div ui:field="eventCategory" class="{local_res.css.eventheader_intro_details_item}">
                 <!-- event.category -->

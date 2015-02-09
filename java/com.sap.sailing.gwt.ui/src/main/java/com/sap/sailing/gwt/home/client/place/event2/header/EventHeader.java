@@ -83,10 +83,7 @@ public class EventHeader extends Composite {
         eventVenueName.setInnerText(event.venue.getName());
 //        TODO eventVenueCountry
         if(event.getOfficialWebsiteURL() != null) {
-            String title = event.getOfficialWebsiteURL();
-            if(title.startsWith("http://")) {
-                title = title.substring("http://".length(), title.length());
-            }
+            String title = withoutPrefix(event.getOfficialWebsiteURL(), "http://", "https://");
             if(title.length() > 35) {
                 title = TextMessages.INSTANCE.officalEventWebsite();
             }
@@ -96,19 +93,28 @@ public class EventHeader extends Composite {
             hide(eventLink);
         }
         
-        // Multi-Regatta-Event
-        if(event.regattas.size() > 1) {
-//            TODO competitorsCount.setInnerText(text);
-//            TODO racesCount;
-//            TODO eventCategory.setInnerText(event.get);
-            if(event.isFinished()) {
-//                TODO trackedRacesCount;
-            } else {
-                hide(trackedRaces);
-            }
-        } else {
+        // TODO Multi-Regatta-Event
+//        if(event.regattas.size() > 1) {
+////            TODO competitorsCount.setInnerText(text);
+////            TODO racesCount;
+////            TODO eventCategory.setInnerText(event.get);
+//            if(event.isFinished()) {
+////                TODO trackedRacesCount;
+//            } else {
+//                hide(trackedRaces);
+//            }
+//        } else {
             hide(competitors, races, trackedRaces);
+//        }
+    }
+
+    private String withoutPrefix(String title, String... prefixes) {
+        for (String prefix : prefixes) {
+            if(title.startsWith(prefix)) {
+                return title.substring(prefix.length(), title.length());
+            }
         }
+        return title;
     }
 
     private void hide(Element... elementsToHide) {
