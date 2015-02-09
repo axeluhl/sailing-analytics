@@ -19,4 +19,7 @@
 	 	</init-param>
 	</servlet>
 
+	<welcome-file-list>
+	    <welcome-file>SSETheme.html</welcome-file>
+	</welcome-file-list>
 </web-app>
