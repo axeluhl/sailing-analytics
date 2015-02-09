@@ -99,6 +99,7 @@ public class AsyncActionsExecutor {
         this.durationAfterToResetQueue = durationAfterToResetQueue;
         this.actionsPerTypeCounter = new HashMap<>();
         this.lastRequestedActionsNotBeingSentOut = new HashMap<>();
+        this.timepointOfLastSuccessfulJobExecution = MillisecondsTimePoint.now(); // triggering duration to reset
     }
     
     public <T> void execute(AsyncAction<T> action, AsyncCallback<T> callback) {
@@ -129,7 +130,7 @@ public class AsyncActionsExecutor {
         if (numPendingCalls >= maxPendingCalls || (numActionsOfType >= maxPendingCallsPerType)) {
             TimePoint now = MillisecondsTimePoint.now();
             if (timepointOfLastSuccessfulJobExecution != null &&
-                    now.minus(durationAfterToResetQueue).before(timepointOfLastSuccessfulJobExecution)) {
+                    now.minus(durationAfterToResetQueue).after(timepointOfLastSuccessfulJobExecution)) {
                 // reset the number of pending calls
                 numPendingCalls = 0;
                 // reset number of pending actions per type - 0 is fine as checkForEmptyCallQueue
