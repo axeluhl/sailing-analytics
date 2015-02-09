@@ -100,6 +100,9 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
 
+    /**
+     * Expects the HTTP header {@code Content-Length} to be set.
+     */
     //
     // example for testing upload:
     // $ curl -v -H "Content-Type:image/jpeg" \

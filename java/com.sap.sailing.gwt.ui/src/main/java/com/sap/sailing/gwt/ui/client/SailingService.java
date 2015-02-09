@@ -55,8 +55,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
@@ -91,12 +89,13 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.security.shared.MailException;
+import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
  * the time-dependent service methods, an empty (non-<code>null</code>) result is returned.
  */
-public interface SailingService extends RemoteService {
+public interface SailingService extends RemoteService, FileStorageManagementGwtService {
     List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception;
     
     List<RegattaDTO> getRegattas();
@@ -577,29 +576,6 @@ public interface SailingService extends RemoteService {
     
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
-    
-    FileStorageServiceDTO[] getAvailableFileStorageServices();
-
-    /**
-     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
-     */
-    FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName) throws NoCorrespondingServiceRegisteredException;
-
-    /**
-     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
-     */
-    void setActiveFileStorageService(String serviceName) throws NoCorrespondingServiceRegisteredException;
-
-    /**
-     * @return may be {@code null}
-     */
-    String getActiveFileStorageServiceName();
-    
-    /**
-     * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
-     * @throws IllegalArgumentException if the property with name {@code propertyName} doesn't exist for the service
-     */
-    void setFileStorageServiceProperties(String serviceName, Map<String, String> properties);
     
     void sendInvitationEmailToCompetitors(Iterable<CompetitorDTO> competitors) throws MailException;
 }
