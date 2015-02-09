@@ -107,7 +107,6 @@ public class AsyncActionsExecutorTest extends GWTTestCase {
         // now the action should be retriggered - we can not use Thread.sleep() here as it is not
         // compilable by the GWT compiler. Using a hack to wait a little bit.
         while (MillisecondsTimePoint.now().minus(Duration.ONE_SECOND.times(3)).before(startOfExecution)) {
-            // waiting...
         }
         executor.execute(nonTriggeringAction, defaultCallback);
         assertEquals(7, nonTriggeringAction.getExecutionCounter());
