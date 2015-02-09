@@ -274,7 +274,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String combinedWindSourceTypeName();
     String courseBasedWindSourceTypeName();
     String trackBasedEstimationWindSourceTypeName();
-    String expeditionWindSourceTypeName();
+    String windSensorWindSourceTypeName();
     String webWindSourceTypeName();
     String raceCommitteeWindSourceTypeName();
     String clickChartToSetTime();
@@ -860,7 +860,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String combinedWindSourceTypeTooltip();
     String courseBasedWindSourceTypeTooltip();
     String trackBasedEstimationWindSourceTypeTooltip();
-    String expeditionWindSourceTypeTooltip();
+    String windSensorWindSourceTypeTooltip();
     String webWindSourceTypeTooltip();
     String raceCommitteeWindSourceTypeTooltip();
     String sheetName();
@@ -1136,4 +1136,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String error();
     String fileStorage();
     String active();
+    String scoringSchemeHighPointEssOverallDescription();
 }
