@@ -1,4 +1,4 @@
-package com.sap.sse.mail;
+package com.sap.sse.common.mail;
 
 import java.io.Serializable;
 

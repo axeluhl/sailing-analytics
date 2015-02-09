@@ -8,7 +8,7 @@ import javax.servlet.ServletContext;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 
-import com.sap.sse.mail.MailException;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
