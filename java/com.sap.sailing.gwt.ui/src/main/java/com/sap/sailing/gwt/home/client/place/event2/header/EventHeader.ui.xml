@@ -15,8 +15,7 @@
             <h2 class="{local_res.css.eventheader_intro_name}">
               <span ui:field="eventName"></span>
               <!-- IF event.state === 'live' -->
-              <div ui:field="live" data-labeltype="live" class="{res.mainCss.label}">
-                live<!-- TODO <ui:text from='{i18n.eventHeader.event.live}' /> -->
+              <div ui:field="eventState" data-labeltype="live" class="{res.mainCss.label}">
               </div>
               <!-- IFEND event.state === 'live' -->
             </h2>

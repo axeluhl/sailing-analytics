@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
+import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 
@@ -30,7 +31,7 @@ public class EventHeader extends Composite {
     
     @UiField ImageElement eventLogo;
     @UiField SpanElement eventName;
-    @UiField DivElement live;
+    @UiField DivElement eventState;
     @UiField DivElement eventDate;
     @UiField DivElement eventVenue;
     @UiField SpanElement eventVenueName;
@@ -68,12 +69,20 @@ public class EventHeader extends Composite {
         eventLogo.setSrc(logoUrl);
         eventLogo.setAlt(event.getName());
         eventName.setInnerText(event.getName());
-        if(!event.isRunning()) {
-            hide(live);
+        
+        if(event.isFinished()) {
+            eventState.setInnerText(i18n.finished());
+            eventState.setAttribute("data-labeltype", "finished");
+        } else if(event.isRunning()) {
+            eventState.setInnerText(i18n.live());
+            eventState.setAttribute("data-labeltype", "live");
+        } else {
+            hide(eventState);
         }
+        
         VenueDTO venue = event.venue;
         if(venue != null && event.regattas.size() <=1) {
-//            TODO eventDate
+            eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
             eventVenueName.setInnerText(venue.getName());
 //            TODO eventVenueCountry
             if(event.getOfficialWebsiteURL() != null) {
