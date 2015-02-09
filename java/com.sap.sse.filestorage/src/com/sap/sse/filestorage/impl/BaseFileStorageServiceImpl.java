@@ -1,6 +1,7 @@
 package com.sap.sse.filestorage.impl;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import com.sap.sse.common.IsManagedByCache;
@@ -11,12 +12,12 @@ import com.sap.sse.filestorage.FileStorageServiceResolver;
 public abstract class BaseFileStorageServiceImpl implements FileStorageService {
     private static final long serialVersionUID = 7787261863522200165L;
     private final String name;
-    private final String description;
+    private final String descriptionKey;
     protected final Map<String, FileStorageServicePropertyImpl> propertiesByNameInInsertionOrder = new LinkedHashMap<>();
     
-    protected BaseFileStorageServiceImpl(String name, String description) {
+    protected BaseFileStorageServiceImpl(String name, String descriptionKey) {
         this.name = name;
-        this.description = description;
+        this.descriptionKey = descriptionKey;
     }
     
     protected void addProperties(FileStorageServicePropertyImpl... properties) {
@@ -31,8 +32,8 @@ public abstract class BaseFileStorageServiceImpl implements FileStorageService {
     }
     
     @Override
-    public String getDescription() {
-        return description;
+    public String getDescription(Locale locale) {
+        return FileStorageI18n.STRING_MESSAGES.get(locale, descriptionKey);
     }
 
     @Override

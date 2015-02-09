@@ -1,10 +1,13 @@
-package com.sap.sse.datamining.i18n;
+package com.sap.sse.i18n;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public interface DataMiningStringMessages {
+/**
+ * Allow server-side internationalization similar to GWT client-side by using property files.
+ */
+public interface ResourceBundleStringMessages {
 
     public String getResourceBaseName();
 

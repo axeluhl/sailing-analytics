@@ -234,7 +234,11 @@ Set the team image of a certain competitor
 
 **Verb:** ``POST``
 
-Binary data (not multipart) with ``Content-Type`` of ``image/jpeg`` or ``image/png``
+Binary data (not multipart)
+
+Headers:
+- ``Content-Type:`` ``image/jpeg`` or ``image/png``
+- ``Content-Length:`` set according to [HTTP spec](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.13)
 
 e.g.
 ```
