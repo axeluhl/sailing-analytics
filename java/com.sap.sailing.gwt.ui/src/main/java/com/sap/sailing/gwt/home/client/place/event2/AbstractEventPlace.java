@@ -4,10 +4,10 @@ import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 
-public abstract class EventPlace extends AbstractBasePlace {
+public abstract class AbstractEventPlace extends AbstractBasePlace {
     private final EventContext ctx;
 
-    protected EventPlace(EventContext ctx) {
+    protected AbstractEventPlace(EventContext ctx) {
         this.ctx = ctx;
     }
 
@@ -15,7 +15,7 @@ public abstract class EventPlace extends AbstractBasePlace {
         return ctx;
     }
 
-    public EventPlace(String eventUuidAsString) {
+    public AbstractEventPlace(String eventUuidAsString) {
         this.ctx = new EventContext();
         ctx.withId(eventUuidAsString);
     }

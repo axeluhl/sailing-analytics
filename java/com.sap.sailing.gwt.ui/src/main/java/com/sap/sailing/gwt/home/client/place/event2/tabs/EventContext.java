@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2.tabs;
 
+import com.sap.sailing.gwt.home.client.place.events.EventsClientFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 /**
@@ -10,15 +11,26 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
  */
 public class EventContext {
 
+    private EventsClientFactory clientFactory;
     private String eventId;
     private String leaderboardIdAsNameString;
+
+    /**
+     * Common state required by all tabs/ places in event
+     */
     private EventDTO eventDTO;
+
 
     public EventContext() {
     }
 
     public EventContext(EventDTO dto) {
         updateContext(dto);
+    }
+
+    public EventContext(EventsClientFactory clientFactory, EventContext ctx) {
+        updateContext(ctx.getEventDTO());
+        this.clientFactory = clientFactory;
     }
 
     public EventContext withId(String eventId) {
@@ -40,7 +52,11 @@ public class EventContext {
      */
     public EventContext updateContext(EventDTO dto) {
         this.eventDTO = dto;
-        withId(dto.id.toString());
+        if (eventDTO == null) {
+            withId(null);
+        } else {
+            withId(dto.id.toString());
+        }
         return this;
     }
 
@@ -56,6 +72,12 @@ public class EventContext {
         return leaderboardIdAsNameString;
     }
 
+    public EventsClientFactory getClientFactory() {
+        return clientFactory;
+    }
 
+    public void setClientFactory(EventsClientFactory clientFactory) {
+        this.clientFactory = clientFactory;
+    }
 
 }

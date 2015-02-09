@@ -3,10 +3,13 @@ package com.sap.sailing.gwt.home.client.place.event2;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.PlaceContextProvider;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.place.event2.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
@@ -50,8 +53,13 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
     }
 
     @Override
-    public void navigateTabsTo(EventPlace place) {
-        tabPanelUi.gotoPlace(place);
+    public void navigateTabsTo(AbstractEventPlace place) {
+        tabPanelUi.activatePlace(place);
+    }
+
+    @UiHandler("tabPanelUi")
+    public void onTabSelection(TabPanelPlaceSelectionEvent<?> e) {
+        currentPresenter.handleTabPlaceSelection((TabActivity<?, EventContext>) e.getSelectedActivity());
     }
 
 }

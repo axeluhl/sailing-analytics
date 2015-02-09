@@ -4,15 +4,17 @@ import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
 import com.sap.sailing.gwt.home.client.app.ApplicationClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventActivity extends AbstractActivity implements EventView.Presenter {
 
-    private final EventPlace currentPlace;
+    private final AbstractEventPlace currentPlace;
 
     private final EventContext ctx;
 
@@ -20,16 +22,17 @@ public class EventActivity extends AbstractActivity implements EventView.Present
 
     private ApplicationClientFactory clientFactory;
 
-    public EventActivity(EventPlace place, ApplicationClientFactory clientFactory) {
+    public EventActivity(AbstractEventPlace place, ApplicationClientFactory clientFactory) {
         this.currentPlace = place;
-        this.ctx = place.getCtx();
+        this.ctx = new EventContext(clientFactory, place.getCtx());
+
         this.clientFactory = clientFactory;
 
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        if (currentPlace.getCtx().getEventDTO() != null) {
+        if (ctx.getEventDTO() != null) {
             afterLoad(panel);
         } else {
             final UUID eventUUID = UUID.fromString(currentPlace.getCtx().getEventId());
@@ -66,6 +69,15 @@ public class EventActivity extends AbstractActivity implements EventView.Present
     public EventContext getCtx() {
 
         return ctx;
+    }
+
+    @Override
+    public void handleTabPlaceSelection(TabActivity<?, EventContext> selectedActivity) {
+
+        Place tabPlaceToGo = selectedActivity.placeToFire(ctx);
+
+        clientFactory.getPlaceController().goTo(tabPlaceToGo);
+        
     }
 
 }

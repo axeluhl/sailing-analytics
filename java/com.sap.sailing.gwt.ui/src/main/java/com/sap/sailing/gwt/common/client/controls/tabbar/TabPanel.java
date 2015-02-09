@@ -117,7 +117,7 @@ public class TabPanel<PLACECONTEXT> extends Composite {
      * @param placeToGo
      *            the given place.
      */
-    public void gotoPlace(Place placeToGo) {
+    public void activatePlace(Place placeToGo) {
 
         if (knownTabs.containsKey(placeToGo.getClass())) {
 

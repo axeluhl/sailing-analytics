@@ -51,6 +51,12 @@
 			<c:tabcontent title="Overview">
 				<tabs:overview.EventOverviewWidgetAndActivity />
 			</c:tabcontent>
+			<c:tabcontent title="Races">
+				<tabs:races.EventRacesWidgetAndActivity />
+			</c:tabcontent>
+			<c:tabcontent title="Leaderboard">
+				<tabs:leaderboard.EventLeaderboardWidgetAndActivity />
+			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 

@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.client.place.event2.tabs.overview;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.home.client.place.event2.EventPlace;
+import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 
-public class EventOverviewPlace extends EventPlace {
+public class EventOverviewPlace extends AbstractEventPlace {
     public EventOverviewPlace(String id) {
         super(id);
     }
