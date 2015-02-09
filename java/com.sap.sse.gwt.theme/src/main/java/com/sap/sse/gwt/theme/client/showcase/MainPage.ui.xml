@@ -14,6 +14,9 @@
 						<ux:item name="SAP Footer">
 							<ux:components.SAPFooterShowcase />
 						</ux:item>
+						<ux:item name="Loading Indicator">
+							<ux:components.LoadingIndicatorShowcase />
+						</ux:item>
 					</ux:Section>
 				</ux:stack>
 				<ux:stack>
