@@ -22,12 +22,13 @@ public class CompetitorImpl implements DynamicCompetitor {
     private transient Set<CompetitorChangeListener> listeners;
     private String email;
     
-    public CompetitorImpl(Serializable id, String name, Color color, DynamicTeam team, DynamicBoat boat) {
+    public CompetitorImpl(Serializable id, String name, Color color, String email, DynamicTeam team, DynamicBoat boat) {
         this.id = id;
         this.name = name;
         this.team = team;
         this.boat = boat;
         this.color = color;
+        this.email = email;
         this.listeners = new HashSet<CompetitorChangeListener>();
     }
     
@@ -120,9 +121,14 @@ public class CompetitorImpl implements DynamicCompetitor {
         return email;
     }
 
-    public void setEmail(String eMail) {
-        //TODO: add E-Mail verification from SecurityServiceImpl
-        this.email = eMail;
+    public void setEmail(String newEmail) {
+        final String oldEmail = this.email;
+        if (!Util.equalsWithNull(oldEmail, newEmail)) {
+            this.email = newEmail;
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.emailChanged(oldEmail, newEmail);
+            }
+        }
     }
     
     public boolean hasEmail(){

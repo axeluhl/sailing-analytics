@@ -15,11 +15,11 @@ import com.sap.sse.common.Color;
 
 public abstract class AbstractLeaderboardTest {
     public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(competitorName, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
-                new PersonImpl(competitorName, new NationalityImpl("GER"),
-                /* dateOfBirth */ null, "This is famous "+competitorName)),
-                new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
+        return new CompetitorImpl(competitorName, competitorName, Color.RED, null, new TeamImpl("STG", Collections.singleton(
+                        new PersonImpl(competitorName, new NationalityImpl("GER"),
+                        /* dateOfBirth */ null, "This is famous "+competitorName)),
+                        new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null));
     }
 
@@ -33,11 +33,11 @@ public abstract class AbstractLeaderboardTest {
     }
 
     public static CompetitorImpl createCompetitor(String competitorName, Serializable id) {
-        return new CompetitorImpl(id, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
-                new PersonImpl(competitorName, new NationalityImpl("GER"),
-                /* dateOfBirth */ null, "This is famous "+competitorName)),
-                new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
+        return new CompetitorImpl(id, competitorName, Color.RED, null, new TeamImpl("STG", Collections.singleton(
+                        new PersonImpl(competitorName, new NationalityImpl("GER"),
+                        /* dateOfBirth */ null, "This is famous "+competitorName)),
+                        new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null));
     }
 }

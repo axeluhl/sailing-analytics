@@ -68,8 +68,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         listeners.remove(listener);
     }
 
-    private Competitor createCompetitor(Serializable id, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
-        Competitor result = new CompetitorImpl(id, name, displayColor, team, boat);
+    private Competitor createCompetitor(Serializable id, String name, Color displayColor, String email, DynamicTeam team, DynamicBoat boat) {
+        Competitor result = new CompetitorImpl(id, name, displayColor, email, team, boat);
         addNewCompetitor(id, result);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
@@ -100,7 +100,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             try {
                 result = getExistingCompetitorById(competitorId); // try again, now while holding the write lock
                 if (result == null) {
-                    result = createCompetitor(competitorId, name, displayColor, team, boat);
+                    result = createCompetitor(competitorId, name, displayColor, email, team, boat);
                 }
             } finally {
                 LockUtil.unlockAfterWrite(lock);
