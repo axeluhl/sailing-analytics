@@ -27,6 +27,7 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, P
         this.context = context;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Void doInBackground(Util.Pair<Serializable, URL>... queries) {
         for (Util.Pair<Serializable, URL> query : queries) {

@@ -148,45 +148,37 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
      * </ol>
      */
     public String getStageImageURL() {
-        final String result;
-        if (imageURLs.isEmpty()) {
-            result = null;
-        } else {
-            Comparator<String> stageImageComparator = new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    final int result;
-                    if (o1.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
-                        if (o2.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
-                            result = compareBySize(o1, o2);
-                        } else {
-                            // o1 has stage indicator substring in its URL but o2 doesn't; o1 ranks greater
-                            result = 1;
-                        }
-                    } else {
-                        if (o2.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
-                            result = -1; // o1 does not and o2 does have stage indicator substring, so o2 ranks greater
-                        } else {
-                            // both don't have stage indicator; compare by size
-                            result = compareBySize(o1, o2);
-                        }
-                    }
-                    return result;
-                }
-
-                private int compareBySize(String o1, String o2) {
-                    final int result;
-                    final ImageSize o1Size = getImageSize(o1);
-                    final ImageSize o2Size = getImageSize(o2);
-                    result = (o1Size == null ? 0 : (o1Size.getWidth() * o1Size.getHeight()))
-                            - (o2Size == null ? 0 : (o2Size.getWidth() * o2Size.getHeight()));
-                    return result;
-                }
-            };
-            List<String> sortedImageURLs = new ArrayList<>(imageURLs);
-            Collections.sort(sortedImageURLs, stageImageComparator);
-            result = sortedImageURLs.get(sortedImageURLs.size() - 1);
+        String result = null;
+        List<String> imageCandidates = new ArrayList<String>();
+        for(String imageUrl: imageURLs) {
+            if(imageUrl.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
+                imageCandidates.add(imageUrl);
+            }
         }
+        if(imageCandidates.isEmpty()) {
+            for(String imageUrl: imageURLs) {
+                if(!imageUrl.toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
+                    imageCandidates.add(imageUrl);
+                }
+            }
+        }
+        if(!imageCandidates.isEmpty()) {
+            if(imageCandidates.size() == 1) {
+                result = imageCandidates.get(0);
+            } else {
+                Collections.sort(imageCandidates, new Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        ImageSize o1Size = getImageSize(o1);
+                        ImageSize o2Size = getImageSize(o2);
+                        return (o1Size == null ? 0 : (o1Size.getWidth() * o1Size.getHeight()))
+                                - (o2Size == null ? 0 : (o2Size.getWidth() * o2Size.getHeight()));
+                    }
+                });
+                result = imageCandidates.get(imageCandidates.size() - 1);
+            }
+        }
+
         return result;
     }
 

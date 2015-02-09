@@ -13,9 +13,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.util.SmartFutureCache;
-import com.sap.sailing.util.SmartFutureCache.EmptyUpdateInterval;
-import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
+import com.sap.sse.util.SmartFutureCache;
+import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
+import com.sap.sse.util.SmartFutureCache.UpdateInterval;
 
 public class SmartFutureCacheTest {
     @Test

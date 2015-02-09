@@ -200,7 +200,7 @@ if [[ "$@" == "release" ]]; then
 
     RELEASE_NOTES=""
     COMMIT_WEEK_COUNT=4
-	if [ $suppress_confirmation -eq 0 ]; then
+    if [ $suppress_confirmation -eq 0 ]; then
         echo ""
         echo "Please provide me with some notes about this release. You can add more than"
         echo "one line. Please include major changes or new features. After your notes I will"
@@ -357,7 +357,7 @@ if [[ "$@" == "local-deploy" ]]; then
         echo "WARNING: Bundle versions do not differ. Update not needed."
     fi
 
-	if [ $suppress_confirmation -eq 0 ]; then
+    if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "Do you really want to locally deploy bundle $OSGI_BUNDLE_NAME to $TARGET_DIR? (y/N): " answer
         case $answer in
         "Y" | "y") echo "Continuing";;
@@ -420,7 +420,7 @@ if [[ "$@" == "hot-deploy" ]]; then
         echo "WARNING: Bundle versions do not differ. Update not needed."
     fi
 
-	if [ $suppress_confirmation -eq 0 ]; then
+    if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $SERVERS_HOME/$active_branch? (y/N): " answer
         case $answer in
         "Y" | "y") echo "Continuing";;
@@ -571,13 +571,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     # back to root!
     cd $PROJECT_HOME
 
-	if [ $testing -eq 0 ]; then
+    if [ $testing -eq 0 ]; then
 	    echo "INFO: Skipping tests"
 	    extra="$extra -Dmaven.test.skip=true -DskipTests=true"
     else
         extra="$extra -DskipTests=false"
         # TODO: Think about http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html
-	fi
+    fi
 
     if [ $android -eq 0 ] && [ $gwtcompile -eq 0 ] && [ $testing -eq 0 ]; then
         parallelexecution=1
@@ -602,8 +602,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         TRACKING_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
-
-        
     else
         echo "INFO: Deactivating mobile modules"
         extra="$extra -P !with-mobile"
@@ -653,7 +651,7 @@ fi
 
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
-	if [ $suppress_confirmation -eq 0 ]; then
+    if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "Currently branch $active_branch is active and I will deploy to $ACDIR. Do you want to proceed with $@ (y/N): " answer
         case $answer in
         "Y" | "y") echo "Continuing";;
@@ -777,7 +775,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
     REMOTE_SERVER="$REMOTE_HOME/$SERVER"
 
-	if [ $suppress_confirmation -eq 0 ]; then
+    if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "I will deploy the current GIT branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
         case $answer in
         "Y" | "y") OK=1;;
@@ -829,7 +827,7 @@ if [[ "$@" == "remote-deploy" ]]; then
 
     echo "Deployed successfully. I did NOT change any configuration (no env.sh or config.ini or jetty.xml adaption), only code!"
 
-	if [ $suppress_confirmation -eq 0 ]; then
+    if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "Do you want me to restart the remote server (y/n)? " answer
         case $answer in
         "Y" | "y") OK=1;;

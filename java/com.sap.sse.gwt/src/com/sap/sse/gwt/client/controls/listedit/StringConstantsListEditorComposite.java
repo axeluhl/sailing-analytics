@@ -121,7 +121,8 @@ public class StringConstantsListEditorComposite extends ListEditorComposite<Stri
         }
         
         protected ListBox createListBox() {
-            ListBox result = new ListBox(false);
+            ListBox result = new ListBox();
+            result.setMultipleSelect(false);
             updateSelectionListBox(result, availableConstantValuesToAdd);
             return result;
         }

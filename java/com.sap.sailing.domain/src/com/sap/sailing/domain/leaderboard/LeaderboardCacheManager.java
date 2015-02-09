@@ -15,16 +15,16 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.WithNationality;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.util.impl.ConcurrentWeakHashMap;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Color;
+import com.sap.sse.concurrent.ConcurrentWeakHashMap;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * Manages a {@link LeaderboardCache}. When a {@link Leaderboard} is {@link LeaderboardCache#add added} to the cache, it

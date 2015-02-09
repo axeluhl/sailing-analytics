@@ -12,12 +12,12 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
  * Re-calculating the maximum speed over a {@link GPSFixTrack} is time consuming. When the track grows the way it
@@ -71,6 +71,13 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         track.addListener(this);
         cache = new HashMap<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>>();
         lock = new NamedReentrantReadWriteLock(MaxSpeedCache.class.getSimpleName()+" for track of "+track.getTrackedItem(), /* fair */ false);
+    }
+    
+    /**
+     * For testing purposes, mainly. Subclasses may use this to create, manage and monitor specific locking states.
+     */
+    protected NamedReentrantReadWriteLock getLock() {
+        return lock;
     }
 
     /**
@@ -173,8 +180,16 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         if (!to.before(from)) {
             result = cacheLookup(from, to);
             if (result == null) {
-                result = computeMaxSpeed(from, to);
-                cache(from, to, result);
+                LockUtil.lockForWrite(lock);
+                try {
+                    // need to run both, the re-calculation as well as the caching, under the write lock because otherwise
+                    // an invocation of gpsFixReceived(...) may cut in between, obtain the write lock and perform invalidations
+                    // that would have needed to invalidate the value recalculated.
+                    result = computeMaxSpeed(from, to);
+                    cache(from, to, result);
+                } finally {
+                    LockUtil.unlockAfterWrite(lock);
+                }
             }
         }
         return result;
@@ -221,7 +236,11 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         return result;
     }
 
-    private void cache(TimePoint from, TimePoint to, Util.Pair<FixType, Speed> fixAtMaxSpeed) {
+    /**
+     * This method is protected mostly for testing reasons such that a test can subclass this method to intercept
+     * and react or suspend the caching at an interesting point in time to force a certain ordering of things.
+     */
+    protected void cache(TimePoint from, TimePoint to, Util.Pair<FixType, Speed> fixAtMaxSpeed) {
         LockUtil.lockForWrite(lock);
         try {
             addEntryToMap(from, to, fixAtMaxSpeed, cache);
@@ -248,9 +267,11 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
     }
     
     /**
+     * This method is protected for test subclasses to intercept calls.
+     * 
      * @return <code>null</code>, if no fix exists in the interval specified
      */
-    private Util.Pair<FixType, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
+    protected Util.Pair<FixType, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
         track.lockForRead();
         try {
             // fetch all fixes on this leg so far and determine their maximum speed

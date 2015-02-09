@@ -42,10 +42,10 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.WithValidityCache;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
     private static final Logger logger = Logger.getLogger(GPSFixTrackImpl.class.getName());
@@ -185,13 +185,17 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
         this.listeners = new GPSTrackListeners<ItemType, FixType>();
         this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
-        this.maxSpeedCache = new MaxSpeedCache<ItemType, FixType>(this);
+        this.maxSpeedCache = createMaxSpeedCache();
+    }
+
+    protected MaxSpeedCache<ItemType, FixType> createMaxSpeedCache() {
+        return new MaxSpeedCache<ItemType, FixType>(this);
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         distanceCache = new DistanceCache(trackedItem.toString());
-        maxSpeedCache = new MaxSpeedCache<ItemType, FixType>(this);
+        maxSpeedCache = createMaxSpeedCache();
     }
     
     @Override
@@ -612,8 +616,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     }
                 }
             }
-            if (logger.isLoggable(Level.FINE) && (estimatedSpeedCacheHits + estimatedSpeedCacheMisses) % 1000 == 0) {
-                logger.fine("estimated speed cache hits/misses: "+estimatedSpeedCacheHits+"/"+estimatedSpeedCacheMisses);
+            if (logger.isLoggable(Level.FINEST) && (estimatedSpeedCacheHits + estimatedSpeedCacheMisses) % 1000 == 0) {
+                logger.finest("estimated speed cache hits/misses: "+estimatedSpeedCacheHits+"/"+estimatedSpeedCacheMisses);
             }
             return result;
         } finally {

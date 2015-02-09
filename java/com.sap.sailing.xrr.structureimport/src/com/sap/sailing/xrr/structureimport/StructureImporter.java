@@ -29,10 +29,8 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.impl.AbstractColor;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
@@ -49,7 +47,9 @@ import com.sap.sailing.xrr.structureimport.buildstructure.GuessFleetOrderingStra
 import com.sap.sailing.xrr.structureimport.buildstructure.RegattaStructure;
 import com.sap.sailing.xrr.structureimport.buildstructure.Series;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberStrategy;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sapsailing.xrr.structureimport.eventimport.EventImport;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 

@@ -17,14 +17,12 @@ import com.sap.sse.common.TimePoint;
 public class TracTracStartTimeUpdateHandler extends UpdateHandler implements StartTimeChangedListener {
     
     private static final String ACTION = "update_race_start_time";
-    private final TracTracStartTimeResetHandler resetHandler;
     
     private final static Logger logger = Logger.getLogger(TracTracStartTimeUpdateHandler.class.getName());
     private final static String FIELD_RACE_START_TIME = "race_start_time";
     
     public TracTracStartTimeUpdateHandler(URI updateURI, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
         super(updateURI, ACTION, tracTracUsername, tracTracPassword, tracTracEventId, raceId);
-        resetHandler = new TracTracStartTimeResetHandler(updateURI, tracTracUsername, tracTracPassword, tracTracEventId, raceId);
     }
 
     @Override
@@ -34,8 +32,20 @@ public class TracTracStartTimeUpdateHandler extends UpdateHandler implements Sta
         }
         
         if (newStartTime == null) {
-            // reset start time with TracTrac
-            resetHandler.startTimeChanged(null);
+            /*
+             * Do not reset start time based on request by Jorge from TracTrac:
+             * 
+             * """
+             * We have detected that when you want to update the race start time your
+             * system sends before a message to reset the race start time. When your
+             * system invokes the first service our system changes the race start time
+             * to null and this value causes some secondary effects in our side.
+             * 
+             * Can you just send the update_race_start_time without the
+             * reset_race_start_time? The reset_race_start_time service has to be used
+             * if you want to set the value to null.
+             * """
+             */
         } else {
             HashMap<String, String> additionalParameters = new HashMap<String, String>();
             additionalParameters.put(FIELD_RACE_START_TIME, String.valueOf(newStartTime.asMillis()));

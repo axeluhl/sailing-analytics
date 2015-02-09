@@ -11,8 +11,8 @@ import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImport
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * This lock is used to allow only one master data import operation be performed at once. It also keeps information

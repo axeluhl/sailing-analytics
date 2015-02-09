@@ -112,8 +112,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
                 e.printStackTrace();
             }
         }
-        // TODO Start live and stored data subscribers
-        // test cases need to start the thread calling startController
+        // test cases need to start the thread calling addListenersForStoredDataAndStartController
         // after adding their listeners
     }
 

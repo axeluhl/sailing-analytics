@@ -9,8 +9,8 @@ import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
+import com.sap.sse.common.TypeBasedServiceFinder;
 
 public class GPSFixImporterRegistration {
     private static Dictionary<String, String> getDict(String type) {
