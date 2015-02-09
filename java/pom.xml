@@ -19,6 +19,7 @@
 		<module>com.sap.sse.shared.android</module>
 		<module>com.sap.sse.mongodb</module>
 		<module>com.sap.sse.gwt</module>
+		<module>com.sap.sse.gwt.test</module>
 		<module>com.sap.sse.gwt.adminconsole</module>
 		<module>com.sap.sse.datamining</module>
 		<module>com.sap.sse.datamining.shared</module>
