@@ -46,7 +46,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sse.security.common,
  com.sap.sse.filestorage,
- org.apache.servicemix.bundles.zxing;bundle-version="3.1.0"
+ com.sap.sse.mail
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.polars,
