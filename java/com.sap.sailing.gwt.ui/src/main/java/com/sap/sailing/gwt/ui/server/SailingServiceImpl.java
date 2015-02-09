@@ -446,7 +446,6 @@ import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
-import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -471,8 +470,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
-    
-    private final ServiceTracker<MailService, MailService> mailServiceTracker;
 
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -550,7 +547,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 .getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory());
         scoreCorrectionProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context,
                 ScoreCorrectionProvider.class);
-        mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
                 .createDomainObjectFactory(mongoObjectFactory.getDatabase(), getTracTracAdapter()
                         .getTracTracDomainFactory());
@@ -617,10 +613,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     protected TracTracAdapter getTracTracAdapter() {
         return getTracTracAdapterFactory().getOrCreateTracTracAdapter(baseDomainFactory);
-    }
-    
-    protected MailService getMailService() {
-        return mailServiceTracker.getService();
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
