@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.server;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -503,8 +500,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final QuickRanksLiveCache quickRanksLiveCache;
     
-    private final Properties mailProperties;
-    
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
@@ -559,20 +554,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
-        
-        final String jettyHome = System.getProperty("jetty.home", "configuration");
-        final File propertiesDir = new File(jettyHome).getParentFile();
-        File propertiesfile = new File(propertiesDir, "security.properties");
-        mailProperties = new Properties();
-        try {
-            mailProperties.load(new FileReader(propertiesfile));
-        } catch (IOException ioe) {
-            try {
-                logger.log(Level.SEVERE, "Couldn't read security properties from "+propertiesfile.getCanonicalPath(), ioe);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Couldn't read security properties and could net fetch canonical path");
-            }
-        }
     }
     
     /**
