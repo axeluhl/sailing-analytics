@@ -5370,7 +5370,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             try {
                 SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService()
                         .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
-                                LegType.UPWIND, Tack.STARBOARD);
+                                LegType.UPWIND, Tack.STARBOARD, false);
                 pointsForUpwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
                         averageUpwindStarboardMovingAverage.getObject().getKnots()));
 
@@ -5383,7 +5383,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             try {
                 SpeedWithBearingWithConfidence<Void> averageUpwindPortMovingAverage = getService()
                         .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
-                                LegType.UPWIND, Tack.PORT);
+                                LegType.UPWIND, Tack.PORT, false);
                 pointsForUpwindPortAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
                         averageUpwindPortMovingAverage.getObject().getKnots()));
 
@@ -5396,7 +5396,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             try {
                 SpeedWithBearingWithConfidence<Void> averageDownwindStarboardMovingAverage = getService()
                         .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
-                                LegType.DOWNWIND, Tack.STARBOARD);
+                                LegType.DOWNWIND, Tack.STARBOARD, false);
                 pointsForDownwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
                         averageDownwindStarboardMovingAverage.getObject().getKnots()));
 
@@ -5409,7 +5409,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             try {
                 SpeedWithBearingWithConfidence<Void> averageDownwindPortMovingAverage = getService()
                         .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
-                                LegType.DOWNWIND, Tack.PORT);
+                                LegType.DOWNWIND, Tack.PORT, false);
                 pointsForDownwindPortAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
                         averageDownwindPortMovingAverage.getObject().getKnots()));
 

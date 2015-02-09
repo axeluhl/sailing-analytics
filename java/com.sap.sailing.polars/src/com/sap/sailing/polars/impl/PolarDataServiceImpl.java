@@ -91,8 +91,8 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        return polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
+            Speed windSpeed, LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
+        return polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack, useRegressionForSpeed);
     }
 
 

@@ -43,4 +43,13 @@ public class CubicSpeedRegressions {
         regression.addData(fix.getWindSpeed().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
     }
 
+    public double estimateSpeedInKnots(LegType legType, Tack tack, double windSpeedInKnots) {
+        double[] coeffs =  regressions.get(new Pair<LegType, Tack>(legType, tack)).getCoefficiants();
+        double resultSum = 0;
+        for (int i = 0; i < coeffs.length; i++) {
+            resultSum = resultSum + coeffs[i] * Math.pow(windSpeedInKnots, i);
+        }
+        return resultSum;
+    }
+
 }

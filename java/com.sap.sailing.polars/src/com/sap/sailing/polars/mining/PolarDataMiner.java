@@ -218,7 +218,7 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
 
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
+            Speed windSpeed, LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
+        return incrementalRegressionProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack, useRegressionForSpeed);
     }
 }

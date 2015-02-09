@@ -29,7 +29,7 @@ import com.sap.sse.common.Util.Pair;
  * This service uses a {@link PolarSheetAnalyzer} for more advanced analysis. Its methods are facaded in this interface for
  * central access.<p>
  * The interesting methods for a client are {@link #getSpeed(BoatClass, Speed, Bearing, boolean)} if data for a specific angle is
- * needed and {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)} 
+ * needed and {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack, boolean)} 
  * which also returns the average angle for the parameters provided.
  * 
  * @author Frederik Petersen (D054528)
@@ -59,6 +59,7 @@ public interface PolarDataService {
      *            courses yet. Use getSpeed for the desired angle to get rawer information on other courses for now.
      * @param tack
      *            Polar data can vary depending on the tack the boat is on.
+     * @param useRegressionForSpeed TODO
      * @return The estimated average speed of a boat for the supplied parameters with the estimated average bearing to
      *         the true wind and a confidence which consists of the confidences of the wind speed, and boat speed sources (50%)
      *         and a confidence calculated using the amount of underlying fixes (50%). 0 <= confidence < 1<br/>
@@ -77,7 +78,7 @@ public interface PolarDataService {
      *             If there is not enough data to supply a value with some kind of significance.
      */
     SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
-            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
+            LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException;
 
 
     /**

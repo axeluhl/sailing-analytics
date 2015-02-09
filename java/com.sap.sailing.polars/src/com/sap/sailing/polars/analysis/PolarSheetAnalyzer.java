@@ -9,5 +9,5 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 
 public interface PolarSheetAnalyzer {
     SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
-			Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
+			Speed windSpeed, LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException;
 }

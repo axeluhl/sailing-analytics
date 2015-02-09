@@ -31,7 +31,8 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
     }
 
     @Override
-    public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass, Speed windSpeed, LegType legType, Tack tack)
+    public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
+            Speed windSpeed, LegType legType, Tack tack, boolean useRegression)
             throws NotEnoughDataHasBeenAddedException {
         final int startAngleInclusive;
         final int endAngleExclusive;
@@ -48,11 +49,11 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
             startAngleInclusive = 270;
             endAngleExclusive = 360;
         } else {
-            throw new IllegalArgumentException("Leg type must be "+LegType.UPWIND.name()+
-                    " or "+LegType.DOWNWIND.name()+" but was "+legType.name());
+            throw new IllegalArgumentException("Leg type must be " + LegType.UPWIND.name() + " or "
+                    + LegType.DOWNWIND.name() + " but was " + legType.name());
         }
-        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed, startAngleInclusive,
-                endAngleExclusive);
+        SpeedWithBearingWithConfidence<Void> speedWithBearing = estimateAnglePeakAndAverageSpeed(boatClass, windSpeed,
+                startAngleInclusive, endAngleExclusive);
         return speedWithBearing;
     }
     

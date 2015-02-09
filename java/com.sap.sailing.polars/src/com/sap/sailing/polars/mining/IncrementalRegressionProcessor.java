@@ -208,7 +208,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround;
             try {
                 averageSpeedAndCourseOverGround = getAverageSpeedAndCourseOverGround(
-                        boatClass, windSpeed, legType, tack);
+                        boatClass, windSpeed, legType, tack, false);
                 averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(windSpeed,
                         averageSpeedAndCourseOverGround));
             } catch (NotEnoughDataHasBeenAddedException e) {
@@ -242,10 +242,19 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
 
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
+            Speed windSpeed, LegType legType, Tack tack, boolean useCubicRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
         Double averageAngle = averageAngleContainers.get(new Pair<>(legType, tack)).getAverageAngleDeg(
                 boatClass, windSpeed);
-        return estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
+        SpeedWithBearingWithConfidence<Void> result;
+        if (useCubicRegressionForSpeed) {
+            DegreeBearingImpl angleToTheWind = new DegreeBearingImpl(averageAngle);
+            SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(cubicRegressions.get(boatClass)
+                    .estimateSpeedInKnots(legType, tack, windSpeed.getKnots()), angleToTheWind);
+            result = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, /* FIXME */0.5, null);
+        } else {
+            result = estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
+        }
+        return result;
     }
 
     private SpeedWithBearingWithConfidence<Void> estimateSpeedForAverageAngle(BoatClass boatClass, Speed windSpeed,
