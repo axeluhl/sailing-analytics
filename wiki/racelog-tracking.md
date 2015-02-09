@@ -7,4 +7,5 @@ The term itself should be revised at some point, and currently refers to the tec
 [[Server Architecture|wiki/racelog-tracking/server]]
 
 ## App Architecture
-[[App Architecture|wiki/racelog-tracking/app]]
+- [current Tracking App](wiki/tracking-app)
+- [old prototype](wiki/racelog-tracking/app)
