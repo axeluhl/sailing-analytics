@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
-import com.google.gwt.http.client.URL;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+import com.sap.sse.common.URLEncoder;
 
 /**
  * Shared between GWT and Android. Used for creating and deciphering the URL encoded by the QRCode, which gives the
@@ -40,20 +40,14 @@ public class DeviceMappingConstants {
 
     @Deprecated
     static final String APK_PATH = "/apps/com.sap.sailing.android.tracking.app.apk";
-    
-    public static String encode(String value) {
-        //pathSegment instead of queryString, so that ' ' is encoded as '%20'
-        return URL.encodePathSegment(value);
-    }
-    
+
     public static String getDeviceMappingForRegattaLogUrl(String serverUrlWithoutTrailingSlash, String eventId,
             String leaderboardName, String mappedItemType, String mappedItemId) {
-        return serverUrlWithoutTrailingSlash + URL_BASE + "?"
-                + URL_EVENT_ID + "=" + encode(eventId) + "&"
-                + URL_LEADERBOARD_NAME + "=" + encode(leaderboardName)
-                + "&" + mappedItemType + "=" + encode(mappedItemId);
+        return URLEncoder.encode(serverUrlWithoutTrailingSlash + URL_BASE + "?" + URL_EVENT_ID + "=" + eventId + "&"
+                + URL_LEADERBOARD_NAME + "=" + leaderboardName + "&" + mappedItemType + "="
+                + mappedItemId);
     }
-    
+
     @Deprecated
     public static String getDeviceMappingForRaceLogUrl(String serverUrlWithoutTrailingSlash, String leaderboardName,
             String raceColumnName, String fleetName, String mappedItemType, String mappedItemId, long fromMillis,
@@ -61,12 +55,11 @@ public class DeviceMappingConstants {
         if (fromMillis > toMillis) {
             throw new QRCodeURLCreationException("from can't lie after to");
         }
-        return serverUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
-                + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + encode(leaderboardName) + "&"
-                + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + encode(raceColumnName)
-                + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + encode(fleetName)
-                + "&" + mappedItemType + "=" + encode(mappedItemId)
-                + "&" + DeviceMappingConstants.URL_FROM_MILLIS + "=" + fromMillis
-                + "&" + DeviceMappingConstants.URL_TO_MILLIS + "=" + toMillis;
+        return URLEncoder.encode(serverUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
+                + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + leaderboardName + "&"
+                + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
+                + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName + "&" + mappedItemType + "="
+                + mappedItemId + "&" + DeviceMappingConstants.URL_FROM_MILLIS + "=" + fromMillis + "&"
+                + DeviceMappingConstants.URL_TO_MILLIS + "=" + toMillis);
     }
 }
