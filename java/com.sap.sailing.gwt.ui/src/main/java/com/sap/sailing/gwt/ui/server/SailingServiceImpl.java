@@ -5421,11 +5421,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, UUID eventId,
-            String leaderboardName, String localeInfoName) throws MailException {
-        Event event = getService().getEvent(eventId);
+    public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
+            String leaderboardName, Set<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
+        Event event = getService().getEvent(eventDto.id);
+        Set<Competitor> competitors = new HashSet<>();
+        for (CompetitorDTO c : competitorDtos) {
+            competitors.add(getCompetitor(c));
+        }
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
-                getLocale(localeInfoName));
+                competitors, getLocale(localeInfoName));
     }
 }

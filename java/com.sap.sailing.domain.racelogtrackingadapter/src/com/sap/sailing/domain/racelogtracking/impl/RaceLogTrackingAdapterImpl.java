@@ -357,11 +357,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     
     @Override
     public void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
-            String serverUrlWithoutTrailingSlash, Locale locale) throws MailException {
-        //TODO check bug 2587
-        Iterable<Competitor> competitors = leaderboard.getAllCompetitors();
-
-
+            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException {
         StringBuilder occuredExceptions = new StringBuilder();
 
         for (Competitor competitor : competitors){

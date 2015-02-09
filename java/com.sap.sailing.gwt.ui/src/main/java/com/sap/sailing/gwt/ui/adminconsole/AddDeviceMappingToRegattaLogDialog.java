@@ -17,11 +17,11 @@ import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.common.client.GenericListBox;
-import com.sap.sailing.gwt.ui.common.client.GenericListBox.ValueBuilder;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.GenericListBox;
+import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 
 public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog {
     private DeviceMappingQRCodeWidget qrWidget;

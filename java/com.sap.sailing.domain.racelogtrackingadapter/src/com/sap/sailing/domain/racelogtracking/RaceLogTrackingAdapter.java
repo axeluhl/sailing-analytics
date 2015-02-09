@@ -101,8 +101,8 @@ public interface RaceLogTrackingAdapter {
     void registerCompetitors(RacingEventService service, RegattaLog regattaLog, Set<Competitor> competitors);
 
     /**
-     * Invite all competitors known in the leaderboard for tracking via the Tracking App by sending out emails.
+     * Invite competitors for tracking via the Tracking App by sending out emails.
      */
     void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
-            String serverUrlWithoutTrailingSlash, Locale locale) throws MailException;
+            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException;
 }
