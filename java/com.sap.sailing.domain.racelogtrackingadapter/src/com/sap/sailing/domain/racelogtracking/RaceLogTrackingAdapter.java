@@ -25,7 +25,7 @@ import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.mail.MailException;
+import com.sap.sse.common.mail.MailException;
 
 public interface RaceLogTrackingAdapter {
     /**

@@ -87,9 +87,9 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
-import com.sap.sse.mail.MailException;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to

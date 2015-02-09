@@ -27,7 +27,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sse.common.Util;
-import com.sap.sse.mail.MailException;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;

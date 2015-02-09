@@ -76,8 +76,8 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.qrcode.QRCodeGenerationUtil;
-import com.sap.sse.mail.MailException;
 import com.sap.sse.mail.MailService;
 
 public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {

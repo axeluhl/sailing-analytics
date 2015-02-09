@@ -2,6 +2,7 @@ package com.sap.sse.mail;
 
 import javax.mail.Multipart;
 
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.impl.ReplicableMailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
