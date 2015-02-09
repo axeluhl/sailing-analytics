@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Could not determine the version of your GWT SDK; using the module DTD 
 	from GWT 1.6.4. You may want to change this. -->
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.4.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.4.0/distro-source/core/src/gwt-module.dtd">
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
 <module>
-	<stylesheet src="../base.css" />
-
 	<!-- Inherit the core Web Toolkit stuff. -->
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.http.HTTP"/>
-
-	<stylesheet src="../LeaderboardNewHome.css" />
 
 	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name='com.sap.sailing.gwt.FormFactor'/>
@@ -35,10 +31,10 @@
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
   	<inherits name='com.google.gwt.maps.Maps' />
-	
+  	
   	<!--  Bootstrap API -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
+  	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+  	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
   	
 	<!-- Default is Tablet/Desktop -->
 	<replace-with
@@ -57,7 +53,6 @@
 	</replace-with>
 
 	<!-- Specify the app entry point class. -->
-	<entry-point class='com.sap.sailing.gwt.home.client.HomeEntryPoint' />
 
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de" />
@@ -70,13 +65,21 @@
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 
 	<set-property name="gwt.logging.logLevel" value="INFO"/>
 	
-	<set-property name="gwt.logging.firebugHandler" value="ENABLED" />
 	<set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
 	<set-property name="gwt.logging.consoleHandler" value="ENABLED" />
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
-	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
+
+	<add-linker name="xsiframe" />
+	<set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
+	<set-configuration-property name="devModeRedirectEnabled" value="true" />
+    <set-property name="compiler.useSourceMaps" value="true" />
 	
+	
+	<source path='home' />
+	<source path='common' />
+	<source path='idangerous' />
+		
 	<source path='ui/common' />
 	<source path='ui/client' />
 	<source path='ui/shared' />
@@ -87,7 +90,8 @@
 	<source path='ui/masterdataimport' />
 	<source path='ui/regattaoverview' />
 	<source path='ui/leaderboard'/>
-	<source path='home' />
-	<source path='common' />
-	<source path='idangerous' />
+	
+	
+		<entry-point class='com.sap.sailing.gwt.home.client.HomeEntryPoint' />
+	
 </module>

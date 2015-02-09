@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.sap.sailing.util.impl.ConcurrentWeakHashMap;
+import com.sap.sse.concurrent.ConcurrentWeakHashMap;
 
 /**
  * Tests the class {@link ConcurrentWeakHashMap}.

@@ -1,12 +1,14 @@
 package com.sap.sailing.domain.common.test;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
 
 public class TimePointTest {
     @Test

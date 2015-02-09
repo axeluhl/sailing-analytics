@@ -14,9 +14,9 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
-import com.sap.sailing.util.SmartFutureCache;
-import com.sap.sailing.util.SmartFutureCache.AbstractCacheUpdater;
-import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
+import com.sap.sse.util.SmartFutureCache;
+import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
+import com.sap.sse.util.SmartFutureCache.UpdateInterval;
 
 /**
  * Calculating the quick ranks for many clients for a live race is expensive and therefore benefits from consolidation

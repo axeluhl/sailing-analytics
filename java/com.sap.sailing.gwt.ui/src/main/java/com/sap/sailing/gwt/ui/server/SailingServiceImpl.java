@@ -126,7 +126,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
@@ -193,12 +192,9 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
-import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -408,9 +404,13 @@ import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.BuildVersion;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -419,6 +419,11 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.filestorage.FileStorageService;
+import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -465,7 +470,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
 
-    private final com.sap.sailing.domain.common.CountryCodeFactory countryCodeFactory;
+    private final com.sap.sse.common.CountryCodeFactory countryCodeFactory;
 
     private final Executor executor;
     
@@ -516,7 +521,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         .getTracTracDomainFactory());
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
-        countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
+        countryCodeFactory = com.sap.sse.common.CountryCodeFactory.INSTANCE;
         leaderboardDifferenceCacheByIdPair = new LinkedHashMap<com.sap.sse.common.Util.Pair<String, String>, IncrementalLeaderboardDTO>(LEADERBOARD_DIFFERENCE_CACHE_SIZE, 0.75f, /* accessOrder */ true) {
             private static final long serialVersionUID = 3775119859130148488L;
             @Override
@@ -1048,7 +1053,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
                     raceRecord.getTrackingStartTime().asDate(), 
                     raceRecord
-                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(),
+                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime() == null ? null : raceRecord.getRaceStartTime().asDate(),
                     raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getRaceVisibility(), raceRecord.getJsonURL().toString(),
                     hasRememberedRegatta(raceRecord.getID())));
         }
@@ -4520,21 +4525,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) {
+        Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
     	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
-    	//new competitor
-    	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty()) {
+    	final CompetitorDTO result;
+    	// new competitor
+    	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
     	    BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
     	    DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
     	    DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
     	    DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
-    	    return getBaseDomainFactory().convertToCompetitorDTO(getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(), competitor.getColor(),
-    				team, boat));
-    	}
-    	
-        return getBaseDomainFactory().convertToCompetitorDTO(
-                getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
-                competitor.getColor(), competitor.getSailID(), nationality)));
+            result = getBaseDomainFactory().convertToCompetitorDTO(
+                    getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
+                            competitor.getColor(), team, boat));
+        } else {
+            result = getBaseDomainFactory().convertToCompetitorDTO(
+                    getService().apply(
+                            new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
+                                    .getColor(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
+        }
+        return result;
     }
 
     @Override
@@ -5417,5 +5427,60 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 pointsForDownwindPortAverageSpeedMovingAverage, pointsForDownwindPortAverageConfidence);
 
         return data;
+    }
+    
+    private FileStorageService getFileStorageService(String name) {
+        if (name == null || name.equals("")) {
+            return null;
+        }
+        return getService().getFileStorageManagementService().getFileStorageService(name);
+    }
+
+    @Override
+    public FileStorageServiceDTO[] getAvailableFileStorageServices() {
+        List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
+        for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
+            serviceDtos.add(FileStorageServiceDTOUtils.convert(s));
+        }
+        return serviceDtos.toArray(new FileStorageServiceDTO[0]);
+    }
+
+    @Override
+    public void setFileStorageServiceProperties(String serviceName, Map<String, String> properties) {
+        for (Entry<String, String> p : properties.entrySet()) {
+            try {
+                getService().getFileStorageManagementService()
+                    .setFileStorageServiceProperty(getFileStorageService(serviceName), p.getKey(), p.getValue());
+            } catch (NoCorrespondingServiceRegisteredException | IllegalArgumentException e) {
+                //ignore, doing refresh afterwards anyways
+            }
+        }
+    }
+
+    @Override
+    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName) {
+        try {
+            FileStorageService service = getFileStorageService(serviceName);
+            if (service != null) {
+                service.testProperties();
+            }
+        } catch (InvalidPropertiesException e) {
+            return FileStorageServiceDTOUtils.convert(e);
+        }
+        return null;
+    }
+
+    @Override
+    public void setActiveFileStorageService(String serviceName) {
+        getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
+    }
+
+    @Override
+    public String getActiveFileStorageServiceName() {
+        try {
+            return getService().getFileStorageManagementService().getActiveFileStorageService().getName();
+        } catch (NoCorrespondingServiceRegisteredException e) {
+            return null;
+        }
     }
 }

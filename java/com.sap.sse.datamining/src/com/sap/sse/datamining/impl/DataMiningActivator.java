@@ -19,7 +19,7 @@ import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.impl.functions.FunctionManager;
-import com.sap.sse.datamining.impl.i18n.DataMiningStringMessagesImpl;
+import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 public class DataMiningActivator implements BundleActivator {
 
@@ -40,7 +40,7 @@ public class DataMiningActivator implements BundleActivator {
         FunctionManager functionManager = new FunctionManager();
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
         dataMiningServer = new DataMiningServerImpl(executor, functionManager, functionManager, dataRetrieverChainDefinitionRegistry);
-        dataMiningServer.addStringMessages(new DataMiningStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningActivator.class.getClassLoader()));
+        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningActivator.class.getClassLoader()));
         
         serviceRegistrations = new HashSet<>();
     }

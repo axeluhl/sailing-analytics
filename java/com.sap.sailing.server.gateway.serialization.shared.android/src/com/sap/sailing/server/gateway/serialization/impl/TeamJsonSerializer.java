@@ -28,19 +28,15 @@ public class TeamJsonSerializer implements JsonSerializer<Team> {
     public JSONObject serialize(Team team) {
         JSONObject result = new JSONObject();
         result.put(FIELD_NAME, team.getName());
-        
         result.put(FIELD_COACH, personJsonSerializer.serialize(team.getCoach()));
-        
         JSONArray jsonSailors = new JSONArray();
         for (Person sailor : team.getSailors()) {
             jsonSailors.add(personJsonSerializer.serialize(sailor));
         }
         result.put(FIELD_SAILORS, jsonSailors);
-        
-        if (team.getImage() != null){
-        	result.put(FIELD_IMAGE_URI, team.getImage().toString());
+        if (team.getImage() != null) {
+            result.put(FIELD_IMAGE_URI, team.getImage().toString());
         }
-        
         return result;
     }
 }

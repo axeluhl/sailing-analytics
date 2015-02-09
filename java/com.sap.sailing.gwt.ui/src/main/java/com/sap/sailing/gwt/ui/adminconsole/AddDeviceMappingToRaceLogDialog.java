@@ -108,13 +108,13 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                 new SelectionChangedHandler() {
                     @Override
                     public void onSelectionChange(MarkDTO mark) {
-                        qrWidget.setMappedItem(DeviceMappingConstants.MARK_ID_AS_STRING, mark.getIdAsString());
+                        qrWidget.setMappedItem(DeviceMappingConstants.URL_MARK_ID_AS_STRING, mark.getIdAsString());
                         validate();
                     }
 
                     @Override
                     public void onSelectionChange(CompetitorDTO competitor) {
-                        qrWidget.setMappedItem(DeviceMappingConstants.COMPETITOR_ID_AS_STRING,
+                        qrWidget.setMappedItem(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                                 competitor.getIdAsString());
                         validate();
                     }
@@ -153,8 +153,8 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                         + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + DeviceMappingQRCodeWidget.encode(leaderboardName) + "&"
                         + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + DeviceMappingQRCodeWidget.encode(raceColumnName)
                         + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + DeviceMappingQRCodeWidget.encode(fleetName)
-                        + "&" + mappedItemQueryParam + "&" + DeviceMappingConstants.FROM_MILLIS + "=" + fromMillis
-                        + "&" + DeviceMappingConstants.TO_MILLIS + "=" + toMillis;
+                        + "&" + mappedItemQueryParam + "&" + DeviceMappingConstants.URL_FROM_MILLIS + "=" + fromMillis
+                        + "&" + DeviceMappingConstants.URL_TO_MILLIS + "=" + toMillis;
             }
         });
         qrWidget.generateQRCode();

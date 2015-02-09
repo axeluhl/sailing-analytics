@@ -3,7 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.CompetitorStore;
-import com.sap.sailing.domain.common.Color;
+import com.sap.sse.common.Color;
 
 public interface DynamicCompetitorStore extends CompetitorStore {
     @Override

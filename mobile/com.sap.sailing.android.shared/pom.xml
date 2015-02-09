@@ -47,7 +47,6 @@
             <scope>compile</scope>
         </dependency>
 
-		<!-- needed on remote repository -->
         <dependency>
             <groupId>android</groupId>
             <artifactId>android</artifactId>
@@ -69,7 +68,7 @@
                 <artifactId>android-maven-plugin</artifactId>
                 <configuration>
                     <sdk>
-                        <platform>13</platform>
+                        <platform>19</platform>
                     </sdk>
                 </configuration>
             </plugin>

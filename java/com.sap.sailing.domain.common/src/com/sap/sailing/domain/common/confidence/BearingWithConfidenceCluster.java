@@ -51,7 +51,7 @@ public class BearingWithConfidenceCluster<RelativeTo> {
      *            remains empty.
      * @return two bearing clusters; both empty if this cluster is empty; only the second one empty if this cluster
      *         contains only one bearing. Otherwise, the two bearings farthest apart (greatest absolute
-     *         {@link Bearing#getDifferenceTo(Bearing) difference}) are guaranteed not to be in different clusters, and
+     *         {@link Bearing#getDifferenceTo(Bearing) difference}) are guaranteed to be in different clusters, and
      *         all other bearings contained in this cluster will be contained in the cluster that contains the extreme
      *         bearing to which it's closer.
      */

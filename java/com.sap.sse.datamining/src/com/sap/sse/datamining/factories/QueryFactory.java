@@ -19,7 +19,6 @@ import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
@@ -27,11 +26,12 @@ import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.FunctionValuesFilterCriterion;
 import com.sap.sse.datamining.impl.functions.LocalizationParameterProvider;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class QueryFactory {
 
     public <DataSourceType, DataType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, QueryDefinition<DataSourceType, DataType, ResultType> queryDefinition,
-                                                                            DataMiningStringMessages stringMessages, ExecutorService executor) {
+                                                                            ResourceBundleStringMessages stringMessages, ExecutorService executor) {
         return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale()) {
             @Override
             protected Processor<DataSourceType, ?> createFirstProcessor() {
@@ -62,7 +62,7 @@ public class QueryFactory {
         };
     }
     
-    private Iterable<Pair<Function<?>, ParameterProvider>> getParameterProvidersFor(Iterable<Function<?>> functions, DataMiningStringMessages stringMessages, Locale locale) {
+    private Iterable<Pair<Function<?>, ParameterProvider>> getParameterProvidersFor(Iterable<Function<?>> functions, ResourceBundleStringMessages stringMessages, Locale locale) {
         Collection<Pair<Function<?>, ParameterProvider>> functionsWithParameterProvider = new ArrayList<>();
         for (Function<?> function : functions) {
             functionsWithParameterProvider.add(new Pair<>(function, getParameterProviderFor(function, stringMessages, locale)));
@@ -70,7 +70,7 @@ public class QueryFactory {
         return functionsWithParameterProvider;
     }
 
-    private ParameterProvider getParameterProviderFor(Function<?> function, DataMiningStringMessages stringMessages, Locale locale) {
+    private ParameterProvider getParameterProviderFor(Function<?> function, ResourceBundleStringMessages stringMessages, Locale locale) {
         if (functionNeedsLocalizationParameters(function)) {
             return new LocalizationParameterProvider(locale, stringMessages);
         }
@@ -91,7 +91,7 @@ public class QueryFactory {
         parameterTypesIterator = function.getParameters().iterator();
         Class<?> firstParameter = parameterTypesIterator.next();
         Class<?> secondParameter = parameterTypesIterator.next();
-        return firstParameter.isAssignableFrom(Locale.class) && secondParameter.isAssignableFrom(DataMiningStringMessages.class);
+        return firstParameter.isAssignableFrom(Locale.class) && secondParameter.isAssignableFrom(ResourceBundleStringMessages.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -117,7 +117,7 @@ public class QueryFactory {
     public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
             DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, int retrieverLevel,
             Iterable<Function<?>> dimensions, Locale locale,
-            DataMiningStringMessages stringMessages, ExecutorService executor) {
+            ResourceBundleStringMessages stringMessages, ExecutorService executor) {
         return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale) {
             @Override
             protected Processor<DataSource, ?> createFirstProcessor() {

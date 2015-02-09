@@ -3,10 +3,10 @@ package com.sap.sailing.datamining.data;
 import java.util.Locale;
 
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public interface HasGPSFixContext {
     
@@ -17,6 +17,6 @@ public interface HasGPSFixContext {
     public GPSFixMoving getGPSFix();
     
     @Dimension(messageKey="WindStrengthInBeaufort", ordinal=10)
-    public ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, DataMiningStringMessages stringMessages);
+    public ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, ResourceBundleStringMessages stringMessages);
 
 }
