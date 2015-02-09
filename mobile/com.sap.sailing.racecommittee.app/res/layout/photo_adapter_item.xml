@@ -17,8 +17,7 @@
         android:id="@+id/photo_adapter_thumbnail"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:src="@drawable/ic_menu_gallery"
-        android:contentDescription="@string/empty" />
+        android:src="@drawable/ic_menu_gallery" />
 
     <ImageButton
         android:id="@+id/photo_adapter_remove"

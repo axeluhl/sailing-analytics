@@ -2,15 +2,16 @@
 <lint>
     <issue id="IconLocation" severity="ignore" />
 
-    <issue id="NestedWeights">
-        <ignore path="res/layout/results_capturing_view.xml" />
-    </issue>
+    <!-- Reason: App is not for the Play Store right now -->
+    <issue id="ContentDescription" severity="ignore" />
 
-    <issue id="UselessLeaf">
-        <ignore path="res/layout/results_capturing_view.xml" />
-    </issue>
+<!--
+    &lt;!&ndash; Reason: App is not RTL (right to left) aware &ndash;&gt;
+    <issue id="RtlSymmetry" severity="ignore" />
+    <issue id="RtlHardcoded" severity="ignore" />
+-->
 
-    <!-- Reason:  Don't want to use apply() instead of commit() -->
+    <!-- Reason: Don't want to use apply() instead of commit() -->
     <issue id="CommitPrefEdits">
         <ignore path="src/com/sap/sailing/racecommittee/app/AppPreferences.java" />
         <ignore path="src/com/sap/sailing/racecommittee/app/utils/autoupdate/AutoUpdater.java" />
@@ -29,5 +30,4 @@
         <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/dialogs/ProtestTimeDialogFragment.java" />
         <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/RaceInfoFragment.java" />
     </issue>
-
 </lint>

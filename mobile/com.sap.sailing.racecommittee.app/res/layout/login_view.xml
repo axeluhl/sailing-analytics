@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools" android:id="@+id/loginLayout"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:orientation="vertical">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <fragment
-            android:id="@+id/login_view_backdrop"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            class="com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop"
-            tools:layout="@layout/login_backdrop"/>
+        android:id="@+id/login_view_backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop"
+        tools:layout="@layout/login_backdrop" />
 
-    <fragment android:layout_width="match_parent"
-              android:id="@+id/login_listview"
-              android:layout_height="0dp"
-              class="com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews"
-              tools:layout="@layout/login_listviews"
-              android:layout_gravity="center_horizontal|bottom"/>
-</FrameLayout>
+    <fragment
+        android:id="@+id/login_listview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal|bottom"
+        class="com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews"
+        tools:layout="@layout/login_listviews" />
+</merge>
 

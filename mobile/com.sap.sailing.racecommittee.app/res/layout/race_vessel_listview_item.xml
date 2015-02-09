@@ -26,7 +26,6 @@
         android:layout_marginRight="@dimen/default_margin"
         android:layout_toEndOf="@+id/vessel_position"
         android:layout_toRightOf="@+id/vessel_position"
-        android:contentDescription="@string/empty"
         android:src="@drawable/flag_de" />
 
     <TextView

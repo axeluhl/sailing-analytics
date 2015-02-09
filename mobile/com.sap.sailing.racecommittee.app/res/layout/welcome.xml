@@ -4,7 +4,6 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:contentDescription="@string/empty"
         android:src="@drawable/login_backdrop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -33,7 +32,6 @@
         android:id="@+id/imageView"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:contentDescription="@string/empty"
         android:src="@drawable/sap_logo"
         android:layout_above="@+id/backdrop_title"
         android:layout_alignLeft="@+id/backdrop_title"

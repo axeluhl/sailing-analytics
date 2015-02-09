@@ -60,11 +60,9 @@
             android:text="@string/today"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <TimePicker
+        <include
             android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:timePickerMode="spinner" />
+            layout="@layout/time_picker"/>
     </LinearLayout>
 
 </RelativeLayout>

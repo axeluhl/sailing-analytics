@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@color/welter_extralight_gray_transparent"
-    android:orientation="vertical">
+    android:layout_height="fill_parent">
 
     <RelativeLayout
         android:id="@+id/InnerRelativeLayout"
@@ -24,31 +22,6 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/courseInfoHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="6dp"
-                android:text="@string/empty"
-                android:textAppearance="@style/TextAppearance.Welter.LinkText" />
-
-            <TextView
-                android:id="@+id/windInfoHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="6dp"
-                android:text="@string/empty"
-                android:textAppearance="@style/TextAppearance.Welter.LinkText" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
                 android:id="@+id/regattaGroupInfoHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -66,14 +39,35 @@
                     android:layout_height="wrap_content"
                     android:text="@string/empty"
                     android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/courseInfoHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="6dp"
+                        android:text="@string/empty"
+                        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
+                    <TextView
+                        android:id="@+id/windInfoHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="6dp"
+                        android:text="@string/empty"
+                        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabelLink" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
             android:orientation="horizontal">
 
             <Button
@@ -90,8 +84,15 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:orientation="horizontal"
-            android:visibility="gone">
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/currentTimeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="@string/current_time"
+                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
 
             <com.sap.sailing.racecommittee.app.ui.views.DigitalClock
                 android:id="@+id/digitalClock"
@@ -104,22 +105,8 @@
 
     </RelativeLayout>
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_gravity="center_horizontal"
-        android:contentDescription="@string/app_name"
-        android:paddingBottom="6dp"
-        android:paddingLeft="40dp"
-        android:paddingRight="40dp"
-        android:paddingTop="6dp"
-        android:scaleType="fitXY"
-        android:src="@android:drawable/divider_horizontal_textfield" />
-
     <FrameLayout
         android:id="@+id/infoContainer"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1" />
-
-</LinearLayout>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>

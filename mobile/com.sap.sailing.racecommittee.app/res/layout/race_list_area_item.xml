@@ -100,7 +100,6 @@
                 android:orientation="vertical">
 
             <ImageView
-                    android:contentDescription="@string/empty"
                     android:id="@+id/current_flag"
                     android:layout_width="40dp"
                     android:layout_height="25dp"
@@ -114,7 +113,6 @@
                     android:orientation="horizontal">
 
                 <ImageView
-                        android:contentDescription="@string/empty"
                         android:id="@+id/arrow_direction"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

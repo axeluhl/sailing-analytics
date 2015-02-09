@@ -6,7 +6,6 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:contentDescription="@string/empty"
         android:scaleType="centerCrop"
         android:src="@drawable/login_backdrop" />
 
@@ -20,7 +19,6 @@
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginStart="@dimen/default_margin"
         android:layout_marginTop="25dp"
-        android:contentDescription="@string/empty"
         android:src="@drawable/sap_logo" />
 
     <View
@@ -68,7 +66,6 @@
         android:layout_margin="@dimen/default_margin"
         android:alpha="0"
         android:background="@drawable/round_button"
-        android:contentDescription="@string/empty"
         android:padding="10dp"
         android:src="@drawable/ic_settings_white_48dp" />
 

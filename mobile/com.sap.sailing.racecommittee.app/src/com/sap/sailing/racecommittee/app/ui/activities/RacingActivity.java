@@ -46,6 +46,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Locale;
 
 public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks,
         TickListener, OnClickListener {
@@ -235,7 +236,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             setSupportActionBar(toolbar);
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
-        dateFormat = new SimpleDateFormat("HH:mm:ss");
+        dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
         mCourseAreaId = courseAreaId;

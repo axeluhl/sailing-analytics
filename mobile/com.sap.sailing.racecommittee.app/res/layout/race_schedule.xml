@@ -31,7 +31,6 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
-            android:contentDescription="@string/empty"
             android:src="@drawable/ic_chevron_right_grey600_24dp" />
 
         <TextView
@@ -85,7 +84,6 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
-            android:contentDescription="@string/empty"
             android:src="@drawable/ic_chevron_right_grey600_24dp" />
 
         <TextView
@@ -139,7 +137,6 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
-            android:contentDescription="@string/empty"
             android:src="@drawable/ic_chevron_right_grey600_24dp" />
 
         <ImageView
@@ -150,7 +147,6 @@
             android:layout_margin="@dimen/default_margin_half"
             android:layout_toLeftOf="@+id/start_mode_value"
             android:layout_toStartOf="@+id/start_mode_value"
-            android:contentDescription="@string/empty"
             android:focusableInTouchMode="false"
             android:src="@drawable/flag_papa_48dp" />
 
@@ -204,7 +200,6 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
-            android:contentDescription="@string/empty"
             android:src="@drawable/ic_chevron_right_grey600_24dp" />
 
         <ImageView
@@ -214,7 +209,6 @@
             android:layout_margin="@dimen/default_margin_half"
             android:layout_toLeftOf="@+id/start_course_value"
             android:layout_toStartOf="@+id/start_course_value"
-            android:contentDescription="@string/empty"
             android:src="@drawable/papa_flag" />
 
         <TextView
@@ -267,7 +261,6 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
-            android:contentDescription="@string/empty"
             android:src="@drawable/ic_chevron_right_grey600_24dp" />
 
         <ImageView
@@ -277,7 +270,6 @@
             android:layout_margin="@dimen/default_margin_half"
             android:layout_toLeftOf="@+id/wind_value"
             android:layout_toStartOf="@+id/wind_value"
-            android:contentDescription="@string/empty"
             android:src="@drawable/wind_on" />
 
         <TextView

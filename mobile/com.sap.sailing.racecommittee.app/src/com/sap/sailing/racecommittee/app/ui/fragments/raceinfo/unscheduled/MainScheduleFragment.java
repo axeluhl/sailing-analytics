@@ -67,7 +67,7 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         if (getRace() != null) {
             if (getRace().getState() != null) {
                 TimePoint timePoint = getRace().getState().getProtestTime();

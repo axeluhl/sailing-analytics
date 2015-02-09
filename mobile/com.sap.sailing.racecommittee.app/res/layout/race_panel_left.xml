@@ -20,8 +20,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black"
-                android:contentDescription="@string/empty" />
+                android:background="@color/black" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -42,7 +41,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:contentDescription="@string/empty"
                     android:src="@drawable/lock_outline" />
             </LinearLayout>
 
@@ -72,8 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black"
-                android:contentDescription="@string/empty" />
+                android:background="@color/black" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -94,7 +91,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:contentDescription="@string/empty"
                     android:src="@drawable/lock_outline" />
             </LinearLayout>
 
@@ -105,7 +101,6 @@
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="@dimen/default_margin"
-                android:contentDescription="@string/empty"
                 android:src="@drawable/flag_papa_64dp" />
         </RelativeLayout>
 
@@ -121,8 +116,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black"
-                android:contentDescription="@string/empty" />
+                android:background="@color/black" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -143,7 +137,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:contentDescription="@string/empty"
                     android:src="@drawable/lock_outline" />
             </LinearLayout>
         </RelativeLayout>
@@ -160,8 +153,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black"
-                android:contentDescription="@string/empty" />
+                android:background="@color/black" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -182,7 +174,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:contentDescription="@string/empty"
                     android:src="@drawable/lock_outline" />
             </LinearLayout>
 

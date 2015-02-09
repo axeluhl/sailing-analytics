@@ -3,23 +3,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/race_finishing_race_countup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/currentlyLoading"
-        android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel"
-        android:visibility="gone" />
+        android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel" />
 
     <TextView
         android:id="@+id/race_finishing_additional_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-        android:textIsSelectable="false"
-        android:visibility="gone" />
+        android:textIsSelectable="false" />
 
     <ImageView
         android:layout_width="500dp"
@@ -28,8 +26,7 @@
         android:contentDescription="@string/app_name"
         android:paddingBottom="2dp"
         android:scaleType="fitXY"
-        android:src="@android:drawable/divider_horizontal_textfield"
-        android:visibility="gone" />
+        android:src="@android:drawable/divider_horizontal_textfield" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -47,64 +44,63 @@
             android:layout_height="match_parent"
             android:layout_weight="0.618"
             android:gravity="fill_horizontal"
-            android:orientation="vertical"
-            android:visibility="gone" />
+            android:orientation="vertical" />
 
         <TextView
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:background="#DADADA"
-            android:visibility="gone" />
-
+            android:background="#DADADA" />
         <!-- ACTION SECTION -->
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+        <LinearLayout
+            android:layout_width="225dp"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <ImageButton
+                android:id="@+id/race_finishing_finished"
+                android:layout_width="140dp"
+                android:layout_height="80dp"
+                android:contentDescription="@string/choose_blue_flag"
+                android:scaleType="fitCenter"
+                android:src="@drawable/blue_flag" />
+
+            <TextView
+                android:id="@+id/ChooseBlueFlagLabel"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="vertical" >
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="2dp"
+                android:text="@string/choose_blue_flag_finishing"
+                android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 
-                <ImageButton
-                    android:id="@+id/race_finishing_finished"
-                    android:layout_width="140dp"
-                    android:layout_height="80dp"
-                    android:contentDescription="@string/choose_blue_flag"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/blue_flag" />
+            <ImageButton
+                android:id="@+id/race_finishing_abort"
+                android:layout_width="140dp"
+                android:layout_height="80dp"
+                android:contentDescription="@string/abort_running_race"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ap_november_flag" />
 
-                <TextView
-                    android:id="@+id/ChooseBlueFlagLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/choose_blue_flag_finishing"
-                    android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+            <TextView
+                android:id="@+id/abortingFlagButtonLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="2dp"
+                android:text="@string/abort_running_race"
+                android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+            
+            <Button
+                android:id="@+id/race_finishing_reset_course"
+                android:layout_width="140dp"
+                android:layout_height="50dp"
+                android:text="@string/race_reset_course" />
+        </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/race_finishing_abort"
-                    android:layout_width="140dp"
-                    android:layout_height="80dp"
-                    android:contentDescription="@string/abort_running_race"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ap_november_flag" />
-
-                <TextView
-                    android:id="@+id/abortingFlagButtonLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/abort_running_race"
-                    android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
-            </LinearLayout>
-        </ScrollView>
         <!-- END ACTION SECTION -->
 
     </LinearLayout>

@@ -41,8 +41,7 @@
                 android:src="@drawable/ic_menu_btn_wind" 
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-                android:contentDescription="@string/empty" />
+                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"/>
             
             <TextView
 		        android:layout_width="wrap_content"

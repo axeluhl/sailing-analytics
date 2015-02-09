@@ -22,15 +22,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black"
-                android:contentDescription="@string/empty" />
+                android:background="@color/black" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_image_size"
                 android:layout_height="@dimen/side_button_image_size"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:contentDescription="@string/empty"
                 android:src="@drawable/flags_abandon" />
 
             <TextView
@@ -55,15 +53,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black"
-                android:contentDescription="@string/empty" />
+                android:background="@color/black" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_image_size"
                 android:layout_height="@dimen/side_button_image_size"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:contentDescription="@string/empty"
                 android:src="@drawable/flags_recall" />
 
             <TextView
@@ -88,15 +84,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black"
-                android:contentDescription="@string/empty" />
+                android:background="@color/black" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_image_size"
                 android:layout_height="@dimen/side_button_image_size"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:contentDescription="@string/empty"
                 android:src="@drawable/flags_postpone" />
 
             <TextView
@@ -121,15 +115,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black"
-                android:contentDescription="@string/empty" />
+                android:background="@color/black" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_image_size"
                 android:layout_height="@dimen/side_button_image_size"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:contentDescription="@string/empty"
                 android:src="@drawable/flags_course" />
 
             <TextView
@@ -154,15 +146,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black"
-                android:contentDescription="@string/empty" />
+                android:background="@color/black" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_image_size"
                 android:layout_height="@dimen/side_button_image_size"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:contentDescription="@string/empty"
                 android:src="@drawable/flags_more" />
 
             <TextView
