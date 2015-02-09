@@ -46,7 +46,6 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sse.security.common,
  com.sap.sse.filestorage,
- org.apache.servicemix.bundles.zxing,
  com.sap.sse.mail
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
@@ -54,9 +53,6 @@ Import-Package: com.sap.sailing.polars,
  com.sap.sailing.polars.factory,
  com.sap.sailing.polars.regression,
  javax.jms;version="1.1.0",
- javax.mail;version="1.4.0",
- javax.mail.internet;version="1.4.0",
- javax.mail.util;version="1.4.0",
  javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0",

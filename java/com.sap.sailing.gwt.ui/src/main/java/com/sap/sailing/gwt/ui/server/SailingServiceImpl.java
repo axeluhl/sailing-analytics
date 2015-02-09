@@ -50,19 +50,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMessage.RecipientType;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
 import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
@@ -71,7 +58,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.zxing.WriterException;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.Revokable;
@@ -208,7 +194,6 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -436,7 +421,6 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.common.qrcode.QRCodeGenerationUtil;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
@@ -5452,86 +5436,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return null;
         }
     }
-
-    
-    private class SMTPAuthenticator extends javax.mail.Authenticator {
-
-        public PasswordAuthentication getPasswordAuthentication() {
-           String username = mailProperties.getProperty("mail.smtp.user");
-           String password = mailProperties.getProperty("mail.smtp.password");
-           return new PasswordAuthentication(username, password);
-        }
-    }
     
     @Override
-    public void inviteCompetitorsViaEmail(String serverUrlWithoutTrailingSlash, String eventId,
+    public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, UUID eventId,
             String leaderboardName) throws MailException {
-        if (!(this.mailProperties != null && this.mailProperties.containsKey("mail.transport.protocol"))) {
-            logger.severe("Could not find valid email properties to send competitor invitation E-Mail");
-            return;
-        }
-        
-        //TODO check bug 2587
-        Iterable<Competitor> competitors = getService().getLeaderboardByName(leaderboardName).getAllCompetitors();
-        
-        
-        StringBuilder occuredExceptions = new StringBuilder();
-        
-        for (Competitor competitor : competitors){
-            final String toAddress = competitor.getEmail();
-            if (toAddress != null) {
-                Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
-                MimeMessage msg = new MimeMessage(session);
-                try {
-                    msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
-                    msg.setSubject("Invitation to a SAP Sailing Analytics event"); //FIXME: I18N?
-                    msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
-                    
-                    // taken from http://www.tutorialspoint.com/javamail_api/javamail_api_send_inlineimage_in_email.htm
-                    // This mail has 2 part, the BODY and the embedded image
-                    MimeMultipart multipart = new MimeMultipart("related");
-
-                    // first part (the html)
-                    BodyPart messageBodyPart = new MimeBodyPart();
-                    String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(serverUrlWithoutTrailingSlash,
-                            eventId, leaderboardName, DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
-                            competitor.getId().toString());
-                    String htmlText = String.format("<h1>Welcome to %s</h1>"
-                                    + "<p>Scan the following QRCode or visit the URL using your smartphone to register as <b>%s</b></p>"
-                            + "<img src=\"cid:image\">"
-                            + "<a href=\"%s\">%s</a>", leaderboardName, competitor.getName(), url, url);
-                    messageBodyPart.setContent(htmlText, "text/html");
-                    // add it
-                    multipart.addBodyPart(messageBodyPart);
-
-                    // second part (the image)
-                    messageBodyPart = new MimeBodyPart();
-                    InputStream imageIs = QRCodeGenerationUtil.create(url, 64);
-                    DataSource imageDs = new ByteArrayDataSource(imageIs, "image/png");
-
-                    messageBodyPart.setDataHandler(new DataHandler(imageDs));
-                    messageBodyPart.setHeader("Content-ID", "<image>");
-
-                    // add image to the multipart
-                    multipart.addBodyPart(messageBodyPart);
-
-                    // put everything together
-                    msg.setContent(multipart);
-
-                    Transport ts = session.getTransport();
-                    ts.connect();
-                    ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
-                    ts.close();
-                    logger.info("mail sent to competitor " + competitor.getName() + " with e-mail address " + toAddress);
-                } catch (MessagingException | WriterException | IOException e) {
-                    logger.log(Level.SEVERE, "Error trying to send mail to user " + competitor.getName()
-                            + " with e-mail address " + toAddress, e);
-                    occuredExceptions.append(e.getMessage()+"\r\n");
-                }
-            }
-        }
-        if (!(occuredExceptions.length() == 0)){
-            throw new MailException(occuredExceptions.toString());
-        }
+        Event event = getService().getEvent(eventId);
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash);
     }
 }

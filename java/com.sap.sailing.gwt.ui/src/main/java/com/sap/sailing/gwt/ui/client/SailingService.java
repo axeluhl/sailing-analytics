@@ -577,6 +577,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
     
-    void inviteCompetitorsViaEmail(String serverUrlWithoutTrailingSlash, String eventId, String leaderboardName)
+    void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, UUID eventId, String leaderboardName)
         throws MailException;
 }
