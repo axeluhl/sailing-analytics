@@ -73,11 +73,11 @@ public class EventActivity extends AbstractActivity implements EventView.Present
 
     @Override
     public void handleTabPlaceSelection(TabActivity<?, EventContext> selectedActivity) {
-
         Place tabPlaceToGo = selectedActivity.placeToFire(ctx);
-
         clientFactory.getPlaceController().goTo(tabPlaceToGo);
-        
+    }
+    public void navigateTo(Place place) {
+        clientFactory.getPlaceController().goTo(place);
     }
 
 }

@@ -46,7 +46,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
             }
         }, historyMapper);
         
-        eventHeader = new EventHeader(currentPresenter.getCtx().getEventDTO());
+        eventHeader = new EventHeader(currentPresenter);
         
         initWidget(uiBinder.createAndBindUi(this));
 

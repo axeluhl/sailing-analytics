@@ -14,9 +14,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
+import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
+import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.VenueDTO;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -24,15 +27,14 @@ public class EventHeader extends Composite {
     interface EventHeaderUiBinder extends UiBinder<Widget, EventHeader> {
     }
     
-    @UiField TextMessages i18n;
+    @UiField StringMessages i18n;
     
     @UiField BreadcrumbPane breadcrumbs;
     
     @UiField ImageElement eventLogo;
     @UiField SpanElement eventName;
-    @UiField DivElement live;
+    @UiField DivElement eventState;
     @UiField DivElement eventDate;
-    @UiField DivElement eventVenue;
     @UiField SpanElement eventVenueName;
     @UiField SpanElement eventVenueCountry;
     @UiField AnchorElement eventLink;
@@ -47,13 +49,16 @@ public class EventHeader extends Composite {
     private final HomePlacesNavigator placeNavigator;
 
     private EventDTO event;
+
+    private Presenter presenter;
     
-    public EventHeader(EventDTO event) {
-        this(event, null, null);
+    public EventHeader(EventView.Presenter presenter) {
+        this(presenter, null);
     }
     
-    public EventHeader(EventDTO event, EventView.Presenter presenter, HomePlacesNavigator placeNavigator) {
-        this.event = event;
+    public EventHeader(EventView.Presenter presenter, HomePlacesNavigator placeNavigator) {
+        this.event = presenter.getCtx().getEventDTO();
+        this.presenter = presenter;
         this.placeNavigator = placeNavigator;
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
@@ -68,42 +73,53 @@ public class EventHeader extends Composite {
         eventLogo.setSrc(logoUrl);
         eventLogo.setAlt(event.getName());
         eventName.setInnerText(event.getName());
-        if(!event.isRunning()) {
-            hide(live);
-        }
-        VenueDTO venue = event.venue;
-        if(venue != null && event.regattas.size() <=1) {
-//            TODO eventDate
-            eventVenueName.setInnerText(venue.getName());
-//            TODO eventVenueCountry
-            if(event.getOfficialWebsiteURL() != null) {
-                String title = event.getOfficialWebsiteURL();
-                if(title.startsWith("http://")) {
-                    title = title.substring("http://".length(), title.length());
-                }
-                if(title.length() > 35) {
-                    title = TextMessages.INSTANCE.officalEventWebsite();
-                }
-                eventLink.setInnerText(title);
-                eventLink.setHref(event.getOfficialWebsiteURL());
-            } else {
-                hide(eventLink);
-            }
+        
+        if(event.isFinished()) {
+            eventState.setInnerText(i18n.finished());
+            eventState.setAttribute("data-labeltype", "finished");
+        } else if(event.isRunning()) {
+            eventState.setInnerText(i18n.live());
+            eventState.setAttribute("data-labeltype", "live");
         } else {
-            hide(eventDate, eventVenue);
+            hide(eventState);
         }
-        if(event.regattas.size() > 1) {
-//            TODO competitorsCount.setInnerText(text);
-//            TODO racesCount;
-//            TODO eventCategory.setInnerText(event.get);
-            if(event.isFinished()) {
-//                TODO trackedRacesCount;
-            } else {
-                hide(trackedRaces);
+        
+        eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
+        eventVenueName.setInnerText(event.venue.getName());
+//        TODO eventVenueCountry
+        if(event.getOfficialWebsiteURL() != null) {
+            String title = withoutPrefix(event.getOfficialWebsiteURL(), "http://", "https://");
+            if(title.length() > 35) {
+                title = TextMessages.INSTANCE.officalEventWebsite();
             }
+            eventLink.setInnerText(title);
+            eventLink.setHref(event.getOfficialWebsiteURL());
         } else {
+            hide(eventLink);
+        }
+        
+        // TODO Multi-Regatta-Event
+//        if(event.regattas.size() > 1) {
+////            TODO competitorsCount.setInnerText(text);
+////            TODO racesCount;
+////            TODO eventCategory.setInnerText(event.get);
+//            if(event.isFinished()) {
+////                TODO trackedRacesCount;
+//            } else {
+//                hide(trackedRaces);
+//            }
+//        } else {
             hide(competitors, races, trackedRaces);
+//        }
+    }
+
+    private String withoutPrefix(String title, String... prefixes) {
+        for (String prefix : prefixes) {
+            if(title.startsWith(prefix)) {
+                return title.substring(prefix.length(), title.length());
+            }
         }
+        return title;
     }
 
     private void hide(Element... elementsToHide) {
@@ -113,6 +129,10 @@ public class EventHeader extends Composite {
     }
 
     private void initBreadCrumbs() {
+//        addBreadCrumbItem(i18n.home(), placeNavigator.getHomeNavigation());
+//        addBreadCrumbItem(i18n.events(), placeNavigator.getEventsNavigation());
+        // TODO series, event ...
+        // TODO dummy implementation
         breadcrumbs.addBreadcrumbItem(i18n.home(), "TODO" /* placeNavigator.getHomeNavigation().getTargetUrl() */, new Runnable() {
             @Override
             public void run() {
@@ -133,6 +153,15 @@ public class EventHeader extends Composite {
             @Override
             public void run() {
                 // TODO
+            }
+        });
+    }
+    
+    private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
+        breadcrumbs.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
+            @Override
+            public void run() {
+                presenter.navigateTo(placeNavigation.getPlace());
             }
         });
     }

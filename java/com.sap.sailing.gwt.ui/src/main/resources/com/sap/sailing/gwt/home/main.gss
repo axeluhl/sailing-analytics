@@ -251,12 +251,12 @@ figcaption {
 .label[data-labeltype='live']:before {
   border-right-color: #e94a1b;
 }
-.label[datalabeltype='finished'] {
+.label[data-labeltype='finished'] {
   background-color: #8ab54e;
   vertical-align: middle;
   margin-top: -0.416666666666667em;
 }
-.label[datalabeltype='finished']:before {
+.label[data-labeltype='finished']:before {
   border-right-color: #8ab54e;
 }
 .label[datalabeltype='progress'] {
