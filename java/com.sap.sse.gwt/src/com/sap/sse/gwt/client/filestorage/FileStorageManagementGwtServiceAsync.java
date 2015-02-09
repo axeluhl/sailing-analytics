@@ -10,14 +10,14 @@ public interface FileStorageManagementGwtServiceAsync {
 
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
-    void getAvailableFileStorageServices(AsyncCallback<FileStorageServiceDTO[]> callback);
+    void getAvailableFileStorageServices(String localeInfoName, AsyncCallback<FileStorageServiceDTO[]> callback);
 
-    void setActiveFileStorageService(String serviceName, AsyncCallback<Void> callback);
+    void setActiveFileStorageService(String serviceName, String localeInfoName, AsyncCallback<Void> callback);
 
     void setFileStorageServiceProperties(String serviceName, Map<String, String> properties,
             AsyncCallback<Void> callback);
 
-    void testFileStorageServiceProperties(String serviceName,
+    void testFileStorageServiceProperties(String serviceName, String localeInfoName,
             AsyncCallback<FileStorageServicePropertyErrorsDTO> callback);
 
 }
