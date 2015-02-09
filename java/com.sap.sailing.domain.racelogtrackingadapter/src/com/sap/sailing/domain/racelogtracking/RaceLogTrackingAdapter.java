@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelogtracking;
 
+import java.util.Locale;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -102,6 +103,6 @@ public interface RaceLogTrackingAdapter {
     /**
      * Invite all competitors known in the leaderboard for tracking via the Tracking App by sending out emails.
      */
-    void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash)
-            throws MailException;
+    void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
+            String serverUrlWithoutTrailingSlash, Locale locale) throws MailException;
 }

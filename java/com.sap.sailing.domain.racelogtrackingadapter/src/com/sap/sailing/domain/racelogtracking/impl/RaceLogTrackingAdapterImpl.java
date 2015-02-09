@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -356,7 +357,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     
     @Override
     public void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
-            String serverUrlWithoutTrailingSlash) throws MailException {
+            String serverUrlWithoutTrailingSlash, Locale locale) throws MailException {
         //TODO check bug 2587
         Iterable<Competitor> competitors = leaderboard.getAllCompetitors();
 
@@ -368,25 +369,27 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             if (toAddress != null) {
                 String leaderboardName = leaderboard.getName();
                 String competitorName = competitor.getName();
-                
-                //TODO i18n
+
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(serverUrlWithoutTrailingSlash,
                         event.getId().toString(), leaderboardName, DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                         competitor.getId().toString());
-                String subject = "Tracking invitation for " + competitorName;
+                String subject = String.format("%s %s",
+                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "trackingInvitationFor"), competitorName);
 
                 // taken from http://www.tutorialspoint.com/javamail_api/javamail_api_send_inlineimage_in_email.htm
                 BodyPart messageTextPart = new MimeBodyPart();
-                String htmlText = String.format("<h1>Welcome to %s</h1>"
-                        + "<p>Scan the following QRCode or visit the URL using your smartphone to register as <b>%s</b></p>"
+                String htmlText = String.format("<h1>%s %s</h1>" + "<p>%s <b>%s</b></p>"
                         + "<img src=\"cid:image\">"
-                        + "<a href=\"%s\">%s</a>", leaderboardName, competitorName, url, url);
+                        + "<a href=\"%s\">%s</a>",
+                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "welcomeTo"), leaderboardName,
+                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs"), competitorName,
+                        url, url);
                 
                 try {
                     messageTextPart.setContent(htmlText, "text/html");
 
                     BodyPart messageImagePart = new MimeBodyPart();
-                    InputStream imageIs = QRCodeGenerationUtil.create(url, 64);
+                    InputStream imageIs = QRCodeGenerationUtil.create(url, 128);
                     DataSource imageDs = new ByteArrayDataSource(imageIs, "image/png");
                     messageImagePart.setDataHandler(new DataHandler(imageDs));
                     messageImagePart.setHeader("Content-ID", "<image>");

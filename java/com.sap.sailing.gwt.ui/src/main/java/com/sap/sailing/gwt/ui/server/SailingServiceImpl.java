@@ -5386,13 +5386,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return getService().getFileStorageManagementService().getFileStorageService(name);
     }
+    
+    private Locale getLocale(String localeInfoName) {
+        return ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+    }
 
     @Override
     public FileStorageServiceDTO[] getAvailableFileStorageServices(String localeInfoName) {
-        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
         for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
-            serviceDtos.add(FileStorageServiceDTOUtils.convert(s, locale));
+            serviceDtos.add(FileStorageServiceDTOUtils.convert(s, getLocale(localeInfoName)));
         }
         return serviceDtos.toArray(new FileStorageServiceDTO[0]);
     }
@@ -5411,14 +5414,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) {
-        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         try {
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {
                 service.testProperties();
             }
         } catch (InvalidPropertiesException e) {
-            return FileStorageServiceDTOUtils.convert(e, locale);
+            return FileStorageServiceDTOUtils.convert(e, getLocale(localeInfoName));
         }
         return null;
     }
@@ -5439,9 +5441,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, UUID eventId,
-            String leaderboardName) throws MailException {
+            String leaderboardName, String localeInfoName) throws MailException {
         Event event = getService().getEvent(eventId);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash);
+        getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
+                getLocale(localeInfoName));
     }
 }

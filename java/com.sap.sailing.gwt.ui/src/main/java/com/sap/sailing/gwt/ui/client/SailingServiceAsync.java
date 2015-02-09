@@ -689,5 +689,5 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, UUID eventId,
-            String leaderboardName, AsyncCallback<Void> callback); 
+            String leaderboardName, String localeInfo, AsyncCallback<Void> callback); 
 }
