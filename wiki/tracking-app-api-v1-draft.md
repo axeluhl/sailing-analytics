@@ -1,1 +1,1 @@
-moved to [wiki/tracking-app-api-v1](wiki/tracking-app-api-v1)
+moved to [tracking-app/api-v1](tracking-app/api-v1)
