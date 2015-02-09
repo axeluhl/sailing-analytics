@@ -1,6 +1,7 @@
 package com.sap.sse.filestorage;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * Property of a file storage service.
@@ -15,5 +16,5 @@ public interface FileStorageServiceProperty extends Serializable {
      * @return {@code null} if not yet initialized
      */
     String getValue();
-    String getDescription();
+    String getDescription(Locale locale);
 }
