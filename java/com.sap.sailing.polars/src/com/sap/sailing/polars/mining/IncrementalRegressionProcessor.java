@@ -50,6 +50,8 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     private final Set<BoatClass> availableBoatClasses = new HashSet<>();
 
     private final Map<Pair<LegType, Tack>, AverageAngleContainer> averageAngleContainers;
+    
+    private final Map<BoatClass, CubicSpeedRegressions> cubicRegressions = new HashMap<>();
 
     public IncrementalRegressionProcessor(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
@@ -81,6 +83,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         // Only add GPS data if speeds and angles are not null, else do nothing!
         if (angleToTheWind != null && windSpeed != null && boatSpeedWithConfidence != null) {
             fillAverageAngleContainer(fix, element, windSpeed);
+            fillCubicRegressions(fix);
             WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;
             double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
             double confidenceForWindBearing = angleToTheWind.getConfidence();
@@ -88,6 +91,13 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             double averagedConfidence = (confidenceForBoatSpeed + confidenceForWindBearing + confidenceForWindSpeed) / 3;
             boatSpeedEstimator.addData(boatSpeedWithConfidence.getObject(), averagedConfidence);
         }
+    }
+
+    private void fillCubicRegressions(GPSFixMovingWithPolarContext fix) {
+        if (!cubicRegressions.containsKey(fix.getBoatClass())) {
+            cubicRegressions.put(fix.getBoatClass(), new CubicSpeedRegressions());
+        }
+        cubicRegressions.get(fix.getBoatClass()).addFix(fix);
     }
 
     private void fillAverageAngleContainer(GPSFixMovingWithPolarContext fix,
