@@ -1,5 +1,6 @@
 package com.sap.sse.common;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,9 +12,9 @@ public class URLEncoder {
      */
     public static String encode(String decodedUrlString) {
         try {
-            Class.forName("com.google.gwt.http.client.URL");
+            Class<?> clazz = Class.forName("com.google.gwt.http.client.URL");
             // GWT context
-            return com.google.gwt.http.client.URL.encode(decodedUrlString);
+            return (String) clazz.getMethod("encode", String.class).invoke(/* object */null, decodedUrlString);
         } catch (ClassNotFoundException e) {
             // non-GWT context (URL/URI should be fully available)
             try {
@@ -22,9 +23,11 @@ public class URLEncoder {
                         url.getQuery(), url.getRef());
                 return uri.toString();
             } catch (MalformedURLException | URISyntaxException f) {
-                f.printStackTrace();
                 return null;
             }
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+                | SecurityException e) {
+            return null;
         }
     }
 }
