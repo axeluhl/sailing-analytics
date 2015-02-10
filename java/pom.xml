@@ -141,6 +141,7 @@
   <properties>
     <tycho-version>0.21.0</tycho-version>
     <gwt.version>2.7.0</gwt.version>
+    <gwt.workers>2</gwt.workers>
     <p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile -->
     <!-- QUESTION: Which properties or settings are system dependent and differ across different machines/environments? QUESTION: 
       Can we move the system property -Dmongo.dbName to "parameters.mongodb"? If so the IP of the host would be the same for all 
@@ -332,7 +333,7 @@
               <!--
               <style>PRETTY</style>
               -->
-              <localWorkers>2</localWorkers>
+              <localWorkers>${gwt.workers}</localWorkers>
               <!-- Uncomment the following to obtain details split-point reports
               <compileReport>true</compileReport>
               <detailedSoyc>true</detailedSoyc>

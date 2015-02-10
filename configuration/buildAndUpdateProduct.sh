@@ -69,6 +69,10 @@ SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
 # Can be overridden using the -x option
 GWT_WORKERS=2
 
+# The number of worker threads to use for building GWT permutations.
+# Can be overridden using the -x option
+GWT_WORKERS=2
+
 MAVEN_SETTINGS="$PROJECT_HOME/configuration/maven-settings.xml"
 MAVEN_SETTINGS_PROXY="$PROJECT_HOME/configuration/maven-settings-proxy.xml"
 
@@ -167,7 +171,7 @@ do
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
         u) suppress_confirmation=1;;
         v) p2local=1;;
-	x) GWT_WORKERS=$OPTARG;;
+        x) GWT_WORKERS=$OPTARG;;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -175,6 +179,7 @@ done
 
 ACDIR=$SERVERS_HOME/$TARGET_SERVER_NAME
 echo INSTALL goes to $ACDIR
+extra="${extra} -Dgwt.workers=${GWT_WORKERS}"
 
 shift $((OPTIND-1))
 
