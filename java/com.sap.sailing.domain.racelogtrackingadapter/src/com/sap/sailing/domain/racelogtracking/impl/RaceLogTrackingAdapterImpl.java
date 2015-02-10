@@ -375,17 +375,17 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 // taken from http://www.tutorialspoint.com/javamail_api/javamail_api_send_inlineimage_in_email.htm
                 BodyPart messageTextPart = new MimeBodyPart();
                 String htmlText = String.format("<h1>%s %s</h1>" + "<p>%s <b>%s</b></p>"
-                        + "<img src=\"cid:image\">"
+                        + "<img src=\"cid:image\" title=\"%s\"><br/>"
                         + "<a href=\"%s\">%s</a>",
                         RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "welcomeTo"), leaderboardName,
                         RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs"), competitorName,
-                        url, url);
+                        url, url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "alternativelyVisitThisLink"));
                 
                 try {
                     messageTextPart.setContent(htmlText, "text/html");
 
                     BodyPart messageImagePart = new MimeBodyPart();
-                    InputStream imageIs = QRCodeGenerationUtil.create(url, 128);
+                    InputStream imageIs = QRCodeGenerationUtil.create(url, 250);
                     DataSource imageDs = new ByteArrayDataSource(imageIs, "image/png");
                     messageImagePart.setDataHandler(new DataHandler(imageDs));
                     messageImagePart.setHeader("Content-ID", "<image>");
