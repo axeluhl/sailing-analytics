@@ -62,7 +62,7 @@
 							<extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
 							<!-- <userAgents>chrome</userAgents> -->
 							<modules>
-								<module>com.sap.sse.gwt.theme.Theme</module>
+								<module>com.sap.sse.gwt.theme.SSETheme</module>
 							</modules>
 							<gen>${basedir}/.generated</gen>
 							<localWorkers>7</localWorkers>
