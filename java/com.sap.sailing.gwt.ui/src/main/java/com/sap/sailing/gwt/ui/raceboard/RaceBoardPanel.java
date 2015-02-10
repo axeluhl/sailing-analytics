@@ -43,7 +43,6 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.Perspective;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
@@ -265,7 +264,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 /*autoApplyTopNFilter*/ false, /*showCompetitorFilterStatus*/ false);
     }
 
-    private void setComponentVisible(ComponentViewer componentViewer, Component<?> component, boolean visible) {
+    private void setComponentVisible(SideBySideComponentViewer componentViewer, Component<?> component, boolean visible) {
         component.setVisible(visible);      
         componentViewer.forceLayout();
     }

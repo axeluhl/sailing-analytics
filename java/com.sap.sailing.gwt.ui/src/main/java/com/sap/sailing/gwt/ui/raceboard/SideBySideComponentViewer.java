@@ -23,18 +23,17 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListen
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * Component Viewer that uses a {@link TouchSplitLayoutPanel} to display its components.
+ * A Viewer that uses a {@link TouchSplitLayoutPanel} to display its components.
  * 
  * TODO: Refactor to make sure it is really only performing operations that are related to view. Currently it is digging
  * too deep into components and setting titles or even creating video buttons.
  */
-public class SideBySideComponentViewer implements ComponentViewer {
+public class SideBySideComponentViewer {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = 432; // works well for 505 and ESS
