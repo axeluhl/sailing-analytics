@@ -65,15 +65,21 @@ public class MailServiceImpl implements ReplicableMailService, ClearStateTestSup
             if (toAddress != null) {
                 Session session = Session.getInstance(mailProperties, new SMTPAuthenticator());
                 MimeMessage msg = new MimeMessage(session);
+                ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
                     msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
                     msg.setSubject(subject);
-                    contentSetter.setContent(msg);
                     msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
+                    
+                    // this fixes the DCH MIME type error 
+                    // see http://tanyamadurapperuma.blogspot.de/2014/01/struggling-with-nosuchproviderexception.html
+                    Thread.currentThread().setContextClassLoader(javax.mail.Session.class.getClassLoader());
+
+                    contentSetter.setContent(msg);
                     
                     // for testing with gmail
                     //Transport ts = session.getTransport("smtps");
-                    
+
                     Transport ts = session.getTransport();
                     ts.connect();
                     ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
@@ -82,6 +88,8 @@ public class MailServiceImpl implements ReplicableMailService, ClearStateTestSup
                 } catch (MessagingException e) {
                     logger.log(Level.SEVERE, "Error trying to send mail to " + toAddress, e);
                     throw new MailException(e.getMessage(), e);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(oldClassLoader);
                 }
             }
         } else {
