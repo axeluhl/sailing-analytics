@@ -65,6 +65,9 @@ HEAD_SHA=$(git show-ref --head -s | head -1)
 HEAD_DATE=$(date "+%Y%m%d%H%M")
 VERSION_INFO="$HEAD_SHA-$active_branch-$HEAD_DATE"
 SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
+# The number of worker threads to use for building GWT permutations.
+# Can be overridden using the -x option
+GWT_WORKERS=2
 
 MAVEN_SETTINGS="$PROJECT_HOME/configuration/maven-settings.xml"
 MAVEN_SETTINGS_PROXY="$PROJECT_HOME/configuration/maven-settings-proxy.xml"
@@ -107,6 +110,7 @@ if [ $# -eq 0 ]; then
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
     echo "-v Build local p2 respository, and use this instead of p2.sapsailing.com"
+    echo "-x <number-of-workers> use this many worker threads for building GWT permutations (default: 2)."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo ""
@@ -163,6 +167,7 @@ do
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
         u) suppress_confirmation=1;;
         v) p2local=1;;
+	x) GWT_WORKERS=$OPTARG;;
         \?) echo "Invalid option"
             exit 4;;
     esac
