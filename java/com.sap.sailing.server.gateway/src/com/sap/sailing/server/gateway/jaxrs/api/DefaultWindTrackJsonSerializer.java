@@ -61,8 +61,7 @@ public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {
             }
             jsonWindFixes.add(jsonWind);
         }
-        result.put(windSource.name(), jsonWindFixes);
-
+        result.put(windSource.getType() + (windSource.getId() != null ? "-"+windSource.getId().toString() : ""), jsonWindFixes);
         return result;
     }
 

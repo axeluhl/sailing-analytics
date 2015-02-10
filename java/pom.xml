@@ -22,37 +22,26 @@
 		<module>com.sap.sse.gwt.adminconsole</module>
 		<module>com.sap.sse.datamining</module>
 		<module>com.sap.sse.datamining.shared</module>
-		<module>com.sap.sse.datamining.test</module>
 		<module>com.sap.sse.security</module>
-		<module>com.sap.sse.security.replication.test</module>
-		<module>com.sap.sse.security.test</module>
 		<module>com.sap.sse.security.common</module>
 		<module>com.sap.sse.security.ui</module>
 		<module>com.sap.sse.security.userstore.mongodb</module>
 		<module>com.sap.sse.operationaltransformation</module>
-		<module>com.sap.sse.operationaltransformation.test</module>
 		<module>com.sap.sse.replication</module>
-		<module>com.sap.sse.replication.testsupport</module>
-		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sse.filestorage</module>
-		<module>com.sap.sse.filestorage.test</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
 		<module>com.sap.sailing.geocoding</module>
 		<module>com.sap.sailing.datamining</module>
 		<module>com.sap.sailing.datamining.shared</module>
-		<module>com.sap.sailing.datamining.test</module>
 		<module>com.sap.sailing.domain.persistence</module>
 		<module>com.sap.sailing.domain.deckmanadapter</module>
-		<module>com.sap.sailing.domain.deckmanadapter.test</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
 		<module>com.sap.sailing.domain.igtimiadapter</module>
 		<module>com.sap.sailing.domain.igtimiadapter.persistence</module>
-		<module>com.sap.sailing.domain.igtimiadapter.test</module>
 		<module>com.sap.sailing.domain.racelogtrackingadapter</module>
-		<module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
 		<module>com.sap.sailing.domain.racelogtrackingadapter.testsupport</module>
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
@@ -68,7 +57,6 @@
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xmlexport</module>
-		<module>com.sap.sailing.xmlexport.test</module>
 		<module>com.google.gwt.osgi</module>
 		<module>com.tractrac.clientmodule</module>
 		<module>org.json.simple</module>
@@ -84,18 +72,33 @@
 		<module>com.sap.sailing.xrr.schema</module>
 		<module>com.sap.sailing.xrr.resultimport</module>
 		<module>com.sap.sailing.xrr.structureimport</module>
-		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>org.openqa.selenium.osgi</module>
 		<module>com.sap.sailing.monitoring</module>
 		<module>com.sap.sailing.nmeaconnector</module>
 		<module>net.sf.marineapi</module>
-		<module>net.sf.marineapi.test</module>
 		<module>com.sap.sailing.simulator</module>
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.feature.runtime</module>
 		<module>com.sap.sailing.gwt.ui</module>
 		<module>com.sap.sailing.domain.test</module>
+		<module>com.sap.sse.replication.testsupport</module>
+	<!-- The following test fragment doesn't yet do what it should in the Maven context...
+		<module>com.sap.sse.gwt.test</module>
+         -->
+		<module>com.sap.sse.datamining.test</module>
+		<module>com.sap.sse.security.replication.test</module>
+		<module>com.sap.sse.security.test</module>
+		<module>com.sap.sse.operationaltransformation.test</module>
+		<module>com.sap.sse.common.test</module>
+		<module>com.sap.sse.filestorage.test</module>
+		<module>com.sap.sailing.datamining.test</module>
+		<module>com.sap.sailing.domain.deckmanadapter.test</module>
+		<module>com.sap.sailing.domain.igtimiadapter.test</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
+		<module>com.sap.sailing.xmlexport.test</module>
+		<module>com.sap.sailing.xrr.resultimport.test</module>
+		<module>net.sf.marineapi.test</module>
 		<module>com.sap.sailing.domain.shared.android.test</module>
 		<module>com.sap.sailing.geocoding.test</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.test</module>
