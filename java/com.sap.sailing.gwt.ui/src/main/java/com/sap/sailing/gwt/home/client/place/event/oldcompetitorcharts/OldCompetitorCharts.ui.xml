@@ -7,7 +7,7 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
     <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalyticsResources" />
 		<g:HTMLPanel>
-			<div class="{res.mainCss.grid}">
+			<div class="{res.mainCss.grid}" style="margin:5rem;">
 			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
 			   		<h3><ui:text from="{i18n.competitorsAnalytics}" /></h3>
 			  </div>    
