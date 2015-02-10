@@ -30,7 +30,9 @@ import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.Perspective;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspective;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -73,6 +75,8 @@ public class DesktopStartView extends Composite implements StartView {
     private Map<String, String> raceboardParameters;
     private Map<String, String> leaderboardParameters;
     
+    private List<Perspective> supportedPerspectives;
+    
     private final int defaultTimeToStartTimeInSeconds = 180;
 
     public DesktopStartView(PlaceNavigator navigator, EventBus eventBus) {
@@ -82,6 +86,7 @@ public class DesktopStartView extends Composite implements StartView {
         this.events = new ArrayList<EventDTO>();
         this.raceboardParameters = new HashMap<String, String>();
         this.leaderboardParameters = new HashMap<String, String>();
+        this.supportedPerspectives = new ArrayList<Perspective>();
         
         sapHeader = new SAPHeader("Auto player configuration", false);
         eventSelectionBox = new ListBox();
@@ -91,6 +96,8 @@ public class DesktopStartView extends Composite implements StartView {
         localeSelectionBox = new ListBox();
         localeSelectionBox.setMultipleSelect(false);
 
+        supportedPerspectives.add(new LeaderboardPerspective(null));
+        
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
         for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
