@@ -10,4 +10,8 @@ public class MailException extends Exception implements Serializable {
     public MailException(String message) {
         super(message);
     }
+    
+    public MailException(String message, Throwable caught) {
+        super(message, caught);
+    }
 }

@@ -70,6 +70,10 @@ public class MailServiceImpl implements ReplicableMailService, ClearStateTestSup
                     msg.setSubject(subject);
                     contentSetter.setContent(msg);
                     msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
+                    
+                    // for testing with gmail
+                    //Transport ts = session.getTransport("smtps");
+                    
                     Transport ts = session.getTransport();
                     ts.connect();
                     ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
@@ -77,7 +81,7 @@ public class MailServiceImpl implements ReplicableMailService, ClearStateTestSup
                     logger.info("mail sent to " + toAddress + " with subject " + subject);
                 } catch (MessagingException e) {
                     logger.log(Level.SEVERE, "Error trying to send mail to " + toAddress, e);
-                    throw new MailException(e.getMessage());
+                    throw new MailException(e.getMessage(), e);
                 }
             }
         } else {
