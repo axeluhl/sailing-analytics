@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
+import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
@@ -149,7 +150,8 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                     throw new QRCodeURLCreationException("from can't lie after to");
                 }
                 return DeviceMappingConstants.getDeviceMappingForRaceLogUrl(baseUrlWithoutTrailingSlash,
-                        leaderboardName, raceColumnName, fleetName, mappedItemType, mappedItemId, fromMillis, toMillis);
+                        leaderboardName, raceColumnName, fleetName, mappedItemType, mappedItemId, fromMillis, toMillis,
+                        GwtUrlHelper.INSTANCE);
             }
         });
         qrWidget.generateQRCode();

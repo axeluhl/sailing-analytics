@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
-import com.sap.sse.common.URLEncoder;
+import com.sap.sse.common.util.UrlHelper;
 
 /**
  * Shared between GWT and Android. Used for creating and deciphering the URL encoded by the QRCode, which gives the
@@ -42,8 +42,8 @@ public class DeviceMappingConstants {
     static final String APK_PATH = "/apps/com.sap.sailing.android.tracking.app.apk";
 
     public static String getDeviceMappingForRegattaLogUrl(String serverUrlWithoutTrailingSlash, String eventId,
-            String leaderboardName, String mappedItemType, String mappedItemId) {
-        return URLEncoder.encode(serverUrlWithoutTrailingSlash + URL_BASE + "?" + URL_EVENT_ID + "=" + eventId + "&"
+            String leaderboardName, String mappedItemType, String mappedItemId, UrlHelper helper) {
+        return helper.encodeUrl(serverUrlWithoutTrailingSlash + URL_BASE + "?" + URL_EVENT_ID + "=" + eventId + "&"
                 + URL_LEADERBOARD_NAME + "=" + leaderboardName + "&" + mappedItemType + "="
                 + mappedItemId);
     }
@@ -51,11 +51,11 @@ public class DeviceMappingConstants {
     @Deprecated
     public static String getDeviceMappingForRaceLogUrl(String serverUrlWithoutTrailingSlash, String leaderboardName,
             String raceColumnName, String fleetName, String mappedItemType, String mappedItemId, long fromMillis,
-            long toMillis) throws QRCodeURLCreationException {
+            long toMillis, UrlHelper helper) throws QRCodeURLCreationException {
         if (fromMillis > toMillis) {
             throw new QRCodeURLCreationException("from can't lie after to");
         }
-        return URLEncoder.encode(serverUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
+        return helper.encodeUrl(serverUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
                 + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + leaderboardName + "&"
                 + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
                 + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName + "&" + mappedItemType + "="

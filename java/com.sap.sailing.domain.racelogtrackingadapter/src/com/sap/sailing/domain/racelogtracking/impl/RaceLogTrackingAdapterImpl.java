@@ -80,6 +80,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.qrcode.QRCodeGenerationUtil;
 import com.sap.sse.mail.MailService;
+import com.sap.sse.util.impl.NonGwtUrlHelper;
 
 public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     private static final Logger logger = Logger.getLogger(RaceLogTrackingAdapterImpl.class.getName());
@@ -368,7 +369,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(serverUrlWithoutTrailingSlash,
                         event.getId().toString(), leaderboardName, DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
-                        competitor.getId().toString());
+                        competitor.getId().toString(), NonGwtUrlHelper.INSTANCE);
                 String subject = String.format("%s %s",
                         RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "trackingInvitationFor"), competitorName);
 

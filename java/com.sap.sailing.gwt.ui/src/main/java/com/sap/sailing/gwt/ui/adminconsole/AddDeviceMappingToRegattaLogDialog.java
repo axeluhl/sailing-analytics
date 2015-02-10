@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
+import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -98,7 +99,7 @@ public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog
                 }
                 String eventIdAsString = events.getValue().id.toString();
                 return DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash, eventIdAsString,
-                        leaderboardName, mappedItemType, mappedItemId);
+                        leaderboardName, mappedItemType, mappedItemId, GwtUrlHelper.INSTANCE);
             }
         });
         qrWidget.generateQRCode();
