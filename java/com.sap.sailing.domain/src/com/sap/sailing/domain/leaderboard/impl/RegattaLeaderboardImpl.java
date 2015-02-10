@@ -100,13 +100,13 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        HashSet<Competitor> competitors = new HashSet<Competitor>();
-        
+        HashSet<Competitor> competitors = new HashSet<>();
         
         for(Competitor competitor : super.getAllCompetitors()){
             competitors.add(competitor);
         }
         
+        // regatta considers {@link RegattaLog} as well
         for(Competitor competitor : regatta.getAllCompetitors()){
             competitors.add(competitor);
         }

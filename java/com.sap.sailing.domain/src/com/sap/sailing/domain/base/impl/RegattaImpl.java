@@ -12,8 +12,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -306,14 +305,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 result.add(c);
             }
         }
-        
-        RegattaLog regattaLog = regattaLikeHelper.getRegattaLog();
-        for (RegattaLogEvent event : regattaLog.getUnrevokedEvents()){
-            if (event instanceof RegisterCompetitorEvent){
-                RegisterCompetitorEvent<?> competitorRegistrationEvent = (RegisterCompetitorEvent<?>) event;
-                result.add(competitorRegistrationEvent.getCompetitor());
-            }
-        }
+
+        //consider {@link RegattaLog}
+        Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
+        result.addAll(viaLog);
+
         return result;
     }
 
