@@ -103,13 +103,11 @@
 					<!-- GWT version detected from dependencyManagement -->
 					<execution>
 						<configuration>
-							<extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2048m</extraJvmArgs>
 							<!-- <userAgents>chrome</userAgents> -->
 							<modules>
 								<module>com.sap.sailing.dashboards.gwt.RibDashboard</module>
 							</modules>
 							<gen>${basedir}/.generated</gen>
-							<localWorkers>15</localWorkers>
 							<webappDirectory>${basedir}</webappDirectory>
 							<warSourceDirectory>${basedir}/src/main/resources
 							</warSourceDirectory>

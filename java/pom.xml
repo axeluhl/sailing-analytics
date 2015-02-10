@@ -318,6 +318,31 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+
+		    <plugin>
+		      <groupId>org.codehaus.mojo</groupId>
+		      <artifactId>gwt-maven-plugin</artifactId>
+		      <version>${gwt.version}</version>
+		      <executions>
+			<!-- GWT version detected from dependencyManagement -->
+			<execution>
+			      <configuration>
+				<extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2048m</extraJvmArgs>
+				<!--
+				<userAgents>chrome</userAgents>
+				-->
+			    <!--<style>PRETTY</style>-->
+				    <localWorkers>2</localWorkers>
+			      <!-- Uncomment the following to obtain details split-point reports
+				  <compileReport>true</compileReport>
+				  <detailedSoyc>true</detailedSoyc>
+			      -->
+			      </configuration>
+			</execution>
+		      </executions>
+		    </plugin>
+
 		</plugins>
 
     <extensions>
