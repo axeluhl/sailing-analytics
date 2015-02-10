@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>root</artifactId>
@@ -14,71 +15,76 @@
     <repository>
       <id>sonatype</id>
       <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-      <snapshots><enabled>true</enabled></snapshots>
-      <releases><enabled>false</enabled></releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
   </repositories>
 
   <dependencies>
     <dependency>
-       <groupId>javax.validation</groupId>
-       <artifactId>validation-api</artifactId>
-       <version>1.0.0.GA</version>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>1.0.0.GA</version>
     </dependency>
     <dependency>
-       <groupId>javax.validation</groupId>
-       <artifactId>validation-api</artifactId>
-       <version>1.0.0.GA</version>
-       <classifier>sources</classifier>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>1.0.0.GA</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
-        <!-- This dependency is required because the GWT Maven Plugin searches other GWT modules only in Maven dependencies -->
-	<groupId>com.github.branflake2267</groupId>
-	<artifactId>gwt-maps-api</artifactId>
-	<version>3.9.0-build-17</version>
-    	<scope>provided</scope>
+      <!-- This dependency is required because the GWT Maven Plugin searches 
+        other GWT modules only in Maven dependencies -->
+      <groupId>com.github.branflake2267</groupId>
+      <artifactId>gwt-maps-api</artifactId>
+      <version>3.9.0-build-17</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-	<groupId>org.moxieapps.gwt</groupId>
-	<artifactId>org.moxieapps.gwt.highcharts</artifactId>
-	<version>1.6.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
+      <groupId>org.moxieapps.gwt</groupId>
+      <artifactId>org.moxieapps.gwt.highcharts</artifactId>
+      <version>1.6.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
-    	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sailing.domain.common</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.domain.common</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
-    	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sse.common</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.common</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
-    	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sse.gwt</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.gwt</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
-    	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sse.gwt.adminconsole</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.gwt.adminconsole</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
-    	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sailing.datamining.shared</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.datamining.shared</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
-    	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sse.datamining.shared</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.datamining.shared</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>com.github.gwtbootstrap</groupId>
@@ -87,16 +93,16 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-    	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sse.security.common</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.security.common</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
-    	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sse.security.ui</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.security.ui</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
   </dependencies>
 
@@ -109,35 +115,31 @@
         <executions>
           <!-- GWT version detected from dependencyManagement -->
           <execution>
-	        <configuration>
-		  <!--
-		  <userAgents>chrome</userAgents>
-		  -->
-	          <modules>
-	            <module>com.sap.sailing.gwt.ui.EmulatedJRE</module>
-		        <module>com.sap.sailing.gwt.Home</module>
-		        <module>com.sap.sailing.gwt.AutoPlay</module>
-		        <module>com.sap.sailing.gwt.ui.AdminConsole</module>
-		        <module>com.sap.sailing.gwt.ui.Leaderboard</module>
-		        <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
-		        <module>com.sap.sailing.gwt.ui.RaceBoard</module>
-		        <module>com.sap.sailing.gwt.ui.Spectator</module>
-		        <module>com.sap.sailing.gwt.ui.DataMining</module>
-		        <module>com.sap.sailing.gwt.ui.VideoPopup</module>
-		        <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
-		        <module>com.sap.sailing.gwt.ui.Simulator</module>
-		        <module>com.sap.sailing.gwt.ui.RegattaOverview</module>
-		        <module>com.sap.sailing.gwt.ui.PolarSheets</module>
-		      </modules>
-              <!--<style>PRETTY</style>-->
-		      <gen>${basedir}/.generated</gen>
-		      <webappDirectory>${basedir}</webappDirectory>
-		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
-                <!-- Uncomment the following to obtain details split-point reports
-		    <compileReport>true</compileReport>
-                    <detailedSoyc>true</detailedSoyc>
-		-->
-	        </configuration>
+            <configuration>
+              <!-- <userAgents>chrome</userAgents> -->
+              <modules>
+                <module>com.sap.sailing.gwt.ui.EmulatedJRE</module>
+                <module>com.sap.sailing.gwt.Home</module>
+                <module>com.sap.sailing.gwt.AutoPlay</module>
+                <module>com.sap.sailing.gwt.ui.AdminConsole</module>
+                <module>com.sap.sailing.gwt.ui.Leaderboard</module>
+                <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
+                <module>com.sap.sailing.gwt.ui.RaceBoard</module>
+                <module>com.sap.sailing.gwt.ui.Spectator</module>
+                <module>com.sap.sailing.gwt.ui.DataMining</module>
+                <module>com.sap.sailing.gwt.ui.VideoPopup</module>
+                <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
+                <module>com.sap.sailing.gwt.ui.Simulator</module>
+                <module>com.sap.sailing.gwt.ui.RegattaOverview</module>
+                <module>com.sap.sailing.gwt.ui.PolarSheets</module>
+              </modules>
+              <!--<style>PRETTY</style> -->
+              <gen>${basedir}/.generated</gen>
+              <webappDirectory>${basedir}</webappDirectory>
+              <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
+              <!-- Uncomment the following to obtain details split-point 
+                reports <compileReport>true</compileReport> <detailedSoyc>true</detailedSoyc> -->
+            </configuration>
             <goals>
               <goal>compile</goal>
             </goals>
@@ -145,46 +147,46 @@
         </executions>
       </plugin>
       <plugin>
-	      <groupId>org.eclipse.tycho</groupId>
-	      <artifactId>tycho-source-plugin</artifactId>
-	      <version>${tycho-version}</version>
-	      <executions>
-		      <execution>
-			      <id>plugin-source</id>
-			      <phase>generate-sources</phase>
-			      <goals>
-				      <goal>plugin-source</goal>
-			      </goals>
-		      </execution>
-	      </executions>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-source-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <executions>
+          <execution>
+            <id>plugin-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>plugin-source</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
 
   <profiles>
-        <profile>
-            <id>debug.no-gwt-compile</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>gwt-maven-plugin</artifactId>
-                        <version>${gwt.version}</version>
-                        <executions>
-                          <execution>
-                              <configuration combine.self="override">
-                                  <modules>
-                                  </modules>
-                              </configuration>
-                              <goals>
-                                <goal>help</goal>
-                              </goals>
-                          </execution>
-                      </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+    <profile>
+      <id>debug.no-gwt-compile</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>gwt-maven-plugin</artifactId>
+            <version>${gwt.version}</version>
+            <executions>
+              <execution>
+                <configuration combine.self="override">
+                  <modules>
+                  </modules>
+                </configuration>
+                <goals>
+                  <goal>help</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
