@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -28,9 +29,7 @@ public class StartModeFragment extends RaceFragment {
 
         @Override
         public int compare(StartMode left, StartMode right) {
-            StartMode leftStartMode = (StartMode) left;
-            StartMode rightStartMode = (StartMode) right;
-            return leftStartMode.getFlagName().compareToIgnoreCase(rightStartMode.getFlagName());
+            return left.getFlagName().compareToIgnoreCase(right.getFlagName());
         }
     }
 
@@ -40,6 +39,11 @@ public class StartModeFragment extends RaceFragment {
 
     public StartModeFragment() {
 
+    }
+
+    public static StartModeFragment newInstance() {
+        StartModeFragment fragment = new StartModeFragment();
+        return fragment;
     }
 
     @Override
@@ -70,9 +74,21 @@ public class StartModeFragment extends RaceFragment {
                     }
                     if (checkedItem != null) {
                         mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), checkedItem.getFlag());
+                        openMainFragment();
                     } else {
                         Toast.makeText(getActivity(), "Please choose one start mode", Toast.LENGTH_LONG).show();
                     }
+                }
+            });
+        }
+
+        LinearLayout headerText = (LinearLayout) view.findViewById(R.id.header_text);
+        if (headerText != null) {
+            headerText.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    openMainFragment();
                 }
             });
         }
@@ -99,5 +115,14 @@ public class StartModeFragment extends RaceFragment {
         Collections.sort(startMode, new StartModeComparator());
         mAdapter = new StartModeAdapter(getActivity(), startMode);
         mListView.setAdapter(mAdapter);
+    }
+
+    private void openMainFragment() {
+        RaceFragment fragment = MainScheduleFragment.newInstance();
+        fragment.setArguments(getRecentArguments());
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.racing_view_container, fragment)
+                .commit();
     }
 }

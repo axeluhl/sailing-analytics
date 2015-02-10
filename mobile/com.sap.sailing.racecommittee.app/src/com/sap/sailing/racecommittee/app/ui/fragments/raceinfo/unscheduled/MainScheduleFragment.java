@@ -9,12 +9,15 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.text.SimpleDateFormat;
 
@@ -24,6 +27,8 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
 
     private TextView mStartTime;
     private String mStartTimeString;
+    private TimePoint mProtestTime;
+    private RacingProcedureType mRacingProcedureType;
 
     public static MainScheduleFragment newInstance() {
         MainScheduleFragment fragment = new MainScheduleFragment();
@@ -69,9 +74,10 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         if (getRace() != null) {
-            if (getRace().getState() != null) {
-                TimePoint timePoint = getRace().getState().getProtestTime();
+            if (getRaceState() != null) {
+                TimePoint timePoint = getRaceState().getProtestTime();
                 if (timePoint != null && mStartTime != null) {
+                    mProtestTime = timePoint;
                     mStartTimeString = simpleDateFormat.format(timePoint.asDate());
                 }
             }
@@ -96,13 +102,19 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.start_mode:
+                openFragment(StartModeFragment.newInstance());
                 break;
 
             case R.id.start_procedure:
                 break;
 
             case R.id.start_race:
-                RaceInfoFragmentChooser fragmentChooser = RaceInfoFragmentChooser.on(getRace().getState().getRacingProcedure().getType());
+                mRacingProcedureType = getRaceState().getRacingProcedure().getType();
+                TimePoint now = MillisecondsTimePoint.now();
+                getRaceState().setAdvancePass(now);
+                getRaceState().setRacingProcedure(now, mRacingProcedureType);
+                getRaceState().forceNewStartTime(now, mProtestTime);
+                RaceInfoFragmentChooser fragmentChooser = RaceInfoFragmentChooser.on(mRacingProcedureType);
                 openFragment(fragmentChooser.getStartFragment(getActivity(), getRace()));
                 break;
 
@@ -125,7 +137,7 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
     }
 
     private void openFragment(RaceFragment fragment) {
-        fragment.setArguments(RaceFragment.createArguments(getRace()));
+        fragment.setArguments(getRecentArguments());
         getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.racing_view_container, fragment)

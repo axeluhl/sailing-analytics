@@ -2,14 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorGreyDark"
     android:padding="@dimen/listview_row_padding" >
 
     <ImageView
         android:id="@+id/flag"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/zulu_flag" />
+        android:src="@drawable/flag_zulu_64dp" />
 
     <ImageView
         android:id="@+id/checked"
@@ -18,7 +17,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_check_black_18dp" />
+        android:src="@drawable/ic_check_white_18dp" />
 
     <TextView
         android:id="@+id/flag_name"
@@ -26,10 +25,10 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/flag"
-        android:layout_toLeftOf="@+d/check"
+        android:layout_toLeftOf="@id/checked"
         android:layout_toRightOf="@id/flag"
         android:layout_toStartOf="@id/checked"
-        android:padding="3dp"
+        android:padding="@dimen/default_padding_half"
         android:text="Zulu" />
 
 </RelativeLayout>

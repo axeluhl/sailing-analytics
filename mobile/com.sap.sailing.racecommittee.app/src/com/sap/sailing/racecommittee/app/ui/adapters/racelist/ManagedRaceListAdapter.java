@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -316,13 +317,14 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             current_flag.setImageBitmap(flag);
             String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
             flag_timer.setText(text.replace("-", ""));
-            Drawable arrow;
+            Resources resources = getContext().getResources();
+            Bitmap arrow;
             if (changePole.isDisplayed()) {
-                arrow = getContext().getResources().getDrawable(R.drawable.arrow_up_small);
+                arrow = BitmapFactory.decodeResource(resources, R.drawable.arrow_up);
             } else {
-                arrow = getContext().getResources().getDrawable(R.drawable.arrow_down_small);
+                arrow = BitmapFactory.decodeResource(resources, R.drawable.arrow_down);
             }
-            arrow_direction.setImageBitmap(((BitmapDrawable) arrow).getBitmap());
+            arrow_direction.setImageBitmap(arrow);
             race_flag.setVisibility(View.VISIBLE);
         }
     }

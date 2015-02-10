@@ -120,12 +120,14 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+
         preferences = AppPreferences.on(activity);
     }
 
     @Override
     public void onStart() {
         super.onStart();
+
         TickSingleton.INSTANCE.registerListener(this);
         notifyTick();
     }
@@ -133,6 +135,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     @Override
     public void onStop() {
         super.onStop();
+
         TickSingleton.INSTANCE.unregisterListener(this);
     }
 }

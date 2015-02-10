@@ -83,8 +83,8 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
 
         TimePoint protestTime = null;
         if (getRace() != null) {
-            if (getRace().getState() != null) {
-                protestTime = getRace().getState().getProtestTime();
+            if (getRaceState() != null) {
+                protestTime = getRaceState().getProtestTime();
             }
         }
 
@@ -132,7 +132,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
                 calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
                 calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
 
-                getRace().getState().setProtestTime(now, new MillisecondsTimePoint(calendar.getTimeInMillis()));
+                getRaceState().setProtestTime(now, new MillisecondsTimePoint(calendar.getTimeInMillis()));
                 openMainFragment();
                 break;
 
@@ -147,7 +147,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
 
     private void openMainFragment() {
         RaceFragment fragment = MainScheduleFragment.newInstance();
-        fragment.setArguments(RaceFragment.createArguments(getRace()));
+        fragment.setArguments(getRecentArguments());
         getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.racing_view_container, fragment)

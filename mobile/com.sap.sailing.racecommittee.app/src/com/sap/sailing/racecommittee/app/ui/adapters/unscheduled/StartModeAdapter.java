@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.StartModeFragment;
 
 public class StartModeAdapter extends BaseAdapter implements OnClickListener {
 
@@ -49,19 +50,19 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
     private int getResId(String res) {
         switch (Flags.valueOf(res)) {
         case AP:
-            return R.drawable.ap_flag;
+            return R.drawable.flag_ap_64dp;
 
         case BLACK:
-            return R.drawable.black_flag;
+            return R.drawable.flag_black_64dp;
 
         case BRAVO:
-            return R.drawable.bravo;
+            return R.drawable.flag_bravo_64dp;
 
         case BLUE:
-            return R.drawable.blue_flag;
+            return R.drawable.flag_blue_64dp;
 
         case CLASS:
-            return R.drawable.generic_class;
+            return R.drawable.flag_class_64dp;
 
         case ESSONE:
             return R.drawable.one_min_flag;
@@ -73,37 +74,37 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
             return R.drawable.two_min_flag;
 
         case FIRSTSUBSTITUTE:
-            return R.drawable.first_substitute_flag;
+            return R.drawable.flag_first_substitute_64dp;
 
         case FOXTROTT:
-            return R.drawable.foxtrott_flag;
+            return R.drawable.flag_foxtrott_64dp;
 
         case GOLF:
-            return R.drawable.golf_flag;
+            return R.drawable.flag_golf_64dp;
 
         case HOTEL:
-            return R.drawable.hotel_flag;
+            return R.drawable.flag_hotel_64dp;
 
         case INDIA:
-            return R.drawable.india_flag;
+            return R.drawable.flag_india_64dp;
 
         case JURY:
             return R.drawable.jury_flag;
 
         case NOVEMBER:
-            return R.drawable.november_flag;
+            return R.drawable.flag_november_64dp;
 
         case PAPA:
-            return R.drawable.papa_flag;
+            return R.drawable.flag_papa_64dp;
 
         case XRAY:
-            return R.drawable.xray_flag;
+            return R.drawable.flag_xray_64dp;
 
         case ZULU:
-            return R.drawable.zulu_flag;
+            return R.drawable.flag_zulu_64dp;
 
         default:
-            return R.drawable.alpha_flag;
+            return R.drawable.flag_alpha_64dp;
         }
     }
 
@@ -124,6 +125,10 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
         mFlagName = ViewHolder.get(convertView, R.id.flag_name);
         if (mFlagName != null) {
             mFlagName.setText(mStartMode.getFlagName());
+            mFlagName.setTextColor(mContext.getResources().getColor(R.color.grey_light));
+            if (mStartMode.isChecked()) {
+                mFlagName.setTextColor(mContext.getResources().getColor(R.color.white));
+            }
         }
 
         mChecked = ViewHolder.get(convertView, R.id.checked);
