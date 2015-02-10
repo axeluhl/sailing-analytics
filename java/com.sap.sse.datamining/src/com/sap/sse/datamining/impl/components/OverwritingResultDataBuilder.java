@@ -4,10 +4,10 @@ import java.util.Locale;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
  * For general information see {@link AdditionalResultDataBuilder}.<br />
@@ -35,11 +35,11 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     }
 
     @Override
-    public AdditionalResultData build(long calculationTimeInNanos, DataMiningStringMessages stringMessages, Locale locale) {
+    public AdditionalResultData build(long calculationTimeInNanos, ResourceBundleStringMessages stringMessages, Locale locale) {
         return new AdditionalResultDataImpl(retrievedDataAmount, buildResultSignifier(stringMessages, locale), unit, resultDecimals, calculationTimeInNanos);
     }
 
-    private String buildResultSignifier(DataMiningStringMessages stringMessages, Locale locale) {
+    private String buildResultSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
         if (extractionFunction == null || aggregationNameMessageKey == null) {
             return "";
         }

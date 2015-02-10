@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
@@ -25,6 +26,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.TabbingTextInputCell;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
@@ -182,7 +185,7 @@ public class FileStoragePanel extends FlowPanel {
      * @param callback
      */
     private void testProperties(final Callback<Void, Void> callback) {
-        sailingService.testFileStorageServiceProperties(getSelectedServiceName(),
+        sailingService.testFileStorageServiceProperties(getSelectedServiceName(), getLocaleInfo(),
                 new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
                     @Override
                     public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
@@ -243,7 +246,7 @@ public class FileStoragePanel extends FlowPanel {
         saveAndTestProperties(new Callback<Void, Void>() {
             @Override
             public void onSuccess(Void result) {
-                sailingService.setActiveFileStorageService(getSelectedServiceName(), new AsyncCallback<Void>() {
+                sailingService.setActiveFileStorageService(getSelectedServiceName(), getLocaleInfo(), new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
                         activeServiceLabel.setText(getSelectedServiceName());
@@ -276,6 +279,10 @@ public class FileStoragePanel extends FlowPanel {
         serviceDescriptionLabel.setText(selected.description);
         properties.addAll(Arrays.asList(selected.properties));
     }
+    
+    private String getLocaleInfo() {
+        return LocaleInfo.getCurrentLocale().getLocaleName();
+    }
 
     private void refresh() {
         String oldSelectedService = getSelectedServiceName();
@@ -299,7 +306,7 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
 
-        sailingService.getAvailableFileStorageServices(new AsyncCallback<FileStorageServiceDTO[]>() {
+        sailingService.getAvailableFileStorageServices(getLocaleInfo(), new AsyncCallback<FileStorageServiceDTO[]>() {
             @Override
             public void onSuccess(FileStorageServiceDTO[] result) {
                 for (FileStorageServiceDTO service : result) {
