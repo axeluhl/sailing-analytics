@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.sap.sse.mail
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.sap.sse.mail.impl.Activator
 Export-Package: com.sap.sse.mail
 Import-Package: javax.mail,
  javax.mail.internet,
