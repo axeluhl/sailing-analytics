@@ -6,8 +6,10 @@ import com.sap.sse.common.Color;
 
 public interface DynamicCompetitor extends Competitor, Renamable {
     DynamicBoat getBoat();
+
     DynamicTeam getTeam();
-    
+
     void setColor(Color displayColor);
+
     void setEmail(String email);
 }
