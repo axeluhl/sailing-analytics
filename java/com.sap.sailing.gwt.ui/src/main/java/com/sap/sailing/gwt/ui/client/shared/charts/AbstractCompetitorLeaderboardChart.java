@@ -297,8 +297,11 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 raceColumnNumber++;
             }
         }
-//        chart.getYAxis().setMaxPadding(0.5 / maxCompetitorCount).setMinPadding(0.5 / maxCompetitorCount);
-        chart.setHeight(Window.getClientHeight()); // maxCompetitorCount * 30 + 100 + "px");
+        setHeight();
+    }
+
+    private void setHeight() {
+        chart.setHeight(Window.getClientHeight());
     }
 
     private void fillTotalPointsSeries(
@@ -342,8 +345,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 raceColumnNumber++;
             }
         }
-        chart.getYAxis().setMaxPadding(0.5/maxCompetitorCount).setMinPadding(0.5/maxCompetitorCount);
-        chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
+        setHeight();
     }
     
     private boolean hasValidValues(List<Double> values) {
