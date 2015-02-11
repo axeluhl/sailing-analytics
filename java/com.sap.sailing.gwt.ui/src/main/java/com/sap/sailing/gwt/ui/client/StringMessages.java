@@ -1139,4 +1139,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String fileStorage();
     String active();
     String scoringSchemeHighPointEssOverallDescription();
+    String timeBetweenRaceStartAndCompetitorStartInSeconds();
+    String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
 }
