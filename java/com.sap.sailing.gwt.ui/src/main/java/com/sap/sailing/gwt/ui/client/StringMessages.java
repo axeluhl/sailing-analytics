@@ -191,6 +191,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String actionRaceUnlink();
     String actionRaceRemove();
     String actionExportXML();
+    String actionOpenDashboard();
     String filterLeaderboardsByName();
     String actions();
     String islinked();
@@ -1137,6 +1138,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String fileStorage();
     String active();
     String scoringSchemeHighPointEssOverallDescription();
+    String timeBetweenRaceStartAndCompetitorStartInSeconds();
+    String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
     String email();
     String pleaseEnterAnEmail();
     String inviteCompetitors();

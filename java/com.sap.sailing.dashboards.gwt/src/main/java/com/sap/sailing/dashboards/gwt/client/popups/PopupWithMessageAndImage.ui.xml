@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	
+    <ui:style type='com.sap.sailing.dashboards.gwt.client.popups.PopupWithMessageAndImage.PopupWithMessageAndImageStyle' src='PopupWithMessageAndImage.css'></ui:style>
+    
+	<g:VerticalPanel ui:field="popup" styleName="{style.popup}">
+	    <g:Image ui:field="icon" styleName="{style.popup_icon}"></g:Image>
+	    <g:HTML ui:field="message" styleName="{style.popup_message}"></g:HTML>
+	    <g:Image ui:field="loadingindicator" styleName="{style.popup_loadingindicator}"></g:Image>
+		<g:Button ui:field="button" styleName="{style.popup_button}"></g:Button>
+	</g:VerticalPanel>
+	
+</ui:UiBinder> 

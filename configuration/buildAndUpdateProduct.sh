@@ -65,6 +65,9 @@ HEAD_SHA=$(git show-ref --head -s | head -1)
 HEAD_DATE=$(date "+%Y%m%d%H%M")
 VERSION_INFO="$HEAD_SHA-$active_branch-$HEAD_DATE"
 SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
+# The number of worker threads to use for building GWT permutations.
+# Can be overridden using the -x option
+GWT_WORKERS=2
 
 # The number of worker threads to use for building GWT permutations.
 # Can be overridden using the -x option
@@ -92,7 +95,7 @@ parallelexecution=0
 p2local=0
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
+    echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port> -x <gwt-workers>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
@@ -148,7 +151,7 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocparvm:n:l:s:w:u'
+options=':bgtocparvm:n:l:s:w:x:u'
 while getopts $options option
 do
     case $option in
