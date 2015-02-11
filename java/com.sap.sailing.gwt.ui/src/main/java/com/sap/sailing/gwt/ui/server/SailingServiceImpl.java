@@ -5358,7 +5358,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return data;
     }
     
-    protected FileStorageService getFileStorageService(String name) {
+    private FileStorageService getFileStorageService(String name) {
         if (name == null || name.equals("")) {
             return null;
         }
