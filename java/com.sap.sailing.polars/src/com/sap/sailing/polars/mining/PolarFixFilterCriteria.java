@@ -2,6 +2,7 @@ package com.sap.sailing.polars.mining;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -10,13 +11,49 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.FilterCriterion;
 
 public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithPolarContext> {
+    
+    /**
+     * 0 if every competitor should be included.
+     * 1 if only the leading competitor should be included and so on.
+     */
+    private final int numberOfLeadingCompetitorsToInclude;
+
+    /**
+     * 
+     * @param numberOfLeadingCompetitorsToInclude 
+     *                          0 if every competitor should be included.<br \>
+     *                          1 if only the leading competitor should be included and so on.
+     */
+    public PolarFixFilterCriteria(int numberOfLeadingCompetitorsToInclude) {
+        this.numberOfLeadingCompetitorsToInclude = numberOfLeadingCompetitorsToInclude;
+    }
+    
+    public PolarFixFilterCriteria() {
+        this.numberOfLeadingCompetitorsToInclude = 0;
+    }
 
     @Override
     public boolean matches(GPSFixMovingWithPolarContext element) {
         boolean afterStartTime = isAfterStartTime(element);
         boolean beforeFinishTime = isBeforeFinishTime(element);
         boolean noDirectionChange = !hasDirectionChange(element);
-        return (afterStartTime && beforeFinishTime && noDirectionChange);
+        boolean isInLeadingCompetitors = true;
+        if (numberOfLeadingCompetitorsToInclude > 0) {
+            isInLeadingCompetitors = isInLeadingCompetitors(element);
+        }
+        return (afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors);
+    }
+    
+    private boolean isInLeadingCompetitors(GPSFixMovingWithPolarContext element) {
+        boolean result;
+        try {
+            int rank = element.getRace().getRank(element.getCompetitor(), element.getFix().getTimePoint());
+            result = rank <= numberOfLeadingCompetitorsToInclude;
+        } catch (NoWindException e) {
+            // Unrealistic, we wouldn't be here if there was no wind. Let's return false.
+            result = false;
+        }
+        return result;
     }
 
     private boolean hasDirectionChange(GPSFixMovingWithPolarContext element) {
