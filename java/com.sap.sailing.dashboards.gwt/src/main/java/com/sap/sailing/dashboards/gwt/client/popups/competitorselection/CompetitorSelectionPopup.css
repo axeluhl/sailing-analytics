@@ -1,0 +1,87 @@
+@CHARSET "UTF-8";
+
+.competitorselectionpopup {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 200pt;
+	height: 200pt;
+	margin-top: -600pt;
+	margin-left: -100pt;
+	background-color: white;
+	border-radius: 0px;
+	z-index: 2;
+}
+
+.header {
+	position: absolute;
+	color: black;
+	font-size: 12pt;
+	background-color: white;
+	height: 30pt;
+	line-height: 30pt;
+	vertical-align: middle;
+	text-align: center;
+	font-weight: bold;
+	text-shadow: 0 1px 1px rgba(255, 255, 255, .7);
+	width: 100%;
+	z-index: 3;
+}
+
+.scrollpanel {
+	position: absolute;
+	top: 30pt;
+	width: 100%;
+	bottom: 6pt;
+	overflow: hidden;
+	z-index: 2;
+}
+
+.button {
+	position: absolute;
+	background-color: #2AB3E8;
+	box-shadow: none;
+	outline: none;
+	border-width: 0;
+	font-size: 12pt;
+	font-color: white;
+	color: white;
+	height: 0pt;
+	width: 100%;
+	top: 100%;
+	left: 0pt;
+}
+
+.button:active {
+	background-color: #4192D9;
+}
+
+.buttonshow {
+	transition: all ease-in-out 200ms;
+	height: 30pt;
+}
+
+.popuphide {
+	transition: all ease-in-out 500ms;
+	height: 0pt;
+}
+
+.popupshow {
+	transition: margin-top ease-in-out 500ms;
+	margin-top: -100pt;
+}
+
+.popuphide {
+	transition: margin-top ease-in-out 500ms;
+	margin-top: -600pt;
+}
+
+.blurred {
+	-webkit-filter: blur(10pt) brightness(0.92);
+	filter: blur(10pt) brightness(0.92);
+}
+
+.not_blurred {
+	-webkit-filter: blur(0pt) brightness(1);
+	filter: blur(0pt) brightness(1);
+}

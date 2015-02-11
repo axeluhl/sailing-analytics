@@ -1,0 +1,41 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <ui:style src="LiveAverageComponent.css" />
+    
+	<g:HTMLPanel ui:field="liveAveragePanel" styleName="{style.liveAverageCompoment_panel}">
+
+		<g:HTMLPanel styleName="{style.liveAverageCompoment_header_container}">
+			    <div class="{style.liveAverageCompoment_header}" ui:field="header"></div>
+		</g:HTMLPanel>
+
+		<g:HTMLPanel ui:field="livePanel" styleName="{style.liveAverageCompoment_live_container}">
+			    <div class="{style.liveAverageCompoment_value_panel}">
+					<span class="{style.liveAverageCompoment_panel_value_number}" ui:field="liveNumber"></span>
+					<span class="{style.liveAverageCompoment_panel_value_unit}" ui:field="liveUnit"></span>
+				</div>
+		</g:HTMLPanel>
+
+		<g:HTMLPanel ui:field="middleLine" styleName="{style.liveAverageCompoment_middle_line}">
+			
+		</g:HTMLPanel>
+
+		<g:HTMLPanel ui:field="averagePanel" styleName="{style.liveAverageCompoment_average_container}">
+			    <div class="{style.liveAverageCompoment_value_panel}">
+					<span class="{style.liveAverageCompoment_panel_value_number}" ui:field="averageNumber"></span>
+					<span class="{style.liveAverageCompoment_panel_value_unit}" ui:field="averageUnit"></span>
+				</div>
+		</g:HTMLPanel>
+
+		<g:HTMLPanel styleName="{style.liveAverageCompoment_liveLabelContainer}">
+			    <div class="{style.liveAverageCompoment_label_text}" ui:field="liveLabel"></div>
+		</g:HTMLPanel>
+		
+		<g:HTMLPanel styleName="{style.liveAverageCompoment_averageLabelContainer}">
+			    <div class="{style.liveAverageCompoment_label_text}" ui:field="averageLabel"></div>
+		</g:HTMLPanel>
+
+	</g:HTMLPanel>
+
+</ui:UiBinder> 

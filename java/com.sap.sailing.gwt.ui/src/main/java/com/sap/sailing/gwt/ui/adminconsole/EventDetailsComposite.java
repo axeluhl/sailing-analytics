@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -15,6 +17,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -34,6 +37,7 @@ public class EventDetailsComposite extends Composite  {
     private final Label endDate;
     private final Label isPublic;
     private final Anchor officialWebsiteURL;
+    private final Anchor eventOverviewURL;
     private final Anchor logoImageURL;
     private final SimpleStringListComposite courseAreaNamesList;
     private final SimpleStringListComposite imageURLList;
@@ -52,7 +56,7 @@ public class EventDetailsComposite extends Composite  {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 14;
+        int rows = 15;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
@@ -65,6 +69,7 @@ public class EventDetailsComposite extends Composite  {
         endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
         isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isPublic(), "IsPublicLabel");
         officialWebsiteURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
+        eventOverviewURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventOverviewURL(), "EventOverviewURLLabel");
         logoImageURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventLogoImageURL(), "LogoImageURLLabel");
         courseAreaNamesList = createLableAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");
         imageURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.imageURLs(), "ImageURLValueList");
@@ -126,6 +131,11 @@ public class EventDetailsComposite extends Composite  {
             isPublic.setText(String.valueOf(event.isPublic));
             officialWebsiteURL.setText(event.getOfficialWebsiteURL());
             officialWebsiteURL.setHref(event.getOfficialWebsiteURL());
+            Map<String, String> regattaOverviewURLParameters = new HashMap<String, String>();
+            regattaOverviewURLParameters.put("event", event.id.toString());
+            String regattaOverviewLink = EntryPointLinkFactory.createRegattaOverviewLink(regattaOverviewURLParameters);
+            eventOverviewURL.setText(regattaOverviewLink);
+            eventOverviewURL.setHref(regattaOverviewLink);
             logoImageURL.setText(event.getLogoImageURL());
             logoImageURL.setHref(event.getLogoImageURL());
      

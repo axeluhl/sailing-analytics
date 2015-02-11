@@ -1,0 +1,39 @@
+@CHARSET "UTF-8";
+
+.flowPanelContainer {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+.verticalWindChartClickArea {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+.verticalWindChart {
+	position: absolute;
+	top: 0px;
+	bottom: 5px;
+	left: 0px;
+	right: 0px;
+}
+
+.verticalWindChartClickHint {
+	position: absolute;
+	height: 35px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	line-height: 35px;
+	vertical-align: middle;
+	font-size: 12px;
+	font-family: "Arial";
+	text-align: center;
+	color: black;
+}
+
+.clickHintMinutesSpan{
+	font-weight: bolder;
+}
