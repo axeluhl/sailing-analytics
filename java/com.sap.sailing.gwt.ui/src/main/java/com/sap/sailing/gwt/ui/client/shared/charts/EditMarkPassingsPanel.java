@@ -58,6 +58,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
     private RegattaAndRaceIdentifier raceIdentifier;
     private final AsyncActionsExecutor asyncExecutor;
     private final ErrorReporter errorReporter;
+    private final StringMessages stringMessages;
     private final CompetitorSelectionProvider competitorSelectionModel;
     private String leaderboardName;
     private RaceColumnDTO column;
@@ -77,7 +78,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
     private final Button removeSuppressedPassingButton;
 
     public EditMarkPassingsPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            final RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages,
+            final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
             final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter,
             final Timer timer) {
         this.sailingService = sailingService;
@@ -85,6 +86,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
         this.asyncExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.competitorSelectionModel = competitorSelectionModel;
+        this.stringMessages = stringMessages;
         competitorSelectionModel.addCompetitorSelectionChangeListener(this);
 
         setVisible(false);
@@ -117,7 +119,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                     }
                 };
             }
-        }, "Waypoint");
+        }, stringMessages.waypoint());
         wayPointSelectionTable.addColumn(new Column<Util.Pair<Integer, Date>, SafeHtml>(new AnchorCell()) {
             @Override
             public SafeHtml getValue(final Pair<Integer, Date> object) {
@@ -145,13 +147,13 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                     }
                 };
             }
-        }, "Mark passing");
+        }, stringMessages.markPassing());
 
         waypointList.addDataDisplay(wayPointSelectionTable);
         wayPointSelectionTable.setSelectionModel(waypointSelectionModel);
 
         // Buttons for fixing
-        removeFixedMarkPassingsButton = new Button("Remove fixed mark passing");
+        removeFixedMarkPassingsButton = new Button(stringMessages.removeFixedPassings());
         removeFixedMarkPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -164,7 +166,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                 }, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error removing fixed mark passing");
+                        errorReporter.reportError(stringMessages.errorRemovingFixedPassing(caught.getMessage()));
                     }
 
                     @Override
@@ -174,7 +176,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                 });
             }
         });
-        setTimeAsMarkPassingsButton = new Button("Set time as mark passing");
+        setTimeAsMarkPassingsButton = new Button(stringMessages.setFixedPassing());
         setTimeAsMarkPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -188,7 +190,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                 }, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error setting fixed mark passing");
+                        errorReporter.reportError(stringMessages.errorSettingFixedPassing(caught.getMessage()));
                     }
 
                     @Override
@@ -200,7 +202,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
         });
 
         // Button for suppressing
-        suppressPassingsButton = new Button("Suppress starting with selected");
+        suppressPassingsButton = new Button(stringMessages.setSuppressedPassing());
         suppressPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -214,7 +216,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                 }, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error suppressing mark passings");
+                        errorReporter.reportError(stringMessages.errorSuppressingPassing(caught.getMessage()));
                     }
 
                     @Override
@@ -225,7 +227,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
             }
         });
 
-        removeSuppressedPassingButton = new Button("Remove suppressed passing");
+        removeSuppressedPassingButton = new Button(stringMessages.removeSuppressedPassing());
         removeSuppressedPassingButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -238,7 +240,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                 }, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error suppressing mark passings");
+                        errorReporter.reportError(stringMessages.errorRemovingSupressedPassing(caught.getMessage()));
                     }
 
                     @Override
@@ -286,7 +288,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
         clearInfo();
 
         competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
-        
+
         // Get current mark passings
         asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
             @Override
@@ -296,7 +298,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
         }, new AsyncCallback<Map<Integer, Date>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error obtaining mark passings");
+                errorReporter.reportError(stringMessages.errorTryingToObtainMarkPassing(caught.getMessage()));
             }
 
             @Override
@@ -310,9 +312,9 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                 wayPointSelectionTable.redraw();
             }
         });
-        
+
         // Get current edits
-        
+
         asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
             @Override
             public void execute(AsyncCallback<Map<Integer, Date>> callback) {
@@ -323,7 +325,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
         }, new AsyncCallback<Map<Integer, Date>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error retrieving race log mark passing data");
+                errorReporter.reportError(stringMessages.errorTryingToObtainRaceLogMarkPassingData(caught.getMessage()));
             }
 
             @Override
@@ -356,7 +358,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
         }, new AsyncCallback<RaceCourseDTO>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error obtaining course");
+                errorReporter.reportError(stringMessages.errorTryingToObtainRaceCourse(caught.getMessage()));
             }
 
             @Override
@@ -379,7 +381,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
             if (selectedWaypoint != null) {
                 setTimeAsMarkPassingsButton.setEnabled(true);
                 suppressPassingsButton.setEnabled(true);
-                if(currentCompetitorEdits.containsKey(selectedWaypoint.getA())){
+                if (currentCompetitorEdits.containsKey(selectedWaypoint.getA())) {
                     removeFixedMarkPassingsButton.setEnabled(true);
                 }
             }

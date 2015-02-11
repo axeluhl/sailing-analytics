@@ -1127,8 +1127,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String confidence();
     String errorTryingToGetEvents(String message);
     String createDefaultSettingsForAllRegattas();
-    String useInternalAlgorithm();
-    String editMarkPassings();
     String noOverallEventSelected();
     String errorTryingToCreateNewEvent(String name, String message);
     String createNewEvent();
@@ -1142,4 +1140,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String scoringSchemeHighPointEssOverallDescription();
     String timeBetweenRaceStartAndCompetitorStartInSeconds();
     String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
+    String useInternalAlgorithm();
+    String editMarkPassings();
+    String removeFixedPassings();
+    String setFixedPassing();
+    String setSuppressedPassing();
+    String removeSuppressedPassing();
+    String errorRemovingFixedPassing(String message);
+    String errorSettingFixedPassing(String message);
+    String errorSuppressingPassing(String message);
+    String errorRemovingSupressedPassing(String message);
+    String errorTryingToObtainMarkPassing(String message);
+    String errorTryingToObtainRaceLogMarkPassingData(String message);
     }
