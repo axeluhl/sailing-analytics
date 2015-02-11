@@ -84,7 +84,6 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         List<String> races = table.getRaceNames();
         
         assertThat(races.size(), equalTo(5));
-        assertThat(table.getEntries().size(), equalTo(0));
         
         adminConsoleWindow.switchToWindow();
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
