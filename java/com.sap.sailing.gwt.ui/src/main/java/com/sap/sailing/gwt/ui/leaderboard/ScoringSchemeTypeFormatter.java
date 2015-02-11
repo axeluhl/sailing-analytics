@@ -38,6 +38,8 @@ public class ScoringSchemeTypeFormatter {
         switch(scoringSchemeType) {
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return stringMessages.scoringSchemeHighPointFirstGetsTenOrEightDescription();
+        case HIGH_POINT_ESS_OVERALL:
+            return stringMessages.scoringSchemeHighPointEssOverallDescription();
         default:
             return format(scoringSchemeType, stringMessages);
         }

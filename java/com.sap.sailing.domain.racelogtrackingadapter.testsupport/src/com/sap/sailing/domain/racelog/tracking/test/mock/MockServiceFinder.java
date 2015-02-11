@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.racelog.tracking.test.mock;
 
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import java.util.Collections;
+import java.util.Set;
+
+import com.sap.sse.common.TypeBasedServiceFinder;
 
 public class MockServiceFinder<T> implements TypeBasedServiceFinder<T> {
     private final T handler;
@@ -19,5 +22,10 @@ public class MockServiceFinder<T> implements TypeBasedServiceFinder<T> {
     @Override
     public void setFallbackService(T fallback) {
         this.fallback = fallback;
+    }
+    
+    @Override
+    public Set<T> findAllServices() {
+        return Collections.singleton(handler);
     }
 }

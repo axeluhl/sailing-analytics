@@ -1,0 +1,42 @@
+@CHARSET "UTF-8";
+
+.locationPointerCompass{
+	height: 100%;
+	width: 100%;
+	overflow: visible !important;
+}
+
+.locationPointerCompass_needle{
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	top: 0%;
+	left: 0%;
+}
+
+.locationPointerCompass_angleToLocationLabel{
+	position: absolute;
+	height: 10pt;
+	width: 100%;
+	margin-top: 50%;
+	top: -5pt;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 9pt;
+	font-weight: bold;
+	color: white;
+}
+
+.locationPointerCompass_distanceToLocationLabel{
+	position: absolute;
+	height: 15pt;
+	width: 100%;
+	bottom: -17pt;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 10pt;
+	font-weight: bold;
+	font-size: 9pt;
+	color: black;
+	z-index: 10;
+}

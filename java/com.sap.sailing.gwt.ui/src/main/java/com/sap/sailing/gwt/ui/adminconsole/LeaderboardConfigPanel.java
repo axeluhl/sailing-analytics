@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -37,6 +39,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
@@ -261,6 +264,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     openLeaderboardUrlConfigDialog(leaderboardDTO, stringMessages);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
                     Window.open("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name, "", null);
+                } else if (LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD.equals(value)) {
+                    Map<String, String> dashboardURLParameters = new HashMap<String, String>();
+                    dashboardURLParameters.put("leaderboardName", leaderboardDTO.name);
+                    Window.open(EntryPointLinkFactory.createDashboardLink(dashboardURLParameters), "", null);
                 }
             }
         });

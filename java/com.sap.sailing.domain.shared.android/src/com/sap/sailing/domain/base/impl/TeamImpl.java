@@ -19,15 +19,16 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
     private final DynamicPerson coach;
     private final NationalityChangeListener personNationalityChangeForwarder;
     private transient Set<NationalityChangeListener> listeners;
-	private URI image;
+    private URI image;
 
-	public TeamImpl(String name, Iterable<? extends DynamicPerson> sailors, DynamicPerson coach) {
+    public TeamImpl(String name, Iterable<? extends DynamicPerson> sailors, DynamicPerson coach) {
         super(name);
         listeners = new HashSet<NationalityChangeListener>();
         this.sailors = sailors;
         this.coach = coach;
         this.personNationalityChangeForwarder = new NationalityChangeListener() {
             private static final long serialVersionUID = -6024941913105410444L;
+
             @Override
             public void nationalityChanged(WithNationality what, Nationality oldNationality, Nationality newNationality) {
                 if (what == getNationalityDonor()) {
@@ -39,16 +40,15 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
         };
         setTransitiveListeners();
     }
-	
-	
-	public TeamImpl(String name, Iterable<? extends DynamicPerson> sailors, DynamicPerson coach, URI image) {
-		this(name, sailors, coach);
-		this.image = image;
-	}
+
+    public TeamImpl(String name, Iterable<? extends DynamicPerson> sailors, DynamicPerson coach, URI image) {
+        this(name, sailors, coach);
+        this.image = image;
+    }
 
     /**
-     * The listeners on {@link DynamicPerson} are transient. Our {@link #personNationalityChangeForwarder} needs to
-     * be restored after deserialization.
+     * The listeners on {@link DynamicPerson} are transient. Our {@link #personNationalityChangeForwarder} needs to be
+     * restored after deserialization.
      */
     private void setTransitiveListeners() {
         if (this.sailors != null) {
@@ -128,14 +128,13 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
         }
     }
 
-	@Override
-	public URI getImage() {
-		return image;
-	}
-	
-    
+    @Override
+    public URI getImage() {
+        return image;
+    }
+
+    @Override
     public void setImage(URI teamImage) {
-		this.image = teamImage;
-	}
-    
+        this.image = teamImage;
+    }
 }
