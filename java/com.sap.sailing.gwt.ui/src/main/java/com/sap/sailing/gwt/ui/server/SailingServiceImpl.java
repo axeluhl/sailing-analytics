@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -424,6 +425,7 @@ import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -5416,10 +5418,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public FileStorageServiceDTO[] getAvailableFileStorageServices() {
+    public FileStorageServiceDTO[] getAvailableFileStorageServices(String localeInfoName) {
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
         for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
-            serviceDtos.add(FileStorageServiceDTOUtils.convert(s));
+            serviceDtos.add(FileStorageServiceDTOUtils.convert(s, locale));
         }
         return serviceDtos.toArray(new FileStorageServiceDTO[0]);
     }
@@ -5437,20 +5440,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName) {
+    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) {
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         try {
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {
                 service.testProperties();
             }
         } catch (InvalidPropertiesException e) {
-            return FileStorageServiceDTOUtils.convert(e);
+            return FileStorageServiceDTOUtils.convert(e, locale);
         }
         return null;
     }
 
     @Override
-    public void setActiveFileStorageService(String serviceName) {
+    public void setActiveFileStorageService(String serviceName, String localeInfoName) {
         getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
     }
 
