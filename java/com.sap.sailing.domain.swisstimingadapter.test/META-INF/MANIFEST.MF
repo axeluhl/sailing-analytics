@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.domain.swisstimingadapter
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.udpconnector,
- com.mongodb.driver;bundle-version="2.6.2",
+ com.mongodb.driver,
  com.sap.sse.mongodb,
  com.googlecode.java-diff-utils;bundle-version="1.3.0",
  com.sap.sailing.server,
