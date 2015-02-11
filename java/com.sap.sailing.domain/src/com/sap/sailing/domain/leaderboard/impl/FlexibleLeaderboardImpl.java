@@ -283,15 +283,12 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<>();
-        
         for (Competitor c : super.getAllCompetitors()) {
             result.add(c);
         }
-        
         //consider {@link RegattaLog}
         Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
         result.addAll(viaLog);
-        
         return result;
     }
 }

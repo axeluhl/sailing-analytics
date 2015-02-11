@@ -305,11 +305,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 result.add(c);
             }
         }
-
         //consider {@link RegattaLog}
         Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
         result.addAll(viaLog);
-
         return result;
     }
 
