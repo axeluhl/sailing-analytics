@@ -57,9 +57,6 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                             if (displayColor instanceof InvalidColor) {
                                 result = displayColor.getAsHtml();
                             }
-                        } else if (valueToValidate.getEmail() == null) {
-                            //TODO: Proper Email-Validation
-                            result = stringMessages.pleaseEnterAnEmail();
                         } else if (valueToValidate.getBoatClass().getName() == null || valueToValidate.getBoatClass().getName().isEmpty()) {
                             result = stringMessages.pleaseEnterABoatClass();
                         }
@@ -94,6 +91,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         
         this.name = createTextBox(competitorToEdit.getName());
         this.email = createTextBox(competitorToEdit.getEmail());
+        this.email.getElement().setPropertyString("placeholder", stringMessages.pleaseEnterAnEmail());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
