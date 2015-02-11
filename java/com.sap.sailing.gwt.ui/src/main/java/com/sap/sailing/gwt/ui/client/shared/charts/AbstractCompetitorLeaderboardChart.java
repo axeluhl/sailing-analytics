@@ -27,6 +27,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -296,8 +297,8 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 raceColumnNumber++;
             }
         }
-        chart.getYAxis().setMaxPadding(0.5 / maxCompetitorCount).setMinPadding(0.5 / maxCompetitorCount);
-        chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
+//        chart.getYAxis().setMaxPadding(0.5 / maxCompetitorCount).setMinPadding(0.5 / maxCompetitorCount);
+        chart.setHeight(Window.getClientHeight()); // maxCompetitorCount * 30 + 100 + "px");
     }
 
     private void fillTotalPointsSeries(
