@@ -1279,7 +1279,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection result = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         DBObject index = new BasicDBObject(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), null);
         index.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), null);
-        result.ensureIndex(index);
+        result.createIndex(index);
         return result;
     }
     

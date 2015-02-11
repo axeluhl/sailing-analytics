@@ -38,14 +38,12 @@ public abstract class AbstractMongoDBTest {
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
         assertNotNull(mongo);
-        db.requestStart();
         dropAllCollections(db);
         assertNotNull(db);
     }
     
     @After
     public void tearDown() {
-        db.requestDone();
     }
 
     private void dropAllCollections(DB theDB) throws InterruptedException {
