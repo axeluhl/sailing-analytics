@@ -1,0 +1,49 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:client="urn:import:com.sap.sailing.dashboards.gwt.client"
+	xmlns:startlineadvantage="urn:import:com.sap.sailing.dashboards.gwt.client.startlineadvantage"
+	xmlns:startanalysis="urn:import:com.sap.sailing.dashboards.gwt.client.startanalysis"
+	xmlns:mgwtcarousel="urn:import:com.googlecode.mgwt.ui.client.widget.carousel"
+	xmlns:mgwtpanel="urn:import:com.googlecode.mgwt.ui.client.widget.panel">
+
+	<ui:style
+		type='com.sap.sailing.dashboards.gwt.client.RibDashboardPanelStyle'
+		src='Ribstyle.css'></ui:style>
+
+	<g:LayoutPanel ui:field="root">
+		<g:layer left="0%" top="0%" right="0%" height="35pt">
+			<g:HTMLPanel ui:field="header" styleName="{style.bar}"></g:HTMLPanel>
+		</g:layer>
+		<g:layer left="0pt" top="35pt" right="0pt" bottom="0pt">
+			<mgwtcarousel:Carousel ui:field="carousel">
+				<mgwtpanel:Panel styleName="{style.page}">
+					<g:HTMLPanel ui:field="leftwindbotcontainer" styleName="{style.collumn} {style.left}">
+						<div class="{style.windloadinghint}"><div ui:field="windloadinghintleft" class="{style.windloadinghinttext}">Loading Wind Bot Data...</div></div>
+					</g:HTMLPanel>
+					<g:HTMLPanel ui:field="rightwindbotcontainer"
+						styleName="{style.collumn} {style.right}">
+						<div class="{style.windloadinghint}"><div ui:field="windloadinghintright" class="{style.windloadinghinttext}">Loading Wind Bot Data...</div></div>
+					</g:HTMLPanel>
+					<g:HTMLPanel styleName="{style.windcharthint}">Tap on chart to change interval.</g:HTMLPanel>
+				</mgwtpanel:Panel>
+				<mgwtpanel:Panel styleName="{style.page}">
+					<g:HTMLPanel styleName="{style.collumn} {style.startanalysiscollumn}">
+						<startanalysis:StartlineAnalysisComponent
+							ui:field="startanalysisComponent"></startanalysis:StartlineAnalysisComponent>
+					</g:HTMLPanel>
+					<g:HTMLPanel styleName="{style.collumn} {style.collumn3}">
+						<g:HTMLPanel styleName="{style.startlineadvantagepanel}">
+							<startlineadvantage:StartLineAdvantageComponent
+								ui:field="startLineCAComponent"></startlineadvantage:StartLineAdvantageComponent>
+						</g:HTMLPanel>
+					</g:HTMLPanel>
+				</mgwtpanel:Panel>
+			</mgwtcarousel:Carousel>
+		</g:layer>
+		<g:layer left="0%" bottom="0%" right="0%" height="30pt">
+			<g:HTMLPanel ui:field="bottombar" styleName="{style.bar}">
+			</g:HTMLPanel>
+		</g:layer>
+	</g:LayoutPanel>
+
+</ui:UiBinder>

@@ -842,7 +842,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START, DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
-                DetailType.DISTANCE_TO_START_AT_RACE_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
+                DetailType.DISTANCE_TO_START_AT_RACE_START, DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
+                DetailType.SPEED_OVER_GROUND_AT_RACE_START,
                 DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
                 DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
                 DetailType.START_TACK,
@@ -923,6 +924,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.DISTANCE_TO_START_AT_RACE_START,
                     new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TO_START_AT_RACE_START, new DistanceToStartAtRaceStartInMeters(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
+                    new FormattedDoubleDetailTypeColumn(DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START, new TimeBetweenRaceStartAndCompetitorStartInSeconds(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.SPEED_OVER_GROUND_AT_RACE_START,
                     new FormattedDoubleDetailTypeColumn(DetailType.SPEED_OVER_GROUND_AT_RACE_START, new SpeedOverGroundAtRaceStartInKnots(),
@@ -1097,6 +1101,24 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null) {
                     result = fieldsForRace.distanceToStartLineAtStartOfRaceInMeters;
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the time between start of race and the competitors start mark passing, telling
+         * how long after the gun the competitor actually started.
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class TimeBetweenRaceStartAndCompetitorStartInSeconds implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.timeBetweenRaceStartAndCompetitorStartInSeconds;
                 }
                 return result;
             }

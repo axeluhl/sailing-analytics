@@ -66,6 +66,8 @@ public class DetailTypeFormatter {
             return stringMessages.windwardDistanceToLeaderInMeters();
         case DISTANCE_TO_START_AT_RACE_START:
             return stringMessages.distanceToLineAtRaceStart();
+        case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
+            return stringMessages.timeBetweenRaceStartAndCompetitorStartInSeconds();
         case SPEED_OVER_GROUND_AT_RACE_START:
             return stringMessages.speedOverGroundAtRaceStart();
         case SPEED_OVER_GROUND_WHEN_PASSING_START:
@@ -180,6 +182,7 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_DOWNWIND:
         case RACE_TIME_TRAVELED_REACHING:
         case RACE_TIME_TRAVELED_UPWIND:
+        case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
             return stringMessages.secondsUnit();
 
         case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
@@ -275,6 +278,8 @@ public class DetailTypeFormatter {
             return stringMessages.windwardDistanceToLeaderInMetersTooltip();
         case DISTANCE_TO_START_AT_RACE_START:
             return stringMessages.distanceToLineAtRaceStartTooltip();
+        case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
+            return stringMessages.timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
         case SPEED_OVER_GROUND_AT_RACE_START:
             return stringMessages.speedOverGroundAtRaceStartTooltip();
         case SPEED_OVER_GROUND_WHEN_PASSING_START:

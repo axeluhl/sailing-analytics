@@ -10,11 +10,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestMethodWrappingFunction {
     
@@ -49,7 +49,7 @@ public class TestMethodWrappingFunction {
     
     @Test
     public void testGetLocalizedName() {
-        DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessages();
+        ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessages();
 
         Function<?> dimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(dimensionMethod);
         String expectedEnglishName = "dimension-english";
