@@ -4995,7 +4995,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getRaceLogTrackingAdapter().copyCourseAndCompetitors(fromRaceLog, toRaceLogs, baseDomainFactory, getService());
     }
     
-    protected TypeBasedServiceFinder<DeviceIdentifierStringSerializationHandler> getDeviceIdentifierStringSerializerHandlerFinder(
+    private TypeBasedServiceFinder<DeviceIdentifierStringSerializationHandler> getDeviceIdentifierStringSerializerHandlerFinder(
             boolean withFallback) {
         TypeBasedServiceFinderFactory factory = getService().getTypeBasedServiceFinderFactory();
         TypeBasedServiceFinder<DeviceIdentifierStringSerializationHandler> finder = factory.createServiceFinder(DeviceIdentifierStringSerializationHandler.class);
