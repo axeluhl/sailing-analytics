@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationHandler;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sse.common.TypeBasedServiceFinder;
 
 public abstract class TypeBasedJsonDeserializer<T> implements JsonDeserializer<T> {
     public static final String FIELD_TYPE = "type";

@@ -510,12 +510,35 @@ There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` tha
 
 ### Opening replication channel for Sailing Analytics server
 
-The local server acts as a master and replicates data through a RabbitMQ running locally to an external server. The external server needs to connect to localhost on 9087.
+The local server acts as a master and replicates data through a RabbitMQ running locally to one or more external servers, depending on the load balancing, DNS and cross-region configuration. The external server(s) need(s) to connect to localhost on 9087 (for live1) or 9088 (for live2) and can use the default RabbitMQ port (specifying "0" which maps to the default port 5672) on their localhost.
+
+To launch the SSH tunnels, execute the following script from the `sailing` user's home directory, providing the IP addresses of the external servers as parameters:
 
 <pre>
-autossh -M 20000 -R 5672:localhost:5672 -R 9087:localhost:8887 -L 2012:localhost:2012 sailing@54.194.10.242
+./ssh_tunnels_to_replicas.sh 54.76.64.42 54.72.14.139 54.169.167.42 54.169.157.202
 </pre>
 
+Make sure that you have an unlocked SSH key in memory (e.g., using a local ssh-agent or passing through with the `-A` option for your ssh connection to the live server) that is good for logging in on the external servers as user `sailing`. You should once do this for each of the servers whose IP addresses you specify:
+
+<pre>
+ssh sailing@54.76.64.42
+</pre>
+
+to ensure that the external server's host key can interactively be accepted and stored in the `known_hosts` file. Otherwise, the ssh connections will fail.
+
+Check that all connections have been established, e.g., issuing the command
+
+<pre>
+ps axlw | grep ssh
+</pre>
+
+To terminate the tunnel connections, run the following command from the `sailing` user's home directory:
+
+<pre>
+./kill_ssh_tunnels_to_replicas.sh
+</pre>
+
+This kill script is generated during the execution of the script establishing the tunnels and records the PIDs of the autossh processes to kill.
 ### Replicate Race Logs
 
 <pre>

@@ -30,7 +30,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.replication,
  com.sap.sse,
  com.sap.sailing.server.gateway.serialization.shared.android,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sse.filestorage
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;
@@ -42,6 +43,5 @@ Export-Package: com.sap.sailing.server,
    com.sap.sailing.server.replication.test,
    com.sap.sailing.domain.racelogtrackingadapter.test",
  com.sap.sailing.server.masterdata,
- com.sap.sailing.server.operationaltransformation,
- com.sap.sailing.server.racelog.tracking
+ com.sap.sailing.server.operationaltransformation
 

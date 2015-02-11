@@ -62,7 +62,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
 
     public RegattaConfigurationDialog(DeviceConfigurationDTO.RegattaConfigurationDTO regattaConfiguration,
             StringMessages messages, DataEntryDialog.DialogCallback<RegattaConfigurationDTO> callback) {
-        super(messages.racingProcedureConfiguration(), "", messages.save(), messages.cancel(), null, callback);
+        super(messages.racingProcedureConfiguration(), "", messages.save(), messages.cancel(), /* validator */ null, callback);
         this.stringMessages = messages;
         this.originalConfiguration = regattaConfiguration;
     }
@@ -100,7 +100,9 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     }
 
     private void setupRacingProcedureListBox(Grid grid, int gridRow) {
-        racingProcedureListBox = new ListBox(false);
+        racingProcedureListBox = new ListBox();
+        racingProcedureListBox.setMultipleSelect(false);
+
         racingProcedureListBox.setWidth("100%");
         ListBoxUtils.setupRacingProcedureTypeListBox(racingProcedureListBox,
                 originalConfiguration.defaultRacingProcedureType, stringMessages.dontoverwrite());
@@ -115,7 +117,9 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     }
 
     private void setupCourseDesignerListBox(Grid grid, int gridRow) {
-        designerModeEntryListBox = new ListBox(false);
+        designerModeEntryListBox = new ListBox();
+        designerModeEntryListBox.setMultipleSelect(false);
+
         designerModeEntryListBox.setWidth("100%");
         ListBoxUtils.setupCourseDesignerModeListBox(designerModeEntryListBox,
                 originalConfiguration.defaultCourseDesignerMode, stringMessages.dontoverwrite());
@@ -198,7 +202,9 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     }
 
     private void setupRRS26StartModeFlags() {
-        rrs26StartModeFlagsBox = new ListBox(true);
+        rrs26StartModeFlagsBox = new ListBox();
+        rrs26StartModeFlagsBox.setMultipleSelect(true);
+
         rrs26StartModeFlagsBox.setWidth("100%");
         List<Flags> selectedFlags = new ArrayList<Flags>();
         if (originalConfiguration != null && originalConfiguration.rrs26Configuration != null

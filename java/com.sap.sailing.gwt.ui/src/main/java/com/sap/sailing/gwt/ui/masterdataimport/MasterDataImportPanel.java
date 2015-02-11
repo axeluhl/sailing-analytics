@@ -322,7 +322,9 @@ public class MasterDataImportPanel extends VerticalPanel {
         filterPanel.add(filterBox);
         contentPanel.add(filterPanel);
 
-        leaderboardgroupListBox = new ListBox(true);
+        leaderboardgroupListBox = new ListBox();
+        leaderboardgroupListBox.setMultipleSelect(true);
+
         addSelectionChangedListener();
         contentPanel.add(leaderboardgroupListBox);
         
