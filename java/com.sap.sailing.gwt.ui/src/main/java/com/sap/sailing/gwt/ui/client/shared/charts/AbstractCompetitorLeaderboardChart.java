@@ -246,7 +246,9 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                             break;
                         }
         
-                        chart.setSizeToMatchContainer();
+                        // TODO will removing the following line do harm on any usage of this abstract base class?
+                        // chart.setSizeToMatchContainer();
+                        
                         // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox
                         // positions (nativeAdjustCheckboxPosition)
                         // in the BaseChart class would not be called
@@ -301,7 +303,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
     }
 
     private void setHeight() {
-        chart.setHeight(Window.getClientHeight());
+        chart.setSize(chart.getOffsetWidth(), Window.getClientHeight());
     }
 
     private void fillTotalPointsSeries(
