@@ -62,11 +62,21 @@ public class BoatSpeedEstimator implements Serializable {
     }
 
     public int getDataCount() {
-        return dataCount;
+        LockUtil.lockForRead(lock);
+        try {
+            return dataCount;
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
     }
 
     public double getConfidence() {
-        return confidenceSum / dataCount;
+        LockUtil.lockForRead(lock);
+        try {
+            return confidenceSum / dataCount;
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
     }
     
     private void readObject(ObjectInputStream ois) {

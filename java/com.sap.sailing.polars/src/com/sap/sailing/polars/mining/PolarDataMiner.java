@@ -81,7 +81,7 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
 
         Collection<Processor<GPSFixMovingWithPolarContext, ?>> filteringResultReceivers = Arrays.asList(groupingProcessor);
         Processor<GPSFixMovingWithPolarContext, GPSFixMovingWithPolarContext> filteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria());
+                GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria(1));
 
         Collection<Processor<GPSFixMovingWithPolarContext, ?>> enrichingResultReceivers = Arrays
                 .asList(filteringProcessor);

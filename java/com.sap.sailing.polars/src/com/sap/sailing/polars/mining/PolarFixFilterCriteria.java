@@ -1,8 +1,9 @@
 package com.sap.sailing.polars.mining;
 
+import java.util.Iterator;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -45,13 +46,19 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
     }
     
     private boolean isInLeadingCompetitors(GPSFixMovingWithPolarContext element) {
-        boolean result;
-        try {
-            int rank = element.getRace().getRank(element.getCompetitor(), element.getFix().getTimePoint());
-            result = rank <= numberOfLeadingCompetitorsToInclude;
-        } catch (NoWindException e) {
-            // Unrealistic, we wouldn't be here if there was no wind. Let's return false.
-            result = false;
+        boolean result = false;
+        Iterator<MarkPassing> finishPassings = element.getRace()
+                .getMarkPassingsInOrder(element.getRace().getRace().getCourse().getLastWaypoint()).iterator();
+        for (int i = 0; i < numberOfLeadingCompetitorsToInclude; i++) {
+            if (finishPassings.hasNext()) {
+                if (finishPassings.next().getCompetitor().equals(element.getCompetitor())) {
+                    result = true;
+                    break;
+                }
+            } else {
+                result = false;
+                break;
+            }
         }
         return result;
     }
