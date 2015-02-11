@@ -130,9 +130,9 @@
 		        <module>com.sap.sailing.gwt.ui.RegattaOverview</module>
 		        <module>com.sap.sailing.gwt.ui.PolarSheets</module>
 		      </modules>
-                      <!-- uncomment the following for PRETTY-printed, non-obfuscated output format
+                      <!-- uncomment the following for PRETTY-printed, non-obfuscated output format -->
 		      <style>PRETTY</style>
-                      -->
+                      <!-- -->
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>15</localWorkers>
 		      <webappDirectory>${basedir}</webappDirectory>
