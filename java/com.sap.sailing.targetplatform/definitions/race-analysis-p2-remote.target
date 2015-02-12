@@ -219,6 +219,7 @@
 <plugin id="org.junit4"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
+<plugin id="org.mongodb.mongo-java-driver"/>
 <plugin id="org.objectweb.asm"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objenesis"/>
