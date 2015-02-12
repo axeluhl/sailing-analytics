@@ -52,12 +52,12 @@
 .regattalink:hover .regatta_intro_image {
   opacity: 0.9;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
-  filter: literal("alpha(opacity=90)");
+  filter: alpha(opacity=90);
 }
-.regattalink:nth-child\(even\) {
+.regattalink:nth-child(even) {
   background-color: #f8f8f8;
 }
-.regattalink:nth-child\(even\):hover {
+.regattalink:nth-child(even):hover {
   background-color: #f3f3f3;
 }
 .regatta_intro {
