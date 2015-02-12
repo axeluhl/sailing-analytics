@@ -101,6 +101,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
+    private static final String ACCESS_TOKEN_KEY = "access_token";
+
     private CachingSecurityManager securityManager;
     
     /**
@@ -899,6 +901,22 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             throw new SecurityException("User " + SessionUtils.loadUsername()
                     + " does not have permission to read preferences of user " + username);
         }
+    }
+    
+    @Override
+    public String getAccessToken() {
+        Subject subject = SecurityUtils.getSubject();
+        final String token;
+        if (subject.isAuthenticated()) {
+            RandomNumberGenerator rng = new SecureRandomNumberGenerator();
+            byte[] salt = rng.nextBytes().getBytes();
+            token = hashPassword(new String(rng.nextBytes().getBytes()), salt);
+            User user = getCurrentUser();
+            apply(s->s.internalSetPreference(user.getName(), ACCESS_TOKEN_KEY, token));
+        } else {
+            token = null;
+        }
+        return token;
     }
 
     // ----------------- Replication -------------

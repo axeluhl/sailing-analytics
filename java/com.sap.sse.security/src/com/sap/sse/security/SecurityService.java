@@ -139,4 +139,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     String getPreference(String username, String key);
 
+    /**
+     * Assuming that the call has an authenticated subject, issues a new access token and remembers it so that
+     * later requests can be authenticated using the token.
+     * 
+     * @return a new access token if the user was authenticated, <code>null</code> otherwise
+     */
+    String getAccessToken();
+
 }

@@ -11,6 +11,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.json.simple.JSONObject;
+
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.UserManagementException;
 
@@ -36,6 +38,23 @@ public class SecurityResource extends AbstractSecurityResource {
         try {
             getService().login(username, password);
             logger.info("Successfully logged in " + username + " with password");
+        } catch (UserManagementException e) {
+            logger.info("Logging in " + username + " with password failed: "+e.getMessage());
+            return getSecurityErrorResponse(e.getMessage());
+        }
+        return Response.ok("Logged in!", MediaType.TEXT_PLAIN).build();
+    }
+
+    @POST
+    @Path("/access_token")
+    @Produces("application/json;charset=UTF-8")
+    public Response accessToken(@FormParam("username") String username, @FormParam("password") String password) {
+        try {
+            getService().login(username, password);
+            logger.info("Successfully logged in " + username + " with password");
+            JSONObject response = new JSONObject();
+            response.put("username", username);
+            response.put("access_token", getService().getAccessToken());
         } catch (UserManagementException e) {
             logger.info("Logging in " + username + " with password failed: "+e.getMessage());
             return getSecurityErrorResponse(e.getMessage());
