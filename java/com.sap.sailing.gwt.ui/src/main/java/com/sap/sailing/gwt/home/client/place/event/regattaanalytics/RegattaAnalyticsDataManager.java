@@ -102,6 +102,7 @@ public class RegattaAnalyticsDataManager {
         multiCompetitorChart.updateSettings(settings);
         multiCompetitorChart.setVisible(true);
         timer.addTimeListener(multiCompetitorChart);
+        multiCompetitorChart.clearChart();
         multiCompetitorChart.timeChanged(timer.getTime(), null);
     }
 

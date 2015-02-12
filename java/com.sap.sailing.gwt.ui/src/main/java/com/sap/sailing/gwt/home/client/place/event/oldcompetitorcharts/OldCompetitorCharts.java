@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -26,6 +27,7 @@ public class OldCompetitorCharts extends Composite {
 
     @UiField HTMLPanel oldCompetitorChartsPanel;
     @UiField ListBox chartTypeSelectionListBox;
+//    @UiField DivElement filterStateUi;
     
     private final List<DetailType> availableDetailsTypes;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;

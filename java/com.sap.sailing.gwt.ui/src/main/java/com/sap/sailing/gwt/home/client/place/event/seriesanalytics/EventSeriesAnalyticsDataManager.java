@@ -1,7 +1,13 @@
 package com.sap.sailing.gwt.home.client.place.event.seriesanalytics;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -13,6 +19,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -36,6 +43,7 @@ public class EventSeriesAnalyticsDataManager {
     private final UserAgentDetails userAgent;
     private final SailingServiceAsync sailingService;
     private final Timer timer;
+    private final int MAX_COMPETITORS_IN_CHART = 30; 
 
     public EventSeriesAnalyticsDataManager(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
@@ -93,11 +101,27 @@ public class EventSeriesAnalyticsDataManager {
     }
 
     public void showCompetitorChart(DetailType chartDetailType) {
+        // preselect the top N competitors in case there was no selection before and there too many competitors for a chart
+        int competitorsCount = Util.size(competitorSelectionProvider.getAllCompetitors());
+        int selectedCompetitorsCount = Util.size(competitorSelectionProvider.getSelectedCompetitors());
+        
+        if(selectedCompetitorsCount == 0 && competitorsCount > MAX_COMPETITORS_IN_CHART) {
+            List<CompetitorDTO> selectedCompetitors = new ArrayList<CompetitorDTO>();
+            Iterator<CompetitorDTO> allCompetitorsIt = competitorSelectionProvider.getAllCompetitors().iterator();
+            int counter = 0;
+            while(counter < MAX_COMPETITORS_IN_CHART) {
+                selectedCompetitors.add(allCompetitorsIt.next());
+                counter++;
+            }
+            competitorSelectionProvider.setSelection(selectedCompetitors, (CompetitorSelectionChangeListener[]) null);
+        }
+        
         MultiCompetitorLeaderboardChart multiCompetitorChart = getMultiCompetitorChart();
         MultiCompetitorLeaderboardChartSettings settings = new MultiCompetitorLeaderboardChartSettings(chartDetailType);
         multiCompetitorChart.updateSettings(settings);
         multiCompetitorChart.setVisible(true);
         timer.addTimeListener(multiCompetitorChart);
+        multiCompetitorChart.clearChart();
         multiCompetitorChart.timeChanged(timer.getTime(), null);
     }
 

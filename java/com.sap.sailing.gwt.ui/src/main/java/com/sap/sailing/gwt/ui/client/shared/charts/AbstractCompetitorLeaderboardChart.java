@@ -181,7 +181,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         }));
     }
 
-    protected void clearChart() {
+    public void clearChart() {
         competitorSeries.clear();
         chart.removeAllSeries();
     }
