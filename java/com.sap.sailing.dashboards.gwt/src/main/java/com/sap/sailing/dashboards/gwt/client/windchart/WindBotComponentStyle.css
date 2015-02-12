@@ -1,0 +1,65 @@
+@CHARSET "UTF-8";
+
+.windBotComponent{
+	position: absolute;
+	height: 100%;
+	width:  100%;
+	z-index: 5;
+}
+
+.windBotNamePanel {
+	height: 45pt;
+	line-height: 45pt;
+	vertical-align: middle;
+	font-size: 15pt;
+	font-family: "Arial";
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+	overflow: visible;
+	background-color: white;
+}
+
+.wind_bot_component_live_average_container {
+	position: absolute;
+	border: none;
+	border-radius: 0pt;
+	background-color: white;
+	top: 45pt;
+	bottom: 65%;
+}
+
+.wind_bot_component_left {
+	left: 0pt;
+	right: 50%;
+}
+
+.wind_bot_component_right {
+	left: 50%;
+	right: 0pt;
+}
+
+.wind_bot_component_windchart_container {
+	position: absolute;
+	border: none;
+	border-radius: 0pt;
+	background-color: white;
+	top: 35%;
+	bottom: 0pt;
+}
+
+.wind_bot_component_windchart{
+		position: absolute;
+	left: 0pt;
+	right: 0pt;
+	top: 0pt;
+	bottom: 0pt;
+}
+
+.wind_bot_component_compass_container{
+	position: absolute;
+	height: 45pt;
+	width: 45pt;
+	top: 5pt;
+	right: 5pt;
+}

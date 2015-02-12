@@ -64,7 +64,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
     }
 
     private void updateRaceTimesInfoProvider(LeaderboardDTO newLeaderboard) {
-        Set<RegattaAndRaceIdentifier> oldRaceIdentifiers = raceTimesInfoProvider.getRaceIdentifiers();
+        Set<RegattaAndRaceIdentifier> oldRaceIdentifiers = new HashSet<>(raceTimesInfoProvider.getRaceIdentifiers());
         Set<RegattaAndRaceIdentifier> newRaceIdentifiers = new HashSet<RegattaAndRaceIdentifier>();
         for (RaceColumnDTO column : newLeaderboard.getRaceList()) {
             for (FleetDTO fleet : column.getFleets()) {

@@ -1,6 +1,5 @@
 package com.sap.sailing.server.gateway.impl;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
@@ -13,12 +12,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hamcrest.Matcher;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 import org.mockito.ArgumentMatcher;
 
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -35,7 +36,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
-import com.sap.sailing.server.gateway.impl.WindJsonGetServlet;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -58,6 +58,14 @@ public class WindJsonGetServletRefactoringTest {
     private JSONObject getExpectedResult(String windSourceToRead, TrackedRace trackedRace, TimePoint from, TimePoint to) {
         JSONObject jsonWindTracks = new JSONObject();
         List<WindSource> windSources = servlet.getAvailableWindSources(trackedRace);
+        JSONArray jsonWindSourcesDisplayed = new JSONArray();
+        for (WindSource windSource : windSources) {
+            JSONObject windSourceInformation = new JSONObject();
+            windSourceInformation.put("typeName", windSource.getType().name());
+            windSourceInformation.put("id", windSource.getId() != null ? windSource.getId().toString() : "");
+            jsonWindSourcesDisplayed.add(windSourceInformation);
+        }
+        jsonWindTracks.put("availableWindSources", jsonWindSourcesDisplayed);
         for (WindSource windSource : windSources) {
             if("ALL".equals(windSourceToRead) || windSource.getType().name().equalsIgnoreCase(windSourceToRead)) {
                 JSONArray jsonWindArray = new JSONArray();
@@ -94,7 +102,7 @@ public class WindJsonGetServletRefactoringTest {
                 } finally {
                     windTrack.unlockAfterRead();
                 }
-                jsonWindTracks.put(windSource.toString(), jsonWindArray);
+                jsonWindTracks.put(windSource.toString()+(windSource.getId()!=null ? "-"+windSource.getId():""), jsonWindArray);
             }
         }
         return jsonWindTracks;
@@ -137,7 +145,17 @@ public class WindJsonGetServletRefactoringTest {
         stub(trackedRace.getWind(isA(Position.class), argThat(isNeitherTooEarlyNorTooLate))).toReturn(someCombinedWindFix);
         webWindTrack.add(new WindImpl(new DegreePosition(49, 3), now,
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))));
-        assertEquals(getExpectedResult(WindJsonGetServlet.ALL, trackedRace, earlier, later),
-                servlet.getResult(WindJsonGetServlet.ALL, trackedRace, earlier, later));
+        System.out.println(getExpectedResult(WindJsonGetServlet.ALL, trackedRace, earlier, later));
+        assertWindSourcesEquals(getExpectedResult(WindJsonGetServlet.ALL, trackedRace, earlier, later),
+                servlet.getResult(WindJsonGetServlet.ALL, "", trackedRace, earlier, later));
+    }
+
+    private void assertWindSourcesEquals(JSONObject expectedResult, JSONObject result) {
+        Set<String> expectedWindSourceNames = ((JSONArray) expectedResult.get("availableWindSources")).stream().map(o->o.toString()).collect(Collectors.toSet());
+        Set<String> actualWindSourceNames = ((JSONArray) result.get("availableWindSources")).stream().map(o->o.toString()).collect(Collectors.toSet());
+        assertEquals(expectedWindSourceNames, actualWindSourceNames);
+        for (String windSourceName : expectedWindSourceNames) {
+            assertEquals(expectedResult.get(windSourceName), result.get(windSourceName));
+        }
     }
 }

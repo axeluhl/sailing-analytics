@@ -45,8 +45,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
@@ -79,11 +77,12 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.BuildVersionRetriever;
+import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 
 /**
  * The async counterpart of {@link SailingService}
  */
-public interface SailingServiceAsync extends BuildVersionRetriever {
+public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageManagementGwtServiceAsync {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
@@ -686,16 +685,5 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
 
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
 			EventDTO newEvent, AsyncCallback<Void> asyncCallback);
-
-    void setFileStorageServiceProperties(String serviceName, Map<String, String> properties,
-            AsyncCallback<Void> callback);
-
-    void getAvailableFileStorageServices(AsyncCallback<FileStorageServiceDTO[]> callback);
-
-    void testFileStorageServiceProperties(String serviceName, AsyncCallback<FileStorageServicePropertyErrorsDTO> callback);
-
-    void setActiveFileStorageService(String serviceName, AsyncCallback<Void> callback);
-
-    void getActiveFileStorageServiceName(AsyncCallback<String> callback); 
 
 }

@@ -47,7 +47,8 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     /**
      * Tells if in the containing {@link DynamicGPSFixTrackImpl} this fix is considered valid. This cache
      * needs to be invalidated as soon as fixes are added to the containing track which may have an impact
-     * on this fix's validity. -1 means "no value"; 0 means invalid, 1 means valid.
+     * on this fix's validity. See the bitmask values such as {@link #VALIDITY}, {@link #IS_ESTIMATED_SPEED_CACHED} and
+     * {@link #IS_VALIDITY_CACHED}.
      */
     private byte whatIsCached = 0;
     

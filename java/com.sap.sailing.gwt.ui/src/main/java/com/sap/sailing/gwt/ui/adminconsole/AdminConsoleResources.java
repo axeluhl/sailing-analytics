@@ -61,6 +61,9 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/xml.png")
     ImageResource exportXMLIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/opencoachdashboard.png")
+    ImageResource openCoachDashboard();
 
     @Source("com/sap/sailing/gwt/ui/client/images/add_racelog_tracker.png")
     ImageResource addRaceLogTracker();

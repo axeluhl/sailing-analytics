@@ -26,7 +26,7 @@
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
-    <inherits name="com.sap.sse.Security" />
+        <inherits name="com.sap.sse.Security" />
     
 	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
 	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
