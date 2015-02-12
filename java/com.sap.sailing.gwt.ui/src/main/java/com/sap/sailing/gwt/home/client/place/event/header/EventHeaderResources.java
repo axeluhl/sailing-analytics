@@ -9,14 +9,8 @@ import com.google.gwt.resources.client.ImageResource;
 public interface EventHeaderResources extends ClientBundle {
     public static final EventHeaderResources INSTANCE = GWT.create(EventHeaderResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/place/event/header/EventHeader.css")
+    @Source("com/sap/sailing/gwt/home/client/place/event/header/EventHeader.gss")
     LocalCss css();
-
-    public interface MinWidth50emCss extends LocalCss {
-    }
-
-    @Source("com/sap/sailing/gwt/home/client/place/event/header/EventHeaderLarge.css")
-    MinWidth50emCss largeCss();
 
     @Shared
     public interface LocalCss extends CssResource {

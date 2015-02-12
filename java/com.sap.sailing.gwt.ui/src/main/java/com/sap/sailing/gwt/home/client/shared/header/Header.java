@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -56,7 +55,6 @@ public class Header extends Composite {
         this.navigator = navigator;
 
         HeaderResources.INSTANCE.css().ensureInjected();
-        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+HeaderResources.INSTANCE.largeCss().getText()+"}");
 
         initWidget(uiBinder.createAndBindUi(this));
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink });
