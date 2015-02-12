@@ -8,23 +8,11 @@ import com.google.gwt.resources.client.CssResource.Shared;
 public interface SharedResources extends ClientBundle {
     public static final SharedResources INSTANCE = GWT.create(SharedResources.class);
 
-    @Source("com/sap/sailing/gwt/home/main.css")
+    @Source("com/sap/sailing/gwt/home/main.gss")
     MainCss mainCss();
 
-    @Source("com/sap/sailing/gwt/home/media.css")
+    @Source("com/sap/sailing/gwt/home/media.gss")
     MediaCss mediaCss();
-
-    public interface MinWidth25emCss extends MediaCss {
-    }
-
-    @Source("com/sap/sailing/gwt/home/medium.css")
-    MinWidth25emCss mediumCss();
-
-    public interface MinWidth50emCss extends MediaCss {
-    }
-
-    @Source("com/sap/sailing/gwt/home/large.css")
-    MinWidth50emCss largeCss();
 
     @Shared 
     public interface MainCss extends CssResource {

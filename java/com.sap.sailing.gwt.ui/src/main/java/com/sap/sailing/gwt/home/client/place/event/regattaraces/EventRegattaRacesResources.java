@@ -8,13 +8,7 @@ import com.google.gwt.resources.client.CssResource.Shared;
 public interface EventRegattaRacesResources extends ClientBundle {
     public static final EventRegattaRacesResources INSTANCE = GWT.create(EventRegattaRacesResources.class);
 
-    public interface MinWidth25emCss extends LocalCss {
-    }
-
-    @Source("com/sap/sailing/gwt/home/client/place/event/regattaraces/EventRegattaRacesMedium.css")
-    MinWidth25emCss mediumCss();
-
-    @Source("com/sap/sailing/gwt/home/client/place/event/regattaraces/EventRegattaRaces.css")
+    @Source("com/sap/sailing/gwt/home/client/place/event/regattaraces/EventRegattaRaces.gss")
     LocalCss css();
 
     @Shared

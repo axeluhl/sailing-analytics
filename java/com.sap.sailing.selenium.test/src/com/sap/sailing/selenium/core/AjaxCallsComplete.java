@@ -1,8 +1,11 @@
 package com.sap.sailing.selenium.core;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
 /**
@@ -14,6 +17,8 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
  *   D049941
  */
 public class AjaxCallsComplete implements ExpectedCondition<Boolean> {
+    private static final Logger logger = Logger.getLogger(AjaxCallsComplete.class.getName());
+    
     /**
      * <p>The key for the global category as defined in the class
      *   <code>com.sap.sailing.gwt.ui.client.MarkedAsyncCallback</code>.</p>
@@ -53,7 +58,12 @@ public class AjaxCallsComplete implements ExpectedCondition<Boolean> {
     @Override
     public Boolean apply(WebDriver driver) {
         JavascriptExecutor executor = (JavascriptExecutor) driver;
-        
-        return (Boolean) executor.executeScript(JAVASCRIPT, this.category);
+        boolean result = false;
+        try {
+            result = (Boolean) executor.executeScript(JAVASCRIPT, this.category);
+        } catch (WebDriverException e) {
+            logger.log(Level.WARNING, "Exception looking for PENDING_AJAX_CALLS variable. Telling caller that not all AJAX calls have finished yet.", e);
+        }
+        return result;
     }
 }

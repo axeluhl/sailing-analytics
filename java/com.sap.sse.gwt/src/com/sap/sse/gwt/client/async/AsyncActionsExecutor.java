@@ -78,21 +78,30 @@ public class AsyncActionsExecutor {
     
     private final int maxPendingCalls;
     private final int maxPendingCallsPerType;
+    private final Duration durationAfterToResetQueue;
     private final Map<String, Integer> actionsPerTypeCounter;
     private final Map<String, ExecutionJob<?>> lastRequestedActionsNotBeingSentOut;
+    private final Map<String, TimePoint> timePointOfTypeLastBeingExecuted;
     
     private int numPendingCalls = 0;
-    private TimePoint timepointOfLastSuccessfulJobExecution = null;
+    private TimePoint timePointOfFirstExecutorInit = null;
 
     public AsyncActionsExecutor() {
-        this(/*maxPendingCalls*/DEFAULT_MAX_PENDING_CALLS, /*maxPendingCallsPerType*/DEFAULT_MAX_PENDING_CALLS_PER_TYPE);
+        this(/*maxPendingCalls*/DEFAULT_MAX_PENDING_CALLS, /*maxPendingCallsPerType*/DEFAULT_MAX_PENDING_CALLS_PER_TYPE,
+                /*durationAfterToResetQueue*/DURATION_AFTER_TO_RESET_QUEUE);
     }
     
-    public AsyncActionsExecutor(int maxPendingCalls, int maxPendingCallsPerType) {
+    public AsyncActionsExecutor(int maxPendingCalls, int maxPendingCallsPerType, Duration durationAfterToResetQueue) {
+        if (maxPendingCalls < maxPendingCallsPerType) {
+            throw new RuntimeException("The number of max pending calls can not be lower than the number of max pending calls per type.");
+        }
         this.maxPendingCalls = maxPendingCalls;
         this.maxPendingCallsPerType = maxPendingCallsPerType;
+        this.durationAfterToResetQueue = durationAfterToResetQueue;
         this.actionsPerTypeCounter = new HashMap<>();
         this.lastRequestedActionsNotBeingSentOut = new HashMap<>();
+        this.timePointOfTypeLastBeingExecuted = new HashMap<>();
+        this.timePointOfFirstExecutorInit = MillisecondsTimePoint.now(); // triggering duration to reset
     }
     
     public <T> void execute(AsyncAction<T> action, AsyncCallback<T> callback) {
@@ -103,6 +112,18 @@ public class AsyncActionsExecutor {
         execute(new ExecutionJob<T>(action, category, callback));
     }
     
+    public int getNumberOfPendingActionsPerType(String type) {
+        int result = 0;
+        if (actionsPerTypeCounter != null) {
+            result = actionsPerTypeCounter.get(type);
+        }
+        return result;
+    }
+    
+    public int getNumberOfPendingActions() {
+        return numPendingCalls;
+    }
+    
     private void execute(ExecutionJob<?> job) {
         Integer numActionsOfType = actionsPerTypeCounter.get(job.getType());
         if (numActionsOfType == null) {
@@ -110,8 +131,10 @@ public class AsyncActionsExecutor {
         }
         if (numPendingCalls >= maxPendingCalls || (numActionsOfType >= maxPendingCallsPerType)) {
             TimePoint now = MillisecondsTimePoint.now();
-            if (timepointOfLastSuccessfulJobExecution != null &&
-                    now.minus(DURATION_AFTER_TO_RESET_QUEUE).before(timepointOfLastSuccessfulJobExecution)) {
+            TimePoint timePointToInspectForResetDecision = timePointOfTypeLastBeingExecuted.get(job.getType()) != null ?
+                    timePointOfTypeLastBeingExecuted.get(job.getType()) : timePointOfFirstExecutorInit;
+            if (timePointToInspectForResetDecision != null &&
+                    now.minus(durationAfterToResetQueue).after(timePointToInspectForResetDecision)) {
                 // reset the number of pending calls
                 numPendingCalls = 0;
                 // reset number of pending actions per type - 0 is fine as checkForEmptyCallQueue
@@ -144,7 +167,7 @@ public class AsyncActionsExecutor {
             actionsPerTypeCounter.put(type, numActionsPerType-1);
         }
         numPendingCalls--;
-        timepointOfLastSuccessfulJobExecution = MillisecondsTimePoint.now();
+        timePointOfTypeLastBeingExecuted.put(type, MillisecondsTimePoint.now());
         checkForEmptyCallQueue(type);
     }
 

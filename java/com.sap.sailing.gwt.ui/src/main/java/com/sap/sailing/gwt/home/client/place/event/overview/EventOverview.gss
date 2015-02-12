@@ -1,0 +1,464 @@
+/**
+ * The overview page of an event
+ */
+.latestraceresults {
+  font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  margin-top: 1.875em;
+  margin-bottom: 4.0625em;
+}
+.latestraceresults_refresh {
+  float: right;
+}
+.latestraceresults_headline {
+  border-bottom: solid 1px #ccc;
+  margin: 0;
+  padding: 0 0 0.5em 0;
+}
+.latestraceresults_link {
+  cursor: pointer;
+}
+.latestraceresults_link:hover,
+.latestraceresults_link:focus {
+  text-decoration: none;
+  background-color: #f8f8f8;
+}
+.latestraceresults_link:hover .latestraceresults_link_title,
+.latestraceresults_link:focus .latestraceresults_link_title {
+  text-decoration: underline;
+}
+.latestraceresults_detail {
+  background-color: #f8f8f8;
+}
+.latestraceresults_detail_wrapper {
+  margin-top: 1.25em;
+}
+.latestraceresults_detail_wrapper_medal {
+  border-bottom: solid 1px #ccc;
+  padding-top: 0.625em;
+  height: 2.875em;
+  color: #333;
+}
+.latestraceresults_detail_wrapper_medal.last {
+  border-bottom: none;
+}
+.latestraceresults_detail_wrapper_thumb {
+  border: solid 1px #ccc;
+}
+.latestraceresults_detail_wrapper_more {
+  padding: 1.25em 0 0.625em;
+}
+.latestraceresults_link,
+.latestraceresults_detail {
+  display: block;
+  border-bottom: solid 1px #ddd;
+  padding: 0.625em;
+}
+.latestraceresults_link_title,
+.latestraceresults_detail_title {
+  color: #008fcc;
+  float: left;
+  font-weight: 700;
+}
+.latestraceresults_link_raceCount,
+.latestraceresults_detail_raceCount {
+  color: #333;
+  display: inline-block;
+}
+.latestraceresults_link_datetime,
+.latestraceresults_detail_datetime {
+  color: #999;
+  float: right;
+  margin-right: 0.625em;
+}
+.columns .latestraceresults_detail_wrapperimage {
+  max-width: none;
+}
+.mediateaser {
+  font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  margin-top: 1.875em;
+  margin-bottom: 4.0625em;
+}
+.mediateaser_title {
+  margin-bottom: 0.375em;
+}
+.mediateaser_title_link {
+  color: #008fcc;
+}
+.mediateaser_title_value {
+  font-weight: 400;
+}
+.mediateaser_photo {
+  background-position: center center;
+  background-repeat: no-repeat;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+}
+.mediateaser_photomain {
+  height: 22.1875em;
+  margin-right: -0.9375rem;
+}
+.mediateaser_photothumb {
+  height: 10.625em;
+}
+.mediateaser_photothumb:first-child {
+  margin-bottom: 0.9375em;
+}
+.mediateaser_video {
+  position: relative;
+  height: 26.875em;
+  background-position: center center;
+  background-repeat: no-repeat;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+}
+.mediateaser_video:hover {
+  cursor: pointer;
+}
+.playablevideo_buttonplay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 7.125em;
+  width: 7.125em;
+  margin-top: -3.5625em;
+  margin-left: -3.5625em;
+  background: url("../images/play-icon.png") no-repeat;
+}
+.box {
+  display: block;
+  color: inherit;
+  background: #f8f8f8;
+  margin-top: 1.875em;
+}
+.boxlink {
+  text-decoration: none;
+}
+.boxlink:hover {
+  background: #f0f0f0;
+  text-decoration: none;
+}
+.boxlink:hover .box_header {
+  background: #e6e6e6;
+}
+.boxlink:hover h2,
+.boxlink:hover h3,
+.boxlink:hover h4,
+.boxlink:hover h5 {
+  text-decoration: underline;
+}
+.box h2,
+.box h3,
+.box h4,
+.box h5 {
+  margin: 0;
+}
+.box_header {
+  background: #eee;
+  border-bottom: 1px solid #dfdfdf;
+  padding: 1.25em;
+}
+.box_header_title {
+  font-size: 1.25em;
+  display: inline-block;
+}
+.box_content {
+  border-bottom: 1px solid #dfdfdf;
+  padding: 0.9375em 1.25em;
+}
+.box_content:last-child {
+  border-bottom: none;
+}
+.box_contentlink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.box_contentlink:hover,
+.box_contentlink:focus {
+  background: #f5f5f5;
+  text-decoration: none;
+}
+.upcomingraceshort {
+  font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  padding: 0.8125em 0.625em;
+  zoom: 1;
+}
+.upcomingraceshort:before,
+.upcomingraceshort:after {
+  content: "";
+  display: table;
+}
+.upcomingraceshort:after {
+  clear: both;
+}
+.upcomingraceshort:hover .upcomingraceshort_name {
+  text-decoration: underline;
+}
+.upcomingraceshort_date {
+  float: left;
+  width: 20%;
+  text-align: center;
+  line-height: 1;
+}
+.upcomingraceshort_date_today {
+  font-size: 1.125em;
+  margin: 0.375em 0;
+}
+.upcomingraceshort_date_day {
+  font-size: 1.125em;
+  font-weight: 700;
+}
+.upcomingraceshort_date_month {
+  font-size: 0.75em;
+  text-transform: uppercase;
+}
+.upcomingraceshort_name {
+  float: left;
+  width: 100%;
+  color: #008fcc;
+  font-size: 1.125em;
+  font-weight: 800;
+}
+.upcomingraceshort_subtitle {
+  font-size: 0.875em;
+  font-weight: 600;
+  margin-top: -emCalc(3px);
+}
+.upcomingraceshort_details {
+  position: absolute;
+  right: 1.125em;
+  margin-top: 1.5625em;
+  width: 20%;
+  text-align: center;
+}
+.upcomingraceshort_details[data-countdown='true'],
+.upcomingraceshort_details[data-countdown='data-countdown'] {
+  color: #f00;
+}
+.upcomingraceshort_countdown {
+  color: #666;
+  font-size: 0.875em;
+  font-weight: 100;
+}
+.weathershort {
+  font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  font-weight: 600;
+  background: #eee;
+  height: 5em;
+  white-space: nowrap;
+}
+.weathershort .grid {
+  height: 100%;
+  float: left;
+  width: 60%;
+  padding: 0;
+  margin: 0;
+}
+.weathershort_title {
+  float: left;
+  width: 40%;
+}
+.weathershort_title h3 {
+  font-size: 1.25em;
+  padding: 1.375em 0 1.375em 0.75em;
+}
+.weathershort_data {
+  padding: 2.8125em 0 0 0;
+  background-repeat: no-repeat;
+  background-position: center 0.9375em;
+  text-align: center;
+  border-left: solid 1px #ddd;
+  height: 100%;
+}
+.weathershort_datatemperature {
+  background-image: url("../images/weather-sunny.png");
+}
+.weathershort_datawindspeed {
+  background-image: url("../images/weather-wind-speed.png");
+}
+.weathershort_datawinddirection {
+  background-image: url("../images/weather-wind-direction.png");
+}
+.newsupdate {
+  font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+}
+.newsupdate_date {
+  font-size: 0.875em;
+  color: #949494;
+  display: block;
+}
+.dropdown {
+  font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  width: 18.75em;
+  display: inline-block;
+}
+.dropdown:hover .dropdown_content,
+.dropdown:focus .dropdown_content {
+  display: block;
+}
+.dropdown_head {
+  cursor: pointer;
+  display: block;
+}
+.dropdown_head_title {
+  cursor: pointer;
+  background: #f8f8f8;
+  color: #666;
+  height: 2.5625em;
+  line-height: 2.5em;
+  padding-left: 0.9375em;
+  font-weight: 700;
+}
+.dropdown_head_titlebutton {
+  float: right;
+}
+.dropdown_content {
+  position: absolute;
+  z-index: 1;
+  background: #f6f9fc;
+  display: none;
+  width: 18.75em;
+  height: auto;
+  max-height: 21.875em;
+  overflow: auto;
+  -webkit-box-shadow: 0 0.0625em 0.25em #ccc;
+  box-shadow: 0 0.0625em 0.25em #ccc;
+  border-bottom: solid 1px #ccc;
+}
+.dropdown_content_link {
+  display: block;
+  cursor: pointer;
+  padding: 1.25em 0.9375em;
+  border-bottom: 1px solid #ddd;
+}
+.dropdown_content_link:hover,
+.dropdown_content_link:focus {
+  background: #f8f8f8;
+  text-decoration: none;
+}
+.dropdown_content_link:hover .dropdown_content_link_title,
+.dropdown_content_link:focus .dropdown_content_link_title {
+  text-decoration: underline;
+}
+.dropdown_content_link_title {
+  color: #008fcc;
+  display: block;
+  font-weight: 700;
+  font-size: 1.125em;
+}
+.dropdown_content_link_subtitle {
+  color: #666;
+  font-size: 1em;
+}
+.eventquickfinder.dropdown {
+  font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  float: right;
+}
+.eventlivebox {
+  font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  margin-top: 1.875em;
+}
+.eventlivebox_video_container {
+  position: relative;
+  height: 26.875em;
+  background-position: center center;
+  background-repeat: no-repeat;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+}
+.eventlivebox_video_container_captionlayer {
+  background: #000;
+  opacity: 0.4;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
+  filter: alpha(opacity=40);
+  position: absolute;
+  bottom: 0px;
+  height: 5em;
+  width: 100%;
+}
+.eventlivebox_video_container_caption {
+  position: absolute;
+  bottom: 0px;
+  font-size: 1.5em;
+  color: #008fcc;
+  font-weight: 700;
+  padding: 0.9375em 1.25em;
+}
+.eventlivebox_video_container_caption .label {
+  margin-right: 0.9375em;
+}
+.eventlivebox_video_container:hover,
+.eventlivebox_video_container:focus {
+  cursor: pointer;
+}
+.eventlivebox_video_container:hover .eventlivebox_video_container_caption,
+.eventlivebox_video_container:focus .eventlivebox_video_container_caption {
+  text-decoration: underline;
+}
+.eventlivebox_linklist {
+  border-left: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+}
+.eventlivebox_linklist_link {
+  display: inline-block;
+  border-bottom: solid 1px #ccc;
+  width: 100%;
+}
+.eventlivebox_linklist_link:hover,
+.eventlivebox_linklist_link:focus {
+  background: #fafafa;
+  text-decoration: none;
+}
+.eventlivebox_linklist_link:hover .eventlivebox_linklist_link_title,
+.eventlivebox_linklist_link:focus .eventlivebox_linklist_link_title {
+  text-decoration: underline;
+}
+.eventlivebox_linklist_link_icon {
+  float: left;
+  width: 3.625em;
+  height: 3.625em;
+  background-repeat: no-repeat;
+  background-position: left top;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  border: solid 1px #ccc;
+  margin: 1.25em;
+}
+.eventlivebox_linklist_link_icon[data-type="audio"] {
+  background-image: url("../images/icon/audio.png");
+}
+.eventlivebox_linklist_link_icon[data-type="diagram"] {
+  background-image: url("../images/icon/diagram.png");
+}
+.eventlivebox_linklist_link_icon[data-type="video"] {
+  background-image: url("../images/icon/video.png");
+}
+.eventlivebox_linklist_link_title {
+  font-weight: 700;
+  display: block;
+  font-size: 1.25em;
+  margin-top: 1.25em;
+}
+.eventlivebox_linklist_link_title .label {
+  margin: -0.25em 0 0 0.3125em;
+}
+.eventlivebox_linklist_link_description {
+  color: #666;
+  padding-right: 0.625em;
+}
+.eventoverview {
+  font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+}
