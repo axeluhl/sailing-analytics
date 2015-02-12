@@ -207,8 +207,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
-    void getLeaderboardsByRegatta(RegattaDTO regatta, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-
     void getLeaderboardsByRaceAndRegatta(RaceDTO race, RegattaIdentifier regattaIdentifier,
             AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
@@ -562,9 +560,9 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
     
-
     void showCachedPolarSheetForBoatClass(String boatClassName,
             AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
+    
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void denoteForRaceLogTracking(String leaderboardName,
