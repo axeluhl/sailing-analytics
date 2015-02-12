@@ -125,6 +125,10 @@ public class EventSeriesAnalyticsDataManager {
         multiCompetitorChart.timeChanged(timer.getTime(), null);
     }
 
+    public CompetitorSelectionModel getCompetitorSelectionProvider() {
+        return competitorSelectionProvider;
+    }
+
     public void hideCompetitorChart() {
         MultiCompetitorLeaderboardChart multiCompetitorChart = getMultiCompetitorChart();
         multiCompetitorChart.setVisible(false);

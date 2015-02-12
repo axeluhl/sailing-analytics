@@ -81,6 +81,10 @@ public class RegattaAnalyticsDataManager {
         return multiCompetitorChart;
     }
 
+    public CompetitorSelectionModel getCompetitorSelectionProvider() {
+        return competitorSelectionProvider;
+    }
+
     public void showCompetitorChart(DetailType chartDetailType) {
         // preselect the top N competitors in case there was no selection before and there too many competitors for a chart
         int competitorsCount = Util.size(competitorSelectionProvider.getAllCompetitors());

@@ -18,11 +18,8 @@
 			  <div class="{res.mediaCss.column}" style="margin-bottom: 1em;">
 			   		<b><ui:text from="{i18n.chartSelectionHint}" /></b>
 			  </div>    
-			  <!-- 
-			  <div ui:field="filterStateUi" class="{res.mediaCss.column}" style="margin-bottom: 1em;">
-			   		<b>Filter: </b>
+			  <div ui:field="competitorSelectionStateUi" class="{res.mediaCss.column}" style="margin-bottom: 1em;">
 			  </div>    
-			   -->
 			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
               	<g:HTMLPanel ui:field="oldCompetitorChartsPanel">
         		</g:HTMLPanel>
