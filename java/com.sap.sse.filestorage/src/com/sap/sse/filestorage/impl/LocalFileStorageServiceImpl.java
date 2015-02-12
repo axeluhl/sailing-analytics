@@ -38,17 +38,15 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     private static final long serialVersionUID = -8661781258137340835L;
     private static final String testFile = "Bundesliga2014_Regatta6_eventteaser.jpg";
     public static final String NAME = "Local Storage";
-    public static final  String DESCRIPTION = "Service for storing files in the local file system. Files get stored in localPath+fileName and can be accessed at baseUrl+fileName Note that the content lying in baseUrl must therefore be accessible remotely. This can for examplebe achieved by mounting a remote file system for example from static.sapsailing.com on the replicas to localPath.";
     
     private static final Logger logger = Logger.getLogger(LocalFileStorageServiceImpl.class.getName());
 
-    private final FileStorageServicePropertyImpl baseURL = new FileStorageServicePropertyImpl("baseURL", true,
-            "Base URL: Base URL + fileName = URL where uploaded file will be accessible");
-    private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, "Local Path to use for file storage");
+    private final FileStorageServicePropertyImpl baseURL = new FileStorageServicePropertyImpl("baseURL", true, "localBaseUrlDesc");
+    private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, "localLocalPathDesc");
 
     
     protected LocalFileStorageServiceImpl() {
-        super(NAME, DESCRIPTION);
+        super(NAME, "localDesc");
         addProperties(baseURL, localPath);
     }
 
@@ -157,7 +155,7 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     }
 
     private String removeTrailingSlash(String value) {
-        if (value.endsWith("/")) {
+        if (value != null && value.endsWith("/")) {
             value = value.substring(0, value.length() - 1);
         }
         return value;

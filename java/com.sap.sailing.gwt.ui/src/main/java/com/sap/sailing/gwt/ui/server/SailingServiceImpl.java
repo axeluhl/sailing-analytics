@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -276,8 +277,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServiceDTO;
-import com.sap.sailing.gwt.ui.shared.FileStorageServicePropertyErrorsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
@@ -423,6 +422,10 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -2312,8 +2315,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return results;
     }
 
-    @Override
-    public List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
+    private List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         if (regatta != null && regatta.races != null) {
             for (RaceDTO race : regatta.races) {
@@ -5436,10 +5438,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public FileStorageServiceDTO[] getAvailableFileStorageServices() {
+    public FileStorageServiceDTO[] getAvailableFileStorageServices(String localeInfoName) {
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
         for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
-            serviceDtos.add(FileStorageServiceDTOUtils.convert(s));
+            serviceDtos.add(FileStorageServiceDTOUtils.convert(s, locale));
         }
         return serviceDtos.toArray(new FileStorageServiceDTO[0]);
     }
@@ -5457,20 +5460,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName) {
+    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) {
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         try {
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {
                 service.testProperties();
             }
         } catch (InvalidPropertiesException e) {
-            return FileStorageServiceDTOUtils.convert(e);
+            return FileStorageServiceDTOUtils.convert(e, locale);
         }
         return null;
     }
 
     @Override
-    public void setActiveFileStorageService(String serviceName) {
+    public void setActiveFileStorageService(String serviceName, String localeInfoName) {
         getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
     }
 

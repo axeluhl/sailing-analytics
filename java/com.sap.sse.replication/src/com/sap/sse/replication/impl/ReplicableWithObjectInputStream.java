@@ -234,6 +234,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             }
             return result;
         } catch (Exception e) {
+            // FIXME why is the following call not performed in a finally clause? What are the consequences of not "cleaning up" in case the method terminates normally?
             setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
             logger.log(Level.SEVERE, "apply", e);
             throw new RuntimeException(e);

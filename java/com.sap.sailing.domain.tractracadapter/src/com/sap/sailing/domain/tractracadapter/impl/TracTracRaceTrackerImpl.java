@@ -502,6 +502,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             stopped = true;
             raceSubscriber.stop();
             eventSubscriber.stop();
+            raceSubscriber.unsubscribeConnectionStatus(this);
             for (Receiver receiver : receivers) {
                 if (stopReceiversPreemtively) {
                     receiver.stopPreemptively();

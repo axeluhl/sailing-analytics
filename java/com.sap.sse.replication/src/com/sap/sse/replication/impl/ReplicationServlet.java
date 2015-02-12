@@ -107,6 +107,9 @@ public class ReplicationServlet extends AbstractHttpServlet {
             for (String replicableIdAsString : replicableIdsAsStrings) {
                 Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable == null) {
+                    final String msg = "Couldn't find replicable with ID "+replicableIdAsString+". Aborting serialization of initial load.";
+                    logger.severe(msg);
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
                     break; // causing an error on the replica which is expecting the replica's initial load
                 }
                 try {
