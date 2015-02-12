@@ -64,4 +64,16 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
         return true;
     }
+
+    /**
+     * For low-point scoring schemes, we don't want to see boats at the top of the leaderboard just because they have
+     * not scored in any races yet. Although generally we don't want to consider the number of races, this implementation
+     * makes an exception for the case that no races were sailed by a competitor. No races is worse than one or more races.
+     * Other than that, this implementation ignores the number of races.
+     */
+    @Override
+    public int compareByNumberOfRacesScored(int competitor1NumberOfRacesScored, int competitor2NumberOfRacesScored) {
+        return (int) Math.signum(competitor1NumberOfRacesScored) - (int) Math.signum(competitor2NumberOfRacesScored);
+    }
+
 }
