@@ -73,7 +73,7 @@ public class LowPoint extends AbstractScoringSchemeImpl {
      */
     @Override
     public int compareByNumberOfRacesScored(int competitor1NumberOfRacesScored, int competitor2NumberOfRacesScored) {
-        return (int) Math.signum(competitor1NumberOfRacesScored) - (int) Math.signum(competitor2NumberOfRacesScored);
+        return (int) Math.signum(competitor2NumberOfRacesScored) - (int) Math.signum(competitor1NumberOfRacesScored);
     }
 
 }
