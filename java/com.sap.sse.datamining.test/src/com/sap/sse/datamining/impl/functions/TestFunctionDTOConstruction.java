@@ -12,17 +12,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
 import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestFunctionDTOConstruction {
     
-    private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessages();
+    private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessages();
 
     private Method dimensionMethod;
     private Method sideEffectFreeValueMethod;

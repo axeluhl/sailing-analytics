@@ -1,0 +1,40 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:client="urn:import:com.sap.sailing.dashboards.gwt.client"
+	xmlns:startlineadvantage="urn:import:com.sap.sailing.dashboards.gwt.client.startlineadvantage"
+	xmlns:windchart="urn:import:com.sap.sailing.dashboards.gwt.client.windchart"
+	xmlns:compass="urn:import:com.sap.sailing.dashboards.gwt.client.windchart.compass">
+
+	<ui:style type='com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent.WindBotComponentStyle'
+		src='WindBotComponentStyle.css'></ui:style>
+
+	<g:HTMLPanel styleName="windBotComponent">
+		<g:HTMLPanel ui:field="windBotNamePanel" styleName="{style.windBotNamePanel}">Wind Bot</g:HTMLPanel>
+		<g:HTMLPanel
+			styleName="{style.wind_bot_component_live_average_container} {style.wind_bot_component_left}">
+			<startlineadvantage:LiveAverageComponent
+				ui:field="trueWindSpeedLiveAverageComponent" header="TWS" unit="kts"></startlineadvantage:LiveAverageComponent>
+		</g:HTMLPanel>
+		<g:HTMLPanel
+			styleName="{style.wind_bot_component_live_average_container} {style.wind_bot_component_right}">
+			<startlineadvantage:LiveAverageComponent
+				ui:field="trueWindDirectionLiveAverageComponent" header="TWD" unit="°"></startlineadvantage:LiveAverageComponent>
+		</g:HTMLPanel>
+		<g:HTMLPanel
+			styleName="{style.wind_bot_component_windchart_container} {style.wind_bot_component_left}">
+			<windchart:VerticalWindChart ui:field="trueWindSpeedVerticalWindChart"
+				styleName="{style.wind_bot_component_windchart}" positiveFillColor="#008FFF"
+				negativeFillColor="#6ADBFF"></windchart:VerticalWindChart>
+		</g:HTMLPanel>
+		<g:HTMLPanel
+			styleName="{style.wind_bot_component_windchart_container} {style.wind_bot_component_right}">
+			<windchart:VerticalWindChart ui:field="trueWindDirectionVerticalWindChart"
+				styleName="{style.wind_bot_component_windchart}" positiveFillColor="#008FFF"
+				negativeFillColor="#6ADBFF"></windchart:VerticalWindChart>
+		</g:HTMLPanel>
+		<g:HTMLPanel styleName="{style.wind_bot_component_compass_container}">
+			<compass:LocationPointerCompass
+				ui:field="locationPointerCompass"></compass:LocationPointerCompass>
+		</g:HTMLPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

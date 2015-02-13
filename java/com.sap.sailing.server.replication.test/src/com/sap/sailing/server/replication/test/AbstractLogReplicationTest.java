@@ -21,8 +21,6 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
@@ -39,14 +37,11 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
      * master re-loads the race log it should see the new race log event.
      */
     protected void addEventToDB(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent createRaceStatusEvent, String regattaName, String raceColumnName, String fleetName) {
-        final MongoObjectFactory defaultMongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
-        defaultMongoObjectFactory.getDatabase().getLastError(); // wait for regatta write operation to complete
         final RacingEventServiceImpl temporaryMaster = createNewMaster();
         Regatta regatta = temporaryMaster.getRegatta(new RegattaName(regattaName+" ("+BOAT_CLASS_NAME_49er+")"));
         Series series = regatta.getSeries().iterator().next();
         RaceLog masterLog = series.getRaceColumnByName(raceColumnName).getRaceLog(series.getFleetByName(fleetName));
         masterLog.add(createRaceStatusEvent);
-        defaultMongoObjectFactory.getDatabase().getLastError(); // wait for write operation to complete
     }
     
     /**

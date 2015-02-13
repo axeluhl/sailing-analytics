@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -192,12 +193,9 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
-import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -409,8 +407,11 @@ import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSerie
 import com.sap.sse.BuildVersion;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -419,6 +420,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.filestorage.FileStorageService;
+import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -2308,8 +2315,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return results;
     }
 
-    @Override
-    public List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
+    private List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         if (regatta != null && regatta.races != null) {
             for (RaceDTO race : regatta.races) {
@@ -4520,21 +4526,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) {
+        Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
     	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
-    	//new competitor
-    	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty()) {
+    	final CompetitorDTO result;
+    	// new competitor
+    	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
     	    BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
     	    DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
     	    DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
     	    DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
-    	    return getBaseDomainFactory().convertToCompetitorDTO(getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(), competitor.getColor(),
-    				team, boat));
-    	}
-    	
-        return getBaseDomainFactory().convertToCompetitorDTO(
-                getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
-                competitor.getColor(), competitor.getSailID(), nationality)));
+            result = getBaseDomainFactory().convertToCompetitorDTO(
+                    getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
+                            competitor.getColor(), team, boat));
+        } else {
+            result = getBaseDomainFactory().convertToCompetitorDTO(
+                    getService().apply(
+                            new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
+                                    .getColor(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
+        }
+        return result;
     }
 
     @Override
@@ -5417,5 +5428,62 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 pointsForDownwindPortAverageSpeedMovingAverage, pointsForDownwindPortAverageConfidence);
 
         return data;
+    }
+    
+    private FileStorageService getFileStorageService(String name) {
+        if (name == null || name.equals("")) {
+            return null;
+        }
+        return getService().getFileStorageManagementService().getFileStorageService(name);
+    }
+
+    @Override
+    public FileStorageServiceDTO[] getAvailableFileStorageServices(String localeInfoName) {
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
+        for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
+            serviceDtos.add(FileStorageServiceDTOUtils.convert(s, locale));
+        }
+        return serviceDtos.toArray(new FileStorageServiceDTO[0]);
+    }
+
+    @Override
+    public void setFileStorageServiceProperties(String serviceName, Map<String, String> properties) {
+        for (Entry<String, String> p : properties.entrySet()) {
+            try {
+                getService().getFileStorageManagementService()
+                    .setFileStorageServiceProperty(getFileStorageService(serviceName), p.getKey(), p.getValue());
+            } catch (NoCorrespondingServiceRegisteredException | IllegalArgumentException e) {
+                //ignore, doing refresh afterwards anyways
+            }
+        }
+    }
+
+    @Override
+    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) {
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        try {
+            FileStorageService service = getFileStorageService(serviceName);
+            if (service != null) {
+                service.testProperties();
+            }
+        } catch (InvalidPropertiesException e) {
+            return FileStorageServiceDTOUtils.convert(e, locale);
+        }
+        return null;
+    }
+
+    @Override
+    public void setActiveFileStorageService(String serviceName, String localeInfoName) {
+        getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
+    }
+
+    @Override
+    public String getActiveFileStorageServiceName() {
+        try {
+            return getService().getFileStorageManagementService().getActiveFileStorageService().getName();
+        } catch (NoCorrespondingServiceRegisteredException e) {
+            return null;
+        }
     }
 }

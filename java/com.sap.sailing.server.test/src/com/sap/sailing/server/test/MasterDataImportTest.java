@@ -298,7 +298,6 @@ public class MasterDataImportTest {
             inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
             importer.importFromStream(inputStream, randomUUID, false);
-            db.getLastError(); // make sure the write has finished before reads are used
         } finally {
             os.close();
             inputStream.close();

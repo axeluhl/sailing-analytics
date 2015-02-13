@@ -13,7 +13,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Install Google plugin for Eclipse (https://developers.google.com/eclipse/docs/download)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
 3. Git (e.g. msysGit for Windows v1.7.10), http://git-scm.com
-4. MongoDB (e.g. Production Release 2.0.4), download: http://www.mongodb.org/
+4. MongoDB (e.g. Production Release 2.6.7), download: http://www.mongodb.org/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
 6. JDK 1.7 (Java SE 7), http://jdk7.java.net
 7. JDK 1.8 (Java SE 8), http://jdk8.java.net

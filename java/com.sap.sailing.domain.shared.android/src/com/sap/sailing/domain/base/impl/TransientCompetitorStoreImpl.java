@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -105,7 +106,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 LockUtil.unlockAfterWrite(lock);
             }
         } else if (isCompetitorToUpdateDuringGetOrCreate(result)) {
-            updateCompetitor(result.getId().toString(), name, displayColor, boat.getSailID(), team.getNationality());
+            updateCompetitor(result.getId().toString(), name, displayColor, boat.getSailID(), team.getNationality(),
+                    team.getImage());
             competitorNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
@@ -189,7 +191,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newSailId, Nationality newNationality) {
+    public Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newSailId,
+            Nationality newNationality, URI newTeamImageUri) {
         DynamicCompetitor competitor = (DynamicCompetitor) getExistingCompetitorByIdAsString(idAsString);
         if (competitor != null) {
             LockUtil.lockForWrite(lock);
@@ -198,6 +201,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 competitor.setColor(newDisplayColor);
                 competitor.getBoat().setSailId(newSailId);
                 competitor.getTeam().setNationality(newNationality);
+                competitor.getTeam().setImage(newTeamImageUri);
                 weakCompetitorDTOCache.remove(competitor);
             } finally {
                 LockUtil.unlockAfterWrite(lock);
