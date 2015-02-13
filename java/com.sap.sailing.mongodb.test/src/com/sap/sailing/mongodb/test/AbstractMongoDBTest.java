@@ -9,6 +9,7 @@ import org.junit.Before;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
@@ -31,20 +32,18 @@ public abstract class AbstractMongoDBTest {
     }
     
     protected Mongo newMongo() throws UnknownHostException, MongoException {
-        return new Mongo(dbConfiguration.getHostName(), dbConfiguration.getPort());
+        return new MongoClient(dbConfiguration.getHostName(), dbConfiguration.getPort());
     }
     
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
         assertNotNull(mongo);
-        db.requestStart();
         dropAllCollections(db);
         assertNotNull(db);
     }
     
     @After
     public void tearDown() {
-        db.requestDone();
     }
 
     private void dropAllCollections(DB theDB) throws InterruptedException {
