@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
+import com.sap.sse.gwt.client.IconResources;
 
 public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
     public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -35,7 +36,7 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
                 new ImageSpec(ACTION_EDIT_SCORES, stringMessages.actionEditScores(), makeImagePrototype(resources.scoresIcon())),
                 new ImageSpec(ACTION_EDIT_COMPETITORS, stringMessages.actionEditCompetitors(), makeImagePrototype(resources.competitorsIcon())),
                 new ImageSpec(ACTION_CONFIGURE_URL, stringMessages.actionConfigureUrl(), makeImagePrototype(resources.settingsActionIcon())),
-                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(resources.removeIcon())),
+                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())),
                 new ImageSpec(ACTION_EXPORT_XML, stringMessages.actionExportXML(), makeImagePrototype(resources.exportXMLIcon())),
                 new ImageSpec(ACTION_OPEN_COACH_DASHBOARD, stringMessages.actionOpenDashboard(), makeImagePrototype(resources.openCoachDashboard())));
     }

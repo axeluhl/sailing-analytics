@@ -7,13 +7,18 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
     <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalyticsResources" />
 		<g:HTMLPanel>
-			<div class="{res.mediaCss.grid}">
+			<div class="{res.mediaCss.grid}" style="margin-left:5rem;margin-right:5rem;">
 			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
 			   		<h3><ui:text from="{i18n.competitorsAnalytics}" /></h3>
 			  </div>    
 			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
 			      	<ui:text from="{i18n.chooseChart}" />
 			  		<g:ListBox ui:field="chartTypeSelectionListBox" />
+			  </div>    
+			  <div class="{res.mediaCss.column}" style="margin-bottom: 1em;">
+			   		<b><ui:text from="{i18n.chartSelectionHint}" /></b>
+			  </div>    
+			  <div ui:field="competitorSelectionStateUi" class="{res.mediaCss.column}" style="margin-bottom: 1em;">
 			  </div>    
 			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
               	<g:HTMLPanel ui:field="oldCompetitorChartsPanel">

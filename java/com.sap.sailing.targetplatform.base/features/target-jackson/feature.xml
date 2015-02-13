@@ -47,4 +47,32 @@
          version="2.5.0"
          unpack="false"/>
 
+   <plugin
+         id="org.codehaus.jettison.jettison"
+         download-size="0"
+         install-size="0"
+         version="1.3.7"
+         unpack="false"/>
+
+   <plugin
+         id="jackson-jaxrs"
+         download-size="0"
+         install-size="0"
+         version="1.9.13"
+         unpack="false"/>
+
+   <plugin
+         id="jackson-core-lgpl"
+         download-size="0"
+         install-size="0"
+         version="1.9.13"
+         unpack="false"/>
+
+   <plugin
+         id="jackson-mapper-lgpl"
+         download-size="0"
+         install-size="0"
+         version="1.9.13"
+         unpack="false"/>
+
 </feature>

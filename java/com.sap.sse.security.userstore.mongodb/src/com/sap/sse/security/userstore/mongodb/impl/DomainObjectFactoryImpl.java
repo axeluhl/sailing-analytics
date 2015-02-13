@@ -33,18 +33,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Iterable<User> loadAllUsers() {
-        ArrayList<User> result = new ArrayList<User>();
+        ArrayList<User> result = new ArrayList<>();
         DBCollection userCollection = db.getCollection(CollectionNames.USERS.name());
-
         try {
             for (DBObject o : userCollection.find()) {
                 result.add(loadUser(o));
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
-            logger.log(Level.SEVERE, "loadAllEvents", e);
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load users.");
+            logger.log(Level.SEVERE, "loadAllUsers", e);
         }
-
         return result;
     }
     

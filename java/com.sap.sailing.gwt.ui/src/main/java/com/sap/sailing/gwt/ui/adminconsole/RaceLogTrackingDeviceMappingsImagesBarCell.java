@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sse.gwt.client.IconResources;
 
 public class RaceLogTrackingDeviceMappingsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_CLOSE = "CLOSE";
@@ -23,7 +24,7 @@ public class RaceLogTrackingDeviceMappingsImagesBarCell extends ImagesBarCell {
         ArrayList<ImageSpec> result = new ArrayList<ImageSpec>();
         DeviceMappingDTO mapping = (DeviceMappingDTO) getContext().getKey();
         
-        result.add(new ImageSpec(ACTION_REMOVE, stringMessages.remove(), makeImagePrototype(resources.removeIcon())));
+        result.add(new ImageSpec(ACTION_REMOVE, stringMessages.remove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())));
         
         if (mapping.from == null || mapping.to == null) {
             result.add(new ImageSpec(ACTION_CLOSE, stringMessages.closeTimeRange(),

@@ -125,9 +125,11 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         Fleet defaultFleet = leaderboard.getFleet(null);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         raceColumn.getRaceLog(defaultFleet).add(expectedEvent);
-        db.getLastError(); // sync DB
+        //getLastError() is now deprecated - seems to run fine without (at least locally)
+        //db.getLastError(); // sync DB
         leaderboard.removeRaceColumn(raceColumnName);
-        db.getLastError(); // sync DB
+        //getLastError() is now deprecated - seems to run fine without (at least locally)
+        //db.getLastError(); // sync DB
         leaderboard.addRaceColumn(raceColumnName, /* medalRace */false);
         // now assert that the race log is empty because the column was removed and so should have been the race log
         RaceLog loadedRaceLog = leaderboard.getRaceColumnByName(raceColumnName).getRaceLog(leaderboard.getRaceColumnByName(raceColumnName).getFleets().iterator().next());
@@ -149,10 +151,12 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         Fleet defaultFleet = leaderboard.getFleet(null);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         raceColumn.getRaceLog(defaultFleet).add(expectedEvent);
-        db.getLastError(); // sync DB to ensure event is stored
+        //getLastError() is now deprecated - seems to run fine without (at least locally)
+        //db.getLastError(); // sync DB to ensure event is stored
         final String newColumnName = "New "+raceColumnName;
         service.renameLeaderboardColumn(leaderboardName, raceColumnName, newColumnName);
-        db.getLastError(); // sync DB
+        //getLastError() is now deprecated - seems to run fine without (at least locally)
+        //db.getLastError(); // sync DB
         // now assert that the race log still holds the original race log event because the column was only renamed
         RaceLog renamedRaceLog = leaderboard.getRaceColumnByName(newColumnName).getRaceLog(leaderboard.getRaceColumnByName(newColumnName).getFleets().iterator().next());
         renamedRaceLog.lockForRead();

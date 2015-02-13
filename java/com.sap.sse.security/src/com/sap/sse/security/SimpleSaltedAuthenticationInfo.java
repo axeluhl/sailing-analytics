@@ -9,12 +9,12 @@ import org.apache.shiro.util.SimpleByteSource;
 public class SimpleSaltedAuthenticationInfo implements SaltedAuthenticationInfo {
     private static final long serialVersionUID = -8423637970683173260L;
     private String username;
-    private String password;
+    private String saltedPassword;
     private byte[] salt;
 
-    public SimpleSaltedAuthenticationInfo(String username, String password, byte[] salt) {
+    public SimpleSaltedAuthenticationInfo(String username, String saltedPassword, byte[] salt) {
         this.username = username;
-        this.password = password;
+        this.saltedPassword = saltedPassword;
         this.salt = salt;
     }
 
@@ -26,7 +26,7 @@ public class SimpleSaltedAuthenticationInfo implements SaltedAuthenticationInfo 
 
     @Override
     public Object getCredentials() {
-        return password;
+        return saltedPassword;
     }
 
     @Override
