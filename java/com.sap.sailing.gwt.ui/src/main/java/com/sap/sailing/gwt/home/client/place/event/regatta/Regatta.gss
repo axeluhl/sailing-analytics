@@ -1,6 +1,6 @@
 .regatta {
   font-size: 15px;
-  font-size: 1rem;
+  /* @alternate */ font-size: 1rem;
   border-bottom: 1px solid #d9d9d9;
   padding: 1.333333333333333em 0;
 }
@@ -16,11 +16,11 @@
 .regatta[data-rendermode='link']:focus {
   background-color: #fcfcfc;
 }
-.regatta[data-rendermode='link']:nth-child\(odd\) {
+.regatta[data-rendermode='link']:nth-child(odd) {
   background-color: #f8f8f8;
 }
-.regatta[data-rendermode='link']:nth-child\(odd\):hover,
-.regatta[data-rendermode='link']:nth-child\(odd\):focus {
+.regatta[data-rendermode='link']:nth-child(odd):hover,
+.regatta[data-rendermode='link']:nth-child(odd):focus {
   background-color: #f3f3f3;
 }
 .regatta_intro {
@@ -90,6 +90,12 @@
   padding: 0.133333333333333em 1.333333333333333em 0.133333333333333em 0;
   min-height: 2.666666666666667em;
 
+}
+@media (min-width: 50em) {
+  .regatta_intro_phases_phase {
+    display: inline-block;
+    border-right: 1px solid #ccc;
+  }
 }
 .regatta_intro_phases_phase_name {
   font-size: 0.866666666666667em;

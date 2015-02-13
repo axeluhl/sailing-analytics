@@ -87,7 +87,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration) {
         DBCollection stConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
-        stConfigCollection.ensureIndex(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+        stConfigCollection.createIndex(new BasicDBObject(CollectionNames.SWISSTIMING_CONFIGURATIONS.name(), 1));
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.ST_CONFIG_NAME.name(), swissTimingConfiguration.getName());
         for (DBObject equallyNamedConfig : stConfigCollection.find(result)) {
@@ -104,7 +104,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     public void storeSwissTimingArchiveConfiguration(
             SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration) {
         DBCollection stArchiveConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
-        stArchiveConfigCollection.ensureIndex(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+        stArchiveConfigCollection.createIndex(new BasicDBObject(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name(), 1));
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonUrl());
         for (DBObject equallyNamedConfig : stArchiveConfigCollection.find(result)) {

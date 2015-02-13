@@ -25,7 +25,6 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
             mongoDBService.getDB().dropDatabase();
         }
         mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
-        mongoObjectFactory.getDatabase().requestStart();
     }
 
     protected RacingEventServiceImpl createNewMaster() {
@@ -39,9 +38,5 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                 // replica gets its own base DomainFactory:
                 new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
                 EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
-    }
-
-    protected void persistenceTearDown() {
-        mongoObjectFactory.getDatabase().requestDone();
     }
 }
