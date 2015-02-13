@@ -52,7 +52,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
         DBObject dbUser = new BasicDBObject();
         dbUser.put(FieldNames.User.NAME.name(), user.getName());
-
         usersCollection.remove(dbUser);
     }
 

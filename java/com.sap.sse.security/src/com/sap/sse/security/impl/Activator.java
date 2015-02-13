@@ -42,6 +42,10 @@ public class Activator implements BundleActivator {
         UsernamePasswordRealm.setTestUserStore(theTestUserStore);
     }
     
+    public static void setSecurityService(SecurityService securityService) {
+        Activator.securityService = securityService;
+    }
+    
     public static BundleContext getContext() {
         return context;
     }
@@ -75,7 +79,7 @@ public class Activator implements BundleActivator {
     }
 
     private void createAndRegisterSecurityService(UserStore store, Properties mailProperties) {
-        securityService = new SecurityServiceImpl(store, mailProperties);
+        securityService = new SecurityServiceImpl(store, mailProperties, /* setAsActivatorSecurityService */ true);
         registration = context.registerService(SecurityService.class.getName(),
                 securityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
