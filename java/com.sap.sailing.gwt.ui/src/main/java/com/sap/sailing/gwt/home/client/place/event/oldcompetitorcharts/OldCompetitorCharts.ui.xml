@@ -15,6 +15,11 @@
 			      	<ui:text from="{i18n.chooseChart}" />
 			  		<g:ListBox ui:field="chartTypeSelectionListBox" />
 			  </div>    
+			  <div class="{res.mediaCss.column}" style="margin-bottom: 1em;">
+			   		<b><ui:text from="{i18n.chartSelectionHint}" /></b>
+			  </div>    
+			  <div ui:field="competitorSelectionStateUi" class="{res.mediaCss.column}" style="margin-bottom: 1em;">
+			  </div>    
 			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
               	<g:HTMLPanel ui:field="oldCompetitorChartsPanel">
         		</g:HTMLPanel>
