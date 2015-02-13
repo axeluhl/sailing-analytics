@@ -134,8 +134,24 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
      * @param mailProperties must not be <code>null</code>
      */
     public SecurityServiceImpl(UserStore store, Properties mailProperties) {
+        this(store, mailProperties, /* setAsActivatorTestSecurityService */ false);
+    }
+    
+    /**
+     * @param setAsActivatorSecurityService
+     *            when <code>true</code>, the {@link Activator#setSecurityService(com.sap.sse.security.SecurityService)}
+     *            will be called with this new instance as argument so that the cache manager can already be accessed
+     *            when the security manager is created. {@link ReplicatingCacheManager#getCache(String)} fetches the
+     *            activator's security service and passes it to the cache entries created. They need it, in turn, for
+     *            replication.
+     * 
+     */
+    public SecurityServiceImpl(UserStore store, Properties mailProperties, boolean setAsActivatorSecurityService) {
         assert mailProperties != null;
         logger.info("Initializing Security Service with user store " + store+" and mail properties "+mailProperties);
+        if (setAsActivatorSecurityService) {
+            Activator.setSecurityService(this);
+        }
         operationsSentToMasterForReplication = new HashSet<>();
         cacheManager = new ReplicatingCacheManager();
         this.operationExecutionListeners = new ConcurrentHashMap<>();

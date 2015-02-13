@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UsernamePasswordRealm;
+import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.jaxrs.api.SecurityResource;
 import com.sap.sse.security.shared.MailException;
@@ -28,8 +29,9 @@ public class SecurityResourceTest {
     @Before
     public void setUp() throws UserManagementException, MailException {
         final UserStoreImpl store = new UserStoreImpl();
+        Activator.setTestUserStore(store);
         UsernamePasswordRealm.setTestUserStore(store);
-        service = new SecurityServiceImpl(store, /* mailProperties */ new Properties());
+        service = new SecurityServiceImpl(store, /* mailProperties */ new Properties(), /* setAsActivatorSecurityService */ true);
         SecurityUtils.setSecurityManager(service.getSecurityManager());
         Session session = SecurityUtils.getSubject().getSession();
         assertNotNull(session);
