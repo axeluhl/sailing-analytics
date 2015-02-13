@@ -91,6 +91,18 @@ The setup for such an event usually consists of the following departments:
 * Sunset & Vine APP (TV)
   * Sarah Greene (Manager)
 
+## Team Contact Information
+
+<pre>
+The Wave	Rob Wilson	rob@robwilsonsailing.com
+Team Russia	Alberto Barovier	abarovier@gmail.com
+Red Bull	Nick Blackman	njblackman@gmail.com
+SAP	Michael Hestbek	michael.hestbek@sapextremesailing.com
+Oman Air	Rob Wilson	rob@robwilsonsailing.com
+GAC Pindar	Tyson Lamond	tysonlamond@me.com
+Team Turx	Edhem Dirvana	edhemdirvana@gmail.com
+</pre>
+
 ## Technical Architecture
 The technical infrastructure can be divided into two major parts.
 
@@ -492,20 +504,18 @@ There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` tha
 * (Caching) squidclient -h 192.168.1.202 cache_object://localhost/ mgr:info
 * (Caching) http://192.168.1.202/Squid/cgi-bin/cachemgr.cgi?host=localhost&port=3128&user_name=&operation=counters&auth=
 
-### Competitor colors for 2014
+### Competitor colors for 2015
 
 <pre>
-#33CC33 Groupama
-#FF0000 Alinghi
-#2AFFFF GAC
-#000010 ETNZ
-#FFFFFF Gazprom
-#999999 JP Morgan
-#FFC61E SAP
-#B07A00 Oman Air
-#000099 Realteam
-#990099 Red Bull
-#16A6ED The Wave
+The Wave #16A6ED
+Oman Air #B07A00
+Gazprom Team Russia #FFFFFF
+Lino Sonego Team Italia #000099
+SAP Extreme Sailing Team #FFC61E
+Invite #FFFF00
+Beko Team Turx #FF0000
+GAC Pindar #2AFFFF
+Red Bull Sailing Team #990099
 </pre>
 
 ### Opening replication channel for Sailing Analytics server

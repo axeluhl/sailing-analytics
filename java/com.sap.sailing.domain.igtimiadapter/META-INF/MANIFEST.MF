@@ -27,7 +27,8 @@ Import-Package: javax.ws.rs;version="1.1.1",
  org.eclipse.jetty.websocket.api.extensions;version="9.0.0",
  org.eclipse.jetty.websocket.client;version="9.0.0",
  org.eclipse.jetty.websocket.common;version="9.0.0",
- org.osgi.framework;version="1.7.0"
+ org.osgi.framework;version="1.7.0",
+ org.codehaus.jackson.jaxrs;version="1.9.13"
 Web-ContextPath: /igtimi
 Bundle-Activator: com.sap.sailing.domain.igtimiadapter.impl.Activator
 Export-Package: com.sap.sailing.domain.igtimiadapter,

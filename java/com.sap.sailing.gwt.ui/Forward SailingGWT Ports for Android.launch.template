@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.github.sdbg.debug.core.androidReverseForwardsLaunchConfig">
+<stringAttribute key="device" value="<YOUR-DEVICE>"/>
+<intAttribute key="deviceCommandPort" value="6565"/>
+<stringAttribute key="reverseForwards" value="localhost:8888:8888,localhost:9876:9876,localhost:9875:9875"/>
+</launchConfiguration>

@@ -10,7 +10,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sse.mongodb,
- com.mongodb.driver;bundle-version="2.6.2",
+ org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence,
@@ -66,4 +66,10 @@ Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-ajaxloader.jar,
  WEB-INF/lib/gwt-bootstrap-2.3.2.0.jar
 TrackLifecycle: true
-Export-Package: com.sap.sailing.gwt.ui.shared
+Export-Package: com.sap.sailing.gwt.ui.actions,
+ com.sap.sailing.gwt.ui.client,
+ com.sap.sailing.gwt.ui.client.shared.charts,
+ com.sap.sailing.gwt.ui.client.shared.racemap,
+ com.sap.sailing.gwt.ui.server,
+ com.sap.sailing.gwt.ui.shared,
+ com.sap.sailing.gwt.ui.shared.racemap

@@ -2198,6 +2198,7 @@ public abstract class BaseChart<T> extends Widget {
     public T redraw() {
         if (isRendered()) {
             nativeRedraw(chart);
+            nativeAdjustCheckboxPosition(chart);
         }
         return returnThis();
     }
@@ -2903,6 +2904,24 @@ public abstract class BaseChart<T> extends Widget {
         return seriesList.get(seriesIndex).getPlotOptions().getDataLabels().getFormatter().format(new DataLabelsData(nativeData));
     }
 
+    /**
+     * Fixing a bug currently in the base Highcharts implementation regarding the placement of the checkbox in the legend.
+     * Requires the symbol padding (see {@link Legend#setSymbolPadding(Number)}) to be set to <code>25</code>. Invoked
+     * whenever the chart is rendered.<p>
+     * 
+     * The implementation moves the checkbox between the legend symbol and the legend item, using the space made by setting the symbol
+     * padding to 25px.
+     */
+    private static native JavaScriptObject nativeAdjustCheckboxPosition(JavaScriptObject chart) /*-{
+        var series = chart.series;
+        for(var i= 0; i<series.length; i++) {
+            if(series[i].legendItem && series[i].checkbox) {
+                series[i].checkbox.style.marginLeft = -series[i].checkboxOffset + 40 + "px";
+                series[i].checkbox.style.marginTop = '1px';
+            }
+        }
+    }-*/;
+    
     private static native void nativeRedraw(JavaScriptObject chart) /*-{
         chart.redraw();
     }-*/;
