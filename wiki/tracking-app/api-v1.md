@@ -295,8 +295,9 @@ http://<host>/buoy-tender/checkin
 _also see [Tracking App Check-In Information](#tracking-checkin-info) for additional notes that might apply_
 
 ## Course Information
+<div id="course-info"></div>
 
-_not yet implemented_
+_see [bug 2651](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2651)_
 
 **Path:** ``leaderboards/{leaderboard-name}/races/{race-name}/course``
 
