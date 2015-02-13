@@ -26,7 +26,6 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -38,6 +37,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRa
 import com.sap.sailing.racecommittee.app.ui.fragments.*;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.WindFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -46,7 +46,6 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Locale;
 
 public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks,
         TickListener, OnClickListener {
@@ -156,11 +155,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void loadWindFragment() {
         // check if the fragment is actively shown already, otherwise show it
         if ((windFragment != null && !windFragment.isFragmentUIActive()) || windFragment == null) {
-            if (selectedRace != null) {
-                windFragment = new WindFragment(selectedRace);
-            } else {
-                windFragment = new WindFragment();
-            }
+            windFragment = WindFragment.newInstance();
 
             showMarker(mWindMarker, 1);
             getFragmentManager().beginTransaction()
@@ -331,21 +326,21 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             onWindEntered(mWind);
         }
 
-/*
-        //TODO Implement reload after return
-        Serializable raceId  = savedInstanceState.getSerializable(RACE);
-        selectedRace = OnlineDataManager.create(this).getDataStore().getRace(raceId);
-        if (selectedRace != null) {
-            onRaceItemClicked(selectedRace);
-        }
-*/
+//        //TODO Implement reload after return
+//        Serializable raceId  = savedInstanceState.getSerializable(RACE);
+//        selectedRace = OnlineDataManager.create(this).getDataStore().getRace(raceId);
+//        if (selectedRace != null) {
+//            onRaceItemClicked(selectedRace);
+//        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(WIND, mWind);
-        outState.putSerializable(RACE, selectedRace.getId());
+        if (selectedRace != null) {
+            outState.putSerializable(RACE, selectedRace.getId());
+        }
     }
 
     @Override

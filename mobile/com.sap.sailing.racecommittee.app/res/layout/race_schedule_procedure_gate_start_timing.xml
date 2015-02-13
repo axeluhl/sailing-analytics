@@ -3,58 +3,115 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <Button
-        android:id="@+id/confirm"
+    <RelativeLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:text="Confirm Gate Timing" />
+        android:layout_height="@dimen/selector_header_height"
+        android:background="@color/grey_dark">
 
-    <NumberPicker
-        android:id="@+id/time"
-        style="@style/AppTheme.Widget.NumberPicker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" />
+        <LinearLayout
+            android:id="@+id/header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
+            android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/plusSign"
-        style="@style/AppTheme.LargeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/time"
-        android:layout_toStartOf="@id/time"
-        android:text=" + " />
+            <ImageView
+                android:id="@+id/header_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_chevron_left_white_24dp" />
 
-    <TextView
-        style="@style/AppTheme.LargeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/plusSign"
-        android:layout_toLeftOf="@id/plusSign"
-        android:layout_toStartOf="@id/plusSign"
-        android:text="@string/race_start_in_4_minutes" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/gate_start_timing"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </RelativeLayout>
 
-    <TextView
-        android:id="@+id/equalSign"
-        style="@style/AppTheme.LargeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toEndOf="@id/time"
-        android:layout_toRightOf="@id/time"
-        android:text=" = " />
+    <View
+        android:id="@+id/line_top"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thick_line"
+        android:layout_below="@id/header"
+        android:background="@color/black" />
 
-    <TextView
-        android:id="@+id/resultTime"
-        style="@style/AppTheme.LargeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/equalSign"
-        android:layout_toEndOf="@id/equalSign"
-        android:layout_toRightOf="@id/equalSign"
-        android:text="x Minuten" />
+    <RelativeLayout
+        android:layout_below="@id/line_top"
+        android:background="@color/grey"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/time_launch"/>
+
+                    <NumberPicker
+                        android:id="@+id/time_launch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <TextView
+                    android:text="+"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:text="@string/time_golf"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"/>
+
+                    <NumberPicker
+                        android:id="@+id/time_golf"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/set_gate_time"
+                android:text="Set Gate Time"
+                android:textAllCaps="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@color/blue_light"
+                android:padding="@dimen/default_padding"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_marginRight="@dimen/default_margin"
+                android:layout_marginLeft="@dimen/default_margin"/>
+        </LinearLayout>
+    </RelativeLayout>
 </RelativeLayout>

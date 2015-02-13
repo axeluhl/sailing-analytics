@@ -10,20 +10,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.*;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class StartModeFragment extends RaceFragment {
+public class StartModeFragment extends ScheduleFragment implements StartModeAdapter.StartModeClick {
 
     private class StartModeComparator implements Comparator<StartMode> {
 
@@ -57,30 +53,7 @@ public class StartModeFragment extends RaceFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_mode, container, false);
 
-        mListView = (ListView) view.findViewById(R.id.listMode);
-
-        Button confirm = (Button) view.findViewById(R.id.confirm);
-        if (confirm != null) {
-            confirm.setOnClickListener(new OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    StartMode checkedItem = null;
-                    for (int i = 0; i < mAdapter.getCount(); i++) {
-                        StartMode item = mAdapter.getItem(i);
-                        if (item.isChecked()) {
-                            checkedItem = item;
-                        }
-                    }
-                    if (checkedItem != null) {
-                        mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), checkedItem.getFlag());
-                        openMainFragment();
-                    } else {
-                        Toast.makeText(getActivity(), "Please choose one start mode", Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-        }
+        mListView = (ListView) view.findViewById(R.id.listView);
 
         LinearLayout headerText = (LinearLayout) view.findViewById(R.id.header_text);
         if (headerText != null) {
@@ -88,7 +61,7 @@ public class StartModeFragment extends RaceFragment {
 
                 @Override
                 public void onClick(View v) {
-                    openMainFragment();
+                    openMainScheduleFragment();
                 }
             });
         }
@@ -100,8 +73,7 @@ public class StartModeFragment extends RaceFragment {
     public void onResume() {
         super.onResume();
 
-        ArrayList<StartMode> startMode = new ArrayList<StartMode>();
-
+        ArrayList<StartMode> startMode = new ArrayList<>();
         List<Flags> flags = mProcedure.getConfiguration().getStartModeFlags();
 
         for (Flags flag : flags) {
@@ -113,16 +85,13 @@ public class StartModeFragment extends RaceFragment {
         }
 
         Collections.sort(startMode, new StartModeComparator());
-        mAdapter = new StartModeAdapter(getActivity(), startMode);
+        mAdapter = new StartModeAdapter(getActivity(), startMode, this);
         mListView.setAdapter(mAdapter);
     }
 
-    private void openMainFragment() {
-        RaceFragment fragment = MainScheduleFragment.newInstance();
-        fragment.setArguments(getRecentArguments());
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.racing_view_container, fragment)
-                .commit();
+    @Override
+    public void onClick(StartMode startMode) {
+        mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), startMode.getFlag());
+        openMainScheduleFragment();
     }
 }

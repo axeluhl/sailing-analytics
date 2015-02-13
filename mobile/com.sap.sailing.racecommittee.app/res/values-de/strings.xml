@@ -277,5 +277,20 @@
     <string name="start_procedure_line_start">Line Start</string>
     <string name="start_procedure_simplified">Simplified</string>
     <string name="race_select">Wähle ein Rennen</string>
+    <string name="gate_start_pathfinder">Gate Start Pathfinder</string>
+    <string name="gate_start_timing">Gate Start Timing</string>
+    <string name="time_golf">Golf</string>
+    <string name="time_launch">Gate Launch</string>
+    <string name="time_total">Total</string>
+    <string name="wind_enter_position">Set Your Position</string>
+    <string name="wind_from">Coming from</string>
+    <string name="wind_off">No Wind Sensors</string>
+    <string name="wind_on">Wind Sensors active</string>
+    <string name="wind_position">Measuring Position</string>
+    <string name="wind_set_data">Set Wind Data</string>
+    <string name="wind_set_position">Set Position</string>
+    <string name="wind_speed">Speed</string>
+    <string name="wind_kn">kn</string>
+    <string name="wind_address_hint">Enter Address</string>
 
 </resources>

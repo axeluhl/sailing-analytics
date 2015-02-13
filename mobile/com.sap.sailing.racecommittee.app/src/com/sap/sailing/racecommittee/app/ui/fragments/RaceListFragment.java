@@ -1,14 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
@@ -29,12 +20,9 @@ import android.widget.*;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
@@ -52,32 +40,15 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogF
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
+import java.io.Serializable;
+import java.util.*;
+
 public class RaceListFragment extends LoggableFragment implements OnItemClickListener, JuryFlagClickedListener,
         OnItemSelectedListener, TickListener, OnScrollListener {
-
-    public enum FilterMode {
-        ACTIVE(R.string.race_list_filter_show_active), ALL(R.string.race_list_filter_show_all);
-
-        private String displayName;
-
-        private FilterMode(int resId) {
-            this.displayName = RaceApplication.getStringContext().getString(resId);
-        }
-
-        @Override
-        public String toString() {
-            return displayName;
-        }
-    }
-
-    public static interface RaceListCallbacks {
-        void onRaceListItemSelected(RaceListDataType selectedItem);
-    }
 
     private final static String TAG = RaceListFragment.class.getName();
     private final static String LAYOUT = "layout";
     private final static String HEADER = "header";
-
     private ManagedRaceListAdapter mAdapter;
     private RaceListCallbacks mCallbacks;
     private Button mCurrent;
@@ -92,7 +63,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private ManagedRace mSelectedRace;
     private boolean mUpdateList;
     private ArrayList<RaceListDataType> mViewItems;
-
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
         @Override
         public void onStartTimeChanged(ReadonlyRaceState state) {
@@ -109,7 +79,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             filterChanged();
         }
     };
-
     public RaceListFragment() {
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
@@ -156,8 +125,10 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mAdapter.notifyDataSetChanged();
 
         if (mCurrent != null && mAll != null) {
-            mCurrent.setTextColor(getResources().getColor(R.color.grey_light));
-            mAll.setTextColor(getResources().getColor(R.color.grey_light));
+            int colorGrey = getResources().getColor(R.color.grey_light);
+            int colorOrange = getResources().getColor(R.color.orange);
+            mCurrent.setTextColor(colorGrey);
+            mAll.setTextColor(colorGrey);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 mCurrent.setBackground(null);
                 mAll.setBackground(null);
@@ -168,29 +139,34 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
             Drawable drawable = getResources().getDrawable(R.drawable.nav_drawer_tab_button);
             switch (getFilterMode()) {
-            case ALL:
-                mAll.setTextColor(getResources().getColor(R.color.orange));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    mAll.setBackground(drawable);
-                } else {
-                    mAll.setBackgroundDrawable(drawable);
-                }
-                break;
+                case ALL:
+                    mAll.setTextColor(colorOrange);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        mAll.setBackground(drawable);
+                    } else {
+                        mAll.setBackgroundDrawable(drawable);
+                    }
+                    break;
 
-            default:
-                mCurrent.setTextColor(getResources().getColor(R.color.orange));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    mCurrent.setBackground(drawable);
-                } else {
-                    mCurrent.setBackgroundDrawable(drawable);
-                }
-                break;
+                default:
+                    mCurrent.setTextColor(colorOrange);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        mCurrent.setBackground(drawable);
+                    } else {
+                        mCurrent.setBackgroundDrawable(drawable);
+                    }
+                    break;
             }
         }
     }
 
     public FilterMode getFilterMode() {
         return mFilterMode;
+    }
+
+    public void setFilterMode(FilterMode filterMode) {
+        mFilterMode = filterMode;
+        filterChanged();
     }
 
     @Override
@@ -228,7 +204,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         int layout = R.layout.race_list_vertical;
-        if (getArguments() != null && getArguments().getInt(LAYOUT) !=0) {
+        if (getArguments() != null && getArguments().getInt(LAYOUT) != 0) {
             layout = getArguments().getInt(LAYOUT);
         }
         View view = inflater.inflate(layout, container, false);
@@ -261,7 +237,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 }
             });
         }
-        
+
         mHeader = (TextView) view.findViewById(R.id.regatta_data);
         if (getArguments() != null && getArguments().getString(HEADER) != null) {
             mHeader.setText(getArguments().getString(HEADER));
@@ -340,13 +316,13 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         switch (scrollState) {
-        case SCROLL_STATE_FLING:
-        case SCROLL_STATE_TOUCH_SCROLL:
-            mUpdateList = false;
-            break;
+            case SCROLL_STATE_FLING:
+            case SCROLL_STATE_TOUCH_SCROLL:
+                mUpdateList = false;
+                break;
 
-        default:
-            mUpdateList = true;
+            default:
+                mUpdateList = true;
         }
     }
 
@@ -371,11 +347,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         for (ManagedRace managedRace : mManagedRacesById.values()) {
             managedRace.getState().addChangedListener(stateListener);
         }
-    }
-
-    public void setFilterMode(FilterMode filterMode) {
-        mFilterMode = filterMode;
-        filterChanged();
     }
 
     public void setUp(DrawerLayout drawerLayout, SpannableString header) {
@@ -445,5 +416,24 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         for (ManagedRace managedRace : mManagedRacesById.values()) {
             managedRace.getState().removeChangedListener(stateListener);
         }
+    }
+
+    public enum FilterMode {
+        ACTIVE(R.string.race_list_filter_show_active), ALL(R.string.race_list_filter_show_all);
+
+        private String displayName;
+
+        private FilterMode(int resId) {
+            this.displayName = RaceApplication.getStringContext().getString(resId);
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
+    public static interface RaceListCallbacks {
+        void onRaceListItemSelected(RaceListDataType selectedItem);
     }
 }

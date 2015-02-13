@@ -10,22 +10,24 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import android.widget.TextView;
 import com.sap.sailing.racecommittee.app.R;
 
 public class CompassView extends RelativeLayout {
 
     public interface CompassDirectionListener {
-        public void onDirectionChanged(float degree);
+        void onDirectionChanged(float degree);
     }
 
     private CompassDirectionListener changeListener = null;
     private RotateAnimation rotation = null;
     private ImageView needleView = null;
+    private TextView degreeView = null;
     private float currentDegrees = 0.0f;
     private Float deferredToDegress = null;
 
-    private float getNeedlePivotX() { return needleView.getWidth() / 2; }
-    private float getNeedlePivotY() { return needleView.getHeight() / 2; }
+    private float getNeedlePivotX() { return needleView.getMeasuredWidth() / 2; }
+    private float getNeedlePivotY() { return needleView.getMeasuredHeight() / 2; }
 
     public CompassView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -50,24 +52,27 @@ public class CompassView extends RelativeLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
         needleView = (ImageView) findViewById(R.id.compass_view_needle);
+        degreeView = (TextView) findViewById(R.id.compass_view_degree);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float rotateX = event.getX() - needleView.getX() - getNeedlePivotX();
-        float rotateY = (-1) * (event.getY() - needleView.getY() - getNeedlePivotY());
+        float rotateX = (-1) * (event.getY() - needleView.getY() - getNeedlePivotY());
+        float rotateY = event.getX() - needleView.getX() - getNeedlePivotX();
 
-        float toDegrees = (float) Math.toDegrees(Math.atan2(rotateX, rotateY));
+        float toDegrees = (float) Math.toDegrees(Math.atan2(rotateY, rotateX));
         cancelAndStartAnimation(toDegrees, 0);
         
         return true;
     }
-    
+
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+
         doDeferredRotation();
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     public void setDirection(float toDegrees) {
@@ -76,6 +81,10 @@ public class CompassView extends RelativeLayout {
         } else {
             cancelAndStartAnimation(toDegrees, 500);
         }
+    }
+
+    public float getDirection() {
+        return currentDegrees;
     }
 
     private void cancelAndStartAnimation(float toDegrees, long duration) {
@@ -89,6 +98,13 @@ public class CompassView extends RelativeLayout {
         rotation.setFillAfter(true);
         rotation.setAnimationListener(new NeedleRotationListener(toDegrees));
         needleView.startAnimation(rotation);
+        if (degreeView != null) {
+            float degree = toDegrees;
+            if (degree < 0) {
+                degree += 360;
+            }
+            degreeView.setText(String.format("%.0f", degree));
+        }
     }
 
     public void setDirectionListener(CompassDirectionListener listener) {

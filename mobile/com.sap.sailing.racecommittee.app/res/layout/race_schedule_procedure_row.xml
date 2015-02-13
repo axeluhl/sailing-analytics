@@ -9,33 +9,34 @@
     android:paddingTop="@dimen/listview_row_padding">
 
     <ImageView
-        android:id="@+id/flag"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/flag_zulu_64dp"
-        android:layout_centerVertical="true" />
-
-    <ImageView
-        android:id="@+id/checked"
+        android:id="@+id/set_path_finder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_check_white_18dp" />
+        android:src="@drawable/ic_chevron_right_grey600_24dp"
+        android:visibility="invisible" />
 
-    <TextView
-        android:id="@+id/flag_name"
+    <ImageView
+        android:id="@+id/checked"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@id/flag"
-        android:layout_toLeftOf="@id/checked"
-        android:layout_toRightOf="@id/flag"
-        android:layout_toStartOf="@id/checked"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_toLeftOf="@+id/set_path_finder"
+        android:layout_toStartOf="@+id/set_path_finder"
+        android:src="@drawable/ic_check_white_18dp" />
+
+    <TextView
+        android:id="@+id/start_procedure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
         android:padding="@dimen/default_padding_half"
-        android:text="Zulu" />
+        android:text="Zulu"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <View
         android:layout_width="match_parent"

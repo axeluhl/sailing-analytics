@@ -67,37 +67,28 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
         if (mDatePicker != null) {
             mDatePicker.setCalendarViewShown(false);
             mDatePicker.setMinDate(System.currentTimeMillis() - 1000);
+            mDatePicker.getCalendarView().setDate(Calendar.getInstance().getTimeInMillis());
         }
 
         mTimePicker = (TimePicker) view.findViewById(R.id.start_time_picker);
         if (mTimePicker != null) {
             mTimePicker.setIs24HourView(true);
+
+            // In 10 minutes from now, but always a 5-minute-mark.
+            Calendar now = Calendar.getInstance();
+            now.add(Calendar.MINUTE, 10);
+            int hours = now.get(Calendar.HOUR_OF_DAY);
+            int minutes = now.get(Calendar.MINUTE);
+            minutes = (int) (Math.ceil((minutes / 5.0)) * 5.0);
+            if (minutes >= 60) {
+                hours++;
+            }
+
+            mTimePicker.setCurrentHour(hours);
+            mTimePicker.setCurrentMinute(minutes);
         }
 
         return view;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        TimePoint protestTime = null;
-        if (getRace() != null) {
-            if (getRaceState() != null) {
-                protestTime = getRaceState().getProtestTime();
-            }
-        }
-
-        if (protestTime != null) {
-            if (mDatePicker != null) {
-                mDatePicker.getCalendarView().setDate(protestTime.asMillis());
-            }
-
-            if (mTimePicker != null) {
-                mTimePicker.setCurrentHour(protestTime.asDate().getHours());
-                mTimePicker.setCurrentMinute(protestTime.asDate().getMinutes());
-            }
-        }
     }
 
     @Override

@@ -1,24 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
-    
-    <ImageView 
-        android:id="@+id/compass_view_background"
-        android:src="@drawable/compass_back_302dpi_new"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/compass_view_compass"
-        android:layout_gravity="center"
-        android:layout_centerInParent="true" />
-    
-    <ImageView 
-        android:id="@+id/compass_view_needle"
-        android:src="@drawable/compass_needle_302dpi_north_new"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/compass_view_needle"
-        android:layout_gravity="center"
-        android:layout_centerInParent="true" />
+    android:layout_height="wrap_content">
 
-</merge>
+    <ImageView
+        android:id="@+id/compass_view_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:contentDescription="@string/compass_view_compass"
+        android:src="@drawable/compass_back_380" />
+
+    <ImageView
+        android:id="@+id/compass_view_needle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:contentDescription="@string/compass_view_needle"
+        android:src="@drawable/compass_needle_380" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <TextView
+            android:id="@+id/compass_view_degree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="0"
+            android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="°"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_alignTop="@+id/compass_view_degree"
+            android:layout_toRightOf="@+id/compass_view_degree"
+            android:layout_toEndOf="@+id/compass_view_degree" />
+    </RelativeLayout>
+</RelativeLayout>

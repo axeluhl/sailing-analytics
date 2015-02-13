@@ -43,7 +43,7 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
-import com.sap.sailing.racecommittee.app.ui.fragments.WindFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;

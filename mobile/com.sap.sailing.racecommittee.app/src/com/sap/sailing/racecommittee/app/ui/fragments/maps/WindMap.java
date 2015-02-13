@@ -32,6 +32,7 @@ import java.util.List;
  */
 public class WindMap extends MapFragment {
 
+    private final static float DEFAULT_ZOOM = 15;
     public Marker windMarker;
     public Circle windCircle;
     private List<MapMarker> mapItems;
@@ -51,13 +52,12 @@ public class WindMap extends MapFragment {
             windCircle.remove();
         }
         CircleOptions co = new CircleOptions()
-                .center(new LatLng(location.getLatitude(), location
-                        .getLongitude())).radius(location.getAccuracy())
+                .center(new LatLng(location.getLatitude(),
+                        location.getLongitude())).radius(location.getAccuracy())
                 .fillColor(Color.parseColor("#33ff0000")).strokeWidth(1)
                 .strokeColor(Color.RED);
         windCircle = getMap().addCircle(co);
     }
-
 
     /**
      * animates the map pin to move to a different position
@@ -125,7 +125,7 @@ public class WindMap extends MapFragment {
      * @param lng double: longitude
      */
     public void centerMap(double lat, double lng) {
-        centerMap(lat, lng, 13);
+        centerMap(lat, lng, DEFAULT_ZOOM);
     }
 
     /**
@@ -133,7 +133,7 @@ public class WindMap extends MapFragment {
      * @param latLng LatLng: coordinates to center around
      */
     public void centerMap(LatLng latLng) {
-        centerMap(latLng.latitude, latLng.longitude, 13);
+        centerMap(latLng.latitude, latLng.longitude, DEFAULT_ZOOM);
     }
 
     /**

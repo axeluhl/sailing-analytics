@@ -98,8 +98,8 @@ public class RacePositionsPoller implements PollingActiveChangedListener {
         URL u = new URL(MessageSendingService.getRacePositionsUrl(context, race.getRaceGroup().getName(),
                 race.getName()));
 
-        // TODO: remove this debug line:
-        u = new URL("http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/sailingserver/api/v1/regattas/ESS%202014%20Singapore%20%28Extreme40%29/races/Race%201/marks/positions");
+//         TODO: remove this debug line:
+//        u = new URL("http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/sailingserver/api/v1/regattas/ESS%202014%20Singapore%20%28Extreme40%29/races/Race%201/marks/positions");
 
         ExLog.i(context, TAG, String.format("Using url %s", u));
         return u;

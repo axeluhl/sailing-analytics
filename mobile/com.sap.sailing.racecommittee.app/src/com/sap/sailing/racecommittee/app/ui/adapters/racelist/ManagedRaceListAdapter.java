@@ -34,13 +34,14 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsBitmapCache;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
     public interface JuryFlagClickedListener {
-        public void onJuryFlagClicked(BoatClassSeriesFleet clickedItem);
+        void onJuryFlagClicked(BoatClassSeriesFleet clickedItem);
     }
 
     private enum ViewType {
@@ -226,9 +227,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         race_name.setTextColor(getContext().getResources().getColor(R.color.white));
                     }
                 }
-                // if (race.isUpdateIndicatorVisible()) {
-                // update_badge.setVisibility(View.VISIBLE);
-                // }
             }
             updateFlag(race.getRace());
         }
@@ -312,9 +310,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             TimePoint changeAt = flagPoleState.getNextStateValidFrom();
             FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
 
-            Bitmap flag = new FlagsBitmapCache(getContext()).getBitmap(changePole.getUpperFlag(),
-                    changePole.getLowerFlag());
-            current_flag.setImageBitmap(flag);
+            current_flag.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 1));
             String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
             flag_timer.setText(text.replace("-", ""));
             Resources resources = getContext().getResources();

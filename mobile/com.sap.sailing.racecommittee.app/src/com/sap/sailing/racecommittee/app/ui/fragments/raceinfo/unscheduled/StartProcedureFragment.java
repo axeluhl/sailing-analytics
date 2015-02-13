@@ -1,0 +1,79 @@
+package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
+import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedureAdapter;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.util.ArrayList;
+
+public class StartProcedureFragment extends ScheduleFragment implements StartProcedureAdapter.RacingProcedureTypeClick {
+
+    private final ArrayList<StartProcedure> startProcedure = new ArrayList<>();
+
+    public StartProcedureFragment() {
+
+    }
+
+    public static StartProcedureFragment newInstance() {
+        StartProcedureFragment fragment = new StartProcedureFragment();
+        return fragment;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.race_schedule_procedure, container, false);
+
+        LinearLayout headerText = (LinearLayout) view.findViewById(R.id.header_text);
+        if (headerText != null) {
+            headerText.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    openMainScheduleFragment();
+                }
+            });
+        }
+
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        String className;
+        for (RacingProcedureType procedureType : RacingProcedureType.validValues()) {
+            if (procedureType.equals(RacingProcedureType.GateStart)) {
+                className = GateStartFragment.class.getSimpleName();
+            } else {
+                className = null;
+            }
+            startProcedure.add(new StartProcedure(procedureType, (getRaceState().getRacingProcedure().getType() == procedureType), className));
+        }
+
+        ListView listView = (ListView) getActivity().findViewById(R.id.listView);
+        if (listView != null) {
+            StartProcedureAdapter adapter = new StartProcedureAdapter(getActivity(), startProcedure, this);
+            listView.setAdapter(adapter);
+        }
+    }
+
+    @Override
+    public void onClick(RacingProcedureType procedureType, String className) {
+        getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
+        if (TextUtils.isEmpty(className)) {
+            openMainScheduleFragment();
+        } else {
+            openFragment(GateStartFragment.Pathfinder.newInstance());
+        }
+    }
+}

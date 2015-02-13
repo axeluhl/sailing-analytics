@@ -45,7 +45,6 @@
             android:layout_toRightOf="@id/start_time_caption"
             android:layout_toStartOf="@id/start_time_icon"
             android:gravity="end"
-            android:text="11:00:00 / - 06:32"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white" />
 
@@ -147,8 +146,7 @@
             android:layout_margin="@dimen/default_margin_half"
             android:layout_toLeftOf="@+id/start_mode_value"
             android:layout_toStartOf="@+id/start_mode_value"
-            android:focusableInTouchMode="false"
-            android:src="@drawable/flag_papa_48dp" />
+            android:focusableInTouchMode="false" />
 
         <TextView
             android:id="@+id/start_mode_value"
@@ -161,7 +159,6 @@
             android:layout_toStartOf="@+id/start_mode_icon"
             android:gravity="end"
             android:singleLine="true"
-            android:text="Papa"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white" />
 
@@ -208,8 +205,7 @@
             android:layout_centerVertical="true"
             android:layout_margin="@dimen/default_margin_half"
             android:layout_toLeftOf="@+id/start_course_value"
-            android:layout_toStartOf="@+id/start_course_value"
-            android:src="@drawable/papa_flag" />
+            android:layout_toStartOf="@+id/start_course_value" />
 
         <TextView
             android:id="@+id/start_course_value"

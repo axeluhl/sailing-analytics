@@ -1,15 +1,21 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.unscheduled;
 
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+
 public class StartProcedure {
 
     private Boolean mChecked;
     private String mClassName;
-    private String mStartProcdure;
+    private RacingProcedureType mProcedureType;
 
-    public StartProcedure(String startProcedure, Boolean checked, String className) {
+    public StartProcedure(RacingProcedureType procedureType, Boolean checked, String className) {
         mChecked = checked;
         mClassName = className;
-        mStartProcdure = startProcedure;
+        mProcedureType = procedureType;
+    }
+
+    public RacingProcedureType getProcedureType() {
+        return mProcedureType;
     }
 
     public String getClassName() {
@@ -26,6 +32,6 @@ public class StartProcedure {
     
     @Override
     public String toString() {
-        return mStartProcdure;
+        return mProcedureType.toString();
     }
 }
