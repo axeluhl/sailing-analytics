@@ -12,4 +12,4 @@ Require-Bundle: org.junit4;bundle-version="4.8.2",
  com.rabbitmq.client,
  org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.replication.testsupport,
- com.sap.sse.replication.testsupport
+ com.sap.sse.mail.replication.testsupport

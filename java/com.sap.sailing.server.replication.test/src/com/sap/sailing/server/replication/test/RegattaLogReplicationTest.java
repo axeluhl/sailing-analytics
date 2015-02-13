@@ -22,11 +22,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 public class RegattaLogReplicationTest extends
         AbstractLogReplicationTest<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> {
 
-    private Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
+    private Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     private RegattaLogEvent regattaLogEvent;
 //    private RegattaLogEvent anotherRegattaLogEvent;
