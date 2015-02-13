@@ -7,6 +7,8 @@ We have decided to handle checkins etc. at the level of ``Leaderboard``s instead
 
 This document supplements the [documentation of the existing REST API](http://www.sapsailing.com/sailingserver/webservices/api/v1/index.html), highlighting those resources necessary for the tracking app, and specifying such resources that are not yet present in the API.
 
+For the moment, this document also contains the API for the proposed [Buoy Tender (Tonnenleger) App](#buoy-tender-app), which can be moved to a separate document at some point.
+
 ### URL base
 ```
 http://<host>/sailingserver/api/v1/
@@ -18,7 +20,7 @@ All relative URLs given below are relative to this base URL.
 The endpoints listed below should mostly be called in the order they are listed here.
 That is, after
 
-1. receiving the [Checkin Information](#checkin-info), the App can 
+1. receiving the [Checkin Information](#tracking-checkin-info), the App can 
 2. then perform the [Check-In](#checkin) for the competitor in question
 3. and proceed with sending [GPS Fixes](#fixes).
 
@@ -30,7 +32,7 @@ _not yet implemented_
 Event data can be updated via push notifications. These are limited on iOS to 256 bytes (not characters). For this reason, on receiving a push notification, the app must GET the event data.
 
 ## Check-In Information
-<div id="checkin-info"></div>
+<div id="tracking-checkin-info"></div>
 
 ### URL and QRCode
 
@@ -266,3 +268,78 @@ $ curl -H "Content-Type:image/jpeg" --data-binary @<path-to-jpeg> \
   "teamImageUri" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
 }
 ```
+
+# Buoy Tender (Tonnenleger) App
+<div id="buoy-tender-app"></div>
+
+An app aimed at buoy tenders. In v1, this only allows marks of an existing course to be _pinged_. The steps for doing so are
+
+1. provide the information for which leaderboard and race to ping marks
+2. get the course information for that race (potentially form the RaceLog, if no RaceDefinition is yet present)
+3. ping the marks in that course by submitting fixes
+
+## Check-In Information
+<div id="bouy-tender-checkin-info"></div>
+
+_see [bug 2650](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2650)_
+
+In contrast to the _Tracking App_, we won't perform a check-in. However, we can deliver the information on leaderboard and race analogously through a URL (potentially QRCode), which is why this section is also called _Check-In Information_.
+
+This information is represented in a URL with the following structure:
+```
+http://<host>/buoy-tender/checkin
+  &leaderboard_name=<leaderboard-name>
+  &race_name=<race-name>
+```
+
+_also see [Tracking App Check-In Information](#tracking-checkin-info) for additional notes that might apply_
+
+## Course Information
+
+_not yet implemented_
+
+**Path:** ``leaderboards/{leaderboard-name}/races/{race-name}/course``
+
+**Verb:** ``GET``
+
+**Response:** ([example link](http://www.sapsailing.com/sailingserver/api/v1/regattas/505%20Worlds%202014/races/SAP%20505%20Worlds%20R1/course))
+```
+{
+  "name": "SAP 505 Worlds R1",
+  "waypoints": [
+    {
+      "name": "Start",
+      "passingInstruction": "None",
+      "controlPoint": {
+        "@class": "ControlPointWithTwoMarks",
+        "name": "Start",
+        "left": {
+          "@class": "Mark",
+          "name": "Start (1)",
+          "id": "Start (1)",
+          "type": "BUOY"
+        },
+        "right": {
+          "@class": "Mark",
+          "name": "Start (2)",
+          "id": "Start (2)",
+          "type": "BUOY"
+        }
+      }
+    },
+    {
+      "name": "Windward",
+      "passingInstruction": "None",
+      "controlPoint": {
+        "@class": "Mark",
+        "name": "Windward",
+        "id": "22a53380-046e-0132-0da7-60a44ce903c3",
+        "type": "BUOY"
+      }
+    },
+    ...
+  ]
+}
+```
+
+_hint: we cannot use [GET regatta/{reg}/races/{race}/course](http://www.sapsailing.com/sailingserver/webservices/api/v1/raceCourseGetDoc.html), as we operate in a leaderboard context (not necessarily regatta), and if case no RaceDefinition exists, this endpoint currently returns no information_
