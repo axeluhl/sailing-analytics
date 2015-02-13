@@ -18,7 +18,7 @@
     <module>com.sap.sse.shared.android</module>
     <module>com.sap.sse.mail</module>
     <module>com.sap.sse.mail.replication.test</module>
-    <module>com.sap.sse.mail.replicadtion.testsupport</module>
+    <module>com.sap.sse.mail.replication.testsupport</module>
     <module>com.sap.sse.mongodb</module>
     <module>com.sap.sse.gwt</module>
     <module>com.sap.sse.gwt.adminconsole</module>
