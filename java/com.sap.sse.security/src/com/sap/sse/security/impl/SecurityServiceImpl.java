@@ -75,6 +75,7 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.security.AccessToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.GithubApi;
@@ -310,6 +311,22 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         }
         logger.info("Redirecturl: " + redirectUrl);
         return redirectUrl;
+    }
+    
+    @Override
+    public User loginByAccessToken(String accessToken) {
+        AccessToken token = new AccessToken(accessToken);
+        logger.info("Trying to login with access token");
+        Subject subject = SecurityUtils.getSubject();
+        try {
+            subject.login(token);
+            final String username = (String) token.getPrincipal();
+            SessionUtils.saveUsername(username);
+            return store.getUserByName(username);
+        } catch (AuthenticationException e) {
+            logger.log(Level.INFO, "Authentication failed with access token "+accessToken);
+            throw e;
+        }
     }
 
     @Override

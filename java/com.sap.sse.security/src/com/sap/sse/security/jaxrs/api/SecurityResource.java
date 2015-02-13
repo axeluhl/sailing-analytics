@@ -67,7 +67,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/authenticate")
     @Produces("application/json;charset=UTF-8")
     public Response authenticate(@FormParam("access_token") String accessToken) {
-        User user = getService().getUserByAccessToken(accessToken);
+        User user = getService().loginByAccessToken(accessToken);
         if (user == null) {
             logger.info("Invalid access token " + accessToken);
             return Response.status(Status.UNAUTHORIZED).entity("Access token " + accessToken + " not recognized")

@@ -157,4 +157,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void removeAccessToken(String username, String accessToken);
 
+    User loginByAccessToken(String accessToken);
+
 }

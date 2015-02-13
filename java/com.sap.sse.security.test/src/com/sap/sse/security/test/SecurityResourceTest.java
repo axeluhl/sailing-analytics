@@ -2,8 +2,11 @@ package com.sap.sse.security.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
+
+import javax.ws.rs.core.Response;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
@@ -43,12 +46,22 @@ public class SecurityResourceTest {
         };
     }
     
-    @Test
-    public void createAccessTokenAndAuthenticate() throws ParseException {
+    private String createAccessToken() throws ParseException {
         String responseJsonString = (String) servlet.accessToken("admin", "admin").getEntity();
         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseJsonString);
         assertEquals("admin", responseJson.get("username"));
         String accessToken = (String) responseJson.get("access_token");
         assertNotNull(accessToken);
+        return accessToken;
+    }
+
+    @Test
+    public void createAccessTokenAndAuthenticate() throws ParseException {
+        String accessToken = createAccessToken();
+        Response response = servlet.authenticate(accessToken);
+        JSONObject responseJson = (JSONObject) new JSONParser().parse((String) response.getEntity());
+        assertEquals("admin", responseJson.get("username"));
+        assertTrue(SecurityUtils.getSubject().isAuthenticated());
+        assertEquals("admin", SecurityUtils.getSubject().getPrincipal());
     }
 }
