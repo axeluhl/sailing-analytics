@@ -64,7 +64,7 @@ public class UserDetailsView extends FlowPanel {
         }
         List<String> defaultPermissionNames = new ArrayList<>();
         for (DefaultPermissions defaultPermission : DefaultPermissions.values()) {
-            defaultPermissionNames.add(defaultPermission.getPermissionname());
+            defaultPermissionNames.add(defaultPermission.getStringPermission());
         }
         rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultRoleNames,
                 stringMessages.enterRoleName());

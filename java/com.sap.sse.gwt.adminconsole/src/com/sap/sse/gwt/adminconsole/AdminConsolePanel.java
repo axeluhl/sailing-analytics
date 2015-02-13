@@ -273,7 +273,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         for (Map.Entry<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, AdminConsoleFeatures> e : roleSpecificTabs
                 .entrySet()) {
             final Widget panelToAdd = e.getKey().getB();
-            if (user != null && user.hasPermission(e.getValue().getRequiredPermission())) {
+            if (user != null && user.hasPermission(e.getValue().getRequiredPermission().getStringPermission())) {
                 e.getKey().getA().add(panelToAdd, e.getKey().getC(), /* asHtml */false);
             } else {
                 e.getKey().getA().remove(panelToAdd);
