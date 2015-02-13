@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="93">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="94">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
@@ -71,6 +71,10 @@
 <plugin id="com.fasterxml.jackson.core.jackson-databind"/>
 <plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-base"/>
 <plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider"/>
+<plugin id="org.codehaus.jettison.jettison"/>
+<plugin id="jackson-jaxrs"/>
+<plugin id="jackson-core-lgpl"/>
+<plugin id="jackson-mapper-lgpl"/>
 <plugin id="com.rabbitmq.client"/>
 <plugin id="com.sun.jersey"/>
 <plugin id="com.sun.jersey.contribs.jersey-multipart"/>
@@ -220,6 +224,7 @@
 <plugin id="org.junit4"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
+<plugin id="org.mongodb.mongo-java-driver"/>
 <plugin id="org.objectweb.asm"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objenesis"/>

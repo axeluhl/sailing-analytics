@@ -91,7 +91,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
         
         Integer[] expectedPointsForFindelJens = new Integer[] {2, 18, 12, 4, 7};
-        Integer[] expectedRankForFindelJens = new Integer[] {3, 9, 11, 7, 6};
+        Integer[] expectedRankForFindelJens = new Integer[] {2, 9, 11, 7, 6}; // Bogacki with no score in R1 expected to end up at end of leaderboard
         
         // Link the races and check the leaderboard again
         for (int i = 0; i < 5; i++) {

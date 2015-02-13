@@ -8,7 +8,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -97,7 +96,6 @@ public class Regatta extends Composite {
 //        competitorWithRank3 = new RegattaCompetitor(3, null);
         
         RegattaResources.INSTANCE.css().ensureInjected();
-        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+RegattaResources.INSTANCE.largeCss().getText()+"}");
 
         initWidget(uiBinder.createAndBindUi(this));
     }

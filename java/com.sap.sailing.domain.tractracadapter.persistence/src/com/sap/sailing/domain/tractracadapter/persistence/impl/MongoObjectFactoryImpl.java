@@ -18,7 +18,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
         DBCollection ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
-        ttConfigCollection.ensureIndex(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
+        ttConfigCollection.createIndex(new BasicDBObject(CollectionNames.TRACTRAC_CONFIGURATIONS.name(), 1));
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.TT_CONFIG_NAME.name(), tracTracConfiguration.getName());
         for (DBObject equallyNamedConfig : ttConfigCollection.find(result)) {
