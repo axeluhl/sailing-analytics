@@ -61,6 +61,7 @@ public class Activator implements BundleActivator {
      * registered as an OSGi service.
      */
     public void start(BundleContext bundleContext) throws Exception {
+        context = bundleContext;
         // Load mail properties
         final String jettyHome = System.getProperty("jetty.home", "configuration");
         final File propertiesDir = new File(jettyHome).getParentFile();
