@@ -344,3 +344,37 @@ _see [bug 2651](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2651)_
 ```
 
 _hint: we cannot use [GET regatta/{reg}/races/{race}/course](http://www.sapsailing.com/sailingserver/webservices/api/v1/raceCourseGetDoc.html), as we operate in a leaderboard context (not necessarily regatta), and if case no RaceDefinition exists, this endpoint currently returns no information_
+
+## Ping Marks
+
+_see [bug 2652](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2652)_
+
+Instead of the checkin/checkout process of the tracking app, marks can be pinged using an API that hides the inner workings on the server completely. The server creates a device-mapping in the regatta-log for the exact timepoint of every fix, and adds the fixes to the GPSFixStore.
+
+The interface (apart from the path) is identical to [Send Measurements](#fixes). Several fixes can be sent at once, but in the interest of pinging a mark, this should usually just be a single fix.
+
+**Path:** ``leaderboards/{leaderboard-name}/marks/{mark-id}/gps_fixes``
+
+**Verb:** ``POST``
+
+**Request:**
+```
+{
+  "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
+  "fixes" : [
+    {
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
+      "speed" : 3.61,
+      "course" : 258.11,
+    }
+  ]
+}
+```
+
+**Additional Notes:**
+* the path for this endpoint intentionally has the leaderboard as a parent item
+  * each mark should have a unique ID (``SharedDomainFactory#getOrCreateMark(String toStringRepresentationOfID, String name)``)
+  * however, the mark cannot be pinged without the leaderboard as context, however, as the GPSFixStore contains only fixes with a device ID, and the mapping from that device to a mark has to be established through a RegattaLog (or RaceLog), which is attached to a (Flexible|Regatta)Leaderboard
+  * an alternative endpoint definition might be ``POST marks/{mid}/gps_fixes?leaderboard_name={ln}``
