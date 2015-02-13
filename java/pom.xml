@@ -155,7 +155,7 @@
       -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost
     </parameters.tractrac>
     <parameters.mongodb>
-      -Dmongo.host=localhost
+      -Dmongo.host=127.0.0.1
     </parameters.mongodb>
     <parameters.debug>
       -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y
@@ -184,7 +184,7 @@
       <id>no-debug.without-proxy</id>
       <properties>
         <tycho.build.argLine>
-          ${parameters.common} ${parameters.vm-settings}
+          ${parameters.common} ${parameters.vm-settings} ${parameters.mongodb}
         </tycho.build.argLine>
       </properties>
     </profile>
@@ -192,7 +192,7 @@
       <id>debug.with-proxy</id>
       <properties>
         <tycho.build.argLine>
-          ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug}
+          ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug} ${parameters.mongodb}
         </tycho.build.argLine>
       </properties>
     </profile>
@@ -200,7 +200,7 @@
       <id>debug.without-proxy</id>
       <properties>
         <tycho.build.argLine>
-          ${parameters.common} ${parameters.vm-settings} ${parameters.debug}
+          ${parameters.common} ${parameters.vm-settings} ${parameters.debug} ${parameters.mongodb}
         </tycho.build.argLine>
       </properties>
     </profile>
