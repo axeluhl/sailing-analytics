@@ -49,6 +49,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
+import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -478,7 +479,7 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         };
         final VideoSynchPlayer videoPlayer;
         final UserDTO currentUser = userService.getCurrentUser();
-        boolean showSynchControls = currentUser != null && (currentUser.hasRole(UserRoles.administrator.getRolename()) ||
+        boolean showSynchControls = currentUser != null && (currentUser.hasRole(DefaultRoles.ADMIN.getRolename()) ||
                 currentUser.hasRole(UserRoles.eventmanager.getRolename()) || currentUser.hasRole(UserRoles.mediaeditor.getRolename()));
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
