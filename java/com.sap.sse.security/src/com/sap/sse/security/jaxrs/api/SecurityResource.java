@@ -54,7 +54,7 @@ public class SecurityResource extends AbstractSecurityResource {
             logger.info("Successfully logged in " + username + " with password");
             JSONObject response = new JSONObject();
             response.put("username", username);
-            response.put("access_token", getService().getAccessToken());
+            response.put("access_token", getService().createAccessToken(username));
         } catch (UserManagementException e) {
             logger.info("Logging in " + username + " with password failed: "+e.getMessage());
             return getSecurityErrorResponse(e.getMessage());

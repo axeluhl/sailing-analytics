@@ -101,8 +101,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
-    private static final String ACCESS_TOKEN_KEY = "access_token";
-
     private CachingSecurityManager securityManager;
     
     /**
@@ -308,6 +306,11 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public User getUserByName(String name) {
         return store.getUserByName(name);
+    }
+    
+    @Override
+    public User getUserByAccessToken(String accessToken) {
+        return store.getUserByAccessToken(accessToken);
     }
 
     @Override
@@ -893,6 +896,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
+    public Void internalSetAccessToken(String username, String accessToken) {
+        store.setAccessToken(username, accessToken);
+        return null;
+    }
+
+    @Override
     public String getPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
@@ -904,15 +913,14 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
     
     @Override
-    public String getAccessToken() {
-        Subject subject = SecurityUtils.getSubject();
+    public String createAccessToken(String username) {
+        User user = getUserByName(username);
         final String token;
-        if (subject.isAuthenticated()) {
+        if (user != null) {
             RandomNumberGenerator rng = new SecureRandomNumberGenerator();
             byte[] salt = rng.nextBytes().getBytes();
             token = hashPassword(new String(rng.nextBytes().getBytes()), salt);
-            User user = getCurrentUser();
-            apply(s->s.internalSetPreference(user.getName(), ACCESS_TOKEN_KEY, token));
+            apply(s -> s.internalSetAccessToken(user.getName(), token));
         } else {
             token = null;
         }
