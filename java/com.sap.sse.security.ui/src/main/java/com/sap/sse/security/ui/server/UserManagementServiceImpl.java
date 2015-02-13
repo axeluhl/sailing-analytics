@@ -272,7 +272,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
 
-    private UserDTO createUserDTOFromUser(User user){
+    private UserDTO createUserDTOFromUser(User user) {
         UserDTO userDTO;
         Map<AccountType, Account> accounts = user.getAllAccounts();
         List<AccountDTO> accountDTOs = new ArrayList<>();
@@ -288,9 +288,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 break;
             }
         }
-        userDTO = new UserDTO(user.getName(), user.getEmail(), user.isEmailValidated(), accountDTOs);
-        userDTO.addRoles(user.getRoles());
-        userDTO.addPermissions(user.getPermissions());
+        userDTO = new UserDTO(user.getName(), user.getEmail(), user.isEmailValidated(), accountDTOs, user.getRoles(), user.getPermissions());
         return userDTO;
     }
 

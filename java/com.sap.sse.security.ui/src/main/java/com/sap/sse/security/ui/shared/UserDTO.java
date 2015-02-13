@@ -1,27 +1,35 @@
 package com.sap.sse.security.ui.shared;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.WildcardPermission;
 
 public class UserDTO implements IsSerializable {
     private String name;
     private String email;
     private List<AccountDTO> accounts;
-    private Set<String> roles = new HashSet<>();
-    private Set<String> permissions = new HashSet<>();
+    private Set<String> roles;
+    private Set<WildcardPermission> permissions;
     private boolean emailValidated;
 
     UserDTO() {} // for serialization only
 
-    public UserDTO(String name, String email, boolean emailValidated, List<AccountDTO> accounts) {
+    public UserDTO(String name, String email, boolean emailValidated, List<AccountDTO> accounts, Iterable<String> roles, Iterable<String> stringPermissions) {
         this.name = name;
         this.email = email;
         this.emailValidated = emailValidated;
         this.accounts = accounts;
+        this.roles = new HashSet<>();
+        Util.addAll(roles, this.roles);
+        this.permissions = new HashSet<>();
+        for (String stringPermission : stringPermissions) {
+            this.permissions.add(new WildcardPermission(stringPermission));
+        }
     }
 
     public String getName() {
@@ -36,32 +44,31 @@ public class UserDTO implements IsSerializable {
         return roles.contains(role);
     }
     
-    public void addRoles(Iterable<String> roles) {
-        Util.addAll(roles, this.roles);
-    }
-    
-    public void setRoles(Iterable<String> newRoleList) {
-        this.roles.clear();
-        Util.addAll(newRoleList, this.roles);
-    }
-    
-    public Iterable<String> getPermissions() {
+    public Iterable<WildcardPermission> getPermissions() {
         return permissions;
     }
     
-    public boolean hasPermission(String permission) {
-        return permissions.contains(permission);
-    }
-
-    public void addPermissions(Iterable<String> permissions) {
-        Util.addAll(permissions, this.permissions);
-    }
-
-    public void setPermissions(Iterable<String> newPermissionList) {
-        this.permissions.clear();
-        Util.addAll(newPermissionList, this.permissions);
+    public Iterable<String> getStringPermissions() {
+        List<String> result = new ArrayList<>();
+        for (WildcardPermission wp : getPermissions()) {
+            result.add(wp.toString());
+        }
+        return result;
     }
     
+    public boolean hasPermission(String permission) {
+        return hasPermission(new WildcardPermission(permission));
+    }
+    
+    public boolean hasPermission(WildcardPermission permission) {
+        for (WildcardPermission p : permissions) {
+            if (p.implies(permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<AccountDTO> getAccounts() {
         return accounts;
     }

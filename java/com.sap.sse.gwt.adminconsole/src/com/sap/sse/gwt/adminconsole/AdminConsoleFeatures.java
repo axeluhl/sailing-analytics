@@ -11,17 +11,17 @@ import com.sap.sse.common.impl.NamedImpl;
  */
 public class AdminConsoleFeatures extends NamedImpl {
     private static final long serialVersionUID = 7441608351911944793L;
-    private String[] enabledRoles;
+    private String requiredPermission;
     
-    public AdminConsoleFeatures(String name, String... enabledRoles) {
+    public AdminConsoleFeatures(String name, String requiredPermission) {
         super(name);
-        this.enabledRoles = enabledRoles;
+        this.requiredPermission = requiredPermission;
     }
 
     /**
      * If the user has at least one of these roles, he/she is permitted to use this feature.
      */
-    public String[] getEnabledRoles() {
-        return enabledRoles;
+    public String getRequiredPermission() {
+        return requiredPermission;
     }
 }

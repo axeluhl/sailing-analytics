@@ -80,7 +80,9 @@ public class UserManagementPanel extends DockPanel {
         deleteButton.setEnabled(singleSelectionModel.getSelectedObject() != null);
         final UserList userList = new UserList();
         userList.setSelectionModel(singleSelectionModel);
-        final UserDetailsView userDetailsView = new UserDetailsView(userService, singleSelectionModel.getSelectedObject(), stringMessages);
+        TextBox filterBox = new TextBox();
+        userListDataProvider = new UserListDataProvider(userManagementService, filterBox);
+        final UserDetailsView userDetailsView = new UserDetailsView(userService, singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider);
         add(userDetailsView, DockPanel.CENTER);
         userDetailsView.addUserChangeEventHandler(new UserChangeEventHandler() {
             @Override
@@ -96,8 +98,6 @@ public class UserManagementPanel extends DockPanel {
             }
         });
         userList.setPageSize(20);
-        TextBox filterBox = new TextBox();
-        userListDataProvider = new UserListDataProvider(userManagementService, filterBox);
         userListDataProvider.addDataDisplay(userList);
         SimplePager pager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
         pager.setDisplay(userList);

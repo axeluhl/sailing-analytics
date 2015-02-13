@@ -76,6 +76,5 @@ public class UserListDataProvider extends AbstractDataProvider<UserDTO> {
         for (HasData<UserDTO> hd : getDataDisplays()) {
             onRangeChanged(hd);
         }
-//        //TODO [D056866] SelectionChangeEvent.fire(singleSelectionModel);
     }
 }
