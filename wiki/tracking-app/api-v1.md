@@ -13,12 +13,24 @@ http://<host>/sailingserver/api/v1/
 ```
 All relative URLs given below are relative to this base URL.
 
+## Process
+
+The endpoints listed below should mostly be called in the order they are listed here.
+That is, after
+
+1. receiving the [Checkin Information](#checkin-info), the App can 
+2. then perform the [Check-In](#checkin) for the competitor in question
+3. and proceed with sending [GPS Fixes](#fixes).
+
+
 ## Push Notifications
+
+_not yet implemented_
 
 Event data can be updated via push notifications. These are limited on iOS to 256 bytes (not characters). For this reason, on receiving a push notification, the app must GET the event data.
 
-
-## Checkin Information
+## Check-In Information
+<div id="checkin-info"></div>
 
 ### URL and QRCode
 
@@ -105,6 +117,7 @@ _**Note:** Consider using the leaderboard-dependent verison below - which includ
 
 
 ## Check-In
+<div id="checkin"></div>
 
 After the user has received the event data with the short URL, the smartphone is mapped to a competitor.
 
@@ -162,6 +175,7 @@ Ends the device to competitor coupling. Does not delete it, but rather marks the
 
 
 ## Send Measurements (to the Fix Store)
+<div id="fixes"></div>
 
 The main data sent by the app.
 
