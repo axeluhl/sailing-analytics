@@ -9,6 +9,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sailing.polars,
  com.sap.sailing.polars.factory,
  com.sap.sailing.server.gateway.deserialization,
+ com.sap.sailing.simulator,
+ com.sap.sailing.simulator.impl,
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.3.0",

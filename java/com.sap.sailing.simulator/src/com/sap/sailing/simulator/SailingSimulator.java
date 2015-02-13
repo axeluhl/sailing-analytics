@@ -12,6 +12,8 @@ public interface SailingSimulator {
 
     Path getLegGPSTrack(SimulatorUISelection selection);
 
+    Path getPath(PathType pathType);
+    
     Map<String, Path> getAllPaths();
 
     Map<String, Path> getAllPathsForLeg(SimulatorUISelection selection);

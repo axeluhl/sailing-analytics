@@ -191,6 +191,8 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.simulator.SimulationService;
+import com.sap.sailing.simulator.SimulationServiceFactory;
 import com.sap.sse.BuildVersion;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -344,6 +346,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final PolarDataService polarDataService;
 
+    private final SimulationService simulationService;
+
     /**
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
      * unpredictable fashion
@@ -496,6 +500,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         /* keepAliveTime */60, TimeUnit.SECONDS,
         /* workQueue */new LinkedBlockingQueue<Runnable>());
         polarDataService = PolarDataServiceFactory.createStandardPolarDataService(polarExecutor);
+        Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
+        /* maximumPoolSize */THREAD_POOL_SIZE,
+        /* keepAliveTime */60, TimeUnit.SECONDS,
+        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
+        simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor);
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.regattaLogReplicator = new RegattaLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
@@ -544,6 +554,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return polarDataService;
     }
 
+    @Override
+    public SimulationService getSimulationService() {
+        return simulationService;
+    }
+    
     @Override
     public void clearState() throws Exception {
         for (String leaderboardGroupName : new ArrayList<>(this.leaderboardGroupsByName.keySet())) {

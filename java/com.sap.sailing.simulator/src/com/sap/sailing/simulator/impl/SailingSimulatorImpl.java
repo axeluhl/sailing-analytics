@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.RaceProperties;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -61,6 +62,12 @@ public class SailingSimulatorImpl implements SailingSimulator {
     @Override
     public SimulationParameters getSimulationParameters() {
         return this.simulationParameters;
+    }
+
+    @Override
+    public Path getPath(PathType pathType) {
+        // TODO: de-scramble implementation of getAllPaths() to focus on just one path fpr multi-threaded execution
+        return null;
     }
 
     @Override

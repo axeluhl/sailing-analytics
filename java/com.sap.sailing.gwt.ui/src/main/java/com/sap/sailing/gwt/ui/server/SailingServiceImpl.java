@@ -389,12 +389,12 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
-import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
+import com.sap.sailing.simulator.SimulationService;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
-import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
@@ -1560,19 +1560,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     simuStep, SailingSimulatorConstants.ModeEvent, true, true);
 
             // for upwind/downwind, run simulation with start-time, start-position, end-position and windfield
-            SailingSimulator simulator = new SailingSimulatorImpl(simulationPars);
-            Map<String, Path> pathsAndNames = null;
+            SimulationService simulationService = getService().getSimulationService();
+            Map<PathType, Path> paths = null;
             if (legType != LegType.REACHING) {
-                pathsAndNames = simulator.getAllPathsEvenTimed(timeStep.asMillis(), null);
+                paths = simulationService.getAllPaths(simulationPars);
             }
 
             // prepare simulator-results-dto
-            if (pathsAndNames != null) {
-                int noOfPaths = pathsAndNames.size();
+            if (paths != null) {
+                int noOfPaths = paths.size();
                 PathDTO[] pathDTOs = new PathDTO[noOfPaths];
                 int index = noOfPaths - 1;
-                for (Entry<String, Path> entry : pathsAndNames.entrySet()) {
-                    pathDTOs[index] = new PathDTO(entry.getKey());
+                for (Entry<PathType, Path> entry : paths.entrySet()) {
+                    pathDTOs[index] = new PathDTO(entry.getKey().getTxtId());
                     // fill pathDTO with path points where speed is true wind speed
                     List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
                     for (TimedPositionWithSpeed p : entry.getValue().getPathPoints()) {
