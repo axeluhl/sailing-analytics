@@ -11,15 +11,15 @@ import com.sap.sse.mail.impl.MailServiceImpl;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
 
-public class AbstractMailReplicationTest extends AbstractServerWithSingleServiceReplicationTest<MailService, MailServiceImpl> {
-    public AbstractMailReplicationTest() {
+public class AbstractMailServiceReplicationTest extends AbstractServerWithSingleServiceReplicationTest<MailService, MailServiceImpl> {
+    public AbstractMailServiceReplicationTest() {
         super(new MailServerReplicationTestSetUp());
     }
 
     public static final Map<MailServiceImpl, Integer> numberOfMailsSent = new HashMap<>();
     
     @Before
-    public void setUp() {
+    public void clearNumberOfMailsSent() {
         numberOfMailsSent.clear();
     }
     

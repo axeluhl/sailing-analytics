@@ -16,7 +16,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.impl.MailServiceImpl;
-import com.sap.sse.mail.replication.testsupport.AbstractMailReplicationTest;
+import com.sap.sse.mail.replication.testsupport.AbstractMailServiceReplicationTest;
 import com.sap.sse.replication.testsupport.AbstractServerWithMultipleServicesReplicationTest;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
@@ -29,21 +29,22 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
  * @author Fredrik Teschke
  */
 public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractServerWithMultipleServicesReplicationTest {
-    private static final SecurityServerReplicationTestSetUp securitySetUp = new SecurityServerReplicationTestSetUp();
-    private static final MailServerReplicationTestSetUp mailSetUp = new MailServerReplicationTestSetUp();
+    private final SecurityServerReplicationTestSetUp securitySetUp = new SecurityServerReplicationTestSetUp();
+    private final MailServerReplicationTestSetUp mailSetUp = new MailServerReplicationTestSetUp();
 
-    private static MailServiceImpl masterMailService;
-    private static MailServiceImpl replicaMailService;
+    private MailServiceImpl masterMailService;
+    private MailServiceImpl replicaMailService;
 
     @Before
     @Override
     public void setUp() throws Exception {
-        masterMailService = AbstractMailReplicationTest.createMailCountingService(true);
-        replicaMailService = AbstractMailReplicationTest.createMailCountingService(false);
+        masterMailService = AbstractMailServiceReplicationTest.createMailCountingService(true);
+        replicaMailService = AbstractMailServiceReplicationTest.createMailCountingService(false);
+        AbstractMailServiceReplicationTest.numberOfMailsSent.clear();
         super.setUp();
     }
 
-    private static class SecurityServerReplicationTestSetUp extends
+    private class SecurityServerReplicationTestSetUp extends
             AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp {
         @Override
         protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException {
@@ -65,7 +66,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         }
     }
 
-    private static class MailServerReplicationTestSetUp extends AbstractMailReplicationTest.MailServerReplicationTestSetUp {
+    private class MailServerReplicationTestSetUp extends AbstractMailServiceReplicationTest.MailServerReplicationTestSetUp {
         private static final int SERVLET_PORT = 9991;
         
         public MailServerReplicationTestSetUp() {
@@ -95,6 +96,9 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     @Test
     public void triggerEmailSendByAddingUserOnMaster()
             throws UserManagementException, MailException, IllegalAccessException, InterruptedException {
+        //TODO IllegalStateExceptions thrown, probably because the two replication services per instance share the
+        //same message queue, but don't know about each other (unlike actual OSGi setup, where there is only
+        //one replication service per instance that nows all Replicables)
         SecurityService masterSecurityService = securitySetUp.getMaster();
 
         final String username = "Ernie";
@@ -111,9 +115,9 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         Thread.sleep(3000);
 
         assertThat("mail was not sent on replica",
-                AbstractMailReplicationTest.numberOfMailsSent.get(replicaMailService), equalTo(null));
+                AbstractMailServiceReplicationTest.numberOfMailsSent.get(replicaMailService), equalTo(null));
         assertThat("mail was sent on master",
-                AbstractMailReplicationTest.numberOfMailsSent.get(masterMailService), equalTo(1));
+                AbstractMailServiceReplicationTest.numberOfMailsSent.get(masterMailService), equalTo(1));
     }
 
 
@@ -141,8 +145,8 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         Thread.sleep(3000);
 
         assertThat("mail was not sent on replica",
-                AbstractMailReplicationTest.numberOfMailsSent.get(replicaMailService), equalTo(null));
+                AbstractMailServiceReplicationTest.numberOfMailsSent.get(replicaMailService), equalTo(null));
         assertThat("mail was sent on master",
-                AbstractMailReplicationTest.numberOfMailsSent.get(masterMailService), equalTo(1));
+                AbstractMailServiceReplicationTest.numberOfMailsSent.get(masterMailService), equalTo(1));
     }
 }
