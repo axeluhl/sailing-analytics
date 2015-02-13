@@ -307,6 +307,11 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     public User getUserByName(String name) {
         return store.getUserByName(name);
     }
+    
+    @Override
+    public User getUserByAccessToken(String accessToken) {
+        return store.getUserByAccessToken(accessToken);
+    }
 
     @Override
     public User getUserByEmail(String email) {
@@ -891,6 +896,18 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
+    public Void internalSetAccessToken(String username, String accessToken) {
+        store.setAccessToken(username, accessToken);
+        return null;
+    }
+
+    @Override
+    public Void internalRemoveAccessToken(String username, String accessToken) {
+        store.removeAccessToken(username, accessToken);
+        return null;
+    }
+
+    @Override
     public String getPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
@@ -899,6 +916,26 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             throw new SecurityException("User " + SessionUtils.loadUsername()
                     + " does not have permission to read preferences of user " + username);
         }
+    }
+    
+    @Override
+    public String createAccessToken(String username) {
+        User user = getUserByName(username);
+        final String token;
+        if (user != null) {
+            RandomNumberGenerator rng = new SecureRandomNumberGenerator();
+            byte[] salt = rng.nextBytes().getBytes();
+            token = hashPassword(new String(rng.nextBytes().getBytes()), salt);
+            apply(s -> s.internalSetAccessToken(user.getName(), token));
+        } else {
+            token = null;
+        }
+        return token;
+    }
+    
+    @Override
+    public void removeAccessToken(String username, String accessToken) {
+        apply(s -> s.internalRemoveAccessToken(username, accessToken));
     }
 
     // ----------------- Replication -------------

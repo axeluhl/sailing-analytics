@@ -46,7 +46,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.PERMISSIONS.name(), user.getPermissions());
         usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
-
+    
     @Override
     public void deleteUser(User user) {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
