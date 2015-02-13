@@ -22,6 +22,8 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalSetAccessToken(String username, String accessToken);
 
+    Void internalRemoveAccessToken(String username, String accessToken);
+
     Boolean internalSetSetting(String key, Object setting);
 
     Void internalAddSetting(String key, Class<?> clazz);

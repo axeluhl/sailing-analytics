@@ -97,4 +97,6 @@ public interface UserStore extends Named {
      */
     boolean setAccessToken(String username, String accessToken);
 
+    void removeAccessToken(String username, String accessToken);
+
 }

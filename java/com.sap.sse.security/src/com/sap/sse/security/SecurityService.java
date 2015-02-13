@@ -141,7 +141,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     /**
      * Issues a new access token and remembers it so that later the user identified by <code>username</code> can be
-     * authenticated using the token.
+     * authenticated using the token. Any access token previously created for same user will be invalidated by this
+     * call.
      * 
      * @return a new access token if <code>username</code> identifies a known user, <code>null</code> otherwise
      */
@@ -153,5 +154,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @return <code>null</code> in case the access token is unknown or was deleted / invalidated
      */
     User getUserByAccessToken(String accessToken);
+
+    void removeAccessToken(String username, String accessToken);
 
 }

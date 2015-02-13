@@ -123,6 +123,15 @@ public class UserStoreImpl implements UserStore {
         return result;
     }
 
+    @Override
+    public void removeAccessToken(String username, String accessToken) {
+        User user = usersByAccessToken.remove(accessToken);
+        if (user != null) {
+            // the access token actually existed; now we need to update the preferences
+            unsetPreference(username, ACCESS_TOKEN_KEY);
+        }
+    }
+
     private void addToUsersByEmail(User u) {
         if (u.getEmail() != null && !u.getEmail().isEmpty()) {
             Set<User> set = usersByEmail.get(u.getEmail());

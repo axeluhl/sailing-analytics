@@ -902,6 +902,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
+    public Void internalRemoveAccessToken(String username, String accessToken) {
+        store.removeAccessToken(username, accessToken);
+        return null;
+    }
+
+    @Override
     public String getPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
@@ -925,6 +931,11 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             token = null;
         }
         return token;
+    }
+    
+    @Override
+    public void removeAccessToken(String username, String accessToken) {
+        apply(s -> s.internalRemoveAccessToken(username, accessToken));
     }
 
     // ----------------- Replication -------------
