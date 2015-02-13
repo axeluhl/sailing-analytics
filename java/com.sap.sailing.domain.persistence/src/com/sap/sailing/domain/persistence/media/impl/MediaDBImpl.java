@@ -14,7 +14,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoException;
+import com.mongodb.DuplicateKeyException;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -70,7 +70,7 @@ public class MediaDBImpl implements MediaDB {
         dbMediaTrack.put(DbNames.Fields.ASSIGNED_RACES.name(), assignedRacesDb);
         DBCollection dbVideos = getVideoCollection();
         dbVideos.insert(dbMediaTrack);
-        return ((ObjectId) dbMediaTrack.get(DbNames.Fields._id.name())).toStringMongod();
+        return ((ObjectId) dbMediaTrack.get(DbNames.Fields._id.name())).toHexString();
     }
 
     @Override
@@ -99,7 +99,7 @@ public class MediaDBImpl implements MediaDB {
         DBCollection dbVideos = getVideoCollection();
         try {
             dbVideos.insert(dbMediaTrack);
-        } catch (MongoException.DuplicateKey e) {
+        } catch (DuplicateKeyException e) {
             throw new IllegalArgumentException("Duplicate key '" + dbId
                     + "' caused an error when importing media (title: '" + title + "')", e);
         }
@@ -109,7 +109,7 @@ public class MediaDBImpl implements MediaDB {
         try {
             DBCollection dbVideos = database.getCollection(DbNames.Collections.VIDEOS.name());
             dbVideos.setWriteConcern(WriteConcern.FSYNC_SAFE);
-            dbVideos.ensureIndex(DbNames.Collections.VIDEOS.name());
+            dbVideos.createIndex(new BasicDBObject(DbNames.Collections.VIDEOS.name(), 1));
             return dbVideos;
         } catch (NullPointerException e) {
             // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
@@ -118,7 +118,7 @@ public class MediaDBImpl implements MediaDB {
     }
 
     private MediaTrack createMediaTrackFromDb(DBObject dbObject) {
-        String dbId = ((ObjectId) dbObject.get(DbNames.Fields._id.name())).toStringMongod();
+        String dbId = ((ObjectId) dbObject.get(DbNames.Fields._id.name())).toHexString();
         String title = (String) dbObject.get(DbNames.Fields.MEDIA_TITLE.name());
         String url = (String) dbObject.get(DbNames.Fields.MEDIA_URL.name());
         Date startTime = (Date) dbObject.get(DbNames.Fields.STARTTIME.name());
