@@ -47,10 +47,11 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, RaceLogEvent, RaceLogEventVisitor> {
 
-    private Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
+    private Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     private RaceLogEvent raceLogEvent;
     private RaceLogEvent anotherRaceLogEvent;
@@ -217,7 +218,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
      * has been added to the DB and then race log is re-loaded on the master, the events added through the DB also show up on the replica.
      */
     @Test
-    public void testRaceLogReloadReplication() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceLogReloadReplication() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";

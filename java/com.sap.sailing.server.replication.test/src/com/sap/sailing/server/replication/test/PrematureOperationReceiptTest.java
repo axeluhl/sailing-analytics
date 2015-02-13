@@ -15,6 +15,7 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.ReplicationReceiver;
+import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 public class PrematureOperationReceiptTest extends AbstractServerReplicationTest {
     private ReplicationReceiver replicator;
@@ -25,7 +26,7 @@ public class PrematureOperationReceiptTest extends AbstractServerReplicationTest
     @Before
     @Override
     public void setUp() throws Exception {
-        Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result =
+        Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result =
                 basicSetUp(/* dropDB */ true, /* master=null means create a new one */ null, /* replica=null means create a new one */ null);
         replicator = replicaReplicator.startToReplicateFromButDontYetFetchInitialLoad(result.getB(), /* startReplicatorSuspended */ true);
     }

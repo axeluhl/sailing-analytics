@@ -81,16 +81,20 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         
     }
 
-    @Before
-    @Override
-    public void setUp() throws Exception {
-        try {
-            Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result = basicSetUp(/* dropDB */ true,
-                    /* master=null means create a new one */ null, /* replica=null means create a new one */null);
-            masterDescriptor = MasterReplicationDescriptorMock.from(result.getB());
-        } catch (Exception e) {
-            e.printStackTrace();
-            tearDown();
+    protected static class ServerReplicationTestSetUp extends
+            com.sap.sailing.server.replication.test.AbstractServerReplicationTest.ServerReplicationTestSetUp {
+        @Before
+        @Override
+        public void setUp() throws Exception {
+            try {
+                Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result = basicSetUp(
+                        /* dropDB */true,
+                        /* master=null means create a new one */null, /* replica=null means create a new one */null);
+                masterDescriptor = MasterReplicationDescriptorMock.from(result.getB());
+            } catch (Exception e) {
+                e.printStackTrace();
+                tearDown();
+            }
         }
     }
 
@@ -102,7 +106,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         /* until here both instances should have the same in-memory state.
          * now lets add an event on master and stop the messaging queue. */
         stopMessagingExchange();
-        replicaReplicator.startToReplicateFrom(masterDescriptor);
+        testSetUp.getReplicaReplicator().startToReplicateFrom(testSetUp.getMasterDescriptor());
         Event event = addEventOnMaster();
         Thread.sleep(1000); // wait for master queue to get filled
         assertNull(replica.getEvent(event.getId()));
