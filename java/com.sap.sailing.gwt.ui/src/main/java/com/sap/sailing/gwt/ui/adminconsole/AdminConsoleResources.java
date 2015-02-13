@@ -11,9 +11,6 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/settingsActionIcon.png")
     ImageResource settingsActionIcon();
 
-    @Source("com/sap/sse/gwt/client/images/remove.png")
-    ImageResource removeIcon();
-
     @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
     ImageResource editIcon();
 
@@ -61,6 +58,9 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/xml.png")
     ImageResource exportXMLIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/opencoachdashboard.png")
+    ImageResource openCoachDashboard();
 
     @Source("com/sap/sailing/gwt/ui/client/images/add_racelog_tracker.png")
     ImageResource addRaceLogTracker();

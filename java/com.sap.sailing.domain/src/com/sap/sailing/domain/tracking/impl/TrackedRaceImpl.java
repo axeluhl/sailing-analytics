@@ -483,6 +483,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         ois.defaultReadObject();
         attachedRaceLogs = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
+        // The short time wind cache needs to be there before operations such as maneuver recalculation try to access it
+        shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
         competitorRankings = createCompetitorRankingsCache();
@@ -493,7 +495,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         maneuverCache = createManeuverCache();
         triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
-        shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         // considering the unlikely possibility that the course and this tracked race's internal structures
         // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
         adjustStructureToCourse();

@@ -8,5 +8,6 @@ Fragment-Host: com.sap.sse.security
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit4;bundle-version="4.8.2",
  com.sap.sse.security.userstore.mongodb,
- com.mongodb.driver,
+ org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.mongodb
+Import-Package: org.apache.shiro.session.mgt

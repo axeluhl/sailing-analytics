@@ -1,0 +1,15 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:highcharts="urn:import:org.moxieapps.gwt.highcharts.client">
+
+	<ui:style
+		type='com.sap.sailing.dashboards.gwt.client.windchart.VerticalWindChart.VerticalWindChartStyle'
+		src='VerticalWindChartStyle.css'></ui:style>
+
+	<g:FlowPanel styleName="{style.flowPanelContainer}">
+		<highcharts:Chart ui:field="verticalWindChart"
+			styleName="{style.verticalWindChart}"></highcharts:Chart>
+	<g:FocusPanel ui:field="verticalWindChartClickArea" styleName="{style.verticalWindChartClickArea}"></g:FocusPanel>
+	</g:FlowPanel>
+
+</ui:UiBinder> 

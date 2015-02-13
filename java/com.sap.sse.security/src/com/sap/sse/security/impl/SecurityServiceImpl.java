@@ -75,6 +75,7 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.security.AccessToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.GithubApi;
@@ -134,8 +135,24 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
      * @param mailProperties must not be <code>null</code>
      */
     public SecurityServiceImpl(UserStore store, Properties mailProperties) {
+        this(store, mailProperties, /* setAsActivatorTestSecurityService */ false);
+    }
+    
+    /**
+     * @param setAsActivatorSecurityService
+     *            when <code>true</code>, the {@link Activator#setSecurityService(com.sap.sse.security.SecurityService)}
+     *            will be called with this new instance as argument so that the cache manager can already be accessed
+     *            when the security manager is created. {@link ReplicatingCacheManager#getCache(String)} fetches the
+     *            activator's security service and passes it to the cache entries created. They need it, in turn, for
+     *            replication.
+     * 
+     */
+    public SecurityServiceImpl(UserStore store, Properties mailProperties, boolean setAsActivatorSecurityService) {
         assert mailProperties != null;
         logger.info("Initializing Security Service with user store " + store+" and mail properties "+mailProperties);
+        if (setAsActivatorSecurityService) {
+            Activator.setSecurityService(this);
+        }
         operationsSentToMasterForReplication = new HashSet<>();
         cacheManager = new ReplicatingCacheManager();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
@@ -295,6 +312,22 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         logger.info("Redirecturl: " + redirectUrl);
         return redirectUrl;
     }
+    
+    @Override
+    public User loginByAccessToken(String accessToken) {
+        AccessToken token = new AccessToken(accessToken);
+        logger.info("Trying to login with access token");
+        Subject subject = SecurityUtils.getSubject();
+        try {
+            subject.login(token);
+            final String username = (String) token.getPrincipal();
+            SessionUtils.saveUsername(username);
+            return store.getUserByName(username);
+        } catch (AuthenticationException e) {
+            logger.log(Level.INFO, "Authentication failed with access token "+accessToken);
+            throw e;
+        }
+    }
 
     @Override
     public void logout() {
@@ -306,6 +339,11 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public User getUserByName(String name) {
         return store.getUserByName(name);
+    }
+    
+    @Override
+    public User getUserByAccessToken(String accessToken) {
+        return store.getUserByAccessToken(accessToken);
     }
 
     @Override
@@ -891,6 +929,18 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
+    public Void internalSetAccessToken(String username, String accessToken) {
+        store.setAccessToken(username, accessToken);
+        return null;
+    }
+
+    @Override
+    public Void internalRemoveAccessToken(String username, String accessToken) {
+        store.removeAccessToken(username, accessToken);
+        return null;
+    }
+
+    @Override
     public String getPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
@@ -899,6 +949,26 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             throw new SecurityException("User " + SessionUtils.loadUsername()
                     + " does not have permission to read preferences of user " + username);
         }
+    }
+    
+    @Override
+    public String createAccessToken(String username) {
+        User user = getUserByName(username);
+        final String token;
+        if (user != null) {
+            RandomNumberGenerator rng = new SecureRandomNumberGenerator();
+            byte[] salt = rng.nextBytes().getBytes();
+            token = hashPassword(new String(rng.nextBytes().getBytes()), salt);
+            apply(s -> s.internalSetAccessToken(user.getName(), token));
+        } else {
+            token = null;
+        }
+        return token;
+    }
+    
+    @Override
+    public void removeAccessToken(String username, String accessToken) {
+        apply(s -> s.internalRemoveAccessToken(username, accessToken));
     }
 
     // ----------------- Replication -------------

@@ -1,0 +1,7 @@
+/bin
+/.gwt
+/.generated
+/gwt-unitCache
+/extras
+/war
+/com.sap.sailing.dashboards.gwt.*
