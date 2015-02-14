@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -33,6 +34,8 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
@@ -41,6 +44,7 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitors
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
@@ -53,6 +57,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -65,6 +70,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -506,5 +512,53 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             response = Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
         }
         return response;
+    }
+    
+    private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{leaderboardName}/marks")
+    public Response getMarksForRace(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
+        //TODO also look for defined marks in RegattaLog?
+        
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + leaderboardName + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a race column '" + raceColumnName + "' in leaderboard '" + leaderboardName + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        Fleet fleet = leaderboard.getFleet(fleetName);
+        if (fleet == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find fleet '" + fleetName + "' in leaderboard '" + leaderboardName + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
+        
+        List<Mark> marks = new ArrayList<>();
+        
+        marks.addAll(new DefinedMarkFinder(raceLog).analyze());
+        if (trackedRace != null) {
+            Util.addAll(trackedRace.getMarks(), marks);
+        }
+        
+        JSONArray array = new JSONArray();
+        for (Mark mark : marks) {
+            array.add(markSerializer.serialize(mark));
+        }
+        
+        return Response.ok(array.toJSONString(), MediaType.APPLICATION_JSON).build();
     }
 }
