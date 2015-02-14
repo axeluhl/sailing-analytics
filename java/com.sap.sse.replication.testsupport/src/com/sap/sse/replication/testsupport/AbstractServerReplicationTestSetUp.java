@@ -61,14 +61,6 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         this.servletPort = servletPort;
     }
     
-    protected AbstractServerReplicationTestSetUp() {
-        servletPort = DEFAULT_SERVLET_PORT;
-    }
-    
-    protected AbstractServerReplicationTestSetUp(int servletPort) {
-        this.servletPort = servletPort;
-    }
-    
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
     private Thread initialLoadTestServerThread;
 
