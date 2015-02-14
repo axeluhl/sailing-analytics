@@ -40,6 +40,10 @@ public class Activator implements BundleActivator {
         UsernamePasswordRealm.setTestUserStore(theTestUserStore);
     }
     
+    public static void setSecurityService(SecurityService securityService) {
+        Activator.securityService = securityService;
+    }
+    
     public static BundleContext getContext() {
         return context;
     }
@@ -55,6 +59,7 @@ public class Activator implements BundleActivator {
      * registered as an OSGi service.
      */
     public void start(BundleContext bundleContext) throws Exception {
+        context = bundleContext;
         if (testUserStore != null) {
             createAndRegisterSecurityService(bundleContext, testUserStore);
         } else {
@@ -63,7 +68,7 @@ public class Activator implements BundleActivator {
     }
 
     private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore store) {
-        securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class), store);
+        securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class), store, /* setAsActivatorSecurityService */ true);
         registration = context.registerService(SecurityService.class.getName(),
                 securityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();

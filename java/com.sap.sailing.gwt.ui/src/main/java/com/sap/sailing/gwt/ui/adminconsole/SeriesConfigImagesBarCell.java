@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
+import com.sap.sse.gwt.client.IconResources;
 
 public class SeriesConfigImagesBarCell extends ImagesBarCell {
     static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -26,6 +27,6 @@ public class SeriesConfigImagesBarCell extends ImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
-                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(resources.removeIcon())));
+                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())));
     }
 }

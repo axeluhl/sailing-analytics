@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.IconResources;
 
 /**
  * A variant of the dialog used to create a series within a regatta that has fleets. This variant is actually more of a
@@ -49,7 +50,7 @@ public class SeriesWithFleetsDefaultCreateDialog extends SeriesWithFleetsCreateD
 
     protected void initializeFleetListComposite(StringMessages stringMessages) {
         fleetListComposite = new FleetListEditableEditorComposite(Arrays.asList(new FleetDTO(
-                LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
+                LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, IconResources.INSTANCE.removeIcon());
         fleetListComposite.ensureDebugId("FleetListEditableEditorComposite");
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<Iterable<FleetDTO>>() {
             @Override

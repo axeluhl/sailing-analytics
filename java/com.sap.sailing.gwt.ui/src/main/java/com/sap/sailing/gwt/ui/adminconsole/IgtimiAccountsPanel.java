@@ -35,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -48,7 +49,6 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
     public static class AccountImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
-        private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
         private final StringMessages stringMessages;
         
         public AccountImagesBarCell(StringMessages stringMessages) {
@@ -64,7 +64,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         @Override
         protected Iterable<ImageSpec> getImageSpecs() {
             return Arrays.asList(
-                    new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(resources.removeIcon())));
+                    new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())));
         }
     }
     
