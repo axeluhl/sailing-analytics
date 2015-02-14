@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
