@@ -75,7 +75,22 @@ public interface RaceLogTrackingAdapter {
     /**
      * Add a fix to the {@link GPSFixStore}, and create a mapping with a virtual device for exactly that timepoint.
      */
+    void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service, DeviceIdentifier device);
+    
+    /**
+     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService) using a random {@link PingDeviceIdentifier}
+     */
     void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
+    
+    /**
+     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService)
+     */
+    void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
+    
+    /**
+     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService, DeviceIdentifier)
+     */
+    void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service, DeviceIdentifier device);
     
     /**
      * Duplicate the course and competitor registrations in the newest {@link RaceLogCourseDesignChangedEvent}
