@@ -14,6 +14,11 @@ import com.sap.sse.mongodb.MongoDBService;
 public abstract class AbstractServerReplicationTest extends com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest<RacingEventService, RacingEventServiceImpl> {
     protected ServerReplicationTestSetUp testSetUp;
     
+    protected AbstractServerReplicationTest(ServerReplicationTestSetUp testSetUp) {
+        super(testSetUp);
+        this.testSetUp = testSetUp;
+    }
+    
     public AbstractServerReplicationTest() {
         super(new ServerReplicationTestSetUp());
         testSetUp = (ServerReplicationTestSetUp) super.testSetUp;

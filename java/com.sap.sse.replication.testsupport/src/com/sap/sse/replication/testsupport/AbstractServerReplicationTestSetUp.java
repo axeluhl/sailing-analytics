@@ -51,7 +51,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
     protected ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator;
     private ReplicaDescriptor replicaDescriptor;
     private ReplicationServiceImpl masterReplicator;
-    protected ReplicationMasterDescriptor  masterDescriptor;
+    protected ReplicationMasterDescriptor masterDescriptor;
     
     protected AbstractServerReplicationTestSetUp() {
         servletPort = DEFAULT_SERVLET_PORT;
