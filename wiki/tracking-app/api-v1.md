@@ -272,11 +272,11 @@ $ curl -H "Content-Type:image/jpeg" --data-binary @<path-to-jpeg> \
 # Buoy Tender (Tonnenleger) App
 <div id="buoy-tender-app"></div>
 
-An app aimed at buoy tenders. In v1, this only allows marks of an existing course to be _pinged_. The steps for doing so are
+An app aimed at buoy tenders. In v1, this only allows marks of a race to be _pinged_. The steps for doing so are
 
 1. provide the information for which leaderboard and race to ping marks
-2. get the course information for that race (potentially form the RaceLog, if no RaceDefinition is yet present)
-3. ping the marks in that course by submitting fixes
+2. get the marks for that race (potentially form the RaceLog, if no TrackedRace is yet present)
+3. ping the marks by submitting fixes
 
 ## Check-In Information
 <div id="bouy-tender-checkin-info"></div>
@@ -294,56 +294,39 @@ http://<host>/buoy-tender/checkin
 
 _also see [Tracking App Check-In Information](#tracking-checkin-info) for additional notes that might apply_
 
-## Course Information
-<div id="course-info"></div>
+## Get Marks
 
 _see [bug 2651](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2651)_
 
-**Path:** ``leaderboards/{leaderboard-name}/races/{race-name}/course``
+Do not use the course to get the list of marks to ping. Instead, use the ``RaceLogDefineMarkEvent``s in the RaceLog, or ``TrackedRace#getMarks()``. As the JavaDoc of the latter states, not all marks for a race are necessarily present in the course - e.g. if they are backup buoys to be used in the case of a wind shift.
+
+**Path:** ``leaderboards/{leaderboard-name}/races/{race-name}/marks``
 
 **Verb:** ``GET``
 
-**Response:** ([example link](http://www.sapsailing.com/sailingserver/api/v1/regattas/505%20Worlds%202014/races/SAP%20505%20Worlds%20R1/course))
+**Response:**
 ```
-{
-  "name": "SAP 505 Worlds R1",
-  "waypoints": [
-    {
-      "name": "Start",
-      "passingInstruction": "None",
-      "controlPoint": {
-        "@class": "ControlPointWithTwoMarks",
-        "name": "Start",
-        "left": {
-          "@class": "Mark",
-          "name": "Start (1)",
-          "id": "Start (1)",
-          "type": "BUOY"
-        },
-        "right": {
-          "@class": "Mark",
-          "name": "Start (2)",
-          "id": "Start (2)",
-          "type": "BUOY"
-        }
-      }
-    },
-    {
-      "name": "Windward",
-      "passingInstruction": "None",
-      "controlPoint": {
-        "@class": "Mark",
-        "name": "Windward",
-        "id": "22a53380-046e-0132-0da7-60a44ce903c3",
-        "type": "BUOY"
-      }
-    },
-    ...
-  ]
-}
+[
+  {
+    "@class": "Mark",
+    "name": "Start (1)",
+    "id": "Start (1)",
+    "type": "BUOY"
+  },
+  {
+    "@class": "Mark",
+    "name": "Start (2)",
+    "id": "Start (2)",
+    "type": "BUOY"
+  },
+  {
+    "@class": "Mark",
+    "name": "Windward",
+    "id": "22a53380-046e-0132-0da7-60a44ce903c3",
+    "type": "BUOY"
+  }
+]
 ```
-
-_hint: we cannot use [GET regatta/{reg}/races/{race}/course](http://www.sapsailing.com/sailingserver/webservices/api/v1/raceCourseGetDoc.html), as we operate in a leaderboard context (not necessarily regatta), and if case no RaceDefinition exists, this endpoint currently returns no information_
 
 ## Ping Marks
 
