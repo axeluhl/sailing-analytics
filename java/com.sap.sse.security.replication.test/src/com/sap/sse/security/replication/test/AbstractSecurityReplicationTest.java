@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
@@ -11,10 +12,10 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public abstract class AbstractSecurityReplicationTest extends AbstractServerWithSingleServiceReplicationTest<SecurityService, SecurityServiceImpl> {
     public AbstractSecurityReplicationTest() {
-        super(new ServerReplicationTestSetUp());
+        super(new SecurityServerReplicationTestSetUp());
     }
 
-    private static class ServerReplicationTestSetUp extends com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp<SecurityService, SecurityServiceImpl> {
+    public static class SecurityServerReplicationTestSetUp extends AbstractServerReplicationTestSetUp<SecurityService, SecurityServiceImpl> {
         private MongoDBService mongoDBService;
         
         @Override

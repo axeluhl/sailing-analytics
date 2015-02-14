@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,9 +27,8 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
-import com.sap.sse.util.ClearStateTestSupport;
 
-public class MailServiceImpl implements ReplicableMailService, ClearStateTestSupport {
+public class MailServiceImpl implements ReplicableMailService {
     private static final Logger logger = Logger.getLogger(MailServiceImpl.class.getName());
 
     private Properties mailProperties;
@@ -39,7 +39,7 @@ public class MailServiceImpl implements ReplicableMailService, ClearStateTestSup
      */
     private ReplicationMasterDescriptor replicatingFromMaster;
     private final ConcurrentHashMap<OperationExecutionListener<ReplicableMailService>, OperationExecutionListener<ReplicableMailService>> operationExecutionListeners;
-    private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
+    private final Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
             .withInitial(() -> false);
 
@@ -56,12 +56,17 @@ public class MailServiceImpl implements ReplicableMailService, ClearStateTestSup
         }
     }
 
-    private static interface ContentSetter {
+    protected static interface ContentSetter {
         void setContent(MimeMessage msg) throws MessagingException;
     }
 
-    private void internalSendMail(String toAddress, String subject, ContentSetter contentSetter) throws MailException {
-        if (mailProperties != null && mailProperties.containsKey("mail.transport.protocol")) {
+    private boolean canSendMail() {
+        return mailProperties != null && mailProperties.containsKey("mail.transport.protocol");
+    }
+
+    //protected for testing purposes
+    protected void internalSendMail(String toAddress, String subject, ContentSetter contentSetter) throws MailException {
+        if (canSendMail()) {
             if (toAddress != null) {
                 Session session = Session.getInstance(mailProperties, new SMTPAuthenticator());
                 MimeMessage msg = new MimeMessage(session);
@@ -212,10 +217,5 @@ public class MailServiceImpl implements ReplicableMailService, ClearStateTestSup
             boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
         this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster
                 .set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
-    }
-
-    @Override
-    public void clearState() throws Exception {
-        mailProperties.clear();
     }
 }

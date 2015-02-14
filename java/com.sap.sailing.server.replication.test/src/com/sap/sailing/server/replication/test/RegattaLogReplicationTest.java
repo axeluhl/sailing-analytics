@@ -17,17 +17,11 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.test.TrackBasedTest;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 public class RegattaLogReplicationTest extends
         AbstractLogReplicationTest<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> {
-
-    private Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     private RegattaLogEvent regattaLogEvent;
 //    private RegattaLogEvent anotherRegattaLogEvent;
@@ -38,17 +32,10 @@ public class RegattaLogReplicationTest extends
     }
     
     @Before
-    @Override
-    public void setUp() throws Exception {
+    public void createEvent() throws Exception {
         final Competitor competitor = TrackBasedTest.createCompetitor("Test Competitor");
         regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), author, t(0), 0, competitor);
 //        anotherRegattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(1), author, t(1), 1, null);
-        try {
-            replicationDescriptorPair = basicSetUp(/* dropDB */ true, null, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            tearDown();
-        }
     }
     
     @Test
@@ -58,7 +45,7 @@ public class RegattaLogReplicationTest extends
         final String fleetName = "Default";
         Regatta regatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RegattaLog masterLog = regatta.getRegattaLog();
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RegattaLog replicaLog = getReplicaLog(regatta);
         addAndValidateEventIds(masterLog, replicaLog);
     }
@@ -71,7 +58,7 @@ public class RegattaLogReplicationTest extends
         Regatta regatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RegattaLog masterLog = regatta.getRegattaLog();
         masterLog.add(regattaLogEvent);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RegattaLog replicaLog = getReplicaLog(regatta);
         addAndValidateEventIds(masterLog, replicaLog);
     }
@@ -84,7 +71,7 @@ public class RegattaLogReplicationTest extends
         Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RegattaLog masterLog = masterRegatta.getRegattaLog();
         masterLog.add(regattaLogEvent);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RegattaLog replicaLog = getReplicaLog(masterRegatta);
         addAndValidateEventIds(masterLog, replicaLog, regattaLogEvent);
     }
@@ -95,7 +82,7 @@ public class RegattaLogReplicationTest extends
         FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
         RegattaLog masterLog = masterLeaderboard.getRegattaLog();
         masterLog.add(regattaLogEvent);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RegattaLog replicaLog = getReplicaLog(masterLeaderboard);
         addAndValidateEventIds(masterLog, replicaLog, regattaLogEvent);
     }

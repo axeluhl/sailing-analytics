@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.rabbitmq.client.Channel;
@@ -32,6 +31,10 @@ import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 
 public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTest {
     static final Logger logger = Logger.getLogger(ConnectionResetAndReconnectTest.class.getName());
+    
+    public ConnectionResetAndReconnectTest() {
+        super(new ServerReplicationTestSetUp());
+    }
     
     public static boolean forceStopDelivery = false;
     
@@ -81,9 +84,8 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         
     }
 
-    protected static class ServerReplicationTestSetUp extends
+    private static class ServerReplicationTestSetUp extends
             com.sap.sailing.server.replication.test.AbstractServerReplicationTest.ServerReplicationTestSetUp {
-        @Before
         @Override
         public void setUp() throws Exception {
             try {
@@ -106,7 +108,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         /* until here both instances should have the same in-memory state.
          * now lets add an event on master and stop the messaging queue. */
         stopMessagingExchange();
-        testSetUp.getReplicaReplicator().startToReplicateFrom(testSetUp.getMasterDescriptor());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         Event event = addEventOnMaster();
         Thread.sleep(1000); // wait for master queue to get filled
         assertNull(replica.getEvent(event.getId()));

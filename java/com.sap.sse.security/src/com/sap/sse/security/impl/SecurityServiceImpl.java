@@ -185,6 +185,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             }
         }
     }
+    
+    private MailService getMailService() {
+        return mailServiceTracker == null ? null : mailServiceTracker.getService();
+    }
 
     @Override
     public void sendMail(String username, String subject, String body) throws MailException {
@@ -192,7 +196,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         if (user != null) {
             final String toAddress = user.getEmail();
             if (toAddress != null) {
-                mailServiceTracker.getService().sendMail(username, subject, body);
+                MailService mailService = getMailService();
+                if (mailService == null) {
+                    logger.warning(String.format("Could not send mail to user %s: no MailService found", username));
+                } else {
+                    getMailService().sendMail(username, subject, body);
+                }
             }
         }
     }
