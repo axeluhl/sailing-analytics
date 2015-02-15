@@ -34,6 +34,9 @@ public class SecurityResourceTest {
     @Before
     public void setUp() throws UserManagementException, MailException {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase().dropDatabase();
+        ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        try {
         final UserStoreImpl store = new UserStoreImpl();
         Activator.setTestUserStore(store);
         UsernamePasswordRealm.setTestUserStore(store);
@@ -51,6 +54,9 @@ public class SecurityResourceTest {
         store.addPermissionForUser("admin", "can do");
         store.addPermissionForUser("admin", "event:view:*");
         store.addPermissionForUser("admin", "event:edit:123");
+        } finally {
+        	Thread.currentThread().setContextClassLoader(oldContextClassLoader);
+        }
     }
     
     private String createAccessToken() throws ParseException {
@@ -62,7 +68,7 @@ public class SecurityResourceTest {
         return accessToken;
     }
 
-    @Ignore("Ignore on master until we've found out what the problem with unloadable UsernameAndPasswordRealm is")
+    // @Ignore("Ignore on master until we've found out what the problem with unloadable UsernameAndPasswordRealm is")
     @Test
     public void createAccessTokenAndAuthenticate() throws ParseException {
         String accessToken = createAccessToken();
