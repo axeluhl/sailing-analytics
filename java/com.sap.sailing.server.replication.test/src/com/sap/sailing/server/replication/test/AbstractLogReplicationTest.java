@@ -35,8 +35,9 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
     /**
      * Uses a new master that loads the existing regatta and race log to append an event to the race log. This will store it to the DB so that if the original
      * master re-loads the race log it should see the new race log event.
+     * @throws Exception 
      */
-    protected void addEventToDB(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent createRaceStatusEvent, String regattaName, String raceColumnName, String fleetName) {
+    protected void addEventToDB(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent createRaceStatusEvent, String regattaName, String raceColumnName, String fleetName) throws Exception {
         final RacingEventServiceImpl temporaryMaster = createNewMaster();
         Regatta regatta = temporaryMaster.getRegatta(new RegattaName(regattaName+" ("+BOAT_CLASS_NAME_49er+")"));
         Series series = regatta.getSeries().iterator().next();

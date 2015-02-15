@@ -22,8 +22,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 
@@ -42,16 +40,26 @@ import com.sap.sse.replication.impl.ReplicationReceiver;
 import com.sap.sse.replication.impl.ReplicationServiceImpl;
 import com.sap.sse.replication.impl.SingletonReplicablesProvider;
 
-public abstract class AbstractServerReplicationTest<ReplicableInterface extends Replicable<?, ?>, ReplicableImpl extends ReplicableInterface> {
-    private static final Logger logger = Logger.getLogger(AbstractServerReplicationTest.class.getName());
+public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface extends Replicable<?, ?>, ReplicableImpl extends ReplicableInterface> {
+    private static final Logger logger = Logger.getLogger(AbstractServerReplicationTestSetUp.class.getName());
     
-    protected static final int SERVLET_PORT = 9990;
+    protected static final int DEFAULT_SERVLET_PORT = 9990;
+    
+    private final int servletPort;
     protected ReplicableImpl replica;
     protected ReplicableImpl master;
     protected ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator;
     private ReplicaDescriptor replicaDescriptor;
     private ReplicationServiceImpl masterReplicator;
-    protected ReplicationMasterDescriptor  masterDescriptor;
+    protected ReplicationMasterDescriptor masterDescriptor;
+    
+    protected AbstractServerReplicationTestSetUp() {
+        servletPort = DEFAULT_SERVLET_PORT;
+    }
+    
+    protected AbstractServerReplicationTestSetUp(int servletPort) {
+        this.servletPort = servletPort;
+    }
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
     private Thread initialLoadTestServerThread;
@@ -64,7 +72,6 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
      * or {@link ReplicationServiceTestImpl#startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor, boolean)}
      * on the first component returned by {@link #basicSetUp(boolean, Replicable, Replicable)}.
      */
-    @Before
     public void setUp() throws Exception {
         try {
             Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = basicSetUp(
@@ -120,9 +127,9 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
         masterReplicator.registerReplica(replicaDescriptor);
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
-        masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, 0, UUID.randomUUID().toString(), "localhost", SERVLET_PORT);
+        masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, 0, UUID.randomUUID().toString(), "localhost", servletPort);
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,
-                this.replica, this.master, masterReplicator, masterDescriptor);
+                this.replica, this.master, masterReplicator, masterDescriptor, servletPort);
         Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
         logger.info("starting initial load transmission servlet for "+getClass().getName());
         initialLoadTestServerThread = replicaReplicator.startInitialLoadTransmissionServlet();
@@ -136,16 +143,15 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
      * any initialization that {@link #persistenceSetUp(boolean)} may have performed can be assumed to have taken place in the implementations
      * of this method.
      */
-    abstract protected ReplicableImpl createNewMaster() throws Exception;
+    protected abstract ReplicableImpl createNewMaster() throws Exception;
 
     /**
      * Creates a new replica replicable instance. This method is called only after {@link #persistenceSetUp(boolean)} has been called. Therefore,
      * any initialization that {@link #persistenceSetUp(boolean)} may have performed can be assumed to have taken place in the implementations
      * of this method.
      */
-    abstract protected ReplicableImpl createNewReplica();
+    protected abstract ReplicableImpl createNewReplica() throws Exception;
 
-    @After
     public void tearDown() throws Exception {
         logger.info("starting to tearDown() test");
         persistenceTearDown();
@@ -160,7 +166,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
         try {
             if (initialLoadTestServerThread != null) {
                 logger.info("found non-null initialLoadTestServerThread that we'll now try to stop...");
-                URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
+                URLConnection urlConnection = new URL("http://localhost:"+servletPort+"/STOP").openConnection(); // stop the initial load test server thread
                 urlConnection.getInputStream().close();
                 logger.info("sent and closed STOP request");
                 initialLoadTestServerThread.join(10000 /* wait 10s */);
@@ -191,16 +197,19 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
         private final ReplicaDescriptor replicaDescriptor;
         private final ReplicationService masterReplicationService;
         private final ReplicationMasterDescriptor masterDescriptor;
+        private final int servletPort;
         
         public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, ReplicationInstancesManager replicationInstancesManager,
                 ReplicaDescriptor replicaDescriptor, ReplicableInterface replica,
-                ReplicableInterface master, ReplicationService masterReplicationService, ReplicationMasterDescriptor masterDescriptor)
+                ReplicableInterface master, ReplicationService masterReplicationService, ReplicationMasterDescriptor masterDescriptor,
+                int servletPort)
                 throws IOException {
             super(exchangeName, exchangeHost, 0, replicationInstancesManager, new SingletonReplicablesProvider(replica));
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
             this.masterReplicationService = masterReplicationService;
             this.masterDescriptor = masterDescriptor;
+            this.servletPort = servletPort;
         }
         
         private Thread startInitialLoadTransmissionServlet() throws InterruptedException {
@@ -209,7 +218,7 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
                 public void run() {
                     ServerSocket ss = null;
                     try {
-                        ss = new ServerSocket(SERVLET_PORT);
+                        ss = new ServerSocket(servletPort);
                         synchronized (listening) {
                             listening[0] = true;
                             listening.notifyAll();
@@ -316,5 +325,21 @@ public abstract class AbstractServerReplicationTest<ReplicableInterface extends 
                 }
             }
         }
+    }
+
+    public ReplicableImpl getReplica() {
+        return replica;
+    }
+
+    public ReplicableImpl getMaster() {
+        return master;
+    }
+
+    public ReplicationServiceTestImpl<ReplicableInterface> getReplicaReplicator() {
+        return replicaReplicator;
+    }
+
+    public ReplicationMasterDescriptor getMasterDescriptor() {
+        return masterDescriptor;
     }
 }

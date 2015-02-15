@@ -6,4 +6,6 @@ public interface CompetitorChangeListener extends BoatChangeListener, Nationalit
     void colorChanged(Color oldColor, Color newColor);
     
     void nameChanged(String oldName, String newName);
+    
+    void emailChanged(String oldEmail, String newEmail);
 }

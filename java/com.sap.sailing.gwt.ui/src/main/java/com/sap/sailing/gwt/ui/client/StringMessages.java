@@ -1142,4 +1142,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String scoringSchemeHighPointEssOverallDescription();
     String timeBetweenRaceStartAndCompetitorStartInSeconds();
     String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
+    String email();
+    String pleaseEnterAnEmail();
+    String inviteCompetitors();
+    String notAllCompetitorsProvideEmail();
+    String sendingMailsFailed();
+    String sendingMailsSuccessfull();
+    String selectEventForInvitation();
 }

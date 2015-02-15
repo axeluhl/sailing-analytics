@@ -40,7 +40,7 @@ public class AbstractGPSFixStoreTest {
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
     protected RaceLog raceLog;
     protected GPSFixStore store;
-    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null);
+    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
     private final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
