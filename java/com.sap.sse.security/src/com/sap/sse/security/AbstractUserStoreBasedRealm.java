@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.AuthorizationInfo;
-import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -20,6 +19,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.UserManagementException;
 
 public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
@@ -109,8 +109,8 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
                 Util.addAll(getUserStore().getRolesFromUser(username), roles);
                 if (permissionsForRoleProvider != null) {
                     for (String role : roles) {
-                        for (Permission permission : permissionsForRoleProvider.getPermissions(role)) {
-                            ai.addObjectPermission(permission);
+                        for (String permission : permissionsForRoleProvider.getPermissions(role)) {
+                            ai.addStringPermission(permission);
                         }
                     }
                 }

@@ -9,10 +9,8 @@ Export-Package: com.sap.sse.common,
  com.sap.sse.common.filter,
  com.sap.sse.common.impl,
  com.sap.sse.common.mail,
- com.sap.sse.common.qrcode,
  com.sap.sse.common.scalablevalue,
  com.sap.sse.common.search,
  com.sap.sse.common.util
-Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0",
- org.apache.servicemix.bundles.zxing;bundle-version="3.1.0"
+Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy

@@ -1,6 +1,5 @@
-package com.sap.sse.security;
+package com.sap.sse.security.shared;
 
-import org.apache.shiro.authz.Permission;
 
 /**
  * Roles can imply permissions. For example, an application may define that the role "admin" can do everything by
@@ -10,5 +9,5 @@ import org.apache.shiro.authz.Permission;
  *
  */
 public interface PermissionsForRoleProvider {
-    Iterable<Permission> getPermissions(String role);
+    Iterable<String> getPermissions(String role);
 }
