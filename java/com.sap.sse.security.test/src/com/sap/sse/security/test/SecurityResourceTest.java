@@ -14,7 +14,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sse.common.mail.MailException;
@@ -68,7 +67,6 @@ public class SecurityResourceTest {
         return accessToken;
     }
 
-    // @Ignore("Ignore on master until we've found out what the problem with unloadable UsernameAndPasswordRealm is")
     @Test
     public void createAccessTokenAndAuthenticate() throws ParseException {
         String accessToken = createAccessToken();
