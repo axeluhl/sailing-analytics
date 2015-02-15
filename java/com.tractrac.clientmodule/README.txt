@@ -17,6 +17,42 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
  
 ********************************************
+************* TracAPI 3.0.9 ****************
+******************************************** 
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 13/02/2015
+Build number: 9904
+ 
+ 1) Bugs
+ 
+ - There is a ConcurrentModificationException in the IConnectionStatusListener subscription, when a thread
+ is adding subscriptions/unsubscriptions and other thread is sending events through this listener (Reported 
+ by Axel Uhl,07/02/2015)
+
+********************************************
+************* TracAPI 3.0.8 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features. 
+These features add methods to the API, but they keep the backward compatibility. 
+This version provides a new JavaDoc version.
+
+Release date: 07/02/2015
+Build number: 9826
+ 
+ 1) New features
+ 
+ - Adding the method IEvent.getEventType that returns the type of the event (e.g: Sailing, Orienteering...).
+ (Requested by Jorge Piera, 01/02/2014)
+ 
+ 2) Bugs
+ 
+ - The changes in the static fields of the route (including the metadata) were not propagated through 
+ the subscription library. Following the same approach used for the races, controls and competitors, 
+ a new listener IRoutesListener has been added to manage these changes.  (Reported by Axel Uhl,
+ 06/02/2015)
+ 
+********************************************
 ************* TracAPI 3.0.7 ****************
 ********************************************
 This is a final version. It fixes bugs in the implementation and it adds a some features. 

@@ -15,7 +15,7 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-8-openjdk-amd64"/>
+<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_20"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y -ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=2010 -Xmx6000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -XX:+UseMembar -Digtimi.client.id=7fcdd217e0aa16090edb4ad55b09ec43b2021090e209541fc9b7003c2a2b70c6 -Digtimi.client.secret=aa569cf4909bdc7b0e04b11873f3c4ea20687421e010fcc25b771cca9e6f3f9a -Digtimi.client.redirecturi=http://127.0.0.1:8888/igtimi/oauth/v1/authorizationcallback -DspatialWind=true -Dmongo.host=172.31.25.253 -Dmongo.port=10200 -Dmongo.dbName=LOAD_TEST"/>

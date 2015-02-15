@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.IconResources;
 
 public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
     public final static String ACTION_REMOVE = "ACTION_REMOVE";
@@ -35,7 +36,7 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
         StrippedLeaderboardDTO selectedLeaderboard = selectedLeaderboardProvider.getSelectedLeaderboard();
         if (selectedLeaderboard != null && selectedLeaderboard.type != LeaderboardType.RegattaLeaderboard && selectedLeaderboard.type != LeaderboardType.RegattaMetaLeaderboard) {
             // race columns cannot be removed from a regatta leaderboard; they need to be removed from the regatta instead
-            result.add(new ImageSpec(ACTION_REMOVE, stringMessages.actionRaceRemove(), makeImagePrototype(resources.removeIcon())));
+            result.add(new ImageSpec(ACTION_REMOVE, stringMessages.actionRaceRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())));
         }
         result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
