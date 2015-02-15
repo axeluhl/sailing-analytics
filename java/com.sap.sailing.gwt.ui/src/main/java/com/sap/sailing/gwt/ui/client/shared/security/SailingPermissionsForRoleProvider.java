@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server.security;
+package com.sap.sailing.gwt.ui.client.shared.security;
 
 import java.util.Collections;
 

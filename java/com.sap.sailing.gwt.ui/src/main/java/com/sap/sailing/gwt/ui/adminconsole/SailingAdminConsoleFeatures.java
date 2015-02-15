@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.sap.sailing.gwt.ui.server.security.Permission;
+import com.sap.sailing.gwt.ui.client.shared.security.Permission;
 import com.sap.sse.gwt.adminconsole.AdminConsoleFeatures;
 
 public interface SailingAdminConsoleFeatures {
