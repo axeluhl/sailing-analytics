@@ -5,13 +5,32 @@
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.header.EventHeaderResources" />
-  <g:HTMLPanel>
+  <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small12} {res.mediaCss.large9} {res.mediaCss.columns}">
-          <t:BreadcrumbPane ui:field="breadcrumbs" addStyleNames="{local_res.css.eventheader_breadcrumb}" />
           <div class="{local_res.css.eventheader_intro}">
             <div class="{local_res.css.eventheader_intro_logo}">
               <img ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" />
             </div>
+            <!-- IF header.dropdown === 'regattas' -->
+            <div class="{local_res.css.dropdown} {local_res.css.dropdownregattas} {local_res.css.jsdropdown}" style="display: none;">
+              <div class="{local_res.css.dropdown_head} {local_res.css.dropdownregattas_head} {local_res.css.jsdropdown_head}">
+                <a class="{local_res.css.dropdown_head_title} {local_res.css.dropdownregattas_head_title}">
+                  <!-- regatta.name -->
+                  <!-- IF event.state === 'live' -->
+                  <div data-labeltype="live" class="{res.mainCss.label} {res.mainCss.labellarge}">
+                    <!-- <ui:text from='{i18n.live}' /> -->
+                  </div>
+                  <!-- IFEND event.state === 'live' -->
+                  <div class="{local_res.css.dropdown_head_title_button} {local_res.css.dropdownregattas_head_title_button}"></div>
+                </a>
+              </div>
+              <div class="{local_res.css.dropdown_content} {local_res.css.dropdownregattas_content} {local_res.css.jsdropdown_content}">
+                <!-- EACH regattaItem in event.regattas -->
+                <!-- TODO <s:eventHeader.RegattasDropdownItem ui:field='regattaItem'></s> -->
+                  <!-- EACHEND -->
+              </div>
+            </div>
+            <!-- IFEND header.dropdown === 'regattas' -->
             <h2 class="{local_res.css.eventheader_intro_name}">
               <span ui:field="eventName"></span>
               <!-- IF event.state === 'live' -->
@@ -27,7 +46,7 @@
                 <img src="images/home/location-icon.png" class="{local_res.css.locationicon}"></img>
                 <span>
                   <span ui:field="eventVenueName"></span><!-- TODO: ,  -->
-                  <span ui:field="eventVenueCountry" style="display: none;">TODO</span>
+                  <span ui:field="eventVenueCountry" style="display: none;">TODO: Country</span>
                 </span>
               </div>
               <a ui:field="eventLink" class="{local_res.css.eventheader_intro_details_item}"></a>

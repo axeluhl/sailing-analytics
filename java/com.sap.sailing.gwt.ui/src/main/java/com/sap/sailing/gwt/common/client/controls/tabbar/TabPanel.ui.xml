@@ -11,21 +11,11 @@
 		border-bottom: 1px solid #dedede;
 	}
 	
-	.back {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		width: 1.333333333333333em;
-		border-right: 1px solid #cfcfcf;
-		background-color: #dedede;
-		background-image: url("images/home/breadcrumb-arrow__back.png");
-		background-position: center center;
-		background-repeat: no-repeat;
-		background-size: 50%;
-		-webkit-transition: background-color 0.2s, border-color 0.2s;
-		-moz-transition: background-color 0.2s, border-color 0.2s;
-		transition: background-color 0.2s, border-color 0.2s;
+	.breadcrumb {
+		font-size: 1rem;
+		/* @alternate */ font-size: 0.866666666666667em;
+		font-weight: 600;
+		padding: 0.666666666666667em 0;
 	}
 	
 	.back:hover {
@@ -37,21 +27,28 @@
 		height: 100%;
 	}
 	
-	.tabs {
-		clear: both;
-		padding-top: 1rem;
+	.navigation {
+		/* font-size: 0; */
+		margin-bottom: -1px;
 	}
 	</ui:style>
-
 	<g:FlowPanel>
 		<g:HTMLPanel addStyleNames="{style.header}">
-			<a class="{style.back}" ui:field="back" style="display: none;"></a>
 			<div class="{res.mediaCss.grid}">
-				<g:SimplePanel ui:field="additionalHeader" />
-
-				<c:TabBar ui:field="tabBar" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
+				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+					<c:BreadcrumbPane ui:field="breadcrumbs"
+						addStyleNames="{style.breadcrumb}" />
+				</div>
+			</div>
+			<g:SimplePanel ui:field="additionalHeader" />
+			<div class="{res.mediaCss.grid}">
+				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+					<c:TabBar ui:field="tabBar"
+						addStyleNames="{style.navigation}" />
+				</div>
 			</div>
 		</g:HTMLPanel>
-		<g:SimplePanel ui:field="tabContentPanelUi" addStyleNames="{style.content}" />
+		<g:SimplePanel ui:field="tabContentPanelUi"
+			addStyleNames="{style.content}" />
 	</g:FlowPanel>
 </ui:UiBinder>

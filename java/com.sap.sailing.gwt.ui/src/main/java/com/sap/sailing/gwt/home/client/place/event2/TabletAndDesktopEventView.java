@@ -11,8 +11,10 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopEventView extends Composite implements EventView {
     private static final ApplicationHistoryMapper historyMapper = GWT
@@ -25,6 +27,8 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
     interface MyBinder extends UiBinder<Widget, TabletAndDesktopEventView> {
     }
 
+    @UiField StringMessages i18n;
+    
     @UiField(provided = true)
     TabPanel<EventContext> tabPanelUi;
     
@@ -50,6 +54,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
         
         initWidget(uiBinder.createAndBindUi(this));
 
+        initBreadCrumbs();
     }
 
     @Override
@@ -61,5 +66,43 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
     public void onTabSelection(TabPanelPlaceSelectionEvent<?> e) {
         currentPresenter.handleTabPlaceSelection((TabActivity<?, EventContext>) e.getSelectedActivity());
     }
+    
+    private void initBreadCrumbs() {
+//      addBreadCrumbItem(i18n.home(), placeNavigator.getHomeNavigation());
+//      addBreadCrumbItem(i18n.events(), placeNavigator.getEventsNavigation());
+      // TODO series, event ...
+      // TODO dummy implementation
+        tabPanelUi.addBreadcrumbItem(i18n.home(), "TODO" /* placeNavigator.getHomeNavigation().getTargetUrl() */, new Runnable() {
+          @Override
+          public void run() {
+              // TODO
+//              presenter.
+//              placeNavigator.getHomeNavigation().getPlace()
+          }
+      });
+        tabPanelUi.addBreadcrumbItem(i18n.events(), "TODO" /* placeNavigator.getEventsNavigation().getTargetUrl() */, new Runnable() {
+          @Override
+          public void run() {
+              // TODO
+//              presenter.
+//              placeNavigator.getEventsNavigation().getPlace()
+          }
+      });
+        tabPanelUi.addBreadcrumbItem(currentPresenter.getCtx().getEventDTO().getName(), "TODO", new Runnable() {
+          @Override
+          public void run() {
+              // TODO
+          }
+      });
+  }
+  
+  private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
+      tabPanelUi.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
+          @Override
+          public void run() {
+              currentPresenter.navigateTo(placeNavigation.getPlace());
+          }
+      });
+  }
 
 }
