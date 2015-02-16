@@ -8,11 +8,11 @@ import javax.servlet.ServletContext;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.DefaultRoles;
-import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 
@@ -138,5 +138,25 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
     String getPreference(String username, String key);
+
+    /**
+     * Issues a new access token and remembers it so that later the user identified by <code>username</code> can be
+     * authenticated using the token. Any access token previously created for same user will be invalidated by this
+     * call.
+     * 
+     * @return a new access token if <code>username</code> identifies a known user, <code>null</code> otherwise
+     */
+    String createAccessToken(String username);
+
+    /**
+     * Looks up a user by an access token that was created before using {@link #createAccessToken(String)} for same user name.
+     * 
+     * @return <code>null</code> in case the access token is unknown or was deleted / invalidated
+     */
+    User getUserByAccessToken(String accessToken);
+
+    void removeAccessToken(String username, String accessToken);
+
+    User loginByAccessToken(String accessToken);
 
 }

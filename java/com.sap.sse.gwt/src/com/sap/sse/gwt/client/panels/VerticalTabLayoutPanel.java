@@ -175,7 +175,7 @@ public class VerticalTabLayoutPanel extends ResizeComposite implements HasWidget
   }
 
   interface VerticalTabLayoutPanelResources extends ClientBundle {
-      @Source("com/sap/sse/gwt/resources/VerticalTabLayoutPanel.css")
+      @Source("VerticalTabLayoutPanel.css")
       CssResource verticalTabPanelStyles();
   }
   

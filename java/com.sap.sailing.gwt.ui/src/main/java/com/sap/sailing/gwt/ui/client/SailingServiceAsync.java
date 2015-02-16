@@ -684,4 +684,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
 			EventDTO newEvent, AsyncCallback<Void> asyncCallback);
 
+    void getActiveFileStorageServiceName(AsyncCallback<String> callback);
+
+    void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
+            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback); 
 }

@@ -51,6 +51,8 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
             }
             String name = (String) object.get(CompetitorJsonSerializer.FIELD_NAME);
             String displayColorAsString = (String) object.get(CompetitorJsonSerializer.FIELD_DISPLAY_COLOR);
+            String email = (String) object.get(CompetitorJsonSerializer.FIELD_EMAIL);
+            
             final Color displayColor;
             if (displayColorAsString == null || displayColorAsString.isEmpty()) {
                 displayColor = null;
@@ -67,7 +69,8 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
                 boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonSerializer.FIELD_BOAT));
             }
-            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, team, boat);
+            
+            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, email, team, boat);
             return competitor;
         } catch (Exception e) {
             throw new JsonDeserializationException(e);

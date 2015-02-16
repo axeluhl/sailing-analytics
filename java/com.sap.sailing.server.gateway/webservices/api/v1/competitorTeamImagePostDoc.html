@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0 Beta</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0 Beta</h1>
+<h2>URL: /api/v1/competitors/{id}/team/image</h2>
+
+<b>Description:</b>
+<p>Sets the team image</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>JSON</td>
+	</tr>
+	<tr>
+		<td>Mandatory headers:</td>
+		<td>Content-Type: (image-png|image-jpg)</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>Content-Length</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>POST (Binary data, not multipart)</td>
+	</tr>
+	<tr>
+		<td>Request example:</td>
+		<td><pre>curl -H "Content-Type:image/jpeg" --data-binary @{image-path} \
+   http://sapsailing.com/sailingserver/api/v1/competitors/{competitor-id}/team/image</pre></td>
+	</tr>
+	<tr>
+		<td>Response example:</td>
+		<td><pre>{
+  "teamImageUri" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
+}</pre></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

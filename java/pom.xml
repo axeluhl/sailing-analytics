@@ -16,6 +16,9 @@
     <module>com.sap.sse</module>
     <module>com.sap.sse.common</module>
     <module>com.sap.sse.shared.android</module>
+    <module>com.sap.sse.mail</module>
+    <module>com.sap.sse.mail.replication.test</module>
+    <module>com.sap.sse.mail.replication.testsupport</module>
     <module>com.sap.sse.mongodb</module>
     <module>com.sap.sse.gwt</module>
     <module>com.sap.sse.gwt.adminconsole</module>
@@ -60,7 +63,6 @@
     <module>com.google.gwt.osgi</module>
     <module>com.tractrac.clientmodule</module>
     <module>org.json.simple</module>
-    <module>com.mongodb.driver</module>
     <module>com.googlecode.java-diff-utils</module>
     <module>com.googlecode.mgwt</module>
     <module>com.sap.sailing.dashboards.gwt</module>
@@ -151,13 +153,13 @@
       -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
     </parameters.common>
     <parameters.vm-settings>
-      -ea -Xmx1024m -XX:PermSize=256m -XX:+UseG1GC
+      -ea -Xmx1024m -XX:+UseG1GC
     </parameters.vm-settings>
     <parameters.tractrac>
       -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost
     </parameters.tractrac>
     <parameters.mongodb>
-      -Dmongo.host=localhost
+      -Dmongo.host=127.0.0.1
     </parameters.mongodb>
     <parameters.debug>
       -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y
@@ -186,7 +188,7 @@
       <id>no-debug.without-proxy</id>
       <properties>
         <tycho.build.argLine>
-          ${parameters.common} ${parameters.vm-settings}
+          ${parameters.common} ${parameters.vm-settings} ${parameters.mongodb}
         </tycho.build.argLine>
       </properties>
     </profile>
@@ -194,7 +196,7 @@
       <id>debug.with-proxy</id>
       <properties>
         <tycho.build.argLine>
-          ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug}
+          ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug} ${parameters.mongodb}
         </tycho.build.argLine>
       </properties>
     </profile>
@@ -202,7 +204,7 @@
       <id>debug.without-proxy</id>
       <properties>
         <tycho.build.argLine>
-          ${parameters.common} ${parameters.vm-settings} ${parameters.debug}
+          ${parameters.common} ${parameters.vm-settings} ${parameters.debug} ${parameters.mongodb}
         </tycho.build.argLine>
       </properties>
     </profile>
