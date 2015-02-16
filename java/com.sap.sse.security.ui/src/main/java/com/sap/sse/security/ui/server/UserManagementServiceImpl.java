@@ -108,7 +108,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo login(String username, String password) {
         try {
             String redirectURL = getSecurityService().login(username, password);
-            return new SuccessInfo(true, "Success. Redirecting to "+redirectURL, redirectURL, createUserDTOFromUser(getSecurityService().getUserByName(username)));
+            return new SuccessInfo(true, "Success. Redirecting to "+redirectURL, redirectURL,
+                    createUserDTOFromUser(getSecurityService().getUserByName(username)));
         } catch (UserManagementException | AuthenticationException e) {
             return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
         }

@@ -16,5 +16,4 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
         }
         return result;
     }
-
 }
