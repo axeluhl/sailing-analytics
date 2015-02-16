@@ -16,12 +16,14 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
+import com.sap.sse.common.Util.Pair;
 
 @Path("/v1/events")
 public class EventsResource extends AbstractSailingServerResource {
@@ -74,7 +76,24 @@ public class EventsResource extends AbstractSailingServerResource {
     @Path("{eventId}/racestates")
     public Response getRaceStates(@PathParam("eventId") String eventId, @QueryParam("filterByLeaderboard") String filterByLeaderboard,
             @QueryParam("filterByCourseArea") String filterByCourseArea, @QueryParam("filterByDayOffset") String filterByDayOffset) {
-        return Response.noContent().build();
+        Response response;
+        UUID eventUuid;
+        try {
+            eventUuid = UUID.fromString(eventId);
+        } catch (IllegalArgumentException e) {
+            return getBadEventErrorResponse(eventId);
+        }
+        Event event = getService().getEvent(eventUuid);
+        if (event == null) {
+            response = getBadEventErrorResponse(eventId);
+        } else {
+            EventRaceStatesSerializer eventRaceStatesSerializer = new EventRaceStatesSerializer(filterByCourseArea,
+                    filterByLeaderboard, filterByDayOffset);
+            JSONObject raceStatesJson = eventRaceStatesSerializer.serialize(new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
+            String json = raceStatesJson.toJSONString();
+            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+        }
+        return response;
     }
 }
  
