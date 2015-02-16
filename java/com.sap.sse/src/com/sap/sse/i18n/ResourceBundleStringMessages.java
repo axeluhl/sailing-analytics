@@ -6,6 +6,16 @@ import java.util.Map;
 
 /**
  * Allow server-side internationalization similar to GWT client-side by using property files.
+ * 
+ * Get Locale in GWT-Context by calling
+ * <pre>
+ * LocaleInfo.getCurrentLocale().getLocaleName();
+ * </pre>
+ * 
+ * Then transform back to {@link Locale} on server by calling
+ * <pre>
+ * ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+ * </pre>
  */
 public interface ResourceBundleStringMessages {
 

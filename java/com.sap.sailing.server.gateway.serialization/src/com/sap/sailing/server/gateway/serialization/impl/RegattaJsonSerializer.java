@@ -49,7 +49,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
 
         if(competitorSerializer != null) {
             JSONArray competitorsJson = new JSONArray();
-            for (Competitor competitor: regatta.getCompetitors()) {
+            for (Competitor competitor: regatta.getAllCompetitors()) {
                 competitorsJson.add(competitorSerializer.serialize(competitor));
             }
             result.put(FIELD_COMPETITORS, competitorsJson);

@@ -49,8 +49,8 @@ public class RaceLogSerializationTest {
     private JsonDeserializer<RaceLogEvent> deserializer;
     private final AbstractLogEventAuthor author = new LogEventAuthorImpl("test", 0);
     private static final Competitor competitor = new CompetitorImpl("a", "b", null,
-            new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null),
-            new BoatImpl("a", new BoatClassImpl("a", true), "abc"));
+            null,
+            new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null), new BoatImpl("a", new BoatClassImpl("a", true), "abc"));
     
     @Before
     public void setup() {

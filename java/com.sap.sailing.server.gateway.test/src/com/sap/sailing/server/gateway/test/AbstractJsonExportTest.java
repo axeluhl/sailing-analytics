@@ -89,11 +89,11 @@ public abstract class AbstractJsonExportTest {
         BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
         for (int i = 1; i <= numberOfCompetitorsToCreate; i++) {
             String competitorName = "C" + i;
-            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
-                    new PersonImpl(competitorName, new NationalityImpl("GER"),
-                            /* dateOfBirth */ null, "This is famous "+competitorName)),
-                            new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
+            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, null, new TeamImpl("STG", Collections.singleton(
+                                    new PersonImpl(competitorName, new NationalityImpl("GER"),
+                                            /* dateOfBirth */ null, "This is famous "+competitorName)),
+                                            new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
+                                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
                                     boatClass, null)); 
             result.add(competitor);
         }
