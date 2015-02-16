@@ -19,7 +19,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.impl.Activator;
-import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.UserManagementException;
 
 public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
