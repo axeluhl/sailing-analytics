@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/login_backdrop" />
+        android:src="@drawable/backdrop" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -39,7 +39,7 @@
         android:layout_marginBottom="@dimen/default_margin"
         android:text="@string/login_text"
         android:textColor="@color/white"
-        android:textSize="@dimen/textsize_big" />
+        android:textSize="@dimen/textSize_40" />
 
     <TextView
         android:id="@+id/backdrop_subtitle"
@@ -54,7 +54,7 @@
         android:drawableStart="@drawable/ic_assignment_white_48dp"
         android:text="@string/login_sub_text"
         android:textColor="@color/white"
-        android:textSize="@dimen/textsize_big"/>
+        android:textSize="@dimen/textSize_40" />
 
     <ImageView
         android:id="@+id/settings_button"
@@ -74,5 +74,5 @@
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/orange" />
+        android:background="@color/sap_yellow_1" />
 </RelativeLayout>

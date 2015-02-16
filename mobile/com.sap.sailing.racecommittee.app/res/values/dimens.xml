@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="navigation_drawer_image_height">200dp</dimen>
+    <dimen name="navigation_drawer_image_height">160dp</dimen>
     <dimen name="navigation_drawer_width">300dp</dimen>
     <dimen name="navigation_drawer_right_box">150dp</dimen>
 
-    <dimen name="listview_side_padding">100dp</dimen>
-    <dimen name="listview_row_padding">20dp</dimen>
-    <dimen name="listview_row_height">100dp</dimen>
+    <dimen name="listView_side_padding">100dp</dimen>
+    <dimen name="listView_row_padding">20dp</dimen>
+    <dimen name="listView_row_height">100dp</dimen>
     <dimen name="selector_header_height">100dp</dimen>
 
     <dimen name="preference_margin">0dp</dimen>
@@ -15,8 +15,13 @@
     <dimen name="thin_line">1dp</dimen>
     <dimen name="thick_line">2dp</dimen>
 
-    <dimen name="textsize_normal">30sp</dimen>
-    <dimen name="textsize_big">40sp</dimen>
+    <dimen name="textSize_18">18sp</dimen>
+    <dimen name="textSize_20">20sp</dimen>
+    <dimen name="textSize_22">22sp</dimen>
+    <dimen name="textSize_26">26sp</dimen>
+    <dimen name="textSize_32">32sp</dimen>
+    <dimen name="textSize_40">40sp</dimen>
+    <dimen name="textSize_72">72sp</dimen>
 
     <dimen name="setup_text_width">150dp</dimen>
 
@@ -29,7 +34,7 @@
     <dimen name="default_margin_twice">@dimen/default_padding_twice</dimen>
 
     <dimen name="side_button_width">200dp</dimen>
-    <dimen name="side_button_textsize">20sp</dimen>
-    <dimen name="side_button_image_size">100dp</dimen>
+    <dimen name="side_button_textSize">20sp</dimen>
+    <dimen name="side_button_imageSize">100dp</dimen>
 
 </resources>

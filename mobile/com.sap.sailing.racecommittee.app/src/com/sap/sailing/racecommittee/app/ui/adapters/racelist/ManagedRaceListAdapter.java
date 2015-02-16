@@ -290,10 +290,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 race_unscheduled.setVisibility(View.GONE);
             }
             if (race_name != null) {
-                race_name.setTextColor(getContext().getResources().getColor(R.color.grey_light));
+                race_name.setTextColor(getContext().getResources().getColor(R.color.sap_light_gray));
             }
             if (group_name != null) {
-                group_name.setTextColor(getContext().getResources().getColor(R.color.grey_light));
+                group_name.setTextColor(getContext().getResources().getColor(R.color.sap_light_gray));
             }
         }
     }
@@ -310,7 +310,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             TimePoint changeAt = flagPoleState.getNextStateValidFrom();
             FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
 
-            current_flag.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 1));
+            current_flag.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 48));
             String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
             flag_timer.setText(text.replace("-", ""));
             Resources resources = getContext().getResources();

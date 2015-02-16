@@ -7,7 +7,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="@color/grey_dark">
+        android:background="@color/sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -29,8 +29,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/gate_start_pathfinder"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/textSize_26" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -45,7 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/line_top"
-        android:background="@color/grey">
+        android:background="@color/sap_gray_black_30">
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -63,20 +63,22 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Nationality" />
+                    android:text="Nationality"
+                    android:textSize="@dimen/textSize_18" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Number" />
+                    android:text="Number"
+                    android:textSize="@dimen/textSize_18" />
 
                 <View
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_marginLeft="@dimen/default_margin"
                     android:layout_marginRight="@dimen/default_margin"
-                    android:layout_marginLeft="@dimen/default_margin"/>
+                    android:layout_weight="1" />
             </LinearLayout>
 
             <LinearLayout
@@ -86,24 +88,24 @@
                 android:orientation="horizontal">
 
                 <EditText
+                    android:id="@+id/pathfinder_nat"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="@color/white"
-                    android:id="@+id/pathfinder_nat"
                     android:hint="Nationality"
-                    android:inputType="textCapCharacters" />
+                    android:inputType="textCapCharacters"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/textSize_26" />
 
                 <EditText
+                    android:id="@+id/pathfinder_num"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="@color/white"
                     android:hint="Number"
-                    android:id="@+id/pathfinder_num"
-                    android:inputType="number" />
+                    android:inputType="number"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/textSize_26" />
 
                 <Button
                     android:id="@+id/set_path_finder"
@@ -112,11 +114,12 @@
                     android:layout_marginLeft="@dimen/default_margin"
                     android:layout_marginRight="@dimen/default_margin"
                     android:layout_weight="1"
-                    android:background="@color/blue_light"
+                    android:background="@color/sap_blue_1"
+                    android:enabled="false"
                     android:text="Set Pathfinder"
                     android:textAllCaps="true"
-                    android:enabled="false"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
+                    android:textSize="@dimen/textSize_22"
+                    android:textStyle="bold" />
             </LinearLayout>
         </RelativeLayout>
     </RelativeLayout>

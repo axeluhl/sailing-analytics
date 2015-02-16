@@ -113,7 +113,7 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
                         mStartModeValue.setText(flag.name());
                     }
                     if (mStartModeFlag != null) {
-                        mStartModeFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.name(), 1));
+                        mStartModeFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.name(), 48));
                     }
                 }
                 if (mStartProcedureValue != null) {

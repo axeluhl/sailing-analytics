@@ -36,5 +36,5 @@
         android:layout_toStartOf="@id/nav_button"
         android:padding="10dp"
         android:text="@string/nav_header"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textSize="@dimen/textSize_32" />
 </RelativeLayout>

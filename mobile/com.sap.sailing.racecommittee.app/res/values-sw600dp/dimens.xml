@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="navigation_drawer_image_height">300dp</dimen>
+    <dimen name="navigation_drawer_image_height">160dp</dimen>
     <dimen name="navigation_drawer_width">400dp</dimen>
 	<dimen name="navigation_drawer_right_box">150dp</dimen>
 	
-	<dimen name="listview_side_padding">100dp</dimen>
-	<dimen name="listview_row_padding">20dp</dimen>
+	<dimen name="listView_side_padding">100dp</dimen>
+	<dimen name="listView_row_padding">20dp</dimen>
     
 	<dimen name="preference_margin">0dp</dimen>
 	

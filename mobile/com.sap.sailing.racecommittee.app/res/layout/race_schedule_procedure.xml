@@ -7,7 +7,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="@color/grey_dark">
+        android:background="@color/sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -29,8 +29,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/start_procedure"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/textSize_26" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -46,8 +46,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/line_top"
+        android:background="@color/sap_gray_black_30"
         android:divider="@null"
-        android:dividerHeight="0dp"
-        android:background="@color/grey"/>
-
+        android:dividerHeight="0dp" />
 </RelativeLayout>

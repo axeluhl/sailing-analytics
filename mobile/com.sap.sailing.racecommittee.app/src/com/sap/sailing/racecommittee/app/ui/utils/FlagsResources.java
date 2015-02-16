@@ -2,208 +2,96 @@ package com.sap.sailing.racecommittee.app.ui.utils;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 
 public class FlagsResources {
 
-    private static int getResId(String res, int size) {
+    private static int getResId(Context context, String res, int size) {
+        String fileName;
+
         switch (Flags.valueOf(res)) {
             case AP:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_ap_48dp;
-
-                    case 3:
-                        return R.drawable.flag_ap_96dp;
-
-                    default:
-                        return R.drawable.flag_ap_64dp;
-                }
+                fileName = "flag_ap_" + size + "dp";
+                break;
 
             case BLACK:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_black_48dp;
-
-                    case 3:
-                        return R.drawable.flag_black_96dp;
-
-                    default:
-                        return R.drawable.flag_black_64dp;
-                }
+                fileName = "flag_black_" + size + "dp";
+                break;
 
             case BRAVO:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_bravo_48dp;
-
-                    case 3:
-                        return R.drawable.flag_bravo_96dp;
-
-                    default:
-                        return R.drawable.flag_bravo_64dp;
-                }
+                fileName = "flag_bravo_" + size + "dp";
+                break;
 
             case BLUE:
-                switch (size){
-                    case 1:
-                        return R.drawable.flag_blue_48dp;
-
-                    case 3:
-                        return R.drawable.flag_blue_96dp;
-
-                    default:
-                        return R.drawable.flag_blue_64dp;
-                }
+                fileName = "flag_blue_" + size + "dp";
+                break;
 
             case CLASS:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_class_48dp;
-
-                    case 3:
-                        return R.drawable.flag_class_96dp;
-
-                    default:
-                        return R.drawable.flag_class_64dp;
-                }
+                fileName = "flag_class_" + size + "dp";
+                break;
 
             case ESSONE:
-                return R.drawable.one_min_flag;
+                fileName = "one_min_flag";
+                break;
 
             case ESSTHREE:
-                return R.drawable.three_min_flag;
+                fileName = "three_min_flag";
+                break;
 
             case ESSTWO:
-                return R.drawable.two_min_flag;
+                fileName = "two_min_flag";
+                break;
 
             case FIRSTSUBSTITUTE:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_first_substitute_48dp;
-
-                    case 3:
-                        return R.drawable.flag_first_substitute_96dp;
-
-                    default:
-                        return R.drawable.flag_first_substitute_64dp;
-                }
+                fileName = "flag_first_substitute_" + size + "dp";
+                break;
 
             case FOXTROTT:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_foxtrott_48dp;
-
-                    case 3:
-                        return R.drawable.flag_foxtrott_96dp;
-
-                    default:
-                        return R.drawable.flag_foxtrott_64dp;
-                }
+                fileName = "flag_foxtrott_" + size + "dp";
+                break;
 
             case GOLF:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_golf_48dp;
-
-                    case 3:
-                        return R.drawable.flag_golf_96dp;
-
-                    default:
-                        return R.drawable.flag_golf_64dp;
-                }
+                fileName = "flag_golf_" + size + "dp";
+                break;
 
             case HOTEL:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_hotel_48dp;
-
-                    case 3:
-                        return R.drawable.flag_hotel_96dp;
-
-                    default:
-                        return R.drawable.flag_hotel_64dp;
-                }
+                fileName = "flag_hotel_" + size + "dp";
+                break;
 
             case INDIA:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_india_48dp;
-
-                    case 3:
-                        return R.drawable.flag_india_96dp;
-
-                    default:
-                        return R.drawable.flag_india_64dp;
-                }
+                fileName = "flag_india_" + size + "dp";
+                break;
 
             case JURY:
-                return R.drawable.jury_flag;
+                fileName = "juri_flag";
+                break;
 
             case NOVEMBER:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_november_48dp;
-
-                    case 3:
-                        return R.drawable.flag_november_96dp;
-
-                    default:
-                        return R.drawable.flag_november_64dp;
-                }
+                fileName = "flag_november_" + size + "dp";
+                break;
 
             case PAPA:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_papa_48dp;
-
-                    case 3:
-                        return R.drawable.flag_papa_96dp;
-
-                    default:
-                        return R.drawable.flag_papa_64dp;
-                }
+                fileName = "flag_papa_" + size + "dp";
+                break;
 
             case XRAY:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_xray_48dp;
-
-                    case 3:
-                        return R.drawable.flag_xray_96dp;
-
-                    default:
-                        return R.drawable.flag_xray_64dp;
-                }
+                fileName = "flag_xray_" + size + "dp";
+                break;
 
             case ZULU:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_zulu_48dp;
-
-                    case 3:
-                        return R.drawable.flag_zulu_96dp;
-
-                    default:
-                        return R.drawable.flag_zulu_64dp;
-                }
+                fileName = "flag_zulu_" + size + "dp";
+                break;
 
             default:
-                switch (size) {
-                    case 1:
-                        return R.drawable.flag_alpha_48dp;
-
-                    case 3:
-                        return R.drawable.flag_alpha_96dp;
-
-                    default:
-                        return R.drawable.flag_alpha_64dp;
-                }
+                fileName = "flag_alpha_32dp";
         }
+
+        return context.getResources().getIdentifier(fileName, "drawable", context.getPackageName());
     }
 
     public static Drawable getFlagDrawable(Context context, String flag, int size) {
-        return context.getResources().getDrawable(FlagsResources.getResId(flag, size));
+        return context.getResources().getDrawable(FlagsResources.getResId(context, flag, size));
     }
 }

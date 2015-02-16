@@ -7,7 +7,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="@color/grey_dark">
+        android:background="@color/sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -30,8 +30,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/set_time"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/textSize_26" />
         </LinearLayout>
 
         <TextView
@@ -61,8 +61,8 @@
                 android:tag="5"
                 android:text="Start in 5 Min"
                 android:textAllCaps="true"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/textSize_22" />
 
             <Button
                 android:id="@+id/start_min_one"
@@ -72,8 +72,8 @@
                 android:tag="1"
                 android:text="Start in 1 Min"
                 android:textAllCaps="true"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/textSize_22" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -87,8 +87,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/grey"
-        android:layout_below="@id/line_top">
+        android:layout_below="@id/line_top"
+        android:background="@color/sap_gray_black_30">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -115,12 +115,12 @@
             android:layout_alignParentRight="true"
             android:layout_centerInParent="true"
             android:layout_margin="@dimen/default_margin_twice"
-            android:background="@color/blue_light"
+            android:background="@color/sap_blue_1"
             android:padding="@dimen/default_padding"
             android:text="Set Start"
             android:textAllCaps="true"
-            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white"
+            android:textSize="@dimen/textSize_22"
             android:textStyle="bold" />
     </RelativeLayout>
 </RelativeLayout>

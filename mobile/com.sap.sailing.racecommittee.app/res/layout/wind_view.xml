@@ -12,7 +12,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="@color/grey_dark">
+        android:background="@color/sap_gray">
 
         <TextView
             android:id="@+id/wind_sensor"
@@ -83,7 +83,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header"
-        android:background="@color/grey">
+        android:background="@color/sap_gray_black_30">
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -100,7 +100,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_gravity="center_horizontal"
                 android:layout_margin="@dimen/default_margin_half"
-                android:background="@color/blue_light"
+                android:background="@color/sap_blue_1"
                 android:padding="@dimen/default_padding_half"
                 android:text="@string/wind_set_data"
                 android:textAllCaps="true"
@@ -114,12 +114,12 @@
                 android:layout_centerHorizontal="true"
                 android:layout_gravity="center_horizontal"
                 android:layout_margin="@dimen/default_margin_half"
-                android:background="@color/blue_light"
+                android:background="@color/sap_blue_1"
                 android:padding="@dimen/default_padding_half"
                 android:text="@string/wind_set_position"
                 android:textAllCaps="true"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -230,7 +230,7 @@
                                 android:singleLine="true"
                                 android:textAppearance="?android:attr/textAppearanceLarge"
                                 android:textColor="@color/black"
-                                android:textColorHint="@color/grey_light"/>
+                                android:textColorHint="@color/sap_light_gray" />
                         </RelativeLayout>
 
                         <RelativeLayout

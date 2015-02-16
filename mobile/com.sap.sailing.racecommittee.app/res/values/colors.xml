@@ -1,34 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="white">#FFFFFF</color>
-    <color name="white_transparent">#55FFFFFF</color>
+    <!-- color definition by Make Studio -->
+    <color name="white">#ffffff</color>
+    <color name="sap_light_gray">#929292</color>
+    <color name="sap_gray">#333333</color>
+    <color name="sap_gray_white_10">#474747</color>
+    <color name="sap_gray_black_20">#2a2a2a</color>
+    <color name="sap_gray_black_30">#242424</color>
+    <color name="sap_gray_black_40">#1f1f1f</color>
+    <color name="black">#000000</color>
+    <color name="sap_yellow_1">#f0ab00</color>
+    <color name="sap_red_1">#e94a1b</color>
+    <color name="sap_blue_1">#008fcc</color>
+    <!-- color definition end -->
 
-    <color name="black">#ff000000</color>
-    <color name="black_light">#ff242424</color>
-    <color name="black_transparent">#99000000</color>
-
-    <color name="red">#ffff0000</color>
-
-    <color name="green">#ff00ff00</color>
-
-    <color name="blue">#ff0000ff</color>
-    <color name="blue_light">#ff028fcc</color>
-    <color name="blue_light_trans">#7f028fcc</color>
-
-    <color name="grey_light">#ff929292</color>
-    <color name="grey">#ff242424</color>
-    <color name="grey_dark">#ff333333</color>
-
-    <color name="orange_light">#fff0ab00</color>
-    <color name="orange">#ffe79b1d</color>
-    <color name="orange_dark">#ffde892d</color>
-
+    <!-- default color -->
     <color name="colorPrimary">@color/black</color>
     <color name="colorPrimaryDark">@color/black</color>
-    <color name="colorAccent">@color/red</color>
+    <color name="colorAccent">@color/sap_red_1</color>
+    <!-- default color end -->
 
-    <color name="colorGreyDark">#ffcccccc</color>
-    <color name="colorGrey">#ffe5e5e5</color>
+    <color name="black_light">#ff242424</color>
+    <color name="black_transparent">#99000000</color>
 
 </resources>

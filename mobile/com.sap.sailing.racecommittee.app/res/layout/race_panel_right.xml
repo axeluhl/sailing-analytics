@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_dark">
+            android:background="@color/sap_gray">
 
             <ImageView
                 android:id="@+id/abandon_flags_marker"
@@ -25,8 +25,8 @@
                 android:background="@color/black" />
 
             <ImageView
-                android:layout_width="@dimen/side_button_image_size"
-                android:layout_height="@dimen/side_button_image_size"
+                android:layout_width="@dimen/side_button_imageSize"
+                android:layout_height="@dimen/side_button_imageSize"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:src="@drawable/flags_abandon" />
@@ -38,7 +38,7 @@
                 android:layout_marginBottom="@dimen/default_margin"
                 android:gravity="center_horizontal"
                 android:text="@string/flags_abandon"
-                android:textSize="@dimen/side_button_textsize" />
+                android:textSize="@dimen/textSize_22" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -46,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_dark">
+            android:background="@color/sap_gray">
 
             <ImageView
                 android:id="@+id/recall_flags_marker"
@@ -56,8 +56,8 @@
                 android:background="@color/black" />
 
             <ImageView
-                android:layout_width="@dimen/side_button_image_size"
-                android:layout_height="@dimen/side_button_image_size"
+                android:layout_width="@dimen/side_button_imageSize"
+                android:layout_height="@dimen/side_button_imageSize"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:src="@drawable/flags_recall" />
@@ -69,7 +69,7 @@
                 android:layout_marginBottom="@dimen/default_margin"
                 android:gravity="center_horizontal"
                 android:text="@string/flags_recall"
-                android:textSize="@dimen/side_button_textsize" />
+                android:textSize="@dimen/textSize_22" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -77,7 +77,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_dark">
+            android:background="@color/sap_gray">
 
             <ImageView
                 android:id="@+id/postpone_flags_marker"
@@ -87,8 +87,8 @@
                 android:background="@color/black" />
 
             <ImageView
-                android:layout_width="@dimen/side_button_image_size"
-                android:layout_height="@dimen/side_button_image_size"
+                android:layout_width="@dimen/side_button_imageSize"
+                android:layout_height="@dimen/side_button_imageSize"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:src="@drawable/flags_postpone" />
@@ -100,7 +100,7 @@
                 android:layout_marginBottom="@dimen/default_margin"
                 android:gravity="center_horizontal"
                 android:text="@string/flags_postpone"
-                android:textSize="@dimen/side_button_textsize" />
+                android:textSize="@dimen/textSize_22" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -108,7 +108,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_dark">
+            android:background="@color/sap_gray">
 
             <ImageView
                 android:id="@+id/course_flags_marker"
@@ -118,8 +118,8 @@
                 android:background="@color/black" />
 
             <ImageView
-                android:layout_width="@dimen/side_button_image_size"
-                android:layout_height="@dimen/side_button_image_size"
+                android:layout_width="@dimen/side_button_imageSize"
+                android:layout_height="@dimen/side_button_imageSize"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:src="@drawable/flags_course" />
@@ -131,7 +131,7 @@
                 android:layout_marginBottom="@dimen/default_margin"
                 android:gravity="center_horizontal"
                 android:text="@string/flags_course"
-                android:textSize="@dimen/side_button_textsize" />
+                android:textSize="@dimen/textSize_22" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -139,7 +139,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_dark">
+            android:background="@color/sap_gray">
 
             <ImageView
                 android:id="@+id/more_flags_marker"
@@ -149,8 +149,8 @@
                 android:background="@color/black" />
 
             <ImageView
-                android:layout_width="@dimen/side_button_image_size"
-                android:layout_height="@dimen/side_button_image_size"
+                android:layout_width="@dimen/side_button_imageSize"
+                android:layout_height="@dimen/side_button_imageSize"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:src="@drawable/flags_more" />
@@ -162,7 +162,7 @@
                 android:layout_marginBottom="@dimen/default_margin"
                 android:gravity="center_horizontal"
                 android:text="@string/flags_more"
-                android:textSize="@dimen/side_button_textsize" />
+                android:textSize="@dimen/textSize_22" />
         </RelativeLayout>
     </LinearLayout>
 
@@ -172,5 +172,4 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:background="@color/black" />
-
 </RelativeLayout>

@@ -54,7 +54,7 @@ public class StartProcedureAdapter extends BaseAdapter implements OnClickListene
         TextView startProcedure = ViewHolder.get(convertView, R.id.start_procedure);
         if (startProcedure != null) {
             startProcedure.setText(getItem(position).toString());
-            startProcedure.setTextColor(mContext.getResources().getColor(R.color.grey_light));
+            startProcedure.setTextColor(mContext.getResources().getColor(R.color.sap_light_gray));
             if (getItem(position).isChecked()) {
                 startProcedure.setTextColor(mContext.getResources().getColor(R.color.white));
             }

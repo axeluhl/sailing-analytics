@@ -12,25 +12,27 @@
         layout="@layout/race_panel_right" />
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_toEndOf="@id/panel_left"
         android:layout_toLeftOf="@id/panel_right"
         android:layout_toRightOf="@id/panel_left"
         android:layout_toStartOf="@id/panel_right"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:orientation="vertical">
+
         <include
             android:id="@+id/content_header"
-            layout="@layout/race_content_header"
-            android:layout_height="0dp"
             android:layout_width="match_parent"
-            android:layout_weight="1"/>
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            layout="@layout/race_content_header" />
 
-        <LinearLayout android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="3"
-            android:orientation="vertical"
-            android:background="@color/grey">
+            android:background="@color/sap_gray_black_30"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"

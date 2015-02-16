@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <RelativeLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="@color/grey_dark">
+        android:background="@color/sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -29,8 +29,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/gate_start_timing"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/textSize_26" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -42,10 +42,10 @@
         android:background="@color/black" />
 
     <RelativeLayout
-        android:layout_below="@id/line_top"
-        android:background="@color/grey"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/line_top"
+        android:background="@color/sap_gray_black_30">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -67,19 +67,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="@string/time_launch"/>
+                        android:text="@string/time_launch"
+                        android:textSize="@dimen/textSize_18" />
 
                     <NumberPicker
                         android:id="@+id/time_launch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content" />
                 </LinearLayout>
 
                 <TextView
-                    android:text="+"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"/>
+                    android:layout_gravity="center_vertical"
+                    android:text="+"
+                    android:textSize="@dimen/textSize_18" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -88,30 +90,33 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:text="@string/time_golf"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"/>
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/time_golf"
+                        android:textSize="@dimen/textSize_18" />
 
                     <NumberPicker
                         android:id="@+id/time_golf"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content" />
                 </LinearLayout>
             </LinearLayout>
 
             <Button
                 android:id="@+id/set_gate_time"
-                android:text="Set Gate Time"
-                android:textAllCaps="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:background="@color/blue_light"
-                android:padding="@dimen/default_padding"
-                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_marginLeft="@dimen/default_margin"
                 android:layout_marginRight="@dimen/default_margin"
-                android:layout_marginLeft="@dimen/default_margin"/>
+                android:background="@color/sap_blue_1"
+                android:padding="@dimen/default_padding"
+                android:text="Set Gate Time"
+                android:textAllCaps="true"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="@dimen/textSize_22"
+                android:textStyle="bold" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

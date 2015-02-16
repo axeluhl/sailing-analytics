@@ -13,7 +13,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_dark">
+            android:background="@color/sap_gray">
 
             <ImageView
                 android:id="@+id/start_procedure_marker"
@@ -33,7 +33,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/start_procedure"
                     android:textAllCaps="true"
-                    android:textSize="@dimen/side_button_textsize" />
+                    android:textSize="@dimen/textSize_20" />
 
                 <ImageView
                     android:id="@+id/start_procedure_lock"
@@ -55,7 +55,7 @@
                 android:gravity="center_horizontal"
                 android:text="@string/start_procedure_line_start"
                 android:textColor="@color/white"
-                android:textSize="@dimen/side_button_textsize" />
+                android:textSize="@dimen/textSize_22" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_dark">
+            android:background="@color/sap_gray">
 
             <ImageView
                 android:id="@+id/start_mode_marker"
@@ -83,7 +83,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/start_mode"
                     android:textAllCaps="true"
-                    android:textSize="@dimen/side_button_textsize" />
+                    android:textSize="@dimen/textSize_20" />
 
                 <ImageView
                     android:id="@+id/start_mode_lock"
@@ -109,7 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_dark">
+            android:background="@color/sap_gray">
 
             <ImageView
                 android:id="@+id/course_marker"
@@ -129,7 +129,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/course"
                     android:textAllCaps="true"
-                    android:textSize="@dimen/side_button_textsize" />
+                    android:textSize="@dimen/textSize_20" />
 
                 <ImageView
                     android:id="@+id/course_lock"
@@ -146,7 +146,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_dark">
+            android:background="@color/sap_gray">
 
             <ImageView
                 android:id="@+id/wind_marker"
@@ -166,7 +166,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/wind"
                     android:textAllCaps="true"
-                    android:textSize="@dimen/side_button_textsize" />
+                    android:textSize="@dimen/textSize_20" />
 
                 <ImageView
                     android:id="@+id/wind_lock"
@@ -188,7 +188,7 @@
                 android:gravity="center_horizontal"
                 android:text="@string/wind_unknown"
                 android:textColor="@color/white"
-                android:textSize="@dimen/side_button_textsize" />
+                android:textSize="@dimen/textSize_22" />
         </RelativeLayout>
     </LinearLayout>
 

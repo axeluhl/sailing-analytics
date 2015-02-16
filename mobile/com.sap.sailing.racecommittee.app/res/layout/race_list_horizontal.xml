@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey"
+    android:background="@color/sap_gray_black_30"
+    android:baselineAligned="false"
     android:fitsSystemWindows="true"
     android:orientation="horizontal">
 
@@ -17,5 +18,4 @@
         android:layout_height="match_parent"
         android:layout_weight="2"
         layout="@layout/race_list_list" />
-
 </LinearLayout>

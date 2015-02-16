@@ -125,8 +125,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mAdapter.notifyDataSetChanged();
 
         if (mCurrent != null && mAll != null) {
-            int colorGrey = getResources().getColor(R.color.grey_light);
-            int colorOrange = getResources().getColor(R.color.orange);
+            int colorGrey = getResources().getColor(R.color.sap_light_gray);
+            int colorOrange = getResources().getColor(R.color.sap_yellow_1);
             mCurrent.setTextColor(colorGrey);
             mAll.setTextColor(colorGrey);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {

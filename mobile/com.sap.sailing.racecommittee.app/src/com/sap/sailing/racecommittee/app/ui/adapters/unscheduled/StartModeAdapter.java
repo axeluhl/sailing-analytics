@@ -55,13 +55,13 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
         StartMode startMode = getItem(position);
         ImageView flag = ViewHolder.get(convertView, R.id.flag);
         if (flag != null) {
-            flag.setImageDrawable(FlagsResources.getFlagDrawable(mContext, startMode.getFlagName(), 2));
+            flag.setImageDrawable(FlagsResources.getFlagDrawable(mContext, startMode.getFlagName(), 64));
         }
 
         TextView flagName = ViewHolder.get(convertView, R.id.flag_name);
         if (flagName != null) {
             flagName.setText(startMode.getFlagName());
-            flagName.setTextColor(mContext.getResources().getColor(R.color.grey_light));
+            flagName.setTextColor(mContext.getResources().getColor(R.color.sap_light_gray));
             if (startMode.isChecked()) {
                 flagName.setTextColor(mContext.getResources().getColor(R.color.white));
             }

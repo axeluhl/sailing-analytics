@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/listview_row_height"
-    android:paddingEnd="@dimen/listview_row_padding"
-    android:paddingLeft="@dimen/listview_row_padding"
-    android:paddingRight="@dimen/listview_row_padding"
-    android:paddingStart="@dimen/listview_row_padding"
-    android:paddingTop="@dimen/listview_row_padding">
+    android:layout_height="@dimen/listView_row_height"
+    android:paddingEnd="@dimen/listView_row_padding"
+    android:paddingLeft="@dimen/listView_row_padding"
+    android:paddingRight="@dimen/listView_row_padding"
+    android:paddingStart="@dimen/listView_row_padding"
+    android:paddingTop="@dimen/listView_row_padding">
 
     <ImageView
         android:id="@+id/set_path_finder"
@@ -42,6 +42,5 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_alignParentBottom="true"
-        android:background="@color/grey_dark" />
-
+        android:background="@color/sap_gray" />
 </RelativeLayout>

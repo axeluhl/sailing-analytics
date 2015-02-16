@@ -146,7 +146,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         if (lastSelected != null) {
             textView = (TextView) lastSelected.findViewById(R.id.list_item_subtitle);
             if (textView != null) {
-                textView.setTextColor(getResources().getColor(R.color.grey_light));
+                textView.setTextColor(getResources().getColor(R.color.sap_light_gray));
             }
 
             imageView = (ImageView) lastSelected.findViewById(R.id.checked);
