@@ -138,6 +138,11 @@ public class MailServiceImpl implements ReplicableMailService {
         apply(s -> s.internalSendMail(toAddress, subject, multipartContent));
     }
 
+    @Override
+    public void clearState() throws Exception {
+        // nothing to clear for test support
+    }
+
     // ----------------- Replication -------------
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
