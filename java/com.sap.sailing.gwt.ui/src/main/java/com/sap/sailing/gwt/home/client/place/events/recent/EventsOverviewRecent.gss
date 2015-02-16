@@ -7,24 +7,33 @@
 .eventsoverviewnavigation .gridalternator {
   overflow: visible;
 }
+.accordion {
+  font-size: 1rem;
+}
+.accordion_trigger {
+  font-size: inherit;
+}
+.accordion_content {
+  font-size: inherit;
+}
 .eventsoverviewrecent {
   font-size: 1rem;
   padding-top: 2em;
 }
 .eventsoverviewrecent_year {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #ebebeb;
   -webkit-transition: opacity 0.1s;
      -moz-transition: opacity 0.1s;
           transition: opacity 0.1s;
 }
-.eventsoverviewrecent_year:nth-child(even) {
+.eventsoverviewrecent_year:nth-child(2n) {
   background: #f2f2f2;
 }
-.eventsoverviewrecent_year:nth-child(even) .eventsoverviewrecent_year_header:hover,
-.eventsoverviewrecent_year:nth-child(even) .eventsoverviewrecent_year_header:focus {
-  background-color: #fbfbfb;
+.eventsoverviewrecent_year:nth-child(2n) .eventsoverviewrecent_year_header:hover,
+.eventsoverviewrecent_year:nth-child(2n) .eventsoverviewrecent_year_header:focus {
+  background-color: #fafafa;
 }
-.eventsoverviewrecent_yearcollapsed .eventsoverviewrecent_year_header_info_arrow_image {
+.eventsoverviewrecent_year.accordioncollapsed .eventsoverviewrecent_year_header_info_arrow_image {
   -webkit-transform: rotate(0deg);
      -moz-transform: rotate(0deg);
       -ms-transform: rotate(0deg);
@@ -61,7 +70,7 @@
           transition: transform 0.4s;
 }
 .eventsoverviewrecent_year_header_info_item {
-  border-right: 1px solid #eee;
+  border-right: 1px solid #ebebeb;
   padding: 0.466666666666667em 1.133333333333333em;
 }
 .eventsoverviewrecent_year_header_info_item_value {

@@ -75,10 +75,10 @@ public class EventsOverviewRecentYear extends Composite {
     private void updateContentVisibility() {
         if(isContentVisible) {
             contentDiv.getStyle().clearDisplay();
-            headerDiv.getElement().removeClassName(EventsOverviewRecentResources.INSTANCE.css().eventsoverviewrecent_yearcollapsed());
+            getElement().removeClassName(EventsOverviewRecentResources.INSTANCE.css().accordioncollapsed());
         } else {
             contentDiv.getStyle().setDisplay(Display.NONE);
-            headerDiv.getElement().addClassName(EventsOverviewRecentResources.INSTANCE.css().eventsoverviewrecent_yearcollapsed());
+            getElement().addClassName(EventsOverviewRecentResources.INSTANCE.css().accordioncollapsed());
         }
     }
 }

@@ -13,10 +13,13 @@ public interface EventsOverviewRecentResources extends ClientBundle {
     public interface LocalCss extends CssResource {
         String eventsoverviewnavigation();
         String gridalternator();
+        String accordion();
+        String accordion_trigger();
+        String accordion_content();
         String eventsoverviewrecent();
         String eventsoverviewrecent_year();
         String eventsoverviewrecent_year_header();
-        String eventsoverviewrecent_yearcollapsed();
+        String accordioncollapsed();
         String eventsoverviewrecent_year_header_info_arrow_image();
         String eventsoverviewrecent_year_header_title();
         String eventsoverviewrecent_year_header_info();

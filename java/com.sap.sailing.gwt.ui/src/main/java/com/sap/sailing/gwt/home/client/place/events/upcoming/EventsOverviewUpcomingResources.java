@@ -7,20 +7,25 @@ import com.google.gwt.resources.client.CssResource;
 public interface EventsOverviewUpcomingResources extends ClientBundle {
     public static final EventsOverviewUpcomingResources INSTANCE = GWT.create(EventsOverviewUpcomingResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/place/events/upcoming/EventsOverviewUpcoming.css")
+    @Source("com/sap/sailing/gwt/home/client/place/events/upcoming/EventsOverviewUpcoming.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
+        String accordion();
+        String accordion_trigger();
+        String accordion_content();
         String eventsoverviewupcoming();
-        String eventsoverviewupcoming_teaser();
-        String eventslist();
-        String eventslist_header();
-        String eventslist_header_item();
-        String eventslist_header_itemseries();
-        String eventslist_event();
-        String eventslist_event_itemname();
-        String eventslist_event_link();
-        String eventslist_event_item();
-        String eventslist_event_itemseries();
+        String accordioncollapsed();
+        String eventsoverviewupcoming_header_info_arrow_image();
+        String eventsoverviewupcoming_header();
+        String eventsoverviewupcoming_header_info();
+        String eventsoverviewupcoming_header_info_arrow();
+        String eventsoverviewupcoming_header_info_item();
+        String eventsoverviewupcoming_header_info_item_value();
+        String eventsoverviewupcoming_content();
+        String eventsoverviewupcoming_content_event();
+        String eventsoverviewupcoming_content_event_name();
+        String eventsoverviewupcoming_content_event_location();
+        String eventsoverviewupcoming_content_event_icon();
     }
 }

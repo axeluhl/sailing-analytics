@@ -1,0 +1,83 @@
+/**
+ * The overview over upcoming events
+ */
+.accordion {
+  font-size: 1rem;
+}
+.accordion_trigger {
+  font-size: inherit;
+}
+.accordion_content {
+  font-size: inherit;
+}
+.eventsoverviewupcoming {
+  font-size: 1rem;
+}
+.eventsoverviewupcoming.accordioncollapsed .eventsoverviewupcoming_header_info_arrow_image {
+  -webkit-transform: rotate(0deg);
+     -moz-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+          transform: rotate(0deg);
+}
+.eventsoverviewupcoming_header {
+  padding-top: 0.333333333333333em;
+  padding-bottom: 0.666666666666667em;
+  cursor: pointer;
+}
+.eventsoverviewupcoming_header_info {
+  float: right;
+}
+.eventsoverviewupcoming_header_info_arrow {
+  padding: 0.466666666666667em 1.133333333333333em;
+}
+.eventsoverviewupcoming_header_info_arrow_image {
+  -webkit-transform: rotate(180deg);
+     -moz-transform: rotate(180deg);
+      -ms-transform: rotate(180deg);
+          transform: rotate(180deg);
+  -webkit-transition: -webkit-transform 0.4s;
+     -moz-transition: -moz-transform 0.4s;
+          transition: transform 0.4s;
+}
+.eventsoverviewupcoming_header_info_item {
+  border-right: 1px solid #ebebeb;
+  padding: 0.466666666666667em 1.133333333333333em;
+}
+.eventsoverviewupcoming_header_info_item_value {
+  font-weight: 700;
+  color: #008fcc;
+  margin-right: 0.533333333333333em;
+}
+.eventsoverviewupcoming_content {
+  padding-bottom: 0;
+  border-bottom: 0;
+  background: none;
+}
+.eventsoverviewupcoming_content_event {
+  height: 3.333333333333333em;
+  line-height: 3.333333333333333em;
+}
+.eventsoverviewupcoming_content_event:nth-child(odd) {
+  background: #f2f2f2;
+}
+.eventsoverviewupcoming_content_event_name {
+  font-size: 1.466666666666667em;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eventsoverviewupcoming_content_event_name:hover {
+  text-decoration: underline;
+}
+.eventsoverviewupcoming_content_event_location {
+  white-space: nowrap;
+  color: #333;
+}
+.eventsoverviewupcoming_content_event_icon {
+  text-align: center;
+}
+.eventsoverviewupcoming_content_event_icon img {
+  vertical-align: middle;
+  width: 0.533333333333333em;
+}
