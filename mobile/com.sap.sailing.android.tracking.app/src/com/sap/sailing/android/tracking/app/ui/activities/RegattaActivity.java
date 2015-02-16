@@ -350,7 +350,7 @@ public class RegattaActivity extends BaseActivity {
 				    HttpPost httppost = new HttpPost(uploadUrl);
 
 				    InputStreamEntity reqEntity = new InputStreamEntity( new FileInputStream(imageFile), -1);
-				    reqEntity.setContentType("binary/octet-stream");
+				    reqEntity.setContentType("image/jpeg");
 				    reqEntity.setChunked(true); // Send in multiple parts if needed
 				    httppost.setEntity(reqEntity);
 				    httpclient.execute(httppost);
