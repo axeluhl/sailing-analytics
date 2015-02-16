@@ -33,6 +33,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -356,11 +357,18 @@ public class RegattaActivity extends BaseActivity {
 				}
 			} catch (IOException e) {
 				ExLog.e(RegattaActivity.this, TAG, "Error uploading image: " + e.getLocalizedMessage());
-				e.printStackTrace();
 				this.cancel(true);
 			}
 
 			return "";
+		}
+		
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+			Toast.makeText(RegattaActivity.this,
+					getString(R.string.error_sending_team_image_to_server),
+					Toast.LENGTH_LONG).show();
 		}
 
 		protected void onPostExecute(String  result) {
