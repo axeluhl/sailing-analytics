@@ -1,4 +1,4 @@
-package com.sap.sse.common.qrcode;
+package com.sap.sse.qrcode;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -22,6 +22,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
  * QRCode generator based on the ZXing library.
  * 
  * TODO have a look at repackaging <a href="https://github.com/kenglxn/QRGen">QRGen</a> as OSGi bundle.
+ * 
  * @author Fredrik Teschke
  *
  */
