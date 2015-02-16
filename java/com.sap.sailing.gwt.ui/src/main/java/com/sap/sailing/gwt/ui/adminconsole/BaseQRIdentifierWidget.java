@@ -4,7 +4,6 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -13,7 +12,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.adminconsole.DeviceMappingQRCodeWidget.QRCodeURLCreationException;
+import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.QRCodeComposite;
 
@@ -90,10 +89,5 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     
     protected void setError(String text) {
         error.setText(text);
-    }
-    
-    public static String encode(String value) {
-        //pathSegment instead of queryString, so that ' ' is encoded as '%20'
-        return URL.encodePathSegment(value);
     }
 }

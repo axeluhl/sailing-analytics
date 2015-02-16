@@ -6,10 +6,14 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -274,5 +278,17 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public void removeListener(RegattaLikeListener listener) {
         regattaLikeHelper.removeListener(listener);
+    }
+    
+    @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        Set<Competitor> result = new HashSet<>();
+        for (Competitor c : super.getAllCompetitors()) {
+            result.add(c);
+        }
+        //consider {@link RegattaLog}
+        Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
+        result.addAll(viaLog);
+        return result;
     }
 }
