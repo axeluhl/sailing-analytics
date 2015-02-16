@@ -1,11 +1,15 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.util.Calendar;
+
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastFlagsFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
@@ -13,6 +17,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -64,5 +69,22 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         raceLogStateJson.put("lastUpperFlag", upperFlagName);
         raceLogStateJson.put("lastLowerFlag", lowerFlagName);
         raceLogStateJson.put("displayed", isDisplayed);
+    }
+    
+    public boolean isRaceStateOfSameDay(Pair<RaceColumn, Fleet> raceColumnAndFleet, Calendar dayToCheck) {
+        RaceColumn raceColumn = raceColumnAndFleet.getA();
+        Fleet fleet = raceColumnAndFleet.getB();
+        
+        boolean result = false;
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        if (raceLog != null && !raceLog.isEmpty()) {
+            TimePoint startTime = new StartTimeFinder(raceLog).analyze();
+            TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
+            RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();
+            TimePoint abortingTime = abortingFlagEvent != null ? abortingFlagEvent.getLogicalTimePoint() : null;
+            
+            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, abortingTime, dayToCheck);
+        }
+        return result;
     }
 }

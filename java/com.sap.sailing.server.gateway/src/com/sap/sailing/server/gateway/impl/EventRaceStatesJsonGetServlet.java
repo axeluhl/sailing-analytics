@@ -13,20 +13,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.jaxrs.api.RaceStateSerializer;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
@@ -85,8 +78,9 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
                                     String leaderboardDisplayName = leaderboard.getDisplayName();
                                     for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                                         for (Fleet fleet : raceColumn.getFleets()) {
-                                            if(!filterByDayOffset || isRaceStateOfSameDay(raceColumn, fleet, dayToCheck)) {
-                                                JSONObject raceStateJson = raceStateSerializer.serialize(new Pair<RaceColumn, Fleet>(raceColumn, fleet));
+                                            Pair<RaceColumn, Fleet> raceColumnAndFleet = new Pair<RaceColumn, Fleet>(raceColumn, fleet);
+                                            if(!filterByDayOffset || raceStateSerializer.isRaceStateOfSameDay(raceColumnAndFleet, dayToCheck)) {
+                                                JSONObject raceStateJson = raceStateSerializer.serialize(raceColumnAndFleet);
                                                 raceStateJson.put("courseAreaName", courseArea.getName());
                                                 raceStateJson.put("leaderboardName", leaderboardName);
                                                 raceStateJson.put("leaderboardDisplayName", leaderboardDisplayName);
@@ -105,20 +99,6 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         }
     }
 
-    private boolean isRaceStateOfSameDay(RaceColumn raceColumn, Fleet fleet, Calendar now) {
-        boolean result = false;
-        RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        if (raceLog != null && !raceLog.isEmpty()) {
-            TimePoint startTime = new StartTimeFinder(raceLog).analyze();
-            TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
-            RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();
-            TimePoint abortingTime = abortingFlagEvent != null ? abortingFlagEvent.getLogicalTimePoint() : null;
-            
-            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, abortingTime, now);
-        }
-        return result;
-    }
-    
     /**
      * Tries to convert the given identifier to a UUID. When the identifier is not a UUID, null is returned.
      * @param identifierToConvert the identifier as a String
