@@ -1,6 +1,7 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,6 +10,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,6 +36,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
@@ -206,7 +212,7 @@ public class RegattaActivity extends BaseActivity {
      */
     public void updateLeaderboardPictureChosenByUser(final Bitmap bitmap)
     {
-    	storeImage(bitmap, getLeaderboardImageFileName(leaderboard.name));
+    	storeImageAndSendToServer(bitmap, getLeaderboardImageFileName(leaderboard.name), true);
     	
     	runOnUiThread(new Runnable() {
 			@Override
@@ -220,10 +226,10 @@ public class RegattaActivity extends BaseActivity {
     }
     
     /**
-     * Store image for quicker retrieval later.
+     * Store image for quicker retrieval later and trigger upload to server.
      * @param images
      */
-    private void storeImage(Bitmap image, String fileName) {
+    private void storeImageAndSendToServer(Bitmap image, String fileName, boolean sendToServer) {
         File pictureFile = getImageFile(fileName);
         if (pictureFile == null) {
             Log.d(TAG,
@@ -234,6 +240,10 @@ public class RegattaActivity extends BaseActivity {
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();
+            
+            if (sendToServer) {
+            	sendTeamImageToServer(pictureFile);
+            }
         } catch (FileNotFoundException e) {
             Log.d(TAG, "File not found: " + e.getMessage());
         } catch (IOException e) {
@@ -260,10 +270,21 @@ public class RegattaActivity extends BaseActivity {
     }
     
 
-//    private File getMediaFile(){
-//    	
-//    	
-//    } 
+    /**
+     * Silently send the team image to the server.
+     * @param imageFile
+     */
+	private void sendTeamImageToServer(File imageFile) {
+		if (BuildConfig.DEBUG) {
+			ExLog.i(this, TAG, "Sending imageFile to server: " + imageFile);
+		}
+		
+		final String uploadURLStr = event.server
+				+ prefs.getServerUploadTeamImagePath().replace(
+						"{competitor_id}", competitor.id);
+
+		new UploadTeamImageTask(imageFile).execute(uploadURLStr);
+    }
     
     /**
      * Get Path for cached leaderbaord image.
@@ -311,6 +332,42 @@ public class RegattaActivity extends BaseActivity {
         return mediaStorageDir;
     }
     
+    private class UploadTeamImageTask extends AsyncTask<String, Void, String> {
+		File imageFile;
+		String uploadUrl;
+		
+		public UploadTeamImageTask(File imageFile) {
+			this.imageFile = imageFile;
+		}
+
+		protected String doInBackground(String... urls) {
+			uploadUrl = urls[0];
+
+			try {
+				if (imageFile != null) {
+					HttpClient httpclient = new DefaultHttpClient();
+				    HttpPost httppost = new HttpPost(uploadUrl);
+
+				    InputStreamEntity reqEntity = new InputStreamEntity( new FileInputStream(imageFile), -1);
+				    reqEntity.setContentType("binary/octet-stream");
+				    reqEntity.setChunked(true); // Send in multiple parts if needed
+				    httppost.setEntity(reqEntity);
+				    httpclient.execute(httppost);
+				}
+			} catch (IOException e) {
+				ExLog.e(RegattaActivity.this, TAG, "Error uploading image: " + e.getLocalizedMessage());
+				e.printStackTrace();
+				this.cancel(true);
+			}
+
+			return "";
+		}
+
+		protected void onPostExecute(String  result) {
+			// do something
+		}
+	}
+    
     
 	private class DownloadLeaderboardImageTask extends AsyncTask<String, Void, Bitmap> {
 		ImageView bmImage;
@@ -336,7 +393,7 @@ public class RegattaActivity extends BaseActivity {
 		protected void onPostExecute(Bitmap result) {
 			if (result != null) {
 				bmImage.setImageBitmap(result);
-				storeImage(result, getLeaderboardImageFileName(leaderboard.name));
+				storeImageAndSendToServer(result, getLeaderboardImageFileName(leaderboard.name), false);
 				userImageUpdated();
 			} else {
 				ExLog.e(RegattaActivity.this, TAG, "Failed to download leaderboard image at url " + downloadUrl);
@@ -373,7 +430,7 @@ public class RegattaActivity extends BaseActivity {
 			System.out.println("RESULT: " + result);
 			if (result != null) {
 				bmImage.setImageBitmap(result);
-				storeImage(result, getFlagImageFileName(countryCode));
+				storeImageAndSendToServer(result, getFlagImageFileName(countryCode), false);
 			} else {
 				ExLog.e(RegattaActivity.this, TAG, "Failed to download flag image at url " + downloadUrl);
 			}

@@ -29,6 +29,10 @@ public class AppPreferences {
                 R.string.preference_device_identifier_default);
         return DeviceIdentifier;
     }
+    
+    public String getServerUploadTeamImagePath() {
+    	 return PrefUtils.getString(context, R.string.preference_server_team_image_upload_path, R.string.preference_server_team_image_upload_path);
+    }
 
     public String getServerGpsFixesPostPath() {
         return PrefUtils.getString(context, R.string.preference_server_gps_fixes_post_path, R.string.preference_server_gps_fixes_post_path);

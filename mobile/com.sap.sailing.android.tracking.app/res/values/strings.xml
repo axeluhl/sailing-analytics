@@ -35,6 +35,7 @@
 	<string name="getting_competitor">Getting competitor information..</string>
 	<string name="error">Error</string>
 	<string name="error_could_not_complete_operation_on_server_try_again">Could not complete operation on server. Please try again.</string>
+	<string name="error_sending_team_image_to_server">Error: Could not send team image to server.</string>
 	<string name="regatta_starts_in">Regatta starts in:</string>
 	<string name="hours">Hours</string>
 	<string name="minutes">Minutes</string>

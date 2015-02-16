@@ -48,6 +48,7 @@
     <string name="getting_competitor">Hole Teilnehmer-Daten..</string>
     <string name="error">Fehler</string>
     <string name="error_could_not_complete_operation_on_server_try_again">Konnte Operation nicht durchführen. Bitte versuchen Sie es noch einmal.</string>
+    <string name="error_sending_team_image_to_server">Fehler: Konnte team-foto nicht an den server schicken.</string>
     <string name="regatta_starts_in">Regatta beginnt in:</string>
     <string name="hours">Stunden</string>
     <string name="minute">Minute</string>
