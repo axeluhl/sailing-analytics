@@ -59,11 +59,11 @@
         </div>
       </g:HTMLPanel>
       <div ui:field="contentDiv" class="{local_res.css.eventsoverviewrecent_year_content} {local_res.css.accordion_content}">
-        <g:SimplePanel ui:field="recentEventsTeaserPanel" styleName="{res.mediaCss.grid}">
+        <g:FlowPanel ui:field="recentEventsTeaserPanel" styleName="{res.mediaCss.grid}">
         <!-- EACH event in year.events -->
         <!-- <s:eventsOverviewRecent.RecentEventTeaser ui:field='event'></s> -->
         <!-- EACHEND -->
-        </g:SimplePanel>
+        </g:FlowPanel>
       </div>
   </g:HTMLPanel>
 </ui:UiBinder>

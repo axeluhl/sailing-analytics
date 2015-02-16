@@ -11,8 +11,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasOneWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.shared.recentevent.RecentEvent;
@@ -30,7 +30,7 @@ public class EventsOverviewRecentYear extends Composite {
 //    @UiField SpanElement countriesCount;
 //    @UiField SpanElement sailorsCount;
 //    @UiField SpanElement trackedRacesCount;
-    @UiField HasOneWidget recentEventsTeaserPanel;
+    @UiField FlowPanel recentEventsTeaserPanel;
     @UiField DivElement contentDiv;
     @UiField HTMLPanel headerDiv;
     
@@ -46,7 +46,7 @@ public class EventsOverviewRecentYear extends Composite {
 //        this.trackedRacesCount.setInnerText("tbd.");
         for (EventBaseDTO eventDTO : events) {
             RecentEvent recentEvent = new RecentEvent(navigator, eventDTO);
-            recentEventsTeaserPanel.setWidget(recentEvent);
+            recentEventsTeaserPanel.add(recentEvent);
         }
         isContentVisible = true;
         headerDiv.addDomHandler(new ClickHandler() {
