@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -28,6 +29,7 @@ public class EventsOverviewUpcoming extends Composite {
     
     @UiField HTMLPanel header;
     @UiField HTMLPanel eventsPlaceholder;
+    @UiField SpanElement eventsCount;
     
     private boolean isContentVisible = true;
 
@@ -54,6 +56,7 @@ public class EventsOverviewUpcoming extends Composite {
             upcomingEventComposites.add(upcomingEvent);
             eventsPlaceholder.getElement().appendChild(upcomingEvent.getElement());
         }
+        eventsCount.setInnerText(""+events.size());
     }
     
     private void onHeaderCicked() {

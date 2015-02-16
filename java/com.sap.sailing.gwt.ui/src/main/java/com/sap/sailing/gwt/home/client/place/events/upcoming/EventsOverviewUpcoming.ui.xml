@@ -14,14 +14,14 @@
           <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
             <table class="{local_res.css.eventsoverviewupcoming_header_info}">
               <tr>
-                <!-- <td>
+                <td>
                   <div class="{local_res.css.eventsoverviewupcoming_header_info_item}">
                     <span class="{local_res.css.eventsoverviewupcoming_header_info_item_value}">
                       <span ui:field="eventsCount"></span>
                       <ui:text from='{i18n.events}' />
                     </span>
                   </div>
-                </td> -->
+                </td>
                 <td>
                   <div class="{local_res.css.eventsoverviewupcoming_header_info_arrow}">
                     <img src="images/home/arrow-down-yellow.png" class="{local_res.css.eventsoverviewupcoming_header_info_arrow_image}"></img>
