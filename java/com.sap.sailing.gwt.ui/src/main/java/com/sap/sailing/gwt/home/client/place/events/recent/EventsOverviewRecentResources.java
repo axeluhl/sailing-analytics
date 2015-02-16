@@ -7,7 +7,7 @@ import com.google.gwt.resources.client.CssResource;
 public interface EventsOverviewRecentResources extends ClientBundle {
     public static final EventsOverviewRecentResources INSTANCE = GWT.create(EventsOverviewRecentResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/place/events/recent/EventsOverviewRecent.css")
+    @Source("com/sap/sailing/gwt/home/client/place/events/recent/EventsOverviewRecent.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {

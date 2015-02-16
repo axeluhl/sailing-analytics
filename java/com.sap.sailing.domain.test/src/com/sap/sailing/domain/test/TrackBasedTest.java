@@ -60,11 +60,11 @@ public abstract class TrackBasedTest {
     }
 
     public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
-                new PersonImpl(competitorName, new NationalityImpl("GER"),
-                /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
-                new NationalityImpl("NED"),
-                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
+        return new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, null, new TeamImpl("STG", Collections.singleton(
+                        new PersonImpl(competitorName, new NationalityImpl("GER"),
+                        /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
+                        new NationalityImpl("NED"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
     }
     

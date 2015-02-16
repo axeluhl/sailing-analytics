@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 import com.sap.sse.mongodb.AlreadyRegisteredException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
@@ -65,7 +66,7 @@ public class MongoDBServiceImpl implements MongoDBService {
         if (db == null) {
             Mongo mongo = mongos.get(key);
             if (mongo == null) {
-                mongo = new Mongo(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
+                mongo = new MongoClient(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
                 mongos.put(key, mongo);
             }
             db = mongo.getDB(mongoDBConfiguration.getDatabaseName());

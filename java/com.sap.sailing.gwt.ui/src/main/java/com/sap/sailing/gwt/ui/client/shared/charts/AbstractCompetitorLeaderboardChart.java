@@ -27,6 +27,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -180,7 +181,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         }));
     }
 
-    protected void clearChart() {
+    public void clearChart() {
         competitorSeries.clear();
         chart.removeAllSeries();
     }
@@ -245,7 +246,9 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                             break;
                         }
         
-                        chart.setSizeToMatchContainer();
+                        // TODO will removing the following line do harm on any usage of this abstract base class?
+                        // chart.setSizeToMatchContainer();
+                        
                         // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox
                         // positions (nativeAdjustCheckboxPosition)
                         // in the BaseChart class would not be called
@@ -296,8 +299,11 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 raceColumnNumber++;
             }
         }
-        chart.getYAxis().setMaxPadding(0.5 / maxCompetitorCount).setMinPadding(0.5 / maxCompetitorCount);
-        chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
+        setHeight();
+    }
+
+    private void setHeight() {
+        chart.setSize(chart.getOffsetWidth(), Window.getClientHeight());
     }
 
     private void fillTotalPointsSeries(
@@ -341,8 +347,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 raceColumnNumber++;
             }
         }
-        chart.getYAxis().setMaxPadding(0.5/maxCompetitorCount).setMinPadding(0.5/maxCompetitorCount);
-        chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
+        setHeight();
     }
     
     private boolean hasValidValues(List<Double> values) {

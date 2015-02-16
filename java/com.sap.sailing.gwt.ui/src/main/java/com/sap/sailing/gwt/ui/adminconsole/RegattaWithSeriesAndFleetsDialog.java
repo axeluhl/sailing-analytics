@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -12,10 +11,10 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWithSeriesAndFleetsDialog<RegattaDTO> {
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     protected TextBox nameEntryField;
     protected TextBox boatClassEntryField;
 
@@ -38,7 +37,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
 
     @Override
     protected ListEditorComposite<SeriesDTO> createSeriesEditor(Iterable<SeriesDTO> series) {
-        return new SeriesWithFleetsListEditor(series, stringMessages, resources.removeIcon(), isEnableFleetRemoval());
+        return new SeriesWithFleetsListEditor(series, stringMessages, IconResources.INSTANCE.removeIcon(), isEnableFleetRemoval());
     }
 
     protected abstract boolean isEnableFleetRemoval();

@@ -82,7 +82,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     
     private DeviceIdentifier storeAndLoad(DeviceIdentifier device, TypeBasedServiceFinderFactory forStoring, TypeBasedServiceFinderFactory forLoading) {
         createFactories(forStoring);
-        Competitor c = new CompetitorImpl("a", "a", null, null, null);
+        Competitor c = new CompetitorImpl("a", "a", null, null, null, null);
         
         raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(now(), author, device,
                 c, 0, now(), now()));

@@ -418,6 +418,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
@@ -431,7 +432,9 @@ import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.util.ServiceTrackerFactory;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
+
 
 /**
  * The server side implementation of the RPC service.
@@ -496,6 +499,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final SwissTimingReplayService swissTimingReplayService;
 
     private final QuickRanksLiveCache quickRanksLiveCache;
+    
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
@@ -503,21 +507,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             activator.setSailingService(this); // register so this service is informed when the bundle shuts down
         }
         quickRanksLiveCache = new QuickRanksLiveCache(this);
-        racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
-        replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
-        resultUrlRegistryServiceTracker = createAndOpenResultUrlRegistryServiceTracker(context);
-        swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
-        tractracAdapterTracker = createAndOpenTracTracAdapterTracker(context);
-        raceLogTrackingAdapterTracker = createAndOpenRaceLogTrackingAdapterTracker(context);
-        deviceIdentifierStringSerializationHandlerTracker = createAndOpenDeviceIdentifierStringSerializationHandlerTracker(context);
-        igtimiAdapterTracker = createAndOpenIgtimiTracker(context);
+        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
+        resultUrlRegistryServiceTracker = ServiceTrackerFactory.createAndOpen(context, ResultUrlRegistry.class);
+        swissTimingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
+        tractracAdapterTracker = ServiceTrackerFactory.createAndOpen(context, TracTracAdapterFactory.class);
+        raceLogTrackingAdapterTracker = ServiceTrackerFactory.createAndOpen(context,
+                RaceLogTrackingAdapterFactory.class);
+        deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
+                DeviceIdentifierStringSerializationHandler.class);
+        igtimiAdapterTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
         domainObjectFactory = getService().getDomainObjectFactory();
         // TODO what about passing on the mongo/domain object factory to obtain an according SwissTimingAdapterPersistence instance similar to how the tractracDomainObjectFactory etc. are created below?
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        swissTimingReplayService = getSwissTimingReplayService(context);
-        scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
+        swissTimingReplayService = ServiceTrackerFactory.createAndOpen(context, SwissTimingReplayServiceFactory.class)
+                .getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory());
+        scoreCorrectionProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context,
+                ScoreCorrectionProvider.class);
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
                 .createDomainObjectFactory(mongoObjectFactory.getDatabase(), getTracTracAdapter()
                         .getTracTracDomainFactory());
@@ -556,87 +564,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         quickRanksLiveCache.stop();
     }
 
-    protected SwissTimingReplayService getSwissTimingReplayService(BundleContext context) {
-        return createAndOpenSwissTimingReplayServiceTracker(context).getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory());
+    protected SwissTimingAdapterFactory getSwissTimingAdapterFactory() {
+        return swissTimingAdapterTracker.getService();
     }
 
     protected SwissTimingAdapter getSwissTimingAdapter() {
-        return swissTimingAdapterTracker.getService().getOrCreateSwissTimingAdapter(baseDomainFactory);
+        return getSwissTimingAdapterFactory().getOrCreateSwissTimingAdapter(baseDomainFactory);
+    }
+    
+    protected TracTracAdapterFactory getTracTracAdapterFactory() {
+        return tractracAdapterTracker.getService();
     }
 
     protected TracTracAdapter getTracTracAdapter() {
-        return tractracAdapterTracker.getService().getOrCreateTracTracAdapter(baseDomainFactory);
-    }
-
-    protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(BundleContext context) {
-        ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> result = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(
-                context, TracTracAdapterFactory.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> createAndOpenIgtimiTracker(BundleContext context) {
-        ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> result = new ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory>(
-                context, IgtimiConnectionFactory.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> createAndOpenSwissTimingAdapterTracker(
-            BundleContext context) {
-        ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> result = new ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory>(
-                context, SwissTimingAdapterFactory.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> createAndOpenSwissTimingReplayServiceTracker(
-            BundleContext context) {
-        ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> result = new ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory>(
-                context, SwissTimingReplayServiceFactory.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> createAndOpenRaceLogTrackingAdapterTracker(
-            BundleContext context) {
-        ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> result =
-        		new ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory>(
-                context, RaceLogTrackingAdapterFactory.class.getName(), null);
-        result.open();
-        return result;
+        return getTracTracAdapterFactory().getOrCreateTracTracAdapter(baseDomainFactory);
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.defaultWriteObject();
-    }
-
-    protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
-            BundleContext context) {
-        ServiceTracker<RacingEventService, RacingEventService> result = new ServiceTracker<RacingEventService, RacingEventService>(
-                context, RacingEventService.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> createAndOpenResultUrlRegistryServiceTracker(
-            BundleContext context) {
-        ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> result = new ServiceTracker<ResultUrlRegistry, ResultUrlRegistry>(
-                context, ResultUrlRegistry.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    /**
-     * Asks the OSGi system for registered score correction provider services
-     */
-    protected ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
-            BundleContext bundleContext) {
-        ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> tracker = new ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider>(bundleContext,
-                ScoreCorrectionProvider.class.getName(),
-                /* customizer */null);
-        tracker.open();
-        return tracker;
     }
 
     @Override
@@ -683,15 +628,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             hasResultsForBoatClassFromDateByEventName.put(e.getKey(), set);
         }
         return new ScoreCorrectionProviderDTO(scoreCorrectionProvider.getName(), hasResultsForBoatClassFromDateByEventName);
-    }
-
-    protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
-            BundleContext context) {
-        ServiceTracker<ReplicationService, ReplicationService> result =
-                new ServiceTracker<ReplicationService, ReplicationService>(
-                context, ReplicationService.class.getName(), null);
-        result.open();
-        return result;
     }
 
     /**
@@ -1114,10 +1050,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }.start();
             }
         }
-    }
-
-    private SwissTimingReplayService getSwissTimingReplayService() {
-        return swissTimingReplayService;
     }
 
     @Override
@@ -2239,7 +2171,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return racingEventServiceTracker.getService(); // grab the service
     }
 
-    private ReplicationService getReplicationService() {
+    protected ReplicationService getReplicationService() {
         return replicationServiceTracker.getService();
     }
     
@@ -2315,8 +2247,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return results;
     }
 
-    @Override
-    public List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
+    private List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         if (regatta != null && regatta.races != null) {
             for (RaceDTO race : regatta.races) {
@@ -2699,6 +2630,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }.start();
             }
         }
+    }
+    
+    protected SwissTimingReplayService getSwissTimingReplayService() {
+        return swissTimingReplayService;
     }
 
     @Override
@@ -4539,12 +4474,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	    DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
-                            competitor.getColor(), team, boat));
+                            competitor.getColor(), competitor.getEmail(), team, boat));
         } else {
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
-                                    .getColor(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
+                                    .getColor(), competitor.getEmail(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
         }
         return result;
     }
@@ -4737,9 +4672,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private IgtimiConnectionFactory getIgtimiConnectionFactory() {
         return igtimiAdapterTracker.getService();
     }
+    
+    protected RaceLogTrackingAdapterFactory getRaceLogTrackingAdapterFactory() {
+        return raceLogTrackingAdapterTracker.getService();
+    }
 
     protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
-        return raceLogTrackingAdapterTracker.getService().getAdapter(getBaseDomainFactory());
+        return getRaceLogTrackingAdapterFactory().getAdapter(getBaseDomainFactory());
     }
 
     @Override
@@ -5181,16 +5120,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceLog.add(event);
     }
     
-    private ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
-    createAndOpenDeviceIdentifierStringSerializationHandlerTracker(BundleContext context) {
-        ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler> tracker = 
-                new ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>(
-                        context, DeviceIdentifierStringSerializationHandler.class, null);
-        
-        tracker.open();
-        return tracker;
-    }
-    
     @Override
     public List<String> getDeserializableDeviceIdentifierTypes() {
         List<String> result = new ArrayList<String>();
@@ -5416,13 +5345,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return getService().getFileStorageManagementService().getFileStorageService(name);
     }
+    
+    private Locale getLocale(String localeInfoName) {
+        return ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+    }
 
     @Override
     public FileStorageServiceDTO[] getAvailableFileStorageServices(String localeInfoName) {
-        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
         for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
-            serviceDtos.add(FileStorageServiceDTOUtils.convert(s, locale));
+            serviceDtos.add(FileStorageServiceDTOUtils.convert(s, getLocale(localeInfoName)));
         }
         return serviceDtos.toArray(new FileStorageServiceDTO[0]);
     }
@@ -5441,14 +5373,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) {
-        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         try {
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {
                 service.testProperties();
             }
         } catch (InvalidPropertiesException e) {
-            return FileStorageServiceDTOUtils.convert(e, locale);
+            return FileStorageServiceDTOUtils.convert(e, getLocale(localeInfoName));
         }
         return null;
     }
@@ -5465,5 +5396,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (NoCorrespondingServiceRegisteredException e) {
             return null;
         }
+    }
+    
+    @Override
+    public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
+            String leaderboardName, Set<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
+        Event event = getService().getEvent(eventDto.id);
+        Set<Competitor> competitors = new HashSet<>();
+        for (CompetitorDTO c : competitorDtos) {
+            competitors.add(getCompetitor(c));
+        }
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
+                competitors, getLocale(localeInfoName));
     }
 }

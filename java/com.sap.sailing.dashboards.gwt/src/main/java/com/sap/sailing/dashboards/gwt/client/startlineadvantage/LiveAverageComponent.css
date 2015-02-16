@@ -1,0 +1,98 @@
+
+.liveAverageCompoment_panel {
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+}
+
+.liveAverageCompoment_header_container {
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	height: 35%;
+}
+
+.liveAverageCompoment_header {
+	height: 100%;
+	margin-top: 5pt;
+	line-height: 15pt;
+	vertical-align: middle;
+	font-size: 12.5pt;
+	font-family: "Arial;
+	width: 100%;
+	text-align: center;
+	overflow: visible;
+	font-weight: bold;
+}
+
+.liveAverageCompoment_live_container {
+	position: absolute;
+	top: 35%;
+	bottom: 30%;
+	right: 52%;
+	left: 0%;
+}
+
+.liveAverageCompoment_average_container {
+	position: absolute;
+	top: 35%;
+	bottom: 30%;
+	right: 0%;
+	left: 52%;
+}
+
+.liveAverageCompoment_middle_line {
+	position: absolute;
+	top: 35%;
+	height: 30pt;
+	width: 1px;
+	left: 50%;
+	background-color: black;
+	z-index: 100;
+}
+
+.liveAverageCompoment_panel_value_number {
+	font-size: 27pt;
+}
+
+.liveAverageCompoment_panel_value_unit {
+	font-size: 12pt;
+}
+
+.liveAverageCompoment_value_panel {
+	margin: 0px;
+	width: 100%;
+	height: 90%;
+	text-align: center;
+	font-family: "Arial";
+	font-weight: bolder;
+}
+
+.liveAverageCompoment_label_text {
+	margin: 0px;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	font-size: 12pt;
+	color: grey;
+	font-family: "Arial";
+}
+
+.liveAverageCompoment_liveLabelContainer {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	right: 50%;
+	height: 35%;
+}
+
+.liveAverageCompoment_averageLabelContainer {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	left: 50%;
+	height: 35%;
+}

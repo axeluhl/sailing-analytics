@@ -372,7 +372,7 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                 jsonEvent.put("boatclass", regatta.getBoatClass().getName());
             }
             JSONArray jsonCompetitors = new JSONArray();
-            for (Competitor competitor : regatta.getCompetitors()) {
+            for (Competitor competitor : regatta.getAllCompetitors()) {
                 JSONObject jsonCompetitor = new JSONObject();
                 jsonCompetitor.put("name", competitor.getName());
                 jsonCompetitor.put("sailID", competitor.getBoat()==null?"":competitor.getBoat().getSailID());

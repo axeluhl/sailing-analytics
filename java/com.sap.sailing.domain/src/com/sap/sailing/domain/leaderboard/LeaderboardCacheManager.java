@@ -116,6 +116,11 @@ public class LeaderboardCacheManager {
                 competitor.removeCompetitorChangeListener(this);
             }
         }
+
+        @Override
+        public void emailChanged(String oldEmail, String newEmail) {
+            //ignore (email not shown in leaderboard)
+        }
         
     }
     

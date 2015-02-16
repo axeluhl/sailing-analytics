@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -43,7 +42,6 @@ public class EventRegattaRaces extends AbstractEventComposite {
         regatta = new Regatta(event, timerForClientServerOffset, true, placeNavigator, pageNavigator);
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
-        StyleInjector.injectAtEnd("@media (min-width: 25em) { "+EventRegattaRacesResources.INSTANCE.mediumCss().getText()+"}");
         initWidget(uiBinder.createAndBindUi(this));
     }
     

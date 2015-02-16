@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:my="urn:import:com.sap.sailing.dashboards.gwt.client.startanalysis"
+	xmlns:mgwts="urn:import:com.googlecode.mgwt.ui.client.widget.panel.scroll"
+	xmlns:maps="urn:import:com.google.gwt.maps.client">
+
+	<ui:style
+		type='com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComponent.StartlineAnalysis'
+		src='StartlineAnalysis.css'></ui:style>
+
+	<ui:with field='res'
+		type='com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources' />
+
+	<g:HTMLPanel styleName="{style.startanalysis}">
+		<g:HTMLPanel ui:field="header" styleName="{style.panelHeader}">
+			No Starts Available
+		</g:HTMLPanel>
+		<g:Image resource="{res.left}" ui:field="leftButton"
+			styleName="{style.startanalysis_controll_header_button} {style.startanalysis_controll_header_button_left}"></g:Image>
+		<g:Image resource="{res.right}" ui:field="rightButton"
+			styleName="{style.startanalysis_controll_header_button} {style.startanalysis_controll_header_button_right}"></g:Image>
+		<g:FocusPanel ui:field="left_focus_panel" styleName="{style.left_focus_panel}"></g:FocusPanel>
+		<g:FocusPanel ui:field="right_focus_panel" styleName="{style.right_focus_panel}"></g:FocusPanel>
+		<g:HTMLPanel ui:field="startanalysis_card_container"
+			styleName="{style.startanalysis_card_container}">
+		</g:HTMLPanel>
+	</g:HTMLPanel>
+
+</ui:UiBinder>
