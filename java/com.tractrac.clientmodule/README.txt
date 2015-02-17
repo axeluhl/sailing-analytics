@@ -17,6 +17,21 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
  
 ********************************************
+************* TracAPI 3.0.10 ***************
+******************************************** 
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 17/02/2015
+Build number: 9938
+ 
+ 1) Bugs
+ 
+ - It fixes the same bug described in the release 3.0.9 that it was not fixed. The release 3.0.9 fixed
+ the synchronization issue between different threads but the ConcurrentModificationException happens
+ when the same thread is accessing to the list. The synchronization at method level doesn't work
+ in this case (Reported by Axel Uhl,07/02/2015) 
+ 
+********************************************
 ************* TracAPI 3.0.9 ****************
 ******************************************** 
 This is a final version. Only fixes bugs in the implementation
