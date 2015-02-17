@@ -1,12 +1,9 @@
 package com.sap.sailing.dashboards.gwt.server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
@@ -15,8 +12,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardService;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
+import com.sap.sailing.dashboards.gwt.server.startanalysis.StartAnalysisCreationController;
 import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
-import com.sap.sailing.dashboards.gwt.shared.ResponseMessage;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
@@ -25,7 +22,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -39,10 +36,14 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Alexander Ries (D062114)
  *
  */
-public class RibDashboardServiceImpl extends RemoteServiceServlet implements RibDashboardService,
-        StartAnalysisRacesStoreListener {
+public class RibDashboardServiceImpl extends RemoteServiceServlet implements RibDashboardService {
+    
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID = 7710545186662632126L;
+    private StartAnalysisCreationController startAnalysisCreationController;
 
     /**
      * Variable contains last {@link TrackedRace} that is or was live
@@ -62,15 +63,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
      * committee boat to first mark and pin end mark to first mark. Wind has no influence on the value.
      * */
     private MovingAverage averageStartLineAdvantageByGeometry;
-
-    /**
-     * The map values contain a Pair, whose first value is a {@link MovingAverage} for the true wind speed and the
-     * second one contains an average for the true wind direction for a wind bot.
-     * */
-
-    private Map<String, List<StartAnalysisDTO>> startAnalysisDTOsForCompetitor;
-    private StartAnalysisRacesStore startAnalysisRacesStore;
-    
+        
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
     private final BundleContext context;
@@ -82,11 +75,8 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         baseDomainFactory = getRacingEventService().getBaseDomainFactory();
+        startAnalysisCreationController = new StartAnalysisCreationController(getRacingEventService());
 
-        startAnalysisRacesStore = new StartAnalysisRacesStore(getRacingEventService());
-        startAnalysisRacesStore.addStartAnalyisisRacesStoreListener(this);
-
-        startAnalysisDTOsForCompetitor = new HashMap<String, List<StartAnalysisDTO>>();
         averageStartLineAdvantageByWind = new MovingAverage(400);
         averageStartLineAdvantageByGeometry = new MovingAverage(400);
     }
@@ -111,9 +101,9 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
      * @throws NoWindException 
      * */
     @Override
-    public RibDashboardRaceInfoDTO getLiveRaceInfo(String leaderboardName, String competitorName) throws NoWindException {
+    public RibDashboardRaceInfoDTO getLiveRaceInfo(String leaderboardName) throws NoWindException {
         RibDashboardRaceInfoDTO lRInfo = new RibDashboardRaceInfoDTO();
-        if (leaderboardName != null) {
+/*        if (leaderboardName != null) {
             TimePoint timePointOfRequest = MillisecondsTimePoint.now();
             if (checkIfRaceIsStillRunning(timePointOfRequest, leaderboardName)) {
                 if (competitorName == null) {
@@ -124,7 +114,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
                 } else {
                     fillLiveRaceInfoDTOWithRaceData(lRInfo, timePointOfRequest);
                     fillLiveRaceInfoDTOWithStartLineAdavantageData(lRInfo, timePointOfRequest);
-                    fillLiveRaceInfoDTOWithStartAnalysisData(lRInfo, competitorName);
                     lRInfo.responseMessage = ResponseMessage.OK;
                 }
             } else {
@@ -132,30 +121,15 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             }
             return lRInfo;
         } else {
-            lRInfo.responseMessage = ResponseMessage.NO_RACE_LIVE;
+            lRInfo.responseMessage = ResponseMessage.NO_RACE_LIVE;*/
             return lRInfo;
-        }
+        //}
     }
 
     private void fillLiveRaceInfoDTOWithRaceData(RibDashboardRaceInfoDTO lRInfo, TimePoint now) {
         if (runningRace != null) {
             lRInfo.idOfLastTrackedRace = runningRace.getRaceIdentifier();
-            try {
-                List<Competitor> competitors = runningRace.getCompetitorsFromBestToWorst(now);
-                List<String> competitorNames = new ArrayList<String>();
-                for (Competitor competitor : competitors) {
-                    competitorNames.add(competitor.getName());
-                }
-                Collections.sort(competitorNames);
-                lRInfo.competitorNamesFromLastTrackedRace = competitorNames;
-            } catch (NoWindException e) {
-                e.printStackTrace();
-            }
         }
-    }
-
-    private void fillLiveRaceInfoDTOWithStartAnalysisData(RibDashboardRaceInfoDTO lRInfo, String competiorName) {
-        lRInfo.startAnalysisDTOList = startAnalysisDTOsForCompetitor.get(competiorName);
     }
 
     // returns true if race is still live
@@ -165,7 +139,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             if (runningRace == null) {
                 return false;
             } else {
-                startAnalysisRacesStore.addAsListener(runningRace);
+                //startAnalysisRacesStore.addAsListener(runningRace);
                 return true;
             }
         } else {
@@ -182,6 +156,22 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
                     TrackedRace race = column.getTrackedRace(fleet);
                     if (race != null && race.isLive(new MillisecondsTimePoint(new Date()))) {
                         result = race;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
+    private List<TrackedRace> getTrackedRacesFromLeaderboard(String leaderboardName){
+        List<TrackedRace> result = new ArrayList<TrackedRace>();
+        Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardName);
+        if (lb != null) {
+            for (RaceColumn column : lb.getRaceColumns()) {
+                for (Fleet fleet : column.getFleets()) {
+                    TrackedRace race = column.getTrackedRace(fleet);
+                    if (race != null && race.isLive(new MillisecondsTimePoint(new Date()))) {
+                        result.add(race);
                     }
                 }
             }
@@ -242,12 +232,25 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         return baseDomainFactory;
     }
 
-    public TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName) {
-        return null;
+    @Override
+    public List<StartAnalysisDTO> getStartAnalysisListForCompetitorIDAndLeaderboardName(Serializable competitorId,  String leaderboardName) {
+        Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+        List<TrackedRace> trackedRacesForLeaderBoardName = getTrackedRacesFromLeaderboard(leaderboardName);
+        for(TrackedRace trackedRace : trackedRacesForLeaderBoardName){
+            startAnalysisCreationController.checkForNewStartAnalysisForCompetitorInTrackedRace(competitor, trackedRace);
+        }
+        return startAnalysisCreationController.getStartAnalysisCache().getStartAnalysisDTOsForCompetitor(competitor);
     }
 
     @Override
-    public void startAnalyisisRacesChanged(Map<String, List<StartAnalysisDTO>> startAnalysisDTOCompetitorMap) {
-        startAnalysisDTOsForCompetitor = startAnalysisDTOCompetitorMap;
+    public List<CompetitorDTO> getCompetitorsInRaceWithStateLive() {
+        if(runningRace != null){
+            try {
+                return baseDomainFactory.getCompetitorDTOList(runningRace.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(new Date())));
+            } catch (NoWindException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

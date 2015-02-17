@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class CompetitorSelectionPopup extends Composite implements HasWidgets, CompetitorTableRowSelectionListener {
 
@@ -44,10 +45,10 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
     @UiField
     Button button;
 
-    private String currentCompetitorSelected;
+    private CompetitorDTO currentCompetitorSelected;
     private boolean isVisible;
 
-    private List<CompetitorSelectionPopupListener> competitorSelectionPopupListener;
+    private List<CompetitorSelectionListener> competitorSelectionPopupListener;
 
     private static CompetitorSelectionPopupUiBinder uiBinder = GWT.create(CompetitorSelectionPopupUiBinder.class);
 
@@ -55,17 +56,14 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
     }
 
     public CompetitorSelectionPopup() {
-        competitorSelectionPopupListener = new ArrayList<CompetitorSelectionPopupListener>();
+        competitorSelectionPopupListener = new ArrayList<CompetitorSelectionListener>();
         competitortable = new CompetitorTable(this);
         isVisible = false;
         initWidget(uiBinder.createAndBindUi(this));
     }
-    
-    public void setCompetitorList(List<String> competitorList){
-        competitortable.setTableContent(competitorList);
-    }
 
-    public void show() {
+    public void show(List<CompetitorDTO> competitorList) {
+        competitortable.setTableContent(competitorList);
         RootPanel.get().add(this);
         this.button.setText("OK");
         this.getElement().addClassName(style.popupshow());
@@ -84,19 +82,19 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         isVisible = false;
     }
     
-    public void addListener(CompetitorSelectionPopupListener o) {
+    public void addListener(CompetitorSelectionListener o) {
         if (o != null && !competitorSelectionPopupListener.contains(o)) {
             this.competitorSelectionPopupListener.add(o);
         }
     }
 
-    public void removeListener(CompetitorSelectionPopupListener o) {
+    public void removeListener(CompetitorSelectionListener o) {
         this.competitorSelectionPopupListener.remove(o);
     }
 
-    public void notifyListenerAboutOKButtonClickedWithSelectedCompetitorName(String competitorName) {
-        for (CompetitorSelectionPopupListener newStartAnalysisListener : competitorSelectionPopupListener) {
-            newStartAnalysisListener.didClickedOKWithCompetitorName(competitorName);
+    public void notifyListenerAboutOKButtonClickedWithSelectedCompetitorName(CompetitorDTO competitor) {
+        for (CompetitorSelectionListener newStartAnalysisListener : competitorSelectionPopupListener) {
+            newStartAnalysisListener.didClickOKWithSelectedCompetitor(competitor.getIdAsString());
         }
         hide();
     }
@@ -111,6 +109,12 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         if (currentCompetitorSelected != null) {
             notifyListenerAboutOKButtonClickedWithSelectedCompetitorName(currentCompetitorSelected);
         }
+    }
+    
+    @Override
+    public void didSelectedRowWithCompetitorName(CompetitorDTO competitor) {
+        button.getElement().addClassName(style.buttonshow());
+        currentCompetitorSelected = competitor;
     }
 
 
@@ -132,11 +136,5 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
     @Override
     public boolean remove(Widget w) {
         return false;
-    }
-
-    @Override
-    public void didSelectedRowWithCompetitorName(String competitorName) {
-        button.getElement().addClassName(style.buttonshow());
-        currentCompetitorSelected = competitorName;
     }
 }

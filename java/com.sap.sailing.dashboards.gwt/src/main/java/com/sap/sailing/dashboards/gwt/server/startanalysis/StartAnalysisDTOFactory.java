@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.server;
+package com.sap.sailing.dashboards.gwt.server.startanalysis;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,9 +9,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.dashboards.gwt.client.RibDashboardEntryPoint;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
-import com.sap.sailing.dashboards.gwt.client.startanalysis.rankingtable.StartAnalysisStartRankTable;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisCompetitorDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
@@ -35,7 +33,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
@@ -44,120 +41,57 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-/**
- * The task of StartAnalyisisRacesStore is to cache StartAnalysisDTOs for Competitors at one day. At initialization it
- * generates StartAnalysisDTOs for Competitors from races started before initialization time and generates
- * StartAnalysisDTOs for Competitors from races that are starting when the server is running. It achieves this basically
- * by registering as RaceChangeListener and receiving so markRoundings for competitors.
- */
-public class StartAnalysisRacesStore {
-
+public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValidator{
+    
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
-
-    /**
-     * {@link StartAnalyisisRacesStoreListener} get notified at after initialization and after the change of
-     * {@link #startAnalysisDTOListForCompetitorName}
-     * */
-    private List<StartAnalysisRacesStoreListener> listeners;
-
-    /**
-     * Caches a list of chronologically sorted {@link StartAnalysisDTO} for names from Competitors. After any change of
-     * this field {@link #notifyListernersAboutStartAnalysisDTOsChanges()} get called.
-     * */
-    private Map<String, List<StartAnalysisDTO>> startAnalysisDTOListForCompetitorName;
-
-    /**
-     * Contains a ranking list of competitor at mark one for every race
-     * */
-    private Map<TrackedRace, List<Competitor>> rankingListAtMarkOneForTrackedRace;
-
-    /**
-     * Like {@link startAnalysisCompetitorDTOsForCompetitorNameForTrackedRace} gpsFixesForCompetitorNameForTracedRace
-     * contains the list of gps fixes for a competitor name at from 6 seconds at the start. Caching
-     * {@link gpsFixesForCompetitorNameForTracedRace}s brings the advantage of faster code at creating finished
-     * {@link #startAnalysisDTOListForCompetitorName}.
-     * */
-    private Map<TrackedRace, Map<String, List<GPSFixDTO>>> gpsFixesPathBeforeStartForCompetitor;
-
-    private static final Logger logger = Logger.getLogger(RibDashboardEntryPoint.class.getName());
-    /**
-     * Minimum number of competitors in {@link StartAnalysisStartRankTable}
-     * */
-    private final int MINIMUM_NUMBER_OF_COMPETITORS_IN_STARTANALYSISRANKINGTABLE = 3;
+    
+    private static int MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS = 3;
     private final int TAILLENGHT_IN_MILLISECONDS = 200000;
-
-    /**
-     * Calls {@link #generateStartAnalysisDTOsForCompetitorNamesFromRacesStartedBeforeClassInitialization()} to create
-     * startanalysisDTO for races that started before class initialization.
-     */
-    public StartAnalysisRacesStore(RacingEventService racingEventService) {
-
+    
+    private static final Logger logger = Logger.getLogger(StartAnalysisDTOFactory.class.getName());
+    
+    public StartAnalysisDTOFactory(RacingEventService racingEventService){
         baseDomainFactory = racingEventService.getBaseDomainFactory();
-        this.listeners = new ArrayList<StartAnalysisRacesStoreListener>();
-
-        startAnalysisDTOListForCompetitorName = new HashMap<String, List<StartAnalysisDTO>>();
-        rankingListAtMarkOneForTrackedRace = new HashMap<TrackedRace, List<Competitor>>();
-        gpsFixesPathBeforeStartForCompetitor = new HashMap<TrackedRace, Map<String, List<GPSFixDTO>>>();
     }
-
-    /**
-     * Returns the Index of the Mark in the Race. Is used in
-     * {@link #markPassingReceived(Competitor, Map, Iterable, TrackedRace)} to identify just markpassings at mark one,
-     * because the position of a boat at mark one defines the performance/startingrank of the race
-     */
-    private int getIndexOfMarkPassingMark(Iterable<MarkPassing> markPassings, TrackedRace trackedRace) {
-        List<MarkPassing> markPassingsList = listFromIterator(markPassings.iterator());
-        return trackedRace.getRace().getCourse()
-                .getIndexOfWaypoint(markPassingsList.get(markPassingsList.size() - 1).getWaypoint());
-    }
-
-    private List<Competitor> getOrCreateAndAddRankingListAtMarkOneForTrackedRace(TrackedRace trackedRace) {
-        if (!rankingListAtMarkOneForTrackedRace.containsKey(trackedRace)) {
-            List<Competitor> rankingListAtMarkOneForRace = new ArrayList<Competitor>();
-            rankingListAtMarkOneForTrackedRace.put(trackedRace, rankingListAtMarkOneForRace);
-        }
-        return rankingListAtMarkOneForTrackedRace.get(trackedRace);
-    }
-
-    private List<StartAnalysisDTO> getOrCreateAndAddStartAnalysisDTOListForCompetitorName(String competitorName) {
-        if (!startAnalysisDTOListForCompetitorName.containsKey(competitorName)) {
-            List<StartAnalysisDTO> startAnalysisDTOList = new ArrayList<StartAnalysisDTO>();
-            startAnalysisDTOListForCompetitorName.put(competitorName, startAnalysisDTOList);
-        }
-        return startAnalysisDTOListForCompetitorName.get(competitorName);
-    }
-
-    private StartAnalysisDTO createStartAnalysisDTOForCompetitor(Competitor competitor, TrackedRace trackedRace) {
-        StartAnalysisDTO startAnalysisDTO = createStartAnalysisDTOWithOnlyStaticData(trackedRace);
+    
+    public StartAnalysisDTO createStartAnalysisForCompetitorAndTrackedRace(Competitor competitor, TrackedRace trackedRace) {
+        StartAnalysisDTO startAnalysisDTO = new StartAnalysisDTO();
+        addStaticDataToStartAnalysisDTOFrom(startAnalysisDTO, trackedRace);
         List<StartAnalysisCompetitorDTO> competitors = new ArrayList<StartAnalysisCompetitorDTO>();
-        List<Competitor> rankingList = getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace);
-
+        Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
+        List<MarkPassing> markPassingsInOrder = (List<MarkPassing>) trackedRace.getMarkPassingsInOrder(secondWaypoint);
+        
         boolean isCompetitorBetweenFirstThree = false;
-        for (int i = 0; i < MINIMUM_NUMBER_OF_COMPETITORS_IN_STARTANALYSISRANKINGTABLE; i++) {
+        for (int i = 0; i < MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS; i++) {
             competitors.add(createStartAnalysisCompetitorDTO(trackedRace, i + 1,
-                    getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).get(i)));
-            if (rankingList.get(i).equals(competitor)) {
+                    markPassingsInOrder.get(i).getCompetitor()));
+            if (markPassingsInOrder.get(i).getCompetitor().equals(competitor)) {
                 isCompetitorBetweenFirstThree = true;
             }
         }
         if (!isCompetitorBetweenFirstThree) {
-            competitors.add(createStartAnalysisCompetitorDTO(trackedRace,
-                    getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size(), competitor));
+            int rankOfCompetitorWhilePassingSecondWaypoint = getRankOfCompetitorWhilePassingSecondWaypoint(competitor, trackedRace);
+            competitors.add(createStartAnalysisCompetitorDTO(trackedRace, rankOfCompetitorWhilePassingSecondWaypoint, competitor));
         }
+        startAnalysisDTO.competitor = baseDomainFactory.convertToCompetitorDTO(competitor);
         startAnalysisDTO.startAnalysisCompetitorDTOs = competitors;
+        logger.log(Level.INFO, "Created StartAnalysis For Competitor "+competitor.getName()+" and "+trackedRace.getRace().getName());
         return startAnalysisDTO;
     }
-
-    private List<MarkPassing> listFromIterator(Iterator<MarkPassing> iterator) {
-        List<MarkPassing> result = new ArrayList<MarkPassing>();
-        while (iterator.hasNext()) {
-            result.add(iterator.next());
+    
+    private int getRankOfCompetitorWhilePassingSecondWaypoint(Competitor competitor, TrackedRace trackedRace){
+        Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
+        List<MarkPassing> markPassings = (List<MarkPassing>) trackedRace.getMarkPassingsInOrder(secondWaypoint);
+        int counter = 0;
+        for(MarkPassing markPassing: markPassings){
+            counter ++;
+            if(markPassing.getCompetitor().getId().equals(competitor.getId()))
+                return counter;
         }
-        return result;
+        return 0;
     }
-
-    private StartAnalysisDTO createStartAnalysisDTOWithOnlyStaticData(TrackedRace trackedRace) {
-        StartAnalysisDTO startAnalysisDTO = new StartAnalysisDTO();
+    
+    private StartAnalysisDTO addStaticDataToStartAnalysisDTOFrom(StartAnalysisDTO startAnalysisDTO,TrackedRace trackedRace) {
         startAnalysisDTO.raceName = trackedRace.getRace().getName();
         startAnalysisDTO.startLineMarkPositions = getStartLineBoyPositions(trackedRace);
         startAnalysisDTO.firstMark = getMarksOfWayPoint(trackedRace, getFirstMarkWayPoint(trackedRace)).get(0);
@@ -258,10 +192,6 @@ public class StartAnalysisRacesStore {
         return markDTO;
     }
 
-    public void addStartAnalyisisRacesStoreListener(StartAnalysisRacesStoreListener startAnalyisisRacesStoreListener) {
-        listeners.add(startAnalyisisRacesStoreListener);
-    }
-
     private WindAndAdvantagesInfoForStartLineDTO createStartAnalysisWindAndLineData(TrackedRace trackedRace) {
         WindAndAdvantagesInfoForStartLineDTO startAnalysisWindLineInfoDTO = new WindAndAdvantagesInfoForStartLineDTO();
         LineDetails startline = trackedRace.getStartLine(trackedRace.getStartTimeReceived());
@@ -297,15 +227,6 @@ public class StartAnalysisRacesStore {
         }
     }
 
-    public void notifyListernersAboutStartAnalysisDTOChange() {
-        for (StartAnalysisRacesStoreListener startAnalyisisRacesStoreListener : listeners) {
-            startAnalyisisRacesStoreListener.startAnalyisisRacesChanged(startAnalysisDTOListForCompetitorName);
-        }
-    }
-
-    /**
-     * returns a List of GPSFixDTOs for every competitor name in tracked race
-     * */
     private Map<String, List<GPSFixDTO>> getGPSFixDTOListForCompetitorName(TrackedRace trackedRace,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate) throws NoWindException {
@@ -412,77 +333,11 @@ public class StartAnalysisRacesStore {
 
     private Map<String, List<GPSFixDTO>> getOrCreateGPSFixDTOsForCompetitorForTrackedRace(TrackedRace trackedRace) {
         try {
-            if (!gpsFixesPathBeforeStartForCompetitor.containsKey(trackedRace)) {
-                gpsFixesPathBeforeStartForCompetitor.put(
-                        trackedRace,
-                        getGPSFixDTOListForCompetitorName(
-                                trackedRace,
-                                createPerCompetitorIdAsString(trackedRace, new Date(trackedRace.getStartTimeReceived()
-                                        .asMillis() - TAILLENGHT_IN_MILLISECONDS)),
-                                createPerCompetitorIdAsString(trackedRace, new Date(trackedRace.getStartTimeReceived()
-                                        .asMillis())), true));
-            }
+            return getGPSFixDTOListForCompetitorName(trackedRace, createPerCompetitorIdAsString(trackedRace, new Date(trackedRace.getStartTimeReceived()
+                                            .asMillis() - TAILLENGHT_IN_MILLISECONDS)), createPerCompetitorIdAsString(trackedRace, new Date(trackedRace.getStartTimeReceived()
+                                                  .asMillis())), true);
         } catch (NoWindException e) {
-            e.printStackTrace();
-        }
-        return gpsFixesPathBeforeStartForCompetitor.get(trackedRace);
-    }
-
-    public static List<StartAnalysisDTO> cloneList(List<StartAnalysisDTO> list) {
-        List<StartAnalysisDTO> clone = new ArrayList<StartAnalysisDTO>(list.size());
-        for (StartAnalysisDTO item : list)
-            clone.add(item);
-        return clone;
-    }
-
-    public void addAsListener(TrackedRace trackedRace) {
-        trackedRace.addListener(new Listener(trackedRace));
-    }
-
-    private class Listener extends AbstractRaceChangeListener {
-        private final TrackedRace trackedRace;
-
-        protected Listener(TrackedRace trackedRace) {
-            this.trackedRace = trackedRace;
-        }
-
-        @Override
-        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
-                Iterable<MarkPassing> markPassings) {
-            logger.log(Level.INFO, "Received Mark Passing " + competitor.getName());
-            if (markPassings.iterator().hasNext()) {
-                if (getIndexOfMarkPassingMark(markPassings, trackedRace) == 1) {
-                    logger.log(Level.INFO, "Received Mark Passing " + competitor.getName() + " Mark 1");
-                    if (!getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).contains(competitor)) {
-                        getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).add(competitor);
-                        logger.log(Level.INFO, "Received Mark Passing " + competitor.getName() + " RankingList Size"
-                                + getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size());
-                        if (getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size() == MINIMUM_NUMBER_OF_COMPETITORS_IN_STARTANALYSISRANKINGTABLE) {
-                            for (Competitor competitorInRankingList : getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace)) {
-                                getOrCreateAndAddStartAnalysisDTOListForCompetitorName(
-                                        competitorInRankingList.getName()).add(
-                                        createStartAnalysisDTOForCompetitor(competitorInRankingList, trackedRace));
-                            }
-                            logger.log(Level.INFO, "Received Mark Passing "
-                                    + competitor.getName()
-                                    + " StartAnalysisDTOlist for competitor size: "
-                                    + getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitor.getName())
-                                            .size());
-                            notifyListernersAboutStartAnalysisDTOChange();
-                        } else if (getOrCreateAndAddRankingListAtMarkOneForTrackedRace(trackedRace).size() > MINIMUM_NUMBER_OF_COMPETITORS_IN_STARTANALYSISRANKINGTABLE) {
-                            getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitor.getName()).add(
-                                    createStartAnalysisDTOForCompetitor(competitor, trackedRace));
-                            logger.log(Level.INFO, "Received Mark Passing "
-                                    + competitor.getName()
-                                    + " StartAnalysisDTOlist for competitor size: "
-                                    + getOrCreateAndAddStartAnalysisDTOListForCompetitorName(competitor.getName())
-                                            .size());
-                            notifyListernersAboutStartAnalysisDTOChange();
-                        }
-                    }
-                }
-            }
+            return null;
         }
     }
-
 }

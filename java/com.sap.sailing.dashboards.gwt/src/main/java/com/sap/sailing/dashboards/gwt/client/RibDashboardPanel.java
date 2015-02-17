@@ -14,10 +14,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.LayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.ui.client.widget.carousel.Carousel;
-import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotification;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComponent;
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
@@ -72,14 +70,12 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     @UiField(provided = true)
     public StartlineAnalysisComponent startanalysisComponent;
 
-    private BottomNotification bottomNotification;
     private List<WindBotComponent> windBotComponents;
 
     public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService) {
         windBotComponents = new ArrayList<WindBotComponent>();
         RibDashboardDataRetriever.getInstance(ribDashboardService).addDataObserver(this);
-        initBottomNotification();
-        startanalysisComponent = new StartlineAnalysisComponent(bottomNotification, ribDashboardService);
+        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService);
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
     }
@@ -94,11 +90,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         esslogo.setResource(RibDashboardImageResources.INSTANCE.logoess());
         esslogo.getElement().addClassName(style.extremelogo());
         Document.get().getBody().appendChild(esslogo.getElement());
-    }
-
-    private void initBottomNotification() {
-        bottomNotification = new BottomNotification();
-        RootPanel.get().add(bottomNotification);
     }
 
     private void initWindBotComponents(List<String> windBotIDs,
