@@ -129,7 +129,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     }
 
     @Override
-    public void loadMapAndContent(int newPageIndex, String someDataDTO) {
+    public void loadMapAndContent(int newPageIndex) {
         if (cardid == newPageIndex && containsMap == false) {
             addMap(newPageIndex);
         } else if (containsMap == true) {

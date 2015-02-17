@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+	<ui:style
+		type='com.sap.sailing.dashboards.gwt.client.popups.competitorselection.SettingsButtonWithSelectionIndicationLabel.SettingsButtonWithSelectionIndicationLabelStyle'
+		src='SettingsButtonWithSelectionIndicationLabel.css'></ui:style>
+	<g:HTMLPanel>
+		<g:FocusPanel ui:field="settingsButton" styleName="{style.settings_button}">
+		    <g:Image ui:field="settingsButtonImage" styleName="{style.settings_button_image}"></g:Image>
+		</g:FocusPanel>
+		<g:Label ui:field="settingsIndicationLabel" styleName="{style.settings_indication_label}"></g:Label>
+	</g:HTMLPanel>
+</ui:UiBinder> 
