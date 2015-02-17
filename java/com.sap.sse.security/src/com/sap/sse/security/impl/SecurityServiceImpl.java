@@ -631,7 +631,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     public User getCurrentUser() {
         final User result;
         Subject subject = SecurityUtils.getSubject();
-        if (subject == null) {
+        if (subject == null || !subject.isAuthenticated()) {
             result = null;
         } else {
             String username = SessionUtils.loadUsername();
