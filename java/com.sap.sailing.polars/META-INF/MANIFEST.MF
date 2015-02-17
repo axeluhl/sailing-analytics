@@ -21,7 +21,8 @@ Require-Bundle:
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sse.common,
  com.sap.sse,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ org.apache.commons.math;bundle-version="2.1.0"
 Import-Package: 
  com.sap.sailing.util,
  com.sap.sse.common

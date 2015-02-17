@@ -56,7 +56,11 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
     private IncrementalRegressionProcessor incrementalRegressionProcessor;
 
     public PolarDataMiner() {
-        backendPolarSheetGenerationSettings = PolarSheetGenerationSettingsImpl.createBackendPolarSettings();
+        this(PolarSheetGenerationSettingsImpl.createBackendPolarSettings());
+    }
+
+    public PolarDataMiner(PolarSheetGenerationSettings backendPolarSettings) {
+        backendPolarSheetGenerationSettings = backendPolarSettings;
         try {
             setUpWorkflow();
         } catch (ClassCastException | NoSuchMethodException | SecurityException e) {
@@ -81,7 +85,7 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
 
         Collection<Processor<GPSFixMovingWithPolarContext, ?>> filteringResultReceivers = Arrays.asList(groupingProcessor);
         Processor<GPSFixMovingWithPolarContext, GPSFixMovingWithPolarContext> filteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria(1));
+                GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria(backendPolarSheetGenerationSettings.getNumberOfLeadingCompetitorsToInclude()));
 
         Collection<Processor<GPSFixMovingWithPolarContext, ?>> enrichingResultReceivers = Arrays
                 .asList(filteringProcessor);
