@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
+import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 
-public abstract class AbstractEventPlace extends AbstractBasePlace {
+public abstract class AbstractEventPlace extends Place {
     private final EventContext ctx;
 
     protected AbstractEventPlace(EventContext ctx) {

@@ -8,8 +8,7 @@ import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactActivityProxy;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.home.client.place.event2.EventActivity;
-import com.sap.sailing.gwt.home.client.place.event2.tabs.overview.EventOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.EventActivityProxy;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaActivityProxy;
@@ -44,10 +43,10 @@ public class ApplicationActivityMapper implements ActivityMapper {
         } else if (place instanceof EventPlace) {
             // work around
             // return new EventActivityProxy((EventPlace) place, clientFactory);
-            return new EventActivity(new EventOverviewPlace(((EventPlace)place).getEventUuidAsString()), clientFactory);
+            return new EventActivityProxy(new com.sap.sailing.gwt.home.client.place.event2.EventPlace(((EventPlace)place).getEventUuidAsString()), clientFactory);
         } else if (place instanceof com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace) {
             com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace eventPlace = (com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace) place;
-            return new EventActivity(eventPlace, clientFactory);
+            return new EventActivityProxy(eventPlace, clientFactory);
         } else if (place instanceof EventsPlace) {
             return new EventsActivityProxy((EventsPlace) place, clientFactory);
         } else if (place instanceof StartPlace) {

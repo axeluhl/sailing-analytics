@@ -1,68 +1,24 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
-import java.util.UUID;
-
 import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
-import com.sap.sailing.gwt.home.client.app.ApplicationClientFactory;
+import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class EventActivity extends AbstractActivity implements EventView.Presenter {
+public abstract class EventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements EventView.Presenter {
 
-    private final AbstractEventPlace currentPlace;
+    protected final PLACE currentPlace;
 
-    private final EventContext ctx;
+    protected final EventContext ctx;
 
-    private EventView currentView = new TabletAndDesktopEventView();
+    protected final EventClientFactory clientFactory;
 
-    private ApplicationClientFactory clientFactory;
-
-    public EventActivity(AbstractEventPlace place, ApplicationClientFactory clientFactory) {
+    public EventActivity(PLACE place, EventClientFactory clientFactory) {
         this.currentPlace = place;
         this.ctx = new EventContext(clientFactory, place.getCtx());
 
         this.clientFactory = clientFactory;
-
-    }
-
-    @Override
-    public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        if (ctx.getEventDTO() != null) {
-            afterLoad(panel);
-        } else {
-            final UUID eventUUID = UUID.fromString(currentPlace.getCtx().getEventId());
-            clientFactory.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
-                @Override
-                public void onSuccess(final EventDTO event) {
-                    if(event != null) {
-                        ctx.updateContext(event);
-                        afterLoad(panel);
-                    } else {
-                        // TODO
-//                        createErrorView("No such event with UUID " + eventUUID, null, panel);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    // TODO
-//                    createErrorView("Error while loading the event with service getEventById()", caught, panel);
-                }
-            }); 
-
-        }
-
-    }
-
-    private void afterLoad(AcceptsOneWidget panel) {
-        currentView.registerPresenter(this);
-        panel.setWidget(currentView);
-        currentView.navigateTabsTo(currentPlace);
     }
 
     @Override

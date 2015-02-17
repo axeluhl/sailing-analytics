@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2;
+package com.sap.sailing.gwt.home.client.place.event2.multiregatta;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.home.client.place.event2.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class TabletAndDesktopEventView extends Composite implements EventView {
+public class TabletAndDesktopEventView extends Composite implements EventMultiregattaView {
     private static final ApplicationHistoryMapper historyMapper = GWT
             .<ApplicationHistoryMapper> create(ApplicationHistoryMapper.class);
 
@@ -58,7 +58,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
     }
 
     @Override
-    public void navigateTabsTo(AbstractEventPlace place) {
+    public void navigateTabsTo(AbstractMultiregattaEventPlace place) {
         tabPanelUi.activatePlace(place);
     }
 

@@ -1,12 +1,12 @@
-package com.sap.sailing.gwt.home.client.place.event2.tabs.overview;
+package com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.overview;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 
-public class EventOverviewPlace extends AbstractEventRegattaPlace {
-    public EventOverviewPlace(String id, String regattaId) {
-        super(id, regattaId);
+public class EventOverviewPlace extends AbstractMultiregattaEventPlace {
+    public EventOverviewPlace(String id) {
+        super(id);
     }
     
     public EventOverviewPlace(EventContext context) {
@@ -21,8 +21,7 @@ public class EventOverviewPlace extends AbstractEventRegattaPlace {
 
         @Override
         public EventOverviewPlace getPlace(String token) {
-            // TODO
-            return new EventOverviewPlace(token, "");
+            return new EventOverviewPlace(token);
         }
     }
 }
