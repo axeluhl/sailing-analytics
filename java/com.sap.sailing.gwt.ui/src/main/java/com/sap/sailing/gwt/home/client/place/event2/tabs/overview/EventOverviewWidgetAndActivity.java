@@ -11,19 +11,19 @@ import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class EventOverviewWidgetAndActivity extends Composite implements TabActivity<EventOverviewPlace, EventContext> {
+public class EventOverviewWidgetAndActivity extends Composite implements TabActivity<EventRegattaOverviewPlace, EventContext> {
 
     public EventOverviewWidgetAndActivity() {
 
     }
 
     @Override
-    public Class<EventOverviewPlace> getPlaceClassForActivation() {
-        return EventOverviewPlace.class;
+    public Class<EventRegattaOverviewPlace> getPlaceClassForActivation() {
+        return EventRegattaOverviewPlace.class;
     }
 
     @Override
-    public void start(EventOverviewPlace myPlace, AcceptsOneWidget contentArea) {
+    public void start(EventRegattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
 
         initWidget(ourUiBinder.createAndBindUi(this));
 
@@ -41,8 +41,8 @@ public class EventOverviewWidgetAndActivity extends Composite implements TabActi
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public EventOverviewPlace placeToFire(EventContext ctx) {
-        return new EventOverviewPlace(ctx);
+    public EventRegattaOverviewPlace placeToFire(EventContext ctx) {
+        return new EventRegattaOverviewPlace(ctx);
     }
 
 }

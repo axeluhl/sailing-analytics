@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaActivity;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.MultiregattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.overview.EventOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaActivity;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
@@ -21,14 +21,17 @@ public class EventActivityProxy extends AbstractActivityProxy {
     private EventClientFactory clientFactory;
 
     public EventActivityProxy(AbstractEventPlace place, EventClientFactory clientFactory) {
-        this.place = place;
-        ctx = place.getCtx();
+        if(place instanceof EventDefaultPlace) {
+            this.place = new EventOverviewPlace(place.getCtx());
+        } else {
+            this.place = place;
+        }
+        ctx = this.place.getCtx();
         this.clientFactory = clientFactory;
     }
 
     @Override
     protected void startAsync() {
-        
         if (ctx.getEventDTO() != null) {
             afterLoad();
         } else {
@@ -62,16 +65,11 @@ public class EventActivityProxy extends AbstractActivityProxy {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                AbstractEventPlace placeToStart = place;
-                if(placeToStart instanceof EventPlace) {
-                    // TODO decide dependent on event type
-                    placeToStart = new MultiregattaOverviewPlace(ctx);
+                if(place instanceof AbstractEventRegattaPlace) {
+                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) place, clientFactory));
                 }
-                if(placeToStart instanceof AbstractEventRegattaPlace) {
-                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) placeToStart, clientFactory));
-                }
-                if(placeToStart instanceof AbstractMultiregattaEventPlace) {
-                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) placeToStart, clientFactory));
+                if(place instanceof AbstractMultiregattaEventPlace) {
+                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, clientFactory));
                 }
             }
         });
