@@ -44,10 +44,22 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
 
     private PolynomialFunction cachedFunction;
     
-    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder) {
+    private final boolean hasIntercept;
+    
+    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept) {  
+        this.hasIntercept = hasIntercept;
         this.polynomialOrder = polynomialOrder;
-        matrixOfXSums = new double[polynomialOrder + 1][polynomialOrder + 1];
-        vectorOfXYMultSums = new double[polynomialOrder + 1];
+        if (hasIntercept) {
+            matrixOfXSums = new double[polynomialOrder + 1][polynomialOrder + 1];
+            vectorOfXYMultSums = new double[polynomialOrder + 1];
+        } else {
+            matrixOfXSums = new double[polynomialOrder][polynomialOrder];
+            vectorOfXYMultSums = new double[polynomialOrder];
+        }
+    }
+    
+    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder) {  
+        this(polynomialOrder, true);
     }
     
     @Override
@@ -56,13 +68,15 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         try {
             numberOfPointsAdded.incrementAndGet();
             functionNeedsUpdate.set(true);
-            for (int i = 0; i <= polynomialOrder; i++) {
-                vectorOfXYMultSums[i] += y * Math.pow(x, i);
-                for (int j = 0; j <= polynomialOrder; j++) {
-                    if (i == 0 && j == 0) {
+            for (int i = 0; hasIntercept ? i <= polynomialOrder : i < polynomialOrder; i++) {
+                int powerI = hasIntercept ? i : i+1;
+                vectorOfXYMultSums[i] += y * Math.pow(x, powerI);
+                for (int j = 0; hasIntercept ? j <= polynomialOrder : j < polynomialOrder; j++) {
+                    int powerJ = hasIntercept ? j : j+1;
+                    if (powerI == 0 && powerJ == 0) {
                         matrixOfXSums[i][j] += 1;
                     } else {
-                        matrixOfXSums[i][j] += Math.pow(x, i+j);
+                        matrixOfXSums[i][j] += Math.pow(x, powerI+powerJ);
                     }
                 }
             }
@@ -115,7 +129,23 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         }
         RealMatrix inversedMatrix = new LUDecompositionImpl(matrixOfXSumsCopy).getSolver().getInverse();
         RealVector coeffs = inversedMatrix.operate(vectorOfXYMultSumsCopy);
-        resultFunction = new PolynomialFunction(coeffs.toArray());
+        if (!hasIntercept) {
+            resultFunction = createFunctionWithZeroIntercept(coeffs);
+        } else {
+            resultFunction = new PolynomialFunction(coeffs.toArray());
+        }
+        return resultFunction;
+    }
+
+    private PolynomialFunction createFunctionWithZeroIntercept(RealVector coeffs) {
+        PolynomialFunction resultFunction;
+        double[] coeffsNoIntercept = coeffs.toArray();
+        double[] coeffsWithZeroIntercept = new double[coeffsNoIntercept.length + 1];
+        coeffsWithZeroIntercept[0] = 0;
+        for (int i = 1; i < coeffsWithZeroIntercept.length; i++) {
+            coeffsWithZeroIntercept[i] = coeffsNoIntercept[i-1];
+        }
+        resultFunction = new PolynomialFunction(coeffsWithZeroIntercept);
         return resultFunction;
     }
 

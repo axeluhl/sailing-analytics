@@ -3,6 +3,11 @@ package com.sap.sailing.polars.regression.test;
 import static org.hamcrest.Matchers.closeTo;
 import static org.junit.Assert.assertThat;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Random;
 
 import org.junit.Test;
@@ -67,6 +72,64 @@ public class IncrementalLeastSquaresTest {
         assertThat(coeffs[3], closeTo(0.2169 , ERROR));
         assertThat(coeffs[4], closeTo(-0.01182 , ERROR));
     }
+    
+    @Test
+    public void testIncrementalRegressionWithRealData() throws NotEnoughDataHasBeenAddedException {
+        
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(3);
+        fillRegression(leastSquares);
+        double[] coeffs = leastSquares.getOrCreatePolynomialFunction().getCoefficients();
+        
+        assertThat(coeffs[0], closeTo(6.319899225, ERROR));
+        assertThat(coeffs[1], closeTo(-0.427890096, ERROR));
+        assertThat(coeffs[2], closeTo(0.057763706, ERROR));
+        assertThat(coeffs[3], closeTo(-0.001574209 , ERROR));
+    }
+    
+    @Test
+    public void testIncrementalRegressionWithRealDataNoIntercept() throws NotEnoughDataHasBeenAddedException {
+        
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(3, false);
+        fillRegression(leastSquares);
+        double[] coeffs = leastSquares.getOrCreatePolynomialFunction().getCoefficients();
+        
+        assertThat(coeffs[0], closeTo(0, ERROR));
+        assertThat(coeffs[1], closeTo(0.9317759507, ERROR));
+        assertThat(coeffs[2], closeTo(-0.0364029315, ERROR));
+        assertThat(coeffs[3], closeTo(0.0005326266, ERROR));
+    }
+  
+    private void fillRegression(IncrementalLeastSquares leastSquares) {
+        File file = new File("resources/5O5Worlds14_Winners_Upwind4550.csv");
+        BufferedReader br = null;
+        String line = "";
+        String cvsSplitBy = ",";
+
+        try {
+
+            br = new BufferedReader(new FileReader(file));
+            while ((line = br.readLine()) != null) {
+
+                // use comma as separator
+                String[] row = line.split(cvsSplitBy);
+                leastSquares.addData(Double.parseDouble(row[0]), Double.parseDouble(row[1]));
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 
 
 
