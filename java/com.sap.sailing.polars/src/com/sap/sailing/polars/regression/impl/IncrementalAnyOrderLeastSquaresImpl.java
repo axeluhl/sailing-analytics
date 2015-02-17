@@ -25,7 +25,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  *
  */
 public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSquares {
-
+     
     private double[][] matrixOfXSums;
 
     private double[] vectorOfXYMultSums;
@@ -45,10 +45,12 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
     private PolynomialFunction cachedFunction;
     
     private final boolean hasIntercept;
+    private final boolean useSymbollicInversionIfPossible;
     
-    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept) {  
+    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept, boolean useSymbollicInversionIfPossible) {  
         this.hasIntercept = hasIntercept;
         this.polynomialOrder = polynomialOrder;
+        this.useSymbollicInversionIfPossible = useSymbollicInversionIfPossible;
         if (hasIntercept) {
             matrixOfXSums = new double[polynomialOrder + 1][polynomialOrder + 1];
             vectorOfXYMultSums = new double[polynomialOrder + 1];
@@ -59,7 +61,11 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
     }
     
     public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder) {  
-        this(polynomialOrder, true);
+        this(polynomialOrder, true, true);
+    }
+    
+    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept) {  
+        this(polynomialOrder, hasIntercept, true);
     }
     
     @Override
@@ -127,7 +133,14 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
-        RealMatrix inversedMatrix = new LUDecompositionImpl(matrixOfXSumsCopy).getSolver().getInverse();
+        LeastSquaresInversionHelperType type = LeastSquaresInversionHelperType.getType(polynomialOrder, hasIntercept);
+        RealMatrix inversedMatrix = null;
+        if (useSymbollicInversionIfPossible && type != null) {
+            inversedMatrix = type.inverseMatrix(matrixOfXSumsCopy);
+        }
+        if (inversedMatrix == null) {
+            inversedMatrix = new LUDecompositionImpl(matrixOfXSumsCopy).getSolver().getInverse();
+        }
         RealVector coeffs = inversedMatrix.operate(vectorOfXYMultSumsCopy);
         if (!hasIntercept) {
             resultFunction = createFunctionWithZeroIntercept(coeffs);
@@ -158,6 +171,91 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             LockUtil.unlockAfterRead(lock);
         }
         return new PolynomialFunction(coeff);
+    }
+    
+    private enum LeastSquaresInversionHelperType {
+
+        CUBIC,
+        CUBIC_NO_INTERCEPT;
+        
+        
+        /**
+         * 
+         * @param realMatrix matrix to inverse
+         * @return Inversed matrix if symbolic inversion was found. Else null
+         */
+        private RealMatrix inverseMatrix(RealMatrix realMatrix) {
+            RealMatrix result = null;
+            switch (this) {
+            case CUBIC_NO_INTERCEPT:
+                double[][] originDataCNI = realMatrix.getData();
+                double a = originDataCNI[0][0];
+                double b = originDataCNI[0][1];
+                double c = originDataCNI[0][2];
+                double d = originDataCNI[1][2];
+                double e = originDataCNI[2][2];
+                double[][] matrixDataCNI = { { d * d - c * e, b * e - c * d, c * c - b * d },
+                        { b * e - c * d, c * c - a * e, a * d - b * c },
+                        { c * c - b * d, a * d - b * c, b * b - a * c } };
+                RealMatrix intermediateMatrixCNI = MatrixUtils.createRealMatrix(matrixDataCNI);
+                double factorCNI = (1.0 / (-a*c*e + a*d*d + b*b*e-2*b*c*d+c*c*c));
+                result = intermediateMatrixCNI.scalarMultiply(factorCNI);
+                break;
+            case CUBIC:
+                double[][] originDataC = realMatrix.getData();
+                double n = originDataC[0][0];
+                a = originDataC[0][1];
+                b = originDataC[0][2];
+                c = originDataC[0][3];
+                d = originDataC[1][3];
+                e = originDataC[2][3];
+                double f = originDataC[3][3];
+                double[][] matrixDataC = {
+                        { -d * d * d + 2 * c * e * d + b * f * d - b * e * e - c * c * f,
+                                -e * c * c + d * d * c + b * f * c + a * e * e - b * d * e - a * d * f,
+                                -f * b * b + d * d * b + c * e * b - c * c * d - a * d * e + a * c * f,
+                                c * c * c - 2 * b * d * c - a * e * c + a * d * d + b * b * e },
+                        { -e * c * c + d * d * c + b * f * c + a * e * e - b * d * e - a * d * f,
+                                -f * b * b + 2 * c * e * b - c * c * d - e * e * n + d * f * n,
+                                c * c * c - b * d * c - a * e * c - f * n * c + a * b * f + d * e * n,
+                                d * b * b - c * c * b - a * e * b + a * c * d - d * d * n + c * e * n },
+                        { -f * b * b + d * d * b + c * e * b - c * c * d - a * d * e + a * c * f,
+                                c * c * c - b * d * c - a * e * c - f * n * c + a * b * f + d * e * n,
+                                -f * a * a + 2 * c * d * a - b * c * c - d * d * n + b * f * n,
+                                e * a * a - c * c * a - b * d * a + b * b * c + c * d * n - b * e * n },
+                        { c * c * c - 2 * b * d * c - a * e * c + a * d * d + b * b * e,
+                                d * b * b - c * c * b - a * e * b + a * c * d - d * d * n + c * e * n,
+                                e * a * a - c * c * a - b * d * a + b * b * c + c * d * n - b * e * n,
+                                -b * b * b + 2 * a * c * b + d * n * b - a * a * d - c * c * n } };
+                RealMatrix intermediateMatrixC = MatrixUtils.createRealMatrix(matrixDataC);
+                double factorC = 1.0 / (-a * a * d * f + a * a * e * e + 2 * c
+                        * (a * (b * f + d * d) + e * (b * b + d * n)) - c * c * (2 * a * e + 3 * b * d + f * n) + b
+                        * (-2 * a * d * e + d * f * n + e * e * -n) - b * b * b * f + b * b * d * d + c * c * c * c - d
+                        * d * d * n);
+                result = intermediateMatrixC.scalarMultiply(factorC);
+                break;
+            default:
+                break;
+            }
+            return result;
+        }
+        
+        /**
+         * 
+         * @param order Order of the polynomial
+         * @param hasIntercept If the least squares is set to no intercept
+         * @return type of the polynomial or null if it doesn't exist in this implementation
+         */
+        private static LeastSquaresInversionHelperType getType(int order, boolean hasIntercept) {
+            LeastSquaresInversionHelperType result = null;
+            switch(order) {
+                case 3: 
+                    result = hasIntercept ? CUBIC : CUBIC_NO_INTERCEPT;
+                    break;
+            }
+            return result;
+        }
+
     }
 
 }

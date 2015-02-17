@@ -87,7 +87,7 @@ public class IncrementalLeastSquaresTest {
     }
     
     @Test
-    public void testIncrementalRegressionWithRealDataNoIntercept() throws NotEnoughDataHasBeenAddedException {
+    public void testIncrementalRegressionWithRealDataNoInterceptWithSymbollicInversion() throws NotEnoughDataHasBeenAddedException {
         
         IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(3, false);
         fillRegression(leastSquares);
@@ -97,6 +97,65 @@ public class IncrementalLeastSquaresTest {
         assertThat(coeffs[1], closeTo(0.9317759507, ERROR));
         assertThat(coeffs[2], closeTo(-0.0364029315, ERROR));
         assertThat(coeffs[3], closeTo(0.0005326266, ERROR));
+        
+        leastSquares.addData(0, 0);
+        long startTime = System.nanoTime();
+        leastSquares.getOrCreatePolynomialFunction().getCoefficients();
+        System.out.println("With symbollic inversion no intercept" + (System.nanoTime()  - startTime) + "ns");
+    }
+    
+    @Test
+    public void testIncrementalRegressionWithRealDataNoInterceptWithoutSymbollicInversion() throws NotEnoughDataHasBeenAddedException {
+        
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(3, false, false);
+        fillRegression(leastSquares);
+        double[] coeffs = leastSquares.getOrCreatePolynomialFunction().getCoefficients();
+        
+        assertThat(coeffs[0], closeTo(0, ERROR));
+        assertThat(coeffs[1], closeTo(0.9317759507, ERROR));
+        assertThat(coeffs[2], closeTo(-0.0364029315, ERROR));
+        assertThat(coeffs[3], closeTo(0.0005326266, ERROR));
+        
+        leastSquares.addData(0, 0);
+        long startTime = System.nanoTime();
+        leastSquares.getOrCreatePolynomialFunction().getCoefficients();
+        System.out.println("With numeric inversion no intercept " + (System.nanoTime()  - startTime) + "ns");
+    }
+    
+    @Test
+    public void testIncrementalRegressionWithRealDataWithInterceptWithSymbollicInversion() throws NotEnoughDataHasBeenAddedException {
+        
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(3, true, true);
+        fillRegression(leastSquares);
+        double[] coeffs = leastSquares.getOrCreatePolynomialFunction().getCoefficients();
+        
+        assertThat(coeffs[0], closeTo(6.319899225, ERROR));
+        assertThat(coeffs[1], closeTo(-0.427890096, ERROR));
+        assertThat(coeffs[2], closeTo(0.057763706, ERROR));
+        assertThat(coeffs[3], closeTo(-0.001574209, ERROR));
+        
+        leastSquares.addData(0, 0);
+        long startTime = System.nanoTime();
+        leastSquares.getOrCreatePolynomialFunction().getCoefficients();
+        System.out.println("With symbollic inversion and intercept " + (System.nanoTime()  - startTime) + "ns");
+    }
+    
+    @Test
+    public void testIncrementalRegressionWithRealDataWithInterceptWithoutSymbollicInversion() throws NotEnoughDataHasBeenAddedException {
+        
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(3, true, false);
+        fillRegression(leastSquares);
+        double[] coeffs = leastSquares.getOrCreatePolynomialFunction().getCoefficients();
+        
+        assertThat(coeffs[0], closeTo(6.319899225, ERROR));
+        assertThat(coeffs[1], closeTo(-0.427890096, ERROR));
+        assertThat(coeffs[2], closeTo(0.057763706, ERROR));
+        assertThat(coeffs[3], closeTo(-0.001574209, ERROR));
+        
+        leastSquares.addData(0, 0);
+        long startTime = System.nanoTime();
+        leastSquares.getOrCreatePolynomialFunction().getCoefficients();
+        System.out.println("With numeric inversion and intercept " + (System.nanoTime()  - startTime) + "ns");
     }
   
     private void fillRegression(IncrementalLeastSquares leastSquares) {
