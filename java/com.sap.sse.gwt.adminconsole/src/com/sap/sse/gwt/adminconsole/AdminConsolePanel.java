@@ -20,6 +20,7 @@ import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.BuildVersionRetriever;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
+import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
@@ -79,6 +80,8 @@ public class AdminConsolePanel extends DockLayoutPanel {
      */
     private final Map<Widget, RefreshableAdminConsolePanel> panelsByWidget;
     
+    private final PermissionsForRoleProvider permissionsForRoleProvider;
+    
     /**
      * Generic selection handler that forwards selected tabs to a refresher that ensures that data gets reloaded. If
      * you add a new tab then make sure to have a look at #refreshDataFor(Widget widget) to ensure that upon
@@ -130,10 +133,11 @@ public class AdminConsolePanel extends DockLayoutPanel {
         }
     }
     
-    public AdminConsolePanel(UserService userService, BuildVersionRetriever buildVersionRetriever,
-            String releaseNotesAnchorLabel, String releaseNotesURL,
-            ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
+    public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
+            BuildVersionRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
+            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
         super(Unit.EM);
+        this.permissionsForRoleProvider = permissionsForRoleProvider;
         this.userService = userService;
         roleSpecificTabs = new LinkedHashMap<>();
         this.panelsByWidget = new HashMap<>();
@@ -273,7 +277,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         for (Map.Entry<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, AdminConsoleFeatures> e : roleSpecificTabs
                 .entrySet()) {
             final Widget panelToAdd = e.getKey().getB();
-            if (user != null && user.hasPermission(e.getValue().getRequiredPermission().getStringPermission())) {
+            if (user != null && user.hasPermission(e.getValue().getRequiredPermission().getStringPermission(), permissionsForRoleProvider)) {
                 e.getKey().getA().add(panelToAdd, e.getKey().getC(), /* asHtml */false);
             } else {
                 e.getKey().getA().remove(panelToAdd);

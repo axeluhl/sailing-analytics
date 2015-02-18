@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -40,7 +41,7 @@ public class UserManagementPanel extends DockPanel {
 
     private UserListDataProvider userListDataProvider;
     
-    public UserManagementPanel(final UserService userService, final StringMessages stringMessages) {
+    public UserManagementPanel(final UserService userService, final StringMessages stringMessages, PermissionsForRoleProvider permissionsForRoleProvider) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         VerticalPanel west = new VerticalPanel();
         HorizontalPanel buttonPanel = new HorizontalPanel();
@@ -82,7 +83,7 @@ public class UserManagementPanel extends DockPanel {
         userList.setSelectionModel(singleSelectionModel);
         TextBox filterBox = new TextBox();
         userListDataProvider = new UserListDataProvider(userManagementService, filterBox);
-        final UserDetailsView userDetailsView = new UserDetailsView(userService, singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider);
+        final UserDetailsView userDetailsView = new UserDetailsView(userService, singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider, permissionsForRoleProvider);
         add(userDetailsView, DockPanel.CENTER);
         userDetailsView.addUserChangeEventHandler(new UserChangeEventHandler() {
             @Override

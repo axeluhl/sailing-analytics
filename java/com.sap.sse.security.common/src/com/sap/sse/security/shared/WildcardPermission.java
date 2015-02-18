@@ -226,13 +226,25 @@ public class WildcardPermission implements Serializable {
         return true;
     }
 
+    /**
+     * Returns a string representation that can again equivalently be parsed by
+     * {@link WildcardPermission#WildcardPermission(String)}.
+     */
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         for (Set<String> part : parts) {
             if (buffer.length() > 0) {
-                buffer.append(":");
+                buffer.append(PART_DIVIDER_TOKEN);
             }
-            buffer.append(part);
+            boolean first = true;
+            for (String subpart : part) {
+                if (first) {
+                    first = false;
+                } else {
+                    buffer.append(SUBPART_DIVIDER_TOKEN);
+                }
+                buffer.append(subpart);
+            }
         }
         return buffer.toString();
     }

@@ -22,12 +22,14 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.DefaultPermissions;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
@@ -51,11 +53,15 @@ public class UserDetailsView extends FlowPanel {
     private final StringListEditorComposite rolesEditor;
     private final StringListEditorComposite permissionsEditor;
     private final VerticalPanel accountPanels;
+    private final ListBox allPermissionsList;
     private UserDTO user;
 
-    public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages, final UserListDataProvider userListDataProvider) {
+    private final PermissionsForRoleProvider permissionForRoleProvider;
+
+    public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages, final UserListDataProvider userListDataProvider, PermissionsForRoleProvider permissionsForRoleProvider) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         this.stringMessages = stringMessages;
+        this.permissionForRoleProvider = permissionsForRoleProvider;
         this.user = user;
         addStyleName("userDetailsView");
         List<String> defaultRoleNames = new ArrayList<>();
@@ -169,6 +175,11 @@ public class UserDetailsView extends FlowPanel {
         this.add(decoratorPanel);
         this.add(rolesEditor);
         this.add(permissionsEditor);
+        this.add(new Label(stringMessages.allPermissions()));
+        allPermissionsList = new ListBox();
+        allPermissionsList.setVisibleItemCount(10);
+        allPermissionsList.setEnabled(false);
+        this.add(allPermissionsList);
         updateUser(user, userManagementService);
     }
 
@@ -242,6 +253,10 @@ public class UserDetailsView extends FlowPanel {
             }
             rolesEditor.setValue(user.getRoles(), /* fireEvents */ false);
             permissionsEditor.setValue(user.getStringPermissions(), /* fireEvents */ false);
+            allPermissionsList.clear();
+            for (String permission : user.getAllPermissions(permissionForRoleProvider)) {
+                allPermissionsList.addItem(permission);
+            }
         }
     }
 

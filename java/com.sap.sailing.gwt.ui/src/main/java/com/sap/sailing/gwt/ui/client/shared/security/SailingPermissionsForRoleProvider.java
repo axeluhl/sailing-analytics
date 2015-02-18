@@ -6,6 +6,8 @@ import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 
 public class SailingPermissionsForRoleProvider implements PermissionsForRoleProvider {
+    public static final SailingPermissionsForRoleProvider INSTANCE = new SailingPermissionsForRoleProvider();
+    
     @Override
     public Iterable<String> getPermissions(String role) {
         final Iterable<String> result;
