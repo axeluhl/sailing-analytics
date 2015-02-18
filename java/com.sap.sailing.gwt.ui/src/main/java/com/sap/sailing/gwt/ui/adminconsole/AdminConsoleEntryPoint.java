@@ -81,8 +81,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         
         /* LEADERBOARDS */
         
-        final TabLayoutPanel leaderboardTabPanel = panel.addVerticalTab(getStringMessages().leaderboards(),
-                "LeaderboardPanel", Permission.MANAGE_LEADERBOARDS);
+        final TabLayoutPanel leaderboardTabPanel = panel.addVerticalTab(getStringMessages().leaderboards(), "LeaderboardPanel");
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this,
                 getStringMessages(), /* showRaceDetails */true, this);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
@@ -111,8 +110,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         /* RACES */
         
-        final TabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().races(),
-                "RacesPanel", Permission.MANAGE_TRACKED_RACES);
+        final TabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().races(), "RacesPanel");
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this,
                 this, getStringMessages());
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
@@ -149,8 +147,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         /* CONNECTORS */
         
-        final TabLayoutPanel connectorsTabPanel = panel.addVerticalTab(getStringMessages().connectors(),
-                "TrackingProviderPanel", Permission.MANAGE_TRACKED_RACES);
+        final TabLayoutPanel connectorsTabPanel = panel.addVerticalTab(getStringMessages().connectors(), "TrackingProviderPanel");
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService,
                 this, this, getStringMessages());
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
@@ -196,8 +193,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         /* ADVANCED */
         
-        final TabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(),
-                "AdvancedPanel", Permission.MANAGE_REPLICATION);
+        final TabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(), "AdvancedPanel");
         final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanel) {
             @Override
