@@ -1,0 +1,44 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:ux="urn:import:com.sap.sse.gwt.theme.client.showcase">
+	<ui:with field="theme" type="com.sap.sse.gwt.theme.client.resources.ThemeResources" />
+	<ui:with field="res" type="com.sap.sse.gwt.theme.client.showcase.ShowCaseResources" />
+	<ux:ComponentShowCase name="Typeface" >
+		<ux:description>
+			<g:HTMLPanel styleName="{res.css.styleGuideHeader}">
+				Typeface styleguide
+			</g:HTMLPanel>
+		</ux:description>
+		<ux:component>
+			<g:HTMLPanel styleName="{res.css.styleGuideContent}">
+			   <div class="{theme.mediaCss.grid}">
+				   <div class="{res.css.styleGuideRow}">
+				     <div class="{res.css.styleGuideRowDescription} {theme.mediaCss.large3}">
+				       <div class="{res.css.styleGuideRowDescriptionTitle}">REGULAR</div>
+				       	<a href="javascript:return" class="{res.css.styleGuideRowDescription_codeLink}">&lt;/&gt;</a>
+				     </div>
+				     <div class="{res.css.styleGuideRowContent} {theme.mediaCss.large9} {res.css.styleGuideDetailsTypeface_regular}">Grumpy wizards make toxic brew for the evil queen and jack.</div>
+				     <div class="{res.css.styleGuideRowCode} {theme.mediaCss.large9} {theme.mediaCss.largeoffset3}">Code und sooo</div>
+				   </div>
+				   <div class="{res.css.styleGuideRow}">
+				     <div class="{res.css.styleGuideRowDescription} {theme.mediaCss.large3}">
+				       <div class="{res.css.styleGuideRowDescriptionTitle}">SEMIBOLD</div>
+				       <a href="javascript:return" class="{res.css.styleGuideRowDescription_codeLink}">&lt;/&gt;</a>
+				     </div>
+				     <div class="{res.css.styleGuideRowContent} {theme.mediaCss.large9} {res.css.styleGuideDetailsTypeface_semibold}">Grumpy wizards make toxic brew for the evil queen and jack.</div>
+				     <div class="{res.css.styleGuideRowCode} {theme.mediaCss.large9} {theme.mediaCss.largeoffset3}">Code und sooo</div>
+				   </div>
+				   <div class="{res.css.styleGuideRow}">
+				     <div class="{res.css.styleGuideRowDescription} {theme.mediaCss.large3}">
+				       <div class="{res.css.styleGuideRowDescriptionTitle}">BOLD</div>
+				       <a href="javascript:return" class="{res.css.styleGuideRowDescription_codeLink}">&lt;/&gt;</a>
+				     </div>
+				     <div class="{res.css.styleGuideRowContent} {theme.mediaCss.large9} {res.css.styleGuideDetailsTypeface_bold}">Grumpy wizards make toxic brew for the evil queen and jack.</div>
+				     <div class="{res.css.styleGuideRowCode} {theme.mediaCss.large9} {theme.mediaCss.largeoffset3}">Code und sooo</div>
+				   </div>
+				</div>
+ 			</g:HTMLPanel>
+		</ux:component>
+	</ux:ComponentShowCase>
+</ui:UiBinder> 

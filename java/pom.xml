@@ -31,6 +31,7 @@
     <module>com.sap.sse.operationaltransformation</module>
     <module>com.sap.sse.replication</module>
     <module>com.sap.sse.filestorage</module>
+    <module>com.sap.sse.gwt.theme</module>
     <module>com.sap.sailing.domain.common</module>
     <module>com.sap.sailing.domain.shared.android</module>
     <module>com.sap.sailing.domain</module>

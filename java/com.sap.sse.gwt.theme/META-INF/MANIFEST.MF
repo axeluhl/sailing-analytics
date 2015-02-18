@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SSE Base Theme
+Bundle-SymbolicName: com.sap.sse.gwt.theme
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: WEB-INF/classes/
+Import-Package: org.osgi.framework;version="1.7.0",
+ javax.servlet;version="3.1.0",
+ javax.servlet.descriptor;version="3.1.0",
+ javax.servlet.http;version="3.1.0"
+Require-Bundle: com.google.gwt.osgi;bundle-version="2.7.0",
+ com.sap.sailing.domain.common,
+ com.sap.sse.common,
+ com.sap.sse.gwt
+Web-ContextPath: /theme
+Export-Package: com.sap.sse.gwt.theme.client
