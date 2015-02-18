@@ -51,7 +51,7 @@ public class MediaDBTest extends AbstractMongoDBTest {
     
     @Test
     public void testCreateVideoTrackWithId() {
-        final String dbId = new ObjectId().toStringMongod();
+        final String dbId = new ObjectId().toHexString();
         final String videoTitle = "Test Video";
         final String url = "http://localhost:8888/media/HTML5/1809147112001_1842870496001_SAP-Regatta-Day02-Final_libtheora.ogv";
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
@@ -101,7 +101,7 @@ public class MediaDBTest extends AbstractMongoDBTest {
 //    @Test
 //    public void testImportVideoTrackToEmptyDb() throws Exception {
 //        //insert test object
-//        final String dbId = new ObjectId().toStringMongod();
+//        final String dbId = new ObjectId().toHexString();
 //        final String title = "Test Video";
 //        final String url = "test";
 //        Date date = new Date();

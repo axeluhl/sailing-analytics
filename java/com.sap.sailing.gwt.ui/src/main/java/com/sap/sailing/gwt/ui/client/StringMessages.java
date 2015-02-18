@@ -34,6 +34,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String carry();
     String competitor();
     String competitors();
+    String competitorsSelected(int selectedCompetitorsCount, int competitorsCount);
     String defaultLeaderboard();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
@@ -191,6 +192,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String actionRaceUnlink();
     String actionRaceRemove();
     String actionExportXML();
+    String actionOpenDashboard();
     String filterLeaderboardsByName();
     String actions();
     String islinked();
@@ -274,7 +276,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String combinedWindSourceTypeName();
     String courseBasedWindSourceTypeName();
     String trackBasedEstimationWindSourceTypeName();
-    String expeditionWindSourceTypeName();
+    String windSensorWindSourceTypeName();
     String webWindSourceTypeName();
     String raceCommitteeWindSourceTypeName();
     String clickChartToSetTime();
@@ -860,7 +862,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String combinedWindSourceTypeTooltip();
     String courseBasedWindSourceTypeTooltip();
     String trackBasedEstimationWindSourceTypeTooltip();
-    String expeditionWindSourceTypeTooltip();
+    String windSensorWindSourceTypeTooltip();
     String webWindSourceTypeTooltip();
     String raceCommitteeWindSourceTypeTooltip();
     String sheetName();
@@ -1049,6 +1051,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String advancePassId();
     String pleaseSelectAScoringResult();
     String eventOfficialWebsiteURL();
+    String eventOverviewURL();
     String eventLogoImageURL();
     String showPingMarkMappings();
     String errorFetchingWindStreamletData(String message);
@@ -1136,4 +1139,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String error();
     String fileStorage();
     String active();
+    String scoringSchemeHighPointEssOverallDescription();
+    String timeBetweenRaceStartAndCompetitorStartInSeconds();
+    String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
+    String email();
+    String pleaseEnterAnEmail();
+    String inviteCompetitors();
+    String notAllCompetitorsProvideEmail();
+    String sendingMailsFailed();
+    String sendingMailsSuccessfull();
+    String selectEventForInvitation();
 }

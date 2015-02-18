@@ -61,7 +61,7 @@ public class LeaderboardStorageTest extends TestCase {
         DynamicBoat boat = new BoatImpl("woot", service.getBaseDomainFactory().getOrCreateBoatClass("H16"), "70155");
         String competitorId = "testC";
         Competitor competitor = service.getBaseDomainFactory().getOrCreateCompetitor(competitorId, "Test C", null,
-                team, boat);
+                null, team, boat);
 
         double carriedPoints = 2.0;
         leaderboard.setCarriedPoints(competitor, carriedPoints);

@@ -66,7 +66,7 @@ public class UserDetailsView extends FlowPanel {
         for (DefaultPermissions defaultPermission : DefaultPermissions.values()) {
             defaultPermissionNames.add(defaultPermission.getPermissionname());
         }
-        rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, IconResources.INSTANCE.remove(), defaultRoleNames,
+        rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultRoleNames,
                 stringMessages.enterRoleName());
         rolesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
@@ -95,7 +95,7 @@ public class UserDetailsView extends FlowPanel {
                         }));
             }
         });
-        permissionsEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getPermissions(), stringMessages, IconResources.INSTANCE.remove(), defaultPermissionNames,
+        permissionsEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getPermissions(), stringMessages, com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultPermissionNames,
                 stringMessages.enterPermissionName());
         permissionsEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override

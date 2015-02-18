@@ -277,14 +277,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private void ensureIndicesOnWindTracks(DBCollection windTracks) {
-        windTracks.ensureIndex(FieldNames.RACE_ID.name()); // for new programmatic access
-        windTracks.ensureIndex(FieldNames.REGATTA_NAME.name()); // for export or human look-up
+        windTracks.createIndex(new BasicDBObject(FieldNames.RACE_ID.name(), 1)); // for new programmatic access
+        windTracks.createIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), 1)); // for export or human look-up
         // for legacy access to not yet migrated fixes
-        windTracks.ensureIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1)
+        windTracks.createIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1)
                 .add(FieldNames.RACE_NAME.name(), 1).get());
         // Unique index
         try {
-            windTracks.ensureIndex(
+            windTracks.createIndex(
                     new BasicDBObjectBuilder().add(FieldNames.RACE_ID.name(), 1)
                             .add(FieldNames.WIND_SOURCE_NAME.name(), 1).add(FieldNames.WIND_SOURCE_ID.name(), 1)
                             .add(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1).get(),

@@ -5,8 +5,8 @@ Bundle-SymbolicName: com.sap.sse.mongodb
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: com.mongodb.driver;bundle-version="2.6.2",
- com.sap.sse.common
+Require-Bundle: com.sap.sse.common,
+ org.mongodb.mongo-java-driver;bundle-version="2.13.0"
 Export-Package: com.sap.sse.mongodb
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.util,

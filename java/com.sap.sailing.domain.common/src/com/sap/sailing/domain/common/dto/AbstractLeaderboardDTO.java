@@ -65,20 +65,36 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
      * If the race column whose name is specified in <code>raceColumnName</code> has at least one competitor who has valid
      * {@link LeaderboardEntryDTO#legDetails} for that race column, the maximum number of entries of all such competitors in
      * the leg details is returned, telling the number of legs that the race column shall display. Otherwise, -1 is returned.
-     * If you specify an non null <code>preselectedRace</code> the leg count is calculated only for that race.
+     * If you specify an non null <code>preselectedRace</code> the leg count is calculated only for that race for the column
+     * holding that race. All other columns will be unaffected by <code>preselectedRace</code> and will return their regular
+     * leg count. Note that this may lead to a situation where some competitors may have sailed more legs than others because
+     * their fleet association may have varied across races.<p>
+     * 
+     * See also bug 2604 and bug 2035.
      */
     public int getLegCount(String raceColumnName, RaceIdentifier preselectedRace) {
         int result = -1;
+        final boolean preselectedRaceIsInRaceColumn = isRaceInColumn(preselectedRace, raceColumnName);
         for (LeaderboardRowDTO row : rows.values()) {
             LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
             if (leaderboardEntryDTO != null && leaderboardEntryDTO.legDetails != null
-                    && (preselectedRace == null || (preselectedRace != null && preselectedRace.equals(leaderboardEntryDTO.race)))) {
+                    // when no race is pre-selected, always use the actual leg count;
+                    // otherwise, if the pre-selected race is in the column identified by
+                    // raceColumnName, use the entry only if it's in the pre-selected race;
+                    // otherwise (a race is pre-selected but a different column's leg count
+                    // is requested), use the regular leg count as is.
+                    && (preselectedRace == null || !preselectedRaceIsInRaceColumn || preselectedRace.equals(leaderboardEntryDTO.race))) {
                 result = Math.max(result, leaderboardEntryDTO.legDetails.size());
             }
         }
         return result;
     }
  
+    private boolean isRaceInColumn(RaceIdentifier preselectedRace, String raceColumnName) {
+        RaceColumnDTO raceColumn = getRaceColumnByName(raceColumnName);
+        return raceColumn.containsRace(preselectedRace);
+    }
+
     /**
      * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race represented
      * in this leaderboard.

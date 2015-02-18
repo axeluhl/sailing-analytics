@@ -87,6 +87,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 
@@ -162,8 +163,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             String previousLeaderboardId, boolean fillNetPointsUncorrected) throws Exception;
 
     List<StrippedLeaderboardDTO> getLeaderboards();
-    
-    List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta);
     
     List<StrippedLeaderboardDTO> getLeaderboardsByEvent(EventDTO event);
     
@@ -575,4 +574,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
+    
+    void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
+            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
 }

@@ -60,6 +60,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
@@ -209,7 +210,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
-        LeaderboardRegistry, Replicator {
+        LeaderboardRegistry, Replicator, EventFetcher {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -462,7 +463,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor
-                        .getColor(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
+                        .getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
                         competitor.getTeam().getImage()));
             }
         });
@@ -1789,14 +1790,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 regatta.addSeries(seriesObj);
             }
         }
-        for (Event event : getAllEvents()) {
-            event.removeRegatta(regatta);
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (newDefaultCourseAreaId != null && courseArea.getId().equals(newDefaultCourseAreaId)) {
-                    event.addRegatta(regatta);
-                }
-            }
-        }
+        regatta.adjustEventToRegattaAssociation(this);
         if (regatta.isPersistent()) {
             mongoObjectFactory.storeRegatta(regatta);
         }
@@ -2354,7 +2348,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
-                    dynamicCompetitor.getColor(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+                    dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
         }
         logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 

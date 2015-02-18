@@ -73,7 +73,6 @@ public class Activator implements BundleActivator {
         context.registerService(Replicable.class.getName(), racingEventService, replicableServiceProperties);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
         context.registerService(ClearStateTestSupport.class.getName(), racingEventService, null);
-                
         Dictionary<String, String> properties = new Hashtable<String, String>();
         properties.put(TypeBasedServiceFinder.TYPE, GPSFixImpl.class.getName());
         registrations.add(context.registerService(GPSFixMongoHandler.class,
