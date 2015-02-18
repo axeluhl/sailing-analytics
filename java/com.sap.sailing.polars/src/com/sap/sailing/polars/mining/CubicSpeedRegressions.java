@@ -19,7 +19,7 @@ public class CubicSpeedRegressions {
         for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
             for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
                 regressions.put(new Pair<LegType, Tack>(legType, tack),
-                        new IncrementalAnyOrderLeastSquaresImpl(3, false));
+                        new IncrementalAnyOrderLeastSquaresImpl(4, false));
             }
         }
     }
