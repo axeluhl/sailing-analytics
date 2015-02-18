@@ -20,6 +20,7 @@ import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.BuildVersionRetriever;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
+import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -63,7 +64,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * tabs. {@link AdminConsoleFeatures} list the roles to which they are made available. This map keeps track of the
      * dependencies and allows the UI to adjust to role changes.
      */
-    private final LinkedHashMap<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, AdminConsoleFeatures> roleSpecificTabs;
+    private final LinkedHashMap<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, Permission> roleSpecificTabs;
     
     private final SelectionHandler<Integer> tabSelectionHandler;
     
@@ -209,7 +210,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * @return the horizontal tab panel that was created and added to the top-level vertical tab panel; the panel returned can be specified
      * as argument to {@link #addToTabPanel(TabLayoutPanel, Widget, String, AdminConsoleFeatures)}.
      */
-    public TabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, AdminConsoleFeatures feature) {
+    public TabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, Permission feature) {
         final TabLayoutPanel newTabPanel = new TabLayoutPanel(2.5, Unit.EM);
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
@@ -223,7 +224,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * This is useful for panels that form a top-level category of its own but don't require multiple panels to represent this
      * top-level category.
      */
-    public void addToVerticalTabPanel(final RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+    public void addToVerticalTabPanel(final RefreshableAdminConsolePanel panelToAdd, String tabTitle, Permission feature) {
         addToTabPanel(topLevelTabPanelWrapper, panelToAdd, tabTitle, feature);
     }
 
@@ -234,7 +235,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         return scrollPanel;
     }
 
-    public void addToTabPanel(final TabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+    public void addToTabPanel(final TabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, Permission feature) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
             public void add(Widget child, String text, boolean asHtml) {
@@ -255,7 +256,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * a hook so that when the <code>panelToAdd</code>'s widget is selected then the {@link RefreshableAdminConsolePanel#refreshAfterBecomingVisible()}
      * method can be called.
      */
-    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, Permission feature) {
         remeberWidgetLocationAndFeature(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, feature);
         panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
     }
@@ -264,7 +265,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * Remembers the tab panel in which the <code>widgetToAdd</code> is to be displayed and for which feature.
      */
     private void remeberWidgetLocationAndFeature(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
-            String tabTitle, AdminConsoleFeatures feature) {
+            String tabTitle, Permission feature) {
         roleSpecificTabs.put(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel,
                 widgetToAdd, tabTitle), feature);
     }
@@ -274,10 +275,10 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * to see which tabs. See {@link #roleSpecificTabs}.
      */
     private void updateTabDisplayForCurrentUser(UserDTO user) {
-        for (Map.Entry<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, AdminConsoleFeatures> e : roleSpecificTabs
+        for (Map.Entry<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, Permission> e : roleSpecificTabs
                 .entrySet()) {
             final Widget panelToAdd = e.getKey().getB();
-            if (user != null && user.hasPermission(e.getValue().getRequiredPermission().getStringPermission(), permissionsForRoleProvider)) {
+            if (user != null && user.hasPermission(e.getValue().getStringPermission(), permissionsForRoleProvider)) {
                 e.getKey().getA().add(panelToAdd, e.getKey().getC(), /* asHtml */false);
             } else {
                 e.getKey().getA().remove(panelToAdd);
