@@ -202,7 +202,7 @@ public class WildcardPermission implements Serializable {
 
         int i = 0;
         for (Set<String> otherPart : otherParts) {
-            // If this permission has less parts than the other permission, everything after the number of parts contained
+            // If this permission has fewer parts than the other permission, everything after the number of parts contained
             // in this permission is automatically implied, so return true
             if (getParts().size() - 1 < i) {
                 return true;
