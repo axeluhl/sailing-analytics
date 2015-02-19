@@ -6,8 +6,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math.linear.LUDecompositionImpl;
 import org.apache.commons.math.linear.MatrixUtils;
+import org.apache.commons.math.linear.MatrixVisitorException;
 import org.apache.commons.math.linear.RealMatrix;
+import org.apache.commons.math.linear.RealMatrixPreservingVisitor;
 import org.apache.commons.math.linear.RealVector;
+import org.apache.commons.math.linear.SingularMatrixException;
 
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
@@ -25,6 +28,31 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  *
  */
 public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSquares {
+    
+    private class NaNCheckerVisitor implements RealMatrixPreservingVisitor {
+        
+        private boolean hasNaNEntry = false;
+
+        @Override
+        public void visit(int arg0, int arg1, double arg2) throws MatrixVisitorException {
+            if (Double.isNaN(arg2)) {
+                hasNaNEntry = true;
+            }
+        }
+
+        @Override
+        public void start(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5) {}
+
+        @Override
+        public double end() {
+            return 0.0;
+        }
+
+        public boolean hasNaNEntry() {
+            return hasNaNEntry;
+        }
+
+    }
      
     private double[][] matrixOfXSums;
 
@@ -122,7 +150,7 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         return resultFunction;
     }
 
-    private PolynomialFunction createEstimatingPolynomialFunction() {
+    private PolynomialFunction createEstimatingPolynomialFunction() throws NotEnoughDataHasBeenAddedException {
         PolynomialFunction resultFunction;
         RealMatrix matrixOfXSumsCopy;
         RealVector vectorOfXYMultSumsCopy;
@@ -139,7 +167,18 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             inversedMatrix = type.inverseMatrix(matrixOfXSumsCopy);
         }
         if (inversedMatrix == null) {
-            inversedMatrix = new LUDecompositionImpl(matrixOfXSumsCopy).getSolver().getInverse();
+            try {
+                inversedMatrix = new LUDecompositionImpl(matrixOfXSumsCopy).getSolver().getInverse();
+            } catch (SingularMatrixException singularMatrixException) {
+                throw new NotEnoughDataHasBeenAddedException("Matrix singular, all x input equal?", singularMatrixException);
+            }
+        } else {
+            NaNCheckerVisitor nanChecker = new NaNCheckerVisitor();
+            inversedMatrix.walkInOptimizedOrder(nanChecker);
+            if (nanChecker.hasNaNEntry()) {
+                throw new NotEnoughDataHasBeenAddedException("Matrix singular, all x input equal?");
+            }
+            
         }
         RealVector coeffs = inversedMatrix.operate(vectorOfXYMultSumsCopy);
         if (!hasIntercept) {
@@ -248,10 +287,10 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
          */
         private static LeastSquaresInversionHelperType getType(int order, boolean hasIntercept) {
             LeastSquaresInversionHelperType result = null;
-            switch(order) {
-                case 3: 
-                    result = hasIntercept ? CUBIC : CUBIC_NO_INTERCEPT;
-                    break;
+            switch (order) {
+            case 3:
+                result = hasIntercept ? CUBIC : CUBIC_NO_INTERCEPT;
+                break;
             }
             return result;
         }

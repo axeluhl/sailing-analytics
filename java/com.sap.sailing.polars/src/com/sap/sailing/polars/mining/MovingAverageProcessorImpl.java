@@ -24,103 +24,67 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
-import com.sap.sailing.polars.regression.BoatSpeedEstimator;
+import com.sap.sailing.polars.regression.MovingAverageBoatSpeedEstimator;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.impl.WindSpeedAndAngleEstimator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
-import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class IncrementalRegressionProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>,
-        PolarSheetAnalyzer {
+public class MovingAverageProcessorImpl implements MovingAverageProcessor {
 
-    private static final Logger logger = Logger.getLogger(IncrementalRegressionProcessor.class.getName());
+    private static final Logger logger = Logger.getLogger(MovingAverageProcessorImpl.class.getName());
 
-    private final Map<GroupKey, BoatSpeedEstimator> boatSpeedEstimators = new HashMap<GroupKey, BoatSpeedEstimator>();
+    private final Map<GroupKey, MovingAverageBoatSpeedEstimator> boatSpeedEstimators = new HashMap<>();
+    
+    private final Map<GroupKey, AverageAngleContainer> averageAngleContainers = new HashMap<>();
 
     private final ClusterGroup<Speed> speedClusterGroup;
 
     private final Set<BoatClass> availableBoatClasses = new HashSet<>();
 
-    private final Map<Pair<LegType, Tack>, AverageAngleContainer> averageAngleContainers;
-    
-    private final Map<BoatClass, CubicSpeedRegressions> cubicRegressions = new HashMap<>();
 
-    public IncrementalRegressionProcessor(ClusterGroup<Speed> speedClusterGroup) {
+
+    public MovingAverageProcessorImpl(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
-        averageAngleContainers = new HashMap<>();
-        for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
-            for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
-                averageAngleContainers.put(new Pair<LegType, Tack>(legType, tack),
-                        new AverageAngleContainer(speedClusterGroup));
-            }
-        }
     }
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
         GroupKey key = element.getKey();
-        BoatSpeedEstimator boatSpeedEstimator;
+        MovingAverageBoatSpeedEstimator boatSpeedEstimator;
         synchronized (boatSpeedEstimators) {
             boatSpeedEstimator = boatSpeedEstimators.get(key);
             if (boatSpeedEstimator == null) {
-                boatSpeedEstimator = new BoatSpeedEstimator();
+                boatSpeedEstimator = new MovingAverageBoatSpeedEstimator();
                 boatSpeedEstimators.put(key, boatSpeedEstimator);
-                availableBoatClasses.add(element.getDataEntry().getBoatClass());
+            }
+        }
+        AverageAngleContainer averageAngleContainer;
+        synchronized (averageAngleContainers) {
+            averageAngleContainer = averageAngleContainers.get(key);
+            if (averageAngleContainer == null) {
+                averageAngleContainer = new AverageAngleContainer();
+                averageAngleContainers.put(key, averageAngleContainer);
             }
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         BearingWithConfidence<Integer> angleToTheWind = fix.getAngleToTheWind();
         WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWindSpeed();
         SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
-        // Only add GPS data if speeds and angles are not null, else do nothing!
-        if (angleToTheWind != null && windSpeed != null && boatSpeedWithConfidence != null) {
-            fillAverageAngleContainer(fix, element, windSpeed);
-            fillCubicRegressions(fix);
-            WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;
-            double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
-            double confidenceForWindBearing = angleToTheWind.getConfidence();
-            double confidenceForBoatSpeed = boatSpeedWithConfidence.getConfidence();
-            double averagedConfidence = (confidenceForBoatSpeed + confidenceForWindBearing + confidenceForWindSpeed) / 3;
-            boatSpeedEstimator.addData(boatSpeedWithConfidence.getObject(), averagedConfidence);
-        }
-    }
-
-    private void fillCubicRegressions(GPSFixMovingWithPolarContext fix) {
-        if (!cubicRegressions.containsKey(fix.getBoatClass())) {
-            cubicRegressions.put(fix.getBoatClass(), new CubicSpeedRegressions());
-        }
-        cubicRegressions.get(fix.getBoatClass()).addFix(fix);
-    }
-
-    private void fillAverageAngleContainer(GPSFixMovingWithPolarContext fix,
-            GroupedDataEntry<GPSFixMovingWithPolarContext> element,
-            WindWithConfidence<Pair<Position, TimePoint>> windSpeed) {
-        final int roundedAngleDeg = fix.getRoundedTrueWindAngle().getAngleDeg();
-        final LegType legType;
-        final Tack tack;
-        if (roundedAngleDeg < -90) {
-            legType = LegType.DOWNWIND;
-            tack = Tack.PORT;
-        } else if (roundedAngleDeg < 0) {
-            legType = LegType.UPWIND;
-            tack = Tack.PORT;
-        } else if (roundedAngleDeg > 90) {
-            legType = LegType.DOWNWIND;
-            tack = Tack.STARBOARD;
-        } else { // roundedAngleDeg > 0 && roundedAngleDeg <= 90
-            legType = LegType.UPWIND;
-            tack = Tack.STARBOARD;
-        }
-        averageAngleContainers.get(new Pair<>(legType, tack)).addFix(element.getDataEntry().getBoatClass(),
-                windSpeed.getObject(), roundedAngleDeg);
+        availableBoatClasses.add(element.getDataEntry().getBoatClass());
+        WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;
+        double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
+        double confidenceForWindBearing = angleToTheWind.getConfidence();
+        double confidenceForBoatSpeed = boatSpeedWithConfidence.getConfidence();
+        double averagedConfidence = (confidenceForBoatSpeed + confidenceForWindBearing + confidenceForWindSpeed) / 3;
+        averageAngleContainer.addFix(angleToTheWind.getObject().getDegrees());
+        boatSpeedEstimator.addData(boatSpeedWithConfidence.getObject(), averagedConfidence);
     }
 
     @Override
@@ -155,40 +119,23 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         }
     }
     
-    SpeedWithConfidenceAndDataCount estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
-            final Bearing trueWindAngle) throws NotEnoughDataHasBeenAddedException {
-        PolarClusterKey key = new PolarClusterKey() {
-            @Override
-            public RoundedTrueWindAngle getRoundedTrueWindAngle() {
-                return new RoundedTrueWindAngle(trueWindAngle);
-            }
-
-            @Override
-            public BoatClass getBoatClass() {
-                return boatClass;
-            }
-
-            @Override
-            public Cluster<Speed> getWindSpeedCluster() {
-                return speedClusterGroup.getClusterFor(windSpeed);
-            }
-        };
-        GroupKey compoundKey;
-        try {
-            compoundKey = GroupKeyFactory.createNestingCompoundKeyFor(key, PolarDataDimensionCollectionFactory
-                    .getClusterKeyDimensions().iterator());
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        BoatSpeedEstimator boatSpeedEstimator = boatSpeedEstimators.get(compoundKey);
+    private SpeedWithConfidenceAndDataCount estimateBoatSpeed(GroupKey key) throws NotEnoughDataHasBeenAddedException {
+        MovingAverageBoatSpeedEstimator boatSpeedEstimator = boatSpeedEstimators.get(key);
         if (boatSpeedEstimator == null) {
             throw new NotEnoughDataHasBeenAddedException();
         }
-        Speed speedWithoutConfidence = boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(), trueWindAngle.getDegrees());
+        Speed speedWithoutConfidence = boatSpeedEstimator.estimateSpeed();
         final int dataCount = boatSpeedEstimator.getDataCount();
         double confidence = boatSpeedEstimator.getConfidence();
         return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(speedWithoutConfidence, confidence, null), dataCount);
+    }
+    
+    private Bearing estimateAngle(GroupKey key) throws NotEnoughDataHasBeenAddedException {
+        AverageAngleContainer averageAngleContainer = averageAngleContainers.get(key);
+        if (averageAngleContainer == null) {
+            throw new NotEnoughDataHasBeenAddedException();
+        }
+        return new DegreeBearingImpl(averageAngleContainer.getAverageAngleDeg());
     }
     
     Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
@@ -208,7 +155,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround;
             try {
                 averageSpeedAndCourseOverGround = getAverageSpeedAndCourseOverGround(
-                        boatClass, windSpeed, legType, tack, false);
+                        boatClass, windSpeed, legType, tack);
                 averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(windSpeed,
                         averageSpeedAndCourseOverGround));
             } catch (NotEnoughDataHasBeenAddedException e) {
@@ -242,30 +189,52 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
 
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack, boolean useCubicRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
-        Double averageAngle = averageAngleContainers.get(new Pair<>(legType, tack)).getAverageAngleDeg(
-                boatClass, windSpeed);
-        SpeedWithBearingWithConfidence<Void> result;
-        if (useCubicRegressionForSpeed) {
-            DegreeBearingImpl angleToTheWind = new DegreeBearingImpl(averageAngle);
-            SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(cubicRegressions.get(boatClass)
-                    .estimateSpeedInKnots(legType, tack, windSpeed.getKnots()), angleToTheWind);
-            result = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, /* FIXME */0.5, null);
-        } else {
-            result = estimateSpeedForAverageAngle(boatClass, windSpeed, averageAngle);
-        }
+            Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
+        SpeedWithBearingWithConfidence<Void> result = estimateSpeedAndAngle(boatClass, windSpeed, legType, tack);
         return result;
     }
 
-    private SpeedWithBearingWithConfidence<Void> estimateSpeedForAverageAngle(BoatClass boatClass, Speed windSpeed,
-            Double averageAngle) throws NotEnoughDataHasBeenAddedException {
-        if (averageAngle == null) {
-            throw new NotEnoughDataHasBeenAddedException();
-        }
-        DegreeBearingImpl angleToTheWind = new DegreeBearingImpl(averageAngle);
-        SpeedWithConfidence<Void> estimatedSpeed = estimateBoatSpeed(boatClass, windSpeed, angleToTheWind).getSpeedWithConfidence();
-        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed.getObject().getKnots(), angleToTheWind);
+    private SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(BoatClass boatClass, Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
+        GroupKey key = createGroupKey(boatClass, windSpeed, legType, tack);
+        Bearing angleDiffTrueWindToBoat = estimateAngle(key);
+        SpeedWithConfidence<Void> estimatedSpeed = estimateBoatSpeed(key).getSpeedWithConfidence();
+        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed.getObject().getKnots(), angleDiffTrueWindToBoat);
         return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, estimatedSpeed.getConfidence(), null);
+    }
+    
+    private GroupKey createGroupKey(final BoatClass boatClass, final Speed windSpeed, final LegType legType,
+            final Tack tack) {
+        MovingAveragePolarClusterKey key = new MovingAveragePolarClusterKey() {
+
+            @Override
+            public BoatClass getBoatClass() {
+                return boatClass;
+            }
+
+            @Override
+            public Cluster<Speed> getWindSpeedCluster() {
+                return speedClusterGroup.getClusterFor(windSpeed);
+            }
+
+            @Override
+            public Tack getTack() {
+                return tack;
+            }
+
+            @Override
+            public LegType getLegType() {
+                return legType;
+            }
+        };
+        GroupKey compoundKey;
+        try {
+            compoundKey = GroupKeyFactory.createNestingCompoundKeyFor(key, PolarDataDimensionCollectionFactory
+                    .getMovingAverageClusterKeyDimensions().iterator());
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return compoundKey;
     }
 
 }

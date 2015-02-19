@@ -30,8 +30,6 @@ import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
-import com.sap.sailing.polars.mining.IncrementalRegressionProcessor.SpeedWithConfidenceAndDataCount;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -40,7 +38,7 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 
-public class PolarDataMiner implements PolarSheetAnalyzer {
+public class PolarDataMiner {
 
     private static final int THREAD_POOL_SIZE = Math.min(Runtime.getRuntime().availableProcessors(), 3);
     private static final ThreadPoolExecutor executor = createExecutor();
@@ -53,7 +51,19 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
 
 
     private AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext> enrichingProcessor;
-    private IncrementalRegressionProcessor incrementalRegressionProcessor;
+    
+    /**
+     * This processor keeps track of the moving average of the speed values and the average angle for each course (legtype tack combination)
+     */
+    private MovingAverageProcessor movingAverageProcessor;
+    
+    /**
+     * This processor uses two cubic regressions angle to the true wind over windspeed and boatspeed over windspeed for each
+     * course (legtype tack combination)
+     */
+    private CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor;
+    
+    private SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor;
 
     public PolarDataMiner() {
         this(PolarSheetGenerationSettingsImpl.createBackendPolarSettings());
@@ -74,16 +84,41 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         WindSpeedSteppingWithMaxDistance stepping = backendPolarSheetGenerationSettings.getWindSpeedStepping();
         final ClusterGroup<Speed> speedClusterGroup = SpeedClusterGroupFromWindSteppingCreator
                 .createSpeedClusterGroupFrom(stepping);
-        incrementalRegressionProcessor = new IncrementalRegressionProcessor(speedClusterGroup);
-        Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> grouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
-        grouperResultReceivers.add(incrementalRegressionProcessor);
+        movingAverageProcessor = new MovingAverageProcessorImpl(speedClusterGroup);
+        Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> movingAverageGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
+        movingAverageGrouperResultReceivers.add(movingAverageProcessor);
 
-        Collection<Function<?>> dimensions = PolarDataDimensionCollectionFactory.getClusterKeyDimensions();
+        Collection<Function<?>> movingAverageDimensions = PolarDataDimensionCollectionFactory.getMovingAverageClusterKeyDimensions();
 
-        Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> groupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, grouperResultReceivers, dimensions);
+        Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> movingAverageGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
+                GPSFixMovingWithPolarContext.class, executor, movingAverageGrouperResultReceivers, movingAverageDimensions);
+        
 
-        Collection<Processor<GPSFixMovingWithPolarContext, ?>> filteringResultReceivers = Arrays.asList(groupingProcessor);
+        cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();
+        Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerCourseGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
+        regressionPerCourseGrouperResultReceivers.add(cubicRegressionPerCourseProcessor);
+
+        Collection<Function<?>> cubicRegressionPerCourseDimensions = PolarDataDimensionCollectionFactory.getCubicRegressionPerCourseClusterKeyDimensions();
+
+        Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> cubicRegressionPerCourseGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
+                GPSFixMovingWithPolarContext.class, executor, regressionPerCourseGrouperResultReceivers, cubicRegressionPerCourseDimensions);
+        
+        ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
+        speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup);
+        Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerAngleClusterGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
+        regressionPerAngleClusterGrouperResultReceivers.add(speedRegressionPerAngleClusterProcessor);
+
+        Collection<Function<?>> regressionPerAngleClusterDimensions = PolarDataDimensionCollectionFactory.getSpeedRegressionPerAngleClusterClusterKeyDimensions();
+
+        Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> regressionPerAngleClusterGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
+                GPSFixMovingWithPolarContext.class, executor, regressionPerAngleClusterGrouperResultReceivers, regressionPerAngleClusterDimensions);
+
+          
+        Collection<Processor<GPSFixMovingWithPolarContext, ?>> filteringResultReceivers = new ArrayList<>();
+        filteringResultReceivers.add(movingAverageGroupingProcessor);
+        filteringResultReceivers.add(cubicRegressionPerCourseGroupingProcessor);
+        filteringResultReceivers.add(regressionPerAngleClusterGroupingProcessor);
+           
         Processor<GPSFixMovingWithPolarContext, GPSFixMovingWithPolarContext> filteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithPolarContext>(
                 GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria(backendPolarSheetGenerationSettings.getNumberOfLeadingCompetitorsToInclude()));
 
@@ -97,11 +132,15 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
             @Override
             protected GPSFixMovingWithPolarContext enrich(GPSFixMovingWithOriginInfo element) {
                 return new GPSFixMovingWithPolarContext(element.getFix(), element.getTrackedRace(), element.getCompetitor(),
-                        speedClusterGroup);
+                        speedClusterGroup, angleClusterGroup);
             }
         };
     }
 
+
+    private ClusterGroup<Bearing> createAngleClusterGroup() {
+        return new BearingClusterGroup(-180, 180, 5);
+    }
 
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
         enrichingProcessor.processElement(new GPSFixMovingWithOriginInfo(fix, trackedRace,
@@ -124,12 +163,12 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
      */
     public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle)
             throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle).getSpeedWithConfidence();
+        return speedRegressionPerAngleClusterProcessor.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle);
     }
     
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
-        return incrementalRegressionProcessor.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
+        return cubicRegressionPerCourseProcessor.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
     }
 
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
@@ -146,19 +185,18 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
             Integer[] perAngle = new Integer[360];
             Map<Integer, PolarSheetsHistogramData> perWindSpeed = new HashMap<>();
             for (int angle = 0; angle < 360; angle++) {
-                SpeedWithConfidenceAndDataCount speedWithConfidenceAndDataCount;
+                SpeedWithConfidence<Void> speedWithConfidence;
                 try {
                     int convertedAngle = convertAngleIfNecessary(angle);
-                    speedWithConfidenceAndDataCount = incrementalRegressionProcessor.estimateBoatSpeed(boatClass,
+                    speedWithConfidence = speedRegressionPerAngleClusterProcessor.estimateBoatSpeed(boatClass,
                             new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(convertedAngle));
                 } catch (NotEnoughDataHasBeenAddedException e) {
                     // No data so put in a 0 speed with 0 confidence
-                    speedWithConfidenceAndDataCount = new SpeedWithConfidenceAndDataCount(
-                            new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(0), 0, null), 0);
+                    speedWithConfidence = new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(0), 0, null);
                 }
                             
-                averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidenceAndDataCount.getSpeedWithConfidence().getObject().getKnots();
-                int dataCount = speedWithConfidenceAndDataCount.getDataCount();
+                averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidence.getObject().getKnots();
+                int dataCount = 0; /*FIXME*/
                 
                 totalDataCount = totalDataCount + dataCount;
                 // FIXME hard coded
@@ -200,19 +238,14 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
     }
 
     public Set<BoatClass> getAvailableBoatClasses() {
-        return incrementalRegressionProcessor.getAvailableBoatClasses();
+        return movingAverageProcessor.getAvailableBoatClasses();
     }
 
     public int[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive) {
         int[] dataCounts = new int[360];
         for (int angle = 0; angle < 360; angle++) {
             if (angle >= startAngleInclusive && angle < endAngleExclusive) {
-                try {
-                    dataCounts[angle] = incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed,
-                            new DegreeBearingImpl(convertAngleIfNecessary(angle))).getDataCount();
-                } catch (NotEnoughDataHasBeenAddedException e) {
-                    dataCounts[angle] = 0;
-                }
+                dataCounts[angle] = 0; /*FIXME*/
             } else {
                 dataCounts[angle] = -1;
             }
@@ -220,9 +253,14 @@ public class PolarDataMiner implements PolarSheetAnalyzer {
         return dataCounts;
     }
 
-    @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack, useRegressionForSpeed);
+            Speed windSpeed, LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException {  
+        SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround  = null;
+        if (useRegressionForSpeed) {
+            averageSpeedAndCourseOverGround  = cubicRegressionPerCourseProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
+        } else {
+            averageSpeedAndCourseOverGround  = movingAverageProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
+        }
+        return averageSpeedAndCourseOverGround;
     }
 }

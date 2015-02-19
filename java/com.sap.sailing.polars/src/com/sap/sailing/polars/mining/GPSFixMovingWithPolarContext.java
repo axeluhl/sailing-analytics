@@ -7,9 +7,11 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
@@ -24,7 +26,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 
-public class GPSFixMovingWithPolarContext implements PolarClusterKey {
+public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKey, AngleClusterPolarClusterKey {
 
     private final GPSFixMoving fix;
     private final TrackedRace race;
@@ -32,13 +34,15 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     private final ClusterGroup<Speed> windSpeedClusterGroup;
     private final Set<WindSource> windSourcesToExcludeForBearing;
     private final Set<WindSource> windSourcesToExcludeForSpeed;
+    private final ClusterGroup<Bearing> angleClusterGroup;
 
     public GPSFixMovingWithPolarContext(GPSFixMoving fix, TrackedRace race, Competitor competitor,
-            ClusterGroup<Speed> windSpeedClusterGroup) {
+            ClusterGroup<Speed> windSpeedClusterGroup, ClusterGroup<Bearing> angleClusterGroup) {
         this.fix = fix;
         this.race = race;
         this.competitor = competitor;
         this.windSpeedClusterGroup = windSpeedClusterGroup;
+        this.angleClusterGroup = angleClusterGroup;
         this.windSourcesToExcludeForBearing = collectWindSourcesToIgnoreForBearing();
         this.windSourcesToExcludeForSpeed = collectWindSourcesToIgnoreForSpeed();
     }
@@ -53,12 +57,6 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
 
     public Competitor getCompetitor() {
         return competitor;
-    }
-
-    @Override
-    public RoundedTrueWindAngle getRoundedTrueWindAngle() {
-        final BearingWithConfidence<Integer> angleToTheWind = getAngleToTheWind();
-        return angleToTheWind == null ? null : new RoundedTrueWindAngle(angleToTheWind.getObject());
     }
 
     public BearingWithConfidence<Integer> getAngleToTheWind() {
@@ -146,6 +144,36 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     @Override
     public BoatClass getBoatClass() {
         return race.getRace().getBoatClass();
+    }
+
+    @Override
+    public Tack getTack() {
+        return getTack(getAngleToTheWind().getObject());
+    }
+
+    public static Tack getTack(Bearing angleDifferenceWindToBoat) {
+        return angleDifferenceWindToBoat.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
+    }
+
+    @Override
+    public LegType getLegType() {
+        return getLegTypeWithPolarConstraints(getAngleToTheWind().getObject());
+    }
+
+    public static LegType getLegTypeWithPolarConstraints(Bearing angleDifferenceWindToBoat) {
+        double absoluteDiffInDeg = Math.abs(angleDifferenceWindToBoat.getDegrees());
+        LegType result = null;
+        if (absoluteDiffInDeg > 20 && absoluteDiffInDeg < 75) {
+            result = LegType.UPWIND;
+        } else if (absoluteDiffInDeg > 105) {
+            result = LegType.DOWNWIND;
+        }
+        return result;
+    }
+
+    @Override
+    public Cluster<Bearing> getAngleDiffTrueWindToBoat() {
+        return angleClusterGroup.getClusterFor(getAngleToTheWind().getObject());
     }
 
 }

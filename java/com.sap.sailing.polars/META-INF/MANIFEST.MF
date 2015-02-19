@@ -8,7 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Export-Package: 
  com.sap.sailing.polars,
- com.sap.sailing.polars.analysis,
  com.sap.sailing.polars.data,
  com.sap.sailing.polars.factory,
  com.sap.sailing.polars.regression,

@@ -4,11 +4,16 @@ import java.util.Iterator;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.FilterCriterion;
 
 public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithPolarContext> {
@@ -35,6 +40,11 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
 
     @Override
     public boolean matches(GPSFixMovingWithPolarContext element) {
+        boolean importantDataIsNotNull = importantDataIsNotNull(element);
+        if (!importantDataIsNotNull) {
+            return false;
+        }
+        boolean hasLegType = hasLegType(element);
         boolean afterStartTime = isAfterStartTime(element);
         boolean beforeFinishTime = isBeforeFinishTime(element);
         boolean noDirectionChange = !hasDirectionChange(element);
@@ -42,9 +52,24 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         if (numberOfLeadingCompetitorsToInclude > 0) {
             isInLeadingCompetitors = isInLeadingCompetitors(element);
         }
-        return (afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors);
+        return (importantDataIsNotNull && hasLegType && afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors);
     }
     
+    private boolean importantDataIsNotNull(GPSFixMovingWithPolarContext element) {
+        BearingWithConfidence<Integer> angleToTheWind = element.getAngleToTheWind();
+        WindWithConfidence<Pair<Position, TimePoint>> windSpeed = element.getWindSpeed();
+        SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = element.getBoatSpeed();
+        boolean result = false;
+        if (angleToTheWind != null && windSpeed != null && boatSpeedWithConfidence != null) {
+            result = true;
+        }
+        return result;
+    }
+
+    private boolean hasLegType(GPSFixMovingWithPolarContext element) {
+        return element.getLegType() != null;
+    }
+
     private boolean isInLeadingCompetitors(GPSFixMovingWithPolarContext element) {
         boolean result = false;
         Iterator<MarkPassing> finishPassings = element.getRace()

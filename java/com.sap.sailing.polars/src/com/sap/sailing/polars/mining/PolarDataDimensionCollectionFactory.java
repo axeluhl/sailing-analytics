@@ -4,25 +4,66 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 
 public class PolarDataDimensionCollectionFactory {
 
-    public static Collection<Function<?>> getClusterKeyDimensions() throws NoSuchMethodException {
+    public static Collection<Function<?>> getMovingAverageClusterKeyDimensions() throws NoSuchMethodException {
         Collection<Function<?>> dimensions = new ArrayList<>();
         FunctionFactory functionFactory = new FunctionFactory();
-        Function<RoundedTrueWindAngle> angleFunction = functionFactory
-                .createMethodWrappingFunction(PolarClusterKey.class.getMethod("getRoundedTrueWindAngle",
-                        new Class<?>[0]));
-        Function<WindSpeedLevel> windSpeedFunction = functionFactory.createMethodWrappingFunction(PolarClusterKey.class
-                .getMethod("getWindSpeedCluster", new Class<?>[0]));
-        Function<BoatClass> boatClassFunction = functionFactory.createMethodWrappingFunction(PolarClusterKey.class
-                .getMethod("getBoatClass", new Class<?>[0]));
+        addTackAndLegTypeDimensions(dimensions, functionFactory);
 
-        dimensions.add(boatClassFunction);
-        dimensions.add(angleFunction);
+        addPolarBaseDimension(dimensions, functionFactory);
+
+
+        
+        Function<WindSpeedLevel> windSpeedFunction = functionFactory.createMethodWrappingFunction(MovingAveragePolarClusterKey.class
+                .getMethod("getWindSpeedCluster", new Class<?>[0]));
         dimensions.add(windSpeedFunction);
+        return dimensions;
+    }
+
+    private static void addTackAndLegTypeDimensions(Collection<Function<?>> dimensions, FunctionFactory functionFactory)
+            throws NoSuchMethodException {
+        Function<Tack> tackFunction = functionFactory
+                .createMethodWrappingFunction(MovingAveragePolarClusterKey.class.getMethod("getTack",
+                        new Class<?>[0]));
+        Function<LegType> legTypeFunction = functionFactory
+                .createMethodWrappingFunction(MovingAveragePolarClusterKey.class.getMethod("getLegType",
+                        new Class<?>[0]));
+        dimensions.add(tackFunction);
+        dimensions.add(legTypeFunction);
+    }
+
+    private static void addPolarBaseDimension(Collection<Function<?>> dimensions, FunctionFactory functionFactory)
+            throws NoSuchMethodException {
+        Function<BoatClass> boatClassFunction = functionFactory.createMethodWrappingFunction(MovingAveragePolarClusterKey.class
+                .getMethod("getBoatClass", new Class<?>[0]));
+        dimensions.add(boatClassFunction);
+    }
+
+    public static Collection<Function<?>> getCubicRegressionPerCourseClusterKeyDimensions() throws NoSuchMethodException {
+        Collection<Function<?>> dimensions = new ArrayList<>();
+        FunctionFactory functionFactory = new FunctionFactory();
+        addTackAndLegTypeDimensions(dimensions, functionFactory);
+
+        addPolarBaseDimension(dimensions, functionFactory);
+        return dimensions;
+    }
+    
+    public static Collection<Function<?>> getSpeedRegressionPerAngleClusterClusterKeyDimensions() throws NoSuchMethodException {
+        Collection<Function<?>> dimensions = new ArrayList<>();
+        FunctionFactory functionFactory = new FunctionFactory();
+
+        addPolarBaseDimension(dimensions, functionFactory);
+        
+        Function<BoatClass> angleDiffTrueWindToBoatFunction = functionFactory.createMethodWrappingFunction(AngleClusterPolarClusterKey.class
+                .getMethod("getAngleDiffTrueWindToBoat", new Class<?>[0]));
+        dimensions.add(angleDiffTrueWindToBoatFunction);
+        
         return dimensions;
     }
 
