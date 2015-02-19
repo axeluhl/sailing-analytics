@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -73,6 +74,7 @@ public class PolarDataMinerTest {
                 false, 3);
     }
 
+    @Ignore
     @Test
     public void testGrouping() throws InterruptedException, TimeoutException, NoSuchMethodException,
             NotEnoughDataHasBeenAddedException {
