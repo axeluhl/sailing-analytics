@@ -5314,7 +5314,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         movingAverageSpeedDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
                                 new Pair<Double, Double>(windInKnots, averageUpwindStarboardMovingAverage.getObject()
                                         .getKnots()));
+                        
 
+                        averageConfidenceDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
+                                new Pair<Double, Double>(windInKnots, averageUpwindStarboardMovingAverage
+                                        .getConfidence()));
+                        
+                    } catch (NotEnoughDataHasBeenAddedException e) {
+                        // Do not add a point to the result
+                    }
+                    
+                    try {
                         SpeedWithBearingWithConfidence<Void> averageUpwindStarboardRegression = getService()
                                 .getPolarDataService().getAverageSpeedWithBearing(boatClass,
                                         new KnotSpeedImpl(windInKnots), legType, tack, true);
@@ -5322,10 +5332,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         regressionSpeedDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
                                 new Pair<Double, Double>(windInKnots, averageUpwindStarboardRegression.getObject()
                                         .getKnots()));
-
-                        averageConfidenceDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
-                                new Pair<Double, Double>(windInKnots, averageUpwindStarboardMovingAverage
-                                        .getConfidence()));
                     } catch (NotEnoughDataHasBeenAddedException e) {
                         // Do not add a point to the result
                     }
