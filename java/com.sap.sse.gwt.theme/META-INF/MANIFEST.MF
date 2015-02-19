@@ -12,7 +12,6 @@ Import-Package: org.osgi.framework;version="1.7.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0"
 Require-Bundle: com.google.gwt.osgi;bundle-version="2.7.0",
- com.sap.sailing.domain.common,
  com.sap.sse.common,
  com.sap.sse.gwt
 Web-ContextPath: /theme
