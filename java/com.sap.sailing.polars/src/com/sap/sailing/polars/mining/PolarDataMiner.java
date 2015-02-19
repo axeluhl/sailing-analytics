@@ -40,7 +40,7 @@ import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestin
 
 public class PolarDataMiner {
 
-    private static final int THREAD_POOL_SIZE = Math.min(Runtime.getRuntime().availableProcessors(), 3);
+    private static final int THREAD_POOL_SIZE = Math.max((int) (Runtime.getRuntime().availableProcessors() * (3.0/4.0)), 3);
     private static final ThreadPoolExecutor executor = createExecutor();
     private final PolarSheetGenerationSettings backendPolarSheetGenerationSettings;
 
