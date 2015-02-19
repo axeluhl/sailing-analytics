@@ -1,6 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -51,8 +52,18 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
     
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
-        // TODO Auto-generated method stub
-        return null;
+        GroupKey key = createGroupKey(boatClass, legType, tack);
+        Set<SpeedWithBearingWithConfidence<Void>> result = new HashSet<>();
+        if (regressions.containsKey(key)) {
+            try {
+                result = regressions.get(key).estimateTrueWindSpeedAndAngleCandidates(speedOverGround);
+            } catch (NotEnoughDataHasBeenAddedException e) {
+                // Return empty result
+            }
+        } else {
+            // Return empty result;
+        }
+        return result;
     }
     
     private GroupKey createGroupKey(final BoatClass boatClass, final LegType legType,

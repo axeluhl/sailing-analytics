@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
@@ -24,12 +26,14 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -168,7 +172,48 @@ public class PolarDataMiner {
     
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
-        return cubicRegressionPerCourseProcessor.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
+        Set<SpeedWithBearingWithConfidence<Void>> resultSet = cubicRegressionPerCourseProcessor.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
+        if (resultSet.isEmpty()) {
+            // FALLBACK function if no data was available
+            resultSet = getAverageTrueWindSpeedAndAngleCandidatesWithFallbackFunction(boatClass, speedOverGround, legType, tack);
+        }
+        return resultSet;
+    }
+    
+    private Set<SpeedWithBearingWithConfidence<Void>> getAverageTrueWindSpeedAndAngleCandidatesWithFallbackFunction(BoatClass boatClass,
+            Speed speedOverGround, LegType legType, Tack tack) {
+        
+        // The following is an estimation function. It only serves as a stub. It's the same for all boatclasses and returns
+        // default maneuver angles. This is NOT final.
+        // The function is able to return boat speed values for windspeed alues between 5kn and 25kn , which are some kind of realistic
+        // for sailing boats. They are taken from the 505 polars we gathered in the races until now.
+        // TODO keep a cache of sampling points over which to fit a function for every boat class and then return the
+        // corresponding angle
+
+        Set<SpeedWithBearingWithConfidence<Void>> resultSet = new HashSet<>();
+        final int tackFactor = (tack.equals(Tack.PORT)) ? -1 : 1;
+        if (legType.equals(LegType.UPWIND)) {
+            CubicEquation upWindEquation = new CubicEquation(0.0002, -0.0245, 0.7602, -0.0463-speedOverGround.getKnots());
+            int angle = 49 * tackFactor;
+            solveAndAddResults(resultSet, upWindEquation, angle);
+        } else if (legType.equals(LegType.DOWNWIND)) {
+            CubicEquation downWindEquation = new CubicEquation(0.0003, -0.0373, 1.5213, -2.1309-speedOverGround.getKnots());
+            int angle = 30 * tackFactor;
+            solveAndAddResults(resultSet, downWindEquation, angle);
+        }
+        return resultSet;
+        //return polarDataMiner.estimateTrueWindSpeedAndAngleCandidates(boatClass, speedOverGround, legType, tack);
+    }
+
+    private void solveAndAddResults(Set<SpeedWithBearingWithConfidence<Void>> result, CubicEquation equation, int angle) {
+        double[] windSpeedCandidates = equation.solve();
+        for (int i = 0; i < windSpeedCandidates.length; i++) {
+            double windSpeedCandidateInKnots = windSpeedCandidates[i] > 0 ? windSpeedCandidates[i] : 0;
+            if (windSpeedCandidateInKnots < 40) {
+                result.add(new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
+                        windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.00001, null));
+            }
+        }
     }
 
     public PolarSheetsData createFullSheetForBoatClass(BoatClass boatClass) {
@@ -196,7 +241,7 @@ public class PolarDataMiner {
                 }
                             
                 averagedPolarDataByWindSpeed[windIndex][angle] = speedWithConfidence.getObject().getKnots();
-                int dataCount = 0; /*FIXME*/
+                int dataCount = 200; /*FIXME*/
                 
                 totalDataCount = totalDataCount + dataCount;
                 // FIXME hard coded

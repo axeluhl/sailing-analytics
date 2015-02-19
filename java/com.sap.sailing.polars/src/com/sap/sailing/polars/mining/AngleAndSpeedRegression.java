@@ -1,5 +1,8 @@
 package com.sap.sailing.polars.mining;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -10,6 +13,7 @@ import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
@@ -35,6 +39,33 @@ public class AngleAndSpeedRegression {
         Bearing bearing = new DegreeBearingImpl(estimatedAngle);
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed, bearing);
         return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, /*FIXME*/ 0.5, null);
+    }
+
+    public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(Speed speedOverGround) throws NotEnoughDataHasBeenAddedException {
+        double[] coefficiants = speedRegression.getOrCreatePolynomialFunction().getCoefficients();
+        CubicEquation equation = new CubicEquation(coefficiants[2], coefficiants[1], coefficiants[0], -speedOverGround.getKnots());
+        
+        double[] windSpeedCandidates = equation.solve();
+        Set<SpeedWithBearingWithConfidence<Void>> result = new HashSet<>();
+        for (int i = 0; i < windSpeedCandidates.length; i++) {
+            double windSpeedCandidateInKnots = windSpeedCandidates[i];
+            if (windSpeedCandidateInKnots >= 0) {
+                double angle = 0;
+                boolean angleFound;
+                try {
+                    angle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedCandidateInKnots);
+                    angleFound = true;
+                } catch(NotEnoughDataHasBeenAddedException e) {
+                    angleFound = false;
+                }
+                if (angleFound) {
+                    result.add(new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
+                            windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.00001, null));
+                }
+            }
+        }
+        
+        return result;
     }
 
 }
