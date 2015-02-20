@@ -1,6 +1,6 @@
 package com.sap.sailing.dashboards.gwt.server.startanalysis;
 
-import java.util.List;
+import java.util.Iterator;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
@@ -13,8 +13,13 @@ public abstract class AbstractStartAnalysisCreationValidator {
     
     protected boolean threeCompetitorsPassedSecondWayPoint(TrackedRace trackedRace){
         Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
-        List<MarkPassing> markPassingsInOrder = (List<MarkPassing>) trackedRace.getMarkPassingsInOrder(secondWaypoint);
-        return markPassingsInOrder.size() >= MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS ? true : false;
+        Iterator<MarkPassing> markPassingsInOrder = trackedRace.getMarkPassingsInOrder(secondWaypoint).iterator();
+        int counter = 0;
+        while (markPassingsInOrder.hasNext()) {
+            MarkPassing markpassing = markPassingsInOrder.next();
+            counter ++;
+        }
+        return counter >= MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS ? true : false;
     }
     
     protected boolean competitorPassedSecondWayPoint(Competitor competitor, TrackedRace trackedRace){

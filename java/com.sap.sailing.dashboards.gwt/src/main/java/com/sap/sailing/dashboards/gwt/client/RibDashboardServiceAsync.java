@@ -1,6 +1,5 @@
 package com.sap.sailing.dashboards.gwt.client;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -12,8 +11,8 @@ public interface RibDashboardServiceAsync {
 
     void getLiveRaceInfo(String leaderboardName, AsyncCallback<RibDashboardRaceInfoDTO> callback);
 
-    void getStartAnalysisListForCompetitorIDAndLeaderboardName(Serializable competitorID, String leaderboardName, AsyncCallback<List<StartAnalysisDTO>> callback);
+    void getStartAnalysisListForCompetitorIDAndLeaderboardName(String competitorIdAsString, String leaderboardName, AsyncCallback<List<StartAnalysisDTO>> callback);
 
-    void getCompetitorsInRaceWithStateLive(AsyncCallback<List<CompetitorDTO>> callback);
+    void getCompetitorsInLeaderboard(String leaderboardName, AsyncCallback<List<CompetitorDTO>> callback);
 
 }

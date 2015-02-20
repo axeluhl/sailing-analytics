@@ -94,7 +94,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
 
     public void notifyListenerAboutOKButtonClickedWithSelectedCompetitorName(CompetitorDTO competitor) {
         for (CompetitorSelectionListener newStartAnalysisListener : competitorSelectionPopupListener) {
-            newStartAnalysisListener.didClickOKWithSelectedCompetitor(competitor.getIdAsString());
+            newStartAnalysisListener.didClickOKWithSelectedCompetitor(competitor);
         }
         hide();
     }

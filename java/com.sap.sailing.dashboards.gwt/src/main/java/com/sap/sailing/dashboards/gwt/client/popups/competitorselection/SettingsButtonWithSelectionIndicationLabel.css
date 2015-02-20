@@ -1,15 +1,20 @@
 @CHARSET "UTF-8";
 
 .settings_button {
+	position: absolute !important;
+	height: 23.5pt;
+	width: 23.5pt;
+	right: 10pt;
+	top: 17.5pt;
+	z-index: 2;
+}
+
+.settings_button_image {
 	position: absolute;
 	height: 23.5pt;
 	width: 23.5pt;
 	right: 10pt;
 	top: 17.5pt;
-}
-
-.settings_button_image {
-	
 }
 
 .settings_indication_label {

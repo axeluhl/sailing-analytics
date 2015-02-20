@@ -62,7 +62,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     private boolean containsMap = false;
     private StartAnalysisDTO startAnalysisDTO;
 
-    public StartlineAnalysisCard(double leftCSSProperty, int cardID, StartAnalysisDTO startAnalysisDTO) {
+    public StartlineAnalysisCard(double leftCSSProperty, int cardId, StartAnalysisDTO startAnalysisDTO) {
 
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -78,12 +78,11 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
         windarrow.setStyleName(style.startanalysis_card_wind_arrow());
         winddirection.add(windarrow);
 
-        cardid = cardID;
+        this.cardid = cardId;
 
-        if (cardID == 0) {
-            addMap(cardID);
+        if (cardid == 0) {
+            addMap(cardid);
         }
-
         startanalysis_card_table.add(new StartAnalysisStartRankTable(startAnalysisDTO.startAnalysisCompetitorDTOs));
         fillWindAndStartLineData(this.startAnalysisDTO);
 
@@ -122,7 +121,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     }
 
     private void removeMap() {
-        if(simpleMap.isAttached()){
+        if(simpleMap != null && simpleMap.isAttached()){
         startanalysis_card.remove(simpleMap);
         containsMap = false;
         }

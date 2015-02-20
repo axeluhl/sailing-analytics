@@ -55,7 +55,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     @UiField
     HTMLPanel rightwindbotcontainer;
 
-    @UiField
+    @UiField(provided = true)
     public StartLineAdvantageComponent startLineCAComponent;
 
     @UiField
@@ -72,10 +72,11 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     private List<WindBotComponent> windBotComponents;
 
-    public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService) {
+    public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, RibDashboardDataRetriever ribDashboardDataRetriever) {
         windBotComponents = new ArrayList<WindBotComponent>();
-        RibDashboardDataRetriever.getInstance(ribDashboardService).addDataObserver(this);
-        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService);
+        ribDashboardDataRetriever.addDataObserver(this);
+        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, ribDashboardDataRetriever);
+        startLineCAComponent = new StartLineAdvantageComponent(ribDashboardDataRetriever);
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
     }

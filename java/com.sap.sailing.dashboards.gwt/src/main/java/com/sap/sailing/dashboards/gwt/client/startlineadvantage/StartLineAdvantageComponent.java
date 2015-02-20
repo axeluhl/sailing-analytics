@@ -25,7 +25,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
     private static final String HEADER_ADVANTAGE_BY_WIND = "Startline advantage by wind";
     private static final String HEADER_ADVANTAGE_BY_GEOMETRY = "Startline advantage by geometry";
     
-    public StartLineAdvantageComponent() {
+    public StartLineAdvantageComponent(RibDashboardDataRetriever ribDashboardDataRetriever) {
         super();
         initAndSetStartLineAdvantageStates();
         StartLineAdvantageComponentRessources.INSTANCE.css().ensureInjected();
@@ -42,7 +42,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
                 StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_averagePanel());
         this.liveLabel.setInnerHTML("live");
         this.averageLabel.setInnerHTML("average<br>(1 hour)");
-        RibDashboardDataRetriever.getInstance(null).addDataObserver(this);
+        ribDashboardDataRetriever.addDataObserver(this);
     }
 
     private void initAndSetStartLineAdvantageStates() {

@@ -1,9 +1,9 @@
 package com.sap.sailing.dashboards.gwt.server;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
@@ -14,6 +14,7 @@ import com.sap.sailing.dashboards.gwt.client.RibDashboardService;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.server.startanalysis.StartAnalysisCreationController;
 import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
+import com.sap.sailing.dashboards.gwt.shared.ResponseMessage;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
@@ -37,7 +38,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  *
  */
 public class RibDashboardServiceImpl extends RemoteServiceServlet implements RibDashboardService {
-    
+
     /**
      * 
      */
@@ -63,13 +64,12 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
      * committee boat to first mark and pin end mark to first mark. Wind has no influence on the value.
      * */
     private MovingAverage averageStartLineAdvantageByGeometry;
-        
+
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
     private final BundleContext context;
-    
-    private static final Logger logger = Logger.getLogger(RibDashboardServiceImpl.class.getName());
 
+    private static final Logger logger = Logger.getLogger(RibDashboardServiceImpl.class.getName());
 
     public RibDashboardServiceImpl() {
         context = Activator.getDefault();
@@ -95,35 +95,26 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
 
     /**
      * <param>leaderboardName</param> is used to retrieve the live running race with the method
-     * {@link #getLiveRaceFromLeaderboardName(String)}. <param>competitorName</param> If competitorName is null, the
-     * response contains only a list of competitors in the live race. Otherwise the parameter is used to return the
-     * right startanalysis for a specific competitor with in the returned {@link RibDashboardRaceInfoDTO}.
-     * @throws NoWindException 
+     * {@link #getLiveRaceFromLeaderboardName(String)}.
+     * 
+     * @throws NoWindException
      * */
     @Override
     public RibDashboardRaceInfoDTO getLiveRaceInfo(String leaderboardName) throws NoWindException {
         RibDashboardRaceInfoDTO lRInfo = new RibDashboardRaceInfoDTO();
-/*        if (leaderboardName != null) {
+        if (leaderboardName != null) {
             TimePoint timePointOfRequest = MillisecondsTimePoint.now();
             if (checkIfRaceIsStillRunning(timePointOfRequest, leaderboardName)) {
-                if (competitorName == null) {
-                    fillLiveRaceInfoDTOWithRaceData(lRInfo, timePointOfRequest);
-                    logger.log(Level.INFO, "No Competitor selected");
-                    lRInfo.responseMessage = ResponseMessage.NO_COMPETITOR_SELECTED;
-                    return lRInfo;
-                } else {
-                    fillLiveRaceInfoDTOWithRaceData(lRInfo, timePointOfRequest);
-                    fillLiveRaceInfoDTOWithStartLineAdavantageData(lRInfo, timePointOfRequest);
-                    lRInfo.responseMessage = ResponseMessage.OK;
-                }
+                fillLiveRaceInfoDTOWithRaceData(lRInfo, timePointOfRequest);
+                fillLiveRaceInfoDTOWithStartLineAdavantageData(lRInfo, timePointOfRequest);
+                lRInfo.responseMessage = ResponseMessage.RACE_LIVE;
             } else {
                 lRInfo.responseMessage = ResponseMessage.NO_RACE_LIVE;
             }
-            return lRInfo;
         } else {
-            lRInfo.responseMessage = ResponseMessage.NO_RACE_LIVE;*/
-            return lRInfo;
-        //}
+            lRInfo.responseMessage = ResponseMessage.NO_RACE_LIVE;
+        }
+        return lRInfo;
     }
 
     private void fillLiveRaceInfoDTOWithRaceData(RibDashboardRaceInfoDTO lRInfo, TimePoint now) {
@@ -139,7 +130,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             if (runningRace == null) {
                 return false;
             } else {
-                //startAnalysisRacesStore.addAsListener(runningRace);
                 return true;
             }
         } else {
@@ -162,15 +152,15 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         }
         return result;
     }
-    
-    private List<TrackedRace> getTrackedRacesFromLeaderboard(String leaderboardName){
+
+    private List<TrackedRace> getTrackedRacesFromLeaderboard(String leaderboardName) {
         List<TrackedRace> result = new ArrayList<TrackedRace>();
         Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardName);
         if (lb != null) {
             for (RaceColumn column : lb.getRaceColumns()) {
                 for (Fleet fleet : column.getFleets()) {
                     TrackedRace race = column.getTrackedRace(fleet);
-                    if (race != null && race.isLive(new MillisecondsTimePoint(new Date()))) {
+                    if (race != null) {
                         result.add(race);
                     }
                 }
@@ -179,17 +169,18 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         return result;
     }
 
-    private void fillLiveRaceInfoDTOWithStartLineAdavantageData(RibDashboardRaceInfoDTO lRInfo, TimePoint timePoint) throws NoWindException {
+    private void fillLiveRaceInfoDTOWithStartLineAdavantageData(RibDashboardRaceInfoDTO lRInfo, TimePoint timePoint)
+            throws NoWindException {
         if (runningRace != null && timePoint != null) {
             StartLineAdvantageDTO startLineAdvantageDTO = new StartLineAdvantageDTO();
             StartlineAdvantageType startlineAdvantageType = getStartlineAdvantageType(runningRace, timePoint);
-            if(startlineAdvantageType == null || startlineAdvantageType == StartlineAdvantageType.WIND){
+            if (startlineAdvantageType == null || startlineAdvantageType == StartlineAdvantageType.WIND) {
                 startLineAdvantageDTO.startLineAdvatageType = StartlineAdvantageType.WIND;
                 double startlineAdvantage = runningRace.getStartLine(timePoint).getAdvantage().getMeters();
                 startLineAdvantageDTO.startLineAdvantage = startlineAdvantage;
                 averageStartLineAdvantageByWind.add(startlineAdvantage);
                 startLineAdvantageDTO.startlineAdvantageAverage = averageStartLineAdvantageByWind.getAverage();
-            }else if(startlineAdvantageType == StartlineAdvantageType.GEOMETRIC){
+            } else if (startlineAdvantageType == StartlineAdvantageType.GEOMETRIC) {
                 startLineAdvantageDTO.startLineAdvatageType = StartlineAdvantageType.GEOMETRIC;
                 double startlineAdvantage = runningRace.getStartLine(timePoint).getAdvantage().getMeters();
                 startLineAdvantageDTO.startLineAdvantage = startlineAdvantage;
@@ -199,7 +190,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             lRInfo.startLineAdvantageDTO = startLineAdvantageDTO;
         }
     }
-    
+
     private StartlineAdvantageType getStartlineAdvantageType(TrackedRace trackedRace, TimePoint timePoint) {
         try {
             LegType typeOfFirstLeg;
@@ -218,12 +209,13 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         }
     }
 
-    private LegType getFirstLegTypeOfTrackedRaceAtTimePoint(TrackedRace trackedRace, TimePoint timePoint) throws NoWindException{
+    private LegType getFirstLegTypeOfTrackedRaceAtTimePoint(TrackedRace trackedRace, TimePoint timePoint)
+            throws NoWindException {
         Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
-        if(trackedLegs != null && trackedLegs.iterator().hasNext()){
+        if (trackedLegs != null && trackedLegs.iterator().hasNext()) {
             TrackedLeg firstLegInTrackedRace = trackedLegs.iterator().next();
             return firstLegInTrackedRace.getLegType(timePoint);
-        }else{
+        } else {
             return null;
         }
     }
@@ -233,24 +225,28 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     }
 
     @Override
-    public List<StartAnalysisDTO> getStartAnalysisListForCompetitorIDAndLeaderboardName(Serializable competitorId,  String leaderboardName) {
-        Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+    public List<StartAnalysisDTO> getStartAnalysisListForCompetitorIDAndLeaderboardName(String competitorIdAsString,
+            String leaderboardName) {
+        logger.log(Level.INFO, "Recevied getStartAnalysisListForCompetitorIDAndLeaderboardName(...) Request.");
+        Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(
+                competitorIdAsString);
         List<TrackedRace> trackedRacesForLeaderBoardName = getTrackedRacesFromLeaderboard(leaderboardName);
-        for(TrackedRace trackedRace : trackedRacesForLeaderBoardName){
+        for (TrackedRace trackedRace : trackedRacesForLeaderBoardName) {
             startAnalysisCreationController.checkForNewStartAnalysisForCompetitorInTrackedRace(competitor, trackedRace);
         }
         return startAnalysisCreationController.getStartAnalysisCache().getStartAnalysisDTOsForCompetitor(competitor);
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorsInRaceWithStateLive() {
-        if(runningRace != null){
-            try {
-                return baseDomainFactory.getCompetitorDTOList(runningRace.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(new Date())));
-            } catch (NoWindException e) {
-                e.printStackTrace();
-            }
+    public List<CompetitorDTO> getCompetitorsInLeaderboard(String leaderboardName) {
+        logger.log(Level.INFO, "getCompetitorsInLeaderboard(...) Request.");
+        Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardName);
+        try {
+            return baseDomainFactory.getCompetitorDTOList(lb.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(
+                    new Date())));
+        } catch (NoWindException e) {
+            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 }

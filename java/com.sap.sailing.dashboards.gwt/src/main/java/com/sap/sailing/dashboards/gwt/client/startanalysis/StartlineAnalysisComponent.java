@@ -26,12 +26,15 @@ import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
 import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotification;
 import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotificationClickListener;
-import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotificationShowOptions;
+import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotificationType;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.CompetitorSelectionListener;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.CompetitorSelectionPopup;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.SettingsButtonWithSelectionIndicationLabel;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -46,7 +49,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  * @author Alexander Ries (D062114)
  *
  */
-public class StartlineAnalysisComponent extends Composite implements HasWidgets {
+public class StartlineAnalysisComponent extends Composite implements HasWidgets, RaceSelectionChangeListener {
 
     private static StartlineAnalysisComponentUiBinder uiBinder = GWT.create(StartlineAnalysisComponentUiBinder.class);
 
@@ -109,7 +112,6 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     private SettingsButtonWithSelectionIndicationLabel settingsButtonWithSelectionIndicationLabel;
 
     private String leaderboardName;
-    private String selectedCompetitorId;
 
     private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
     private static final String SELECTED_COMPETITOR_ID_COOKIE_KEY = "selectedCompetitorId";
@@ -119,17 +121,20 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     /**
      * Component that contains handles, displays and loads startanalysis cards.
      * */
-    public StartlineAnalysisComponent(RibDashboardServiceAsync ribDashboardService) {
+    public StartlineAnalysisComponent(RibDashboardServiceAsync ribDashboardServiceAsync,
+            RaceSelectionProvider raceSelectionProvider) {
+        raceSelectionProvider.addRaceSelectionChangeListener(this);
+        this.ribDashboardServiceAsync = ribDashboardServiceAsync;
         pageChangeListener = new ArrayList<StartAnalysisPageChangeListener>();
         starts = new ArrayList<StartAnalysisDTO>();
         this.leaderboardName = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
-        
+
         initWidget(uiBinder.createAndBindUi(this));
-        
+
+        initCompetitorSelectionPopupAndAddCompetitorSelectionListener();
         initLeftRightButtons();
         initTimer();
         initAndAddBottomNotification();
-        initCompetitorSelectionPopupAndAddCompetitorSelectionListener();
         getCachedSelectedCompetitorOrAskForWithPopup();
         initAndAddSettingsButtonWithSelectionIndicationLabel();
     }
@@ -158,12 +163,23 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
 
             @Override
             public void timeChanged(Date newTime, Date oldTime) {
+                String selectedCompetitorId = Cookies.getCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY);
                 if (selectedCompetitorId != null) {
                     ribDashboardServiceAsync.getStartAnalysisListForCompetitorIDAndLeaderboardName(
                             selectedCompetitorId, leaderboardName, new AsyncCallback<List<StartAnalysisDTO>>() {
                                 @Override
                                 public void onSuccess(List<StartAnalysisDTO> result) {
-                                    addNewStartAnalysisCards(result);
+                                    if (!result.isEmpty()) {
+                                        if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
+                                            removeAllStartAnalysisCards();
+                                        }
+                                        addNewStartAnalysisCards(result);
+                                        if (result.size() != starts.size()) {
+                                            showNotificationForNewStartAnalysis();
+                                        }
+                                        settingsButtonWithSelectionIndicationLabel
+                                                .setSelectionIndicationTextOnLabel(result.get(0).competitor.getName());
+                                    }
                                 }
 
                                 @Override
@@ -194,14 +210,14 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         competitorSelectionPopup.addListener(new CompetitorSelectionListener() {
 
             @Override
-            public void didClickOKWithSelectedCompetitor(String competitorIdAsString) {
-                if (competitorIdAsString != null) {
-                    Cookies.setCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY, competitorIdAsString,
-                            new Date(new Date().getTime() + SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS));
-                    selectedCompetitorId = competitorIdAsString;
+            public void didClickOKWithSelectedCompetitor(CompetitorDTO competitor) {
+                if (competitor != null) {
+                    Cookies.removeCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY);
+                    Cookies.setCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY, competitor.getIdAsString(), new Date(
+                            new Date().getTime() + SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS));
                     if (settingsButtonWithSelectionIndicationLabel != null) {
-                        settingsButtonWithSelectionIndicationLabel
-                                .setSelectionIndicationTextOnLabel(selectedCompetitorId);
+                        settingsButtonWithSelectionIndicationLabel.setSelectionIndicationTextOnLabel(competitor
+                                .getName());
                     }
                 }
             }
@@ -210,15 +226,13 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
 
     private void getCachedSelectedCompetitorOrAskForWithPopup() {
         String selectedCompetitorIdFromCookie = Cookies.getCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY);
-        if (selectedCompetitorId != null) {
-            selectedCompetitorId = selectedCompetitorIdFromCookie;
-        } else {
+        if (selectedCompetitorIdFromCookie == null) {
             loadCompetitorsAndShowCompetitorSelectionPopup();
         }
     }
 
     private void loadCompetitorsAndShowCompetitorSelectionPopup() {
-        ribDashboardServiceAsync.getCompetitorsInRaceWithStateLive(new AsyncCallback<List<CompetitorDTO>>() {
+        ribDashboardServiceAsync.getCompetitorsInLeaderboard(leaderboardName, new AsyncCallback<List<CompetitorDTO>>() {
             @Override
             public void onSuccess(List<CompetitorDTO> result) {
                 if (!competitorSelectionPopup.isShown())
@@ -233,24 +247,15 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
 
     private void initAndAddSettingsButtonWithSelectionIndicationLabel() {
         settingsButtonWithSelectionIndicationLabel = new SettingsButtonWithSelectionIndicationLabel();
-        settingsButtonWithSelectionIndicationLabel.addClickHanderToSettingsButton(new ClickHandler() {
+        settingsButtonWithSelectionIndicationLabel.addClickHandlerToSettingsButton(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 loadCompetitorsAndShowCompetitorSelectionPopup();
             }
         });
-        if (selectedCompetitorId != null) {
-            settingsButtonWithSelectionIndicationLabel.setSelectionIndicationTextOnLabel(selectedCompetitorId);
-        }
         RootPanel.get().add(settingsButtonWithSelectionIndicationLabel);
     }
-
-    // *****************************************************************************************************
-    // *****************************************************************************************************
-    // *****************************************************************************************************
-    // *****************************************************************************************************
-    // *****************************************************************************************************
 
     /**
      * <param>clickedLeft</param> if clicked left is true, the left arrow button was pressed, a false represent the
@@ -332,6 +337,11 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     private void removeAllStartAnalysisCards() {
         startanalysis_card_container.clear();
         numberOfStartAnalysisCards = 0;
+        starts.clear();
+    }
+
+    private void showNotificationForNewStartAnalysis() {
+        this.bottomNotification.show(BottomNotificationType.NEW_STARTANALYSIS_AVAILABLE);
     }
 
     public void registerPageChangeListener(StartAnalysisPageChangeListener s) {
@@ -348,13 +358,32 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         }
     }
 
-    public void addNewStartAnalysisCards(List<StartAnalysisDTO> startAnalysisDTOs) {
-        removeAllStartAnalysisCards();
+    private void addNewStartAnalysisCards(List<StartAnalysisDTO> startAnalysisDTOs) {
         for (int i = numberOfStartAnalysisCards; i <= startAnalysisDTOs.size() - 1; i++) {
             addStartAnalysisCard(startAnalysisDTOs.get(i));
             starts.add(startAnalysisDTOs.get(i));
         }
-        this.bottomNotification.show(new BottomNotificationShowOptions("New Start Analysis available.", "#F0AB00", "#000000", true));
+    }
+
+    private String getCompetitorIdAsStringFromDisplayedStartAnalysisDTOs() {
+        String result = "";
+        if (starts != null && starts.size() > 0) {
+            CompetitorDTO competitor = starts.get(0).competitor;
+            if (competitor != null)
+                result = starts.get(0).competitor.getIdAsString();
+        }
+        return result;
+    }
+
+    private boolean displayedStartAnalysisCompetitorDifferentToRequestedOne() {
+        String competitorIDFromDispalyedStartAnalysisDTOs = getCompetitorIdAsStringFromDisplayedStartAnalysisDTOs();
+        if (competitorIDFromDispalyedStartAnalysisDTOs != null
+                && !(competitorIDFromDispalyedStartAnalysisDTOs.equals(Cookies
+                        .getCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY)))) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -375,5 +404,10 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     @Override
     public boolean remove(Widget w) {
         return false;
+    }
+
+    @Override
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
+        System.out.println("Race Selection changed ! StartAnaylsis");
     }
 }

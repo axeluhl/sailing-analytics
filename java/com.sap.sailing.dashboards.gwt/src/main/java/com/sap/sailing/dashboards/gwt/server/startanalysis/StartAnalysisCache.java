@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.base.Competitor;
@@ -12,7 +13,11 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class StartAnalysisCache {
 
     private Map<TrackedRace, Map<Competitor, StartAnalysisDTO>> startAnalyisisDTOForTrackedRacesAndCompetitors;
-
+    private static final Logger logger = Logger.getLogger(StartAnalysisCache.class.getName());
+    
+    public StartAnalysisCache(){
+        startAnalyisisDTOForTrackedRacesAndCompetitors = new HashMap<TrackedRace, Map<Competitor,StartAnalysisDTO>>();
+    }
     public void addStartAnalysisDTOFor(StartAnalysisDTO startAnalysisDTO, Competitor competitor, TrackedRace trackedRace) {
         Map<Competitor, StartAnalysisDTO> startAnalysisListForCompetitor = startAnalyisisDTOForTrackedRacesAndCompetitors
                 .get(trackedRace);
@@ -35,6 +40,7 @@ public class StartAnalysisCache {
             if (startAnalysisDTO != null)
                 startAnalysisList.add(startAnalysisDTO);
         }
+        java.util.Collections.sort(startAnalysisList);
         return startAnalysisList;
     }
 

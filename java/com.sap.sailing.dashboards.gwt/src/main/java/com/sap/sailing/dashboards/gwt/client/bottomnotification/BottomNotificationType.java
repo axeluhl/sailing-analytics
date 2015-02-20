@@ -1,15 +1,15 @@
 package com.sap.sailing.dashboards.gwt.client.bottomnotification;
 
-public class BottomNotificationShowOptions {
+public enum BottomNotificationType {
     
+    NEW_STARTANALYSIS_AVAILABLE("New Start Analysis available.", "#F0AB00", "#000000", true);
+
     private String message;
     private String backgroundColorAsHex;
     private String textColorAsHex;
     private boolean shouldDisappearAfter20Seconds;
-    
-    public BottomNotificationShowOptions(String message, String backgroundColorAsHex, String textColorAsHex,
-            boolean shouldDisappearAfter20Seconds) {
-        super();
+
+    private BottomNotificationType(String message, String backgroundColorAsHex, String textColorAsHex, boolean shouldDisappearAfter20Seconds) {
         this.message = message;
         this.backgroundColorAsHex = backgroundColorAsHex;
         this.textColorAsHex = textColorAsHex;

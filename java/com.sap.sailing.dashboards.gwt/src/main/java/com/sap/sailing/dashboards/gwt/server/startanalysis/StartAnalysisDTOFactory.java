@@ -59,7 +59,7 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
         addStaticDataToStartAnalysisDTOFrom(startAnalysisDTO, trackedRace);
         List<StartAnalysisCompetitorDTO> competitors = new ArrayList<StartAnalysisCompetitorDTO>();
         Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
-        List<MarkPassing> markPassingsInOrder = (List<MarkPassing>) trackedRace.getMarkPassingsInOrder(secondWaypoint);
+        List<MarkPassing> markPassingsInOrder = convertMarkpPassingsIteratorToList(trackedRace.getMarkPassingsInOrder(secondWaypoint).iterator());
         
         boolean isCompetitorBetweenFirstThree = false;
         for (int i = 0; i < MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS; i++) {
@@ -73,19 +73,34 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
             int rankOfCompetitorWhilePassingSecondWaypoint = getRankOfCompetitorWhilePassingSecondWaypoint(competitor, trackedRace);
             competitors.add(createStartAnalysisCompetitorDTO(trackedRace, rankOfCompetitorWhilePassingSecondWaypoint, competitor));
         }
-        startAnalysisDTO.competitor = baseDomainFactory.convertToCompetitorDTO(competitor);
+        startAnalysisDTO.competitor = baseDomainFactory.getCompetitorStore().convertToCompetitorDTO(competitor);
+        System.out.println("Competitor ID Displayed Cards: "+competitor.getId().toString());
+        System.out.println("CompetitorDTO ID Displayed Cards: "+startAnalysisDTO.competitor.getIdAsString());
         startAnalysisDTO.startAnalysisCompetitorDTOs = competitors;
+        if(startAnalysisDTO.startAnalysisCompetitorDTOs.size() > 2){
+            logger.log(Level.INFO, "startAnalysisCompetitorDTOs size > 2");
+        }else{
+            logger.log(Level.INFO, "startAnalysisCompetitorDTOs size < 2");
+        }
         logger.log(Level.INFO, "Created StartAnalysis For Competitor "+competitor.getName()+" and "+trackedRace.getRace().getName());
         return startAnalysisDTO;
     }
     
+    private List<MarkPassing> convertMarkpPassingsIteratorToList(Iterator<MarkPassing> iterator){
+        List<MarkPassing> list = new ArrayList<MarkPassing>();
+        while(iterator.hasNext()){
+            list.add(iterator.next());
+        }
+        return list;
+    }
+    
     private int getRankOfCompetitorWhilePassingSecondWaypoint(Competitor competitor, TrackedRace trackedRace){
         Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
-        List<MarkPassing> markPassings = (List<MarkPassing>) trackedRace.getMarkPassingsInOrder(secondWaypoint);
+        Iterator<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(secondWaypoint).iterator();
         int counter = 0;
-        for(MarkPassing markPassing: markPassings){
+        while(markPassings.hasNext()){
             counter ++;
-            if(markPassing.getCompetitor().getId().equals(competitor.getId()))
+            if(markPassings.next().getCompetitor().getId().equals(competitor.getId()))
                 return counter;
         }
         return 0;
@@ -123,6 +138,7 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
 
     private StartAnalysisRankingTableEntryDTO createStartAnalysisRankTableEntryDTOWithRankAndStartTimepoint(
             Competitor competitor, int rank, TrackedRace trackedRace) {
+        logger.log(Level.INFO, "createStartAnalysisRankTableEntryDTOWithRankAndStartTimepoint");
         StartAnalysisRankingTableEntryDTO tableentry = new StartAnalysisRankingTableEntryDTO();
         tableentry.rankAtFirstMark = rank;
         tableentry.teamName = competitor.getName();
@@ -322,8 +338,9 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
 
     private StartAnalysisCompetitorDTO createStartAnalysisCompetitorDTO(TrackedRace trackedRace, int rank,
             Competitor competitor) {
+        logger.log(Level.INFO, "createStartAnalysisCompetitorDTO => "+competitor.getName());
         StartAnalysisCompetitorDTO startAnalysisCompetitorDTOsForRace = new StartAnalysisCompetitorDTO();
-        startAnalysisCompetitorDTOsForRace.competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+        startAnalysisCompetitorDTOsForRace.competitorDTO = baseDomainFactory.getCompetitorStore().convertToCompetitorDTO(competitor);
         startAnalysisCompetitorDTOsForRace.rankingTableEntryDTO = createRankTableEntry(trackedRace, rank, competitor);
         List<GPSFixDTO> boatPositions = getOrCreateGPSFixDTOsForCompetitorForTrackedRace(trackedRace).get(
                 competitor.getName());
