@@ -9,8 +9,15 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
 
     public interface Presenter {
         EventContext getCtx();
-        void handleTabPlaceSelection(TabActivity<?, EventContext> selectedActivity);        
+        void handleTabPlaceSelection(TabActivity<?, EventContext, ? extends Presenter> selectedActivity);        
+        String getUrl(Place place);
         void navigateTo(Place place);
+        boolean needsSelectionInHeader();
+        void forPlaceSelection(PlaceCallback callback);
+    }
+    
+    public interface PlaceCallback {
+        void forPlace(AbstractEventPlace place, String title);
     }
 
     /**

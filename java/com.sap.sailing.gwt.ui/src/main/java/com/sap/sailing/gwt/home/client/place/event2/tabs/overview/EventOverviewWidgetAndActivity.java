@@ -6,12 +6,14 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class EventOverviewWidgetAndActivity extends Composite implements TabActivity<EventRegattaOverviewPlace, EventContext> {
+public class EventOverviewWidgetAndActivity extends Composite implements TabActivity<EventRegattaOverviewPlace, EventContext, EventRegattaView.Presenter> {
 
     public EventOverviewWidgetAndActivity() {
 
@@ -20,6 +22,12 @@ public class EventOverviewWidgetAndActivity extends Composite implements TabActi
     @Override
     public Class<EventRegattaOverviewPlace> getPlaceClassForActivation() {
         return EventRegattaOverviewPlace.class;
+    }
+    
+    @Override
+    public void setPresenter(Presenter presenter) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override

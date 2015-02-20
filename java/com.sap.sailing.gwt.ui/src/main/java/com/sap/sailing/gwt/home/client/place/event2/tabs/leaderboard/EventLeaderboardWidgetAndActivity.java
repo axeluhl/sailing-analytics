@@ -9,13 +9,15 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.overview.EventRegattaOverviewPlace;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class EventLeaderboardWidgetAndActivity extends Composite implements TabActivity<EventLeaderboardPlace, EventContext> {
+public class EventLeaderboardWidgetAndActivity extends Composite implements TabActivity<EventLeaderboardPlace, EventContext, EventRegattaView.Presenter> {
 
     private LeaderboardDTO leaderboardDTO;
 
@@ -26,6 +28,12 @@ public class EventLeaderboardWidgetAndActivity extends Composite implements TabA
     @Override
     public Class<EventLeaderboardPlace> getPlaceClassForActivation() {
         return EventLeaderboardPlace.class;
+    }
+    
+    @Override
+    public void setPresenter(Presenter presenter) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override

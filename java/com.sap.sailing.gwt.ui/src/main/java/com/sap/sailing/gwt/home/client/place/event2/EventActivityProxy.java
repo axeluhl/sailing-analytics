@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -11,7 +12,10 @@ import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.overview.E
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaActivity;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
+import com.sap.sailing.gwt.home.client.place.event2.tabs.overview.EventRegattaOverviewPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class EventActivityProxy extends AbstractActivityProxy {
@@ -21,11 +25,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
     private EventClientFactory clientFactory;
 
     public EventActivityProxy(AbstractEventPlace place, EventClientFactory clientFactory) {
-        if(place instanceof EventDefaultPlace) {
-            this.place = new EventOverviewPlace(place.getCtx());
-        } else {
-            this.place = place;
-        }
+        this.place = place;
         ctx = this.place.getCtx();
         this.clientFactory = clientFactory;
     }
@@ -65,13 +65,34 @@ public class EventActivityProxy extends AbstractActivityProxy {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                if(place instanceof AbstractEventRegattaPlace) {
-                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) place, clientFactory));
+                final AbstractEventPlace placeToStart;
+                if(place instanceof EventDefaultPlace) {
+                    placeToStart = getRealPlace();
+                } else {
+                    placeToStart = place;
                 }
-                if(place instanceof AbstractMultiregattaEventPlace) {
-                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, clientFactory));
+                
+                if(placeToStart instanceof AbstractEventRegattaPlace) {
+                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) placeToStart, clientFactory));
+                }
+                if(placeToStart instanceof AbstractMultiregattaEventPlace) {
+                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) placeToStart, clientFactory));
                 }
             }
+
         });
+    }
+    
+    private AbstractEventPlace getRealPlace() {
+        EventDTO event = ctx.getEventDTO();
+        List<LeaderboardGroupDTO> leaderboardGroups = event.getLeaderboardGroups();
+        if(leaderboardGroups.size() == 1) {
+            LeaderboardGroupDTO leaderboardGroup = leaderboardGroups.get(0);
+            if(leaderboardGroup.getLeaderboards().size() == 1) {
+                StrippedLeaderboardDTO leaderboard = leaderboardGroup.getLeaderboards().get(0);
+                return new EventRegattaOverviewPlace(ctx.withLeaderboardName(leaderboard.name));
+            }
+        }
+        return new EventOverviewPlace(place.getCtx());
     }
 }

@@ -12,5 +12,4 @@ public abstract class AbstractMultiregattaEventPlace extends AbstractEventPlace 
     public AbstractMultiregattaEventPlace(String eventUuidAsString) {
         super(eventUuidAsString);
     }
-
 }

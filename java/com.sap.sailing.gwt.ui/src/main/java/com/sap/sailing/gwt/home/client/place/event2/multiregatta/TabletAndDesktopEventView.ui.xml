@@ -51,6 +51,9 @@
 			<c:tabcontent title="Overview">
 				<tabs:overview.EventOverviewWidgetAndActivity />
 			</c:tabcontent>
+			<c:tabcontent title="Regattas">
+				<tabs:regattas.EventRegattasWidgetAndActivity />
+			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 

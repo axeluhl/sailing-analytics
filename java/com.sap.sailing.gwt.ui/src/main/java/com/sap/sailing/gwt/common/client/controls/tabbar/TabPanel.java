@@ -23,9 +23,9 @@ import com.google.gwt.user.client.ui.Widget;
  * Created by pgtaboada on 25.11.14.
  */
 
-public class TabPanel<PLACECONTEXT> extends Composite {
+public class TabPanel<PLACECONTEXT, PRESENTER> extends Composite {
     private static TabPanelUiBinder ourUiBinder = GWT.create(TabPanelUiBinder.class);
-    private final Map<Class<Place>, TabActivity<Place, PLACECONTEXT>> knownTabs = new HashMap<>();
+    private final Map<Class<Place>, TabActivity<Place, PLACECONTEXT, PRESENTER>> knownTabs = new HashMap<>();
     @UiField
     SimplePanel additionalHeader;
     @UiField
@@ -33,18 +33,20 @@ public class TabPanel<PLACECONTEXT> extends Composite {
     @UiField
     TabBar tabBar;
     @UiField BreadcrumbPane breadcrumbs;
-    private TabActivity<Place, PLACECONTEXT> currentTab;
+    private TabActivity<Place, PLACECONTEXT, PRESENTER> currentTab;
     
     private final PlaceContextProvider<PLACECONTEXT> contextProvider;
     private final PlaceHistoryMapper historyMapper;
+    private final PRESENTER presenter;
 
-    public TabPanel(PlaceContextProvider<PLACECONTEXT> contextProvider, PlaceHistoryMapper historyMapper) {
+    public TabPanel(PlaceContextProvider<PLACECONTEXT> contextProvider, PRESENTER presenter, PlaceHistoryMapper historyMapper) {
         this.contextProvider = contextProvider;
+        this.presenter = presenter;
         this.historyMapper = historyMapper;
         initWidget(ourUiBinder.createAndBindUi(this));
     }
 
-    public TabActivity<?, PLACECONTEXT> getCurrentTab() {
+    public TabActivity<?, PLACECONTEXT, PRESENTER> getCurrentTab() {
         return currentTab;
     }
     
@@ -62,11 +64,12 @@ public class TabPanel<PLACECONTEXT> extends Composite {
      *            The label for the tab.
      */
     @UiChild
-    public void addTabContent(final TabActivity<Place, PLACECONTEXT> tab, String title) {
+    public void addTabContent(final TabActivity<Place, PLACECONTEXT, PRESENTER> tab, String title) {
 
         GWT.log("Adding TAB: " + title);
-
+        
         // TODO: check if place class already known, reject...
+        tab.setPresenter(presenter);
         knownTabs.put(tab.getPlaceClassForActivation(), tab);
 
         String link = "#" + historyMapper.getToken(tab.placeToFire(contextProvider.getContext()));
@@ -82,7 +85,7 @@ public class TabPanel<PLACECONTEXT> extends Composite {
     @UiHandler("tabBar")
     void onTabSelection(SelectionEvent<Class<Place>> event) {
 
-        TabActivity<?, PLACECONTEXT> selectedTabActivity = knownTabs.get(event.getSelectedItem());
+        TabActivity<?, PLACECONTEXT, PRESENTER> selectedTabActivity = knownTabs.get(event.getSelectedItem());
         if (selectedTabActivity != null) {
             GWT.log("Tab selection: " + selectedTabActivity.getPlaceClassForActivation().getName());
             if (currentTab != null) {
@@ -102,7 +105,7 @@ public class TabPanel<PLACECONTEXT> extends Composite {
     public void activatePlace(Place placeToGo) {
         if (knownTabs.containsKey(placeToGo.getClass())) {
 
-            final TabActivity<Place, PLACECONTEXT> newTabActivity = knownTabs.get(placeToGo.getClass());
+            final TabActivity<Place, PLACECONTEXT, PRESENTER> newTabActivity = knownTabs.get(placeToGo.getClass());
 
             newTabActivity.start(placeToGo, tabContentPanelUi);
             tabBar.select(placeToGo);
@@ -121,7 +124,7 @@ public class TabPanel<PLACECONTEXT> extends Composite {
         return addHandler(handler, TabPanelPlaceSelectionEvent.TYPE);
     }
 
-    interface TabPanelUiBinder extends UiBinder<FlowPanel, TabPanel<?>> {
+    interface TabPanelUiBinder extends UiBinder<FlowPanel, TabPanel<?, ?>> {
     }
 
 }

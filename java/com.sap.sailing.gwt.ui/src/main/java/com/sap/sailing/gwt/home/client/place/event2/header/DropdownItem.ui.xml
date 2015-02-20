@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.header.EventHeaderResources" />
+  <ui:style>
+  .important {
+    font-weight: bold;
+  }
+  </ui:style>
+    <a ui:field="link" class="{local_res.css.dropdown_content_link} {local_res.css.dropdownregattas_content_link} {local_res.css.dropdownregattas_content_linkactive}">
+      <div ui:field="title" class="{local_res.css.dropdown_content_link_title} {local_res.css.dropdownregattas_content_link_title}">
+        <!-- regatta.name -->
+      </div>
+    </a>
+</ui:UiBinder>

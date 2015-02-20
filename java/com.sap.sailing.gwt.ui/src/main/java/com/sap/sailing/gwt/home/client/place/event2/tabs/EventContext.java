@@ -13,7 +13,6 @@ public class EventContext {
 
     private EventClientFactory clientFactory;
     private String eventId;
-    private String regattaId;
     private String leaderboardIdAsNameString;
 
     /**
@@ -36,11 +35,6 @@ public class EventContext {
 
     public EventContext withId(String eventId) {
         this.eventId = eventId;
-        return this;
-    }
-    
-    public EventContext withRegattaId(String regattaId) {
-        this.regattaId = regattaId;
         return this;
     }
 
