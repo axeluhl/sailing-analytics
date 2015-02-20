@@ -49,14 +49,14 @@ class TrackingViewController : UIViewController {
     func networkAvailabilityChanged() {
         if (APIManager.sharedManager.networkAvailable) {
             if !BatteryManager.sharedManager.batterySaving {
-                onlineModeLabel.text = "Online"
+                onlineModeLabel.text = NSLocalizedString("Online", comment: "")
                 onlineModeLabel.textColor = Color.Green
             } else {
-                onlineModeLabel.text = "Battery Saving"
+                onlineModeLabel.text = NSLocalizedString("Battery Saving", comment: "")
                 onlineModeLabel.textColor = Color.Orange
             }
         } else {
-            onlineModeLabel.text = "Offline"
+            onlineModeLabel.text = NSLocalizedString("Offline", comment: "")
             onlineModeLabel.textColor = Color.Red
         }
     }
@@ -64,14 +64,14 @@ class TrackingViewController : UIViewController {
     func newLocation(notification: NSNotification) {
         let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as Double
         gpsAccuracy.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
-        trackingStatusLabel.text = "Tracking"
+        trackingStatusLabel.text = NSLocalizedString("Tracking", comment: "")
         trackingStatusLabel.textColor = Color.Green
         cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
     }
     
     func locationManagerFailed(notification: NSNotification) {
-        gpsAccuracy.text = "no GPS"
-        trackingStatusLabel.text = "Not Tracking"
+        gpsAccuracy.text = NSLocalizedString("No GPS", comment: "")
+        trackingStatusLabel.text = NSLocalizedString("Not Tracking", comment: "")
         trackingStatusLabel.textColor = Color.Red
     }
 

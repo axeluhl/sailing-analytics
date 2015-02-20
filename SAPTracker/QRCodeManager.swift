@@ -72,7 +72,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         qrcodeData = QRCodeData()
         let parseSuccess = qrcodeData!.parseString(url)
         if !parseSuccess {
-            let alertView = UIAlertView(title: "Incorrect QR Code", message: "", delegate: self, cancelButtonTitle: nil, otherButtonTitles: "OK")
+            let alertView = UIAlertView(title: NSLocalizedString("Incorrect QR Code", comment: ""), message: "", delegate: self, cancelButtonTitle: nil, otherButtonTitles: NSLocalizedString("Cancel", comment: ""))
             alertView.tag = AlertView.IncorrectQRCode.rawValue;
             alertView.show()
             return
@@ -112,26 +112,29 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                                     let competitorName = (self.competitorDictionary!["name"]) as String
                                     let leaderBoardName = (self.leaderBoardDictionary!["name"]) as String
                                     let sailId = (self.competitorDictionary!["sailID"]) as String
-                                    var title = "Hello \(competitorName). Welcome to \(leaderBoardName). You are registered as \(sailId)."
-                                    let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "OK")
+                                    var title = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""), competitorName, leaderBoardName, sailId)
+                                    let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("OK", comment: ""))
                                     alertView.tag = AlertView.AcceptMapping.rawValue;
                                     alertView.show()
                                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                                     self.delegate.activityIndicatorView?.stopAnimating()
-                                    let alertView = UIAlertView(title: "Couldn't get competitor \(self.qrcodeData!.competitorId!)", message: error.localizedDescription, delegate: self, cancelButtonTitle: "Cancel")
+                                    let title = String(format: NSLocalizedString("Couldn't get competitor %@", comment: ""), self.qrcodeData!.competitorId!)
+                                    let alertView = UIAlertView(title: title, message: error.localizedDescription, delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
                                     alertView.tag = AlertView.ServerError.rawValue;
                                     alertView.show()
                                     
                             }) }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                                 self.delegate.activityIndicatorView?.stopAnimating()
-                                let alertView = UIAlertView(title: "Couldn't get leader board \(self.qrcodeData!.leaderBoardName!)", message: error.localizedDescription, delegate: self, cancelButtonTitle: "Cancel")
+                                let title = String(format: NSLocalizedString("Couldn't get leader board %@", comment: ""), self.qrcodeData!.leaderBoardName!)
+                                let alertView = UIAlertView(title: title, message: error.localizedDescription, delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
                                 alertView.tag = AlertView.ServerError.rawValue;
                                 alertView.show()
                     })
                     
                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                     self.delegate.activityIndicatorView?.stopAnimating()
-                    let alertView = UIAlertView(title: "Couldn't get event \(self.qrcodeData!.eventId!)", message: error.localizedDescription, delegate: self, cancelButtonTitle: "Cancel")
+                    let title = String(format: NSLocalizedString("Couldn't get event %@", comment: ""), self.qrcodeData!.eventId!)
+                    let alertView = UIAlertView(title: title, message: error.localizedDescription, delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
                     alertView.tag = AlertView.ServerError.rawValue;
                     alertView.show()
             })
@@ -186,7 +189,8 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                 self.delegate.qrCodeOK?()
             }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                 self.delegate.activityIndicatorView?.stopAnimating()
-                let alertView = UIAlertView(title: "Couldn't check-in to " + leaderBoardName, message: error.localizedDescription, delegate: self, cancelButtonTitle: "Cancel")
+                let title = String(format:NSLocalizedString("Couldn't check-in to %@", comment: ""), leaderBoardName);
+                let alertView = UIAlertView(title: title, message: error.localizedDescription, delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
                 alertView.tag = AlertView.ServerError.rawValue;
                 alertView.show()
         })

@@ -58,7 +58,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - UIActionSheetDelegate
     
     @IBAction func showActionSheet(sender: AnyObject) {
-        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Settings", "About", "Cancel")
+        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: NSLocalizedString("Settings", comment: ""), NSLocalizedString("About", comment: ""), NSLocalizedString("Cancel", comment: ""))
         actionSheet.cancelButtonIndex = 3
         actionSheet.showInView(view)
     }
@@ -100,7 +100,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "Your Regattas"
+        return NSLocalizedString("Your Regattas", comment: "")
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -159,14 +159,14 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     @IBAction func scanButtonTap(sender: AnyObject) {
         if !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-            let alertView = UIAlertView(title: "No camera available.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+            let alertView = UIAlertView(title: NSLocalizedString("No camera available.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
             alertView.tag = AlertView.NoCameraAvailable.rawValue;
             alertView.show()
             return
         }
         
         if (!QRCodeManager.deviceCanReadQRCodes()) {
-            let alertView = UIAlertView(title: "Cannot read QR codes with this device.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+            let alertView = UIAlertView(title: NSLocalizedString("Cannot read QR codes with this device.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
             alertView.tag = AlertView.NoCameraAvailable.rawValue;
             alertView.show()
             return
@@ -174,10 +174,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         performSegueWithIdentifier("Scan", sender: sender)
     }
     
-    // Für die Verwendung des Regatta-Trackers ist ein Checkin mit QR-Code oder ein Checkin-Link aus der E-Mail notwendig. Sollten Sie diesen nicht erhalten haben, wenden Sie sich bitte an die Wettfahrtleitung.
-    
     @IBAction func noQrCodeButtonTap(sender: AnyObject) {
-        let alertView = UIAlertView(title:  "In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+        let alertView = UIAlertView(title:  NSLocalizedString("In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
         alertView.tag = AlertView.NoCameraAvailable.rawValue;
         alertView.show()
     }

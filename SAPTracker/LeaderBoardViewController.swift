@@ -32,7 +32,7 @@ class LeaderBoardViewController: UIViewController, UIWebViewDelegate, UIAlertVie
     
     func wwebView(webView: UIWebView, didFailLoadWithError error: NSError) {
         activityIndicator.hidden = true
-        let alertView = UIAlertView(title: "Couldn't load about view", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+        let alertView = UIAlertView(title: NSLocalizedString("Couldn't load about view", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
         alertView.show()
     }
     

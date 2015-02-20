@@ -37,10 +37,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     
     func startTracking() -> String? {
         if (!CLLocationManager.locationServicesEnabled()) {
-            return "Please enable location services."
+            return NSLocalizedString("Please enable location services.", comment: "")
         }
         if (CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied) {
-            return "Please enable location services for this app."
+            return NSLocalizedString("Please enable location services for this app.", comment: "")
         }
         if (coreLocationManager.respondsToSelector("requestAlwaysAuthorization")) {
             coreLocationManager.requestAlwaysAuthorization()

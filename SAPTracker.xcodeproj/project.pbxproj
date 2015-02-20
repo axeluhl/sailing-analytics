@@ -11,7 +11,6 @@
 		7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* ScanViewController.swift */; };
 		7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* QRCodeData.swift */; };
 		7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */; };
-		7F0EA8511A695E5B003F3A61 /* eula-ios.html in Resources */ = {isa = PBXBuildFile; fileRef = 7F0EA8501A695E5B003F3A61 /* eula-ios.html */; };
 		7F14A10A1A13B9A6001C1ECB /* _abkhazia.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0041A13B9A6001C1ECB /* _abkhazia.png */; };
 		7F14A10B1A13B9A6001C1ECB /* _basque-country.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0051A13B9A6001C1ECB /* _basque-country.png */; };
 		7F14A10C1A13B9A6001C1ECB /* _british-antarctic-territory.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */; };
@@ -296,6 +295,8 @@
 		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
 		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
 		7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F87CAA61A2CD6BA0076C617 /* Appearance.m */; };
+		7F87DDDB1A97339300704AC4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7F87DDDD1A97339300704AC4 /* Localizable.strings */; };
+		7F87DDE01A973C7400704AC4 /* eula-ios.html in Resources */ = {isa = PBXBuildFile; fileRef = 7F87DDE21A973C7400704AC4 /* eula-ios.html */; };
 		7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */; };
 		7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */; };
 		7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* CourseViewController.swift */; };
@@ -336,7 +337,6 @@
 		7F0658FC19F7D6700077FF95 /* ScanViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScanViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F0658FE19F7EE910077FF95 /* QRCodeData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = QRCodeData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceUDIDManager.swift; sourceTree = "<group>"; };
-		7F0EA8501A695E5B003F3A61 /* eula-ios.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "eula-ios.html"; sourceTree = "<group>"; };
 		7F14A0041A13B9A6001C1ECB /* _abkhazia.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _abkhazia.png; sourceTree = "<group>"; };
 		7F14A0051A13B9A6001C1ECB /* _basque-country.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_basque-country.png"; sourceTree = "<group>"; };
 		7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_british-antarctic-territory.png"; sourceTree = "<group>"; };
@@ -626,6 +626,11 @@
 		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
 		7F87CAA51A2CD6BA0076C617 /* Appearance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appearance.h; sourceTree = "<group>"; };
 		7F87CAA61A2CD6BA0076C617 /* Appearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appearance.m; sourceTree = "<group>"; };
+		7F87DDDC1A97339300704AC4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7F87DDDE1A9733B200704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Main.strings; sourceTree = "<group>"; };
+		7F87DDDF1A9733B200704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7F87DDE11A973C7400704AC4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = "Base.lproj/eula-ios.html"; sourceTree = "<group>"; };
+		7F87DDE31A973C7900704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = de; path = "de.lproj/eula-ios.html"; sourceTree = "<group>"; };
 		7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingPageViewController.swift; sourceTree = "<group>"; };
 		7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeedViewController.swift; sourceTree = "<group>"; };
 		7F8B8D421A373D4400C34B88 /* CourseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseViewController.swift; sourceTree = "<group>"; };
@@ -1019,7 +1024,8 @@
 				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
 				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
 				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
-				7F0EA8501A695E5B003F3A61 /* eula-ios.html */,
+				7F87DDE21A973C7400704AC4 /* eula-ios.html */,
+				7F87DDDD1A97339300704AC4 /* Localizable.strings */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1173,6 +1179,7 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
 			);
 			mainGroup = 7F83F14719F154F000C53328;
 			productRefGroup = 7F83F15119F154F000C53328 /* Products */;
@@ -1275,6 +1282,7 @@
 				7F14A1351A13B9A6001C1ECB /* BI.png in Resources */,
 				7F14A1BB1A13B9A6001C1ECB /* NA.png in Resources */,
 				7F14A1B71A13B9A6001C1ECB /* MW.png in Resources */,
+				7F87DDDB1A97339300704AC4 /* Localizable.strings in Resources */,
 				7F14A1711A13B9A6001C1ECB /* GN.png in Resources */,
 				7F14A19C1A13B9A6001C1ECB /* LICENSE.txt in Resources */,
 				7F14A18C1A13B9A6001C1ECB /* JP.png in Resources */,
@@ -1423,7 +1431,7 @@
 				7F14A12B1A13B9A6001C1ECB /* AW.png in Resources */,
 				7F14A10D1A13B9A6001C1ECB /* _commonwealth.png in Resources */,
 				7F14A1521A13B9A6001C1ECB /* CY.png in Resources */,
-				7F0EA8511A695E5B003F3A61 /* eula-ios.html in Resources */,
+				7F87DDE01A973C7400704AC4 /* eula-ios.html in Resources */,
 				7F14A1391A13B9A6001C1ECB /* BN.png in Resources */,
 				7F14A1231A13B9A6001C1ECB /* AM.png in Resources */,
 				7F14A10F1A13B9A6001C1ECB /* _gosquared.png in Resources */,
@@ -1582,8 +1590,27 @@
 			isa = PBXVariantGroup;
 			children = (
 				7F83F15A19F154F000C53328 /* Base */,
+				7F87DDDE1A9733B200704AC4 /* de */,
 			);
 			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		7F87DDDD1A97339300704AC4 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7F87DDDC1A97339300704AC4 /* Base */,
+				7F87DDDF1A9733B200704AC4 /* de */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		7F87DDE21A973C7400704AC4 /* eula-ios.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7F87DDE11A973C7400704AC4 /* Base */,
+				7F87DDE31A973C7900704AC4 /* de */,
+			);
+			name = "eula-ios.html";
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

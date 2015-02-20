@@ -1,0 +1,51 @@
+/* 
+  Localizable.strings
+  SAPTracker
+
+  Created by computing on 20/02/15.
+  Copyright (c) 2015 com.sap.sailing. All rights reserved.
+*/
+/* HomeViewController */
+"Settings" = "Einstellungen";
+"About" = "Über";
+"Cancel" = "Abbrechen";
+"Your Regattas" = "Ihre Regatten";
+"No camera available." = "Keine Kamera vorhanden.";
+"Cannot read QR codes with this device." = "Cannot read QR codes with this device.";
+"In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either." = "Für die Verwendung des Regatta-Trackers ist ein Checkin mit QR-Code oder ein Checkin-Link aus der E-Mail notwendig. Sollten Sie diesen nicht erhalten haben, wenden Sie sich bitte an die Wettfahrtleitung.";
+"OK" = "OK";
+/* AcceptTermsViewController */
+"You must accept the terms to use this app." = "Sie müssen die AGB annehmen, um diese App verwenden zu können.";
+/* AboutViewController */
+"Couldn't load about view" = "Fenster konnte nicht geladen werden.";
+/* RegattaViewController */
+"Camera" = "Kamera";
+"Photo Library" = "Fotos";
+"Last sync" = "Letzter Update";
+"Start Tracking" = "Tracking starten";
+"Please listen for announcements" = "Bitte achten Sie auf die Durchsagen";
+"Thank you for participating!" = "Vielen Dank, Sie haben erfolgreich an der Regatta teilgenommen.";
+"Check-Out" = "Check-Out";
+"Regatta will start in" = "Regatta beginnt in";
+"Regatta in progress" = "Regatta findet gerade statt";
+"Select a photo for your team" = "Team Foto hinzufügen";
+"Check-out of Regatta?" = "Aus Regatta auschecken?";
+/* LeaderBoardViewController */
+"Online" = "Online";
+"Battery Saving" = "Batterie Sparen";
+"Offline" = "Offline";
+"Tracking" = "Tracking läuft";
+"No GPS" = "Kein GPS";
+"Not Tracking" = "Kein Tracking";
+/* TimerViewController */
+"Stop tracking?" = "Tracking beenden?";
+"Stop" = "Beenden";
+/* QRCodeManager */
+"Incorrect QR Code" = "Ungültiger QR-Code";
+"Hello %@. Welcome to %@. You are registered as %@." = "Hallo %@. Willkommen zu %@. Sie sind als %@ registriert";
+"Couldn't get competitor %@" = "Konnte Teilnehmer %@ nicht holen";
+"Couldn't get leader board %@" = "Konnte Leaderboard %@ nicht holen";
+"Couldn't check-in to %@" = "Konnte nicht in %@ einchecken";
+/* LocationManager */
+"Please enable location services." = "Bitte Ortungsdienste zulassen.";
+"Please enable location services for this app." = "Bitte Ortungsdienste für diese App zulassen.";

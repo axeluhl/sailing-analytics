@@ -1,0 +1,51 @@
+/* 
+  Localizable.strings
+  SAPTracker
+
+  Created by computing on 20/02/15.
+  Copyright (c) 2015 com.sap.sailing. All rights reserved.
+*/
+/* HomeViewController */
+"Settings" = "Settings";
+"About" = "About";
+"Cancel" = "Cancel";
+"Your Regattas" = "Your Regattas";
+"No camera available." = "No camera available.";
+"Cannot read QR codes with this device." = "Cannot read QR codes with this device.";
+"In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either." = "In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.";
+"OK" = "OK";
+/* AcceptTermsViewController */
+"You must accept the terms to use this app." = "You must accept the terms to use this app.";
+/* AboutViewController */
+"Couldn't load about view" = "Couldn't load about view";
+/* RegattaViewController */
+"Camera" = "Camera";
+"Photo Library" = "Photo Library";
+"Last sync" = "Last sync";
+"Start Tracking" = "Start Tracking";
+"Please listen for announcements" = "Please listen for announcements";
+"Thank you for participating!" = "Thank you for participating!";
+"Check-Out" = "Check-Out";
+"Regatta will start in" = "Regatta will start in";
+"Regatta in progress" = "Regatta in progress";
+"Select a photo for your team" = "Select a photo for your team";
+"Check-out of Regatta?" = "Check-out of Regatta?";
+/* LeaderBoardViewController */
+"Online" = "Online";
+"Battery Saving" = "Battery Saving";
+"Offline" = "Offline";
+"Tracking" = "Tracking";
+"No GPS" = "No GPS";
+"Not Tracking" = "Not Tracking";
+/* TimerViewController */
+"Stop tracking?" = "Stop tracking?";
+"Stop" = "Stop";
+/* QRCodeManager */
+"Incorrect QR Code" = "Incorrect QR Code";
+"Hello %@. Welcome to %@. You are registered as %@." = "Hello %@. Welcome to %@. You are registered as %@.";
+"Couldn't get competitor %@" = "Couldn't get competitor %@";
+"Couldn't get leader board %@" = "Couldn't get leader board %@";
+"Couldn't check-in to %@" = "Couldn't check-in to %@";
+/* LocationManager */
+"Please enable location services." = "Please enable location services.";
+"Please enable location services for this app." = "Please enable location services for this app.";

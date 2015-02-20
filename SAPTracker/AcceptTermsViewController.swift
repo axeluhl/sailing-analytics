@@ -26,7 +26,7 @@ class AcceptTermsViewController: UIViewController {
     }
     
     @IBAction func declineButtonTap(sender: AnyObject) {
-        let alertView = UIAlertView(title: "You must accept the terms to use this app.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+        let alertView = UIAlertView(title: NSLocalizedString("You must accept the terms to use this app.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
         alertView.show()
         return
     }

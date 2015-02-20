@@ -92,11 +92,11 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         // get image sources
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
             sourceTypes.append(UIImagePickerControllerSourceType.Camera)
-            sourceTypeNames.append("Camera")
+            sourceTypeNames.append(NSLocalizedString("Camera", comment: ""))
         }
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.PhotoLibrary) {
             sourceTypes.append(UIImagePickerControllerSourceType.PhotoLibrary)
-            sourceTypeNames.append("Photo Library")
+            sourceTypeNames.append(NSLocalizedString("Photo Library", comment: ""))
         }
         
         // point to events API server
@@ -131,30 +131,30 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         // reset views
         lastSyncLabel.hidden = true
         if DataManager.sharedManager.selectedCheckIn!.lastSyncDate != nil {
-            lastSyncLabel.text = "Last sync: " + dateFormatter.stringFromDate(DataManager.sharedManager.selectedCheckIn!.lastSyncDate!)
+            lastSyncLabel.text = NSLocalizedString("Last sync", comment: "") + dateFormatter.stringFromDate(DataManager.sharedManager.selectedCheckIn!.lastSyncDate!)
         } else {
             lastSyncLabel.text = nil
         }
-        startTrackingButton.setTitle("Start Tracking", forState: UIControlState.Normal)
-        announcementsLabel.text = "Please listen for announcements"
+        startTrackingButton.setTitle(NSLocalizedString("Start Tracking", comment: ""), forState: UIControlState.Normal)
+        announcementsLabel.text = NSLocalizedString("Please listen for announcements", comment: "")
         
         if DataManager.sharedManager.selectedCheckIn?.event? != nil {
             let event = DataManager.sharedManager.selectedCheckIn!.event!
             // finished
             if now.timeIntervalSinceDate(event.endDate) > 0 {
                 isFinished = true
-                regattaStartLabel.text = "Thank you for participating!"
+                regattaStartLabel.text = NSLocalizedString("Thank you for participating!", comment: "")
                 leaderBoardButtonHeight.constant = ButtonHeight.smallButtonPortrait
                 daysHeight.constant = 0
                 hoursHeight.constant = 0
                 minutesHeight.constant = 0
-                startTrackingButton.setTitle("Check-Out", forState: UIControlState.Normal)
+                startTrackingButton.setTitle(NSLocalizedString("Check-Out", comment: ""), forState: UIControlState.Normal)
                 startTrackingButton.backgroundColor = UIColor(hex: 0xEFAD00)
                 announcementsLabel.text = " "
             }
                 // before race
             else if now.timeIntervalSinceDate(event.startDate) < 0 {
-                regattaStartLabel.text = "Regatta will start in"
+                regattaStartLabel.text = NSLocalizedString("Regatta will start in", comment: "")
                 lastSyncLabel.hidden = false
                 leaderBoardButtonHeight.constant = 0
                 let delta = floor(now.timeIntervalSinceDate(event.startDate)) * -1
@@ -170,7 +170,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             }
                 // during race
             else {
-                regattaStartLabel.text = "Regatta in progress"
+                regattaStartLabel.text = NSLocalizedString("Regatta in progress", comment: "")
                 daysHeight.constant = 0
                 hoursHeight.constant = 0
                 minutesHeight.constant = 0
@@ -219,7 +219,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         }
         let errorMessage = LocationManager.sharedManager.startTracking()
         if errorMessage != nil {
-            let alertView = UIAlertView(title: errorMessage, message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+            let alertView = UIAlertView(title: errorMessage, message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
             alertView.show()
         } else {
             performSegueWithIdentifier("Tracking", sender: sender)
@@ -233,7 +233,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             imagePicker(sourceTypes[0])
         }
         if sourceTypes.count == 2 {
-            let alertView = UIAlertView(title: "Select a photo for your team", message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: sourceTypeNames[0], sourceTypeNames[1])
+            let alertView = UIAlertView(title: NSLocalizedString("Select a photo for your team", comment: ""), message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: sourceTypeNames[0], sourceTypeNames[1])
             alertView.tag = AlertView.Image.rawValue;
             alertView.show()
         }
@@ -258,7 +258,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     
     // MARK: - Check-out
     func showCheckOutAlertView() {
-        let alertView = UIAlertView(title: "Check-out of Regatta?", message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "OK")
+        let alertView = UIAlertView(title: NSLocalizedString("Check-out of Regatta?", comment: ""), message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("OK", comment: ""))
         alertView.tag = AlertView.CheckOut.rawValue;
         alertView.show()
     }
