@@ -191,8 +191,8 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
-import com.sap.sailing.simulator.SimulationService;
-import com.sap.sailing.simulator.SimulationServiceFactory;
+import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sse.BuildVersion;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -505,7 +505,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         /* keepAliveTime */60, TimeUnit.SECONDS,
         /* workQueue */new LinkedBlockingQueue<Runnable>());
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
-        simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor);
+        simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.regattaLogReplicator = new RegattaLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);

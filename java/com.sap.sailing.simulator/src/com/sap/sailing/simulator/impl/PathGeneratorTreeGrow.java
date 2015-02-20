@@ -739,8 +739,16 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         // add final position (rescaled before to end on height of target)
         path.add(new TimedPositionWithSpeedImpl(bestCand.pos.getTimePoint(), bestCand.pos.getPosition(), null));
 
-        return new PathImpl(path, wf);
-
+        // maximum turn time for one-turner simulation, otherwise zero
+        long maxTurnTime = 0;
+        if (this.maxTurns == 1) {
+            int turnMiddle = 1000;
+            if (bestCand != null) {
+                turnMiddle = bestCand.getIndexOfTurnRL();
+                maxTurnTime = turnMiddle * this.usedTimeStep;
+            }
+        }
+        return new PathImpl(path, wf, maxTurnTime);
     }
 
 }

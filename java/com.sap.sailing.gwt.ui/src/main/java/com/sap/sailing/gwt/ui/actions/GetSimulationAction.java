@@ -3,10 +3,11 @@ package com.sap.sailing.gwt.ui.actions;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
+import com.sap.sailing.simulator.LegIdentifier;
 import com.sap.sse.gwt.client.async.AsyncAction;
 
 /**
@@ -18,19 +19,19 @@ import com.sap.sse.gwt.client.async.AsyncAction;
  */
 public class GetSimulationAction implements AsyncAction<SimulatorResultsDTO> {
     private final SailingServiceAsync sailingService;
-    private final RegattaAndRaceIdentifier raceIdentifier;
+    private final LegIdentifier legIdentifier;
     private final Date from;
     private final Date prevStartTime;
     
-    public GetSimulationAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime) {
+    public GetSimulationAction(SailingServiceAsync sailingService, LegIdentifier legIdentifier, Date from, Date prevStartTime) {
         this.sailingService = sailingService;
-        this.raceIdentifier = raceIdentifier;
+        this.legIdentifier = legIdentifier;
         this.from = from;
         this.prevStartTime = prevStartTime;
     }
 
     @Override
     public void execute(AsyncCallback<SimulatorResultsDTO> callback) {
-        sailingService.getSimulatorResults(raceIdentifier, from, prevStartTime, callback);
+        sailingService.getSimulatorResults(legIdentifier, from, prevStartTime, callback);
     }
 }

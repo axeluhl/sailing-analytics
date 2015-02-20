@@ -64,7 +64,7 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
-import com.sap.sailing.simulator.SimulationService;
+import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;

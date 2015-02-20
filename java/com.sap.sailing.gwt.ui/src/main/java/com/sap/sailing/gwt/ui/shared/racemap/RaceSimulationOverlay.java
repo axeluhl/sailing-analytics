@@ -26,6 +26,8 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
+import com.sap.sailing.simulator.LegIdentifier;
+import com.sap.sailing.simulator.impl.LegIdentifierImpl;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
@@ -70,7 +72,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             if (clearCanvas) {
                 this.clearCanvas();
             }
-            this.simulate(newTime);
+            this.simulate(newTime, newLeg);
         }
     }
 
@@ -247,8 +249,9 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         return pathTimeStr;
     }
     
-    public void simulate(Date from) {
-        GetSimulationAction getSimulation = new GetSimulationAction(sailingService, raceIdentifier, from, prevStartTime);
+    public void simulate(Date from, int leg) {
+        LegIdentifier legIdentifier = new LegIdentifierImpl(raceIdentifier, String.valueOf(leg));
+        GetSimulationAction getSimulation = new GetSimulationAction(sailingService, legIdentifier, from, prevStartTime);
         asyncActionsExecutor.execute(getSimulation, GET_SIMULATION_CATEGORY,
                 new MarkedAsyncCallback<>(new AsyncCallback<SimulatorResultsDTO>() {
                     @Override

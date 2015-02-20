@@ -65,9 +65,38 @@ public class SailingSimulatorImpl implements SailingSimulator {
     }
 
     @Override
-    public Path getPath(PathType pathType) {
-        // TODO: de-scramble implementation of getAllPaths() to focus on just one path fpr multi-threaded execution
-        return null;
+    public Path getPath(PathType pathType, MaximumTurnTimes maxTurnTimes) {
+        PathGeneratorTreeGrow genTreeGrow;
+        PathGeneratorOpportunistEuclidian genOpportunistic;
+        Path path = null;
+        switch (pathType) {
+        case OMNISCIENT:
+            genTreeGrow = new PathGeneratorTreeGrow(this.simulationParameters); // instantiate heuristic searcher
+            genTreeGrow.setEvaluationParameters(null, 0, null); // allow for arbitrary many turns
+            path = genTreeGrow.getPath();
+
+        case ONE_TURNER_LEFT:
+            genTreeGrow = new PathGeneratorTreeGrow(this.simulationParameters); // instantiate heuristic searcher
+            genTreeGrow.setEvaluationParameters("L", 1, null); // start left and limit to one turn
+            path = genTreeGrow.getPath();
+
+        case ONE_TURNER_RIGHT:
+            genTreeGrow = new PathGeneratorTreeGrow(this.simulationParameters); // instantiate heuristic searcher
+            genTreeGrow.setEvaluationParameters("R", 1, null); // start right and limit to one turn
+            path = genTreeGrow.getPath();
+
+        case OPPORTUNIST_LEFT:
+            genOpportunistic = new PathGeneratorOpportunistEuclidian(this.simulationParameters);
+            genOpportunistic.setEvaluationParameters(maxTurnTimes, true);
+            path = genOpportunistic.getPath();
+
+        case OPPORTUNIST_RIGHT:
+            genOpportunistic = new PathGeneratorOpportunistEuclidian(this.simulationParameters);
+            genOpportunistic.setEvaluationParameters(maxTurnTimes, false);
+            path = genOpportunistic.getPath();
+
+        }
+        return path;
     }
 
     @Override
@@ -122,16 +151,17 @@ public class SailingSimulatorImpl implements SailingSimulator {
         // get instance of heuristic searcher
         PathGeneratorTreeGrow genTreeGrow = new PathGeneratorTreeGrow(this.simulationParameters);
 
+        MaximumTurnTimes maxTurnTimes = new MaximumTurnTimes(1000000000, 1000000000);
+        
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1, null);
         Path leftPath = genTreeGrow.getPath();
         PathCandidate leftBestCand = genTreeGrow.getBestCand();
         int left1TurnMiddle = 1000;
-        long left1TurnMidtime = 1000000000;
         long left1TurnTimestep = genTreeGrow.getUsedTimeStep(); 
         if (leftBestCand != null) {
             left1TurnMiddle = leftBestCand.getIndexOfTurnLR();
-            left1TurnMidtime = left1TurnMiddle * left1TurnTimestep; 
+            maxTurnTimes.left = left1TurnMiddle * left1TurnTimestep; 
         }
 
         // search best right-starting 1-turner
@@ -139,11 +169,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path rightPath = genTreeGrow.getPath();
         PathCandidate rightBestCand = genTreeGrow.getBestCand();
         int right1TurnMiddle = 1000;
-        long right1TurnMidtime = 1000000000;
         long right1TurnTimestep = genTreeGrow.getUsedTimeStep(); 
         if (rightBestCand != null) {
             right1TurnMiddle = rightBestCand.getIndexOfTurnRL();
-            right1TurnMidtime = right1TurnMiddle * right1TurnTimestep; 
+            maxTurnTimes.right = right1TurnMiddle * right1TurnTimestep; 
         }
 
         Path optPath = null;
@@ -162,14 +191,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
         	// PathGeneratorOpportunistVMG genOpportunistic = new PathGeneratorOpportunistVMG(simulationParameters);
 
         	// left-starting opportunist
-        	genOpportunistic.setEvaluationParameters(left1TurnMidtime, right1TurnMidtime, true);
+        	genOpportunistic.setEvaluationParameters(maxTurnTimes, true);
         	oppPathL = genOpportunistic.getPath();
         	if (genOpportunistic.getTurns() == 1) {
         		oppPathL = leftPath;
         	}
         	
         	// right-starting opportunist
-        	genOpportunistic.setEvaluationParameters(left1TurnMidtime, right1TurnMidtime, false);
+        	genOpportunistic.setEvaluationParameters(maxTurnTimes, false);
         	oppPathR = genOpportunistic.getPath();
         	if (genOpportunistic.getTurns() == 1) {
         		oppPathR = rightPath;

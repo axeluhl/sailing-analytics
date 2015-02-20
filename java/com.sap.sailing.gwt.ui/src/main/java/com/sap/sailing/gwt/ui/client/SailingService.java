@@ -84,6 +84,7 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.simulator.LegIdentifier;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -140,7 +141,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     Boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier);
 
-    SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime);
+    SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier, Date from, Date prevStartTime);
 
     CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<String, Date> fromPerCompetitorIdAsString,
             Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate) throws NoWindException;

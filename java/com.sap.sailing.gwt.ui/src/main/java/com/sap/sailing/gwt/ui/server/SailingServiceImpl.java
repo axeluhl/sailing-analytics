@@ -388,11 +388,13 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCo
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
+import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sailing.simulator.LegIdentifier;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.SimulationService;
+import com.sap.sailing.simulator.SimulationResults;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
@@ -1493,107 +1495,39 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     };
 
     @Override
-    public SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime) {
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+    public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier, Date from, Date prevStartTime) {
+        // get simulation-results from smart-future-cached simulation-service
+        SimulationService simulationService = getService().getSimulationService();
+        SimulationResults simulationResults = simulationService.getSimulationResults(legIdentifier);
+        // prepare simulator-results-dto
         SimulatorResultsDTO result = null;
-        
-        if (trackedRace != null) {
-            TimePoint fromTimePoint = from == null ? new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis() + 10000) : new MillisecondsTimePoint(from);
-            
-            // get previous mark or start line as start-position
-            TrackedLeg trackedLeg = trackedRace.getCurrentLeg(fromTimePoint);
-            if (trackedLeg == null) {
-                return result;
-            }
-            Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();            
-            
-            // get next mark as end-position
-            Waypoint toWaypoint = trackedLeg.getLeg().getTo();
-
-            TimePoint startTimePoint = null;
-            TimePoint endTimePoint = null;
-            Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> markPassings = trackedRace.getMarkPassingsTimes();
-            long legDuration = 0;
-            synchronized(markPassings) {
-                for(Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassing : markPassings) {
-                    if (markPassing.getA().equals(fromWaypoint)) {
-                        startTimePoint = markPassing.getB().getA();
-                    }
-                    if (markPassing.getA().equals(toWaypoint)) {
-                        endTimePoint = markPassing.getB().getA();
-                    }
+        Map<PathType, Path> paths = simulationResults.getPaths();
+        if (paths != null) {
+            int noOfPaths = paths.size();
+            PathDTO[] pathDTOs = new PathDTO[noOfPaths];
+            int index = noOfPaths - 1;
+            for (Entry<PathType, Path> entry : paths.entrySet()) {
+                pathDTOs[index] = new PathDTO(entry.getKey().getTxtId());
+                // fill pathDTO with path points where speed is true wind speed
+                List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
+                for (TimedPositionWithSpeed p : entry.getValue().getPathPoints()) {
+                    wList.add(createSimulatorWindDTO(p));
                 }
+                pathDTOs[index].setPoints(wList);
+                index--;
             }
-            legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
-            Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
-            Position endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
-
-            if (startTimePoint.asDate().equals(prevStartTime)) {
-                return new SimulatorResultsDTO(startTimePoint.asDate(), 0, 0, null, null, null, null);
-            }
-            
-            // determine legtype upwind/downwind/reaching
-            LegType legType = null;
-            try {
-                legType = trackedLeg.getLegType(fromTimePoint);
-            } catch (NoWindException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            // get windfield
-            WindFieldGenerator windField = new WindFieldTrackedRaceImpl(trackedRace);
-            Duration timeStep = new MillisecondsDurationImpl(15 * 1000);
-            windField.generate(startTimePoint, null, timeStep);
-            
-            // prepare simulation-parameters
-            List<Position> course = new ArrayList<Position>();
-            course.add(startPosition);
-            course.add(endPosition);
-            BoatClass boatClass = trackedRace.getRace().getBoatClass();
-            PolarDataService polarData = getService().getPolarDataService();
-            PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarData);
-            double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
-                    / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
-            Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
-            SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField,
-                    simuStep, SailingSimulatorConstants.ModeEvent, true, true);
-
-            // for upwind/downwind, run simulation with start-time, start-position, end-position and windfield
-            SimulationService simulationService = getService().getSimulationService();
-            Map<PathType, Path> paths = null;
-            if (legType != LegType.REACHING) {
-                paths = simulationService.getAllPaths(simulationPars);
-            }
-
-            // prepare simulator-results-dto
-            if (paths != null) {
-                int noOfPaths = paths.size();
-                PathDTO[] pathDTOs = new PathDTO[noOfPaths];
-                int index = noOfPaths - 1;
-                for (Entry<PathType, Path> entry : paths.entrySet()) {
-                    pathDTOs[index] = new PathDTO(entry.getKey().getTxtId());
-                    // fill pathDTO with path points where speed is true wind speed
-                    List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
-                    for (TimedPositionWithSpeed p : entry.getValue().getPathPoints()) {
-                        wList.add(createSimulatorWindDTO(p));
-                    }
-                    pathDTOs[index].setPoints(wList);
-                    index--;
-                }
-                RaceMapDataDTO rcDTO;
-                rcDTO = new RaceMapDataDTO();
-                rcDTO.coursePositions = new CoursePositionsDTO();
-                rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();
-                PositionDTO posDTO;
-                posDTO = SimulatorServiceUtils.toPositionDTO(startPosition);
-                rcDTO.coursePositions.waypointPositions.add(posDTO);
-                posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
-                rcDTO.coursePositions.waypointPositions.add(posDTO);
-                result = new SimulatorResultsDTO(startTimePoint.asDate(), timeStep.asMillis(), legDuration, rcDTO, pathDTOs, null, null);
-            }
+            RaceMapDataDTO rcDTO;
+            rcDTO = new RaceMapDataDTO();
+            rcDTO.coursePositions = new CoursePositionsDTO();
+            rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();
+            PositionDTO posDTO;
+            posDTO = SimulatorServiceUtils.toPositionDTO(simulationResults.getStartPosition());
+            rcDTO.coursePositions.waypointPositions.add(posDTO);
+            posDTO = SimulatorServiceUtils.toPositionDTO(simulationResults.getEndPosition());
+            rcDTO.coursePositions.waypointPositions.add(posDTO);
+            result = new SimulatorResultsDTO(simulationResults.getStartTime(), simulationResults.getTimeStep(),
+                    simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
         }
-        
         return result;
     }
     
