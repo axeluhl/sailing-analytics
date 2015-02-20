@@ -17,9 +17,12 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartModeFragment extends ScheduleFragment implements StartModeAdapter.StartModeClick {
+
+    private final static String STARTMODE = "startMode";
 
     private class StartModeComparator implements Comparator<StartMode> {
 
@@ -37,8 +40,11 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
 
     }
 
-    public static StartModeFragment newInstance() {
+    public static StartModeFragment newInstance(int startMode) {
         StartModeFragment fragment = new StartModeFragment();
+        Bundle args = new Bundle();
+        args.putInt(STARTMODE, startMode);
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -52,6 +58,18 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_mode, container, false);
+
+        if (getArguments() != null) {
+            switch (getArguments().getInt(STARTMODE, 0)) {
+                case 1:
+                    View header = view.findViewById(R.id.header);
+                    header.setVisibility(View.GONE);
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         mListView = (ListView) view.findViewById(R.id.listView);
 
@@ -92,6 +110,11 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
     @Override
     public void onClick(StartMode startMode) {
         mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), startMode.getFlag());
-        openMainScheduleFragment();
+        if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
+            openMainScheduleFragment();
+        } else {
+            replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+            sendIntent(R.string.intent_uncheck_all);
+        }
     }
 }

@@ -3,7 +3,7 @@
 
     <item
         android:left="60dp"
-        android:top="60dp">
+        android:top="40dp">
         <bitmap
             android:gravity="top"
             android:src="@drawable/flag_sierra_96dp" />

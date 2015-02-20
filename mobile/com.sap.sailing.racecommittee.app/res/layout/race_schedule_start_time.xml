@@ -33,49 +33,50 @@
                 android:textColor="@color/white"
                 android:textSize="@dimen/textSize_26" />
         </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/default_margin_twice"
-            android:layout_marginRight="@dimen/default_margin_twice"
-            android:text="Start in 05:24"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white"
-            android:visibility="invisible" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/start_min_five"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/default_padding"
-                android:tag="5"
-                android:text="Start in 5 Min"
-                android:textAllCaps="true"
-                android:textColor="@color/white"
-                android:textSize="@dimen/textSize_22" />
-
-            <Button
-                android:id="@+id/start_min_one"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/default_padding"
-                android:tag="1"
-                android:text="Start in 1 Min"
-                android:textAllCaps="true"
-                android:textColor="@color/white"
-                android:textSize="@dimen/textSize_22" />
-        </LinearLayout>
     </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="@dimen/default_margin_twice"
+        android:layout_marginRight="@dimen/default_margin_twice"
+        android:layout_marginTop="@dimen/default_margin"
+        android:text="Start in 05:24"
+        android:textColor="@color/white"
+        android:textSize="@dimen/textSize_40"
+        android:visibility="invisible" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/default_margin_half"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/start_min_five"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            android:tag="5"
+            android:text="Start in 5 Min"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_22" />
+
+        <Button
+            android:id="@+id/start_min_one"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            android:tag="1"
+            android:text="Start in 1 Min"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_22" />
+    </LinearLayout>
 
     <View
         android:id="@+id/line_top"
@@ -87,7 +88,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/line_top"
+        android:layout_below="@id/header"
         android:background="@color/sap_gray_black_30">
 
         <LinearLayout
@@ -105,6 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 layout="@layout/time_picker" />
+
         </LinearLayout>
 
         <Button

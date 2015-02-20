@@ -3,6 +3,8 @@
 
     <string-array name="empty_array" tools:ignore="UnusedResources" />
 
+    <string name="intent_update_ui" translatable="false">com.sap.sailing.racecommittee.intent.update-ui</string>
+    <string name="intent_uncheck_all" translatable="false">com.sap.sailing.racecommittee.intent.uncheck-all</string>
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
     <string name="running_on_course">(on course %s)</string>
@@ -302,5 +304,12 @@
     <string name="wind_enter_position">Set Your Position</string>
     <string name="wind_kn">kn</string>
     <string name="wind_address_hint">Enter Address</string>
+
+    <string name="time_up">Up in #TIME#</string>
+    <string name="time_down">Down in #TIME#</string>
+    <string name="time_start">Start #TIME#</string>
+    <string name="time_finish">Finish ~#TIME#</string>
+    <string name="time">#TIME#</string>
+    <string name="set_signal">Set Signal</string>
 
 </resources>

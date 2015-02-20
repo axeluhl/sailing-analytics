@@ -7,7 +7,7 @@
 
     <dimen name="listView_side_padding">100dp</dimen>
     <dimen name="listView_row_padding">20dp</dimen>
-    <dimen name="listView_row_height">100dp</dimen>
+    <dimen name="listView_row_height">85dp</dimen>
     <dimen name="selector_header_height">100dp</dimen>
 
     <dimen name="preference_margin">0dp</dimen>

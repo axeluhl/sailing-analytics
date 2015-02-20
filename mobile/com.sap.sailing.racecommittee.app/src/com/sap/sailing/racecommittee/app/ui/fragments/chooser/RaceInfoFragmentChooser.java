@@ -13,18 +13,20 @@ public abstract class RaceInfoFragmentChooser {
     private static final String TAG = RaceInfoFragmentChooser.class.getName();
     
     public static RaceInfoFragmentChooser on(RacingProcedureType racingProcedureType) {
-        switch (racingProcedureType) {
-        case RRS26:
-            return new RRS26RaceInfoFragmentChooser();
-        case GateStart:
-            return new GateStartRaceInfoFragmentChooser();
-        case ESS:
-            return new ESSRaceInfoFragmentChooser();
-        case BASIC:
-            return new BasicRaceInfoFragmentChooser();
-        default:
-            throw new UnsupportedOperationException(racingProcedureType.toString());
-        }
+        return new BasicRaceInfoFragmentChooser();
+
+//        switch (racingProcedureType) {
+//            case RRS26:
+//                return new RRS26RaceInfoFragmentChooser();
+//            case GateStart:
+//                return new GateStartRaceInfoFragmentChooser();
+//            case ESS:
+//                return new ESSRaceInfoFragmentChooser();
+//            case BASIC:
+//                return new BasicRaceInfoFragmentChooser();
+//            default:
+//                throw new UnsupportedOperationException(racingProcedureType.toString());
+//        }
     }
     
     protected abstract Class<? extends RaceFragment> getStartphaseFragment();
@@ -34,19 +36,19 @@ public abstract class RaceInfoFragmentChooser {
 
     public RaceFragment choose(Context context, ManagedRace managedRace) {
         switch (managedRace.getStatus()) {
-        case UNSCHEDULED:
-            return createInfoFragment(StartTimeFragment.newInstance(false), managedRace);
-        case SCHEDULED:
-        case STARTPHASE:
-            return createInfoFragment(context, getStartphaseFragment(), managedRace);
-        case RUNNING:
-            return createInfoFragment(context, getRunningFragment(), managedRace);
-        case FINISHING:
-            return createInfoFragment(context, getFinishingFragment(), managedRace);
-        case FINISHED:
-            return createInfoFragment(context, getFinishedFragment(), managedRace);
-        default:
-            return createInfoFragment(context, ErrorRaceFragment.class, managedRace);
+            case UNSCHEDULED:
+                return createInfoFragment(StartTimeFragment.newInstance(1), managedRace);
+            case SCHEDULED:
+            case STARTPHASE:
+                return createInfoFragment(context, getStartphaseFragment(), managedRace);
+            case RUNNING:
+                return createInfoFragment(context, getRunningFragment(), managedRace);
+            case FINISHING:
+                return createInfoFragment(context, getFinishingFragment(), managedRace);
+            case FINISHED:
+                return createInfoFragment(context, getFinishedFragment(), managedRace);
+            default:
+                return createInfoFragment(context, ErrorRaceFragment.class, managedRace);
         }
     }
 

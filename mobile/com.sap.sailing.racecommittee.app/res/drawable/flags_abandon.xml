@@ -3,11 +3,12 @@
 
     <item
         android:left="60dp"
-        android:top="60dp">
+        android:top="40dp">
         <bitmap
             android:gravity="top"
             android:src="@drawable/flag_ap_96dp" />
     </item>
+
     <item
         android:left="0dp"
         android:top="0dp">

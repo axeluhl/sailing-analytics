@@ -1,6 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -11,30 +13,42 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
 
 public class GateStartFragment {
 
-    private static int ONE_MINUTE_MILLISECONDS = 60000;
-    private static String NAT = "nationality";
-    private static String NUM = "number";
+    private final static int ONE_MINUTE_MILLISECONDS = 60000;
+    private final static String STARTMODE = "startMode";
+    private final static String NAT = "nationality";
+    private final static String NUM = "number";
 
     public static class Pathfinder extends ScheduleFragment {
 
-        EditText mNat;
-        EditText mNum;
-        View mHeader;
-        View mButton;
+        private EditText mNat;
+        private EditText mNum;
+        private View mHeader;
+        private View mButton;
 
         public static Pathfinder newInstance() {
-            return newInstance(null, null);
+            return newInstance(0, null, null);
+        }
+
+        public static Pathfinder newInstance(int startMode) {
+            return newInstance(startMode, null, null);
         }
 
         public static Pathfinder newInstance(String nat, String num) {
+            return newInstance(0, nat, num);
+        }
+
+        public static Pathfinder newInstance(int startMode, String nat, String num) {
             Pathfinder fragment = new Pathfinder();
             Bundle args = new Bundle();
+            args.putInt(STARTMODE, startMode);
             args.putString(NAT, nat);
             args.putString(NUM, num);
             fragment.setArguments(args);
@@ -43,12 +57,21 @@ public class GateStartFragment {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            final View view = inflater.inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
+            final View layout = inflater.inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
 
-            mNat = (EditText) view.findViewById(R.id.pathfinder_nat);
-            mNum = (EditText) view.findViewById(R.id.pathfinder_num);
-            mHeader = view.findViewById(R.id.header_text);
-            mButton = view.findViewById(R.id.set_path_finder);
+            if (getArguments() != null) {
+                if (getArguments().getInt(STARTMODE, 0) != 0) {
+                    View header = layout.findViewById(R.id.header);
+                    if (header != null) {
+                        header.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            mNat = (EditText) layout.findViewById(R.id.pathfinder_nat);
+            mNum = (EditText) layout.findViewById(R.id.pathfinder_num);
+            mHeader = layout.findViewById(R.id.header_text);
+            mButton = layout.findViewById(R.id.set_path_finder);
 
             if (getArguments() != null) {
                 if (mNat != null) {
@@ -66,8 +89,8 @@ public class GateStartFragment {
 
                         @Override
                         public void afterTextChanged(Editable s) {
-                            view.setTag(R.id.pathfinder_nat, s.length() != 0);
-                            enableSetButton(view, mButton);
+                            layout.setTag(R.id.pathfinder_nat, s.length() != 0);
+                            enableSetButton(layout, mButton);
                         }
                     });
                 }
@@ -87,8 +110,8 @@ public class GateStartFragment {
 
                         @Override
                         public void afterTextChanged(Editable s) {
-                            view.setTag(R.id.pathfinder_num, s.length() != 0);
-                            enableSetButton(view, mButton);
+                            layout.setTag(R.id.pathfinder_num, s.length() != 0);
+                            enableSetButton(layout, mButton);
                         }
                     });
                 }
@@ -99,12 +122,12 @@ public class GateStartFragment {
 
                     @Override
                     public void onClick(View v) {
-                        openFragment(StartProcedureFragment.newInstance());
+                        replaceFragment(StartProcedureFragment.newInstance(0));
                     }
                 });
             }
 
-            return view;
+            return layout;
         }
 
         @Override
@@ -126,7 +149,11 @@ public class GateStartFragment {
                         }
                         GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                         procedure.setPathfinder(MillisecondsTimePoint.now(), String.format("%s%s", nation, number));
-                        openFragment(Timing.newInstance(nation, number));
+                        if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
+                            replaceFragment(Timing.newInstance(nation, number));
+                        } else {
+                            replaceFragment(Timing.newInstance(1, nation, number), R.id.race_frame);
+                        }
                     }
                 });
             }
@@ -141,9 +168,16 @@ public class GateStartFragment {
 
     public static class Timing extends ScheduleFragment {
 
+        private final static String STARTMODE = "startMode";
+
         public static Timing newInstance(String nat, String num) {
+            return newInstance(0, nat, num);
+        }
+
+        public static Timing newInstance(int startMode, String nat, String num) {
             Timing fragment = new Timing();
             Bundle args = new Bundle();
+            args.putInt(STARTMODE, startMode);
             args.putString(NAT, nat);
             args.putString(NUM, num);
             fragment.setArguments(args);
@@ -152,20 +186,29 @@ public class GateStartFragment {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
+            View layout = inflater.inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
 
-            View header = view.findViewById(R.id.header_text);
-            if (header != null) {
-                header.setOnClickListener(new OnClickListener() {
+            if (getArguments() != null) {
+                if (getArguments().getInt(STARTMODE, 0) != 0) {
+                    View header = layout.findViewById(R.id.header);
+                    if (header != null) {
+                        header.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            View caption = layout.findViewById(R.id.header_text);
+            if (caption != null) {
+                caption.setOnClickListener(new OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
-                        openFragment(Pathfinder.newInstance(getArguments().getString(NAT, null), getArguments().getString(NUM, null)));
+                        replaceFragment(Pathfinder.newInstance(getArguments().getString(NAT, null), getArguments().getString(NUM, null)));
                     }
                 });
             }
 
-            return view;
+            return layout;
         }
 
         @Override
@@ -194,6 +237,7 @@ public class GateStartFragment {
             View button = getActivity().findViewById(R.id.set_gate_time);
             if (button != null) {
                 button.setOnClickListener(new OnClickListener() {
+
                     @Override
                     public void onClick(View v) {
                         long launch = 0;
@@ -208,7 +252,12 @@ public class GateStartFragment {
 
                         GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                         procedure.setGateLineOpeningTimes(MillisecondsTimePoint.now(), launch, golf);
-                        openMainScheduleFragment();
+                        if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
+                            openMainScheduleFragment();
+                        } else {
+                            replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+                            sendIntent(R.string.intent_uncheck_all);
+                        }
                     }
                 });
             }

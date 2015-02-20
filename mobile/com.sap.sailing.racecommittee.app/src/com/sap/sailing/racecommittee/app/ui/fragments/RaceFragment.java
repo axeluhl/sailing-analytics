@@ -5,12 +5,16 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
+import android.support.annotation.StringRes;
+import android.support.v4.content.LocalBroadcastManager;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
@@ -137,5 +141,11 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         super.onStop();
 
         TickSingleton.INSTANCE.unregisterListener(this);
+    }
+
+    public void sendIntent(@StringRes int intentAction) {
+        LocalBroadcastManager
+                .getInstance(getActivity())
+                .sendBroadcast(new Intent(getString(intentAction)));
     }
 }

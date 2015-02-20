@@ -30,6 +30,7 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
@@ -53,6 +54,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private final static String TAG = LoginActivity.class.getName();
     private final int RQS_GooglePlayServices = 1;
     private final PositionListFragment positionFragment;
+    private LoginListViews loginListViews = null;
     private Button sign_in;
     private String eventName = null;
     private String courseName = null;
@@ -60,12 +62,29 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
+            sign_in = (Button) findViewById(R.id.login_submit);
+            if (sign_in != null) {
+                sign_in.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        preferences.isSetUp(true);
+                        Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
+                        intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
+                        intent.putExtra(AppConstants.EventIdTag, mSelectedEvent);
+                        startActivity(intent);
+                    }
+                });
+            }
+
             final Serializable eventId = event.getId();
             eventName = event.getName();
             ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
             preferences.setEventID(eventId);
             setupDataManager();
             showCourseAreaListFragment(eventId);
+            if (loginListViews != null) {
+                loginListViews.closeAll();
+            }
         }
     };
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
@@ -75,6 +94,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
             ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
             selectCourseArea(courseArea.getId());
+            if (loginListViews != null) {
+                loginListViews.closeAll();
+            }
         }
     };
     private Serializable mSelectedEvent;
@@ -136,19 +158,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         setContentView(R.layout.login_view);
         setSupportProgressBarIndeterminateVisibility(false);
 
-        sign_in = (Button) findViewById(R.id.login_submit);
-        if (sign_in != null) {
-            sign_in.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    preferences.isSetUp(true);
-                    Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
-                    intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-                    intent.putExtra(AppConstants.EventIdTag, mSelectedEvent);
-                    startActivity(intent);
-                }
-            });
-        }
+        loginListViews = new LoginListViews();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(R.id.login_listview, loginListViews).commitAllowingStateLoss();
 
         addEventListFragment();
 
@@ -219,6 +231,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         preferences.setLoginType(type);
 
         positionName = positionFragment.getAuthor().getName();
+        if (loginListViews != null) {
+            loginListViews.closeAll();
+        }
+
         if (sign_in != null) {
             sign_in.setEnabled(true);
         }

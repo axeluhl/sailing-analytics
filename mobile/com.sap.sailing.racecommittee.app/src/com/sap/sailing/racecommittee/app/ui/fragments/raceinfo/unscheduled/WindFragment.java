@@ -95,7 +95,7 @@ public class WindFragment extends ScheduleFragment
     public WindFragment() {
     }
 
-    public static WindFragment newInstance() {
+    public static WindFragment newInstance(int startMode) {
         WindFragment fragment = new WindFragment();
         return fragment;
     }

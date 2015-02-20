@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
@@ -47,8 +48,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 
-public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks,
-        TickListener, OnClickListener {
+public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks, TickListener, OnClickListener {
     private static final String TAG = RacingActivity.class.getName();
     private static final String WIND = "wind";
     private static final String RACE = "race";
@@ -155,7 +155,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     public void loadWindFragment() {
         // check if the fragment is actively shown already, otherwise show it
         if ((windFragment != null && !windFragment.isFragmentUIActive()) || windFragment == null) {
-            windFragment = WindFragment.newInstance();
+            windFragment = WindFragment.newInstance(0);
 
             showMarker(mWindMarker, 1);
             getFragmentManager().beginTransaction()
@@ -176,6 +176,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             Date date = new Date();
             currentTime.setText(dateFormat.format(date.getTime()));
         }
+
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(getString(R.string.intent_update_ui)));
     }
 
     @Override

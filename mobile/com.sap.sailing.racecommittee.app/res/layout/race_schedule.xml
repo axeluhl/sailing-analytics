@@ -19,8 +19,8 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/set_time"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_26"/>
 
         <ImageView
             android:id="@+id/start_time_icon"
@@ -45,8 +45,8 @@
             android:layout_toRightOf="@id/start_time_caption"
             android:layout_toStartOf="@id/start_time_icon"
             android:gravity="end"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_22"/>
 
         <View
             android:layout_width="match_parent"
@@ -71,8 +71,8 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/start_procedure"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_26"/>
 
         <ImageView
             android:id="@+id/start_procedure_icon"
@@ -97,9 +97,8 @@
             android:layout_toRightOf="@id/start_procedure_caption"
             android:layout_toStartOf="@id/start_procedure_icon"
             android:gravity="end"
-            android:text="@string/start_procedure_line_start"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_22" />
 
         <View
             android:layout_width="match_parent"
@@ -124,8 +123,8 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/start_mode"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_26"/>
 
         <ImageView
             android:id="@+id/start_mode_icon"
@@ -159,8 +158,8 @@
             android:layout_toStartOf="@+id/start_mode_icon"
             android:gravity="end"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_22"/>
 
         <View
             android:layout_width="match_parent"
@@ -185,8 +184,8 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/course"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_26"/>
 
         <ImageView
             android:id="@+id/start_course_icon"
@@ -219,8 +218,8 @@
             android:gravity="end"
             android:singleLine="true"
             android:text="Triangle"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_22"/>
 
         <View
             android:layout_width="match_parent"
@@ -245,8 +244,8 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/wind"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_26"/>
 
         <ImageView
             android:id="@+id/wind_icon"
@@ -279,8 +278,8 @@
             android:layout_toStartOf="@id/wind_icon"
             android:gravity="end"
             android:text="@string/wind_unknown"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/textSize_22"/>
 
         <View
             android:layout_width="match_parent"

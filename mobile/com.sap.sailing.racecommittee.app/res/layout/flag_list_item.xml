@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/line">
+
+    <ImageView
+        android:id="@+id/flag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/default_margin_half"
+        tools:src="@drawable/flag_xray_64dp" />
+
+    <Button
+        android:id="@+id/confirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/default_margin"
+        android:background="@color/sap_blue_1"
+        android:paddingLeft="@dimen/default_padding"
+        android:paddingRight="@dimen/default_padding"
+        android:text="@string/set_signal"
+        android:textAllCaps="true"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="@dimen/default_margin"
+        android:layout_marginLeft="@dimen/default_margin_half"
+        android:layout_marginRight="@dimen/default_margin_half"
+        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_toLeftOf="@id/confirm"
+        android:layout_toRightOf="@id/flag"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/first_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textSize="@dimen/textSize_26"
+            tools:text="Xray" />
+
+        <TextView
+            android:id="@+id/second_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textSize="@dimen/textSize_18"
+            tools:text="Individual Recall" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thick_line"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/default_margin_half"
+        android:layout_marginRight="@dimen/default_margin"
+        android:layout_toRightOf="@id/flag"
+        android:background="@color/sap_gray" />
+</RelativeLayout>

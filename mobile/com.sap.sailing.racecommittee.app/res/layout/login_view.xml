@@ -9,12 +9,11 @@
         class="com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop"
         tools:layout="@layout/login_backdrop" />
 
-    <fragment
+    <FrameLayout
         android:id="@+id/login_listview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal|bottom"
-        class="com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews"
         tools:layout="@layout/login_listviews" />
 </merge>
 

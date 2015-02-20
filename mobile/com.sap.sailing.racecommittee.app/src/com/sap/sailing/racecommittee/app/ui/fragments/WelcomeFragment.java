@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 
@@ -18,11 +17,11 @@ public class WelcomeFragment extends Fragment implements OnClickListener {
     private ActionBar mActionBar;
     private CharSequence mOldTitle;
 
-    public WelcomeFragment() { }
+    public WelcomeFragment() {
+    }
 
     public static WelcomeFragment newInstance() {
         WelcomeFragment fragment = new WelcomeFragment();
-
         return fragment;
     }
 

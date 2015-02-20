@@ -31,49 +31,51 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
-        pathfinderTextView = (TextView) getView().findViewById(R.id.race_startphase_gate_actions_pathfinder_text);
-        gateLaunchTimeTextView = (TextView) getView().findViewById(R.id.race_startphase_gate_actions_opening_text);
-        
-        Button pathfinderButton = (Button) getView().findViewById(R.id.race_startphase_gate_actions_pathfinder_button);
-        pathfinderButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManager = getFragmentManager();
-                RaceDialogFragment fragment = new RaceChoosePathFinderDialog();
-                Bundle args = getRecentArguments();
-                fragment.setArguments(args);
-                fragment.show(fragmentManager, null);
-            }
-        });
-        Boolean hasPathfinder = getRacingProcedure().getConfiguration().hasPathfinder();
-        if (!hasPathfinder) {
-            pathfinderButton.setVisibility(View.GONE);
-            pathfinderTextView.setVisibility(View.GONE);
-        }
-        
-        Button gateLaunchTimeButton = (Button) getView().findViewById(R.id.race_startphase_gate_actions_opening_button);
-        gateLaunchTimeButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManager = getFragmentManager();
-                RaceDialogFragment fragment = new RaceChooseGateLaunchTimesDialog();
-                Bundle args = getRecentArguments();
-                fragment.setArguments(args);
-                fragment.show(fragmentManager, null);
-            }
-        });
+//        pathfinderTextView = (TextView) getView().findViewById(R.id.race_startphase_gate_actions_pathfinder_text);
+//        gateLaunchTimeTextView = (TextView) getView().findViewById(R.id.race_startphase_gate_actions_opening_text);
+//
+//        Button pathfinderButton = (Button) getView().findViewById(R.id.race_startphase_gate_actions_pathfinder_button);
+//        pathfinderButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                FragmentManager fragmentManager = getFragmentManager();
+//                RaceDialogFragment fragment = new RaceChoosePathFinderDialog();
+//                Bundle args = getRecentArguments();
+//                fragment.setArguments(args);
+//                fragment.show(fragmentManager, null);
+//            }
+//        });
+//        Boolean hasPathfinder = getRacingProcedure().getConfiguration().hasPathfinder();
+//        if (!hasPathfinder) {
+//            pathfinderButton.setVisibility(View.GONE);
+//            pathfinderTextView.setVisibility(View.GONE);
+//        }
+//
+//        Button gateLaunchTimeButton = (Button) getView().findViewById(R.id.race_startphase_gate_actions_opening_button);
+//        gateLaunchTimeButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                FragmentManager fragmentManager = getFragmentManager();
+//                RaceDialogFragment fragment = new RaceChooseGateLaunchTimesDialog();
+//                Bundle args = getRecentArguments();
+//                fragment.setArguments(args);
+//                fragment.show(fragmentManager, null);
+//            }
+//        });
     }
     
     @Override
     public void onStart() {
         super.onStart();
-        getRacingProcedure().addChangedListener(changeListener);
+
+//        getRacingProcedure().addChangedListener(changeListener);
     }
     
     @Override
     public void onStop() {
-        getRacingProcedure().removeChangedListener(changeListener);
         super.onStop();
+
+//        getRacingProcedure().removeChangedListener(changeListener);
     }
     
     

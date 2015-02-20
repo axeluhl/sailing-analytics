@@ -29,56 +29,53 @@ public class RRS26StartphaseRaceFragment extends BaseStartphaseRaceFragment<RRS2
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        startModeButton = (ImageButton) getView().findViewById(R.id.race_startphase_rrs26_actions_startmode);
-        startModeButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RaceDialogFragment fragment = new RaceChooseStartModeDialog();
-                fragment.setArguments(getRecentArguments());
-                fragment.show(getFragmentManager(), "dialogStartMode");
-            }
-        });
 
-        raceStartIn5Minutes = (Button) getView().findViewById(R.id.raceStartIn5Minutes);
-        raceStartIn5Minutes.setVisibility(View.VISIBLE);
-        raceStartIn5Minutes.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final TimePoint now = MillisecondsTimePoint.now();
-                getRaceState().setAdvancePass(now);
-                getRaceState().setRacingProcedure(now, RacingProcedureType.RRS26);
-                getRaceState().forceNewStartTime(now, now.plus(5*60*1000));
-            }
-        });
-        raceStartIn2Minutes = (Button) getView().findViewById(R.id.raceStartIn1Minute);
-        raceStartIn2Minutes.setVisibility(View.VISIBLE);
-        raceStartIn2Minutes.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final TimePoint now = MillisecondsTimePoint.now();
-                getRaceState().setAdvancePass(now);
-                getRaceState().setRacingProcedure(now, RacingProcedureType.RRS26);
-                getRaceState().forceNewStartTime(now, now.plus(1*60*1000));
-            }
-        });
+//        startModeButton = (ImageButton) getView().findViewById(R.id.race_startphase_rrs26_actions_startmode);
+//        startModeButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                RaceDialogFragment fragment = new RaceChooseStartModeDialog();
+//                fragment.setArguments(getRecentArguments());
+//                fragment.show(getFragmentManager(), "dialogStartMode");
+//            }
+//        });
+//
+//        raceStartIn5Minutes = (Button) getView().findViewById(R.id.raceStartIn5Minutes);
+//        raceStartIn5Minutes.setVisibility(View.VISIBLE);
+//        raceStartIn5Minutes.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                final TimePoint now = MillisecondsTimePoint.now();
+//                getRaceState().setAdvancePass(now);
+//                getRaceState().setRacingProcedure(now, RacingProcedureType.RRS26);
+//                getRaceState().forceNewStartTime(now, now.plus(5*60*1000));
+//            }
+//        });
+//        raceStartIn2Minutes = (Button) getView().findViewById(R.id.raceStartIn1Minute);
+//        raceStartIn2Minutes.setVisibility(View.VISIBLE);
+//        raceStartIn2Minutes.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                final TimePoint now = MillisecondsTimePoint.now();
+//                getRaceState().setAdvancePass(now);
+//                getRaceState().setRacingProcedure(now, RacingProcedureType.RRS26);
+//                getRaceState().forceNewStartTime(now, now.plus(1*60*1000));
+//            }
+//        });
     }
     
     @Override
     public void onStart() {
         super.onStart();
-        getRacingProcedure().addChangedListener(changeListener);
+
+//        getRacingProcedure().addChangedListener(changeListener);
     }
     
     @Override
     public void onStop() {
-        getRacingProcedure().removeChangedListener(changeListener);
         super.onStop();
-    }
-    
-    
-    @Override
-    protected int getActionsLayoutId() {
-        return R.layout.race_startphase_rrs26_actions;
+
+//        getRacingProcedure().removeChangedListener(changeListener);
     }
 
     @Override

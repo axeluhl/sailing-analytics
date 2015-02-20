@@ -129,6 +129,13 @@ public class LoginListViews extends Fragment implements View.OnClickListener {
         showButton();
     }
 
+    public void closeAll() {
+        closeEvent();
+        closeArea();
+        closePosition();
+        showButton();
+    }
+
     private void closeEvent() {
         if (event_listView != null && event_listView.getLayoutParams() != null) {
             event_listView.getLayoutParams().height = 0;

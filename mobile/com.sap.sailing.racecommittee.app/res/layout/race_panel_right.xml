@@ -22,7 +22,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black" />
+                android:src="@drawable/marker" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_imageSize"
@@ -53,7 +53,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black" />
+                android:src="@drawable/marker" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_imageSize"
@@ -84,7 +84,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black" />
+                android:src="@drawable/marker" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_imageSize"
@@ -115,7 +115,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black" />
+                android:src="@drawable/marker" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_imageSize"
@@ -146,7 +146,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black" />
+                android:src="@drawable/marker" />
 
             <ImageView
                 android:layout_width="@dimen/side_button_imageSize"

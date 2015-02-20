@@ -12,6 +12,10 @@ public class FlagsResources {
         String fileName;
 
         switch (Flags.valueOf(res)) {
+            case ALPHA:
+                fileName = "flag_alpha_" + size + "dp";
+                break;
+
             case AP:
                 fileName = "flag_ap_" + size + "dp";
                 break;
@@ -65,7 +69,7 @@ public class FlagsResources {
                 break;
 
             case JURY:
-                fileName = "juri_flag";
+                fileName = "jury_flag";
                 break;
 
             case NOVEMBER:

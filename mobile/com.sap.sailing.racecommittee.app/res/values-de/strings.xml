@@ -292,5 +292,11 @@
     <string name="wind_speed">Speed</string>
     <string name="wind_kn">kn</string>
     <string name="wind_address_hint">Enter Address</string>
+    <string name="time_down">Down in #TIME#</string>
+    <string name="time_up">Up in #TIME#</string>
+    <string name="time_finish">Finish ~#TIME#</string>
+    <string name="time_start">Start #TIME#</string>
+    <string name="time">#TIME#</string>
+    <string name="set_signal">Set Signal</string>
 
 </resources>

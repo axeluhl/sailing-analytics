@@ -1,30 +1,32 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
 
+import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.v4.content.LocalBroadcastManager;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
 public class ScheduleFragment extends RaceFragment {
 
     protected void openMainScheduleFragment() {
-        openFragment(MainScheduleFragment.newInstance());
+        replaceFragment(MainScheduleFragment.newInstance());
     }
 
-    public void openFragment(RaceFragment fragment) {
-        openFragment(fragment, R.id.racing_view_container);
+    public void replaceFragment(RaceFragment fragment) {
+        replaceFragment(fragment, R.id.racing_view_container);
     }
 
-    public void openFragment(RaceFragment fragment, @IdRes int viewId) {
-        Bundle arguments = fragment.getArguments();
-        if (arguments == null) {
-            arguments = new Bundle();
+    public void replaceFragment(RaceFragment fragment, @IdRes int viewId) {
+        Bundle args = getRecentArguments();
+        if (fragment.getArguments() != null) {
+            args.putAll(fragment.getArguments());
         }
-        arguments.putAll(getRecentArguments());
-        fragment.setArguments(arguments);
-        getFragmentManager()
-                .beginTransaction()
-                .replace(viewId, fragment)
-                .commit();
+        fragment.setArguments(args);
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(viewId, fragment).commit();
+
+        sendIntent(R.string.intent_update_ui);
     }
 }

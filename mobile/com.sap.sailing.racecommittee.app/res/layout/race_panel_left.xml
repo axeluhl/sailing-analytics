@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/side_button_width"
     android:layout_height="match_parent">
 
@@ -20,9 +21,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black" />
+                android:src="@drawable/marker" />
 
             <LinearLayout
+                android:id="@+id/start_procedure_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -33,6 +35,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/start_procedure"
                     android:textAllCaps="true"
+                    android:textColor="@color/sap_light_gray"
                     android:textSize="@dimen/textSize_20" />
 
                 <ImageView
@@ -41,21 +44,31 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:src="@drawable/lock_outline" />
+                    android:src="@drawable/lock_outline"
+                    android:tint="@color/sap_light_gray"
+                    android:visibility="gone" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/start_procedure_value"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginBottom="@dimen/default_margin_twice"
-                android:gravity="center_horizontal"
-                android:text="@string/start_procedure_line_start"
-                android:textColor="@color/white"
-                android:textSize="@dimen/textSize_22" />
+                android:layout_height="match_parent"
+                android:layout_below="@id/start_procedure_header">
+
+                <TextView
+                    android:id="@+id/start_procedure_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerInParent="true"
+                    android:gravity="center_horizontal"
+                    android:paddingLeft="@dimen/default_padding_half"
+                    android:paddingRight="@dimen/default_padding_half"
+                    android:singleLine="true"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/textSize_22"
+                    tools:text="@string/start_procedure_line_start" />
+            </RelativeLayout>
         </RelativeLayout>
 
         <RelativeLayout
@@ -70,9 +83,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black" />
+                android:src="@drawable/marker" />
 
             <LinearLayout
+                android:id="@+id/start_mode_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -83,6 +97,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/start_mode"
                     android:textAllCaps="true"
+                    android:textColor="@color/sap_light_gray"
                     android:textSize="@dimen/textSize_20" />
 
                 <ImageView
@@ -91,17 +106,24 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:src="@drawable/lock_outline" />
+                    android:src="@drawable/lock_outline"
+                    android:tint="@color/sap_light_gray"
+                    android:visibility="gone" />
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/start_mode_flag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="@dimen/default_margin"
-                android:src="@drawable/flag_papa_64dp" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/start_mode_header">
+
+                <ImageView
+                    android:id="@+id/start_mode_flag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerInParent="true"
+                    tools:src="@drawable/flag_papa_64dp" />
+            </RelativeLayout>
         </RelativeLayout>
 
         <RelativeLayout
@@ -116,9 +138,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black" />
+                android:src="@drawable/marker" />
 
             <LinearLayout
+                android:id="@+id/course_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -129,6 +152,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/course"
                     android:textAllCaps="true"
+                    android:textColor="@color/sap_light_gray"
                     android:textSize="@dimen/textSize_20" />
 
                 <ImageView
@@ -137,8 +161,17 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:src="@drawable/lock_outline" />
+                    android:src="@drawable/lock_outline"
+                    android:tint="@color/sap_light_gray"
+                    android:visibility="gone" />
             </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/course_header">
+
+            </RelativeLayout>
         </RelativeLayout>
 
         <RelativeLayout
@@ -153,9 +186,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thick_line"
                 android:layout_alignParentBottom="true"
-                android:background="@color/black" />
+                android:src="@drawable/marker" />
 
             <LinearLayout
+                android:id="@+id/wind_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -166,6 +200,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/wind"
                     android:textAllCaps="true"
+                    android:textColor="@color/sap_light_gray"
                     android:textSize="@dimen/textSize_20" />
 
                 <ImageView
@@ -174,21 +209,28 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:src="@drawable/lock_outline" />
+                    android:src="@drawable/lock_outline"
+                    android:tint="@color/sap_light_gray"
+                    android:visibility="gone" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/wind_value"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginBottom="@dimen/default_margin_twice"
-                android:gravity="center_horizontal"
-                android:text="@string/wind_unknown"
-                android:textColor="@color/white"
-                android:textSize="@dimen/textSize_22" />
+                android:layout_height="match_parent"
+                android:layout_below="@id/wind_header">
+
+                <TextView
+                    android:id="@+id/wind_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerInParent="true"
+                    android:gravity="center_horizontal"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/textSize_22"
+                    tools:text="@string/wind_unknown" />
+            </RelativeLayout>
         </RelativeLayout>
     </LinearLayout>
 
