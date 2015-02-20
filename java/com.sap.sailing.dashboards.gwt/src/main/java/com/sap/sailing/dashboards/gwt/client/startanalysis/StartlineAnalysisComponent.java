@@ -160,32 +160,36 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
             public void timeChanged(Date newTime, Date oldTime) {
                 String selectedCompetitorId = Cookies.getCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY);
                 if (selectedCompetitorId != null) {
-                    ribDashboardServiceAsync.getStartAnalysisListForCompetitorIDAndLeaderboardName(
-                            selectedCompetitorId, leaderboardName, new AsyncCallback<List<StartAnalysisDTO>>() {
-                                @Override
-                                public void onSuccess(List<StartAnalysisDTO> result) {
-                                    if (!result.isEmpty()) {
-                                        if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
-                                            removeAllStartAnalysisCards();
-                                        }
-                                        addNewStartAnalysisCards(result);
-                                        if (result.size() != starts.size()) {
-                                            showNotificationForNewStartAnalysis();
-                                        }
-                                        settingsButtonWithSelectionIndicationLabel
-                                                .setSelectionIndicationTextOnLabel(result.get(0).competitor.getName());
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                }
-                            });
+                    loadStartAnalysisDTOsForCompetitorID(selectedCompetitorId);
                 } else {
                     loadCompetitorsAndShowCompetitorSelectionPopup();
                 }
             }
         });
+    }
+    
+    private void loadStartAnalysisDTOsForCompetitorID(String competitorIdAsString){
+        ribDashboardServiceAsync.getStartAnalysisListForCompetitorIDAndLeaderboardName(
+                competitorIdAsString, leaderboardName, new AsyncCallback<List<StartAnalysisDTO>>() {
+                    @Override
+                    public void onSuccess(List<StartAnalysisDTO> result) {
+                        if (!result.isEmpty()) {
+                            if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
+                                removeAllStartAnalysisCards();
+                            }
+                            addNewStartAnalysisCards(result);
+                            if (result.size() != starts.size()) {
+                                showNotificationForNewStartAnalysis();
+                            }
+                            settingsButtonWithSelectionIndicationLabel
+                                    .setSelectionIndicationTextOnLabel(result.get(0).competitor.getName());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+                });
     }
 
     private void initAndAddBottomNotification() {
@@ -214,6 +218,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
                         settingsButtonWithSelectionIndicationLabel.setSelectionIndicationTextOnLabel(competitor
                                 .getName());
                     }
+                    loadStartAnalysisDTOsForCompetitorID(competitor.getIdAsString());
                 }
             }
         });

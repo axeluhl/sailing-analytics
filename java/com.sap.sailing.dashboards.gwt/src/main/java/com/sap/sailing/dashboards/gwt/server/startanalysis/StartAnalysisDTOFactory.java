@@ -75,11 +75,6 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
         }
         startAnalysisDTO.competitor = baseDomainFactory.getCompetitorStore().convertToCompetitorDTO(competitor);
         startAnalysisDTO.startAnalysisCompetitorDTOs = competitors;
-        if(startAnalysisDTO.startAnalysisCompetitorDTOs.size() > 2){
-            logger.log(Level.INFO, "startAnalysisCompetitorDTOs size > 2");
-        }else{
-            logger.log(Level.INFO, "startAnalysisCompetitorDTOs size < 2");
-        }
         logger.log(Level.INFO, "Created StartAnalysis For Competitor "+competitor.getName()+" and "+trackedRace.getRace().getName());
         return startAnalysisDTO;
     }
