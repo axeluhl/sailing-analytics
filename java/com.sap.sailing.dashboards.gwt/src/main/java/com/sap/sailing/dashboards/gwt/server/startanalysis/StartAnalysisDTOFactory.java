@@ -74,8 +74,6 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
             competitors.add(createStartAnalysisCompetitorDTO(trackedRace, rankOfCompetitorWhilePassingSecondWaypoint, competitor));
         }
         startAnalysisDTO.competitor = baseDomainFactory.getCompetitorStore().convertToCompetitorDTO(competitor);
-        System.out.println("Competitor ID Displayed Cards: "+competitor.getId().toString());
-        System.out.println("CompetitorDTO ID Displayed Cards: "+startAnalysisDTO.competitor.getIdAsString());
         startAnalysisDTO.startAnalysisCompetitorDTOs = competitors;
         if(startAnalysisDTO.startAnalysisCompetitorDTOs.size() > 2){
             logger.log(Level.INFO, "startAnalysisCompetitorDTOs size > 2");

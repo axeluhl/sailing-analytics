@@ -31,10 +31,7 @@ import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.Competit
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.CompetitorSelectionPopup;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.SettingsButtonWithSelectionIndicationLabel;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -49,7 +46,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  * @author Alexander Ries (D062114)
  *
  */
-public class StartlineAnalysisComponent extends Composite implements HasWidgets, RaceSelectionChangeListener {
+public class StartlineAnalysisComponent extends Composite implements HasWidgets {
 
     private static StartlineAnalysisComponentUiBinder uiBinder = GWT.create(StartlineAnalysisComponentUiBinder.class);
 
@@ -121,9 +118,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets,
     /**
      * Component that contains handles, displays and loads startanalysis cards.
      * */
-    public StartlineAnalysisComponent(RibDashboardServiceAsync ribDashboardServiceAsync,
-            RaceSelectionProvider raceSelectionProvider) {
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
+    public StartlineAnalysisComponent(RibDashboardServiceAsync ribDashboardServiceAsync) {
         this.ribDashboardServiceAsync = ribDashboardServiceAsync;
         pageChangeListener = new ArrayList<StartAnalysisPageChangeListener>();
         starts = new ArrayList<StartAnalysisDTO>();
@@ -404,10 +399,5 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets,
     @Override
     public boolean remove(Widget w) {
         return false;
-    }
-
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        System.out.println("Race Selection changed ! StartAnaylsis");
     }
 }

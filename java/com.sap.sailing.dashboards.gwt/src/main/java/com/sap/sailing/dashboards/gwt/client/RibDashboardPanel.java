@@ -75,7 +75,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, RibDashboardDataRetriever ribDashboardDataRetriever) {
         windBotComponents = new ArrayList<WindBotComponent>();
         ribDashboardDataRetriever.addDataObserver(this);
-        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, ribDashboardDataRetriever);
+        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService);
         startLineCAComponent = new StartLineAdvantageComponent(ribDashboardDataRetriever);
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();

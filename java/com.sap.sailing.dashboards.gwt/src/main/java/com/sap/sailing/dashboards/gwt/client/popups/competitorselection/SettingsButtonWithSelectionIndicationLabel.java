@@ -1,13 +1,10 @@
 package com.sap.sailing.dashboards.gwt.client.popups.competitorselection;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -41,22 +38,7 @@ public class SettingsButtonWithSelectionIndicationLabel extends Composite {
 
     public SettingsButtonWithSelectionIndicationLabel() {
         initWidget(uiBinder.createAndBindUi(this));
-        
-        settingsButtonImage.setResource(RibDashboardImageResources.INSTANCE.settings());
-        
-//        settingsButton.addDomHandler(new ClickHandler() {
-//            public void onClick(ClickEvent event) {
-//                Window.alert("OK?");
-//            }
-//        }, ClickEvent.getType());
-//        
-//        settingsButton.addClickHandler(new ClickHandler() {
-//            @Override
-//            public void onClick(ClickEvent event) {
-//                Window.alert("OK?");
-//            }
-//        });
-        
+        settingsButtonImage.setResource(RibDashboardImageResources.INSTANCE.settings());        
     }
     
     public void addClickHandlerToSettingsButton(ClickHandler clickHandler){

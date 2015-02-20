@@ -16,7 +16,7 @@ public abstract class AbstractStartAnalysisCreationValidator {
         Iterator<MarkPassing> markPassingsInOrder = trackedRace.getMarkPassingsInOrder(secondWaypoint).iterator();
         int counter = 0;
         while (markPassingsInOrder.hasNext()) {
-            MarkPassing markpassing = markPassingsInOrder.next();
+            markPassingsInOrder.next();
             counter ++;
         }
         return counter >= MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS ? true : false;
