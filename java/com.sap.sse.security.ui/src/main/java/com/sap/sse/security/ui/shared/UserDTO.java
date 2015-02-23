@@ -72,18 +72,18 @@ public class UserDTO implements IsSerializable {
      * <code>permissionForRoleProvider</code> and including the {@link #getStringPermissions()} that are set explicitly
      * for this user.
      * 
-     * @param permissionForRoleProvider
+     * @param permissionsForRoleProvider
      *            may be <code>null</code> in which case only the {@link #getStringPermissions() explicit permissions}
      *            set for this user will be returned.
      * @return a set of permissions with no duplicates, all in the format parsable by
      *         {@link WildcardPermission#WildcardPermission(String)}
      */
-    public Iterable<String> getAllPermissions(PermissionsForRoleProvider permissionForRoleProvider) {
+    public Iterable<String> getAllPermissions(PermissionsForRoleProvider permissionsForRoleProvider) {
         Set<String> result = new LinkedHashSet<>();
         Util.addAll(getStringPermissions(), result);
-        if (permissionForRoleProvider != null) {
+        if (permissionsForRoleProvider != null) {
             for (String role : getRoles()) {
-                Util.addAll(permissionForRoleProvider.getPermissions(role), result);
+                Util.addAll(permissionsForRoleProvider.getPermissions(role), result);
             }
         }
         return result;

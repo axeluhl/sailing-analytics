@@ -25,6 +25,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
@@ -288,10 +289,16 @@ public class AdminConsolePanel extends DockLayoutPanel {
     }
 
     /**
-     * Remembers the tab panel in which the <code>widgetToAdd</code> is to be displayed and which
-     * permissions are sufficient to see the widget. For the <code>tabPanel</code>, all permissions provided here
-     * are added to the tab panel's permissions so that the user will see the tab panel as soon as the user may see
-     * any of the widgets inside that panel 
+     * Remembers the tab panel in which the <code>widgetToAdd</code> is to be displayed and which permissions are
+     * sufficient to see the widget. For the <code>tabPanel</code>, all permissions provided here are added to the tab
+     * panel's permissions so that the user will see the tab panel as soon as the user may see any of the widgets inside
+     * that panel
+     * 
+     * @param requiresAnyOfThesePermissions
+     *            zero or more permissions; if no permissions are provided, the user will never be able to see the
+     *            widget. Otherwise, if any of these permissions implies any of the permissions the user has, the user
+     *            will be shown the widget. In particular, a "*" wildcard permission will show the widget to all users,
+     *            regardless their actual permissions.
      */
     private void remeberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
             String tabTitle, Permission... requiresAnyOfThesePermissions) {
@@ -321,10 +328,25 @@ public class AdminConsolePanel extends DockLayoutPanel {
         }
     }
 
+    /**
+     * A user is defined to have permission to see a widget if the widget's required permissions imply any of the permissions the
+     * user has. This may at first seem the wrong way around. However, the problem is that a widget cannot express a general permission
+     * that is implied by any detailed permissions. Wildcard permissions don't work this way. Instead, a wildcard permission implies
+     * detailed permissions. This way, if the widget requires, say, "event:*:*" (or "event" for short), this permission implies
+     * all more detailed event permissions such as "event:write:9456192873". Therefore, the permissions provided for widgets
+     * must imply a permission the user has in order for the user to see the tab. More detailed permissions checks can then be
+     * applied at a more detailed level of the UI and, of course, in the back end. Additionally, if any of the user's permissions
+     * implies the required permission (e.g., the user having "*" as the administrator's permission), permission to see the widget
+     * is also implied.
+     */
     private boolean userHasPermissionsToSeeWidget(UserDTO user, Widget widget) {
-        for (Permission requiredPermission : permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget)) {
-            if (user.hasPermission(requiredPermission.getStringPermission(), permissionsForRoleProvider)) {
-                return true;
+        for (Permission requiredStringPermission : permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget)) {
+            WildcardPermission requiredPermission = new WildcardPermission(requiredStringPermission.getStringPermission());
+            for (String userStringPermission : user.getAllPermissions(permissionsForRoleProvider)) {
+                WildcardPermission userPermission = new WildcardPermission(userStringPermission);
+                if (requiredPermission.implies(userPermission) || userPermission.implies(requiredPermission)) {
+                    return true;
+                }
             }
         }
         return false;
