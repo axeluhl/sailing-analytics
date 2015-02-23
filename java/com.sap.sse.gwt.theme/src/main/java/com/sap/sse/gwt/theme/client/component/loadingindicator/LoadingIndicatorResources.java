@@ -7,7 +7,7 @@ import com.google.gwt.resources.client.CssResource;
 public interface LoadingIndicatorResources extends ClientBundle {
     public static final LoadingIndicatorResources INSTANCE = GWT.create(LoadingIndicatorResources.class);
 
-    @Source("LoadingIndicator.css")
+    @Source("LoadingIndicator.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
