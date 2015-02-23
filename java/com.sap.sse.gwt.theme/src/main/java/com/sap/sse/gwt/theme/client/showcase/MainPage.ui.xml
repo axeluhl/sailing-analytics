@@ -14,6 +14,12 @@
 						<ux:item name="SAP Footer">
 							<ux:components.SAPFooterShowcase />
 						</ux:item>
+						<ux:item name="Image Gallery">
+							<ux:components.ImageGalleryShowcase />
+						</ux:item>
+						<ux:item name="Video Gallery">
+							<ux:components.VideoGalleryShowcase />
+						</ux:item>
 						<ux:item name="Loading Indicator">
 							<ux:components.LoadingIndicatorShowcase />
 						</ux:item>
