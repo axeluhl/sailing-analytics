@@ -8,7 +8,7 @@ import com.google.gwt.resources.client.ImageResource;
 public interface SAPHeaderResources extends ClientBundle {
     public static final SAPHeaderResources INSTANCE = GWT.create(SAPHeaderResources.class);
 
-    @Source("SAPHeader.css")
+    @Source("SAPHeader.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
