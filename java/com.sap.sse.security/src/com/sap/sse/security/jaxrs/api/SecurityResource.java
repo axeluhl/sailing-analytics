@@ -23,12 +23,12 @@ public class SecurityResource extends AbstractSecurityResource {
     private static final Logger logger = Logger.getLogger(SecurityResource.class.getName());
     
     private Response getSecurityErrorResponse(String msg) {
-        return  Response.status(Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        return  Response.status(Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN_TYPE).build();
     }
 
     @GET
     @Path("/hello")
-    @Produces("application/json;charset=UTF-8")
+    @Produces("text/plain;charset=UTF-8")
     public Response sayHello() {
         final String messageText;
         if (SecurityUtils.getSubject().isAuthenticated()) {
@@ -36,12 +36,12 @@ public class SecurityResource extends AbstractSecurityResource {
         } else {
             messageText = "Hello!";
         }
-        return Response.ok(messageText, MediaType.TEXT_PLAIN).build();
+        return Response.ok(messageText, MediaType.TEXT_PLAIN_TYPE).build();
     }
     
     @POST
     @Path("/login")
-    @Produces("application/json;charset=UTF-8")
+    @Produces("text/plain;charset=UTF-8")
     public Response login(@FormParam("username") String username, @FormParam("password") String password) {
         try {
             getService().login(username, password);
@@ -50,7 +50,7 @@ public class SecurityResource extends AbstractSecurityResource {
             logger.info("Logging in " + username + " with password failed: "+e.getMessage());
             return getSecurityErrorResponse(e.getMessage());
         }
-        return Response.ok("Logged in!", MediaType.TEXT_PLAIN).build();
+        return Response.ok("Logged in!", MediaType.TEXT_PLAIN_TYPE).build();
     }
 
     @POST
@@ -63,7 +63,7 @@ public class SecurityResource extends AbstractSecurityResource {
             JSONObject response = new JSONObject();
             response.put("username", username);
             response.put("access_token", getService().createAccessToken(username));
-            return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON).build();
+            return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
         } catch (UserManagementException e) {
             logger.info("Logging in " + username + " with password failed: "+e.getMessage());
             return getSecurityErrorResponse(e.getMessage());
@@ -85,14 +85,15 @@ public class SecurityResource extends AbstractSecurityResource {
         JSONObject response = new JSONObject();
         response.put("username", user.getName());
         response.put("email", user.getEmail());
-        return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON).build();
+        return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
     }
     
     @GET
     @Path("/logout")
+    @Produces("text/plain;charset=UTF-8")
     public Response logout() {
         getService().logout();
-        return Response.ok("Logged out", MediaType.TEXT_PLAIN).build();
+        return Response.ok("Logged out", MediaType.TEXT_PLAIN_TYPE).build();
     }
 }
  
