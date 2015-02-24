@@ -85,7 +85,7 @@ public class PolarResource extends AbstractSailingServerResource {
         try {
             PolarDataService service = getService().getPolarDataService();
             SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithBearing(boatClass,
-                    windSpeed, legType, tack, false);
+                    windSpeed, legType, tack, true);
             String resultString = "Speed: " + speedWithBearing.getObject().getKnots() + "kn; Angle: "
                     + speedWithBearing.getObject().getBearing().getDegrees() + "°; Confidence: "
                     + speedWithBearing.getConfidence();
