@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 
@@ -60,8 +62,8 @@ public class PolarDataDimensionCollectionFactory {
 
         addPolarBaseDimension(dimensions, functionFactory);
         
-        Function<BoatClass> angleDiffTrueWindToBoatFunction = functionFactory.createMethodWrappingFunction(AngleClusterPolarClusterKey.class
-                .getMethod("getAngleDiffTrueWindToBoat", new Class<?>[0]));
+        Function<Cluster<Bearing>> angleDiffTrueWindToBoatFunction = functionFactory.createMethodWrappingFunction(AngleClusterPolarClusterKey.class
+                .getMethod("getAngleCluster", new Class<?>[0]));
         dimensions.add(angleDiffTrueWindToBoatFunction);
         
         return dimensions;

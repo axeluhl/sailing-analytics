@@ -24,16 +24,24 @@ public class AngleAndSpeedRegression {
     
     private final IncrementalLeastSquares speedRegression = new IncrementalAnyOrderLeastSquaresImpl(3, false);
     private final IncrementalLeastSquares angleRegression = new IncrementalAnyOrderLeastSquaresImpl(3);
+    
+    private double maxWindSpeedInKnots = -1;
 
     public void addData(WindWithConfidence<Pair<Position, TimePoint>> windSpeed,
             BearingWithConfidence<Integer> angleToTheWind, SpeedWithBearingWithConfidence<TimePoint> boatSpeed) {
         double windSpeedInKnots = windSpeed.getObject().getKnots();
+        if (windSpeedInKnots > maxWindSpeedInKnots) {
+            maxWindSpeedInKnots = windSpeedInKnots;
+        }
         speedRegression.addData(windSpeedInKnots, boatSpeed.getObject().getKnots());
         angleRegression.addData(windSpeedInKnots, angleToTheWind.getObject().getDegrees()); 
     }
 
     public SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
         double windSpeedInKnots = windSpeed.getKnots();
+        if (windSpeedInKnots > maxWindSpeedInKnots) {
+            throw new NotEnoughDataHasBeenAddedException();
+        }
         double estimatedSpeed = speedRegression.getOrCreatePolynomialFunction().value(windSpeedInKnots);
         double estimatedAngle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedInKnots);
         Bearing bearing = new DegreeBearingImpl(estimatedAngle);
@@ -49,7 +57,7 @@ public class AngleAndSpeedRegression {
         Set<SpeedWithBearingWithConfidence<Void>> result = new HashSet<>();
         for (int i = 0; i < windSpeedCandidates.length; i++) {
             double windSpeedCandidateInKnots = windSpeedCandidates[i];
-            if (windSpeedCandidateInKnots >= 0) {
+            if (windSpeedCandidateInKnots >= 0 && windSpeedCandidateInKnots <= maxWindSpeedInKnots) {
                 double angle = 0;
                 boolean angleFound;
                 try {

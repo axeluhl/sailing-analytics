@@ -1,9 +1,7 @@
 package com.sap.sailing.polars.mining;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -21,12 +19,10 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.regression.MovingAverageBoatSpeedEstimator;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
-import com.sap.sailing.polars.regression.impl.WindSpeedAndAngleEstimator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
@@ -136,33 +132,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
             throw new NotEnoughDataHasBeenAddedException();
         }
         return new DegreeBearingImpl(averageAngleContainer.getAverageAngleDeg());
-    }
-    
-    Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
-            Speed speedOverGround, LegType legType, Tack tack) {
-        List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = obtainPolarSamplingPoints(
-                boatClass, legType, tack);
-        
-        WindSpeedAndAngleEstimator windSpeedAndAngleEstimator = new WindSpeedAndAngleEstimator(averageBoatSpeedAndCourseForWindSpeed);
-        return windSpeedAndAngleEstimator.getAverageTrueWindSpeedAndAngleCandidates(speedOverGround);
-    }
-
-    private List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> obtainPolarSamplingPoints(BoatClass boatClass,
-            LegType legType, Tack tack) {
-        List<Pair<Speed, SpeedWithBearingWithConfidence<Void>>> averageBoatSpeedAndCourseForWindSpeed = new ArrayList<>();
-        for (int i = 0; i < 60; i++) {
-            Speed windSpeed = new KnotSpeedImpl(i * 0.5);
-            SpeedWithBearingWithConfidence<Void> averageSpeedAndCourseOverGround;
-            try {
-                averageSpeedAndCourseOverGround = getAverageSpeedAndCourseOverGround(
-                        boatClass, windSpeed, legType, tack);
-                averageBoatSpeedAndCourseForWindSpeed.add(new Pair<Speed, SpeedWithBearingWithConfidence<Void>>(windSpeed,
-                        averageSpeedAndCourseOverGround));
-            } catch (NotEnoughDataHasBeenAddedException e) {
-                // ignore this, since there is not enough data for this windspeed.
-            }
-        }
-        return averageBoatSpeedAndCourseForWindSpeed;
     }
 
     @Override
