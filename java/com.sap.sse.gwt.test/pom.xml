@@ -9,6 +9,14 @@
   </parent>
   <artifactId>com.sap.sse.gwt.test</artifactId>
   <packaging>eclipse-test-plugin</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <version>${gwt.version}</version>
+    </dependency>
+  </dependencies>
+
     <build>
         <plugins>
             <plugin>
