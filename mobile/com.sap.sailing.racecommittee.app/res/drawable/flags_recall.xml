@@ -2,8 +2,8 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:left="60dp"
-        android:top="40dp">
+        android:left="80dp"
+        android:top="60dp">
         <bitmap
             android:gravity="top"
             android:src="@drawable/flag_xray_96dp" />

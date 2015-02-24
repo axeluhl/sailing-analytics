@@ -1,22 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import android.widget.*;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.common.racelog.FlagPole;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
-import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.Calendar;
@@ -24,17 +21,7 @@ import java.util.List;
 
 public class RaceFlagViewerFragment extends RaceFragment {
 
-    private ImageView flagLeft;
-    private ImageView flagRight;
-    private TextView textLeft;
-    private TextView textRight;
-    private View leftUpArrow;
-    private View leftDownArrow;
-    private View rightUpArrow;
-    private View rightDownArrow;
-    private View leftPlace;
-    private View rightPlace;
-    private View middleLine;
+    private LinearLayout mLayout;
 
     public RaceFlagViewerFragment() {
 
@@ -47,21 +34,9 @@ public class RaceFlagViewerFragment extends RaceFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_flags, container, false);
+        mLayout = (LinearLayout) inflater.inflate(R.layout.race_flag_screen, container, false);
 
-        middleLine = layout.findViewById(R.id.middle_line);
-        flagLeft = (ImageView) layout.findViewById(R.id.left_flag);
-        flagRight = (ImageView) layout.findViewById(R.id.right_flag);
-        textLeft = (TextView) layout.findViewById(R.id.left_text);
-        textRight = (TextView) layout.findViewById(R.id.right_text);
-        leftUpArrow = layout.findViewById(R.id.left_arrow_up);
-        leftDownArrow = layout.findViewById(R.id.left_arrow_down);
-        rightUpArrow = layout.findViewById(R.id.right_arrow_up);
-        rightDownArrow = layout.findViewById(R.id.right_arrow_down);
-        leftPlace = layout.findViewById(R.id.left_place);
-        rightPlace = layout.findViewById(R.id.right_place);
-
-        return layout;
+        return mLayout;
     }
 
     @Override
@@ -76,23 +51,64 @@ public class RaceFlagViewerFragment extends RaceFragment {
             return;
         }
 
-        FlagPoleState flagPoleState = getRaceState().getTypedRacingProcedure().getActiveFlags(getRaceState().getStartTime(),
+        FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(),
                 MillisecondsTimePoint.now());
-        List<FlagPole> flagChanges = flagPoleState.computeUpcomingChanges();
-        if (!flagChanges.isEmpty()) {
-            TimePoint changeAt = flagPoleState.getNextStateValidFrom();
-            FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
+        List<FlagPole> flagChanges = poleState.getCurrentState();
+        mLayout.removeAllViews();
+        int size = 0;
+        for (FlagPole flagPole : flagChanges) {
+            size++;
+            mLayout.addView(renderFlag(poleState, flagPole, flagChanges.size() == size));
+        }
+    }
 
-            flagLeft.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), changePole.getUpperFlag().name(), 96));
-            String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
-            textLeft.setText(text.replace("-", ""));
-            leftDownArrow.setVisibility(View.GONE);
-            leftUpArrow.setVisibility(View.GONE);
-            if (changePole.isDisplayed()) {
-                leftUpArrow.setVisibility(View.VISIBLE);
+    private RelativeLayout renderFlag(FlagPoleState poleState, final FlagPole flag, boolean lastEntry) {
+        RelativeLayout layout = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout, false);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
+        layout.setLayoutParams(layoutParams);
+
+        TimePoint changeAt = poleState.getNextStateValidFrom();
+
+        ImageView flagView = (ImageView) layout.findViewById(R.id.flag);
+        TextView textView = (TextView) layout.findViewById(R.id.flag_text);
+        View downView = layout.findViewById(R.id.arrow_down);
+        View upView = layout.findViewById(R.id.arrow_up);
+        View line = layout.findViewById(R.id.line);
+        if (lastEntry) {
+            line.setVisibility(View.GONE);
+        }
+
+        flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.getUpperFlag().name(), 96));
+        if (flag.getUpperFlag() == Flags.CLASS && getRace().getFleet().getColor() != null) {
+            flagView.setPadding(6, 6, 6, 6);
+            flagView.setBackgroundColor(getFleetColorId());
+        }
+
+        downView.setVisibility(View.GONE);
+        upView.setVisibility(View.GONE);
+        textView.setText(null);
+        if (changeAt != null) {
+            textView.setText(getDuration(changeAt.asDate(), Calendar.getInstance().getTime()).replace("-", ""));
+            if (!flag.isDisplayed()) {
+                upView.setVisibility(View.VISIBLE);
             } else {
-                leftDownArrow.setVisibility(View.VISIBLE);
+                downView.setVisibility(View.VISIBLE);
             }
         }
+
+        layout.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(view.getContext(), flag.getUpperFlag().name() + "|" + flag.getLowerFlag().name(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        return layout;
+    }
+
+    private int getFleetColorId() {
+        Util.Triple<Integer, Integer, Integer> rgb = getRace().getFleet().getColor() == null ? new Util.Triple<>(0, 0, 0) : getRace().getFleet().getColor().getAsRGB();
+        return Color.rgb(rgb.getA(), rgb.getB(), rgb.getC());
     }
 }

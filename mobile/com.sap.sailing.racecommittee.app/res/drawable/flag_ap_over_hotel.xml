@@ -2,11 +2,11 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:left="80dp"
-        android:top="60dp">
+        android:left="0dp"
+        android:top="195dp">
         <bitmap
             android:gravity="top"
-            android:src="@drawable/flag_lima_96dp" />
+            android:src="@drawable/flag_hotel_96dp" />
     </item>
 
     <item
@@ -14,7 +14,7 @@
         android:top="0dp">
         <bitmap
             android:gravity="center"
-            android:src="@drawable/flag_blue_96dp" />
+            android:src="@drawable/flag_ap_96dp" />
     </item>
 
 </layer-list>

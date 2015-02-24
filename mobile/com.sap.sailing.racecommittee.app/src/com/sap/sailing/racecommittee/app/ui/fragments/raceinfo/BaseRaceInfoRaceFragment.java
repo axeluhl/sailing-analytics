@@ -185,7 +185,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     @Override
     public void notifyTick() {
         super.notifyTick();
-
     }
 
     protected ProcedureType getRacingProcedure() {
@@ -264,10 +263,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         TimePoint startTime = getRaceState().getStartTime();
 
         if (startTime != null) {
-            long millisecondsTillStart = startTime.minus(now.asMillis()).asMillis();
-
             if (headerTime != null) {
-                headerTime.setText(getString(R.string.time).replace("#TIME#", TimeUtils.formatDurationUntil(millisecondsTillStart)));
+                String time;
+                if (startTime.asMillis() > now.asMillis()) {
+                    time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
+                } else {
+                    time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
+                }
+                headerTime.setText(getString(R.string.time).replace("#TIME#", time));
             }
 
             if (timeStart != null) {
