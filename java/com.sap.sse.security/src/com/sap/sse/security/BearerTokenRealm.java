@@ -12,20 +12,16 @@ import org.apache.shiro.authc.SaltedAuthenticationInfo;
  * @author Axel Uhl (D043530)
  *
  */
-public class AccessTokenRealm extends AbstractUserStoreBasedRealm {
+public class BearerTokenRealm extends AbstractUserStoreBasedRealm {
     
-    public AccessTokenRealm() {
+    public BearerTokenRealm() {
         super();
+        setAuthenticationTokenClass(BearerAuthenticationToken.class);
     }
     
-    @Override
-    public boolean supports(AuthenticationToken token) {
-        return token instanceof AccessToken;
-    }
-
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        AccessToken accessToken = (AccessToken) token;
+        BearerAuthenticationToken accessToken = (BearerAuthenticationToken) token;
         final User user = getUserStore().getUserByAccessToken(accessToken.getCredentials());
         if (user == null) {
             return null;

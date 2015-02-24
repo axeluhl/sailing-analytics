@@ -70,7 +70,7 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
-import com.sap.sse.security.AccessToken;
+import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.GithubApi;
@@ -291,7 +291,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     
     @Override
     public User loginByAccessToken(String accessToken) {
-        AccessToken token = new AccessToken(accessToken);
+        BearerAuthenticationToken token = new BearerAuthenticationToken(accessToken);
         logger.info("Trying to login with access token");
         Subject subject = SecurityUtils.getSubject();
         try {

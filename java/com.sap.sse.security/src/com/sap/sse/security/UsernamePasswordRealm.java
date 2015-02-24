@@ -13,6 +13,7 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
     
     public UsernamePasswordRealm() {
         super();
+        setAuthenticationTokenClass(UsernamePasswordToken.class);
     }
     
     @Override

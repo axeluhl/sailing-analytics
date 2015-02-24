@@ -42,6 +42,7 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
     
     public OAuthRealm() {
         super();
+        setAuthenticationTokenClass(OAuthToken.class);
     }
 
     @Override
