@@ -19,16 +19,13 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
-import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
@@ -38,13 +35,16 @@ import com.sap.sse.common.TimePoint;
 public class PathGeneratorTracTrac extends PathGeneratorBase {
 
     private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator");
-    private static final long DEFAULT_TIMEOUT_MILLISECONDS = 60000;
+    //private static final long DEFAULT_TIMEOUT_MILLISECONDS = 60000;
 
-    private RacingEventServiceImpl service = null;
+    //private RacingEventServiceImpl service = null;
     private TracTracAdapterFactory tracTracAdapterFactory;
     private RaceHandle raceHandle = null;
+    @SuppressWarnings("unused")
     private URL raceURL = null;
+    @SuppressWarnings("unused")
     private URI liveURI = null;
+    @SuppressWarnings("unused")
     private URI storedURI = null;
     private double windScale = 0.0;
     private LinkedList<TimedPositionWithSpeed> raceCourse = null;
@@ -54,7 +54,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     public PathGeneratorTracTrac(SimulationParameters parameters) {
 
         this.parameters = parameters;
-        this.service = new RacingEventServiceImpl(EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, null);
+        //this.service = new RacingEventServiceImpl(EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, null);
         this.tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
 
         this.legIndex = 0;
@@ -74,8 +74,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         LOGGER.info("Calling service.addTracTracRace");
 
         try {
-            this.raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, raceURL, liveURI, storedURI, 
-                    null, null, DEFAULT_TIMEOUT_MILLISECONDS);
+            // TODO: refactor, so that trackedRace is passed from server; no separate access to RacingEventService
+            this.raceHandle = null; //SimulatorUtils.loadRace(service, tracTracAdapterFactory, raceURL, liveURI, storedURI, null, null, DEFAULT_TIMEOUT_MILLISECONDS);
 
         } catch (Exception error) {
             LOGGER.severe(error.getMessage());
@@ -126,6 +126,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     }
 
     @Override
+    @SuppressWarnings("all")
     public Path getPath() {
         this.intializeRaceHandle();
 
@@ -133,7 +134,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         RaceDefinition raceDef = this.raceHandle.getRace();
         Regatta regatta = this.raceHandle.getRegatta();
 
-        TrackedRace trackedRace = this.service.getTrackedRace(regatta, raceDef);
+        // TODO: refactor, so that trackedRace is passed from server; no separate access to RacingEventService
+        TrackedRace trackedRace = null; //this.service.getTrackedRace(regatta, raceDef)
         trackedRace.waitUntilNotLoading();
 
         Iterator<Competitor> competitors = raceDef.getCompetitors().iterator();
@@ -177,21 +179,24 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         return new PathImpl(path, null);
     }
 
+    @SuppressWarnings("null")
     public Path getPathPolyline(Distance maxDistance) {
         this.intializeRaceHandle();
         // getting the race
         RaceDefinition raceDef = this.raceHandle.getRace();
+        @SuppressWarnings("unused")
         Regatta regatta = this.raceHandle.getRegatta();
 
-        TrackedRace trackedRace = this.service.getTrackedRace(regatta, raceDef);
-        try {
+        // TODO: refactor, so that trackedRace is passed from server; no separate access to RacingEventService
+        TrackedRace trackedRace = null; //this.service.getTrackedRace(regatta, raceDef);
+        /*try {
             while (trackedRace.getStatus().getLoadingProgress() < 1.0) {
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
+        }*/
 
         Iterator<Competitor> competitors = raceDef.getCompetitors().iterator();
         Competitor competitor = null;
