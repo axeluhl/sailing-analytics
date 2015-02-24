@@ -6,6 +6,7 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.impl.ReplicableMailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.util.ClearStateTestSupport;
 
 
 /**
@@ -21,7 +22,7 @@ import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
  * @author Fredrik Teschke
  *
  */
-public interface MailService extends ReplicableWithObjectInputStream<ReplicableMailService, MailOperation<?>> {
+public interface MailService extends ReplicableWithObjectInputStream<ReplicableMailService, MailOperation<?>>, ClearStateTestSupport {
     void sendMail(String toAddress, String subject, String body) throws MailException;
     
     /**
