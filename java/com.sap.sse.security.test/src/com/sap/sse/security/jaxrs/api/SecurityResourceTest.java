@@ -1,11 +1,9 @@
-package com.sap.sse.security.test;
+package com.sap.sse.security.jaxrs.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import javax.ws.rs.core.Response;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
@@ -17,11 +15,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.User;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
-import com.sap.sse.security.jaxrs.api.SecurityResource;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -59,7 +58,7 @@ public class SecurityResourceTest {
     }
     
     private String createAccessToken() throws ParseException {
-        String responseJsonString = (String) servlet.accessToken("admin", "admin").getEntity();
+        String responseJsonString = (String) servlet.respondWithAccessTokenForUser("admin").getEntity();
         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseJsonString);
         assertEquals("admin", responseJson.get("username"));
         String accessToken = (String) responseJson.get("access_token");
@@ -70,10 +69,11 @@ public class SecurityResourceTest {
     @Test
     public void createAccessTokenAndAuthenticate() throws ParseException {
         String accessToken = createAccessToken();
-        Response response = servlet.authenticate(accessToken);
-        JSONObject responseJson = (JSONObject) new JSONParser().parse((String) response.getEntity());
-        assertEquals("admin", responseJson.get("username"));
+        User user = service.getUserByAccessToken(accessToken);
+        assertNotNull(user);
+        assertEquals("admin", user.getName());
         final Subject subject = SecurityUtils.getSubject();
+        subject.login(new BearerAuthenticationToken(accessToken));
         assertTrue(subject.isAuthenticated());
         assertEquals("admin", subject.getPrincipal());
         assertTrue(subject.isPermitted("can do"));
