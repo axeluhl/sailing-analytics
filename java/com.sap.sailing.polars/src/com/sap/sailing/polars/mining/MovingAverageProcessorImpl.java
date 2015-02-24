@@ -75,7 +75,7 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         BearingWithConfidence<Integer> angleToTheWind = fix.getAngleToTheWind();
-        WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWindSpeed();
+        WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWind();
         SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
         availableBoatClasses.add(element.getDataEntry().getBoatClass());
         WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;

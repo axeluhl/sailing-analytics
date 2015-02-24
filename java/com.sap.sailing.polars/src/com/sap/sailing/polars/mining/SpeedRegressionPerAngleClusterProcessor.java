@@ -46,7 +46,7 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
             }
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
-        regression.addData(fix.getWindSpeed().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
+        regression.addData(fix.getWind().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
     }
     
     /**
@@ -80,7 +80,7 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
             }
 
             @Override
-            public Cluster<Bearing> getAngleDiffTrueWindToBoat() {
+            public Cluster<Bearing> getAngleCluster() {
                 return angleClusterGroup.getClusterFor(angle);
             }
 

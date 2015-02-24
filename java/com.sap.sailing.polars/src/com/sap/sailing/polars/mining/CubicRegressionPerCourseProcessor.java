@@ -36,7 +36,7 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
             }
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
-        regression.addData(fix.getWindSpeed(), fix.getAngleToTheWind(), fix.getBoatSpeed());
+        regression.addData(fix.getWind(), fix.getAngleToTheWind(), fix.getBoatSpeed());
     }
     
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass, Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {

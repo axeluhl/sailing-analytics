@@ -57,7 +57,7 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
     
     private boolean importantDataIsNotNull(GPSFixMovingWithPolarContext element) {
         BearingWithConfidence<Integer> angleToTheWind = element.getAngleToTheWind();
-        WindWithConfidence<Pair<Position, TimePoint>> windSpeed = element.getWindSpeed();
+        WindWithConfidence<Pair<Position, TimePoint>> windSpeed = element.getWind();
         SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = element.getBoatSpeed();
         boolean result = false;
         if (angleToTheWind != null && windSpeed != null && boatSpeedWithConfidence != null) {

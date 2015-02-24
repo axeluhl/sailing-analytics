@@ -7,6 +7,6 @@ import com.sap.sse.datamining.shared.annotations.Dimension;
 public interface AngleClusterPolarClusterKey extends BasePolarClusterKey {
     
     @Dimension(messageKey = "angleDiffTrueWindToBoat")
-    Cluster<Bearing> getAngleDiffTrueWindToBoat();
+    Cluster<Bearing> getAngleCluster();
 
 }
