@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
@@ -48,15 +49,25 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
         regression.addData(fix.getWindSpeed().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
     }
     
+    /**
+     * There are angle clusters (size defined in the data mining pipeline construction), which each have their own 
+     * regression for boatspeed over windspeed. 
+     * We don't know the thresholds or centers of the angle clusters here, so we roughly interpolate by taking 10 
+     * values from angle-5 deg to angle+5 deg and average the speeds.
+     */
     public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle) throws NotEnoughDataHasBeenAddedException {
-        GroupKey key = createGroupKey(boatClass, trueWindAngle);
-        double estimatedSpeed;
-        if (regressions.containsKey(key)) {
-            estimatedSpeed = regressions.get(key).getOrCreatePolynomialFunction().value(windSpeed.getKnots());
-        } else {
-            throw new NotEnoughDataHasBeenAddedException("Not enough data has been added to Per Course Regressions");
+        double speedSum = 0;
+        double numberOfSpeeds = 0;
+        for (int i = -5; i <= 5; i++) {
+            GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(trueWindAngle.getDegrees() + i));
+            if (regressions.containsKey(key)) {
+                speedSum += regressions.get(key).getOrCreatePolynomialFunction().value(windSpeed.getKnots());
+                numberOfSpeeds++;
+            } else {
+                throw new NotEnoughDataHasBeenAddedException("Not enough data has been added to Per Course Regressions");
+            }
         }
-        Speed speed = new KnotSpeedImpl(estimatedSpeed);
+        Speed speed = new KnotSpeedImpl(speedSum / numberOfSpeeds);
         return new SpeedWithConfidenceImpl<Void>(speed, /*FIXME*/ 0.5, null);
     }
     

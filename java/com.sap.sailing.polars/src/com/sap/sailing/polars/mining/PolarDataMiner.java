@@ -183,12 +183,10 @@ public class PolarDataMiner {
     private Set<SpeedWithBearingWithConfidence<Void>> getAverageTrueWindSpeedAndAngleCandidatesWithFallbackFunction(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
         
-        // The following is an estimation function. It only serves as a stub. It's the same for all boatclasses and returns
-        // default maneuver angles. This is NOT final.
+        // The following is an estimation function. It only serves as a fallback. It's the same for all boatclasses and returns
+        // default maneuver angles.
         // The function is able to return boat speed values for windspeed alues between 5kn and 25kn , which are some kind of realistic
         // for sailing boats. They are taken from the 505 polars we gathered in the races until now.
-        // TODO keep a cache of sampling points over which to fit a function for every boat class and then return the
-        // corresponding angle
 
         Set<SpeedWithBearingWithConfidence<Void>> resultSet = new HashSet<>();
         final int tackFactor = (tack.equals(Tack.PORT)) ? -1 : 1;

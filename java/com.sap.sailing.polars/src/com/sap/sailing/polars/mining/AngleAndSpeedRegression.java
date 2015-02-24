@@ -60,7 +60,7 @@ public class AngleAndSpeedRegression {
                 }
                 if (angleFound) {
                     result.add(new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
-                            windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.00001, null));
+                            windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.5 /*FIXME*/, null));
                 }
             }
         }
