@@ -18,6 +18,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 public class RaceFlagViewerFragment extends RaceFragment {
 
@@ -53,12 +54,12 @@ public class RaceFlagViewerFragment extends RaceFragment {
 
         FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(),
                 MillisecondsTimePoint.now());
-        List<FlagPole> flagChanges = poleState.getCurrentState();
+        List<FlagPole> currentState = poleState.getCurrentState();
         mLayout.removeAllViews();
         int size = 0;
-        for (FlagPole flagPole : flagChanges) {
+        for (FlagPole flagPole : currentState) {
             size++;
-            mLayout.addView(renderFlag(poleState, flagPole, flagChanges.size() == size));
+            mLayout.addView(renderFlag(poleState, flagPole, currentState.size() == size));
         }
     }
 
@@ -68,6 +69,13 @@ public class RaceFlagViewerFragment extends RaceFragment {
         layout.setLayoutParams(layoutParams);
 
         TimePoint changeAt = poleState.getNextStateValidFrom();
+        List<FlagPole> upcoming = poleState.computeUpcomingChanges();
+        boolean next = false;
+        for (FlagPole pole : upcoming) {
+            if (pole.getUpperFlag().name().equals(flag.getUpperFlag().name())) {
+                next = true;
+            }
+        }
 
         ImageView flagView = (ImageView) layout.findViewById(R.id.flag);
         TextView textView = (TextView) layout.findViewById(R.id.flag_text);
@@ -87,7 +95,7 @@ public class RaceFlagViewerFragment extends RaceFragment {
         downView.setVisibility(View.GONE);
         upView.setVisibility(View.GONE);
         textView.setText(null);
-        if (changeAt != null) {
+        if (changeAt != null && next) {
             textView.setText(getDuration(changeAt.asDate(), Calendar.getInstance().getTime()).replace("-", ""));
             if (!flag.isDisplayed()) {
                 upView.setVisibility(View.VISIBLE);
