@@ -18,7 +18,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
 public class RaceFlagViewerFragment extends RaceFragment {
 
@@ -55,26 +54,24 @@ public class RaceFlagViewerFragment extends RaceFragment {
         FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(),
                 MillisecondsTimePoint.now());
         List<FlagPole> currentState = poleState.getCurrentState();
+        List<FlagPole> upcoming = poleState.computeUpcomingChanges();
         mLayout.removeAllViews();
         int size = 0;
         for (FlagPole flagPole : currentState) {
             size++;
-            mLayout.addView(renderFlag(poleState, flagPole, currentState.size() == size));
+            mLayout.addView(renderFlag(poleState, flagPole, FlagPoleState.getMostInterestingFlagPole(upcoming), currentState.size() == size));
         }
     }
 
-    private RelativeLayout renderFlag(FlagPoleState poleState, final FlagPole flag, boolean lastEntry) {
+    private RelativeLayout renderFlag(FlagPoleState poleState, final FlagPole flag, FlagPole nextFlag, boolean lastEntry) {
         RelativeLayout layout = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout, false);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
         layout.setLayoutParams(layoutParams);
 
         TimePoint changeAt = poleState.getNextStateValidFrom();
-        List<FlagPole> upcoming = poleState.computeUpcomingChanges();
         boolean next = false;
-        for (FlagPole pole : upcoming) {
-            if (pole.getUpperFlag().name().equals(flag.getUpperFlag().name())) {
-                next = true;
-            }
+        if (flag.getUpperFlag().equals(nextFlag.getUpperFlag())) {
+            next = true;
         }
 
         ImageView flagView = (ImageView) layout.findViewById(R.id.flag);
@@ -88,14 +85,14 @@ public class RaceFlagViewerFragment extends RaceFragment {
 
         flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.getUpperFlag().name(), 96));
         if (flag.getUpperFlag() == Flags.CLASS && getRace().getFleet().getColor() != null) {
-            flagView.setPadding(6, 6, 6, 6);
             flagView.setBackgroundColor(getFleetColorId());
         }
 
         downView.setVisibility(View.GONE);
         upView.setVisibility(View.GONE);
-        textView.setText(null);
+        textView.setVisibility(View.GONE);
         if (changeAt != null && next) {
+            textView.setVisibility(View.VISIBLE);
             textView.setText(getDuration(changeAt.asDate(), Calendar.getInstance().getTime()).replace("-", ""));
             if (!flag.isDisplayed()) {
                 upView.setVisibility(View.VISIBLE);
@@ -104,13 +101,16 @@ public class RaceFlagViewerFragment extends RaceFragment {
             }
         }
 
-        layout.setOnClickListener(new View.OnClickListener() {
+        View layoutFlag = layout.findViewById(R.id.layout_flag);
+        if (layoutFlag != null) {
+            layoutFlag.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), flag.getUpperFlag().name() + "|" + flag.getLowerFlag().name(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(view.getContext(), flag.getUpperFlag().name() + "|" + flag.getLowerFlag().name(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         return layout;
     }

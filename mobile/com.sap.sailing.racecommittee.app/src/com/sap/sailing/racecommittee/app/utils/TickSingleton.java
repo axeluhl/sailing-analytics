@@ -13,7 +13,7 @@ import android.os.Handler;
 public enum TickSingleton implements Runnable {
     INSTANCE;
 
-    private Set<TickListener> listeners = new HashSet<TickListener>();
+    private Set<TickListener> listeners = new HashSet<>();
     private Handler handler;
 
     private TickSingleton() {

@@ -5,6 +5,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/layout_flag"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -15,6 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/default_margin"
             android:src="@drawable/arrow_large_up"
             android:visibility="gone" />
 
@@ -23,8 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/default_margin_half"
-            android:layout_marginTop="@dimen/default_margin"
+            android:padding="6dp"
             tools:src="@drawable/flag_class_96dp" />
 
         <TextView
@@ -33,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/default_margin"
-            android:layout_marginTop="@dimen/default_margin_half"
+            android:layout_marginTop="@dimen/default_margin"
             android:textSize="@dimen/textSize_22"
             tools:text="@string/time_up" />
 
@@ -50,7 +51,7 @@
         android:id="@+id/line"
         android:layout_width="@dimen/thick_line"
         android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:background="@color/black" />
 </RelativeLayout>

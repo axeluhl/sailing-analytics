@@ -4,6 +4,7 @@
     <string-array name="empty_array" tools:ignore="UnusedResources" />
 
     <string name="intent_update_ui" translatable="false">com.sap.sailing.racecommittee.intent.update-ui</string>
+    <string name="intent_update_ui_data" translatable="false">com.sap.sailing.racecommittee.intent.update-ui.data</string>
     <string name="intent_uncheck_all" translatable="false">com.sap.sailing.racecommittee.intent.uncheck-all</string>
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
