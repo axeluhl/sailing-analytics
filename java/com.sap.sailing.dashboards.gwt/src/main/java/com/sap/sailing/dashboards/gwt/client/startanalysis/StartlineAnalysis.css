@@ -1,0 +1,166 @@
+@CHARSET "UTF-8";
+
+.startanalysis {
+	position: absolute;
+	overflow: hidden;
+	background-color: white;
+	left: 0pt;
+	right: 0pt;
+	top: 0pt;
+	bottom: 0pt;
+}
+
+.panelHeader {
+	height: 100%;
+	margin-top: 0;
+	line-height: 30pt;
+	vertical-align: middle;
+	font-size: 15pt;
+	font-family: "Arial";
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+	overflow: visible;
+	background-color: white;
+}
+
+.startanalysis_controll_header_button {
+	position: absolute;
+	top: 10pt;
+	height: 17.5pt;
+	width: 17.5pt;
+}
+
+.startanalysis_controll_header_button_left {
+	left: 10%;
+}
+
+.startanalysis_controll_header_button_right {
+	right: 10%;
+}
+
+.startanalysis_card_container {
+	position: absolute;
+	overflow: visible;
+	top: 33.5pt;
+	bottom: 10pt;
+	width: 100%;
+	left: 0%;
+	background-color: white;
+	-webkit-transition: left 0.7s ease-in-out; /* For Safari 3.1 to 6.0 */
+	transition: left 0.7s ease-in-out;
+}
+
+.startanalysis_card {
+	position: absolute;
+	display: inline;
+	width: 80%;
+	height: 100%;
+	background-color: #4293DB;
+	margin-top: 1px; /*Zeigt sonst Linie am oberen Rand*/
+	overflow: hidden;
+}
+
+.startanalysis_google_map {
+	position: absolute;
+	bottom: -20pt;
+	right: -20pt;
+	left: -20pt;
+	top: -20pt;
+}
+
+.startanalysis_card_table {
+	position: absolute;
+	bottom: 10pt;
+	right: 10pt;
+	left: 10pt;
+	background-color: white;
+	z-index: 2;
+}
+
+.startanalysis_card_wind_line_data_container {
+	position: absolute;
+	top: 10pt;
+	left: 10pt;
+	width: 45pt;
+	height: 80pt;
+	z-index: 1;
+}
+
+.startanalysis_card_wind_direction_image {
+	position: absolute;
+	top: 0pt;
+	right: 0pt;
+	width: 45pt;
+	height: 45pt;
+	border-radius: 22.5pt;
+	background-color: white;
+}
+
+.startanalysis_card_wind_arrow {
+	width: 25pt;
+	height: 25pt;
+	margin-top: 10pt;
+	margin-left: 10pt;
+}
+
+.startanalysis_card_wind_canvas {
+	width: 25pt;
+	height: 25pt;
+	margin-top: 10pt;
+	margin-left: 10pt;
+}
+
+.startanalysis_card_data {
+	position: absolute;
+	right: 0pt;
+	width: 45pt;
+	height: 25pt;
+	background-color: white;
+	line-height: 25pt;
+	vertical-align: middle;
+	font-size: 11pt;
+	font-family: "Arial";
+	text-align: center;
+}
+
+.startanalysis_card_wind_data_direction {
+	top: 55pt;
+}
+
+.startanalysis_card_wind_data_speed {
+	top: 85pt;
+}
+
+.startanalysis_card_line_advantage {
+	top: 0pt;
+	left: 55pt;
+	width: 215pt;
+	text-align: left;
+	padding-left: 7pt;
+}
+
+.startanalysis_card_line_data_geo {
+	top: 0pt;
+	left: 220pt;
+	width: 100pt;
+	text-align: left;
+}
+
+.left_focus_panel {
+	position: absolute;
+	top: 0pt;
+	right: 0pt;
+	width: 50%;
+	height: 100%;
+	z-index: 2;
+}
+
+.right_focus_panel {
+	position: absolute;
+	top: 0pt;
+	left: 0pt;
+	width: 50%;
+	height: 100%;
+	z-index: 2;
+}

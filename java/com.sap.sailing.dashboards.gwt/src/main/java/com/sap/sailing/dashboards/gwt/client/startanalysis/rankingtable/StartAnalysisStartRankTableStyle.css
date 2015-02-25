@@ -1,0 +1,37 @@
+@CHARSET "UTF-8";
+
+.cellTableHeader {
+padding-left: 10px;
+color: black;
+font-size: 9pt;
+background-image: none;
+background-color: white;
+height: 30px;
+vertical-align: middle;
+font-weight: bold;
+text-shadow: 0 1px 1px rgba(255,255,255,.7);
+}
+
+.cellTableCell {
+padding: 5px;
+overflow: hidden;
+font-size: 10pt;
+height: 20px;
+color: black;
+background-color: white;
+border:none;
+}
+
+.cellTableEvenRow {
+background-color: white;
+border:none;
+}
+.cellTableOddRow {
+background-color: white;
+border:none;
+}
+
+cellTableOddRowCell{
+background-color: white;
+border:none;
+}

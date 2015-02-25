@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
-import java.util.Properties;
 
 import org.apache.shiro.SecurityUtils;
 import org.junit.Before;
@@ -40,7 +39,7 @@ public class LoginTest {
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
-        new SecurityServiceImpl(store, /* mailProperties */ new Properties());
+        Activator.setSecurityService(new SecurityServiceImpl(store));
     }
 
     @Test

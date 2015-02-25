@@ -1,0 +1,78 @@
+.showcaseHeader {
+	width: 100%;
+	display: block;
+	margin: 5px;
+}
+
+.showcaseContent {
+	width: 100%;
+	display: block;
+	margin: 5px;
+}
+
+.styleGuideHeader {
+	width: 100%;
+	display: block;
+	margin: 5px;
+}
+
+.styleGuideContent {
+	width: 100%;
+	display: block;
+	margin: 5px;
+}
+
+.styleGuideRow {
+    clear: both;
+    margin-top: 50px;
+    overflow: hidden;	
+}
+
+.styleGuideRowDescription {
+    float: left;
+    font-weight: 700;	
+}
+
+.styleGuideRowDescriptionTitle {
+    float: left;	
+}
+
+.styleGuideRowContent {
+	float: left;
+}
+
+.styleGuideRowCode {
+    background-color: #EEEEEE;
+    border: 1px solid #CCCCCC;
+    display: none;
+    float: left;
+    font-family: "Lucida Console",Monaco,"Courier New",Courier,monospace;
+    margin-top: 20px;
+    padding: 20px 10px;	
+}
+
+.styleGuideRowDescription_codeLink {
+    color: #999999;
+    display: none;
+    float: right;
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 23px;
+    margin-right: 25px;	
+}
+
+.styleGuideDetailsTypeface_semibold {
+    font-size: 22px;
+    font-weight: 600;	
+}
+
+.styleGuideDetailsTypeface_regular {
+	font-size: 22px;
+}
+
+.styleGuideDetailsTypeface_bold {
+	font-size: 22px;
+    font-weight: 700;
+}
+

@@ -1,0 +1,43 @@
+.siteheader {
+  font-size: 1rem;
+  background: #333;
+  border-bottom: 5px solid #f0ab00;
+  height: 70px;
+  line-height: 4em;
+  width: 100%;
+  overflow: hidden;
+  text-align:center;
+}
+
+.siteheaderLeft {
+    float:left;
+	width: 25%;
+	text-align: left;
+}
+
+.siteheaderCentered {
+	width: 50%;
+    display: inline-block;
+    margin:0 auto;
+}
+
+.siteheaderRight {
+    float:right;
+	width: 25%;
+	text-align: right;
+}
+
+.logo {
+  margin: 0.8em 10px;
+  float: left;
+}
+.logotitle {
+  display: inline;
+  color: #f6f9fc;
+  font-weight: bold;
+}
+.pagetitle {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: bold;
+}

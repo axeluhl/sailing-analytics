@@ -19,11 +19,13 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.UserManagementException;
 
 public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
     private static final Logger logger = Logger.getLogger(AbstractUserStoreBasedRealm.class.getName());
     private final Future<UserStore> userStore;
+    private PermissionsForRoleProvider permissionsForRoleProvider;
 
     /**
      * In a non-OSGi test environment, having Shiro instantiate this class with a default constructor makes it difficult
@@ -39,12 +41,17 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
 
     public AbstractUserStoreBasedRealm() {
         super();
+        setCachingEnabled(false); // always grab fresh authorization info from the user store
         BundleContext context = Activator.getContext();
         if (context != null) {
             userStore = createUserStoreFuture(context);
         } else {
             userStore = null;
         }
+    }
+    
+    public void setPermissionsForRoleProvider(PermissionsForRoleProvider permissionsForRoleProvider) {
+        this.permissionsForRoleProvider = permissionsForRoleProvider;
     }
 
     private Future<UserStore> createUserStoreFuture(BundleContext bundleContext) {
@@ -101,6 +108,13 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
             String username = r.toString();
             try {
                 Util.addAll(getUserStore().getRolesFromUser(username), roles);
+                if (permissionsForRoleProvider != null) {
+                    for (String role : roles) {
+                        for (String permission : permissionsForRoleProvider.getPermissions(role)) {
+                            ai.addStringPermission(permission);
+                        }
+                    }
+                }
                 Util.addAll(getUserStore().getPermissionsFromUser(username), permissions);
             } catch (UserManagementException e) {
                throw new AuthenticationException(e.getMessage());

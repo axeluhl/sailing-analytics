@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.client.place.event.header;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -43,7 +42,6 @@ public class CompactEventHeader extends Composite {
         this.placeNavigator = placeNavigator;
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
-        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
         
         initWidget(uiBinder.createAndBindUi(this));
         

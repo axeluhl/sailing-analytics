@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,14 +30,12 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
-
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-    
     private TextBox seriesNameTextBox;
     private CheckBox isMedalCheckbox;
     private CheckBox startWithZeroScoreCheckbox;
@@ -204,7 +201,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         discardThresholdBoxesWidget.setVisible(useSeriesResultDiscardingThresholdsCheckbox.getValue());
         additionalWidgetPanel.add(discardThresholdBoxesWidget);
         
-        raceNamesEditor = new StringListInlineEditorComposite(getExistingRacesOfSeries(), new RaceNamesEditorUi(regatta, stringMessages, resources.removeIcon(), seriesName));
+        raceNamesEditor = new StringListInlineEditorComposite(getExistingRacesOfSeries(), new RaceNamesEditorUi(regatta, stringMessages, IconResources.INSTANCE.removeIcon(), seriesName));
         raceNamesEditor.ensureDebugId("RaceNamesStringListEditorComposite");
         raceNamesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override

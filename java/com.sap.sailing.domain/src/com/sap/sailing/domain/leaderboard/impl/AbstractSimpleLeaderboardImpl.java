@@ -1413,6 +1413,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 entryDTO.speedOverGroundAtStartOfRaceInKnots = speedAtStartTime == null ? null
                                         : speedAtStartTime.getKnots();
                                 TimePoint competitorStartTime = firstMarkPassing.getTimePoint();
+                                entryDTO.timeBetweenRaceStartAndCompetitorStartInSeconds = startOfRace.until(competitorStartTime).asSeconds();
                                 Speed competitorSpeedWhenPassingStart = track == null ? null : track
                                         .getEstimatedSpeed(competitorStartTime);
                                 entryDTO.speedOverGroundAtPassingStartWaypointInKnots = competitorSpeedWhenPassingStart == null ? null

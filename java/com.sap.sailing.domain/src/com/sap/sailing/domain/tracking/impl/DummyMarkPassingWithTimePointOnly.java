@@ -72,6 +72,16 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             @Override
             public void removeCompetitorChangeListener(CompetitorChangeListener listener) {
             }
+
+            @Override
+            public String getEmail() {
+                return null;
+            }
+
+            @Override
+            public boolean hasEmail() {
+                return false;
+            }
         };
     }
 }

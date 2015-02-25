@@ -1,22 +1,19 @@
 package com.sap.sse.filestorage.impl;
 
+import java.util.Locale;
+
 import com.sap.sse.filestorage.FileStorageServiceProperty;
 
 public class FileStorageServicePropertyImpl implements FileStorageServiceProperty {
     private static final long serialVersionUID = -8418630141746910125L;
     private final boolean isRequired;
     private final String name;
-    private final String description;
+    private final String descriptionKey;
     private String value;
     
-    public FileStorageServicePropertyImpl(String name, boolean isRequired, String description) {
-        this(name, isRequired, description, null);
-    }
-    
-    public FileStorageServicePropertyImpl(String name, boolean isRequired, String description, String value) {
+    public FileStorageServicePropertyImpl(String name, boolean isRequired, String descriptionKey) {
         this.name = name;
-        this.description = description;
-        this.value = value;
+        this.descriptionKey = descriptionKey;
         this.isRequired = isRequired;
     }
 
@@ -36,8 +33,8 @@ public class FileStorageServicePropertyImpl implements FileStorageServicePropert
     }
 
     @Override
-    public String getDescription() {
-        return description;
+    public String getDescription(Locale locale) {
+        return FileStorageI18n.STRING_MESSAGES.get(locale, descriptionKey);
     }
 
     public void setValue(String value) {
