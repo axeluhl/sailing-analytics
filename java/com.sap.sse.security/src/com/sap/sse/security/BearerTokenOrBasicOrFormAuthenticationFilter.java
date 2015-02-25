@@ -27,7 +27,7 @@ import com.sap.sse.security.jaxrs.api.SecurityResource;
  * @author Axel Uhl (D043530)
  *
  */
-public class BearerTokenAuthenticationFilter extends BasicHttpAuthenticationFilter {
+public class BearerTokenOrBasicOrFormAuthenticationFilter extends BasicHttpAuthenticationFilter {
     
     private static final String BEARER = "Bearer";
     
@@ -37,7 +37,7 @@ public class BearerTokenAuthenticationFilter extends BasicHttpAuthenticationFilt
      */
     private final FormAuthenticationFilterWithPublicCreateToken formAuthenticationFilter;
     
-    public BearerTokenAuthenticationFilter() {
+    public BearerTokenOrBasicOrFormAuthenticationFilter() {
         formAuthenticationFilter = new FormAuthenticationFilterWithPublicCreateToken();
     }
 

@@ -41,6 +41,7 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
 
     public AbstractUserStoreBasedRealm() {
         super();
+        setCachingEnabled(false); // always grab fresh authorization info from the user store
         BundleContext context = Activator.getContext();
         if (context != null) {
             userStore = createUserStoreFuture(context);
