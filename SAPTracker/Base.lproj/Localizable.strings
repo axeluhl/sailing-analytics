@@ -30,6 +30,7 @@
 "Regatta in progress" = "Regatta in progress";
 "Select a photo for your team" = "Select a photo for your team";
 "Check-out of Regatta?" = "Check-out of Regatta?";
+"Failed to upload image" = "Failed to upload image";
 /* LeaderBoardViewController */
 "Online" = "Online";
 "Battery Saving" = "Battery Saving";
@@ -43,6 +44,7 @@
 /* QRCodeManager */
 "Incorrect QR Code" = "Incorrect QR Code";
 "Hello %@. Welcome to %@. You are registered as %@." = "Hello %@. Welcome to %@. You are registered as %@.";
+"Couldn't get event %@" = "Couldn't get event %@";
 "Couldn't get competitor %@" = "Couldn't get competitor %@";
 "Couldn't get leader board %@" = "Couldn't get leader board %@";
 "Couldn't check-in to %@" = "Couldn't check-in to %@";

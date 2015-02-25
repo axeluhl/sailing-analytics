@@ -24,12 +24,13 @@
 "Last sync" = "Letzter Update";
 "Start Tracking" = "Tracking starten";
 "Please listen for announcements" = "Bitte achten Sie auf die Durchsagen";
-"Thank you for participating!" = "Vielen Dank, Sie haben erfolgreich an der Regatta teilgenommen.";
+"Thank you for participating!" = "Vielen Dank für Ihre Teilnahme!";
 "Check-Out" = "Check-Out";
 "Regatta will start in" = "Regatta beginnt in";
 "Regatta in progress" = "Regatta findet gerade statt";
 "Select a photo for your team" = "Team Foto hinzufügen";
 "Check-out of Regatta?" = "Aus Regatta auschecken?";
+"Failed to upload image" = "Bild konnte nicht hochgeladen werden.";
 /* LeaderBoardViewController */
 "Online" = "Online";
 "Battery Saving" = "Batterie Sparen";
@@ -43,6 +44,7 @@
 /* QRCodeManager */
 "Incorrect QR Code" = "Ungültiger QR-Code";
 "Hello %@. Welcome to %@. You are registered as %@." = "Hallo %@. Willkommen zu %@. Sie sind als %@ registriert";
+"Couldn't get event %@" = "Konnte Event %@ nicht holen";
 "Couldn't get competitor %@" = "Konnte Teilnehmer %@ nicht holen";
 "Couldn't get leader board %@" = "Konnte Leaderboard %@ nicht holen";
 "Couldn't check-in to %@" = "Konnte nicht in %@ einchecken";

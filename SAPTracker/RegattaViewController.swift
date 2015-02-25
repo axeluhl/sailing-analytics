@@ -16,7 +16,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         case Menu
     }
     enum AlertView: Int {
-        case CheckOut, Image
+        case CheckOut, Image, UploadFailed
     }
     
     var sourceTypes = [UIImagePickerControllerSourceType]()
@@ -253,7 +253,22 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         imageView.image = image
         yourTeamPhotoButton.hidden = true
         editTeamPhotoButton.hidden = false
-        DataManager.sharedManager.selectedCheckIn!.userImage = UIImageJPEGRepresentation(image, 0.8)
+        let jpegData = UIImageJPEGRepresentation(image, 0.8)
+        DataManager.sharedManager.selectedCheckIn!.userImage =  jpegData
+        APIManager.sharedManager.postTeamImage(DataManager.sharedManager.selectedCheckIn!.competitorId,
+            imageData: jpegData,
+            success: { (AnyObject responseObject) -> Void in
+                // http://wiki.sapsailing.com/wiki/tracking-app/api-v1#Competitor-Information-%28in-general%29
+                // "Additional Notes: Competitor profile image left out for now."
+                let responseDictionary = responseObject as [String: AnyObject]
+                let imageUrl = (responseDictionary["teamImageUri"]) as String;
+                DataManager.sharedManager.selectedCheckIn!.imageUrl = imageUrl;
+            },
+            failure: { (NSError error) -> Void in
+                let alertView = UIAlertView(title: NSLocalizedString("Failed to upload image", comment: ""), message: error.localizedDescription, delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
+                alertView.tag = AlertView.UploadFailed.rawValue;
+                alertView.show()
+        })
     }
     
     // MARK: - Check-out
