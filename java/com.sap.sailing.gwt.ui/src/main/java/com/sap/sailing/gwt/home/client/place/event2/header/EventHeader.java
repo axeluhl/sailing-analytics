@@ -28,10 +28,10 @@ import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventMetadataDTO;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventState;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventState;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);

@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
-import com.sap.sailing.gwt.home.client.place.event2.model.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
 
 /**
  * Common context used by the different tabs in the event place.

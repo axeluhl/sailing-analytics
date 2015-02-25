@@ -11,12 +11,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventMetadataDTO;
-import com.sap.sailing.gwt.home.client.place.event2.model.RegattaReferenceDTO;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
+import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 
 /**
  * Created by pgtaboada on 25.11.14.

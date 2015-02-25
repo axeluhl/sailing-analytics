@@ -330,6 +330,11 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventState;
+import com.sap.sailing.gwt.ui.shared.eventview.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -5485,5 +5490,49 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (NoCorrespondingServiceRegisteredException e) {
             return null;
         }
+    }
+
+    @Override
+    public EventMetadataDTO getEventMetadataById(UUID id) {
+        EventDTO o;
+        try {
+            o = getEventById(id, false);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("We can do better than MalformedURLException");
+        }
+
+        EventMetadataDTO dto = new EventMetadataDTO();
+        dto.setId(id);
+        dto.setStartDate(o.startDate);
+        dto.setEndDate(o.endDate);
+        dto.setLogoImageURL(o.getLogoImageURL());
+        dto.setName(o.getName());
+        dto.setOfficialWebsiteURL(o.getOfficialWebsiteURL());
+        dto.setVenue(o.venue.getName());
+        dto.setVenueCountry(null);
+        
+        dto.setState(EventState.FINISHED);
+        if (o.isFakeSeries()) {
+            dto.setType(EventType.SERIES_EVENT);
+            
+            dto.getEventsOfSeries().add(new EventReferenceDTO(id, o.getName()));
+            // FIXME
+            dto.getEventsOfSeries().add(
+                    new EventReferenceDTO(UUID.fromString("212385a0-fff7-432a-a63f-df2420faefc4"),
+ "Series Event 2"));
+            dto.getEventsOfSeries().add(
+                    new EventReferenceDTO(UUID.fromString("312385a0-fff7-432a-a63f-df2420faefc4"),
+ "Series Event 3"));
+        } else {
+            for (LeaderboardGroupDTO lg : o.getLeaderboardGroups()) {
+                for (StrippedLeaderboardDTO sl : lg.leaderboards) {
+                    dto.getRegattas().add(new RegattaReferenceDTO(sl.regattaName));
+                }
+                dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
+            }
+        }
+        
+
+        return dto;
     }
 }

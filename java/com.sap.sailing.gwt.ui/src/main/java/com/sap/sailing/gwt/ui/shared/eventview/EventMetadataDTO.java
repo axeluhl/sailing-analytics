@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.model;
+package com.sap.sailing.gwt.ui.shared.eventview;
 
 import java.util.ArrayList;
 import java.util.Date;

@@ -5,11 +5,11 @@ import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventMetadataDTO;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventReferenceDTO;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventType;
-import com.sap.sailing.gwt.home.client.place.event2.model.RegattaReferenceDTO;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
+import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 
 public abstract class EventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements EventView.Presenter {
 

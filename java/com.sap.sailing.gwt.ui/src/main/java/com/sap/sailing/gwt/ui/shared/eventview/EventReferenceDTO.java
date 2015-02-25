@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.model;
+package com.sap.sailing.gwt.ui.shared.eventview;
 
 import java.util.UUID;
 
@@ -10,7 +10,7 @@ public class EventReferenceDTO implements IsSerializable {
     public EventReferenceDTO() {
     }
     
-    public EventReferenceDTO(UUID id, String name, String regattaName) {
+    public EventReferenceDTO(UUID id, String name) {
         super();
         this.id = id;
         this.displayName = name;

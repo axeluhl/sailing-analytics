@@ -1,6 +1,8 @@
-package com.sap.sailing.gwt.home.client.place.event2.model;
+package com.sap.sailing.gwt.ui.shared.eventview;
 
-public class RegattaReferenceDTO {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class RegattaReferenceDTO implements IsSerializable {
     private String name;
     
     public RegattaReferenceDTO() {

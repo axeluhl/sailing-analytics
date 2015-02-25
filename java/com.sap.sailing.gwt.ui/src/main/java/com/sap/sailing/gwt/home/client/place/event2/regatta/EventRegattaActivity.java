@@ -4,9 +4,9 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventActivity;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventMetadataDTO;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventType;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
+import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventType;
 
 public class EventRegattaActivity extends EventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
 
