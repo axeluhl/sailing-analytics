@@ -38,10 +38,10 @@ public class EventLeaderboardWidgetAndActivity extends Composite implements TabA
 
     @Override
     public void start(final EventLeaderboardPlace selectedPlace, final AcceptsOneWidget contentArea) {
-
-        String leaderboardToLoad = selectedPlace.getLeaderboardIdAsNameString();
+        
+        String regattaId = selectedPlace.getRegattaId();
        
-        if (leaderboardToLoad != null && !leaderboardToLoad.isEmpty() ) {
+        if (regattaId != null && !regattaId.isEmpty() ) {
             
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));

@@ -53,7 +53,7 @@ public class TabletAndDesktopEventView extends Composite implements EventMultire
             }
         }, currentPresenter, historyMapper);
         
-        eventHeader = new EventHeader(currentPresenter, false);
+        eventHeader = new EventHeader(currentPresenter);
         
         initWidget(uiBinder.createAndBindUi(this));
 

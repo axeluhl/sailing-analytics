@@ -27,9 +27,8 @@ public abstract class AbstractEventPlace extends Place {
     public String getEventUuidAsString() {
         return ctx.getEventId();
     }
-
-    public String getLeaderboardIdAsNameString() {
-        return ctx.getLeaderboardIdAsNameString();
+    
+    public String getRegattaId() {
+        return ctx.getRegattaId();
     }
-
 }

@@ -14,6 +14,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         void navigateTo(Place place);
         boolean needsSelectionInHeader();
         void forPlaceSelection(PlaceCallback callback);
+        String getEventName();
     }
     
     public interface PlaceCallback {

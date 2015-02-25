@@ -52,7 +52,7 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
             }
         }, currentPresenter, historyMapper);
         
-        eventHeader = new EventHeader(currentPresenter, true);
+        eventHeader = new EventHeader(currentPresenter);
         
         initWidget(uiBinder.createAndBindUi(this));
 

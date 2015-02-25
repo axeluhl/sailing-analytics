@@ -44,10 +44,7 @@
               </div>
               <div class="{local_res.css.eventheader_intro_details_item}">
                 <img src="images/home/location-icon.png" class="{local_res.css.locationicon}"></img>
-                <span>
-                  <span ui:field="eventVenueName"></span><!-- TODO: ,  -->
-                  <span ui:field="eventVenueCountry" style="display: none;">TODO: Country</span>
-                </span>
+                <span ui:field="eventVenue"></span>
               </div>
               <a ui:field="eventLink" class="{local_res.css.eventheader_intro_details_item}"></a>
               <!-- IFEND event.venue && event.eventType !== 'multi-regatta-event' -->

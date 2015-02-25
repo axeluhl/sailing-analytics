@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event2.tabs;
 
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
 
 /**
  * Common context used by the different tabs in the event place.
@@ -13,7 +13,7 @@ public class EventContext {
 
     private EventClientFactory clientFactory;
     private String eventId;
-    private String leaderboardIdAsNameString;
+    private String regattaId;
 
     /**
      * Common state required by all tabs/ places in event
@@ -30,6 +30,7 @@ public class EventContext {
 
     public EventContext(EventClientFactory clientFactory, EventContext ctx) {
         updateContext(ctx.getEventDTO());
+        withRegattaId(ctx.regattaId);
         this.clientFactory = clientFactory;
     }
 
@@ -38,8 +39,8 @@ public class EventContext {
         return this;
     }
 
-    public EventContext withLeaderboardName(String leaderboardIdAsNameString) {
-        this.leaderboardIdAsNameString = leaderboardIdAsNameString;
+    public EventContext withRegattaId(String regattaId) {
+        this.regattaId = regattaId;
         return this;
     }
 
@@ -55,7 +56,7 @@ public class EventContext {
         if (eventDTO == null) {
             withId(null);
         } else {
-            withId(dto.id.toString());
+            withId(dto.getId().toString());
         }
         return this;
     }
@@ -68,8 +69,8 @@ public class EventContext {
         return eventId;
     }
 
-    public String getLeaderboardIdAsNameString() {
-        return leaderboardIdAsNameString;
+    public String getRegattaId() {
+        return regattaId;
     }
 
     public EventClientFactory getClientFactory() {

@@ -11,13 +11,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
+import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
+import com.sap.sailing.gwt.home.client.place.event2.model.RegattaDTO;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.overview.EventRegattaOverviewPlace;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -47,20 +46,17 @@ public class EventRegattasWidgetAndActivity extends Composite implements TabActi
         initWidget(ourUiBinder.createAndBindUi(this));
         
         EventDTO event = myPlace.getCtx().getEventDTO();
-        for(LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
-            for(final StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
-                PushButton button = new PushButton();
-                button.setText(leaderboard.regattaName);
-                button.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        presenter.navigateTo(new EventRegattaOverviewPlace(new EventContext(myPlace.getCtx().getEventDTO()).withLeaderboardName(leaderboard.name)));
-                    }
-                });
-                content.add(button);
-            }
+        for (final RegattaDTO regatta : event.getRegattas()) {
+            PushButton button = new PushButton();
+            button.setText(regatta.getName());
+            button.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    presenter.navigateTo(new EventRegattaOverviewPlace(new EventContext(myPlace.getCtx().getEventDTO()).withRegattaId(regatta.getName())));
+                }
+            });
+            content.add(button);
         }
-
         contentArea.setWidget(this);
     }
 

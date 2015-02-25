@@ -14,8 +14,8 @@ public class EventRegattaOverviewPlace extends AbstractEventRegattaPlace {
 
     public static class Tokenizer extends AbstractEventRegattaPlace.Tokenizer<EventRegattaOverviewPlace> {
         @Override
-        protected EventRegattaOverviewPlace getRealPlace(String eventId, String leaderboardName) {
-            return new EventRegattaOverviewPlace(eventId, leaderboardName);
+        protected EventRegattaOverviewPlace getRealPlace(String eventId, String regattaId) {
+            return new EventRegattaOverviewPlace(eventId, regattaId);
         }
     }
 }
