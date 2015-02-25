@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONObject;
 
 import com.sap.sse.security.User;
@@ -29,7 +30,13 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/hello")
     @Produces("application/json;charset=UTF-8")
     public Response sayHello() {
-        return Response.ok("Hello!", MediaType.TEXT_PLAIN).build();
+        final String messageText;
+        if (SecurityUtils.getSubject().isAuthenticated()) {
+            messageText = "Hello "+SecurityUtils.getSubject().getPrincipal();
+        } else {
+            messageText = "Hello!";
+        }
+        return Response.ok(messageText, MediaType.TEXT_PLAIN).build();
     }
     
     @POST
