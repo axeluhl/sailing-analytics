@@ -595,7 +595,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         if (!subject.isAuthenticated()) {
             try {
                 subject.login(otoken);
-                logger.info("User [" + SecurityUtils.getSubject().getPrincipal().toString() + "] logged in successfully.");
+                logger.info("User [" + subject.getPrincipal().toString() + "] logged in successfully.");
             } catch (UnknownAccountException uae) {
                 logger.info("There is no user with username of " + subject.getPrincipal());
                 throw new UserManagementException("Invalid credentials!");
@@ -611,7 +611,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
                 throw new UserManagementException("An error occured while authenticating the user!");
             }
         }
-        String username = SecurityUtils.getSubject().getPrincipal().toString();
+        String username = subject.getPrincipal().toString();
         if (username == null) {
             logger.info("Something went wrong while authneticating, check doGetAuthenticationInfo() in "
                     + OAuthRealm.class.getName() + ".");
@@ -632,7 +632,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         if (subject == null || !subject.isAuthenticated()) {
             result = null;
         } else {
-            String username = SecurityUtils.getSubject().getPrincipal().toString();
+            String username = subject.getPrincipal().toString();
             if (username == null || username.length() <= 0) {
                 result = null;
             } else {
@@ -871,10 +871,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public void setPreference(final String username, final String key, final String value) {
         final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SecurityUtils.getSubject().getPrincipal().toString())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalSetPreference(username, key, value));
         } else {
-            throw new SecurityException("User " + SecurityUtils.getSubject().getPrincipal().toString()
+            throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to set preference for user " + username);
         }
     }
@@ -888,10 +888,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public void unsetPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SecurityUtils.getSubject().getPrincipal().toString())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalUnsetPreference(username, key));
         } else {
-            throw new SecurityException("User " + SecurityUtils.getSubject().getPrincipal().toString()
+            throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to unset preference for user " + username);
         }
     }
@@ -917,10 +917,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public String getPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SecurityUtils.getSubject().getPrincipal().toString())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             return store.getPreference(username, key);
         } else {
-            throw new SecurityException("User " + SecurityUtils.getSubject().getPrincipal().toString()
+            throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to read preferences of user " + username);
         }
     }

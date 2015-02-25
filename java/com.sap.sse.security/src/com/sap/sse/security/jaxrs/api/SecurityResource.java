@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONObject;
 
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
@@ -28,8 +29,9 @@ public class SecurityResource extends AbstractSecurityResource {
 
     private Response doSayHello() {
         final String messageText;
-        if (SecurityUtils.getSubject().isAuthenticated()) {
-            messageText = "Hello "+SecurityUtils.getSubject().getPrincipal();
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject.isAuthenticated()) {
+            messageText = "Hello "+subject.getPrincipal();
         } else {
             messageText = "Hello!";
         }
