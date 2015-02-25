@@ -8,7 +8,9 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
 
     public interface Presenter {
         EventContext getCtx();
-        void handleTabPlaceSelection(TabView<?, EventContext, ? extends Presenter> selectedActivity);        
+
+        void handleTabPlaceSelection(TabView<?, ? extends Presenter> selectedActivity);
+
         String getUrl(Place place);
         void navigateTo(Place place);
         boolean needsSelectionInHeader();

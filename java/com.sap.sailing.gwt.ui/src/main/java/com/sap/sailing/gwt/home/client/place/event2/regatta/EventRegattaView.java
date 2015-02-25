@@ -7,5 +7,7 @@ public interface EventRegattaView extends EventView<AbstractEventRegattaPlace, E
     public interface Presenter extends EventView.Presenter {
 
         void gotoOverview();
+
+
     }
 }

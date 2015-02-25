@@ -8,9 +8,9 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.PlaceContextProvider;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
@@ -65,9 +65,10 @@ public class TabletAndDesktopEventView extends Composite implements EventMultire
         tabPanelUi.activatePlace(place);
     }
 
+    @SuppressWarnings("unchecked")
     @UiHandler("tabPanelUi")
     public void onTabSelection(TabPanelPlaceSelectionEvent<?> e) {
-        currentPresenter.handleTabPlaceSelection((TabView<?, EventContext, EventMultiregattaView.Presenter>) e.getSelectedActivity());
+        currentPresenter.handleTabPlaceSelection((TabView<?, EventMultiregattaView.Presenter>) e.getSelectedActivity());
     }
     
     private void initBreadCrumbs() {

@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
+import com.sap.sailing.gwt.home.client.place.event2.model.EventReferenceDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventType;
 import com.sap.sailing.gwt.home.client.place.event2.model.RegattaDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.State;
@@ -29,6 +30,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
         this.clientFactory = clientFactory;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void startAsync() {
         if (ctx.getEventDTO() != null) {
@@ -45,21 +47,32 @@ public class EventActivityProxy extends AbstractActivityProxy {
             event.setEndDate(new Date(115, 6, 12));
             event.setOfficialWebsiteURL("http://sapsailing.com");
             event.setState(State.UPCOMMING);
-            
-//            event.setType(EventType.SINGLE_REGATTA);
-//            event.getRegattas().add(new RegattaDTO("Regatta", State.UPCOMMING));
-//            
-            event.setType(EventType.MULTI_REGATTA);
-            event.getRegattas().add(new RegattaDTO("Regatta 1", State.UPCOMMING));
-            event.getRegattas().add(new RegattaDTO("Regatta 2", State.UPCOMMING));
-            event.getRegattas().add(new RegattaDTO("Regatta 3", State.UPCOMMING));
-            
-//            event.setType(EventType.SERIES_EVENT);
-//            event.getRegattas().add(new RegattaDTO("Regatta", State.UPCOMMING));
-//            event.getEventsOfSeries().add(new EventReferenceDTO(eventUUID, "Series Event 1", "Regatta 1"));
-//            event.getEventsOfSeries().add(new EventReferenceDTO(UUID.fromString("212385a0-fff7-432a-a63f-df2420faefc4"), "Series Event 2", "Regatta 2"));
-//            event.getEventsOfSeries().add(new EventReferenceDTO(UUID.fromString("312385a0-fff7-432a-a63f-df2420faefc4"), "Series Event 3", "Regatta 3"));
-//            
+
+            // event.setType(EventType.SINGLE_REGATTA);
+            // event.setType(EventType.MULTI_REGATTA);
+            event.setType(EventType.SERIES_EVENT);
+
+            switch (event.getType()) {
+            case SINGLE_REGATTA:
+                event.getRegattas().add(new RegattaDTO("Regatta", State.UPCOMMING));
+                break;
+            case MULTI_REGATTA:
+                event.getRegattas().add(new RegattaDTO("Regatta 1", State.UPCOMMING));
+                event.getRegattas().add(new RegattaDTO("Regatta 2", State.UPCOMMING));
+                event.getRegattas().add(new RegattaDTO("Regatta 3", State.UPCOMMING));
+                break;
+            case SERIES_EVENT:
+                event.getRegattas().add(new RegattaDTO("Regatta", State.UPCOMMING));
+                event.getEventsOfSeries().add(new EventReferenceDTO(eventUUID, "Series Event 1", "Regatta 1"));
+                event.getEventsOfSeries().add(
+                        new EventReferenceDTO(UUID.fromString("212385a0-fff7-432a-a63f-df2420faefc4"),
+                                "Series Event 2", "Regatta 2"));
+                event.getEventsOfSeries().add(
+                        new EventReferenceDTO(UUID.fromString("312385a0-fff7-432a-a63f-df2420faefc4"),
+                                "Series Event 3", "Regatta 3"));
+                break;
+
+            }
             ctx.updateContext(event);
             afterLoad();
             

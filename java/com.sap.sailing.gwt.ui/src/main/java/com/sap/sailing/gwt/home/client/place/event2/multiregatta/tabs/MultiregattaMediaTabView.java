@@ -5,8 +5,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.MultiregattaTabView;
 
 /**
@@ -40,15 +40,16 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
+    private Presenter currentPresenter;
 
     @Override
-    public MultiregattaMediaPlace placeToFire(EventContext ctx) {
-        return new MultiregattaMediaPlace(ctx);
+    public MultiregattaMediaPlace placeToFire() {
+        return new MultiregattaMediaPlace(currentPresenter.getCtx());
     }
 
     @Override
-    public void setPresenter(EventMultiregattaView.Presenter presenter) {
-        // TODO Auto-generated method stub
+    public void setPresenter(EventMultiregattaView.Presenter currentPresenter) {
+        this.currentPresenter = currentPresenter;
 
     }
 

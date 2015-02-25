@@ -4,12 +4,12 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 /**
- * Defines lifecycle handling for the Activity.
+ * Defines lifecycle handling for the tab view.
  * <p/>
  * <p/>
  * Created by pgtaboada on 25.11.14.
  */
-public interface TabView<PLACE extends Place, PLACECONTEXT, PRESENTER> {
+public interface TabView<PLACE extends Place, PRESENTER> {
 
     /**
      * The place type that activates this tab.
@@ -19,7 +19,7 @@ public interface TabView<PLACE extends Place, PLACECONTEXT, PRESENTER> {
     Class<PLACE> getPlaceClassForActivation();
 
     /**
-     * Initiates the tab lifecycle.
+     * Lifecycle method that triggers tab view start
      *
      * @param placeToGo
      * @param contentArea
@@ -33,5 +33,5 @@ public interface TabView<PLACE extends Place, PLACECONTEXT, PRESENTER> {
      */
     void stop();
 
-    PLACE placeToFire(PLACECONTEXT ctx);
+    PLACE placeToFire();
 }

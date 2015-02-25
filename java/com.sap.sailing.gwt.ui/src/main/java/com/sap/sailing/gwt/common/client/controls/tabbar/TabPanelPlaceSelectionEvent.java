@@ -10,9 +10,9 @@ public class TabPanelPlaceSelectionEvent<CONTEXT> extends GwtEvent<TabPanelPlace
 
     public final static Type<Handler> TYPE = new Type<Handler>();
 
-    private TabView<?, CONTEXT, ?> selectedActivity;
+    private TabView<?, ?> selectedActivity;
 
-    public TabPanelPlaceSelectionEvent(TabView<?, CONTEXT, ?> selectedActivity) {
+    public TabPanelPlaceSelectionEvent(TabView<?, ?> selectedActivity) {
         this.selectedActivity = selectedActivity;
     }
 
@@ -21,7 +21,7 @@ public class TabPanelPlaceSelectionEvent<CONTEXT> extends GwtEvent<TabPanelPlace
         return TYPE;
     }
 
-    public TabView<?, CONTEXT, ?> getSelectedActivity() {
+    public TabView<?, ?> getSelectedActivity() {
         return selectedActivity;
     }
 

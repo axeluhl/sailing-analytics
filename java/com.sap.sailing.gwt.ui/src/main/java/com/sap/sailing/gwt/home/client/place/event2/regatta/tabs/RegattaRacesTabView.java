@@ -5,7 +5,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
 
@@ -13,6 +12,8 @@ import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
  * Created by pgtaboada on 25.11.14.
  */
 public class RegattaRacesTabView extends Composite implements RegattaTabView<RegattaRacesPlace> {
+
+    private Presenter currentPresenter;
 
     public RegattaRacesTabView() {
 
@@ -24,8 +25,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     }
     
     @Override
-    public void setPresenter(Presenter presenter) {
-        // TODO Auto-generated method stub
+    public void setPresenter(Presenter currentPresenter) {
+        this.currentPresenter = currentPresenter;
         
     }
 
@@ -48,8 +49,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public RegattaRacesPlace placeToFire(EventContext ctx) {
-        return new RegattaRacesPlace(ctx);
+    public RegattaRacesPlace placeToFire() {
+        return new RegattaRacesPlace(currentPresenter.getCtx());
     }
 
 }

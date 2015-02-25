@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
@@ -78,8 +77,8 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public RegattaLeaderboardPlace placeToFire(EventContext ctx) {
-        return new RegattaLeaderboardPlace(ctx);
+    public RegattaLeaderboardPlace placeToFire() {
+        return new RegattaLeaderboardPlace(currentPresenter.getCtx());
     }
 
 }

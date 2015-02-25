@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverview
 public class MultiregattaRegattasTabView extends Composite implements MultiregattaTabView<MultiregattaRegattasPlace> {
     
     @UiField FlowPanel content;
-    private Presenter presenter;
+    private Presenter currentPresenter;
 
     public MultiregattaRegattasTabView() {
 
@@ -36,8 +36,8 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     }
     
     @Override
-    public void setPresenter(EventMultiregattaView.Presenter presenter) {
-        this.presenter = presenter;
+    public void setPresenter(EventMultiregattaView.Presenter currentPresenter) {
+        this.currentPresenter = currentPresenter;
     }
 
     @Override
@@ -52,7 +52,8 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
             button.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    presenter.navigateTo(new RegattaOverviewPlace(new EventContext(myPlace.getCtx().getEventDTO())
+                    currentPresenter.navigateTo(new RegattaOverviewPlace(new EventContext(myPlace.getCtx()
+                            .getEventDTO())
                             .withRegattaId(regatta.getName())));
                 }
             });
@@ -72,8 +73,8 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public MultiregattaRegattasPlace placeToFire(EventContext ctx) {
-        return new MultiregattaRegattasPlace(ctx);
+    public MultiregattaRegattasPlace placeToFire() {
+        return new MultiregattaRegattasPlace(currentPresenter.getCtx());
     }
 
 }

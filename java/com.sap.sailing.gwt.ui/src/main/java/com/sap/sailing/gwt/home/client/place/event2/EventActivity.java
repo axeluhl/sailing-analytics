@@ -32,8 +32,8 @@ public abstract class EventActivity<PLACE extends AbstractEventPlace> extends Ab
     }
 
     @Override
-    public void handleTabPlaceSelection(TabView<?, EventContext, ? extends EventView.Presenter> selectedActivity) {
-        Place tabPlaceToGo = selectedActivity.placeToFire(ctx);
+    public void handleTabPlaceSelection(TabView<?, ? extends EventView.Presenter> selectedActivity) {
+        Place tabPlaceToGo = selectedActivity.placeToFire();
         clientFactory.getPlaceController().goTo(tabPlaceToGo);
     }
     

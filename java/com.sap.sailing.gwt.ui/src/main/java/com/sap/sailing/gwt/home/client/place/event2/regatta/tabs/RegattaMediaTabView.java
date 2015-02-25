@@ -5,15 +5,14 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class RegattaMediaTabView extends Composite implements
-        TabView<RegattaMediaPlace, EventContext, EventRegattaView.Presenter> {
+public class RegattaMediaTabView extends Composite implements RegattaTabView<RegattaMediaPlace> {
 
     public RegattaMediaTabView() {
 
@@ -41,16 +40,16 @@ public class RegattaMediaTabView extends Composite implements
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
+    private Presenter currentPresenter;
 
     @Override
-    public RegattaMediaPlace placeToFire(EventContext ctx) {
-        return new RegattaMediaPlace(ctx);
+    public RegattaMediaPlace placeToFire() {
+        return new RegattaMediaPlace(currentPresenter.getCtx());
     }
 
     @Override
-    public void setPresenter(EventRegattaView.Presenter presenter) {
-        // TODO Auto-generated method stub
-
+    public void setPresenter(EventRegattaView.Presenter currentPresenter) {
+        this.currentPresenter = currentPresenter;
     }
 
 }
