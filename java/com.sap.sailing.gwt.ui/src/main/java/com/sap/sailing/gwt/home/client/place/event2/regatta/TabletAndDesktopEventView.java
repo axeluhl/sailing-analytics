@@ -15,6 +15,8 @@ import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event2.header.EventHeader;
+import com.sap.sailing.gwt.home.client.place.event2.model.EventType;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -73,9 +75,10 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
     private void initBreadCrumbs() {
         addBreadCrumbItem(i18n.home(), new StartPlace());
         addBreadCrumbItem(i18n.events(), new EventsPlace());
-        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getName(),
-                new EventDefaultPlace(currentPresenter.getCtx()));
-        // TODO additional item for multi Regatta
+        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getName(), new EventDefaultPlace(currentPresenter.getCtx()));
+        if(currentPresenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA) {
+            addBreadCrumbItem(currentPresenter.getCtx().getRegattaId(), new RegattaOverviewPlace(currentPresenter.getCtx()));
+        }
     }
 
     private void addBreadCrumbItem(String label, final Place place) {
