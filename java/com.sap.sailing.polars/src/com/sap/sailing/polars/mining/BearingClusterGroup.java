@@ -24,12 +24,11 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing>{
 
     private static Collection<Cluster<Bearing>> createClusters(int startAngle, int endAngle, int clusterSize) {
         int numberOfClusters = (endAngle - startAngle) / clusterSize;
-        double sizeOfOneCluster = clusterSize / numberOfClusters;
         List<Cluster<Bearing>> clusters = new ArrayList<Cluster<Bearing>>();
         for (int i = 0; i < numberOfClusters; i++) {
             clusters.add(new ClusterWithLowerAndUpperBoundaries<Bearing>("", createBoundary(startAngle + i
-                    * sizeOfOneCluster, ComparisonStrategy.GREATER_THAN), createBoundary(startAngle + (i + 1)
-                    * sizeOfOneCluster, ComparisonStrategy.LOWER_EQUALS_THAN)));
+                    * clusterSize, ComparisonStrategy.GREATER_THAN), createBoundary(startAngle + (i + 1)
+                    * clusterSize, ComparisonStrategy.LOWER_EQUALS_THAN)));
         }
         return clusters;
     }
