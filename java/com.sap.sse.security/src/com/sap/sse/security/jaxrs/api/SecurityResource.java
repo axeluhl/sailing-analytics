@@ -14,10 +14,19 @@ import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 
 @Path("/restsecurity")
 public class SecurityResource extends AbstractSecurityResource {
+    /**
+     * Can be used to figure out the current subject. Accepts the GET method. If the subject is
+     * authenticated, the service will respond with a "Hello &lt;subjectname&gt;" message, otherwise
+     * with a generic "Hello!".
+     */
     @GET
     @Path("/hello")
     @Produces("text/plain;charset=UTF-8")
     public Response sayHello() {
+        return doSayHello();
+    }
+
+    private Response doSayHello() {
         final String messageText;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             messageText = "Hello "+SecurityUtils.getSubject().getPrincipal();
@@ -27,17 +36,16 @@ public class SecurityResource extends AbstractSecurityResource {
         return Response.ok(messageText, MediaType.TEXT_PLAIN_TYPE).build();
     }
 
+    /**
+     * Can be used to figure out the current subject. Accepts the POST method. If the subject is
+     * authenticated, the service will respond with a "Hello &lt;subjectname&gt;" message, otherwise
+     * with a generic "Hello!".
+     */
     @POST
     @Path("/hello")
     @Produces("text/plain;charset=UTF-8")
     public Response sayHelloPost() {
-        final String messageText;
-        if (SecurityUtils.getSubject().isAuthenticated()) {
-            messageText = "Hello "+SecurityUtils.getSubject().getPrincipal();
-        } else {
-            messageText = "Hello!";
-        }
-        return Response.ok(messageText, MediaType.TEXT_PLAIN_TYPE).build();
+        return doSayHello();
     }
 
     @GET
