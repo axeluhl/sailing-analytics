@@ -22,20 +22,18 @@ public class SecurityResource extends AbstractSecurityResource {
      */
     @GET
     @Path("/hello")
-    @Produces("text/plain;charset=UTF-8")
+    @Produces("application/json;charset=UTF-8")
     public Response sayHello() {
         return doSayHello();
     }
 
     private Response doSayHello() {
-        final String messageText;
         final Subject subject = SecurityUtils.getSubject();
-        if (subject.isAuthenticated()) {
-            messageText = "Hello "+subject.getPrincipal();
-        } else {
-            messageText = "Hello!";
-        }
-        return Response.ok(messageText, MediaType.TEXT_PLAIN_TYPE).build();
+        final JSONObject result = new JSONObject();
+        result.put("principal", subject.getPrincipal().toString());
+        result.put("authenticated", subject.isAuthenticated());
+        result.put("remembered", subject.isRemembered());
+        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
     }
 
     /**

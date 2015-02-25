@@ -3,6 +3,7 @@ package com.sap.sse.security.jaxrs.api;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shiro.SecurityUtils;
@@ -83,5 +84,13 @@ public class SecurityResourceTest {
         assertFalse(subject.isPermitted("event:edit:234"));
         subject.logout();
         assertFalse(subject.isAuthenticated());
+    }
+
+    @Test
+    public void ensureOldBearerTokenIsInvalidatedByObtainingNewOne() throws ParseException {
+        String accessToken = createAccessToken();
+        createAccessToken();
+        User user = service.getUserByAccessToken(accessToken);
+        assertNull(user); // the old access token is expected to have been obsoleted by obtaining a new one
     }
 }

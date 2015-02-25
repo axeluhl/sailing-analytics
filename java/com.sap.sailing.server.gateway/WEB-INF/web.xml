@@ -253,12 +253,12 @@
    			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
 		</init-param>   
 		<load-on-startup>1</load-on-startup>
-  	</servlet>
-  	<servlet-mapping>
+  </servlet>
+  <servlet-mapping>
     	<servlet-name>Jersey REST API</servlet-name>
     	<url-pattern>/api/*</url-pattern>
-  	</servlet-mapping>
-	<servlet>
+  </servlet-mapping>
+  <servlet>
     	<servlet-name>Jersey REST SPI</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
@@ -270,10 +270,10 @@
    			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
 		</init-param>   
 		<load-on-startup>1</load-on-startup>
-  	</servlet>
-  	<servlet-mapping>
+  </servlet>
+  <servlet-mapping>
     	<servlet-name>Jersey REST SPI</servlet-name>
     	<url-pattern>/spi/*</url-pattern>
-  	</servlet-mapping>
+  </servlet-mapping>
  </web-app>
  
