@@ -11,6 +11,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
@@ -305,5 +307,15 @@ public class PolarDataMiner {
             averageSpeedAndCourseOverGround  = movingAverageProcessor.getAverageSpeedAndCourseOverGround(boatClass, windSpeed, legType, tack);
         }
         return averageSpeedAndCourseOverGround;
+    }
+
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+            throws NotEnoughDataHasBeenAddedException {
+        return cubicRegressionPerCourseProcessor.getSpeedRegressionFunction(boatClass, legType, tack);
+    }
+
+    public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+            throws NotEnoughDataHasBeenAddedException {
+        return cubicRegressionPerCourseProcessor.getAngleRegressionFunction(boatClass, legType, tack);
     }
 }

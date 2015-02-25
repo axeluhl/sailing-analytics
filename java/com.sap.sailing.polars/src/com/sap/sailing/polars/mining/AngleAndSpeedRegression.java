@@ -3,6 +3,8 @@ package com.sap.sailing.polars.mining;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
+
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -74,6 +76,14 @@ public class AngleAndSpeedRegression {
         }
         
         return result;
+    }
+
+    public PolynomialFunction getSpeedRegressionFunction() throws NotEnoughDataHasBeenAddedException {
+        return speedRegression.getOrCreatePolynomialFunction();
+    }
+
+    public PolynomialFunction getAngleRegressionFunction() throws NotEnoughDataHasBeenAddedException {
+        return angleRegression.getOrCreatePolynomialFunction();
     }
 
 }

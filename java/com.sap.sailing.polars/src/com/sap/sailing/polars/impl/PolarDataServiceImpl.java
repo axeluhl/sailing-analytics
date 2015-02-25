@@ -4,6 +4,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
@@ -131,5 +133,17 @@ public class PolarDataServiceImpl implements PolarDataService {
             }
         }
         return closestTwsTwa;
+    }
+
+    @Override
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+            throws NotEnoughDataHasBeenAddedException {
+        return polarDataMiner.getSpeedRegressionFunction(boatClass, legType, tack);
+    }
+    
+    @Override
+    public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+            throws NotEnoughDataHasBeenAddedException {
+        return polarDataMiner.getAngleRegressionFunction(boatClass, legType, tack);
     }
 }

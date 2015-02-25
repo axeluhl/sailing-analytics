@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
@@ -94,6 +96,30 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
             throw new RuntimeException(e);
         }
         return compoundKey;
+    }
+    
+    public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+            throws NotEnoughDataHasBeenAddedException {
+        GroupKey key = createGroupKey(boatClass, legType, tack);
+        PolynomialFunction polynomialFunction;
+        if (regressions.containsKey(key)) {
+            polynomialFunction = regressions.get(key).getSpeedRegressionFunction();
+        } else {
+            throw new NotEnoughDataHasBeenAddedException();
+        }
+        return polynomialFunction;
+    }
+    
+    public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack)
+            throws NotEnoughDataHasBeenAddedException {
+        GroupKey key = createGroupKey(boatClass, legType, tack);
+        PolynomialFunction polynomialFunction;
+        if (regressions.containsKey(key)) {
+            polynomialFunction = regressions.get(key).getAngleRegressionFunction();
+        } else {
+            throw new NotEnoughDataHasBeenAddedException();
+        }
+        return polynomialFunction;
     }
 
     @Override
