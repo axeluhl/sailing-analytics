@@ -30,7 +30,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
@@ -117,7 +116,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo logout() {
-        logger.info("Logging out user: " + SessionUtils.loadUsername());
+        logger.info("Logging out user: " + SecurityUtils.getSubject().getPrincipal().toString());
         getSecurityService().logout();
         getHttpSession().invalidate();
         logger.info("Invalidated HTTP session");
@@ -167,7 +166,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
         final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SessionUtils.loadUsername())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SecurityUtils.getSubject().getPrincipal().toString())) {
             getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
