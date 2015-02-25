@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.tabs.overview;
+package com.sap.sailing.gwt.home.client.place.event2.tabs.overview.regatta;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -11,19 +11,19 @@ import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class EventOverviewWidgetAndActivity extends Composite implements TabActivity<EventRegattaOverviewPlace, EventContext> {
+public class RegattaOverviewWidgetAndActivity extends Composite implements TabActivity<RegattaOverviewPlace, EventContext> {
 
-    public EventOverviewWidgetAndActivity() {
+    public RegattaOverviewWidgetAndActivity() {
 
     }
 
     @Override
-    public Class<EventRegattaOverviewPlace> getPlaceClassForActivation() {
-        return EventRegattaOverviewPlace.class;
+    public Class<RegattaOverviewPlace> getPlaceClassForActivation() {
+        return RegattaOverviewPlace.class;
     }
 
     @Override
-    public void start(EventRegattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
+    public void start(RegattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
 
         initWidget(ourUiBinder.createAndBindUi(this));
 
@@ -35,14 +35,14 @@ public class EventOverviewWidgetAndActivity extends Composite implements TabActi
 
     }
 
-    interface MyBinder extends UiBinder<HTMLPanel, EventOverviewWidgetAndActivity> {
+    interface MyBinder extends UiBinder<HTMLPanel, RegattaOverviewWidgetAndActivity> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public EventRegattaOverviewPlace placeToFire(EventContext ctx) {
-        return new EventRegattaOverviewPlace(ctx);
+    public RegattaOverviewPlace placeToFire(EventContext ctx) {
+        return new RegattaOverviewPlace(ctx);
     }
 
 }

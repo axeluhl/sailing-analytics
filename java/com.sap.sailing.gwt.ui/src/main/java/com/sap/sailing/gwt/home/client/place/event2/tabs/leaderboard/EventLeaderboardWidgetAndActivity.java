@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
-import com.sap.sailing.gwt.home.client.place.event2.tabs.overview.EventRegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.tabs.overview.regatta.RegattaOverviewPlace;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -45,7 +45,7 @@ public class EventLeaderboardWidgetAndActivity extends Composite implements TabA
                         .getCtx()
                         .getClientFactory()
                         .getPlaceController()
-                            .goTo(new EventRegattaOverviewPlace(selectedPlace.getCtx()));
+                            .goTo(new RegattaOverviewPlace(selectedPlace.getCtx()));
                 }
             }.schedule(3000);
 

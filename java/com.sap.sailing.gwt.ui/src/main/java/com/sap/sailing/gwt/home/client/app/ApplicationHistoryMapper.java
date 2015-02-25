@@ -5,9 +5,8 @@ import com.google.gwt.place.shared.WithTokenizers;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.overview.EventOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.leaderboard.EventLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.event2.tabs.overview.EventRegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.tabs.overview.multiregatta.MultiRegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.races.EventRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
@@ -23,8 +22,8 @@ import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
         RegattaPlace.Tokenizer.class, SeriesPlace.Tokenizer.class,
         // Event tab places...
         com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace.Tokenizer.class,//
-        EventOverviewPlace.Tokenizer.class,//
-        EventRegattaOverviewPlace.Tokenizer.class,//
+        MultiRegattaOverviewPlace.Tokenizer.class,//
+        MultiRegattaOverviewPlace.Tokenizer.class,//
         EventRacesPlace.Tokenizer.class,
         EventLeaderboardPlace.Tokenizer.class
 

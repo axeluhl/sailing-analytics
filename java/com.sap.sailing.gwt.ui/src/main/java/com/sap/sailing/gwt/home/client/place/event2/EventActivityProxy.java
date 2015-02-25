@@ -7,10 +7,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaActivity;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.overview.EventOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaActivity;
 import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
+import com.sap.sailing.gwt.home.client.place.event2.tabs.overview.multiregatta.MultiRegattaOverviewPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
@@ -22,7 +22,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
 
     public EventActivityProxy(AbstractEventPlace place, EventClientFactory clientFactory) {
         if(place instanceof EventDefaultPlace) {
-            this.place = new EventOverviewPlace(place.getCtx());
+            this.place = new MultiRegattaOverviewPlace(place.getCtx());
         } else {
             this.place = place;
         }

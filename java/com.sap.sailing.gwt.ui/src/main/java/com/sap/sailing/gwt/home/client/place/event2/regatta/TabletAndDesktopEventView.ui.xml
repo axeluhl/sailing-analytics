@@ -58,6 +58,12 @@
 			<c:tabcontent title="Leaderboard">
 				<tabs:leaderboard.EventLeaderboardWidgetAndActivity />
 			</c:tabcontent>
+			<c:tabcontent title="Schedule">
+				<tabs:leaderboard.EventLeaderboardWidgetAndActivity />
+			</c:tabcontent>
+			<c:tabcontent title="Media">
+				<tabs:leaderboard.EventLeaderboardWidgetAndActivity />
+			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 

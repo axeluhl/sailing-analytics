@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.overview;
+package com.sap.sailing.gwt.home.client.place.event2.tabs.overview.event;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.AbstractMultiregattaEventPlace;
