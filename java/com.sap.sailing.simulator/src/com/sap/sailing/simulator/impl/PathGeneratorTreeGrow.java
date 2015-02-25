@@ -744,7 +744,11 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         if (this.maxTurns == 1) {
             int turnMiddle = 1000;
             if (bestCand != null) {
-                turnMiddle = bestCand.getIndexOfTurnRL();
+                if (bestCand.path.charAt(1) == 'L') {
+                    turnMiddle = bestCand.getIndexOfTurnLR();
+                } else {
+                    turnMiddle = bestCand.getIndexOfTurnRL();
+                }
                 maxTurnTime = turnMiddle * this.usedTimeStep;
             }
         }

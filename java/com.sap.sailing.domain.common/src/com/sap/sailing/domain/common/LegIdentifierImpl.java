@@ -18,7 +18,7 @@ public class LegIdentifierImpl extends RegattaNameAndRaceName implements LegIden
 
     @Override
     public int getLegNumber() {
-        return Integer.parseInt(legName);
+        return Integer.parseInt(legName)-1;
     }
 
     @Override

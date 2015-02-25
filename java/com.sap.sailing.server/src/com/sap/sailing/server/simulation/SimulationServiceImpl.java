@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
@@ -85,7 +86,7 @@ public class SimulationServiceImpl implements SimulationService {
             TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
             trackedRace.addListener(new Listener(legIdentifier));
             cache.triggerUpdate(legIdentifier, null);
-            result = cache.get(legIdentifier, false); // take first simulation result that becomes available
+            result = cache.get(legIdentifier, true); // take first simulation result that becomes available
         }
         return result;
     }
@@ -206,7 +207,7 @@ public class SimulationServiceImpl implements SimulationService {
 
     public Map<PathType, Path> getAllPathsEvenTimed(SimulationParameters simuPars, long millisecondsStep)
             throws InterruptedException, ExecutionException {
-        Map<PathType, Path> allTimedPaths = new HashMap<PathType, Path>();
+        Map<PathType, Path> allTimedPaths = new TreeMap<PathType, Path>();
         Map<PathType, Path> allPaths = this.getAllPaths(simuPars);
         for (Entry<PathType, Path> entry : allPaths.entrySet()) {
             PathType pathType = entry.getKey();

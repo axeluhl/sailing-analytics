@@ -74,27 +74,27 @@ public class SailingSimulatorImpl implements SailingSimulator {
             genTreeGrow = new PathGeneratorTreeGrow(this.simulationParameters); // instantiate heuristic searcher
             genTreeGrow.setEvaluationParameters(null, 0, null); // allow for arbitrary many turns
             path = genTreeGrow.getPath();
-
+            break;
         case ONE_TURNER_LEFT:
             genTreeGrow = new PathGeneratorTreeGrow(this.simulationParameters); // instantiate heuristic searcher
             genTreeGrow.setEvaluationParameters("L", 1, null); // start left and limit to one turn
             path = genTreeGrow.getPath();
-
+            break;
         case ONE_TURNER_RIGHT:
             genTreeGrow = new PathGeneratorTreeGrow(this.simulationParameters); // instantiate heuristic searcher
             genTreeGrow.setEvaluationParameters("R", 1, null); // start right and limit to one turn
             path = genTreeGrow.getPath();
-
+            break;
         case OPPORTUNIST_LEFT:
             genOpportunistic = new PathGeneratorOpportunistEuclidian(this.simulationParameters);
             genOpportunistic.setEvaluationParameters(maxTurnTimes, true);
             path = genOpportunistic.getPath();
-
+            break;
         case OPPORTUNIST_RIGHT:
             genOpportunistic = new PathGeneratorOpportunistEuclidian(this.simulationParameters);
             genOpportunistic.setEvaluationParameters(maxTurnTimes, false);
             path = genOpportunistic.getPath();
-
+            break;
         }
         return path;
     }
