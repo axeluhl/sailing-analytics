@@ -7,10 +7,10 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class EventDTO implements IsSerializable {
+public class EventMetadataDTO implements IsSerializable {
     private UUID id;
     private String name;
-    private State state;
+    private EventState state;
     private EventType type;
     
     private String venue;
@@ -21,7 +21,7 @@ public class EventDTO implements IsSerializable {
     private String logoImageURL;
     private String officialWebsiteURL;
     
-    private List<RegattaDTO> regattas = new ArrayList<>();
+    private List<RegattaReferenceDTO> regattas = new ArrayList<>();
     private List<EventReferenceDTO> eventsOfSeries = new ArrayList<>();
     public UUID getId() {
         return id;
@@ -35,10 +35,10 @@ public class EventDTO implements IsSerializable {
     public void setName(String name) {
         this.name = name;
     }
-    public State getState() {
+    public EventState getState() {
         return state;
     }
-    public void setState(State state) {
+    public void setState(EventState state) {
         this.state = state;
     }
     public String getVenue() {
@@ -77,10 +77,10 @@ public class EventDTO implements IsSerializable {
     public void setOfficialWebsiteURL(String officialWebsiteURL) {
         this.officialWebsiteURL = officialWebsiteURL;
     }
-    public List<RegattaDTO> getRegattas() {
+    public List<RegattaReferenceDTO> getRegattas() {
         return regattas;
     }
-    public void setRegattas(List<RegattaDTO> regattas) {
+    public void setRegattas(List<RegattaReferenceDTO> regattas) {
         this.regattas = regattas;
     }
     public List<EventReferenceDTO> getEventsOfSeries() {

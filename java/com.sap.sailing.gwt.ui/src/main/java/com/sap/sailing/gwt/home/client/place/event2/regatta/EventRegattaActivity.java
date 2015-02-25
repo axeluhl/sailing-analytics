@@ -4,7 +4,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventActivity;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
+import com.sap.sailing.gwt.home.client.place.event2.model.EventMetadataDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventType;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 
@@ -25,7 +25,7 @@ public class EventRegattaActivity extends EventActivity<AbstractEventRegattaPlac
     
     @Override
     public boolean needsSelectionInHeader() {
-        EventDTO event = ctx.getEventDTO();
+        EventMetadataDTO event = ctx.getEventDTO();
         return (event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.MULTI_REGATTA);
     }
     

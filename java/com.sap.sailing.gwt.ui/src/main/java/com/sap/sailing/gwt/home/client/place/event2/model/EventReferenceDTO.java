@@ -6,16 +6,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class EventReferenceDTO implements IsSerializable {
     private UUID id;
-    private String name;
-    private String regattaName;
+    private String displayName;
     public EventReferenceDTO() {
     }
     
     public EventReferenceDTO(UUID id, String name, String regattaName) {
         super();
         this.id = id;
-        this.name = name;
-        this.regattaName = regattaName;
+        this.displayName = name;
     }
 
     public UUID getId() {
@@ -24,16 +22,10 @@ public class EventReferenceDTO implements IsSerializable {
     public void setId(UUID id) {
         this.id = id;
     }
-    public String getName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public String getRegattaName() {
-        return regattaName;
-    }
-    public void setRegattaName(String regattaName) {
-        this.regattaName = regattaName;
+    public void setDisplayName(String name) {
+        this.displayName = name;
     }
 }

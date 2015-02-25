@@ -5,10 +5,10 @@ import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
+import com.sap.sailing.gwt.home.client.place.event2.model.EventMetadataDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventReferenceDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventType;
-import com.sap.sailing.gwt.home.client.place.event2.model.RegattaDTO;
+import com.sap.sailing.gwt.home.client.place.event2.model.RegattaReferenceDTO;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 
 public abstract class EventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements EventView.Presenter {
@@ -43,15 +43,14 @@ public abstract class EventActivity<PLACE extends AbstractEventPlace> extends Ab
 
     @Override
     public void forPlaceSelection(PlaceCallback callback) {
-        EventDTO event = ctx.getEventDTO();
+        EventMetadataDTO event = ctx.getEventDTO();
         if(event.getType() == EventType.SERIES_EVENT) {
             for(EventReferenceDTO seriesEvent : event.getEventsOfSeries()) {
-                RegattaOverviewPlace place = new RegattaOverviewPlace(seriesEvent.getId().toString(),
-                        seriesEvent.getRegattaName());
-                callback.forPlace(place, seriesEvent.getName());
+                RegattaOverviewPlace place = new RegattaOverviewPlace(new EventContext().withId(seriesEvent.getId().toString()));
+                callback.forPlace(place, seriesEvent.getDisplayName());
             }
         } else {
-            for(RegattaDTO regatta : event.getRegattas()) {
+            for(RegattaReferenceDTO regatta : event.getRegattas()) {
                 RegattaOverviewPlace place = new RegattaOverviewPlace(
                         new EventContext(ctx.getEventDTO()).withRegattaId(regatta.getName()));
                 callback.forPlace(place, regatta.getName());

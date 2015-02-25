@@ -28,8 +28,8 @@ import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
-import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
-import com.sap.sailing.gwt.home.client.place.event2.model.State;
+import com.sap.sailing.gwt.home.client.place.event2.model.EventMetadataDTO;
+import com.sap.sailing.gwt.home.client.place.event2.model.EventState;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -62,7 +62,7 @@ public class EventHeader extends Composite {
     
     @UiField FlowPanel dropdownContent;
 
-    private EventDTO event;
+    private EventMetadataDTO event;
 
     private Presenter presenter;
 
@@ -183,10 +183,10 @@ public class EventHeader extends Composite {
     }
 
     private void fillEventState(DivElement eventStateElement) {
-        if(event.getState() == State.FINISHED) {
+        if(event.getState() == EventState.FINISHED) {
             eventStateElement.setInnerText(i18n.finished());
             eventStateElement.setAttribute("data-labeltype", "finished");
-        } else if(event.getState() == State.RUNNING) {
+        } else if(event.getState() == EventState.RUNNING) {
             eventStateElement.setInnerText(i18n.live());
             eventStateElement.setAttribute("data-labeltype", "live");
         } else {
