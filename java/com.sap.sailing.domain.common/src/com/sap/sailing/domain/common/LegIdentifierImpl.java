@@ -1,15 +1,11 @@
-package com.sap.sailing.simulator.impl;
-
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.simulator.LegIdentifier;
-
-
+package com.sap.sailing.domain.common;
 
 public class LegIdentifierImpl extends RegattaNameAndRaceName implements LegIdentifier {
     private static final long serialVersionUID = 3599904513673776450L;
     private String legName;
-        
+
+    LegIdentifierImpl() {}
+
     public LegIdentifierImpl(RegattaAndRaceIdentifier raceIdentifier, String legName) {
         super(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
         this.legName = legName;
@@ -19,15 +15,15 @@ public class LegIdentifierImpl extends RegattaNameAndRaceName implements LegIden
     public String getLegName() {
         return legName;
     }
-    
+
     @Override
     public int getLegNumber() {
         return Integer.parseInt(legName);
     }
-    
+
     @Override
     public String toString() {
-        return getRegattaName()+"/"+getRaceName()+"/"+getLegName();
+        return getRegattaName() + "/" + getRaceName() + "/" + getLegName();
     }
 
     @Override

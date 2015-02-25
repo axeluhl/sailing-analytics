@@ -1,6 +1,4 @@
-package com.sap.sailing.simulator;
-
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+package com.sap.sailing.domain.common;
 
 public interface LegIdentifier extends RegattaAndRaceIdentifier {
     String getLegName();
