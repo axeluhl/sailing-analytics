@@ -116,7 +116,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo logout() {
-        logger.info("Logging out user: " + SecurityUtils.getSubject().getPrincipal().toString());
+        logger.info("Logging out user: " + SecurityUtils.getSubject());
         getSecurityService().logout();
         getHttpSession().invalidate();
         logger.info("Invalidated HTTP session");
