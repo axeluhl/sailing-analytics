@@ -50,10 +50,10 @@
 				<h:EventHeader ui:field="eventHeader" />
 			</c:header>
 			<c:tabcontent title="Overview">
-				<tabs:overview.MultiRegattaOverviewWidgetAndActivity />
+				<tabs:MultiregattaOverviewTabView />
 			</c:tabcontent>
 			<c:tabcontent title="Regattas">
-				<tabs:regattas.EventRegattasWidgetAndActivity />
+				<tabs:MultiregattaRegattasTabView />
 			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>

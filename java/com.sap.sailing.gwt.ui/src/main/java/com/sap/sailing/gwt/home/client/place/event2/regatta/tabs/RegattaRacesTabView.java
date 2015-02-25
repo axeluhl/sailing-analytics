@@ -1,27 +1,26 @@
-package com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.races;
+package com.sap.sailing.gwt.home.client.place.event2.regatta.tabs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class EventRacesWidgetAndActivity extends Composite implements TabActivity<EventRacesPlace, EventContext, EventRegattaView.Presenter> {
+public class RegattaRacesTabView extends Composite implements RegattaTabView<RegattaRacesPlace> {
 
-    public EventRacesWidgetAndActivity() {
+    public RegattaRacesTabView() {
 
     }
 
     @Override
-    public Class<EventRacesPlace> getPlaceClassForActivation() {
-        return EventRacesPlace.class;
+    public Class<RegattaRacesPlace> getPlaceClassForActivation() {
+        return RegattaRacesPlace.class;
     }
     
     @Override
@@ -31,7 +30,7 @@ public class EventRacesWidgetAndActivity extends Composite implements TabActivit
     }
 
     @Override
-    public void start(EventRacesPlace myPlace, AcceptsOneWidget contentArea) {
+    public void start(RegattaRacesPlace myPlace, AcceptsOneWidget contentArea) {
 
         initWidget(ourUiBinder.createAndBindUi(this));
 
@@ -43,14 +42,14 @@ public class EventRacesWidgetAndActivity extends Composite implements TabActivit
 
     }
 
-    interface MyBinder extends UiBinder<HTMLPanel, EventRacesWidgetAndActivity> {
+    interface MyBinder extends UiBinder<HTMLPanel, RegattaRacesTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public EventRacesPlace placeToFire(EventContext ctx) {
-        return new EventRacesPlace(ctx);
+    public RegattaRacesPlace placeToFire(EventContext ctx) {
+        return new RegattaRacesPlace(ctx);
     }
 
 }

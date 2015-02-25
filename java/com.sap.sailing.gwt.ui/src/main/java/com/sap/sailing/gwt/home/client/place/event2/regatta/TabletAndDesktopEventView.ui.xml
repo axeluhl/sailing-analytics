@@ -51,16 +51,16 @@
 				<h:EventHeader ui:field="eventHeader" />
 			</c:header>
 			<c:tabcontent title="Overview">
-				<tabs:overview.RegattaOverviewWidgetAndActivity />
+				<tabs:RegattaOverviewTabView />
 			</c:tabcontent>
 			<c:tabcontent title="Races">
-				<tabs:races.EventRacesWidgetAndActivity />
+				<tabs:RegattaRacesTabView />
 			</c:tabcontent>
 			<c:tabcontent title="Leaderboard">
-				<tabs:leaderboard.EventLeaderboardWidgetAndActivity />
+				<tabs:RegattaLeaderboardTabView />
 			</c:tabcontent>
 			<c:tabcontent title="Media">
-				<tabs:leaderboard.EventLeaderboardWidgetAndActivity />
+				<tabs:RegattaMediaTabView />
 			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>

@@ -2,14 +2,14 @@ package com.sap.sailing.gwt.home.client.place.event2;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventReferenceDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventType;
 import com.sap.sailing.gwt.home.client.place.event2.model.RegattaDTO;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.overview.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 
 public abstract class EventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements EventView.Presenter {
 
@@ -21,7 +21,7 @@ public abstract class EventActivity<PLACE extends AbstractEventPlace> extends Ab
 
     public EventActivity(PLACE place, EventClientFactory clientFactory) {
         this.currentPlace = place;
-        this.ctx = new EventContext(clientFactory, place.getCtx());
+        this.ctx = new EventContext(place.getCtx());
 
         this.clientFactory = clientFactory;
     }
@@ -32,7 +32,7 @@ public abstract class EventActivity<PLACE extends AbstractEventPlace> extends Ab
     }
 
     @Override
-    public void handleTabPlaceSelection(TabActivity<?, EventContext, ? extends EventView.Presenter> selectedActivity) {
+    public void handleTabPlaceSelection(TabView<?, EventContext, ? extends EventView.Presenter> selectedActivity) {
         Place tabPlaceToGo = selectedActivity.placeToFire(ctx);
         clientFactory.getPlaceController().goTo(tabPlaceToGo);
     }

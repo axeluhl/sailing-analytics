@@ -11,10 +11,10 @@ import com.sap.sailing.gwt.home.client.place.event2.model.RegattaDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.State;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaActivity;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.overview.MultiRegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaActivity;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.overview.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class EventActivityProxy extends AbstractActivityProxy {
@@ -119,6 +119,6 @@ public class EventActivityProxy extends AbstractActivityProxy {
         if(event.getType() == EventType.SINGLE_REGATTA) {
             return new RegattaOverviewPlace(ctx.withRegattaId(event.getRegattas().get(0).getName()));
         }
-        return new MultiRegattaOverviewPlace(place.getCtx());
+        return new MultiregattaOverviewPlace(place.getCtx());
     }
 }

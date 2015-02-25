@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.leaderboard;
+package com.sap.sailing.gwt.home.client.place.event2.regatta.tabs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -8,35 +8,35 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.overview.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class EventLeaderboardWidgetAndActivity extends Composite implements TabActivity<EventLeaderboardPlace, EventContext, EventRegattaView.Presenter> {
+public class RegattaLeaderboardTabView extends Composite implements RegattaTabView<RegattaLeaderboardPlace> {
 
     private LeaderboardDTO leaderboardDTO;
+    private Presenter currentPresenter;
 
-    public EventLeaderboardWidgetAndActivity() {
+    public RegattaLeaderboardTabView() {
 
     }
 
     @Override
-    public Class<EventLeaderboardPlace> getPlaceClassForActivation() {
-        return EventLeaderboardPlace.class;
+    public Class<RegattaLeaderboardPlace> getPlaceClassForActivation() {
+        return RegattaLeaderboardPlace.class;
     }
     
     @Override
-    public void setPresenter(EventRegattaView.Presenter presenter) {
-        // TODO Auto-generated method stub
-        
+    public void setPresenter(EventRegattaView.Presenter currentPresenter) {
+        this.currentPresenter = currentPresenter;
     }
 
     @Override
-    public void start(final EventLeaderboardPlace selectedPlace, final AcceptsOneWidget contentArea) {
+    public void start(final RegattaLeaderboardPlace selectedPlace, final AcceptsOneWidget contentArea) {
         
         String regattaId = selectedPlace.getRegattaId();
        
@@ -47,12 +47,7 @@ public class EventLeaderboardWidgetAndActivity extends Composite implements TabA
             new Timer() {
                 @Override
                 public void run() {
-                    // chain is not nice...
-                    selectedPlace
-                        .getCtx()
-                        .getClientFactory()
-                        .getPlaceController()
-                            .goTo(new RegattaOverviewPlace(selectedPlace.getCtx()));
+                    currentPresenter.gotoOverview();
                 }
             }.schedule(3000);
 
@@ -77,14 +72,14 @@ public class EventLeaderboardWidgetAndActivity extends Composite implements TabA
 
     }
 
-    interface MyBinder extends UiBinder<HTMLPanel, EventLeaderboardWidgetAndActivity> {
+    interface MyBinder extends UiBinder<HTMLPanel, RegattaLeaderboardTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public EventLeaderboardPlace placeToFire(EventContext ctx) {
-        return new EventLeaderboardPlace(ctx);
+    public RegattaLeaderboardPlace placeToFire(EventContext ctx) {
+        return new RegattaLeaderboardPlace(ctx);
     }
 
 }

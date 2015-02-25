@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventActivity;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventType;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 
 public class EventRegattaActivity extends EventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
 
@@ -34,5 +35,10 @@ public class EventRegattaActivity extends EventActivity<AbstractEventRegattaPlac
             return ctx.getRegattaId();
         }
         return super.getEventName();
+    }
+
+    @Override
+    public void gotoOverview() {
+        clientFactory.getPlaceController().goTo(new RegattaOverviewPlace(this.ctx));
     }
 }

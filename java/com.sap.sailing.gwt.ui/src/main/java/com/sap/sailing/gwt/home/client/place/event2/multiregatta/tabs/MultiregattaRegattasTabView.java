@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.regattas;
+package com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -10,38 +10,38 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PushButton;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
 import com.sap.sailing.gwt.home.client.place.event2.model.RegattaDTO;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView.Presenter;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.overview.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.MultiregattaTabView;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class EventRegattasWidgetAndActivity extends Composite implements TabActivity<EventRegattasPlace, EventContext, EventMultiregattaView.Presenter> {
+public class MultiregattaRegattasTabView extends Composite implements MultiregattaTabView<MultiregattaRegattasPlace> {
     
     @UiField FlowPanel content;
     private Presenter presenter;
 
-    public EventRegattasWidgetAndActivity() {
+    public MultiregattaRegattasTabView() {
 
     }
 
     @Override
-    public Class<EventRegattasPlace> getPlaceClassForActivation() {
-        return EventRegattasPlace.class;
+    public Class<MultiregattaRegattasPlace> getPlaceClassForActivation() {
+        return MultiregattaRegattasPlace.class;
     }
     
     @Override
-    public void setPresenter(Presenter presenter) {
+    public void setPresenter(EventMultiregattaView.Presenter presenter) {
         this.presenter = presenter;
     }
 
     @Override
-    public void start(final EventRegattasPlace myPlace, AcceptsOneWidget contentArea) {
+    public void start(final MultiregattaRegattasPlace myPlace, AcceptsOneWidget contentArea) {
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
@@ -66,14 +66,14 @@ public class EventRegattasWidgetAndActivity extends Composite implements TabActi
 
     }
 
-    interface MyBinder extends UiBinder<HTMLPanel, EventRegattasWidgetAndActivity> {
+    interface MyBinder extends UiBinder<HTMLPanel, MultiregattaRegattasTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public EventRegattasPlace placeToFire(EventContext ctx) {
-        return new EventRegattasPlace(ctx);
+    public MultiregattaRegattasPlace placeToFire(EventContext ctx) {
+        return new MultiregattaRegattasPlace(ctx);
     }
 
 }

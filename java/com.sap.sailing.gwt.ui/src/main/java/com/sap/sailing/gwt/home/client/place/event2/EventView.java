@@ -2,13 +2,13 @@ package com.sap.sailing.gwt.home.client.place.event2;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 
 public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventView.Presenter> extends IsWidget {
 
     public interface Presenter {
         EventContext getCtx();
-        void handleTabPlaceSelection(TabActivity<?, EventContext, ? extends Presenter> selectedActivity);        
+        void handleTabPlaceSelection(TabView<?, EventContext, ? extends Presenter> selectedActivity);        
         String getUrl(Place place);
         void navigateTo(Place place);
         boolean needsSelectionInHeader();

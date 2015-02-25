@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
-import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
 
 /**
@@ -11,7 +10,6 @@ import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
  */
 public class EventContext {
 
-    private EventClientFactory clientFactory;
     private String eventId;
     private String regattaId;
 
@@ -28,10 +26,9 @@ public class EventContext {
         updateContext(dto);
     }
 
-    public EventContext(EventClientFactory clientFactory, EventContext ctx) {
+    public EventContext(EventContext ctx) {
         updateContext(ctx.getEventDTO());
         withRegattaId(ctx.regattaId);
-        this.clientFactory = clientFactory;
     }
 
     public EventContext withId(String eventId) {
@@ -73,12 +70,6 @@ public class EventContext {
         return regattaId;
     }
 
-    public EventClientFactory getClientFactory() {
-        return clientFactory;
-    }
 
-    public void setClientFactory(EventClientFactory clientFactory) {
-        this.clientFactory = clientFactory;
-    }
 
 }

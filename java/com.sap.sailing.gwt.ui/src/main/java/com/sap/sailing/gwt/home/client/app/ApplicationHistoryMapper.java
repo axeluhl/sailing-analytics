@@ -6,13 +6,13 @@ import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.media.MultiRegattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.overview.MultiRegattaOverviewPlace;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.regattas.EventRegattasPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.leaderboard.EventLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.media.MediaPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.overview.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.races.EventRacesPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
@@ -29,14 +29,14 @@ import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
         // Event tab places...
         EventDefaultPlace.Tokenizer.class,//
         // Multiregatta places:
-        MultiRegattaMediaPlace.Tokenizer.class, //
-        MultiRegattaOverviewPlace.Tokenizer.class,//
-        EventRegattasPlace.Tokenizer.class,//
+        MultiregattaMediaPlace.Tokenizer.class, //
+        MultiregattaOverviewPlace.Tokenizer.class,//
+        MultiregattaRegattasPlace.Tokenizer.class,//
         // Regatta places:
         RegattaOverviewPlace.Tokenizer.class,//
-        EventRacesPlace.Tokenizer.class, //
-        EventLeaderboardPlace.Tokenizer.class, //
-        MediaPlace.Tokenizer.class
+        RegattaRacesPlace.Tokenizer.class, //
+        RegattaLeaderboardPlace.Tokenizer.class, //
+        RegattaMediaPlace.Tokenizer.class
 
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {

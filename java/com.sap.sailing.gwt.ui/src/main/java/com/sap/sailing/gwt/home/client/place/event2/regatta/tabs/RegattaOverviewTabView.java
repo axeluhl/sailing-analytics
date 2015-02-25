@@ -1,21 +1,20 @@
-package com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.overview;
+package com.sap.sailing.gwt.home.client.place.event2.regatta.tabs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class RegattaOverviewWidgetAndActivity extends Composite implements
-        TabActivity<RegattaOverviewPlace, EventContext, EventRegattaView.Presenter> {
+public class RegattaOverviewTabView extends Composite implements RegattaTabView<RegattaOverviewPlace> {
 
-    public RegattaOverviewWidgetAndActivity() {
+    public RegattaOverviewTabView() {
 
     }
 
@@ -37,7 +36,7 @@ public class RegattaOverviewWidgetAndActivity extends Composite implements
 
     }
 
-    interface MyBinder extends UiBinder<HTMLPanel, RegattaOverviewWidgetAndActivity> {
+    interface MyBinder extends UiBinder<HTMLPanel, RegattaOverviewTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
