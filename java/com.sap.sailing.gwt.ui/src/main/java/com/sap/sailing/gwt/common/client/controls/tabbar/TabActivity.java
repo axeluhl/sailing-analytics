@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
  * <p/>
  * Created by pgtaboada on 25.11.14.
  */
-public interface TabActivity<PLACE extends Place, PLACECONTEXT> {
+public interface TabActivity<PLACE extends Place, PLACECONTEXT, PRESENTER> {
 
     /**
      * The place type that activates this tab.
@@ -25,6 +25,8 @@ public interface TabActivity<PLACE extends Place, PLACECONTEXT> {
      * @param contentArea
      */
     void start(PLACE requestedPlace, AcceptsOneWidget contentArea);
+    
+    void setPresenter(PRESENTER presenter);
 
     /**
      * Tells the tab that it is going to be deactiviated (not visible anymore), because of tab switch

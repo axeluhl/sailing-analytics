@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.client.place.event2;
 
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 
 public abstract class AbstractEventPlace extends Place {
     private final EventContext ctx;
@@ -27,9 +26,8 @@ public abstract class AbstractEventPlace extends Place {
     public String getEventUuidAsString() {
         return ctx.getEventId();
     }
-
-    public String getLeaderboardIdAsNameString() {
-        return ctx.getLeaderboardIdAsNameString();
+    
+    public String getRegattaId() {
+        return ctx.getRegattaId();
     }
-
 }

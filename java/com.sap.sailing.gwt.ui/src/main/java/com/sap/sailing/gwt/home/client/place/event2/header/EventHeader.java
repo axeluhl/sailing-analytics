@@ -1,23 +1,37 @@
 package com.sap.sailing.gwt.home.client.place.event2.header;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Event.NativePreviewHandler;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
+import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event2.model.EventDTO;
+import com.sap.sailing.gwt.home.client.place.event2.model.State;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -28,11 +42,15 @@ public class EventHeader extends Composite {
     @UiField StringMessages i18n;
     
     @UiField ImageElement eventLogo;
+    @UiField HeadingElement staticTitle;
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
+    @UiField DivElement dropdownTitle;
+    @UiField SpanElement dropdownEventName;
+    @UiField DivElement dropdownEventState;
+    @UiField AnchorElement dropdownTrigger;
     @UiField DivElement eventDate;
-    @UiField SpanElement eventVenueName;
-    @UiField SpanElement eventVenueCountry;
+    @UiField SpanElement eventVenue;
     @UiField AnchorElement eventLink;
     @UiField DivElement competitors;
     @UiField SpanElement competitorsCount;
@@ -41,47 +59,39 @@ public class EventHeader extends Composite {
     @UiField DivElement trackedRaces;
     @UiField SpanElement trackedRacesCount;
     @UiField DivElement eventCategory;
-
-    private final HomePlacesNavigator placeNavigator;
+    
+    @UiField FlowPanel dropdownContent;
 
     private EventDTO event;
 
     private Presenter presenter;
+
+    private HandlerRegistration reg;
+    boolean dropdownShown = false;
     
     public EventHeader(EventView.Presenter presenter) {
-        this(presenter, null);
-    }
-    
-    public EventHeader(EventView.Presenter presenter, HomePlacesNavigator placeNavigator) {
         this.event = presenter.getCtx().getEventDTO();
         this.presenter = presenter;
-        this.placeNavigator = placeNavigator;
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
         initFields();
+        
+        initTitleAndSelection();
     }
 
     private void initFields() {
         String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
         eventLogo.setSrc(logoUrl);
         eventLogo.setAlt(event.getName());
-        eventName.setInnerText(event.getName());
-        
-        if(event.isFinished()) {
-            eventState.setInnerText(i18n.finished());
-            eventState.setAttribute("data-labeltype", "finished");
-        } else if(event.isRunning()) {
-            eventState.setInnerText(i18n.live());
-            eventState.setAttribute("data-labeltype", "live");
-        } else {
-            hide(eventState);
-        }
         
         eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
-        eventVenueName.setInnerText(event.venue.getName());
-//        TODO eventVenueCountry
+        String venue = event.getVenue();
+        if(event.getVenueCountry() != null && !event.getVenueCountry().isEmpty()) {
+            venue += ", " + event.getVenueCountry();
+        }
+        eventVenue.setInnerText(venue);
         if(event.getOfficialWebsiteURL() != null) {
             String title = withoutPrefix(event.getOfficialWebsiteURL(), "http://", "https://");
             if(title.length() > 35) {
@@ -106,6 +116,82 @@ public class EventHeader extends Composite {
 //        } else {
             hide(competitors, races, trackedRaces);
 //        }
+    }
+
+    private void initTitleAndSelection() {
+        if(!presenter.needsSelectionInHeader()) {
+            eventName.setInnerText(presenter.getEventName());
+            fillEventState(eventState);
+            hide(dropdownTitle);
+        } else {
+            dropdownEventName.setInnerText(presenter.getEventName());
+            fillEventState(dropdownEventState);
+            hide(staticTitle);
+            
+            initDropdown();
+        }
+    }
+
+    private void initDropdown() {
+        Event.sinkEvents(dropdownTrigger, Event.ONCLICK);
+        Event.setEventListener(dropdownTrigger, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                if(dropdownShown) {
+                    return;
+                }
+                dropdownContent.getElement().getStyle().setDisplay(Display.BLOCK);
+                dropdownShown = true;
+                reg = Event.addNativePreviewHandler(new NativePreviewHandler() {
+                    @Override
+                    public void onPreviewNativeEvent(NativePreviewEvent event) {
+                        EventTarget eventTarget = event.getNativeEvent().getEventTarget();
+                        if(!Element.is(eventTarget)) {
+                            return;
+                        }
+                        Element evtElement = Element.as(eventTarget);
+                        if(event.getTypeInt() == Event.ONCLICK && !dropdownContent.getElement().isOrHasChild(evtElement)) {
+                            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                                @Override
+                                public void execute() {
+                                    dropdownContent.getElement().getStyle().clearDisplay();
+                                    dropdownShown = false;
+                                    reg.removeHandler();
+                                    reg = null;
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+        
+        presenter.forPlaceSelection(new PlaceCallback() {
+            @Override
+            public void forPlace(final AbstractEventPlace place, String title) {
+                DropdownItem dropdownItem = new DropdownItem(title, presenter.getUrl(place));
+                dropdownItem.addDomHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        event.preventDefault();
+                        presenter.navigateTo(place);
+                    }
+                }, ClickEvent.getType());
+                dropdownContent.add(dropdownItem);
+            }
+        });
+    }
+
+    private void fillEventState(DivElement eventStateElement) {
+        if(event.getState() == State.FINISHED) {
+            eventStateElement.setInnerText(i18n.finished());
+            eventStateElement.setAttribute("data-labeltype", "finished");
+        } else if(event.getState() == State.RUNNING) {
+            eventStateElement.setInnerText(i18n.live());
+            eventStateElement.setAttribute("data-labeltype", "live");
+        } else {
+            hide(eventStateElement);
+        }
     }
 
     private String withoutPrefix(String title, String... prefixes) {

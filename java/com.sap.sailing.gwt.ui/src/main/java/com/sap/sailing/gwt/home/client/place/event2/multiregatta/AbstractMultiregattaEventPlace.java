@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event2.multiregatta;
 
 import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
-import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
+import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 
 public abstract class AbstractMultiregattaEventPlace extends AbstractEventPlace {
 
@@ -12,5 +12,4 @@ public abstract class AbstractMultiregattaEventPlace extends AbstractEventPlace 
     public AbstractMultiregattaEventPlace(String eventUuidAsString) {
         super(eventUuidAsString);
     }
-
 }

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 
 public class EventDefaultPlace extends AbstractEventPlace {
 

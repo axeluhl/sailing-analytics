@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event2.regatta;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -11,9 +12,11 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabActivity;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.client.place.event2.EventContext;
+import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event2.header.EventHeader;
-import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
+import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopEventView extends Composite implements EventRegattaView {
@@ -30,7 +33,7 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
     @UiField StringMessages i18n;
     
     @UiField(provided = true)
-    TabPanel<EventContext> tabPanelUi;
+    TabPanel<EventContext, EventRegattaView.Presenter> tabPanelUi;
     
     @UiField(provided = true)
     EventHeader eventHeader;
@@ -41,14 +44,13 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
     @Override
     public void registerPresenter(final Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
-        tabPanelUi = new TabPanel<EventContext>(new PlaceContextProvider<EventContext>() {
+        tabPanelUi = new TabPanel<>(new PlaceContextProvider<EventContext>() {
             
             @Override
             public EventContext getContext() {
-                
                 return currentPresenter.getCtx();
             }
-        }, historyMapper);
+        }, currentPresenter, historyMapper);
         
         eventHeader = new EventHeader(currentPresenter);
         
@@ -64,43 +66,21 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
 
     @UiHandler("tabPanelUi")
     public void onTabSelection(TabPanelPlaceSelectionEvent<?> e) {
-        currentPresenter.handleTabPlaceSelection((TabActivity<?, EventContext>) e.getSelectedActivity());
+        currentPresenter.handleTabPlaceSelection((TabActivity<?, EventContext, EventRegattaView.Presenter>) e.getSelectedActivity());
     }
     
     private void initBreadCrumbs() {
-//      addBreadCrumbItem(i18n.home(), placeNavigator.getHomeNavigation());
-//      addBreadCrumbItem(i18n.events(), placeNavigator.getEventsNavigation());
-      // TODO series, event ...
-      // TODO dummy implementation
-        tabPanelUi.addBreadcrumbItem(i18n.home(), "TODO" /* placeNavigator.getHomeNavigation().getTargetUrl() */, new Runnable() {
-          @Override
-          public void run() {
-              // TODO
-//              presenter.
-//              placeNavigator.getHomeNavigation().getPlace()
-          }
-      });
-        tabPanelUi.addBreadcrumbItem(i18n.events(), "TODO" /* placeNavigator.getEventsNavigation().getTargetUrl() */, new Runnable() {
-          @Override
-          public void run() {
-              // TODO
-//              presenter.
-//              placeNavigator.getEventsNavigation().getPlace()
-          }
-      });
-        tabPanelUi.addBreadcrumbItem(currentPresenter.getCtx().getEventDTO().getName(), "TODO", new Runnable() {
-          @Override
-          public void run() {
-              // TODO
-          }
-      });
+      addBreadCrumbItem(i18n.home(), new StartPlace());
+      addBreadCrumbItem(i18n.events(), new EventsPlace());
+      addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getName(), new EventDefaultPlace(currentPresenter.getCtx()));
+      // TODO additional item for multi Regatta
   }
   
-  private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
-      tabPanelUi.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
+  private void addBreadCrumbItem(String label, final Place place) {
+      tabPanelUi.addBreadcrumbItem(label, currentPresenter.getUrl(place), new Runnable() {
           @Override
           public void run() {
-              currentPresenter.navigateTo(placeNavigation.getPlace());
+              currentPresenter.navigateTo(place);
           }
       });
   }

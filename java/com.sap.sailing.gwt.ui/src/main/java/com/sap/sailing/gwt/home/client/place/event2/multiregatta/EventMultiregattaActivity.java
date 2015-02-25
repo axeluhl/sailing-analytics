@@ -4,7 +4,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventActivity;
-import com.sap.sailing.gwt.home.client.place.event2.tabs.EventContext;
 
 public class EventMultiregattaActivity extends EventActivity<AbstractMultiregattaEventPlace> implements EventMultiregattaView.Presenter {
 
@@ -21,9 +20,9 @@ public class EventMultiregattaActivity extends EventActivity<AbstractMultiregatt
         currentView.navigateTabsTo(currentPlace);
     }
 
+    
     @Override
-    public EventContext getCtx() {
-
-        return ctx;
+    public boolean needsSelectionInHeader() {
+        return false;
     }
 }

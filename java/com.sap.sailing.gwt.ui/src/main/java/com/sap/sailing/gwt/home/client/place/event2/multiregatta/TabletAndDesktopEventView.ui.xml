@@ -2,7 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
 	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
-	xmlns:tabs="urn:import:com.sap.sailing.gwt.home.client.place.event2.tabs" xmlns:h="urn:import:com.sap.sailing.gwt.home.client.place.event2.header">
+	xmlns:tabs="urn:import:com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs" 
+	xmlns:h="urn:import:com.sap.sailing.gwt.home.client.place.event2.header">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:style>
 		.header {
@@ -49,7 +50,10 @@
 				<h:EventHeader ui:field="eventHeader" />
 			</c:header>
 			<c:tabcontent title="Overview">
-				<tabs:overview.EventOverviewWidgetAndActivity />
+				<tabs:overview.MultiRegattaOverviewWidgetAndActivity />
+			</c:tabcontent>
+			<c:tabcontent title="Regattas">
+				<tabs:regattas.EventRegattasWidgetAndActivity />
 			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>
