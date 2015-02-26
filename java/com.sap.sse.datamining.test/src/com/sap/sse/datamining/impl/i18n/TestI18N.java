@@ -4,8 +4,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +67,20 @@ public class TestI18N {
         assertThat(ResourceBundleStringMessages.Util.getLocaleFor("de"), is(Locale.GERMAN));
 
         assertThat(ResourceBundleStringMessages.Util.getLocaleFor("Unsupported locale info name"), is(Locale.ENGLISH));
+    }
+    
+    @Test
+    public void testGetSupportedLocales() {
+        Set<Locale> supportedLocales = new HashSet<>();
+        for (Locale locale : ResourceBundleStringMessages.Util.getSupportedLocales()) {
+            supportedLocales.add(locale);
+        }
+        
+        Set<Locale> expectedSupportedLocales = new HashSet<>();
+        expectedSupportedLocales.add(Locale.GERMAN);
+        expectedSupportedLocales.add(Locale.ENGLISH);
+        
+        assertThat(supportedLocales, is(expectedSupportedLocales));
     }
     
     @Test(expected=MissingResourceException.class)
