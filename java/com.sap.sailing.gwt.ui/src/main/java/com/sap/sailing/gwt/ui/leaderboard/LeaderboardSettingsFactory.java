@@ -45,7 +45,8 @@ public class LeaderboardSettingsFactory {
      *            overall details if and only if this parameter is <code>true</code>
      */
     public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
-            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection, Boolean showRegattaRank) {
+            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection, Boolean showRegattaRank, boolean showCompetitorSailIdColumn,
+            boolean showCompetitorNameColumn) {
         if (nameOfRaceColumnToShow != null && nameOfRaceToShow != null) {
             throw new IllegalArgumentException("Can identify only one race to show, either by race name or by its column name, but not both");
         }
@@ -77,7 +78,7 @@ public class LeaderboardSettingsFactory {
                         /* refresh interval */ null, /* name of race to sort */ nameOfRaceToSort,
                         /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                         /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false,
-                        /*showCompetitorSailIdColumns*/true, /*showCompetitorFullNameColumn*/true);
+                        /*showCompetitorSailIdColumns*/showCompetitorSailIdColumn, /*showCompetitorFullNameColumn*/showCompetitorNameColumn);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
