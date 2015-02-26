@@ -45,6 +45,13 @@ For this to work, the Web Bundle requires at least the two bundles `org.apache.s
 
 The Web Bundle then provides a `shiro.ini` file in its classpath root, e.g., directly within its `src` or `resources` source folder. The `shiro.ini` file contains essential configuration information about which realms, which session and which cache manager to use. It also configures URLs for login pages, default success pages and permissions required for access to URLs. The file `com.sap.sse.security/resources/shiro.ini` serves as a reasonable copy template. In the `[urls]` section the `shiro.ini` flie provides so-called filter chains for specific or pattern-based sets of URLs. In particular, the configuration can require the authenticated user to have specific roles and / or specific permissions to access the URL. Note the use of the `AnyOfRolesFilter` and how it is different from the regular `roles` filter.
 
+All authentication filters inheriting from `com.sap.sse.security.AbstractUserStoreBasedRealm` can provide an instance for the `permissionsForRoleProvider` property in the `shiro.ini` configuration file, e.g., as follows:
+
+    permissionsForRoleProvider = com.sap.sailing.gwt.ui.client.shared.security.SailingPermissionsForRoleProvider
+    upRealm = com.sap.sse.security.UsernamePasswordRealm
+    upRealm.credentialsMatcher = $credentialsMatcher
+    upRealm.permissionsForRoleProvider = $permissionsForRoleProvider
+
 ## How to Implement Permission Checks
 
 There are generally two ways in which some feature can require the user to be equipped with permissions: declaratively in the `shiro.ini` file's `[urls]` section; or programmatically by using something like ``org.apache.shiro.SecurityUtils.getSubject().checkPermission(...)`` which will throw an `AuthorizationException` in case the user lacks the necessary permissions.
@@ -56,6 +63,14 @@ This requires users trying to access the URL `/api/v1/events` to be authenticate
 
 Example for a programmatic check:
     SecurityUtils.getSubject().checkPermission("event:view");
+
+### Special Case: Permission Checks in the AdminConsole
+
+The `AdminConsolePanel` provides some generic support for permission handling, aiming at customizing the UI to the user's actual permissions. Ideally, a user would only see UI features he/she has the permission to use. In particular, we don't want to bother the user by showing panels he/she isn't permitted to use at all.
+
+When an administration entry point uses the `AdminConsolePanel`, each widget shown in the panel can be configured to require any of a set of permissions. For example, a panel for managing users would ask for permission `manage_users`. This is actually short for `manage_users:*:*`, a wildcard permission that implies all more specific permissions such as `manage_users:view:*` or `manage_users:edit:peter`. However, a specific permissions such as `manage_users:edit:peter` doesn't imply `manage_users:*:*` by the rules of wildcard permissions.
+
+The widget shall be shown as soon as the user has any permission for managing users, even only a specific one. It is then up to the implementation of the widget to further constrain user interaction and information displayed, based on the user's actual permissions. To implement this, the permission check for the appearance of administration console widgets is slightly modified: a widget will appear if the permission it requires implies any of the permissions the user has, or if any of the user's permissions implies the permission required by the widget. This way, a user having a specific permission such as `manage_users:edit:peter` will see a widget that requires `manage_users`. Also, a user having the administrator permission `*` will see the same widget because `*` implies all other permissions, particularly `manage_users`.
 
 ## Standard REST Security Services
 

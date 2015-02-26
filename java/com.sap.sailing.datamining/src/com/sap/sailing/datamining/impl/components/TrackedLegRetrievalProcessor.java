@@ -11,10 +11,10 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 
-public class TrackedLegFilteringRetrievalProcessor extends
+public class TrackedLegRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<HasTrackedRaceContext, HasTrackedLegContext> {
 
-    public TrackedLegFilteringRetrievalProcessor(ExecutorService executor,
+    public TrackedLegRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasTrackedLegContext, ?>> resultReceivers) {
         super(HasTrackedRaceContext.class, HasTrackedLegContext.class, executor, resultReceivers);
     }

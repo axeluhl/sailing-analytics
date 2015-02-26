@@ -11,10 +11,10 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 
-public class TrackedLegOfCompetitorFilteringRetrievalProcessor extends
+public class TrackedLegOfCompetitorRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext> {
 
-    public TrackedLegOfCompetitorFilteringRetrievalProcessor(ExecutorService executor,
+    public TrackedLegOfCompetitorRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasTrackedLegOfCompetitorContext, ?>> resultReceivers) {
         super(HasTrackedLegContext.class, HasTrackedLegOfCompetitorContext.class, executor, resultReceivers);
     }

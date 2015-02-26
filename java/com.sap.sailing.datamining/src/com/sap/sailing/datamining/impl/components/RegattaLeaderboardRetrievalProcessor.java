@@ -10,10 +10,10 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 
-public class RegattaLeaderboardFilteringRetrievalProcessor extends
+public class RegattaLeaderboardRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<LeaderboardGroup, RegattaLeaderboard> {
 
-    public RegattaLeaderboardFilteringRetrievalProcessor(ExecutorService executor,
+    public RegattaLeaderboardRetrievalProcessor(ExecutorService executor,
             Collection<Processor<RegattaLeaderboard, ?>> resultReceivers) {
         super(LeaderboardGroup.class, RegattaLeaderboard.class, executor, resultReceivers);
     }

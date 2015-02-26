@@ -4,11 +4,12 @@ import java.lang.reflect.Method;
 
 import com.sap.sse.datamining.shared.annotations.Statistic;
 
-public class MethodIsCorrectStatisticFilterCriterion extends AbstractMethodFilterCriterion {
+public class MethodIsValidStatisticFilterCriterion extends AbstractMethodFilterCriterion {
 
     @Override
     public boolean matches(Method method) {
-        return method.getAnnotation(Statistic.class) != null;
+        return method.getAnnotation(Statistic.class) != null &&
+               !method.getReturnType().equals(Void.TYPE);
     }
 
 }
