@@ -864,7 +864,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public CacheManager getCacheManager() {
+    public ReplicatingCacheManager getCacheManager() {
         return cacheManager;
     }
 
