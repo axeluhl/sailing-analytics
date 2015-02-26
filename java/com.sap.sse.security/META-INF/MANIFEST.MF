@@ -36,4 +36,5 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.sse,
  com.sap.sse.mail
 Web-ContextPath: /security
-Export-Package: com.sap.sse.security
+Export-Package: com.sap.sse.security,
+ com.sap.sse.security.jaxrs

@@ -52,7 +52,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.security,
  org.apache.shiro.core;bundle-version="1.2.2",
  org.apache.shiro.web;bundle-version="1.2.2",
- org.apache.shiro.ehcache;bundle-version="1.2.3"
+ org.apache.shiro.ehcache;bundle-version="1.2.3",
+ com.sap.sse.security.common
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,
