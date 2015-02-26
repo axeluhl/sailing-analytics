@@ -2818,21 +2818,28 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      */
     private int ensureSailIDAndCompetitorColumn(int sailIdColumnIndex) {
         final int nextColumnIndex;
+        int columnCounter = 0;
         if (getLeaderboardTable().getColumnCount() <= sailIdColumnIndex) {
-            addColumn(new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-                @Override
-                public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                    return t.competitor;
-                }
-            }));
-            addColumn(createCompetitorColumn());
+            if (isShowCompetitorSailId()) {
+                addColumn(new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+                    @Override
+                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                        return t.competitor;
+                    }
+                }));
+                columnCounter++;
+            }
+            if (isShowCompetitorFullName()) {
+                addColumn(createCompetitorColumn());
+                columnCounter++;
+            }
         } else {
             if (!(getLeaderboardTable().getColumn(sailIdColumnIndex) instanceof SailIDColumn)) {
                 throw new RuntimeException("The second column must always be the sail ID column but it was of type "
                         + getLeaderboardTable().getColumn(sailIdColumnIndex).getClass().getName());
             }
         }
-        nextColumnIndex = sailIdColumnIndex + 2;
+        nextColumnIndex = sailIdColumnIndex + columnCounter;
         return nextColumnIndex;
     }
 
