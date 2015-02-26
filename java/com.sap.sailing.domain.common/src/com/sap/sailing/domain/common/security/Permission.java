@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.security;
+package com.sap.sailing.domain.common.security;
 
 public enum Permission implements com.sap.sse.security.shared.Permission {
     MANAGE_EVENTS,
