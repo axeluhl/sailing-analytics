@@ -32,8 +32,14 @@ public enum DefaultPermissions implements Permission {
     public String getStringPermissionForObjects(Mode mode, String... objectIdentifiers) {
         final StringBuilder result = new StringBuilder(getStringPermission(mode));
         if (objectIdentifiers!=null && objectIdentifiers.length>0) {
+            result.append(':');
+            boolean first = true;
             for (String objectIdentifier : objectIdentifiers) {
-                result.append(',');
+                if (first) {
+                    first = false;
+                } else {
+                    result.append(',');
+                }
                 result.append(objectIdentifier);
             }
         }
