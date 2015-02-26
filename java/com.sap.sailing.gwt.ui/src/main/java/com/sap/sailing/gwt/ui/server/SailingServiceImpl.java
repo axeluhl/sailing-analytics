@@ -3656,6 +3656,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void updateRegatta(RegattaIdentifier regattaName, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
             RegattaConfigurationDTO configurationDTO, boolean useStartTimeInference) {
+        Regatta regatta = getService().getRegatta(regattaName);
+        if (regatta != null) {
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+        }
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         getService().apply(new UpdateSpecificRegatta(regattaName, startTimePoint, endTimePoint,
@@ -3665,6 +3669,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
             List<String> columnNames) {
+        Regatta regatta = getService().getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+        }
         List<RaceColumnInSeriesDTO> result = new ArrayList<RaceColumnInSeriesDTO>();
         for (String columnName : columnNames) {
             RaceColumnInSeries raceColumnInSeries = getService().apply(
@@ -3681,6 +3689,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
             List<FleetDTO> fleets) {
+        Regatta regatta = getService().getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+        }
         getService().apply(
                 new UpdateSeries(regattaIdentifier, seriesName, newSeriesName, isMedal, resultDiscardingThresholds,
                         startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring,
@@ -3689,6 +3701,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        Regatta regatta = getService().getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+        }
         RaceColumnInSeriesDTO result = null;
         RaceColumnInSeries raceColumnInSeries = getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
         if(raceColumnInSeries != null) {
@@ -3699,6 +3715,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+        Regatta regatta = getService().getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+        }
         for(String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
         }
@@ -3706,16 +3726,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        Regatta regatta = getService().getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+        }
         getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
     }
 
     @Override
     public void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        Regatta regatta = getService().getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+        }
         getService().apply(new MoveColumnInSeriesUp(regattaIdentifier, seriesName, columnName));
     }
 
     @Override
     public void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        Regatta regatta = getService().getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+        }
         getService().apply(new MoveColumnInSeriesDown(regattaIdentifier, seriesName, columnName));
     }
 
@@ -3723,6 +3755,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate, 
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference) {
+        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regattaName));
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         Regatta regatta = getService().apply(

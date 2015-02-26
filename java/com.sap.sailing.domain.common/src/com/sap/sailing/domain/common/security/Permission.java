@@ -2,6 +2,7 @@ package com.sap.sailing.domain.common.security;
 
 
 
+
 public enum Permission implements com.sap.sse.security.shared.Permission {
     // AdminConsole permissions
     MANAGE_EVENTS,
@@ -60,8 +61,14 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     public String getStringPermissionForObjects(com.sap.sse.security.shared.Permission.Mode mode, String... objectIdentifiers) {
         final StringBuilder result = new StringBuilder(getStringPermission(mode));
         if (objectIdentifiers!=null && objectIdentifiers.length>0) {
+            result.append(':');
+            boolean first = true;
             for (String objectIdentifier : objectIdentifiers) {
-                result.append(',');
+                if (first) {
+                    first = false;
+                } else {
+                    result.append(',');
+                }
                 result.append(objectIdentifier);
             }
         }
