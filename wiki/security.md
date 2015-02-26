@@ -16,5 +16,36 @@ The inference from roles to the permissions implied by those roles happens by im
 
 ## How to Configure
 
+Shiro security is largely configured by `shiro.ini` files in OSGi Web Bundlesand their `WEB-INF/web.xml` descriptors. Shiro web security hinges on the use of servlet filters that are configured in `web.xml`. The corresponding section to enable Shiro security for a Web Bundle looks like this:
+
+	<context-param>
+		<param-name>shiroEnvironmentClass</param-name>
+		<param-value>org.apache.shiro.web.env.IniWebEnvironment</param-value>
+	</context-param>
+	<listener>
+		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+	</listener>
+	<filter>
+		<filter-name>ShiroFilter</filter-name>
+		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+	</filter>
+	<!-- Make sure any request you want accessible to Shiro is filtered. "/*" 
+		catches all requests. Usually this filter mapping is defined first (before all 
+		others) to ensure that Shiro works in subsequent filters in the filter chain: -->
+	<filter-mapping>
+		<filter-name>ShiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
+
+For this to work, the Web Bundle requires at least the two bundles `org.apache.shiro.core` and `org.apache.shiro.web` which are provided by the target platform. Furthermore, the bundle should require `com.sap.sse.security` so as to get support for the common user store, session replication support and the common roles and permissions management.
+
+The Web Bundle then provides a `shiro.ini` file in its classpath root, e.g., directly within its `src` or `resources` source folder. The `shiro.ini` file contains essential configuration information about which realms, which session and which cache manager to use. It also configures URLs for login pages, default success pages and permissions required for access to URLs. The file `com.sap.sse.security/resources/shiro.ini` serves as a reasonable copy template. In the `[urls]` section the `shiro.ini` flie provides so-called filter chains for specific or pattern-based sets of URLs. In particular, the configuration can require the authenticated user to have specific roles and / or specific permissions to access the URL. Note the use of the `AnyOfRolesFilter` and how it is different from the regular `roles` filter.
+
+## How to Implement Permission Checks
+
 ## Notes on Replication
 
