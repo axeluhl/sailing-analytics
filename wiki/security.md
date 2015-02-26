@@ -59,6 +59,8 @@ Example for a programmatic check:
 
 ## Standard REST Security Services
 
+There are a number of RESTlets registered under the `/security` context root that allow RESTful clients to log in and log out a user, as well as obtain a bearer access token for a user which can then be used in conjunction with the `bearerToken` / `BearerTokenOrBasicOrFormAuthenticationFilter` authentication filter. These services are described in more detail at [/security/webservices/api/index.html](http://sapsailing.com/security/webservices/api/index.html).
+
 ## Notes on Replication
 
 The `SecurityService` implementation is a `Replicable` that is replicated from a master to its replicas and in case of replica-initiated operations also the other way. Also, the `SecurityService` is registered with the OSGi service registry and can be discovered by other components. It has a `UserStore` and a cache manager (`com.sap.sse.security.SessionCacheManager`) that is replication aware. This cache manager has to be configured in the `shiro.ini` file.
