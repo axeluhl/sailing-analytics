@@ -1,9 +1,6 @@
 package com.sap.sailing.domain.common.security;
 
-
-
 public enum Permission implements com.sap.sse.security.shared.Permission {
-    // AdminConsole permissions
     MANAGE_EVENTS,
     MANAGE_REGATTAS,
     MANAGE_TRACKED_RACES,
@@ -23,63 +20,10 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     MANAGE_MASTERDATA_IMPORT,
     MANAGE_DEVICE_CONFIGURATION,
     MANAGE_USERS,
-    MANAGE_FILE_STORAGE,
-    
-    // back-end permissions
-    EVENT,
-    REGATTA,
-    LEADERBOARD,
-    LEADERBOARD_GROUP,
-    TRACKED_RACE
-    ;
+    MANAGE_FILE_STORAGE;
 
-    // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     @Override
-    public String getStringPermission(com.sap.sse.security.shared.Permission.Mode... modes) {
-        final String result;
-        if (modes==null || modes.length==0) {
-            result = name();
-        } else {
-            final StringBuilder modesString = new StringBuilder();
-            boolean first = true;
-            for (com.sap.sse.security.shared.Permission.Mode mode : modes) {
-                if (first) {
-                    first = false;
-                } else {
-                    modesString.append(',');
-                }
-                modesString.append(mode.getStringPermission());
-            }
-            result = name()+":"+modesString.toString();
-        }
-        return result;
-    }
-
-    // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
-    @Override
-    public String getStringPermissionForObjects(com.sap.sse.security.shared.Permission.Mode mode, String... objectIdentifiers) {
-        final StringBuilder result = new StringBuilder(getStringPermission(mode));
-        if (objectIdentifiers!=null && objectIdentifiers.length>0) {
-            for (String objectIdentifier : objectIdentifiers) {
-                result.append(',');
-                result.append(objectIdentifier);
-            }
-        }
-        return result.toString();
-    }
-    
-    /**
-     * The mode of interaction with a resource; used as the second element of a wildcard permission
-     * 
-     * @author Axel Uhl (d043530)
-     *
-     */
-    public static enum Mode implements com.sap.sse.security.shared.Permission.Mode {
-        CREATE, READ, UPDATE, DELETE;
-
-        @Override
-        public String getStringPermission() {
-            return name();
-        }
+    public String getStringPermission() {
+        return name()+":";
     }
 }
