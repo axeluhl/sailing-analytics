@@ -70,7 +70,7 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
-import com.sap.sse.security.AccessToken;
+import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.GithubApi;
@@ -277,7 +277,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         logger.info("Trying to login: " + username);
         Subject subject = SecurityUtils.getSubject();
         subject.login(token);
-        SessionUtils.saveUsername(username);
         HttpServletRequest httpRequest = WebUtils.getHttpRequest(subject);
         SavedRequest savedRequest = WebUtils.getSavedRequest(httpRequest);
         if (savedRequest != null) {
@@ -291,13 +290,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     
     @Override
     public User loginByAccessToken(String accessToken) {
-        AccessToken token = new AccessToken(accessToken);
+        BearerAuthenticationToken token = new BearerAuthenticationToken(accessToken);
         logger.info("Trying to login with access token");
         Subject subject = SecurityUtils.getSubject();
         try {
             subject.login(token);
             final String username = (String) token.getPrincipal();
-            SessionUtils.saveUsername(username);
             return store.getUserByName(username);
         } catch (AuthenticationException e) {
             logger.log(Level.INFO, "Authentication failed with access token "+accessToken);
@@ -597,7 +595,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         if (!subject.isAuthenticated()) {
             try {
                 subject.login(otoken);
-                logger.info("User [" + SessionUtils.loadUsername() + "] logged in successfully.");
+                logger.info("User [" + subject.getPrincipal().toString() + "] logged in successfully.");
             } catch (UnknownAccountException uae) {
                 logger.info("There is no user with username of " + subject.getPrincipal());
                 throw new UserManagementException("Invalid credentials!");
@@ -613,7 +611,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
                 throw new UserManagementException("An error occured while authenticating the user!");
             }
         }
-        String username = SessionUtils.loadUsername();
+        String username = subject.getPrincipal().toString();
         if (username == null) {
             logger.info("Something went wrong while authneticating, check doGetAuthenticationInfo() in "
                     + OAuthRealm.class.getName() + ".");
@@ -631,10 +629,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     public User getCurrentUser() {
         final User result;
         Subject subject = SecurityUtils.getSubject();
-        if (subject == null) {
+        if (subject == null || !subject.isAuthenticated()) {
             result = null;
         } else {
-            String username = SessionUtils.loadUsername();
+            String username = subject.getPrincipal().toString();
             if (username == null || username.length() <= 0) {
                 result = null;
             } else {
@@ -873,10 +871,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public void setPreference(final String username, final String key, final String value) {
         final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalSetPreference(username, key, value));
         } else {
-            throw new SecurityException("User " + SessionUtils.loadUsername()
+            throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to set preference for user " + username);
         }
     }
@@ -890,10 +888,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public void unsetPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalUnsetPreference(username, key));
         } else {
-            throw new SecurityException("User " + SessionUtils.loadUsername()
+            throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to unset preference for user " + username);
         }
     }
@@ -919,10 +917,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public String getPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             return store.getPreference(username, key);
         } else {
-            throw new SecurityException("User " + SessionUtils.loadUsername()
+            throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to read preferences of user " + username);
         }
     }

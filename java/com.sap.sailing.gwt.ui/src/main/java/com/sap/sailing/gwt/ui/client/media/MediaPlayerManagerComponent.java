@@ -37,7 +37,7 @@ import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
+import com.sap.sailing.gwt.ui.client.shared.security.Roles;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -49,6 +49,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
+import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -478,8 +479,8 @@ public class MediaPlayerManagerComponent implements Component<Void>, PlayStateLi
         };
         final VideoSynchPlayer videoPlayer;
         final UserDTO currentUser = userService.getCurrentUser();
-        boolean showSynchControls = currentUser != null && (currentUser.hasRole(UserRoles.administrator.getRolename()) ||
-                currentUser.hasRole(UserRoles.eventmanager.getRolename()) || currentUser.hasRole(UserRoles.mediaeditor.getRolename()));
+        boolean showSynchControls = currentUser != null && (currentUser.hasRole(DefaultRoles.ADMIN.getRolename()) ||
+                currentUser.hasRole(Roles.eventmanager.getRolename()) || currentUser.hasRole(Roles.mediaeditor.getRolename()));
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {

@@ -13,7 +13,7 @@
   <!--
     The context root (the server) against which the tests should be executed.
   -->
-  <context-root>http://riccardo:riccardo@localhost:8888/</context-root>
+  <context-root>http://localhost:8888/</context-root>
   
   <screenshots-folder>./bin/surefire-reports/</screenshots-folder>
   

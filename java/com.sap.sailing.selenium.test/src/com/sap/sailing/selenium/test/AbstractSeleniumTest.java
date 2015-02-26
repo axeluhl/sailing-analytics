@@ -114,12 +114,13 @@ public abstract class AbstractSeleniumTest {
             Cookie result = null;
             URL url = new URL(contextRoot + LOGIN_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setInstanceFollowRedirects(false);
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.connect();
             connection.getOutputStream().write("username=admin&password=admin".getBytes());
-            if (connection.getResponseCode() != 200) {
-                throw new RuntimeException(connection.getResponseMessage());
+            if (connection.getResponseCode() / 100 != 3) { // expecting something like "302 Found" which redirects to the success page
+                throw new RuntimeException("" + connection.getResponseCode() + " "+connection.getResponseMessage());
             }
             List<String> cookies = connection.getHeaderFields().get("Set-Cookie");
             if (cookies != null) {
