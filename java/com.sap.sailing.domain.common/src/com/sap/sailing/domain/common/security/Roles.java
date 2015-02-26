@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.security;
+package com.sap.sailing.domain.common.security;
 
 import com.sap.sse.security.shared.Role;
 
