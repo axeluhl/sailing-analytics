@@ -54,7 +54,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     }
 
     @Override
-    public Iterable<Class<?>> getInternalClassesWithMarkedMethods() {
+    public Iterable<Class<?>> getClassesWithMarkedMethods() {
         Set<Class<?>> internalClasses = new HashSet<>();
         internalClasses.add(HasTrackedRaceContext.class);
         internalClasses.add(HasTrackedLegContext.class);

@@ -85,7 +85,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
     
     @Override
-    public void registerAllWithInternalFunctionPolicy(Iterable<Class<?>> internalClassesToScan) {
+    public void registerAllClasses(Iterable<Class<?>> internalClassesToScan) {
         for (Class<?> internalClass : internalClassesToScan) {
             scanInternalClass(internalClass);
         }

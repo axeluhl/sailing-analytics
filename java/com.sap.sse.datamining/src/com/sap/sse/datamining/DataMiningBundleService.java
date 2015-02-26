@@ -6,7 +6,7 @@ public interface DataMiningBundleService {
     
     public ResourceBundleStringMessages getStringMessages();
 
-    public Iterable<Class<?>> getInternalClassesWithMarkedMethods();
+    public Iterable<Class<?>> getClassesWithMarkedMethods();
     public Iterable<Class<?>> getExternalLibraryClasses();
     
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions();
