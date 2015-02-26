@@ -2823,37 +2823,40 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private int ensureSailIDAndCompetitorColumn(int sailIdColumnIndex) {
         final int nextColumnIndex;
         int columnCounter = 0;
-        if (getLeaderboardTable().getColumnCount() <= sailIdColumnIndex) {
-            if (isShowCompetitorSailId() && competitorSailIdColumnIndex == -1) {
+        int leaderboardColumnCount = getLeaderboardTable().getColumnCount();
+        if (isShowCompetitorSailId() && competitorSailIdColumnIndex == -1) {
+            competitorSailIdColumnIndex = sailIdColumnIndex;
+            if (leaderboardColumnCount > 1) {
+                insertColumn(competitorSailIdColumnIndex, new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+                    @Override
+                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                        return t.competitor;
+                    }
+                }));
+            } else {
                 addColumn(new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
                     @Override
                     public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
                         return t.competitor;
                     }
                 }));
-                columnCounter++;
-                competitorSailIdColumnIndex = sailIdColumnIndex;
-            } else {
-                if (competitorSailIdColumnIndex != -1) {
-                    getLeaderboardTable().removeColumn(competitorSailIdColumnIndex);
-                    competitorSailIdColumnIndex = -1;
-                }
             }
-            if (isShowCompetitorFullName() && competitorFullNameColumnIndex == -1) {
+            columnCounter++;
+        } else if (!isShowCompetitorSailId() && competitorSailIdColumnIndex != -1) {
+            removeColumn(competitorSailIdColumnIndex);
+            competitorSailIdColumnIndex = -1;
+        }
+        if (isShowCompetitorFullName() && competitorFullNameColumnIndex == -1) {
+            if (leaderboardColumnCount > 1) {
+                insertColumn(sailIdColumnIndex+columnCounter, createCompetitorColumn());
+            } else {
                 addColumn(createCompetitorColumn());
-                competitorFullNameColumnIndex = sailIdColumnIndex+columnCounter;
-                columnCounter++;
-            } else {
-                if (competitorFullNameColumnIndex != -1) {
-                    getLeaderboardTable().removeColumn(competitorFullNameColumnIndex);
-                    competitorFullNameColumnIndex = -1;
-                }
             }
-        } else {
-            if (!(getLeaderboardTable().getColumn(sailIdColumnIndex) instanceof SailIDColumn)) {
-                throw new RuntimeException("The second column must always be the sail ID column but it was of type "
-                        + getLeaderboardTable().getColumn(sailIdColumnIndex).getClass().getName());
-            }
+            columnCounter++;
+            competitorFullNameColumnIndex = sailIdColumnIndex+columnCounter;
+        } else if (!isShowCompetitorFullName() && competitorFullNameColumnIndex != -1) {
+            removeColumn(competitorFullNameColumnIndex);
+            competitorFullNameColumnIndex = -1;
         }
         nextColumnIndex = sailIdColumnIndex + columnCounter;
         return nextColumnIndex;
