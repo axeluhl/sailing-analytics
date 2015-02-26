@@ -13,10 +13,10 @@ public interface HasGPSFixContext {
     @Connector
     public HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext();
     
-    @Connector
+    @Connector(ordinal=1)
     public GPSFixMoving getGPSFix();
     
-    @Dimension(messageKey="WindStrengthInBeaufort", ordinal=10)
+    @Dimension(messageKey="WindStrengthInBeaufort", ordinal=11)
     public ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, ResourceBundleStringMessages stringMessages);
 
 }
