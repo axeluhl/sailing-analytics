@@ -48,13 +48,13 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         EventMetadataDTO event = myPlace.getCtx().getEventDTO();
         for (final RegattaReferenceDTO regatta : event.getRegattas()) {
             PushButton button = new PushButton();
-            button.setText(regatta.getName());
+            button.setText(regatta.getDisplayName());
             button.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     currentPresenter.navigateTo(new RegattaOverviewPlace(new EventContext(myPlace.getCtx()
                             .getEventDTO())
-                            .withRegattaId(regatta.getName())));
+                            .withRegattaId(regatta.getId())));
                 }
             });
             content.add(button);

@@ -87,7 +87,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
             return new RegattaOverviewPlace(ctx);
         }
         if(event.getType() == EventType.SINGLE_REGATTA) {
-            return new RegattaOverviewPlace(ctx.withRegattaId(event.getRegattas().get(0).getName()));
+            return new RegattaOverviewPlace(ctx.withRegattaId(event.getRegattas().get(0).getId()));
         }
         return new MultiregattaOverviewPlace(place.getCtx());
     }

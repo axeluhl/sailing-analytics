@@ -5518,15 +5518,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             dto.getEventsOfSeries().add(new EventReferenceDTO(id, o.getName()));
             // FIXME
             dto.getEventsOfSeries().add(
-                    new EventReferenceDTO(UUID.fromString("212385a0-fff7-432a-a63f-df2420faefc4"),
- "Series Event 2"));
+                    new EventReferenceDTO(UUID.fromString("212385a0-fff7-432a-a63f-df2420faefc4"), "Series Event 2"));
             dto.getEventsOfSeries().add(
-                    new EventReferenceDTO(UUID.fromString("312385a0-fff7-432a-a63f-df2420faefc4"),
- "Series Event 3"));
+                    new EventReferenceDTO(UUID.fromString("312385a0-fff7-432a-a63f-df2420faefc4"), "Series Event 3"));
         } else {
             for (LeaderboardGroupDTO lg : o.getLeaderboardGroups()) {
                 for (StrippedLeaderboardDTO sl : lg.leaderboards) {
-                    dto.getRegattas().add(new RegattaReferenceDTO(sl.regattaName));
+                    dto.getRegattas().add(new RegattaReferenceDTO(sl.regattaName, sl.regattaName));
                 }
                 dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
             }
