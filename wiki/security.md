@@ -47,5 +47,12 @@ The Web Bundle then provides a `shiro.ini` file in its classpath root, e.g., dir
 
 ## How to Implement Permission Checks
 
+There are generally two ways in which some feature can require the user to be equipped with permissions: declaratively in the `shiro.ini` file's `[urls]` section; or programmatically by using something like ``org.apache.shiro.SecurityUtils.getSubject().checkPermission(...)`` which will throw an `AuthorizationException` in case the user lacks the necessary permissions.
+
+Example for a declarative permission check:
+    [urls]
+    /api/v1/events = bearerToken, perms["event:view"]
+This requires users trying to access the URL `/api/v1/events` to be authenticated using a valid `JSESSIONID` cookie or any authentication supported by the `bearerToken` filter such that the authenticated user has permissions that imply the `event:view:*` permission.
+
 ## Notes on Replication
 
