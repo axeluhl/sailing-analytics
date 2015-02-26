@@ -225,6 +225,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * but the cumulative score up to that race.
      */
     private boolean showAddedScores;
+    
+    private boolean showCompetitorSailId;
+    private boolean showCompetitorFullName;
 
     /**
      * When <code>true</code> then an additional column just before the overall points is displayed that sums up
@@ -1734,6 +1737,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         leaderboardAsTableSelectionModelRegistration = leaderboardSelectionModel.addSelectionChangeHandler(selectionChangeHandler);
         leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionCheckboxColumn.getSelectionManager());
         setShowAddedScores(settings.isShowAddedScores());
+        setShowCompetitorSailId(settings.isShowCompetitorSailIdColumn());
+        setShowCompetitorFullName(settings.isShowCompetitorFullNameColumn());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(getLeaderboardDisplayDate());
@@ -2027,6 +2032,22 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     
     private void setShowAddedScores(boolean showAddedScores) {
         this.showAddedScores = showAddedScores;
+    }
+    
+    private boolean isShowCompetitorSailId() {
+        return showCompetitorSailId;
+    }
+    
+    private void setShowCompetitorSailId(boolean showCompetitorSailId) {
+        this.showCompetitorSailId = showCompetitorSailId;
+    }
+    
+    private boolean isShowCompetitorFullName() {
+        return showCompetitorFullName;
+    }
+    
+    private void setShowCompetitorFullName(boolean showCompetitorFullName) {
+        this.showCompetitorFullName = showCompetitorFullName;
     }
     
     /**
@@ -2988,7 +3009,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
                 raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                isShowAddedScores(), timer.getRefreshInterval(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), stringMessages);
+                isShowAddedScores(), timer.getRefreshInterval(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
+                isShowCompetitorSailId(), isShowCompetitorFullName(), stringMessages);
     }
 
     @Override
