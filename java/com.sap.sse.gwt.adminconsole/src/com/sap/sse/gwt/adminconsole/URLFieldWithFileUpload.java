@@ -3,6 +3,7 @@ package com.sap.sse.gwt.adminconsole;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
@@ -73,9 +74,10 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String result = event.getResults();
-                JSONObject resultJson = (JSONObject) JSONParser.parseLenient(result);
-                if (resultJson != null && resultJson.get("file_uri") != null) {
-                    uri = resultJson.get("file_uri").toString();
+                JSONArray resultJson = (JSONArray) JSONParser.parseLenient(result.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
+                if (resultJson != null && resultJson.get(0).isObject().get("file_uri") != null) {
+                    uri = resultJson.get(0).isObject().get("file_uri").toString();
+                    urlTextBox.setValue(uri);
                     enableDelete();
                     Window.alert(stringMessages.uploadSuccessful());
                 }
