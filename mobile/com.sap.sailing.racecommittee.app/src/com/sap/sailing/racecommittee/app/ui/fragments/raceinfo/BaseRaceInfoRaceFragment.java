@@ -564,7 +564,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     if (raceHeader != null) {
                         raceHeader.setVisibility(View.GONE);
                     }
-                    replaceFragment(AbandonFlagsFragment.newInstance());
+                    replaceFragment(AbortFlagsFragment.newInstance(Flags.NOVEMBER));
                     break;
 
                 default:
@@ -614,7 +614,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     if (raceHeader != null) {
                         raceHeader.setVisibility(View.GONE);
                     }
-                    replaceFragment(PostponeFlagsFragment.newInstance());
+                    replaceFragment(AbortFlagsFragment.newInstance(Flags.AP));
                     break;
 
                 default:

@@ -6,34 +6,63 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
-public class PostponeFlagsAdapter extends BaseFlagsAdapter {
+public class AbortFlagsAdapter extends BaseFlagsAdapter {
 
-    public class PostponeFlag extends FlagItem {
+    public class AbortFlag extends FlagItem {
 
-        public PostponeFlag(String line1, String line2, String fileName, Flags flag) {
+        public AbortFlag(String line1, String line2, String fileName, Flags flag) {
             super(line1, line2, fileName, flag);
         }
     }
 
     private Context mContext;
-    private ArrayList<PostponeFlag> mFlags;
-    private PostponeFlagItemClick mListener;
+    private ArrayList<AbortFlag> mFlags;
+    private AbortFlagItemClick mListener;
 
-    public PostponeFlagsAdapter(Context context, PostponeFlagItemClick listener) {
+    public AbortFlagsAdapter(Context context, AbortFlagItemClick listener, Flags flags) {
         mContext = context;
         mListener = listener;
 
         mFlags = new ArrayList<>();
-        mFlags.add(new PostponeFlag(context.getString(R.string.flag_ap), context.getString(R.string.flag_ap_desc), "flag_ap_96dp", Flags.NONE));
-        mFlags.add(new PostponeFlag(context.getString(R.string.flag_ap_hotel), context.getString(R.string.flag_ap_hotel_desc), "flag_ap_and_hotel", Flags.HOTEL));
-        mFlags.add(new PostponeFlag(context.getString(R.string.flag_ap_alpha), context.getString(R.string.flag_ap_alpha_desc), "flag_ap_and_alpha", Flags.ALPHA));
+        addFlag(flags.name().toLowerCase(), null);
+        addFlag(flags.name().toLowerCase(), Flags.HOTEL.name().toLowerCase());
+        addFlag(flags.name().toLowerCase(), Flags.ALPHA.name().toLowerCase());
+    }
+
+    private void addFlag(String primaryFlag, String secondFlag) {
+        int flagNameId;
+        int flagDescId;
+        String flagName = null;
+        String flagDesc = null;
+
+        if (!TextUtils.isEmpty(secondFlag)) {
+            secondFlag = "_" + secondFlag;
+        } else {
+            secondFlag = "";
+        }
+
+        flagNameId = mContext.getResources().getIdentifier("string/flag_" + primaryFlag + secondFlag, null, mContext.getPackageName());
+        if (flagNameId != 0) {
+            flagName = mContext.getString(flagNameId);
+        }
+        flagDescId = mContext.getResources().getIdentifier("string/flag_" + primaryFlag + secondFlag + "_desc", null, mContext.getPackageName());
+        if (flagDescId != 0) {
+            flagDesc = mContext.getString(flagDescId);
+        }
+        if (!TextUtils.isEmpty(flagName) && !TextUtils.isEmpty(flagDesc)) {
+            mFlags.add(new AbortFlag(flagName, flagDesc, "flag_" + primaryFlag + secondFlag + "_96dp", Flags.NONE));
+        }
     }
 
     @Override
@@ -42,7 +71,7 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
     }
 
     @Override
-    public PostponeFlag getItem(int position) {
+    public AbortFlag getItem(int position) {
         return mFlags.get(position);
     }
 
@@ -58,7 +87,7 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
             convertView = inflater.inflate(R.layout.flag_list_item, parent, false);
         }
 
-        final PostponeFlag item = getItem(position);
+        final AbortFlag item = getItem(position);
 
         final ImageView flagImage = ViewHolder.get(convertView, R.id.flag);
         if (flagImage != null) {
@@ -109,7 +138,7 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    for (PostponeFlag flag : mFlags) {
+                    for (AbortFlag flag : mFlags) {
                         flag.touched = flag.file_name.equals(item.file_name);
                     }
                     notifyDataSetChanged();
@@ -120,7 +149,7 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
         return convertView;
     }
 
-    public interface PostponeFlagItemClick {
+    public interface AbortFlagItemClick {
         void onClick(Flags flag);
     }
 }

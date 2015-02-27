@@ -12,7 +12,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/default_margin_half"
         android:padding="5dp"
-        tools:src="@drawable/flag_ap_and_alpha" />
+        tools:src="@drawable/flag_ap_alpha_96dp" />
 
     <Button
         android:id="@+id/confirm"

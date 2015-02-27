@@ -5,23 +5,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.ui.adapters.AbandonFlagsAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.AbandonFlagsAdapter.AbandonFlag;
-import com.sap.sailing.racecommittee.app.ui.adapters.AbandonFlagsAdapter.AbandonFlagItemClick;
+import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter.AbortFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class AbandonFlagsFragment extends RaceFragment implements AbandonFlagItemClick {
+public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemClick {
 
-    public static AbandonFlagsFragment newInstance() {
-        AbandonFlagsFragment fragment = new AbandonFlagsFragment();
+    private static final String FLAG = "flag";
+
+    public static AbortFlagsFragment newInstance(Flags flag) {
+        AbortFlagsFragment fragment = new AbortFlagsFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(FLAG, flag);
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -31,7 +34,8 @@ public class AbandonFlagsFragment extends RaceFragment implements AbandonFlagIte
 
         ListView listView = (ListView) layout.findViewById(R.id.listView);
         if (listView != null) {
-            listView.setAdapter(new AbandonFlagsAdapter(getActivity(), this));
+            Flags flag = (Flags) getArguments().getSerializable(FLAG);
+            listView.setAdapter(new AbortFlagsAdapter(getActivity(), this, flag));
         }
 
         return layout;
