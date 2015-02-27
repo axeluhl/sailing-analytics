@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.RecallFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.RecallFlagsAdapter.RecallFlag;
@@ -30,7 +31,7 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
 
         ListView listView = (ListView) layout.findViewById(R.id.listView);
         if (listView != null) {
-            mAdapter = new RecallFlagsAdapter(getActivity());
+            mAdapter = new RecallFlagsAdapter(getActivity(), this);
             listView.setAdapter(mAdapter);
         }
 
@@ -40,5 +41,6 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
     @Override
     public void onClick(RecallFlag flag) {
         mAdapter.notifyDataSetChanged();
+        Toast.makeText(getActivity(), flag.file_name, Toast.LENGTH_SHORT).show();
     }
 }

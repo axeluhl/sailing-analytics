@@ -171,6 +171,13 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/course_header">
 
+                <ImageView
+                    android:id="@+id/course_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerInParent="true"
+                    tools:src="@drawable/course_triangle_48dp" />
             </RelativeLayout>
         </RelativeLayout>
 

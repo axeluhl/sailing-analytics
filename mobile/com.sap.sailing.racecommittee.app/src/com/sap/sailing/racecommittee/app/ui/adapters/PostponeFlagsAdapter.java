@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 
 import java.util.ArrayList;
@@ -16,8 +17,8 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
 
     public class PostponeFlag extends FlagItem {
 
-        public PostponeFlag(String line1, String line2, String flag) {
-            super(line1, line2, flag);
+        public PostponeFlag(String line1, String line2, String fileName, Flags flag) {
+            super(line1, line2, fileName, flag);
         }
     }
 
@@ -25,16 +26,14 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
     private ArrayList<PostponeFlag> mFlags;
     private PostponeFlagItemClick mListener;
 
-    public PostponeFlagsAdapter(Context context) {
+    public PostponeFlagsAdapter(Context context, PostponeFlagItemClick listener) {
         mContext = context;
-        mFlags = new ArrayList<>();
-        mFlags.add(new PostponeFlag(context.getString(R.string.flag_ap), context.getString(R.string.flag_ap_desc), "flag_ap_96dp"));
-        mFlags.add(new PostponeFlag(context.getString(R.string.flag_ap_hotel), context.getString(R.string.flag_ap_hotel_desc), "flag_ap_and_hotel"));
-        mFlags.add(new PostponeFlag(context.getString(R.string.flag_ap_alpha), context.getString(R.string.flag_ap_alpha_desc), "flag_ap_and_alpha"));
+        mListener = listener;
 
-        if (context instanceof PostponeFlagItemClick) {
-            mListener = (PostponeFlagItemClick) context;
-        }
+        mFlags = new ArrayList<>();
+        mFlags.add(new PostponeFlag(context.getString(R.string.flag_ap), context.getString(R.string.flag_ap_desc), "flag_ap_96dp", Flags.NONE));
+        mFlags.add(new PostponeFlag(context.getString(R.string.flag_ap_hotel), context.getString(R.string.flag_ap_hotel_desc), "flag_ap_and_hotel", Flags.HOTEL));
+        mFlags.add(new PostponeFlag(context.getString(R.string.flag_ap_alpha), context.getString(R.string.flag_ap_alpha_desc), "flag_ap_and_alpha", Flags.ALPHA));
     }
 
     @Override
@@ -59,12 +58,12 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
             convertView = inflater.inflate(R.layout.flag_list_item, parent, false);
         }
 
-        final PostponeFlag flag = getItem(position);
+        final PostponeFlag item = getItem(position);
 
         final ImageView flagImage = ViewHolder.get(convertView, R.id.flag);
         if (flagImage != null) {
             flagImage.setVisibility(View.INVISIBLE);
-            int flagResId = mContext.getResources().getIdentifier(flag.flag, "drawable", mContext.getPackageName());
+            int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
             if (flagResId != 0) {
                 Drawable flagDrawable = mContext.getResources().getDrawable(flagResId);
                 flagImage.setImageDrawable(flagDrawable);
@@ -75,34 +74,32 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
         final TextView first_line = ViewHolder.get(convertView, R.id.first_line);
         if (first_line != null) {
             first_line.setVisibility(View.GONE);
-            if (!TextUtils.isEmpty(flag.first_line)) {
+            if (!TextUtils.isEmpty(item.first_line)) {
                 first_line.setVisibility(View.VISIBLE);
-                first_line.setText(flag.first_line);
+                first_line.setText(item.first_line);
             }
         }
 
         final TextView second_line = ViewHolder.get(convertView, R.id.second_line);
         if (second_line != null) {
             second_line.setVisibility(View.GONE);
-            if (!TextUtils.isEmpty(flag.second_line)) {
+            if (!TextUtils.isEmpty(item.second_line)) {
                 second_line.setVisibility(View.VISIBLE);
-                second_line.setText(flag.second_line);
+                second_line.setText(item.second_line);
             }
         }
 
         final Button confirm = ViewHolder.get(convertView, R.id.confirm);
-        if (confirm != null) {
+        if (confirm != null && mListener != null) {
             confirm.setVisibility(View.GONE);
-            if (flag.touched) {
+            if (item.touched) {
                 confirm.setVisibility(View.VISIBLE);
             }
 
             confirm.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mListener != null) {
-                        mListener.onClick(flag);
-                    }
+                    mListener.onClick(item.flag);
                 }
             });
         }
@@ -112,8 +109,8 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    for (PostponeFlag item : mFlags) {
-                        item.touched = item.flag.equals(flag.flag);
+                    for (PostponeFlag flag : mFlags) {
+                        flag.touched = flag.file_name.equals(item.file_name);
                     }
                     notifyDataSetChanged();
                 }
@@ -124,6 +121,6 @@ public class PostponeFlagsAdapter extends BaseFlagsAdapter {
     }
 
     public interface PostponeFlagItemClick {
-        void onClick(PostponeFlag flag);
+        void onClick(Flags flag);
     }
 }

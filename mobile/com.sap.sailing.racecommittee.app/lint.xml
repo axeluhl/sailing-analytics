@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
 <lint>
+    <!-- Reason: some images are not resolution aware (only in drawable-folder)-->
     <issue id="IconLocation" severity="ignore" />
 
     <!-- Reason: App is not for the Play Store right now -->
     <issue id="ContentDescription" severity="ignore" />
 
-<!--
-    &lt;!&ndash; Reason: App is not RTL (right to left) aware &ndash;&gt;
+    <!-- Reson: just ignore right now -->
+    <issue id="UnusedResources" severity="ignore" />
+
+    <!-- Reason: App is not RTL (right to left) aware -->
+    <issue id="UnusedAttribute">
+        <ignore path="AndroidManifest.xml" />
+    </issue>
     <issue id="RtlSymmetry" severity="ignore" />
     <issue id="RtlHardcoded" severity="ignore" />
--->
 
     <!-- Reason: Don't want to use apply() instead of commit() -->
     <issue id="CommitPrefEdits">
@@ -30,5 +35,16 @@
         <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/raceinfo/running/ConfirmDialog.java" />
         <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/dialogs/ProtestTimeDialogFragment.java" />
         <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/RaceInfoFragment.java" />
+    </issue>
+
+    <!-- Reason: Not possible because of wrong image dimensions -->
+    <issue id="UseCompoundDrawables">
+        <ignore path="res/layout/race_panel_left.xml" />
+        <ignore path="res/layout/race_panel_right.xml" />
+        <ignore path="res/layout/race_schedule_mode.xml" />
+        <ignore path="res/layout/race_schedule_procedure.xml" />
+        <ignore path="res/layout/race_schedule_procedure_gate_start_pathfinder.xml" />
+        <ignore path="res/layout/race_schedule_procedure_gate_start_timing.xml" />
+        <ignore path="res/layout/race_schedule_start_time.xml" />
     </issue>
 </lint>

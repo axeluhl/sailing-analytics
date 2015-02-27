@@ -405,20 +405,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }).run();
     }
 
-    public void replaceFragment(RaceFragment fragment) {
-        //FIXME new function
-//        replaceFragment(fragment, R.id.sub_fragment);
-    }
-
-    public void replaceFragment(RaceFragment fragment, int viewId) {
-        raceFragment = fragment;
-
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(viewId, raceFragment);
-        // transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
     @Override
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
         super.setSupportProgressBarIndeterminateVisibility(visible);

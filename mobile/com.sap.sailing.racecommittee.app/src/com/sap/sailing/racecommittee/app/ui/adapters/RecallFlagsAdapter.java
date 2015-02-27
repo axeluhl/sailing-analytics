@@ -17,8 +17,8 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
 
     public class RecallFlag extends FlagItem {
 
-        public RecallFlag(String line1, String line2, String flag) {
-            super(line1, line2, flag);
+        public RecallFlag(String line1, String line2, String fileName) {
+            super(line1, line2, fileName, null);
         }
     }
 
@@ -26,15 +26,14 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
     private ArrayList<RecallFlag> mFlags;
     private RecallFlagItemClick mListener;
 
-    public RecallFlagsAdapter(Context context) {
+    public RecallFlagsAdapter(Context context, RecallFlagItemClick listener) {
         mContext = context;
+        mListener = listener;
+
         mFlags = new ArrayList<>();
         mFlags.add(new RecallFlag(context.getString(R.string.flag_xray), context.getString(R.string.flag_xray_desc), Flags.XRAY.name()));
         mFlags.add(new RecallFlag(context.getString(R.string.flag_first_subst), context.getString(R.string.flag_first_subst_desc), Flags.FIRSTSUBSTITUTE.name()));
 
-        if (context instanceof RecallFlagItemClick) {
-            mListener = (RecallFlagItemClick) context;
-        }
     }
 
     @Override
@@ -59,44 +58,42 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
             convertView = inflater.inflate(R.layout.flag_list_item, parent, false);
         }
 
-        final RecallFlag flag = getItem(position);
+        final RecallFlag item = getItem(position);
 
         final ImageView flagImage = ViewHolder.get(convertView, R.id.flag);
         if (flagImage != null) {
-            flagImage.setImageDrawable(FlagsResources.getFlagDrawable(mContext, flag.flag, 96));
+            flagImage.setImageDrawable(FlagsResources.getFlagDrawable(mContext, item.file_name, 96));
         }
 
         final TextView first_line = ViewHolder.get(convertView, R.id.first_line);
         if (first_line != null) {
             first_line.setVisibility(View.GONE);
-            if (!TextUtils.isEmpty(flag.first_line)) {
+            if (!TextUtils.isEmpty(item.first_line)) {
                 first_line.setVisibility(View.VISIBLE);
-                first_line.setText(flag.first_line);
+                first_line.setText(item.first_line);
             }
         }
 
         final TextView second_line = ViewHolder.get(convertView, R.id.second_line);
         if (second_line != null) {
             second_line.setVisibility(View.GONE);
-            if (!TextUtils.isEmpty(flag.second_line)) {
+            if (!TextUtils.isEmpty(item.second_line)) {
                 second_line.setVisibility(View.VISIBLE);
-                second_line.setText(flag.second_line);
+                second_line.setText(item.second_line);
             }
         }
 
         final Button confirm = ViewHolder.get(convertView, R.id.confirm);
-        if (confirm != null) {
+        if (confirm != null && mListener != null) {
             confirm.setVisibility(View.GONE);
-            if (flag.touched) {
+            if (item.touched) {
                 confirm.setVisibility(View.VISIBLE);
             }
 
             confirm.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mListener != null) {
-                        mListener.onClick(flag);
-                    }
+                    mListener.onClick(item);
                 }
             });
         }
@@ -106,8 +103,8 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    for (RecallFlag item : mFlags) {
-                        item.touched = item.flag.equals(flag.flag);
+                    for (RecallFlag flag : mFlags) {
+                        flag.touched = flag.file_name.equals(item.file_name);
                     }
                     notifyDataSetChanged();
                 }

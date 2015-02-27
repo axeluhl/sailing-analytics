@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="100dp">
 
@@ -24,9 +25,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="13:36"
                 android:textColor="@color/white"
-                android:textSize="@dimen/textSize_40" />
+                android:textSize="@dimen/textSize_40"
+                tools:text="13:36" />
 
             <TextView
                 android:id="@+id/race_started"
@@ -101,9 +102,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="01:12"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/textSize_18" />
+                    android:textSize="@dimen/textSize_18"
+                    tools:text="01:12" />
             </LinearLayout>
         </LinearLayout>
 
@@ -123,17 +124,17 @@
                 android:id="@+id/group_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="470 - Women"
                 android:textSize="@dimen/textSize_22"
-                android:singleLine="true" />
+                android:singleLine="true"
+                tools:text="470 - Women" />
 
             <TextView
                 android:id="@+id/race_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fleet Yellow - Race 3"
                 android:textSize="@dimen/textSize_22"
-                android:singleLine="true" />
+                android:singleLine="true"
+                tools:text="Fleet Yellow - Race 3" />
         </LinearLayout>
     </RelativeLayout>
 
