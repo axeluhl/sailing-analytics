@@ -4,6 +4,7 @@ include ":java:com.sap.sailing.domain.shared.android"
 include ":java:com.sap.sailing.server.gateway.serialization.shared.android"
 include ":java:com.sap.sse.common"
 include ":java:com.sap.sse.datamining.shared"
+include ":java:com.sap.sse.security.common"
 include ":java:com.sap.sse.shared.android"
 include ":java:org.json.simple"
 
