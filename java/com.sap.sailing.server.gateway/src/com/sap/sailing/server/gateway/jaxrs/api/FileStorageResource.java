@@ -78,6 +78,8 @@ public class FileStorageResource extends AbstractSailingServerResource {
         return response;
     }
     
+    // Example test use:
+    //     curl -X DELETE http://127.0.0.1:8888/sailingserver/api/v1/file?uri=file:///c:/tmp/c7b821e1-ebab-4a96-a71d-28ac192b3e69.jpg
     @DELETE
     @Produces("application/json;charset=UTF-8")
     public Response deleteImage(@QueryParam("uri") String uri) {

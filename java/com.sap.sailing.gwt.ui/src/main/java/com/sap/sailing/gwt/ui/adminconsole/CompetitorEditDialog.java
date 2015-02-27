@@ -20,6 +20,7 @@ import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
@@ -40,6 +41,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final TextBox sailId;
     private final TextBox email;
     private final StringMessages stringMessages;
+    private final URLFieldWithFileUpload imageUrlAndUploadComposite;
     
     public CompetitorEditDialog(final StringMessages stringMessages, CompetitorDTO competitorToEdit,
             DialogCallback<CompetitorDTO> callback) {
@@ -121,6 +123,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
             }
         }
         this.sailId = createTextBox(competitorToEdit.getSailID());
+        imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
     }
 
     
@@ -183,7 +186,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(6, 2);
+        Grid result = new Grid(7, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
@@ -196,6 +199,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         result.setWidget(4, 1, email);
         result.setWidget(5, 0, new Label(stringMessages.boatClass()));
         result.setWidget(5, 1, boatClassName);
+        result.setWidget(6, 0, new Label(stringMessages.imageURL()));
+        result.setWidget(6, 1, imageUrlAndUploadComposite);
         return result;
     }
 
