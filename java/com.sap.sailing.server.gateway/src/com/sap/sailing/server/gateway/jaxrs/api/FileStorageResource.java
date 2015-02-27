@@ -1,16 +1,20 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.json.simple.JSONObject;
@@ -31,6 +35,24 @@ import com.sap.sse.filestorage.OperationFailedException;
 @Path("/v1/file")
 public class FileStorageResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(FileStorageResource.class.getName());
+    
+    @GET
+    public Response getFile(@QueryParam("uri") String uri) {
+        Response response;
+        try {
+            InputStream inputStream = new URL(uri).openStream();
+            ResponseBuilder responseBuilder = Response.ok().entity(inputStream);
+            if (uri.toLowerCase().endsWith(".jpg")) {
+                responseBuilder.header("Content-Type", "image/jpeg");
+            } else if (uri.toLowerCase().endsWith(".png")) {
+                responseBuilder.header("Content-Type", "image/png");
+            }
+            response = responseBuilder.build();
+        } catch (IOException ioe) {
+            response = Response.status(Status.BAD_REQUEST).entity(ioe.getMessage()).build();
+        }
+        return response;
+    }
     
     // Example test use:
     //     curl -d "uri=file:///c:/tmp/c7b821e1-ebab-4a96-a71d-28ac192b3e69.jpg" http://127.0.0.1:8888/sailingserver/api/v1/file
