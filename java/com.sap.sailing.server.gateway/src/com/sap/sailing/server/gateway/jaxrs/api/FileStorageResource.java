@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -33,8 +33,8 @@ public class FileStorageResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(FileStorageResource.class.getName());
     
     // Example test use:
-    //     curl -X DELETE http://127.0.0.1:8888/sailingserver/api/v1/file?uri=file:///c:/tmp/c7b821e1-ebab-4a96-a71d-28ac192b3e69.jpg
-    @DELETE
+    //     curl -d "uri=file:///c:/tmp/c7b821e1-ebab-4a96-a71d-28ac192b3e69.jpg" http://127.0.0.1:8888/sailingserver/api/v1/file
+    @POST
     @Produces("application/json;charset=UTF-8")
     public Response deleteFile(@QueryParam("uri") String uri) {
         final JSONObject result = new JSONObject();
@@ -46,8 +46,8 @@ public class FileStorageResource extends AbstractSailingServerResource {
             response = Response.ok().entity(result.toJSONString()).build();
         } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
                 | URISyntaxException | IOException e) {
-            final String errorMessage = "Could not delete file "+uri+": "+e.getMessage();
-            logger.log(Level.WARNING, "Could not delete file "+uri, e);
+            final String errorMessage = "Could not delete file with URI "+uri+": "+e.getMessage();
+            logger.log(Level.WARNING, "Could not delete file with URI "+uri, e);
             result.put("status", Status.BAD_REQUEST.name());
             result.put("message", errorMessage);
             response = Response.status(Status.BAD_REQUEST).entity(result.toJSONString()).build();

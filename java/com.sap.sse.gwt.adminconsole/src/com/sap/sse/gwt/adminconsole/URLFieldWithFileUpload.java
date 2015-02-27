@@ -38,11 +38,13 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-                final JSONObject result = (JSONObject) JSONParser.parseLenient(event.getResults());
-                Window.alert(stringMessages.removeResult(result.get("status"), result.get("message")));
+                final JSONObject resultJson = JSONParser.parseLenient(event.getResults().replaceFirst("<pre[^>]*>(.*)</pre>", "$1")).isObject();
+                Window.alert(stringMessages.removeResult(resultJson.get("status").isString().stringValue(),
+                        resultJson.get("message") == null ? "" : resultJson.get("message").isString().stringValue()));
+                setURL("");
             }
         });
-        removePanel.setMethod("DELETE");
+        removePanel.setMethod(FormPanel.METHOD_POST);
         removeButton = new PushButton(new Image(com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon()));
         removeButton.setEnabled(false); // the button shall only be enabled as long as we know the URI for removal
         removeButton.ensureDebugId("RemoveButton");
@@ -52,6 +54,7 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
             public void onClick(ClickEvent event) {
                 removePanel.setAction("/sailingserver/api/v1/file?uri="+uri);
                 removePanel.submit();
+                uri = null;
             }
         });
         removePanel.add(removeButton);
@@ -76,17 +79,33 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
                 String result = event.getResults();
                 JSONArray resultJson = (JSONArray) JSONParser.parseLenient(result.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
                 if (resultJson != null && resultJson.get(0).isObject().get("file_uri") != null) {
-                    uri = resultJson.get(0).isObject().get("file_uri").toString();
+                    uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
                     urlTextBox.setValue(uri);
-                    enableDelete();
+                    removeButton.setEnabled(true);
                     Window.alert(stringMessages.uploadSuccessful());
                 }
             }
         });
         add(removePanel);
     }
+    
+    /**
+     * Returns <code>null</code> if the trimmed URL field contents are empty
+     */
+    public String getURL() {
+        final String trimmedUrl = urlTextBox.getValue().trim();
+        return trimmedUrl.isEmpty() ? null : trimmedUrl;
+    }
 
-    private void enableDelete() {
-        removeButton.setEnabled(true);
+    public void setURL(String imageURL) {
+        if (imageURL == null) {
+            urlTextBox.setValue("");
+            uri = null;
+            removeButton.setEnabled(false);
+        } else {
+            urlTextBox.setValue(imageURL);
+            uri = imageURL;
+            removeButton.setEnabled(true);
+        }
     }
 }

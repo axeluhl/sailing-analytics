@@ -124,6 +124,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         }
         this.sailId = createTextBox(competitorToEdit.getSailID());
         imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
     }
 
     
@@ -180,7 +181,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, sailId.getText(), competitorToEdit.getIdAsString(),
-                boatClass);
+                imageUrlAndUploadComposite.getURL(), boatClass);
         return result;
     }
 
