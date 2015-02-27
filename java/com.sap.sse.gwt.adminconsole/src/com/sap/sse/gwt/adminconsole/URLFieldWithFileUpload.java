@@ -59,7 +59,7 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
         FormPanel formPanel = new FormPanel();
         HorizontalPanel formPanelContent = new HorizontalPanel();
         formPanel.add(formPanelContent);
-        formPanel.setAction("/sailingserver/api/v1/file");
+        formPanel.setAction("/sailingserver/fileupload");
         formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         formPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
