@@ -9,12 +9,12 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -24,6 +24,8 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/v1/file")
 public class FileStorageResource extends AbstractSailingServerResource {
@@ -45,37 +47,36 @@ public class FileStorageResource extends AbstractSailingServerResource {
     //     --data-binary @<path-to-local-jpg> \
     //     http://127.0.0.1:8888/sailingserver/api/v1/file
     @POST
-    @Consumes({ "image/jpeg", "image/png" })
-    @Produces("application/json;charset=UTF-8")
-    public Response setTeamImage(InputStream uploadedInputStream,
-            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) {
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces("text/html;charset=UTF-8")
+    public String uploadFile(@FormDataParam("file") InputStream uploadedInputStream, @FormDataParam("file") FormDataBodyPart filePart) {
         final JSONObject result = new JSONObject();
-        Response response;
         String fileExtension = "";
-        if (fileType.equals("image/jpeg")) {
-            fileExtension = ".jpg";
-        } else if (fileType.equals("image/png")) {
-            fileExtension = ".png";
+        MediaType fileType = filePart.getMediaType();
+        if (fileType.getType().equals("image")) {
+            if (fileType.getSubtype().equals("jpeg")) {
+                fileExtension = ".jpg";
+            } else if (fileType.getSubtype().equals("png")) {
+                fileExtension = ".png";
+            }
         }
 
         URI fileUri;
         try {
-            if (sizeInBytes > 1024 * 1024 * MAX_SIZE_IN_MB) {
+            if (filePart.getContentDisposition().getSize() > 1024 * 1024 * MAX_SIZE_IN_MB) {
                 throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                         .entity("Image is larger than " + MAX_SIZE_IN_MB + "MB").build());
             }
             fileUri = getService().getFileStorageManagementService().getActiveFileStorageService()
-                    .storeFile(uploadedInputStream, fileExtension, sizeInBytes);
+                    .storeFile(uploadedInputStream, fileExtension, filePart.getContentDisposition().getSize());
             result.put(JSON_FILE_URI, fileUri.toString());
-            response = Response.ok().entity(result.toJSONString()).build();
         } catch (IOException | OperationFailedException | InvalidPropertiesException e) {
             final String errorMessage = "Could not store file: "+e.getMessage();
             logger.log(Level.WARNING, "Could not store file", e);
             result.put("status", Status.INTERNAL_SERVER_ERROR.name());
             result.put("message", errorMessage);
-            response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(result.toJSONString()).build();
         }
-        return response;
+        return result.toJSONString();
     }
     
     // Example test use:

@@ -53,17 +53,21 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
                 removePanel.submit();
             }
         });
+        removePanel.add(removeButton);
         urlTextBox = new TextBox();
         add(urlTextBox);
         FormPanel formPanel = new FormPanel();
+        HorizontalPanel formPanelContent = new HorizontalPanel();
+        formPanel.add(formPanelContent);
         formPanel.setAction("/sailingserver/api/v1/file");
         formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         formPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
+        formPanelContent.add(fileUploadField);
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
         SubmitButton submitButton = new SubmitButton(stringMessages.upload());
-        formPanel.add(submitButton);
+        formPanelContent.add(submitButton);
         add(formPanel);
         formPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
@@ -77,6 +81,7 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
                 }
             }
         });
+        add(removePanel);
     }
 
     private void enableDelete() {
