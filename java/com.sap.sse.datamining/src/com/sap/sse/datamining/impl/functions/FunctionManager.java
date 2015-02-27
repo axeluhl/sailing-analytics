@@ -26,6 +26,7 @@ import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFil
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidExternalFunctionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidStatisticFilterCriterion;
+import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class FunctionManager implements FunctionRegistry, FunctionProvider {
@@ -92,12 +93,12 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
     
     private void scanInternalClass(Class<?> internalClass) {
-        scanInternalClass(internalClass, new ArrayList<Function<?>>());
+        scanInternalClass(internalClass, new ArrayList<Function<?>>(), true);
     }
 
-    private void scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions) {
+    private void scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions, boolean scanForStatistics) {
         for (Method method : internalClass.getMethods()) {
-            if (isValidDimension.matches(method) || isValidStatistic.matches(method)) {
+            if (isValidDimension.matches(method) || (scanForStatistics && isValidStatistic.matches(method) )) {
                 registerFunction(previousFunctions, method);
                 continue;
             }
@@ -142,7 +143,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         Class<?> returnType = method.getReturnType();
         List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
         previousFunctionsClone.add(function);
-        scanInternalClass(returnType, previousFunctionsClone); 
+        scanInternalClass(returnType, previousFunctionsClone, method.getAnnotation(Connector.class).scanForStatistics()); 
     }
 
     @Override
