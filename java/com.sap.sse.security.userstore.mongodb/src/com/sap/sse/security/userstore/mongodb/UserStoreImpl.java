@@ -117,6 +117,10 @@ public class UserStoreImpl implements UserStore {
             result = false;
         } else {
             result = true;
+            final String oldAccessToken = getPreference(username, ACCESS_TOKEN_KEY);
+            if (oldAccessToken != null) {
+                usersByAccessToken.remove(oldAccessToken);
+            }
             usersByAccessToken.put(accessToken, user);
             setPreference(username, ACCESS_TOKEN_KEY, accessToken);
         }

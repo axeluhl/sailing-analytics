@@ -7,18 +7,27 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.ParameterProvider;
 
 public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionReturnType>
              extends AbstractSimpleParallelProcessor<GroupedDataEntry<DataType>, GroupedDataEntry<FunctionReturnType>> {
 
     private final Function<FunctionReturnType> extractionFunction;
+    private final ParameterProvider parameterProvider;
+    
+    public ParallelGroupedElementsValueExtractionProcessor(ExecutorService executor,
+            Collection<Processor<GroupedDataEntry<FunctionReturnType>, ?>> resultReceivers,
+            Function<FunctionReturnType> extractionFunction) {
+        this(executor, resultReceivers, extractionFunction, ParameterProvider.NULL);
+    }
     
     @SuppressWarnings("unchecked")
     public ParallelGroupedElementsValueExtractionProcessor(ExecutorService executor,
                                                            Collection<Processor<GroupedDataEntry<FunctionReturnType>, ?>> resultReceivers,
-                                                           Function<FunctionReturnType> extractionFunction) {
+                                                           Function<FunctionReturnType> extractionFunction, ParameterProvider parameterProvider) {
         super((Class<GroupedDataEntry<DataType>>)(Class<?>) GroupedDataEntry.class, (Class<GroupedDataEntry<FunctionReturnType>>)(Class<?>) GroupedDataEntry.class, executor, resultReceivers);
         this.extractionFunction = extractionFunction;
+        this.parameterProvider = parameterProvider;
     }
 
     @Override
@@ -26,7 +35,7 @@ public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionR
         return new Callable<GroupedDataEntry<FunctionReturnType>>() {
             @Override
             public GroupedDataEntry<FunctionReturnType> call() throws Exception {
-                FunctionReturnType value = extractionFunction.tryToInvoke(element.getDataEntry());
+                FunctionReturnType value = extractionFunction.tryToInvoke(element.getDataEntry(), parameterProvider);
                 return value != null ? new GroupedDataEntry<FunctionReturnType>(element.getKey(), value) :
                                        ParallelGroupedElementsValueExtractionProcessor.super.createInvalidResult();
             }

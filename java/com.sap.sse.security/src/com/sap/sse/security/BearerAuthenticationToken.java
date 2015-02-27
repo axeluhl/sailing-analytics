@@ -11,25 +11,25 @@ import com.sap.sse.security.impl.Activator;
  * @author Axel Uhl (D043530)
  *
  */
-public class AccessToken implements AuthenticationToken {
+public class BearerAuthenticationToken implements AuthenticationToken {
     private static final long serialVersionUID = 8528031991813216585L;
-    private final String accessToken;
+    private final String token;
     
-    public AccessToken(String accessToken) {
+    public BearerAuthenticationToken(String token) {
         super();
-        this.accessToken = accessToken;
+        this.token = token;
     }
 
     @Override
     public Object getPrincipal() {
         SecurityService securityService = Activator.getSecurityService();
-        User user = securityService.getUserByAccessToken(accessToken);
+        User user = securityService.getUserByAccessToken(token);
         return user == null ? null : user.getName();
     }
 
     @Override
     public String getCredentials() {
-        return accessToken;
+        return token;
     }
 
 }

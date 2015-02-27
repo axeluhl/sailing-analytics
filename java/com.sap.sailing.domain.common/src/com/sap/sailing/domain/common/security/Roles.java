@@ -1,9 +1,8 @@
-package com.sap.sailing.gwt.ui.usermanagement;
+package com.sap.sailing.domain.common.security;
 
-import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.Role;
 
-public enum UserRoles {
-    administrator(DefaultRoles.ADMIN.getRolename()),
+public enum Roles implements Role {
     spectator("spectator"),
     moderator("moderator"),
     sailor("sailor"),
@@ -11,7 +10,7 @@ public enum UserRoles {
     eventmanager("eventmanager"),
     mediaeditor("mediaeditor");
     
-    private UserRoles(String rolename) {
+    private Roles(String rolename) {
         this.rolename = rolename;
     }
     

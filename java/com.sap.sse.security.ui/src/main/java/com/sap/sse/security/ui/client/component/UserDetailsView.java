@@ -22,12 +22,14 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.DefaultPermissions;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
@@ -51,11 +53,15 @@ public class UserDetailsView extends FlowPanel {
     private final StringListEditorComposite rolesEditor;
     private final StringListEditorComposite permissionsEditor;
     private final VerticalPanel accountPanels;
+    private final ListBox allPermissionsList;
     private UserDTO user;
 
-    public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages) {
+    private final PermissionsForRoleProvider permissionForRoleProvider;
+
+    public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages, final UserListDataProvider userListDataProvider, PermissionsForRoleProvider permissionsForRoleProvider) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         this.stringMessages = stringMessages;
+        this.permissionForRoleProvider = permissionsForRoleProvider;
         this.user = user;
         addStyleName("userDetailsView");
         List<String> defaultRoleNames = new ArrayList<>();
@@ -64,7 +70,7 @@ public class UserDetailsView extends FlowPanel {
         }
         List<String> defaultPermissionNames = new ArrayList<>();
         for (DefaultPermissions defaultPermission : DefaultPermissions.values()) {
-            defaultPermissionNames.add(defaultPermission.getPermissionname());
+            defaultPermissionNames.add(defaultPermission.getStringPermission());
         }
         rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultRoleNames,
                 stringMessages.enterRoleName());
@@ -85,7 +91,7 @@ public class UserDetailsView extends FlowPanel {
                                 if (!result.isSuccessful()) {
                                     Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), result.getMessage()));
                                 } else {
-                                    selectedUser.setRoles(newRoleList);
+                                    userListDataProvider.updateDisplays();
                                     if (userService.getCurrentUser().getName().equals(selectedUser.getName())) {
                                         // if the current user's roles changed, update the user object in the user service and notify others
                                         userService.updateUser(/* notify other instances */ true);
@@ -95,7 +101,8 @@ public class UserDetailsView extends FlowPanel {
                         }));
             }
         });
-        permissionsEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getPermissions(), stringMessages, com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultPermissionNames,
+        permissionsEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getStringPermissions(), stringMessages,
+                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultPermissionNames,
                 stringMessages.enterPermissionName());
         permissionsEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
@@ -114,7 +121,7 @@ public class UserDetailsView extends FlowPanel {
                                 if (!result.isSuccessful()) {
                                     Window.alert(stringMessages.errorUpdatingPermissions(selectedUser.getName(), result.getMessage()));
                                 } else {
-                                    selectedUser.setPermissions(newPermissionList);
+                                    userListDataProvider.updateDisplays();
                                     if (userService.getCurrentUser().getName().equals(selectedUser.getName())) {
                                         // if the current user's permissions changed, update the user object in the user service and notify others
                                         userService.updateUser(/* notify other instances */ true);
@@ -168,6 +175,11 @@ public class UserDetailsView extends FlowPanel {
         this.add(decoratorPanel);
         this.add(rolesEditor);
         this.add(permissionsEditor);
+        this.add(new Label(stringMessages.allPermissions()));
+        allPermissionsList = new ListBox();
+        allPermissionsList.setVisibleItemCount(10);
+        allPermissionsList.setEnabled(false);
+        this.add(allPermissionsList);
         updateUser(user, userManagementService);
     }
 
@@ -240,7 +252,11 @@ public class UserDetailsView extends FlowPanel {
                 accountPanels.add(accountPanelDecorator);
             }
             rolesEditor.setValue(user.getRoles(), /* fireEvents */ false);
-            permissionsEditor.setValue(user.getPermissions(), /* fireEvents */ false);
+            permissionsEditor.setValue(user.getStringPermissions(), /* fireEvents */ false);
+            allPermissionsList.clear();
+            for (String permission : user.getAllPermissions(permissionForRoleProvider)) {
+                allPermissionsList.addItem(permission);
+            }
         }
     }
 
