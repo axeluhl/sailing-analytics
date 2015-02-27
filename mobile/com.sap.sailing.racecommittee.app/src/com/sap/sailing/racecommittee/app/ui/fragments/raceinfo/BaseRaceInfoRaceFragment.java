@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -360,15 +361,24 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         int retValue = -1;
         ImageView view = (ImageView) v.findViewById(resId);
         if (view != null) {
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
             Drawable drawable = view.getDrawable();
             if (drawable != null) {
                 drawable.setLevel(level);
                 switch (drawable.getLevel()) {
                     case 1:
+                        if (layoutParams != null) {
+                            layoutParams.height = getResources().getDimensionPixelSize(R.dimen.thick_line);
+                            view.invalidate();
+                        }
                         v.setBackgroundColor(getResources().getColor(R.color.sap_gray_black_20));
                         break;
 
                     default:
+                        if (layoutParams != null) {
+                            layoutParams.height = getResources().getDimensionPixelSize(R.dimen.thin_line);
+                            view.invalidate();
+                        }
                         v.setBackgroundColor(getResources().getColor(R.color.sap_gray));
                         break;
                 }
@@ -501,6 +511,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                         break;
 
                     case 1:
+                        replaceFragment(EmptyFragment.newInstance());
                         break;
 
                     default:
@@ -553,6 +564,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     if (raceHeader != null) {
                         raceHeader.setVisibility(View.GONE);
                     }
+                    replaceFragment(AbandonFlagsFragment.newInstance());
                     break;
 
                 default:
@@ -602,6 +614,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     if (raceHeader != null) {
                         raceHeader.setVisibility(View.GONE);
                     }
+                    replaceFragment(PostponeFlagsFragment.newInstance());
                     break;
 
                 default:
@@ -626,6 +639,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     if (raceHeader != null) {
                         raceHeader.setVisibility(View.GONE);
                     }
+                    replaceFragment(EmptyFragment.newInstance());
                     break;
 
                 default:
@@ -651,6 +665,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     if (raceHeader != null) {
                         raceHeader.setVisibility(View.GONE);
                     }
+                    replaceFragment(MoreFlagsFragment.newInstance());
                     break;
 
                 default:

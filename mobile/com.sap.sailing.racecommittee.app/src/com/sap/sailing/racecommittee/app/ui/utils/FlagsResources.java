@@ -37,15 +37,15 @@ public class FlagsResources {
                 break;
 
             case ESSONE:
-                fileName = "one_min_flag";
+                fileName = "flag_ess1_" + size + "dp";
                 break;
 
             case ESSTHREE:
-                fileName = "three_min_flag";
+                fileName = "flag_ess2_" + size + "dp";
                 break;
 
             case ESSTWO:
-                fileName = "two_min_flag";
+                fileName = "flag_ess3_" + size + "dp";
                 break;
 
             case FIRSTSUBSTITUTE:
@@ -69,7 +69,7 @@ public class FlagsResources {
                 break;
 
             case JURY:
-                fileName = "jury_flag";
+                fileName = "flag_jury_" + size + "dp";
                 break;
 
             case NOVEMBER:

@@ -1,39 +1,39 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.sap.sailing.android.shared.util.ViewHolder;
-import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 import java.util.ArrayList;
 
-public class RecallFlagsAdapter extends BaseFlagsAdapter {
+public class AbandonFlagsAdapter extends BaseFlagsAdapter {
 
-    public class RecallFlag extends FlagItem {
+    public class AbandonFlag extends FlagItem {
 
-        public RecallFlag(String line1, String line2, String flag) {
+        public AbandonFlag(String line1, String line2, String flag) {
             super(line1, line2, flag);
         }
     }
 
     private Context mContext;
-    private ArrayList<RecallFlag> mFlags;
-    private RecallFlagItemClick mListener;
+    private ArrayList<AbandonFlag> mFlags;
+    private AbandonFlagItemClick mListener;
 
-    public RecallFlagsAdapter(Context context) {
+    public AbandonFlagsAdapter(Context context) {
         mContext = context;
         mFlags = new ArrayList<>();
-        mFlags.add(new RecallFlag(context.getString(R.string.flag_xray), context.getString(R.string.flag_xray_desc), Flags.XRAY.name()));
-        mFlags.add(new RecallFlag(context.getString(R.string.flag_first_subst), context.getString(R.string.flag_first_subst_desc), Flags.FIRSTSUBSTITUTE.name()));
+        mFlags.add(new AbandonFlag(context.getString(R.string.flag_november), context.getString(R.string.flag_november_desc), "flag_november_96dp"));
+        mFlags.add(new AbandonFlag(context.getString(R.string.flag_november_hotel), context.getString(R.string.flag_november_hotel_desc), "flag_november_and_hotel"));
+        mFlags.add(new AbandonFlag(context.getString(R.string.flag_november_alpha), context.getString(R.string.flag_november_alpha_desc), "flag_november_and_alpha"));
 
-        if (context instanceof RecallFlagItemClick) {
-            mListener = (RecallFlagItemClick) context;
+        if (context instanceof AbandonFlagItemClick) {
+            mListener = (AbandonFlagItemClick) context;
         }
     }
 
@@ -43,7 +43,7 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
     }
 
     @Override
-    public RecallFlag getItem(int position) {
+    public AbandonFlag getItem(int position) {
         return mFlags.get(position);
     }
 
@@ -59,11 +59,17 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
             convertView = inflater.inflate(R.layout.flag_list_item, parent, false);
         }
 
-        final RecallFlag flag = getItem(position);
+        final AbandonFlag flag = getItem(position);
 
         final ImageView flagImage = ViewHolder.get(convertView, R.id.flag);
         if (flagImage != null) {
-            flagImage.setImageDrawable(FlagsResources.getFlagDrawable(mContext, flag.flag, 96));
+            flagImage.setVisibility(View.INVISIBLE);
+            int flagResId = mContext.getResources().getIdentifier(flag.flag, "drawable", mContext.getPackageName());
+            if (flagResId != 0) {
+                Drawable flagDrawable = mContext.getResources().getDrawable(flagResId);
+                flagImage.setImageDrawable(flagDrawable);
+                flagImage.setVisibility(View.VISIBLE);
+            }
         }
 
         final TextView first_line = ViewHolder.get(convertView, R.id.first_line);
@@ -106,7 +112,7 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    for (RecallFlag item : mFlags) {
+                    for (AbandonFlag item : mFlags) {
                         item.touched = item.flag.equals(flag.flag);
                     }
                     notifyDataSetChanged();
@@ -117,7 +123,7 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
         return convertView;
     }
 
-    public interface RecallFlagItemClick {
-        void onClick(RecallFlag flag);
+    public interface AbandonFlagItemClick {
+        void onClick(AbandonFlag flag);
     }
 }

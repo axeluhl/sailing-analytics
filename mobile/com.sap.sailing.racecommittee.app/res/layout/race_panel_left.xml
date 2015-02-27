@@ -19,7 +19,7 @@
             <ImageView
                 android:id="@+id/start_procedure_marker"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/thick_line"
+                android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
                 android:src="@drawable/marker" />
 
@@ -81,7 +81,7 @@
             <ImageView
                 android:id="@+id/start_mode_marker"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/thick_line"
+                android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
                 android:src="@drawable/marker" />
 
@@ -136,7 +136,7 @@
             <ImageView
                 android:id="@+id/course_marker"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/thick_line"
+                android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
                 android:src="@drawable/marker" />
 
@@ -184,7 +184,7 @@
             <ImageView
                 android:id="@+id/wind_marker"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/thick_line"
+                android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
                 android:src="@drawable/marker" />
 
@@ -235,7 +235,7 @@
     </LinearLayout>
 
     <View
-        android:layout_width="@dimen/thick_line"
+        android:layout_width="@dimen/thin_line"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"

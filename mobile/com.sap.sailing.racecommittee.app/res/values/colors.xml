@@ -18,7 +18,7 @@
     <!-- default color -->
     <color name="colorPrimary">@color/black</color>
     <color name="colorPrimaryDark">@color/black</color>
-    <color name="colorAccent">@color/sap_red_1</color>
+    <color name="colorAccent">@color/sap_yellow_1</color>
     <!-- default color end -->
 
     <color name="black_light">#ff242424</color>

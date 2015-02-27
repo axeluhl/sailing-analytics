@@ -99,7 +99,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
                 } else {
                     mDatePicker.setMinDate(System.currentTimeMillis() - 1000);
                 }
-                mDatePicker.getCalendarView().setDate(time.getTimeInMillis());
+                mDatePicker.updateDate(time.get(Calendar.YEAR), time.get(Calendar.MONTH), time.get(Calendar.DAY_OF_MONTH));
             }
 
             mTimePicker = (TimePicker) getView().findViewById(R.id.start_time_picker);

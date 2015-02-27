@@ -39,7 +39,7 @@
     <string name="confirm">Confirm</string>
     <string name="abort">Cancel</string>
     <string name="choose_blue_flag">Begin finish phase</string>
-    <string name="flag_ap">AP Flag</string>
+    <string name="flag_ap">AP</string>
     <string name="flag_november">November</string>
     <string name="flag_jury">Jury</string>
     <string name="label_login_events">Event</string>
@@ -312,5 +312,21 @@
     <string name="time_finish">Finish ~#TIME#</string>
     <string name="time">#TIME#</string>
     <string name="set_signal">Set Signal</string>
+    <string name="flag_ap_desc">Postpone upcoming races</string>
+    <string name="flag_ap_alpha_desc">Postpone, no more racing today</string>
+    <string name="flag_ap_hotel_desc">Postpone, more information ashore</string>
+    <string name="flag_ap_alpha"><![CDATA[AP & Alpha]]></string>
+    <string name="flag_ap_hotel"><![CDATA[AP & Hotel]]></string>
+    <string name="flag_xray">Xray</string>
+    <string name="flag_xray_desc">Individual Recall</string>
+    <string name="flag_first_subst">1st Sub</string>
+    <string name="flag_first_subst_desc">General Recall</string>
+    <string name="flag_blue">Blue</string>
+    <string name="flag_blue_desc">Begin Finish Phase</string>
+    <string name="flag_november_desc">Abandon all started races</string>
+    <string name="flag_november_alpha"><![CDATA[November & Alpha]]></string>
+    <string name="flag_november_hotel"><![CDATA[November & Hotel]]></string>
+    <string name="flag_november_alpha_desc">Abandon, no more racing today</string>
+    <string name="flag_november_hotel_desc">Abandon, more information ashore</string>
 
 </resources>

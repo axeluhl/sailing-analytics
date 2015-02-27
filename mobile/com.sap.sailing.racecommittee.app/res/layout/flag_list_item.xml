@@ -7,11 +7,12 @@
 
     <ImageView
         android:id="@+id/flag"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/default_margin_half"
-        tools:src="@drawable/flag_xray_64dp" />
+        android:padding="5dp"
+        tools:src="@drawable/flag_ap_and_alpha" />
 
     <Button
         android:id="@+id/confirm"

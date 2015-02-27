@@ -17,14 +17,14 @@
     <ImageView
         android:id="@+id/bottom_line"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/thick_line"
+        android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
         android:src="@drawable/marker" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/bottom_line"
+        android:layout_alignParentBottom="true"
         android:layout_marginBottom="@dimen/default_margin"
         android:baselineAligned="false"
         android:orientation="horizontal">
