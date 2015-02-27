@@ -97,6 +97,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
         final ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(lengthInBytes);
         final String key = getKey(fileExtension);
+        // TODO bug 2583: use something like SecurityUtil.getSubject().checkPermission("file:store:"+key)
         final PutObjectRequest request = new PutObjectRequest(bucketName.getValue(), key, is, metadata)
                 .withCannedAcl(CannedAccessControlList.PublicRead);
         final AmazonS3Client s3Client = createS3Client();

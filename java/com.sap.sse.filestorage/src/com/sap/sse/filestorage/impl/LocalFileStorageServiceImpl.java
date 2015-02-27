@@ -55,6 +55,7 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
         OutputStream outputStream = null;
         String fileName = getKey(fileExtension);
         String pathToFile = localPath.getValue() + "/" + fileName;
+        // TODO bug 2583: use something like SecurityUtil.getSubject().checkPermission("file:store:"+pathToFile)
 
         File outputFile = new File(pathToFile);
         logger.log(Level.FINE, "Storing file in " + outputFile.getAbsolutePath());
