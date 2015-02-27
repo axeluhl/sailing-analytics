@@ -74,7 +74,6 @@ public class DataMiningActivator implements BundleActivator {
         dataMiningServer.addStringMessages(dataMiningBundleService.getStringMessages());
         
         dataMiningServer.registerAllClasses(dataMiningBundleService.getClassesWithMarkedMethods());
-        dataMiningServer.registerAllWithExternalFunctionPolicy(dataMiningBundleService.getExternalLibraryClasses());
         
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
@@ -85,7 +84,6 @@ public class DataMiningActivator implements BundleActivator {
         dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
         
         dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getClassesWithMarkedMethods());
-        dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getExternalLibraryClasses());
         
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);

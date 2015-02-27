@@ -1,6 +1,5 @@
 package com.sap.sailing.datamining;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -62,11 +61,6 @@ public class Activator implements BundleActivator, DataMiningBundleService {
         internalClasses.add(HasGPSFixContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         return internalClasses;
-    }
-
-    @Override
-    public Iterable<Class<?>> getExternalLibraryClasses() {
-        return Collections.emptySet();
     }
 
     @Override
