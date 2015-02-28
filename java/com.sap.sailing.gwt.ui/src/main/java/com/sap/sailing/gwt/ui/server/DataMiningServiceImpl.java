@@ -110,7 +110,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
         @SuppressWarnings("unchecked")
-        Iterable<DataRetrieverChainDefinition<RacingEventService, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<RacingEventService,?>>)(Iterable<?>) getDataMiningServer().getDataRetrieverChainDefinitions(RacingEventService.class, baseDataType);
+        Iterable<DataRetrieverChainDefinition<RacingEventService, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<RacingEventService,?>>)(Iterable<?>) getDataMiningServer().getDataRetrieverChainDefinitionsByDataType(baseDataType);
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
     }
     

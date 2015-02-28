@@ -134,9 +134,15 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitions(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(
             Class<DataSourceType> dataSourceType) {
-        return dataRetrieverChainDefinitionRegistry.get(dataSourceType);
+        return dataRetrieverChainDefinitionRegistry.getBySourceType(dataSourceType);
+    }
+    
+    @Override
+    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(
+            Class<DataType> dataType) {
+        return dataRetrieverChainDefinitionRegistry.getByDataType(dataType);
     }
 
     @Override

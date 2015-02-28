@@ -38,8 +38,11 @@ public interface DataMiningServer {
 
     public DataRetrieverChainDefinitionProvider getDataRetrieverChainDefinitionProvider();
 
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitions(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(
             Class<DataSourceType> dataSourceType);
+
+    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(
+            Class<DataType> dataType);
 
     public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> getDataRetrieverChainDefinitions(
             Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType);
