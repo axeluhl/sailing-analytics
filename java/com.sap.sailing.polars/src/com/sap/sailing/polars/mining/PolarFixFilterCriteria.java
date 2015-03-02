@@ -1,22 +1,91 @@
 package com.sap.sailing.polars.mining;
 
+import java.util.Iterator;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.FilterCriterion;
 
 public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithPolarContext> {
+    
+    /**
+     * 0 if every competitor should be included.
+     * 1 if only the leading competitor should be included and so on.
+     */
+    private final int numberOfLeadingCompetitorsToInclude;
+
+    /**
+     * 
+     * @param numberOfLeadingCompetitorsToInclude 
+     *                          0 if every competitor should be included.<br \>
+     *                          1 if only the leading competitor should be included and so on.
+     */
+    public PolarFixFilterCriteria(int numberOfLeadingCompetitorsToInclude) {
+        this.numberOfLeadingCompetitorsToInclude = numberOfLeadingCompetitorsToInclude;
+    }
+    
+    public PolarFixFilterCriteria() {
+        this.numberOfLeadingCompetitorsToInclude = 0;
+    }
 
     @Override
     public boolean matches(GPSFixMovingWithPolarContext element) {
+        boolean importantDataIsNotNull = importantDataIsNotNull(element);
+        if (!importantDataIsNotNull) {
+            return false;
+        }
+        boolean hasLegType = hasLegType(element);
         boolean afterStartTime = isAfterStartTime(element);
         boolean beforeFinishTime = isBeforeFinishTime(element);
         boolean noDirectionChange = !hasDirectionChange(element);
-        return (afterStartTime && beforeFinishTime && noDirectionChange);
+        boolean isInLeadingCompetitors = true;
+        if (numberOfLeadingCompetitorsToInclude > 0) {
+            isInLeadingCompetitors = isInLeadingCompetitors(element);
+        }
+        return (importantDataIsNotNull && hasLegType && afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors);
+    }
+    
+    private boolean importantDataIsNotNull(GPSFixMovingWithPolarContext element) {
+        BearingWithConfidence<Integer> angleToTheWind = element.getAngleToTheWind();
+        WindWithConfidence<Pair<Position, TimePoint>> windSpeed = element.getWind();
+        SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = element.getBoatSpeed();
+        boolean result = false;
+        if (angleToTheWind != null && windSpeed != null && boatSpeedWithConfidence != null) {
+            result = true;
+        }
+        return result;
+    }
+
+    private boolean hasLegType(GPSFixMovingWithPolarContext element) {
+        return element.getLegType() != null;
+    }
+
+    private boolean isInLeadingCompetitors(GPSFixMovingWithPolarContext element) {
+        boolean result = false;
+        Iterator<MarkPassing> finishPassings = element.getRace()
+                .getMarkPassingsInOrder(element.getRace().getRace().getCourse().getLastWaypoint()).iterator();
+        for (int i = 0; i < numberOfLeadingCompetitorsToInclude; i++) {
+            if (finishPassings.hasNext()) {
+                if (finishPassings.next().getCompetitor().equals(element.getCompetitor())) {
+                    result = true;
+                    break;
+                }
+            } else {
+                result = false;
+                break;
+            }
+        }
+        return result;
     }
 
     private boolean hasDirectionChange(GPSFixMovingWithPolarContext element) {

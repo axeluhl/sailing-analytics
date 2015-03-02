@@ -1,18 +1,10 @@
 package com.sap.sailing.polars.mining;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 
-public interface PolarClusterKey {
-
-    /**
-     * 
-     * @return degrees boat to windDirection in DEG
-     */
-    @Dimension(messageKey = "angleToWind")
-    RoundedTrueWindAngle getRoundedTrueWindAngle();
+public interface MovingAveragePolarClusterKey extends TackAndLegTypePolarClusterKey {
 
     /**
      * 
@@ -20,8 +12,5 @@ public interface PolarClusterKey {
      */
     @Dimension(messageKey = "windSpeed")
     Cluster<Speed> getWindSpeedCluster();
-
-    @Dimension(messageKey = "boatClass")
-    BoatClass getBoatClass();
 
 }
