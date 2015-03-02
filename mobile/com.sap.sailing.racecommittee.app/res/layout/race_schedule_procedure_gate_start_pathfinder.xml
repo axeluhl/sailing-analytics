@@ -41,86 +41,99 @@
         android:layout_below="@id/header"
         android:background="@color/black" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/line_top"
-        android:background="@color/sap_gray_black_30">
+        android:orientation="vertical">
+
+        <ViewStub android:id="@+id/race_header"
+            android:layout="@layout/race_content_header"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_width="match_parent" />
 
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_margin="@dimen/default_margin_twice">
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:background="@color/sap_gray_black_30">
 
-            <LinearLayout
-                android:id="@+id/label_area"
-                android:layout_width="match_parent"
+            <RelativeLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_centerVertical="true"
+                android:layout_margin="@dimen/default_margin_twice">
 
-                <TextView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:id="@+id/label_area"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Nationality"
-                    android:textSize="@dimen/textSize_18" />
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Nationality"
+                        android:textSize="@dimen/textSize_18" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Number"
+                        android:textSize="@dimen/textSize_18" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_marginLeft="@dimen/default_margin"
+                        android:layout_marginRight="@dimen/default_margin"
+                        android:layout_weight="1" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Number"
-                    android:textSize="@dimen/textSize_18" />
+                    android:layout_below="@id/label_area"
+                    android:orientation="horizontal">
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_marginLeft="@dimen/default_margin"
-                    android:layout_marginRight="@dimen/default_margin"
-                    android:layout_weight="1" />
-            </LinearLayout>
+                    <EditText
+                        android:id="@+id/pathfinder_nat"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Nationality"
+                        android:inputType="textCapCharacters"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/textSize_26" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/label_area"
-                android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/pathfinder_num"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Number"
+                        android:inputType="number"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/textSize_26" />
 
-                <EditText
-                    android:id="@+id/pathfinder_nat"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Nationality"
-                    android:inputType="textCapCharacters"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/textSize_26" />
-
-                <EditText
-                    android:id="@+id/pathfinder_num"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Number"
-                    android:inputType="number"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/textSize_26" />
-
-                <Button
-                    android:id="@+id/set_path_finder"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/default_margin"
-                    android:layout_marginRight="@dimen/default_margin"
-                    android:layout_weight="1"
-                    android:background="@color/sap_blue_1"
-                    android:enabled="false"
-                    android:text="Set Pathfinder"
-                    android:textAllCaps="true"
-                    android:textSize="@dimen/textSize_22"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                    <Button
+                        android:id="@+id/set_path_finder"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/default_margin"
+                        android:layout_marginRight="@dimen/default_margin"
+                        android:layout_weight="1"
+                        android:background="@color/sap_blue_1"
+                        android:enabled="false"
+                        android:text="Set Pathfinder"
+                        android:textAllCaps="true"
+                        android:textSize="@dimen/textSize_22"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </RelativeLayout>
         </RelativeLayout>
-    </RelativeLayout>
+    </LinearLayout>
 </RelativeLayout>

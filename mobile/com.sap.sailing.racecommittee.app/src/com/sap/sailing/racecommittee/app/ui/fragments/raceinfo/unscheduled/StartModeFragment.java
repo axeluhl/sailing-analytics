@@ -57,12 +57,13 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.race_schedule_mode, container, false);
+        View layout = inflater.inflate(R.layout.race_schedule_mode, container, false);
 
         if (getArguments() != null) {
             switch (getArguments().getInt(STARTMODE, 0)) {
                 case 1:
-                    View header = view.findViewById(R.id.header);
+                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                    View header = layout.findViewById(R.id.header);
                     header.setVisibility(View.GONE);
                     break;
 
@@ -71,9 +72,9 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
             }
         }
 
-        mListView = (ListView) view.findViewById(R.id.listView);
+        mListView = (ListView) layout.findViewById(R.id.listView);
 
-        LinearLayout headerText = (LinearLayout) view.findViewById(R.id.header_text);
+        LinearLayout headerText = (LinearLayout) layout.findViewById(R.id.header_text);
         if (headerText != null) {
             headerText.setOnClickListener(new OnClickListener() {
 
@@ -84,7 +85,7 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
             });
         }
 
-        return view;
+        return layout;
     }
 
     @Override

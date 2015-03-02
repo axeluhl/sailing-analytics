@@ -61,6 +61,7 @@ public class GateStartFragment {
 
             if (getArguments() != null) {
                 if (getArguments().getInt(STARTMODE, 0) != 0) {
+                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
                     View header = layout.findViewById(R.id.header);
                     if (header != null) {
                         header.setVisibility(View.GONE);
@@ -190,6 +191,7 @@ public class GateStartFragment {
 
             if (getArguments() != null) {
                 if (getArguments().getInt(STARTMODE, 0) != 0) {
+                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
                     View header = layout.findViewById(R.id.header);
                     if (header != null) {
                         header.setVisibility(View.GONE);

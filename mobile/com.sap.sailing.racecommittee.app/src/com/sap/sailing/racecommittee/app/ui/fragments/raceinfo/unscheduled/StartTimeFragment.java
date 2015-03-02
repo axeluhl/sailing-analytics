@@ -33,24 +33,25 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.race_schedule_start_time, container, false);
+        View layout = inflater.inflate(R.layout.race_schedule_start_time, container, false);
 
         if (getArguments() != null) {
             switch (getArguments().getInt(STARTMODE, 0)) {
                 case 1:
-                    View header = view.findViewById(R.id.header_text);
+                    View header = layout.findViewById(R.id.header_text);
                     if (header != null) {
                         header.setOnClickListener(this);
                     }
 
-                    View back = view.findViewById(R.id.header_back);
+                    View back = layout.findViewById(R.id.header_back);
                     if (back != null) {
                         back.setVisibility(View.VISIBLE);
                     }
                     break;
 
                 case 2:
-                    View frame = view.findViewById(R.id.header);
+                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                    View frame = layout.findViewById(R.id.header);
                     if (frame != null) {
                         frame.setVisibility(View.GONE);
                     }
@@ -61,22 +62,22 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
             }
         }
 
-        Button min5 = (Button) view.findViewById(R.id.start_min_five);
+        Button min5 = (Button) layout.findViewById(R.id.start_min_five);
         if (min5 != null) {
             min5.setOnClickListener(this);
         }
 
-        Button min1 = (Button) view.findViewById(R.id.start_min_one);
+        Button min1 = (Button) layout.findViewById(R.id.start_min_one);
         if (min1 != null) {
             min1.setOnClickListener(this);
         }
 
-        Button setStart = (Button) view.findViewById(R.id.set_start_time);
+        Button setStart = (Button) layout.findViewById(R.id.set_start_time);
         if (setStart != null) {
             setStart.setOnClickListener(this);
         }
 
-        return view;
+        return layout;
     }
 
     @Override

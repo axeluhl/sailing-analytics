@@ -41,82 +41,95 @@
         android:layout_below="@id/header"
         android:background="@color/black" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/line_top"
-        android:background="@color/sap_gray_black_30">
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
+        <ViewStub android:id="@+id/race_header"
+            android:layout="@layout/race_content_header"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_width="match_parent" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:background="@color/sap_gray_black_30">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_centerInParent="true">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="@string/time_launch"
+                            android:textSize="@dimen/textSize_18" />
+
+                        <NumberPicker
+                            android:id="@+id/time_launch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:text="@string/time_launch"
+                        android:layout_gravity="center_vertical"
+                        android:text="+"
                         android:textSize="@dimen/textSize_18" />
 
-                    <NumberPicker
-                        android:id="@+id/time_launch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="+"
-                    android:textSize="@dimen/textSize_18" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:text="@string/time_golf"
-                        android:textSize="@dimen/textSize_18" />
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical">
 
-                    <NumberPicker
-                        android:id="@+id/time_golf"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="@string/time_golf"
+                            android:textSize="@dimen/textSize_18" />
+
+                        <NumberPicker
+                            android:id="@+id/time_golf"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/set_gate_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="@dimen/default_margin"
+                    android:layout_marginRight="@dimen/default_margin"
+                    android:background="@color/sap_blue_1"
+                    android:padding="@dimen/default_padding"
+                    android:text="Set Gate Time"
+                    android:textAllCaps="true"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textSize="@dimen/textSize_22"
+                    android:textStyle="bold" />
             </LinearLayout>
-
-            <Button
-                android:id="@+id/set_gate_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"
-                android:background="@color/sap_blue_1"
-                android:padding="@dimen/default_padding"
-                android:text="Set Gate Time"
-                android:textAllCaps="true"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="@dimen/textSize_22"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </RelativeLayout>
+        </RelativeLayout>
+    </LinearLayout>
 </RelativeLayout>

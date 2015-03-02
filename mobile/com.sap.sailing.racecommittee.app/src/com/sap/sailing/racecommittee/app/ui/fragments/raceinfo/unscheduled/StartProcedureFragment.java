@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -38,12 +39,13 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.race_schedule_procedure, container, false);
+        View layout = inflater.inflate(R.layout.race_schedule_procedure, container, false);
 
         if (getArguments() != null) {
             switch (getArguments().getInt(STARTMODE, 0)) {
                 case 1:
-                    View header = view.findViewById(R.id.header);
+                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                    View header = layout.findViewById(R.id.header);
                     if (header != null) {
                         header.setVisibility(View.GONE);
                     }
@@ -54,7 +56,7 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
             }
         }
 
-        LinearLayout headerText = (LinearLayout) view.findViewById(R.id.header_text);
+        LinearLayout headerText = (LinearLayout) layout.findViewById(R.id.header_text);
         if (headerText != null) {
             headerText.setOnClickListener(new View.OnClickListener() {
 
@@ -65,7 +67,7 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
             });
         }
 
-        return view;
+        return layout;
     }
 
     @Override

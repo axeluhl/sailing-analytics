@@ -57,7 +57,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     private View moreFlags;
     private TextView startProcedureValue;
     private ImageView startModeFlag;
-    private TextView headerTime;
     private TextView timeStart;
     private TextView timeFinish;
     private UpdateUiReceiver mReceiver;
@@ -75,10 +74,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
         dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         if (getView() != null) {
-            headerTime = (TextView) getView().findViewById(R.id.header_text);
-            timeStart = (TextView) getView().findViewById(R.id.time_start);
-            timeFinish = (TextView) getView().findViewById(R.id.time_finish);
-
             raceHeader = getView().findViewById(R.id.race_content_header);
             if (raceHeader != null) {
                 raceHeader.setOnClickListener(new RaceHeaderClick());
@@ -260,25 +255,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
     private void updateUi() {
 
-        TimePoint now = MillisecondsTimePoint.now();
-        TimePoint startTime = getRaceState().getStartTime();
-
-        if (startTime != null) {
-            if (headerTime != null) {
-                String time;
-                if (startTime.asMillis() > now.asMillis()) {
-                    time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
-                } else {
-                    time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
-                }
-                headerTime.setText(getString(R.string.time).replace("#TIME#", time));
-            }
-
-            if (timeStart != null) {
-                timeStart.setText(getString(R.string.time_start).replace("#TIME#", dateFormat.format(startTime.asDate())));
-            }
-        }
-
         if (startProcedureValue != null) {
             startProcedureValue.setText(getRacingProcedure().getType().toString());
         }
@@ -299,14 +275,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     }
 
     private void uncheckMarker(View v) {
-        if (raceHeader != null) {
-            raceHeader.setVisibility(View.VISIBLE);
-        }
-
-        if (!v.equals(raceHeader)) {
-            setMarkerLevel(raceHeader, R.id.bottom_line, 0);
-        }
-
         if (!v.equals(startProcedure)) {
             setMarkerLevel(startProcedure, R.id.start_procedure_marker, 0);
         }
@@ -535,9 +503,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                         break;
 
                     case 1:
-                        if (raceHeader != null) {
-                            raceHeader.setVisibility(View.GONE);
-                        }
                         replaceFragment(WindFragment.newInstance(1));
                         break;
 
@@ -561,9 +526,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     break;
 
                 case 1:
-                    if (raceHeader != null) {
-                        raceHeader.setVisibility(View.GONE);
-                    }
                     replaceFragment(AbortFlagsFragment.newInstance(Flags.NOVEMBER));
                     break;
 
@@ -586,9 +548,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     break;
 
                 case 1:
-                    if (raceHeader != null) {
-                        raceHeader.setVisibility(View.GONE);
-                    }
                     replaceFragment(RecallFlagsFragment.newInstance());
                     break;
 
@@ -611,9 +570,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     break;
 
                 case 1:
-                    if (raceHeader != null) {
-                        raceHeader.setVisibility(View.GONE);
-                    }
                     replaceFragment(AbortFlagsFragment.newInstance(Flags.AP));
                     break;
 
@@ -636,9 +592,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     break;
 
                 case 1:
-                    if (raceHeader != null) {
-                        raceHeader.setVisibility(View.GONE);
-                    }
                     replaceFragment(EmptyFragment.newInstance());
                     break;
 
@@ -662,9 +615,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     break;
 
                 case 1:
-                    if (raceHeader != null) {
-                        raceHeader.setVisibility(View.GONE);
-                    }
                     replaceFragment(MoreFlagsFragment.newInstance());
                     break;
 

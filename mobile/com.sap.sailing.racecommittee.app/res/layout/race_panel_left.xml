@@ -64,7 +64,6 @@
                     android:gravity="center_horizontal"
                     android:paddingLeft="@dimen/default_padding_half"
                     android:paddingRight="@dimen/default_padding_half"
-                    android:singleLine="true"
                     android:textColor="@color/white"
                     android:textSize="@dimen/textSize_22"
                     tools:text="@string/start_procedure_line_start" />

@@ -34,9 +34,11 @@ public class RaceFlagViewerFragment extends RaceFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mLayout = (LinearLayout) inflater.inflate(R.layout.race_flag_screen, container, false);
+        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.race_flag_screen, container, false);
 
-        return mLayout;
+        mLayout = (LinearLayout) layout.findViewById(R.id.flags);
+
+        return layout;
     }
 
     @Override
