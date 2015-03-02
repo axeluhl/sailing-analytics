@@ -187,7 +187,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void getPolarResults(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
     
-    void getSimulatorResults(LegIdentifier legIdentifier, Date from, Date prevStartTime, AsyncCallback<SimulatorResultsDTO> callback);
+    void getSimulatorResults(LegIdentifier legIdentifier, AsyncCallback<SimulatorResultsDTO> callback);
     
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
 

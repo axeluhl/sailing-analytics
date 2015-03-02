@@ -54,7 +54,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     private SimulatorResultsDTO simulationResult;
     private PathDTO racePath;
     private int raceLeg = 0;
-    private Date prevStartTime;
     private Canvas simulationLegend;
     
     public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor) {
@@ -66,13 +65,13 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         this.colors = new ColorPaletteGenerator();
     }
     
-    public void updateLeg(int newLeg, Date newTime, boolean clearCanvas) {
+    public void updateLeg(int newLeg, boolean clearCanvas) {
         if ((newLeg != raceLeg) && (this.isVisible())) {
             raceLeg = newLeg;
             if (clearCanvas) {
                 this.clearCanvas();
             }
-            this.simulate(newTime, newLeg);
+            this.simulate(newLeg);
         }
     }
 
@@ -249,9 +248,9 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         return pathTimeStr;
     }
     
-    public void simulate(Date from, int leg) {
+    public void simulate(int leg) {
         LegIdentifier legIdentifier = new LegIdentifierImpl(raceIdentifier, String.valueOf(leg));
-        GetSimulationAction getSimulation = new GetSimulationAction(sailingService, legIdentifier, from, prevStartTime);
+        GetSimulationAction getSimulation = new GetSimulationAction(sailingService, legIdentifier);
         asyncActionsExecutor.execute(getSimulation, GET_SIMULATION_CATEGORY,
                 new MarkedAsyncCallback<>(new AsyncCallback<SimulatorResultsDTO>() {
                     @Override
@@ -265,7 +264,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                     public void onSuccess(SimulatorResultsDTO result) {
                         // store results
                         if (result != null) {
-                            prevStartTime = result.getStartTime();
                             if (result.getPaths() != null) {
                                 simulationResult = result;
                                 PathDTO[] paths = result.getPaths();

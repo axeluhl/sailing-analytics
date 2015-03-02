@@ -1429,7 +1429,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     };
 
     @Override
-    public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier, Date from, Date prevStartTime) {
+    public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) {
         // get simulation-results from smart-future-cached simulation-service
         SimulationService simulationService = getService().getSimulationService();
         SimulationResults simulationResults = simulationService.getSimulationResults(legIdentifier);
