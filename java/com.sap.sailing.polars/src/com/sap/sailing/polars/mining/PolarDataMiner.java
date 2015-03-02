@@ -37,9 +37,11 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
@@ -94,10 +96,13 @@ public class PolarDataMiner {
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> movingAverageGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         movingAverageGrouperResultReceivers.add(movingAverageProcessor);
 
-        Collection<Function<?>> movingAverageDimensions = PolarDataDimensionCollectionFactory.getMovingAverageClusterKeyDimensions();
+        Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProviders = new ArrayList<>();
+        for (Function<?> function : PolarDataDimensionCollectionFactory.getClusterKeyDimensions()) {
+            dimensionsWithParameterProviders.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
+        }
 
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> movingAverageGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, movingAverageGrouperResultReceivers, movingAverageDimensions);
+                GPSFixMovingWithPolarContext.class, executor, grouperResultReceivers, dimensionsWithParameterProviders);
         
 
         cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();

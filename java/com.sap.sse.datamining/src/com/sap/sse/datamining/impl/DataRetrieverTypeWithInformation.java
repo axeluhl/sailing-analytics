@@ -4,11 +4,11 @@ import com.sap.sse.datamining.components.Processor;
 
 public class DataRetrieverTypeWithInformation<InputType, RetrievedDataType> {
 
-    private final Class<Processor<InputType, RetrievedDataType>> retrieverType;
+    private final Class<? extends Processor<InputType, RetrievedDataType>> retrieverType;
     private final Class<RetrievedDataType> retrievedDataType;
     private final String retrievedDataTypeMessageKey;
 
-    public DataRetrieverTypeWithInformation(Class<Processor<InputType, RetrievedDataType>> retrieverType,
+    public DataRetrieverTypeWithInformation(Class<? extends Processor<InputType, RetrievedDataType>> retrieverType,
                                             Class<RetrievedDataType> retrievedDataType,
                                             String retrievedDataTypeMessageKey) {
         this.retrieverType = retrieverType;
@@ -16,7 +16,7 @@ public class DataRetrieverTypeWithInformation<InputType, RetrievedDataType> {
         this.retrievedDataTypeMessageKey = retrievedDataTypeMessageKey;
     }
 
-    public Class<Processor<InputType, RetrievedDataType>> getRetrieverType() {
+    public Class<? extends Processor<InputType, RetrievedDataType>> getRetrieverType() {
         return retrieverType;
     }
     
