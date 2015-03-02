@@ -46,7 +46,7 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
             new Timer() {
                 @Override
                 public void run() {
-                    currentPresenter.gotoOverview();
+                    currentPresenter.goToOverview();
                 }
             }.schedule(3000);
 

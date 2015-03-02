@@ -5509,7 +5509,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setName(o.getName());
         dto.setOfficialWebsiteURL(o.getOfficialWebsiteURL());
         dto.venue = o.venue;
-        
+        dto.getLeaderboardGroups().addAll(o.getLeaderboardGroups());
         dto.setState(EventState.FINISHED);
         if (o.isFakeSeries()) {
             dto.setType(EventType.SERIES_EVENT);

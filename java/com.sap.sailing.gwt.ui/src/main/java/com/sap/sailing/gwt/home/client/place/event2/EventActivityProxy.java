@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaActivity;
@@ -20,9 +21,12 @@ public class EventActivityProxy extends AbstractActivityProxy {
     private final AbstractEventPlace place;
     private EventContext ctx;
     private EventClientFactory clientFactory;
+    private HomePlacesNavigator homePlacesNavigator;
 
-    public EventActivityProxy(AbstractEventPlace place, EventClientFactory clientFactory) {
+    public EventActivityProxy(AbstractEventPlace place, EventClientFactory clientFactory,
+            HomePlacesNavigator homePlacesNavigator) {
         this.place = place;
+        this.homePlacesNavigator = homePlacesNavigator;
         ctx = this.place.getCtx();
         this.clientFactory = clientFactory;
     }
@@ -71,10 +75,12 @@ public class EventActivityProxy extends AbstractActivityProxy {
                 }
                 
                 if(placeToStart instanceof AbstractEventRegattaPlace) {
-                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) placeToStart, clientFactory));
+                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) placeToStart, clientFactory,
+                            homePlacesNavigator));
                 }
                 if(placeToStart instanceof AbstractMultiregattaEventPlace) {
-                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) placeToStart, clientFactory));
+                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) placeToStart,
+                            clientFactory, homePlacesNavigator));
                 }
             }
 
