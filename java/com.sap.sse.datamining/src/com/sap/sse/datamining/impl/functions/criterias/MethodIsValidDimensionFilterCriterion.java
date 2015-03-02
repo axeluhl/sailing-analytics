@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import com.sap.sse.datamining.shared.annotations.Dimension;
 
-public class MethodIsCorrectDimensionFilterCriterion extends AbstractMethodFilterCriterion {
+public class MethodIsValidDimensionFilterCriterion extends AbstractMethodFilterCriterion {
 
     @Override
     public boolean matches(Method method) {

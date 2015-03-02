@@ -53,7 +53,7 @@ public class IsDeclaringTypeFilterCriterion extends AbstractFunctionFilterCriter
         return false;
     }
 
-    public boolean isDeclaringTypeMatching(Function<?> function, Class<?> expectingType) {
+    private boolean isDeclaringTypeMatching(Function<?> function, Class<?> expectingType) {
         return function.getDeclaringType().equals(expectingType);
     }
 
