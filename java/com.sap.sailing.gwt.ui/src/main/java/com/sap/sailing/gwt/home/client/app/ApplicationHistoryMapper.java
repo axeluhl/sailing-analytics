@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaMediaPla
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
@@ -27,16 +28,18 @@ import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
         SponsoringPlace.Tokenizer.class, SearchResultPlace.Tokenizer.class, StartPlace.Tokenizer.class,
         RegattaPlace.Tokenizer.class, SeriesPlace.Tokenizer.class,
         // Event tab places...
-        EventDefaultPlace.Tokenizer.class,//
+        EventDefaultPlace.Tokenizer.class,
         // Multiregatta places:
-        MultiregattaMediaPlace.Tokenizer.class, //
-        MultiregattaOverviewPlace.Tokenizer.class,//
-        MultiregattaRegattasPlace.Tokenizer.class,//
+        MultiregattaMediaPlace.Tokenizer.class,
+        MultiregattaOverviewPlace.Tokenizer.class,
+        MultiregattaRegattasPlace.Tokenizer.class,
         // Regatta places:
-        RegattaOverviewPlace.Tokenizer.class,//
-        RegattaRacesPlace.Tokenizer.class, //
-        RegattaLeaderboardPlace.Tokenizer.class, //
-        RegattaMediaPlace.Tokenizer.class
+        RegattaOverviewPlace.Tokenizer.class,
+        RegattaRacesPlace.Tokenizer.class,
+        RegattaLeaderboardPlace.Tokenizer.class,
+        RegattaMediaPlace.Tokenizer.class,
+        // Fake series places:
+        SeriesEventsPlace.Tokenizer.class
 
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {
