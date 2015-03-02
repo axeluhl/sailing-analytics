@@ -93,4 +93,5 @@ Export-Package: com.google.common.annotations,
  org.openqa.selenium.support.events.internal,
  org.openqa.selenium.support.pagefactory,
  org.openqa.selenium.support.pagefactory.internal,
- org.openqa.selenium.support.ui
+ org.openqa.selenium.support.ui,
+ org.json

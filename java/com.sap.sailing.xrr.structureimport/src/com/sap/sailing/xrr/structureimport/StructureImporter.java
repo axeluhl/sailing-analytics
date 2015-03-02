@@ -201,11 +201,12 @@ public class StructureImporter {
                     String idAsString = person.getPersonID();
                     String name = person.getGivenName() + " " + person.getFamilyName();
                     Color color = null;
+                    String email = null;
                     Nationality nationality = (person.getNOC() == null) ? null : getNationality(person.getNOC()
                             .toString());
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
                     this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
-                            UUID.fromString(idAsString), name, color, boatAndTeam.getTeam(), boatAndTeam.getBoat()));
+                            UUID.fromString(idAsString), name, color, email, boatAndTeam.getTeam(), boatAndTeam.getBoat()));
                 } else {
                     break;
                 }

@@ -45,8 +45,6 @@
 	<set-property name="gwt.logging.enabled" value="FALSE" />
 	<!-- Set logging level to INFO -->
 	<set-property name="gwt.logging.logLevel" value="INFO" />
-	<set-property name="gwt.logging.simpleRemoteHandler"
-		value="ENABLED" />
 	<!-- Add compiler.stackMode to get a readable stacktrace from JavaScript 
 		It generates a set of files in WEB-INF/deploy; those files need to be placed 
 		on the server -->

@@ -748,7 +748,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if (map != null && raceMapDataDTO != null) {
                     quickRanks = raceMapDataDTO.quickRanks;
                     if (showViewSimulation && settings.isShowSimulationOverlay()) {
-                    	simulationOverlay.updateLeg(getCurrentLeg(), newTime, /* clearCanvas */ false);
+                    	simulationOverlay.updateLeg(getCurrentLeg(), /* clearCanvas */ false);
                     }
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
@@ -2025,7 +2025,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
-            simulationOverlay.updateLeg(getCurrentLeg(), timer.getTime(), true);
+            simulationOverlay.updateLeg(getCurrentLeg(), true);
         }
         if (requiredRedraw) {
             redraw();
@@ -2235,7 +2235,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leaderWithLeg = this
                 .getLeadingVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
         if (leaderWithLeg == null) {
-            return 0;
+            return 1; // before start, show simulation for leg 1
         } else {
             return leaderWithLeg.getA();
         }

@@ -43,7 +43,9 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
     String gridFile = null;
 
     public PathGeneratorTreeGrow(SimulationParameters params) {
-        this.parameters = params;
+        PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
+        this.parameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
+                params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist());
     }
 
     public void setEvaluationParameters(String startDirection, int maxTurns, String gridFile) {
@@ -739,8 +741,20 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         // add final position (rescaled before to end on height of target)
         path.add(new TimedPositionWithSpeedImpl(bestCand.pos.getTimePoint(), bestCand.pos.getPosition(), null));
 
-        return new PathImpl(path, wf);
-
+        // maximum turn time for one-turner simulation, otherwise zero
+        long maxTurnTime = 0;
+        if (this.maxTurns == 1) {
+            int turnMiddle = 1000;
+            if (bestCand != null) {
+                if (bestCand.path.charAt(1) == 'L') {
+                    turnMiddle = bestCand.getIndexOfTurnLR();
+                } else {
+                    turnMiddle = bestCand.getIndexOfTurnRL();
+                }
+                maxTurnTime = turnMiddle * this.usedTimeStep;
+            }
+        }
+        return new PathImpl(path, wf, maxTurnTime);
     }
 
 }

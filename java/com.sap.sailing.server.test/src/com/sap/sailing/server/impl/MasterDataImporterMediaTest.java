@@ -94,7 +94,7 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToEmptyTarget_WithOverride() throws Exception {
         createRacingEventService();
 
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
         MediaTrack mediaTrackToImport = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
@@ -118,7 +118,7 @@ public class MasterDataImporterMediaTest {
 
     @Test
     public void testImportOneTrackToSameTarget_WithOverride() throws Exception {
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         MimeType mimeType = MimeType.mp3;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
@@ -146,7 +146,7 @@ public class MasterDataImporterMediaTest {
 
     @Test
     public void testImportOneTrackToExistingOtherTrack_WithOverride() throws Exception {
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         MimeType mimeType = MimeType.mp3;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
@@ -155,7 +155,7 @@ public class MasterDataImporterMediaTest {
 
         createRacingEventService(existingMediaTrack);
 
-        String dbId2 = new ObjectId().toStringMongod();
+        String dbId2 = new ObjectId().toHexString();
         MediaTrack mediaTrackToImport = new MediaTrack(dbId2, existingMediaTrack.title, existingMediaTrack.url,
                 existingMediaTrack.startTime, existingMediaTrack.duration, mimeType, existingMediaTrack.assignedRaces);
         mediaTracksToImport.add(mediaTrackToImport);
@@ -174,7 +174,7 @@ public class MasterDataImporterMediaTest {
 
     @Test
     public void testImportOneTrackToSameTargetWithChangedTitle_WithOverride() throws Exception {
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         MimeType mimeType = MimeType.mp3;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
@@ -205,7 +205,7 @@ public class MasterDataImporterMediaTest {
 
     @Test
     public void testImportOneTrackWithNullTitleToSameTargetWithTitle_WithOverride() throws Exception {
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         MimeType mimeType = MimeType.mp3;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
@@ -236,7 +236,7 @@ public class MasterDataImporterMediaTest {
 
     @Test
     public void testImportOneTrackToSameTargetWithChangedTitle_NoOverride() throws Exception {
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         MimeType mimeType = MimeType.mp3;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
@@ -267,7 +267,7 @@ public class MasterDataImporterMediaTest {
 
     @Test
     public void testImportOneTrackToSameTargetWithChangedUrl_WithOverride() throws Exception {
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         MimeType mimeType = MimeType.mp3;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
@@ -298,7 +298,7 @@ public class MasterDataImporterMediaTest {
 
     @Test
     public void testImportOneTrackToSameTargetWithChangedStarttime_WithOverride() throws Exception {
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         MimeType mimeType = MimeType.mp3;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
@@ -329,7 +329,7 @@ public class MasterDataImporterMediaTest {
 
     @Test
     public void testImportOneTrackToSameTargetWithChangedDuration_WithOverride() throws Exception {
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         MimeType mimeType = MimeType.mp3;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));
@@ -359,7 +359,7 @@ public class MasterDataImporterMediaTest {
 
     @Test
     public void testImportOneTrackToSameTargetWithChangedAssignedRaces_WithOverride() throws Exception {
-        String dbId = new ObjectId().toStringMongod();
+        String dbId = new ObjectId().toHexString();
         MimeType mimeType = MimeType.mp3;
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(new RegattaNameAndRaceName("49er", "R1"));

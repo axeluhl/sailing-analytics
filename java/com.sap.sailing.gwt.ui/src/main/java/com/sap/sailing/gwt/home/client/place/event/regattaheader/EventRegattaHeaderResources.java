@@ -7,7 +7,7 @@ import com.google.gwt.resources.client.CssResource;
 public interface EventRegattaHeaderResources extends ClientBundle {
     public static final EventRegattaHeaderResources INSTANCE = GWT.create(EventRegattaHeaderResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/place/event/regattaheader/EventRegattaHeader.css")
+    @Source("com/sap/sailing/gwt/home/client/place/event/regattaheader/EventRegattaHeader.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {

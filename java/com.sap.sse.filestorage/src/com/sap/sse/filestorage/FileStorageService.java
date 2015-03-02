@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Locale;
 
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -50,7 +51,7 @@ public interface FileStorageService extends IsManagedByCache<FileStorageServiceR
     /**
      * Description text that explains the storage service.
      */
-    String getDescription();
+    String getDescription(Locale locale);
 
     /**
      * Test whether properties are valid, e.g. by trying to log in using access credentials provided as properties.

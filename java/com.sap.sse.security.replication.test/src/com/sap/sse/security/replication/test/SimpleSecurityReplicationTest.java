@@ -9,8 +9,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.User;
-import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.UserManagementException;
 
 public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTest {

@@ -94,6 +94,11 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
                 CompetitorListenerTest.this.oldColor = oldColor;
                 CompetitorListenerTest.this.newColor = newColor;
             }
+
+            @Override
+            public void emailChanged(String oldEmail, String newEmail) {
+                //TODO
+            }
         };
         competitor.addCompetitorChangeListener(listener);
     }

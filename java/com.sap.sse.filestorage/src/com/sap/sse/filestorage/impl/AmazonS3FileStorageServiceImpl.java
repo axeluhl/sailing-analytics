@@ -35,8 +35,7 @@ import com.sap.sse.filestorage.OperationFailedException;
 public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl implements FileStorageService {
     private static final long serialVersionUID = -2406798172882732531L;
     public static final String NAME = "Amazon S3";
-    public static final String DESCRIPTION = "Store files on Amazon S3. The resulting file name is a random UUID plus the original file ending.";
-    
+
     private static final Logger logger = Logger.getLogger(AmazonS3FileStorageServiceImpl.class.getName());
 
     private static final String baseUrl = "s3.amazonaws.com";
@@ -44,14 +43,14 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     // private static final String bucketName = "ftes-sap-sailing";
 
     private final FileStorageServicePropertyImpl accessId = new FileStorageServicePropertyImpl("accessId", false,
-            "Access ID (leave blank to use ~/.aws/credentials instead)");
+            "s3AccessIdDesc");
     private final FileStorageServicePropertyImpl accessKey = new FileStorageServicePropertyImpl("accessKey", false,
-            "Secret Access Key (leave blank to use ~/.aws/credentials instead)");
+            "s3AccessKeyDesc");
     private final FileStorageServicePropertyImpl bucketName = new FileStorageServicePropertyImpl("bucketName", true,
-            "Name of Bucket to use (has to already exist, and user needs sufficient permissions)");
+            "s3BucketNameDesc");
 
     public AmazonS3FileStorageServiceImpl() {
-        super(NAME, DESCRIPTION);
+        super(NAME, "s3Desc");
         addProperties(accessId, accessKey, bucketName);
     }
 
@@ -102,15 +101,15 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
                 .withCannedAcl(CannedAccessControlList.PublicRead);
         final AmazonS3Client s3Client = createS3Client();
 
-            new Thread() {
-                public void run() {
-                    try {
-                        s3Client.putObject(request);
-                    } catch (AmazonClientException e) {
-                        logger.log(Level.WARNING, "Could not store file", e);
-                    }
-                };
-            }.run();
+        new Thread() {
+            public void run() {
+                try {
+                    s3Client.putObject(request);
+                } catch (AmazonClientException e) {
+                    logger.log(Level.WARNING, "Could not store file", e);
+                }
+            };
+        }.run();
         URI uri = getUri(key);
         logger.info("Stored file " + uri);
         return uri;
@@ -138,14 +137,14 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             s3.doesBucketExist(bucketName.getValue());
         } catch (Exception e) {
             throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket", e,
-                    new Pair<FileStorageServiceProperty, String>(accessId, "seems to be invalid"), new Pair<FileStorageServiceProperty, String>(accessKey,
-                            "seems to be invalid"));
+                    new Pair<FileStorageServiceProperty, String>(accessId, "seems to be invalid"),
+                    new Pair<FileStorageServiceProperty, String>(accessKey, "seems to be invalid"));
         }
 
         // test if bucket exists
         if (!s3.doesBucketExist(bucketName.getValue())) {
-            throw new InvalidPropertiesException("invalid bucket", new Pair<FileStorageServiceProperty, String>(bucketName,
-                    "bucket does not exist"));
+            throw new InvalidPropertiesException("invalid bucket", new Pair<FileStorageServiceProperty, String>(
+                    bucketName, "bucket does not exist"));
         }
     }
 }

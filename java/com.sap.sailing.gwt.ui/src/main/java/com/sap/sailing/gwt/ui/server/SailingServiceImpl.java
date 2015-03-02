@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -131,6 +132,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
+import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -388,24 +390,20 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCo
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
+import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
-import com.sap.sailing.simulator.SailingSimulator;
-import com.sap.sailing.simulator.SimulationParameters;
+import com.sap.sailing.simulator.SimulationResults;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
-import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
-import com.sap.sailing.simulator.impl.SimulationParametersImpl;
-import com.sap.sailing.simulator.util.SailingSimulatorConstants;
-import com.sap.sailing.simulator.windfield.WindFieldGenerator;
-import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
+import com.sap.sailing.simulator.impl.SparsePolarDataException;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.BuildVersion;
 import com.sap.sse.common.CountryCode;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -414,9 +412,9 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
@@ -424,12 +422,15 @@ import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.util.ServiceTrackerFactory;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
+
 
 /**
  * The server side implementation of the RPC service.
@@ -494,6 +495,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final SwissTimingReplayService swissTimingReplayService;
 
     private final QuickRanksLiveCache quickRanksLiveCache;
+    
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         Activator activator = Activator.getInstance();
@@ -501,21 +503,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             activator.setSailingService(this); // register so this service is informed when the bundle shuts down
         }
         quickRanksLiveCache = new QuickRanksLiveCache(this);
-        racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
-        replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
-        resultUrlRegistryServiceTracker = createAndOpenResultUrlRegistryServiceTracker(context);
-        swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
-        tractracAdapterTracker = createAndOpenTracTracAdapterTracker(context);
-        raceLogTrackingAdapterTracker = createAndOpenRaceLogTrackingAdapterTracker(context);
-        deviceIdentifierStringSerializationHandlerTracker = createAndOpenDeviceIdentifierStringSerializationHandlerTracker(context);
-        igtimiAdapterTracker = createAndOpenIgtimiTracker(context);
+        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
+        resultUrlRegistryServiceTracker = ServiceTrackerFactory.createAndOpen(context, ResultUrlRegistry.class);
+        swissTimingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
+        tractracAdapterTracker = ServiceTrackerFactory.createAndOpen(context, TracTracAdapterFactory.class);
+        raceLogTrackingAdapterTracker = ServiceTrackerFactory.createAndOpen(context,
+                RaceLogTrackingAdapterFactory.class);
+        deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
+                DeviceIdentifierStringSerializationHandler.class);
+        igtimiAdapterTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
         domainObjectFactory = getService().getDomainObjectFactory();
         // TODO what about passing on the mongo/domain object factory to obtain an according SwissTimingAdapterPersistence instance similar to how the tractracDomainObjectFactory etc. are created below?
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        swissTimingReplayService = getSwissTimingReplayService(context);
-        scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
+        swissTimingReplayService = ServiceTrackerFactory.createAndOpen(context, SwissTimingReplayServiceFactory.class)
+                .getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory());
+        scoreCorrectionProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context,
+                ScoreCorrectionProvider.class);
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
                 .createDomainObjectFactory(mongoObjectFactory.getDatabase(), getTracTracAdapter()
                         .getTracTracDomainFactory());
@@ -554,87 +560,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         quickRanksLiveCache.stop();
     }
 
-    protected SwissTimingReplayService getSwissTimingReplayService(BundleContext context) {
-        return createAndOpenSwissTimingReplayServiceTracker(context).getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory());
+    protected SwissTimingAdapterFactory getSwissTimingAdapterFactory() {
+        return swissTimingAdapterTracker.getService();
     }
 
     protected SwissTimingAdapter getSwissTimingAdapter() {
-        return swissTimingAdapterTracker.getService().getOrCreateSwissTimingAdapter(baseDomainFactory);
+        return getSwissTimingAdapterFactory().getOrCreateSwissTimingAdapter(baseDomainFactory);
+    }
+    
+    protected TracTracAdapterFactory getTracTracAdapterFactory() {
+        return tractracAdapterTracker.getService();
     }
 
     protected TracTracAdapter getTracTracAdapter() {
-        return tractracAdapterTracker.getService().getOrCreateTracTracAdapter(baseDomainFactory);
-    }
-
-    protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(BundleContext context) {
-        ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> result = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(
-                context, TracTracAdapterFactory.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> createAndOpenIgtimiTracker(BundleContext context) {
-        ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> result = new ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory>(
-                context, IgtimiConnectionFactory.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> createAndOpenSwissTimingAdapterTracker(
-            BundleContext context) {
-        ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> result = new ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory>(
-                context, SwissTimingAdapterFactory.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> createAndOpenSwissTimingReplayServiceTracker(
-            BundleContext context) {
-        ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> result = new ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory>(
-                context, SwissTimingReplayServiceFactory.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> createAndOpenRaceLogTrackingAdapterTracker(
-            BundleContext context) {
-        ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> result =
-        		new ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory>(
-                context, RaceLogTrackingAdapterFactory.class.getName(), null);
-        result.open();
-        return result;
+        return getTracTracAdapterFactory().getOrCreateTracTracAdapter(baseDomainFactory);
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.defaultWriteObject();
-    }
-
-    protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
-            BundleContext context) {
-        ServiceTracker<RacingEventService, RacingEventService> result = new ServiceTracker<RacingEventService, RacingEventService>(
-                context, RacingEventService.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    protected ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> createAndOpenResultUrlRegistryServiceTracker(
-            BundleContext context) {
-        ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> result = new ServiceTracker<ResultUrlRegistry, ResultUrlRegistry>(
-                context, ResultUrlRegistry.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    /**
-     * Asks the OSGi system for registered score correction provider services
-     */
-    protected ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
-            BundleContext bundleContext) {
-        ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> tracker = new ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider>(bundleContext,
-                ScoreCorrectionProvider.class.getName(),
-                /* customizer */null);
-        tracker.open();
-        return tracker;
     }
 
     @Override
@@ -681,15 +624,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             hasResultsForBoatClassFromDateByEventName.put(e.getKey(), set);
         }
         return new ScoreCorrectionProviderDTO(scoreCorrectionProvider.getName(), hasResultsForBoatClassFromDateByEventName);
-    }
-
-    protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
-            BundleContext context) {
-        ServiceTracker<ReplicationService, ReplicationService> result =
-                new ServiceTracker<ReplicationService, ReplicationService>(
-                context, ReplicationService.class.getName(), null);
-        result.open();
-        return result;
     }
 
     /**
@@ -1114,10 +1048,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    private SwissTimingReplayService getSwissTimingReplayService() {
-        return swissTimingReplayService;
-    }
-
     @Override
     public List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception {
         Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
@@ -1488,112 +1418,50 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         BoatClass boatClass = trackedRace.getRace().getBoatClass();
         PolarDataService polarData = getService().getPolarDataService();
-        PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarData);
+        PolarDiagram polarDiagram;
+        try {
+            polarDiagram = new PolarDiagramGPS(boatClass, polarData);
+        } catch (SparsePolarDataException e) {
+            polarDiagram = null;
+            // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
+        }
         return new Boolean(polarDiagram != null);
     };
 
     @Override
-    public SimulatorResultsDTO getSimulatorResults(RegattaAndRaceIdentifier raceIdentifier, Date from, Date prevStartTime) {
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+    public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) {
+        // get simulation-results from smart-future-cached simulation-service
+        SimulationService simulationService = getService().getSimulationService();
+        SimulationResults simulationResults = simulationService.getSimulationResults(legIdentifier);
+        // prepare simulator-results-dto
         SimulatorResultsDTO result = null;
-        
-        if (trackedRace != null) {
-            TimePoint fromTimePoint = from == null ? new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis() + 10000) : new MillisecondsTimePoint(from);
-            
-            // get previous mark or start line as start-position
-            TrackedLeg trackedLeg = trackedRace.getCurrentLeg(fromTimePoint);
-            if (trackedLeg == null) {
-                return result;
-            }
-            Waypoint fromWaypoint = trackedLeg.getLeg().getFrom();            
-            
-            // get next mark as end-position
-            Waypoint toWaypoint = trackedLeg.getLeg().getTo();
-
-            TimePoint startTimePoint = null;
-            TimePoint endTimePoint = null;
-            Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> markPassings = trackedRace.getMarkPassingsTimes();
-            long legDuration = 0;
-            synchronized(markPassings) {
-                for(Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassing : markPassings) {
-                    if (markPassing.getA().equals(fromWaypoint)) {
-                        startTimePoint = markPassing.getB().getA();
-                    }
-                    if (markPassing.getA().equals(toWaypoint)) {
-                        endTimePoint = markPassing.getB().getA();
-                    }
+        Map<PathType, Path> paths = simulationResults.getPaths();
+        if (paths != null) {
+            int noOfPaths = paths.size();
+            PathDTO[] pathDTOs = new PathDTO[noOfPaths];
+            int index = noOfPaths - 1;
+            for (Entry<PathType, Path> entry : paths.entrySet()) {
+                pathDTOs[index] = new PathDTO(entry.getKey().getTxtId());
+                // fill pathDTO with path points where speed is true wind speed
+                List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
+                for (TimedPositionWithSpeed p : entry.getValue().getPathPoints()) {
+                    wList.add(createSimulatorWindDTO(p));
                 }
+                pathDTOs[index].setPoints(wList);
+                index--;
             }
-            legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
-            Position startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
-            Position endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
-
-            if (startTimePoint.asDate().equals(prevStartTime)) {
-                return new SimulatorResultsDTO(startTimePoint.asDate(), 0, 0, null, null, null, null);
-            }
-            
-            // determine legtype upwind/downwind/reaching
-            LegType legType = null;
-            try {
-                legType = trackedLeg.getLegType(fromTimePoint);
-            } catch (NoWindException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            // get windfield
-            WindFieldGenerator windField = new WindFieldTrackedRaceImpl(trackedRace);
-            Duration timeStep = new MillisecondsDurationImpl(15 * 1000);
-            windField.generate(startTimePoint, null, timeStep);
-            
-            // prepare simulation-parameters
-            List<Position> course = new ArrayList<Position>();
-            course.add(startPosition);
-            course.add(endPosition);
-            BoatClass boatClass = trackedRace.getRace().getBoatClass();
-            PolarDataService polarData = getService().getPolarDataService();
-            PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarData);
-            double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
-                    / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
-            Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
-            SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField,
-                    simuStep, SailingSimulatorConstants.ModeEvent, true, true);
-
-            // for upwind/downwind, run simulation with start-time, start-position, end-position and windfield
-            SailingSimulator simulator = new SailingSimulatorImpl(simulationPars);
-            Map<String, Path> pathsAndNames = null;
-            if (legType != LegType.REACHING) {
-                pathsAndNames = simulator.getAllPathsEvenTimed(timeStep.asMillis(), null);
-            }
-
-            // prepare simulator-results-dto
-            if (pathsAndNames != null) {
-                int noOfPaths = pathsAndNames.size();
-                PathDTO[] pathDTOs = new PathDTO[noOfPaths];
-                int index = noOfPaths - 1;
-                for (Entry<String, Path> entry : pathsAndNames.entrySet()) {
-                    pathDTOs[index] = new PathDTO(entry.getKey());
-                    // fill pathDTO with path points where speed is true wind speed
-                    List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
-                    for (TimedPositionWithSpeed p : entry.getValue().getPathPoints()) {
-                        wList.add(createSimulatorWindDTO(p));
-                    }
-                    pathDTOs[index].setPoints(wList);
-                    index--;
-                }
-                RaceMapDataDTO rcDTO;
-                rcDTO = new RaceMapDataDTO();
-                rcDTO.coursePositions = new CoursePositionsDTO();
-                rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();
-                PositionDTO posDTO;
-                posDTO = SimulatorServiceUtils.toPositionDTO(startPosition);
-                rcDTO.coursePositions.waypointPositions.add(posDTO);
-                posDTO = SimulatorServiceUtils.toPositionDTO(endPosition);
-                rcDTO.coursePositions.waypointPositions.add(posDTO);
-                result = new SimulatorResultsDTO(startTimePoint.asDate(), timeStep.asMillis(), legDuration, rcDTO, pathDTOs, null, null);
-            }
+            RaceMapDataDTO rcDTO;
+            rcDTO = new RaceMapDataDTO();
+            rcDTO.coursePositions = new CoursePositionsDTO();
+            rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();
+            PositionDTO posDTO;
+            posDTO = SimulatorServiceUtils.toPositionDTO(simulationResults.getStartPosition());
+            rcDTO.coursePositions.waypointPositions.add(posDTO);
+            posDTO = SimulatorServiceUtils.toPositionDTO(simulationResults.getEndPosition());
+            rcDTO.coursePositions.waypointPositions.add(posDTO);
+            result = new SimulatorResultsDTO(simulationResults.getStartTime(), simulationResults.getTimeStep(),
+                    simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
         }
-        
         return result;
     }
     
@@ -2241,7 +2109,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return racingEventServiceTracker.getService(); // grab the service
     }
 
-    private ReplicationService getReplicationService() {
+    protected ReplicationService getReplicationService() {
         return replicationServiceTracker.getService();
     }
     
@@ -2317,8 +2185,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return results;
     }
 
-    @Override
-    public List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
+    private List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         if (regatta != null && regatta.races != null) {
             for (RaceDTO race : regatta.races) {
@@ -2701,6 +2568,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }.start();
             }
         }
+    }
+    
+    protected SwissTimingReplayService getSwissTimingReplayService() {
+        return swissTimingReplayService;
     }
 
     @Override
@@ -4541,12 +4412,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	    DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
-                            competitor.getColor(), team, boat));
+                            competitor.getColor(), competitor.getEmail(), team, boat));
         } else {
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
-                                    .getColor(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
+                                    .getColor(), competitor.getEmail(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
         }
         return result;
     }
@@ -4739,9 +4610,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private IgtimiConnectionFactory getIgtimiConnectionFactory() {
         return igtimiAdapterTracker.getService();
     }
+    
+    protected RaceLogTrackingAdapterFactory getRaceLogTrackingAdapterFactory() {
+        return raceLogTrackingAdapterTracker.getService();
+    }
 
     protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
-        return raceLogTrackingAdapterTracker.getService().getAdapter(getBaseDomainFactory());
+        return getRaceLogTrackingAdapterFactory().getAdapter(getBaseDomainFactory());
     }
 
     @Override
@@ -5183,16 +5058,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceLog.add(event);
     }
     
-    private ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
-    createAndOpenDeviceIdentifierStringSerializationHandlerTracker(BundleContext context) {
-        ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler> tracker = 
-                new ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>(
-                        context, DeviceIdentifierStringSerializationHandler.class, null);
-        
-        tracker.open();
-        return tracker;
-    }
-    
     @Override
     public List<String> getDeserializableDeviceIdentifierTypes() {
         List<String> result = new ArrayList<String>();
@@ -5439,12 +5304,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return getService().getFileStorageManagementService().getFileStorageService(name);
     }
+    
+    private Locale getLocale(String localeInfoName) {
+        return ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+    }
 
     @Override
-    public FileStorageServiceDTO[] getAvailableFileStorageServices() {
+    public FileStorageServiceDTO[] getAvailableFileStorageServices(String localeInfoName) {
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
         for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
-            serviceDtos.add(FileStorageServiceDTOUtils.convert(s));
+            serviceDtos.add(FileStorageServiceDTOUtils.convert(s, getLocale(localeInfoName)));
         }
         return serviceDtos.toArray(new FileStorageServiceDTO[0]);
     }
@@ -5462,20 +5331,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName) {
+    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) {
         try {
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {
                 service.testProperties();
             }
         } catch (InvalidPropertiesException e) {
-            return FileStorageServiceDTOUtils.convert(e);
+            return FileStorageServiceDTOUtils.convert(e, getLocale(localeInfoName));
         }
         return null;
     }
 
     @Override
-    public void setActiveFileStorageService(String serviceName) {
+    public void setActiveFileStorageService(String serviceName, String localeInfoName) {
         getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
     }
 
@@ -5486,5 +5355,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (NoCorrespondingServiceRegisteredException e) {
             return null;
         }
+    }
+    
+    @Override
+    public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
+            String leaderboardName, Set<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
+        Event event = getService().getEvent(eventDto.id);
+        Set<Competitor> competitors = new HashSet<>();
+        for (CompetitorDTO c : competitorDtos) {
+            competitors.add(getCompetitor(c));
+        }
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
+                competitors, getLocale(localeInfoName));
     }
 }

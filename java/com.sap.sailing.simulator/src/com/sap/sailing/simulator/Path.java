@@ -9,6 +9,10 @@ public interface Path {
     List<TimedPositionWithSpeed> getPathPoints();
 
     void setPathPoints(List<TimedPositionWithSpeed> pointsList);
+    
+    public long getMaxTurnTime();
+    
+    public void setMaxTurnTime(long maxTurnTime);
 
     void setWindField(WindField wf);
 

@@ -7,13 +7,17 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sse,
  com.sap.sse.gateway,
+ com.sap.sse.i18n,
+ com.sap.sse.i18n.impl,
  com.sap.sse.osgi,
+ com.sap.sse.qrcode,
  com.sap.sse.util,
  com.sap.sse.util.impl,
  com.sap.sse.util.kmeans
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.common,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ org.apache.servicemix.bundles.zxing;bundle-version="3.1.0"
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  org.osgi.framework;version="1.8.0",

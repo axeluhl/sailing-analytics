@@ -3,6 +3,8 @@ package com.sap.sailing.simulator;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.simulator.impl.MaximumTurnTimes;
+
 
 public interface SailingSimulator {
 
@@ -12,6 +14,8 @@ public interface SailingSimulator {
 
     Path getLegGPSTrack(SimulatorUISelection selection);
 
+    Path getPath(PathType pathType, MaximumTurnTimes maxTurnTimes);
+    
     Map<String, Path> getAllPaths();
 
     Map<String, Path> getAllPathsForLeg(SimulatorUISelection selection);

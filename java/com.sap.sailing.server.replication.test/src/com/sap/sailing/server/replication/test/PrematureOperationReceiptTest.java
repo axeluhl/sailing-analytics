@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -17,17 +16,19 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.ReplicationReceiver;
 
 public class PrematureOperationReceiptTest extends AbstractServerReplicationTest {
-    private ReplicationReceiver replicator;
+    private static ReplicationReceiver replicator;
+    
+    public PrematureOperationReceiptTest() {
+        super(new ServerReplicationTestSetUp());
+    }
 
-    /**
-     * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
-     */
-    @Before
-    @Override
-    public void setUp() throws Exception {
-        Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result =
-                basicSetUp(/* dropDB */ true, /* master=null means create a new one */ null, /* replica=null means create a new one */ null);
-        replicator = replicaReplicator.startToReplicateFromButDontYetFetchInitialLoad(result.getB(), /* startReplicatorSuspended */ true);
+    private static class ServerReplicationTestSetUp extends AbstractServerReplicationTest.ServerReplicationTestSetUp {
+        @Override
+        public void setUp() throws Exception {
+            Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result =
+                    basicSetUp(/* dropDB */ true, /* master=null means create a new one */ null, /* replica=null means create a new one */ null);
+            replicator = replicaReplicator.startToReplicateFromButDontYetFetchInitialLoad(result.getB(), /* startReplicatorSuspended */ true);
+        }
     }
 
     /**

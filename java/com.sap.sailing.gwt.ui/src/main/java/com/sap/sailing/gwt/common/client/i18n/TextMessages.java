@@ -6,6 +6,7 @@ import com.google.gwt.i18n.client.Messages;
 public interface TextMessages extends Messages {
     public static final TextMessages INSTANCE = GWT.create(TextMessages.class);
 
+    String chartSelectionHint();
     String chooseALanguage();
     String home();
     String events();

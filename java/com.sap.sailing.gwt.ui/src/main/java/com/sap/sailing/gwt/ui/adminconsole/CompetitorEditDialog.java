@@ -38,6 +38,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final TextBox displayColorTextBox;
     private final ListBox threeLetterIocCountryCode;
     private final TextBox sailId;
+    private final TextBox email;
     private final StringMessages stringMessages;
     
     public CompetitorEditDialog(final StringMessages stringMessages, CompetitorDTO competitorToEdit,
@@ -89,6 +90,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         }
         
         this.name = createTextBox(competitorToEdit.getName());
+        this.email = createTextBox(competitorToEdit.getEmail());
+        this.email.getElement().setPropertyString("placeholder", stringMessages.pleaseEnterAnEmail());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
@@ -170,7 +173,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
             }
         }
         BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(boatClassName.getSelectedIndex()), 0);
-        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color,
+        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color, email.getText(),
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, sailId.getText(), competitorToEdit.getIdAsString(),
@@ -180,7 +183,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(5, 2);
+        Grid result = new Grid(6, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
@@ -189,8 +192,10 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         result.setWidget(2, 1, threeLetterIocCountryCode);
         result.setWidget(3, 0, new Label(stringMessages.color()));
         result.setWidget(3, 1, displayColorTextBox);
-        result.setWidget(4, 0, new Label(stringMessages.boatClass()));
-        result.setWidget(4, 1, boatClassName);
+        result.setWidget(4, 0, new Label(stringMessages.email()));
+        result.setWidget(4, 1, email);
+        result.setWidget(5, 0, new Label(stringMessages.boatClass()));
+        result.setWidget(5, 1, boatClassName);
         return result;
     }
 

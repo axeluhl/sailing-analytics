@@ -1,0 +1,20 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:ux="urn:import:com.sap.sse.gwt.theme.client.showcase"
+	xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.loadingindicator">
+	<ui:with field="res" type="com.sap.sse.gwt.theme.client.showcase.ShowCaseResources" />
+	<ux:ComponentShowCase name="Loading Indicator" >
+		<ux:description>
+			<g:HTMLPanel styleName="{res.css.showcaseHeader}">
+				A Loading indicator.
+				<p>Import: xmlns:sap="urn:import:com.sap.sse.gwt.theme.client.component.loadingindicator"</p>
+			</g:HTMLPanel>
+		</ux:description>
+		<ux:component>
+			<g:HTMLPanel styleName="{res.css.showcaseContent}">
+				<sap:LoadingIndicator ui:field="loadingIndicator"></sap:LoadingIndicator>
+			</g:HTMLPanel>
+		</ux:component>
+	</ux:ComponentShowCase>
+</ui:UiBinder> 

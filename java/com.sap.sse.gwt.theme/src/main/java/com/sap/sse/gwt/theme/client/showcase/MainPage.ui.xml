@@ -1,0 +1,42 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:ux="urn:import:com.sap.sse.gwt.theme.client.showcase">
+	<g:LayoutPanel>
+		<g:layer left="0" width="200">
+			<ux:ShowcaseStackLayoutPanel ui:field="stackLayoutPanelUi" unit="EM">
+				<ux:stack>
+					<ux:header size="3">Components</ux:header>
+					<ux:Section>
+						<ux:item name="SAP Header">
+							<ux:components.SAPHeaderShowcase />
+						</ux:item>
+						<ux:item name="SAP Footer">
+							<ux:components.SAPFooterShowcase />
+						</ux:item>
+						<ux:item name="Image Gallery">
+							<ux:components.ImageGalleryShowcase />
+						</ux:item>
+						<ux:item name="Video Gallery">
+							<ux:components.VideoGalleryShowcase />
+						</ux:item>
+						<ux:item name="Loading Indicator">
+							<ux:components.LoadingIndicatorShowcase />
+						</ux:item>
+					</ux:Section>
+				</ux:stack>
+				<ux:stack>
+					<ux:header size="3">Styleguide</ux:header>
+					<ux:Section>
+						<ux:item name="Typeface Open Sans">
+							<ux:styleguide.TypefaceStyleguide />
+						</ux:item>
+					</ux:Section>
+				</ux:stack>
+			</ux:ShowcaseStackLayoutPanel>
+		</g:layer>
+		<g:layer left="200" right="0">
+			<g:ScrollPanel><g:SimplePanel ui:field="contentUi" /></g:ScrollPanel>
+		</g:layer>
+	</g:LayoutPanel>
+</ui:UiBinder> 

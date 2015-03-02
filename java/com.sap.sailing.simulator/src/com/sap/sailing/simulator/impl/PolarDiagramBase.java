@@ -91,6 +91,14 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         // do nothing
     }
 
+    public PolarDiagramBase(PolarDiagramBase pd) {
+        speedTable = pd.speedTable;
+        beatAngles = pd.beatAngles;
+        beatSOG = pd.beatSOG;
+        jibeAngles = pd.jibeAngles;
+        jibeSOG = pd.jibeSOG;
+    }
+
     // a constructor that allows a generic set of parameters
     public PolarDiagramBase(NavigableMap<Speed, NavigableMap<Bearing, Speed>> speeds,
             NavigableMap<Speed, Bearing> beats, NavigableMap<Speed, Bearing> jibes,

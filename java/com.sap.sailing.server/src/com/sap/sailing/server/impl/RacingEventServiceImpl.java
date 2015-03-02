@@ -60,6 +60,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
@@ -191,6 +192,8 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sse.BuildVersion;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -209,7 +212,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
-        LeaderboardRegistry, Replicator {
+        LeaderboardRegistry, Replicator, EventFetcher {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -344,6 +347,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final PolarDataService polarDataService;
 
+    private final SimulationService simulationService;
+
     /**
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
      * unpredictable fashion
@@ -462,7 +467,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor
-                        .getColor(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
+                        .getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
                         competitor.getTeam().getImage()));
             }
         });
@@ -496,6 +501,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         /* keepAliveTime */60, TimeUnit.SECONDS,
         /* workQueue */new LinkedBlockingQueue<Runnable>());
         polarDataService = PolarDataServiceFactory.createStandardPolarDataService(polarExecutor);
+        Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
+        /* maximumPoolSize */THREAD_POOL_SIZE,
+        /* keepAliveTime */60, TimeUnit.SECONDS,
+        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
+        simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.regattaLogReplicator = new RegattaLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
@@ -544,6 +555,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return polarDataService;
     }
 
+    @Override
+    public SimulationService getSimulationService() {
+        return simulationService;
+    }
+    
     @Override
     public void clearState() throws Exception {
         for (String leaderboardGroupName : new ArrayList<>(this.leaderboardGroupsByName.keySet())) {
@@ -1789,14 +1805,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 regatta.addSeries(seriesObj);
             }
         }
-        for (Event event : getAllEvents()) {
-            event.removeRegatta(regatta);
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (newDefaultCourseAreaId != null && courseArea.getId().equals(newDefaultCourseAreaId)) {
-                    event.addRegatta(regatta);
-                }
-            }
-        }
+        regatta.adjustEventToRegattaAssociation(this);
         if (regatta.isPersistent()) {
             mongoObjectFactory.storeRegatta(regatta);
         }
@@ -2354,7 +2363,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
-                    dynamicCompetitor.getColor(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+                    dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
         }
         logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 
