@@ -17,6 +17,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.impl.functions.FunctionManager;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
@@ -75,6 +77,9 @@ public class DataMiningActivator implements BundleActivator {
         
         dataMiningServer.registerAllClasses(dataMiningBundleService.getClassesWithMarkedMethods());
         
+        for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
+            dataMiningServer.setDataSourceProvider(dataSourceProvider);
+        }
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
         }
@@ -84,7 +89,11 @@ public class DataMiningActivator implements BundleActivator {
         dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
         
         dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getClassesWithMarkedMethods());
+
         
+        for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
+            dataMiningServer.removeDataSourceProvider(dataSourceProvider);
+        }
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);
         }

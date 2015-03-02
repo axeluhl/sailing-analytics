@@ -34,16 +34,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private final BundleContext context;
     
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
     private final FunctionDTOFactory functionDTOFactory;
     
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
-        
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
-        racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
-        
         functionDTOFactory = new FunctionDTOFactory();
     }
 
@@ -57,17 +53,6 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     private DataMiningServer getDataMiningServer() {
         return dataMiningServerTracker.getService();
-    }
-
-    private ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(BundleContext context) {
-        ServiceTracker<RacingEventService, RacingEventService> result = new ServiceTracker<RacingEventService, RacingEventService>(
-                context, RacingEventService.class.getName(), null);
-        result.open();
-        return result;
-    }
-
-    private RacingEventService getRacingEventService() {
-        return racingEventServiceTracker.getService();
     }
     
     @Override
@@ -110,17 +95,17 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
         @SuppressWarnings("unchecked")
-        Iterable<DataRetrieverChainDefinition<RacingEventService, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<RacingEventService,?>>)(Iterable<?>) getDataMiningServer().getDataRetrieverChainDefinitionsByDataType(baseDataType);
+        Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<?, ?>>)(Iterable<?>)  getDataMiningServer().getDataRetrieverChainDefinitionsByDataType(baseDataType);
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
     }
     
     private Collection<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
-            Iterable<DataRetrieverChainDefinition<RacingEventService, ?>> dataRetrieverChainDefinitions, String localeInfoName) {
+            Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions, String localeInfoName) {
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         ResourceBundleStringMessages ServerStringMessages = getDataMiningServer().getStringMessages();
         
         Collection<DataRetrieverChainDefinitionDTO> DTOs = new ArrayList<>();
-        for (DataRetrieverChainDefinition<RacingEventService, ?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
+        for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
             Collection<LocalizedTypeDTO> retrievedDataTypesChain = new ArrayList<>();
             for (DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation : dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()) {
                 String typeName = retrieverTypeWithInformation.getRetrievedDataType().getSimpleName();
@@ -142,7 +127,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
         Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
-        Query<Set<Object>> dimensionValuesQuery = getDataMiningServer().createDimensionValuesQuery(getRacingEventService(), retrieverChainDefinition, retrieverLevel, dimensions, locale);
+        Query<Set<Object>> dimensionValuesQuery = getDataMiningServer().createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, locale);
         QueryResult<Set<Object>> result = dimensionValuesQuery.run();
         return result;
     }
@@ -159,7 +144,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDTO queryDefinitionDTO) throws Exception {
         QueryDefinition<RacingEventService, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
-        Query<ResultType> query = getDataMiningServer().createQuery(getRacingEventService(), queryDefinition);
+        Query<ResultType> query = getDataMiningServer().createQuery(queryDefinition);
         QueryResult<ResultType> result = query.run();
         return result;
     }

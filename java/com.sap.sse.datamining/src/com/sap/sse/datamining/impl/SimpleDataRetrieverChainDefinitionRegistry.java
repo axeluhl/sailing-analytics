@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
 
 public class SimpleDataRetrieverChainDefinitionRegistry implements DataRetrieverChainDefinitionRegistry {
 

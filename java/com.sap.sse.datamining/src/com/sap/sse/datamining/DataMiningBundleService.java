@@ -35,4 +35,9 @@ public interface DataMiningBundleService {
      */
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions();
 
+    /**
+     * @return a collection of {@link DataSourceProvider DataSourceProviders}, that are used to get the data sources for the queries
+     */
+    public Iterable<DataSourceProvider<?>> getDataSourceProviders();
+
 }

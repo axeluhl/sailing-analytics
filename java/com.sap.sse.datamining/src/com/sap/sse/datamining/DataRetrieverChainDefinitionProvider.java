@@ -1,9 +1,7 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining;
 
 import java.util.Collection;
 import java.util.UUID;
-
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
 
 public interface DataRetrieverChainDefinitionProvider {
 

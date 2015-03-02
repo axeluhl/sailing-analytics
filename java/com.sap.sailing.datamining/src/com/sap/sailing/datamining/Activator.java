@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
@@ -24,13 +26,14 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     private static Activator INSTANCE;
 
     private final ResourceBundleStringMessages sailingServerStringMessages;
-    private final SailingDataRetrieverChainDefinitions dataRetrieverChainDefinitions;
+    private final SailingDataRetrievalChainDefinitions dataRetrieverChainDefinitions;
     private final SailingClusterGroups clusterGroups;
+    private DataSourceProvider<?> racingEventServiceProvider;
     
     private ServiceReference<DataMiningBundleService> dataMiningBundleServiceReference;
     
     public Activator() {
-        dataRetrieverChainDefinitions = new SailingDataRetrieverChainDefinitions();
+        dataRetrieverChainDefinitions = new SailingDataRetrievalChainDefinitions();
         sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader());
         clusterGroups = new SailingClusterGroups();
     }
@@ -38,6 +41,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     @Override
     public void start(BundleContext context) throws Exception {
         INSTANCE = this;
+        racingEventServiceProvider = new RacingEventServiceProvider(context);
         
         dataMiningBundleServiceReference = context.registerService(DataMiningBundleService.class, this, null).getReference();
     }
@@ -66,6 +70,13 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     @Override
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions();
+    }
+    
+    @Override
+    public Iterable<DataSourceProvider<?>> getDataSourceProviders() {
+        Collection<DataSourceProvider<?>> dataSourceProviders = new HashSet<>();
+        dataSourceProviders.add(racingEventServiceProvider);
+        return dataSourceProviders;
     }
     
     public SailingClusterGroups getClusterGroups() {
