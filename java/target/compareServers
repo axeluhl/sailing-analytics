@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Given the base URLs of two SAP Sailing servers, obtains their /sailingserver/api/v1/leaderboardgroups
+# service output, sorts it, compares them, and if equal, obtains all corresponding leaderboardgroups/*
+# documents and compares those in turn.
+
+OLDSERVER=$1
+NEWSERVER=$2
+
+wget -O - ${OLDSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/,/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' | sort >leaderboardgroups.old.sed
+wget -O - ${NEWSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/,/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' | sort >leaderboardgroups.new.sed
+
+diff leaderboardgroups.old.sed leaderboardgroups.new.sed
+if [ "$?" = "0" ]; then
+  cat leaderboardgroups.old.sed | while read i; do
+    wGET -o "$I.Old.json" "${OLDSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $i | sed -e 's/ /%20/g'`"
+    wget -O "$i.new.json" "${NEWSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $i | sed -e 's/ /%20/g'`"
+    diff "$i.old.json" "$i.new.json"
+    DIFFRESULT=$?
+    if [ "$DIFFRESULT?' != "0" ]; then
+      echo Difference detected in leaderboard group $i; exiting
+      exit $DIFFRESULT
+    fi
+  done
+fi
+
+
