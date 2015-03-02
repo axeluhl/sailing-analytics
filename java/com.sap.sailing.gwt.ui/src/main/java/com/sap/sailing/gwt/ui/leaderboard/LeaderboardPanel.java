@@ -2824,36 +2824,40 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         final int nextColumnIndex;
         int columnCounter = 0;
         int leaderboardColumnCount = getLeaderboardTable().getColumnCount();
-        if (isShowCompetitorSailId() && competitorSailIdColumnIndex == -1) {
-            competitorSailIdColumnIndex = sailIdColumnIndex;
-            if (leaderboardColumnCount > 1) {
-                insertColumn(competitorSailIdColumnIndex, new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-                    @Override
-                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                        return t.competitor;
-                    }
-                }));
-            } else {
-                addColumn(new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-                    @Override
-                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                        return t.competitor;
-                    }
-                }));
+        if (isShowCompetitorSailId()) { 
+            if (competitorSailIdColumnIndex == -1) {
+                competitorSailIdColumnIndex = sailIdColumnIndex;
+                if (leaderboardColumnCount > 1) {
+                    insertColumn(competitorSailIdColumnIndex, new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+                        @Override
+                        public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                            return t.competitor;
+                        }
+                    }));
+                } else {
+                    addColumn(new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+                        @Override
+                        public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                            return t.competitor;
+                        }
+                    }));
+                }
             }
             columnCounter++;
         } else if (!isShowCompetitorSailId() && competitorSailIdColumnIndex != -1) {
             removeColumn(competitorSailIdColumnIndex);
             competitorSailIdColumnIndex = -1;
         }
-        if (isShowCompetitorFullName() && competitorFullNameColumnIndex == -1) {
-            if (leaderboardColumnCount > 1) {
-                insertColumn(sailIdColumnIndex+columnCounter, createCompetitorColumn());
-            } else {
-                addColumn(createCompetitorColumn());
+        if (isShowCompetitorFullName()) {
+            if (competitorFullNameColumnIndex == -1) {
+                if (leaderboardColumnCount > 1) {
+                    insertColumn(sailIdColumnIndex+columnCounter, createCompetitorColumn());
+                } else {
+                    addColumn(createCompetitorColumn());
+                }
+                competitorFullNameColumnIndex = sailIdColumnIndex+columnCounter;
             }
             columnCounter++;
-            competitorFullNameColumnIndex = sailIdColumnIndex+columnCounter;
         } else if (!isShowCompetitorFullName() && competitorFullNameColumnIndex != -1) {
             removeColumn(competitorFullNameColumnIndex);
             competitorFullNameColumnIndex = -1;
