@@ -768,7 +768,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.races = convertToRaceDTOs(regatta);
         regattaDTO.series = convertToSeriesDTOs(regatta);
         regattaDTO.startDate = regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null;
-        regattaDTO.endDate = regatta.getStartDate() != null ? regatta.getEndDate().asDate() : null;
+        regattaDTO.endDate = regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null;
         BoatClass boatClass = regatta.getBoatClass();
         if (boatClass != null) {
             regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength().getMeters());
