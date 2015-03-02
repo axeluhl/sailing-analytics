@@ -50,18 +50,21 @@
 			<c:header>
 				<h:EventHeader ui:field="eventHeader" />
 			</c:header>
-			<c:tabcontent title="Overview">
-				<tabs:RegattaOverviewTabView />
-			</c:tabcontent>
+<!-- 			<c:tabcontent title="Overview"> -->
+<!-- 				<tabs:RegattaOverviewTabView /> -->
+<!-- 			</c:tabcontent> -->
 			<c:tabcontent title="Races">
 				<tabs:RegattaRacesTabView />
 			</c:tabcontent>
 			<c:tabcontent title="Leaderboard">
 				<tabs:RegattaLeaderboardTabView />
 			</c:tabcontent>
-			<c:tabcontent title="Media">
-				<tabs:RegattaMediaTabView />
+			<c:tabcontent title="Competitor Analytics">
+				<tabs:RegattaCompetitorAnalyticsTabView />
 			</c:tabcontent>
+<!-- 			<c:tabcontent title="Media"> -->
+<!-- 				<tabs:RegattaMediaTabView /> -->
+<!-- 			</c:tabcontent> -->
 		</c:TabPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 
