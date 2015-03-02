@@ -43,7 +43,9 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
     String gridFile = null;
 
     public PathGeneratorTreeGrow(SimulationParameters params) {
-        this.parameters = params;
+        PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
+        this.parameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
+                params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist());
     }
 
     public void setEvaluationParameters(String startDirection, int maxTurns, String gridFile) {

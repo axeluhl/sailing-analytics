@@ -32,6 +32,7 @@ import com.sap.sailing.simulator.impl.MaximumTurnTimes;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
+import com.sap.sailing.simulator.impl.SparsePolarDataException;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
@@ -148,14 +149,20 @@ public class SimulationServiceImpl implements SimulationService {
             course.add(endPosition);
             BoatClass boatClass = trackedRace.getRace().getBoatClass();
             PolarDataService polarDataService = racingEventService.getPolarDataService();
-            PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarDataService);
+            PolarDiagram polarDiagram;
+            try {
+                polarDiagram = new PolarDiagramGPS(boatClass, polarDataService);
+            } catch (SparsePolarDataException e) {
+                polarDiagram = null;
+                // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
+            }
             double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
                     / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
             Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
             SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField,
                     simuStep, SailingSimulatorConstants.ModeEvent, true, true);
             Map<PathType, Path> paths = null;
-            if (legType != LegType.REACHING) {
+            if ((polarDiagram != null)&&(legType != LegType.REACHING)) {
                 paths = getAllPathsEvenTimed(simulationPars, timeStep.asMillis());
             }
             // prepare simulator-results

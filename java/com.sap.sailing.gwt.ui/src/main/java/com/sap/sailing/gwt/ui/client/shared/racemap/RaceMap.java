@@ -2235,7 +2235,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leaderWithLeg = this
                 .getLeadingVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
         if (leaderWithLeg == null) {
-            return 0;
+            return 1; // before start, show simulation for leg 1
         } else {
             return leaderWithLeg.getA();
         }
