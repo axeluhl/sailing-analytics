@@ -15,7 +15,7 @@ if [ "$?" = "0" ]; then
   cat leaderboardgroups.old.sed | while read i; do
     wget -O - "${OLDSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $i | sed -e 's/ /%20/g'`" | python -m json.tool >"$i.old.json"
     wget -O - "${NEWSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $i | sed -e 's/ /%20/g'`" | python -m json.tool >"$i.new.json" 
-    diff -b -B "$i.old.json" "$i.new.json"
+    diff -b -i -B "$i.old.json" "$i.new.json"
     DIFFRESULT=$?
     if [ "$DIFFRESULT" != "0" ]; then
       echo "Difference detected in leaderboard group $i; exiting"
