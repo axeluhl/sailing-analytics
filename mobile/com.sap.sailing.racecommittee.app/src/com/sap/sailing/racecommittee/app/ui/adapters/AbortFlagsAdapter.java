@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 

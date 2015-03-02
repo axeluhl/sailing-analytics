@@ -8,8 +8,10 @@ import android.widget.ListView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter.AbortFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -18,12 +20,15 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemClick {
 
-    private static final String FLAG = "flag";
-
     public static AbortFlagsFragment newInstance(Flags flag) {
+        if (flag != Flags.AP && flag != Flags.NOVEMBER) {
+            throw new IllegalArgumentException(
+                    "The abort fragment can only be instantiated with AP or NOVEMBER, but was " + flag.name());
+        }
+
         AbortFlagsFragment fragment = new AbortFlagsFragment();
         Bundle args = new Bundle();
-        args.putSerializable(FLAG, flag);
+        args.putString(AppConstants.FLAG_KEY, flag.name());
         fragment.setArguments(args);
         return fragment;
     }
@@ -34,7 +39,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
         ListView listView = (ListView) layout.findViewById(R.id.listView);
         if (listView != null) {
-            Flags flag = (Flags) getArguments().getSerializable(FLAG);
+            Flags flag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
             listView.setAdapter(new AbortFlagsAdapter(getActivity(), this, flag));
         }
 
@@ -45,21 +50,41 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
     public void onClick(Flags flag) {
         TimePoint now = MillisecondsTimePoint.now();
         RaceState state = getRaceState();
-        switch (flag) {
+        Flags mainFlag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
+        switch (mainFlag) {
             case AP:
-                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId().toString());
+                logFlag(flag);
                 state.setAborted(now, /* postponed */ true, flag);
                 break;
 
             case NOVEMBER:
-                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId().toString());
+                logFlag(flag);
                 state.setAborted(now, /* postponed */ false, flag);
+                break;
+
+            default:
+                logFlag(flag);
+                break;
+        }
+        state.setAdvancePass(now);
+
+        RacingActivity activity = (RacingActivity) getActivity();
+        activity.onRaceItemClicked(getRace());
+    }
+
+    private void logFlag(Flags flag) {
+        switch (flag) {
+            case ALPHA:
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId().toString());
+                break;
+
+            case HOTEL:
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId().toString());
                 break;
 
             default:
                 ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId().toString());
                 break;
         }
-        state.setAdvancePass(now);
     }
 }

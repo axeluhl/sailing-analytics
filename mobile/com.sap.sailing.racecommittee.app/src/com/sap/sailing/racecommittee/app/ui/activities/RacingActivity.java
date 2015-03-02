@@ -308,6 +308,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         infoFragment = new RaceInfoFragment();
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
+        setupActionBar(managedRace);
+
         getFragmentManager().beginTransaction()
                 // .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                 .replace(R.id.racing_view_container, infoFragment)
@@ -418,10 +420,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
-    private void setupActionBar(CourseArea courseArea) {
-        AbstractLogEventAuthor author = preferences.getAuthor();
-        String title = String.format(getString(R.string.racingview_header), courseArea.getName());
-        title += " (" + author.getName() + ")";
+    private void setupActionBar(ManagedRace race) {
+        String title = race.getSeries().getName() + " / ";
+        if (race.getFleet() != null) {
+            title += race.getFleet().getName() + " / " + race.getRaceName();
+        } else {
+            title += race.getRaceName();
+        }
 
         getSupportActionBar().setTitle(title);
     }

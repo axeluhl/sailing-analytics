@@ -70,7 +70,7 @@ public class RaceFlagViewerFragment extends RaceFragment {
 
         TimePoint changeAt = poleState.getNextStateValidFrom();
         boolean next = false;
-        if (flag.getUpperFlag().equals(nextFlag.getUpperFlag())) {
+        if (nextFlag != null && flag.getUpperFlag().equals(nextFlag.getUpperFlag())) {
             next = true;
         }
 

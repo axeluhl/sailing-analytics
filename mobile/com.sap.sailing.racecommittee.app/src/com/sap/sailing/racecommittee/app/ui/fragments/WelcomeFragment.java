@@ -15,7 +15,6 @@ public class WelcomeFragment extends Fragment implements OnClickListener {
 
     private RacingActivity mActivity;
     private ActionBar mActionBar;
-    private CharSequence mOldTitle;
 
     public WelcomeFragment() {
     }
@@ -34,7 +33,6 @@ public class WelcomeFragment extends Fragment implements OnClickListener {
             mActivity.openDrawer();
             mActionBar = mActivity.getSupportActionBar();
             if (mActionBar != null) {
-                mOldTitle = mActionBar.getTitle();
                 mActionBar.setTitle(getString(R.string.race_select));
             }
         }
@@ -44,9 +42,6 @@ public class WelcomeFragment extends Fragment implements OnClickListener {
     public void onDetach() {
         super.onDetach();
 
-        if (mActionBar != null) {
-            mActionBar.setTitle(mOldTitle);
-        }
         mActionBar = null;
         mActivity = null;
     }
