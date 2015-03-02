@@ -2,12 +2,12 @@
 <ui:UiBinder 
 	xmlns:ui="urn:ui:com.google.gwt.uibinder" 
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
-	xmlns:s="urn:import:com.sap.sailing.gwt.home.client.place.event2.ui"
+	xmlns:s="urn:import:com.sap.sailing.gwt.home.client.place.event2.partials"
 	>
 
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.ui.regattaHeader.RegattaHeaderResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.partials.regattaHeader.RegattaHeaderResources" />
   <g:HTMLPanel>
     <!-- The regatta header contains basic regatta information-->
     <div>

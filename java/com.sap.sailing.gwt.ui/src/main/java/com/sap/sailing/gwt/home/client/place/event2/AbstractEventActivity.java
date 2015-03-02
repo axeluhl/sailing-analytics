@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 
-public abstract class EventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements EventView.Presenter {
+public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements EventView.Presenter {
 
     protected final PLACE currentPlace;
 
@@ -19,7 +19,7 @@ public abstract class EventActivity<PLACE extends AbstractEventPlace> extends Ab
 
     protected final EventClientFactory clientFactory;
 
-    public EventActivity(PLACE place, EventClientFactory clientFactory) {
+    public AbstractEventActivity(PLACE place, EventClientFactory clientFactory) {
         this.currentPlace = place;
         this.ctx = new EventContext(place.getCtx());
 

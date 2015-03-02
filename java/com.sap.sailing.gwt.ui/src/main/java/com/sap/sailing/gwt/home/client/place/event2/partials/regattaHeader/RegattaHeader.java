@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.ui.regattaHeader;
+package com.sap.sailing.gwt.home.client.place.event2.partials.regattaHeader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

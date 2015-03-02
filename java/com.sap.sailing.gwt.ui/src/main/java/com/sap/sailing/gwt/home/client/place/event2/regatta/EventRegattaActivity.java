@@ -3,12 +3,12 @@ package com.sap.sailing.gwt.home.client.place.event2.regatta;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
-import com.sap.sailing.gwt.home.client.place.event2.EventActivity;
+import com.sap.sailing.gwt.home.client.place.event2.AbstractEventActivity;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
-public class EventRegattaActivity extends EventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
+public class EventRegattaActivity extends AbstractEventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
 
     private EventRegattaView currentView = new TabletAndDesktopEventView();
 

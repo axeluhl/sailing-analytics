@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.ui;
+package com.sap.sailing.gwt.home.client.place.event2.partials;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.header;
+package com.sap.sailing.gwt.home.client.place.event2.partials.header;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
@@ -8,7 +8,7 @@ import com.google.gwt.resources.client.ImageResource;
 public interface EventHeaderResources extends ClientBundle {
     public static final EventHeaderResources INSTANCE = GWT.create(EventHeaderResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/place/event2/header/EventHeader.gss")
+    @Source("EventHeader.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
