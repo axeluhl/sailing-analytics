@@ -54,7 +54,7 @@ public class PolarDataMiner {
 
     private static ThreadPoolExecutor createExecutor() {
         return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>());
+                new LinkedBlockingQueue<Runnable>(100));
     }
 
 
