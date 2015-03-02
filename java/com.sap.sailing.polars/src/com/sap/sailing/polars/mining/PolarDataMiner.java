@@ -97,32 +97,37 @@ public class PolarDataMiner {
         movingAverageGrouperResultReceivers.add(movingAverageProcessor);
 
         Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProviders = new ArrayList<>();
-        for (Function<?> function : PolarDataDimensionCollectionFactory.getClusterKeyDimensions()) {
+        for (Function<?> function : PolarDataDimensionCollectionFactory.getMovingAverageClusterKeyDimensions()) {
             dimensionsWithParameterProviders.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
         }
 
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> movingAverageGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, grouperResultReceivers, dimensionsWithParameterProviders);
+                GPSFixMovingWithPolarContext.class, executor, movingAverageGrouperResultReceivers, dimensionsWithParameterProviders);
         
 
         cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerCourseGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         regressionPerCourseGrouperResultReceivers.add(cubicRegressionPerCourseProcessor);
 
-        Collection<Function<?>> cubicRegressionPerCourseDimensions = PolarDataDimensionCollectionFactory.getCubicRegressionPerCourseClusterKeyDimensions();
-
+        Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvidersForCubicRegression = new ArrayList<>();
+        for (Function<?> function : PolarDataDimensionCollectionFactory.getCubicRegressionPerCourseClusterKeyDimensions()) {
+            dimensionsWithParameterProvidersForCubicRegression.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
+        }
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> cubicRegressionPerCourseGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, regressionPerCourseGrouperResultReceivers, cubicRegressionPerCourseDimensions);
+                GPSFixMovingWithPolarContext.class, executor, regressionPerCourseGrouperResultReceivers, dimensionsWithParameterProvidersForCubicRegression);
         
         ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
         speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup);
         Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>> regressionPerAngleClusterGrouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, ?>>();
         regressionPerAngleClusterGrouperResultReceivers.add(speedRegressionPerAngleClusterProcessor);
 
-        Collection<Function<?>> regressionPerAngleClusterDimensions = PolarDataDimensionCollectionFactory.getSpeedRegressionPerAngleClusterClusterKeyDimensions();
-
+        Collection<Pair<Function<?>, ParameterProvider>> dimensionsWithParameterProvidersForRegressionPerAngleCluster = new ArrayList<>();
+        for (Function<?> function : PolarDataDimensionCollectionFactory.getSpeedRegressionPerAngleClusterClusterKeyDimensions()) {
+            dimensionsWithParameterProvidersForRegressionPerAngleCluster.add(new Pair<Function<?>, ParameterProvider>(function, ParameterProvider.NULL));
+        }
+        
         Processor<GPSFixMovingWithPolarContext, GroupedDataEntry<GPSFixMovingWithPolarContext>> regressionPerAngleClusterGroupingProcessor = new ParallelMultiDimensionsValueNestingGroupingProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, regressionPerAngleClusterGrouperResultReceivers, regressionPerAngleClusterDimensions);
+                GPSFixMovingWithPolarContext.class, executor, regressionPerAngleClusterGrouperResultReceivers, dimensionsWithParameterProvidersForRegressionPerAngleCluster);
 
           
         Collection<Processor<GPSFixMovingWithPolarContext, ?>> filteringResultReceivers = new ArrayList<>();
