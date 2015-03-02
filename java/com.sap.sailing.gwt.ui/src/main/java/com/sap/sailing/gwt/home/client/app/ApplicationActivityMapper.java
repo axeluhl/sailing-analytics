@@ -45,10 +45,11 @@ public class ApplicationActivityMapper implements ActivityMapper {
         } else if (place instanceof EventPlace) {
             // work around
             // return new EventActivityProxy((EventPlace) place, clientFactory);
-            return new EventActivityProxy(new com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace(((EventPlace)place).getEventUuidAsString()), clientFactory);
+            return new EventActivityProxy(new com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace(
+                    ((EventPlace) place).getEventUuidAsString()), clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace) {
             com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace eventPlace = (com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace) place;
-            return new EventActivityProxy(eventPlace, clientFactory);
+            return new EventActivityProxy(eventPlace, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof SeriesEventsPlace) {
             return new com.sap.sailing.gwt.home.client.place.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory);
         } else if (place instanceof EventsPlace) {

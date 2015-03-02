@@ -1,0 +1,55 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.partials.regattaraces.EventRegattaRacesResources" />
+<g:HTMLPanel styleName="{local_res.css.eventregattarace}">
+  <div ui:field="fleetColor" class="{local_res.css.eventregattarace_fleetindicator}"></div>
+  <!-- race name  -->
+  <div class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_name}">
+      <span ui:field="raceName" class="{local_res.css.eventregattarace_nameshort}"></span>
+      <ui:text from='{i18n.eventRegattaRaceRace}'/>&nbsp;<span ui:field="raceName2" /><br></br>
+      <span ui:field="raceState" />&nbsp;<span ui:field="raceTime" />
+  </div>
+  <!-- race state  if race.isScheduled and race.isTracked -->
+  <div ui:field="raceFlagDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_flag}">
+      <img src="raceFlag"></img>
+	</div>
+  <div ui:field="windStatusDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_wind}">
+      <ui:text from='{i18n.eventRegattaRaceWind}'/><br></br>
+      <span class="{local_res.css.eventregattarace_wind_strength}"><span ui:field="averageRaceWind" /></span>
+  </div>
+  <div ui:field="raceWinnerDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_leader}">
+      <ui:text from="{i18n.eventRegattaRaceWinner}"/><br></br><span ui:field="raceWinner" class="{local_res.css.eventregattarace_leader_name}"></span>
+  </div>
+  <div ui:field="raceLeaderDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_leader}">
+      <ui:text from="{i18n.eventRegattaRaceLeader}"/><br></br><span ui:field="raceLeader" class="{local_res.css.eventregattarace_leader_name}"></span>
+  </div>
+  <div ui:field="legProgressDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_legs}"><ui:text from='{i18n.leg}'/>&nbsp;<span ui:field="currentLegNo" />/<span ui:field="totalLegsCount" />
+    <div class="{local_res.css.eventregattarace_legs_list}">
+      <div data-status="r" class="{local_res.css.eventregattarace_legs_leg}"></div>
+    </div>
+  </div>
+  <div ui:field="raceFeaturesDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_features}">
+    <div ui:field="featureGPS" class="{local_res.css.eventregattarace_feature} {local_res.css.eventregattarace_featuregps}"></div>
+    <div ui:field="featureWind" class="{local_res.css.eventregattarace_feature} {local_res.css.eventregattarace_featurewind}"></div>
+    <div ui:field="featureVideo" class="{local_res.css.eventregattarace_feature} {local_res.css.eventregattarace_featurevideo}"></div>
+    <div ui:field="featureAudio" class="{local_res.css.eventregattarace_feature} {local_res.css.eventregattarace_featureaudio}"></div>
+  </div>
+  <div ui:field="raceNotTrackedDiv" class="{local_res.css.eventregattarace_action} {local_res.css.eventregattarace_actiondisabled}">
+      <ui:text from='{i18n.eventRegattaRaceNotTracked}'/>
+  </div>
+  <div ui:field="raceNotScheduledDiv" class="{local_res.css.eventregattarace_action} {local_res.css.eventregattarace_actiondisabled}">
+      <ui:text from='{i18n.raceNotScheduled}'/>
+  </div>
+  <div ui:field="watchRaceDiv" class="{local_res.css.eventregattarace_action}">
+      <g:Anchor ui:field="watchRaceLink" target="_blank" styleName="{res.mainCss.button} {local_res.css.eventregattarace_action_watch}"><ui:text from='{i18n.eventRegattaRaceWatch}'/></g:Anchor>
+  </div>
+  <div ui:field="analyzeRaceDiv" class="{local_res.css.eventregattarace_action}">
+      <g:Anchor ui:field="analyzeRaceLink" target="_blank" styleName="{res.mainCss.button} {local_res.css.eventregattarace_action_analyze}"><ui:text from='{i18n.eventRegattaRaceAnalyse}'/></g:Anchor>
+  </div>
+</g:HTMLPanel>
+</ui:UiBinder>
+

@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.home.client.place.event2.regatta;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.AbstractEventActivity;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
@@ -12,8 +12,9 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
 
     private EventRegattaView currentView = new TabletAndDesktopEventView();
 
-    public EventRegattaActivity(AbstractEventRegattaPlace place, EventClientFactory clientFactory) {
-        super(place, clientFactory);
+    public EventRegattaActivity(AbstractEventRegattaPlace place, EventClientFactory clientFactory,
+            HomePlacesNavigator homePlacesNavigator) {
+        super(place, clientFactory, homePlacesNavigator);
     }
 
     @Override
@@ -37,8 +38,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         return super.getEventName();
     }
 
-    @Override
-    public void gotoOverview() {
-        clientFactory.getPlaceController().goTo(new RegattaOverviewPlace(this.ctx));
-    }
+
+
 }

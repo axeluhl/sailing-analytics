@@ -1,6 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+		     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.place.event"
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <g:HTMLPanel>
-        <p>This is regatta competitor analytics tab</p>
+		<s:regattaanalytics.RegattaAnalytics ui:field='regattaAnalytics'/>
     </g:HTMLPanel>
 </ui:UiBinder>
