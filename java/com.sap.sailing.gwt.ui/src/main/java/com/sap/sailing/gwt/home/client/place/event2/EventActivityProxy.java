@@ -11,8 +11,8 @@ import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.Multiregat
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaActivity;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
-import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class EventActivityProxy extends AbstractActivityProxy {
@@ -34,9 +34,9 @@ public class EventActivityProxy extends AbstractActivityProxy {
         } else {
             final UUID eventUUID = UUID.fromString(ctx.getEventId());
             
-            clientFactory.getSailingService().getEventMetadataById(eventUUID, new AsyncCallback<EventMetadataDTO>() {
+            clientFactory.getSailingService().getEventViewById(eventUUID, new AsyncCallback<EventViewDTO>() {
                 @Override
-                public void onSuccess(final EventMetadataDTO event) {
+                public void onSuccess(final EventViewDTO event) {
                     if (event != null) {
                         ctx.updateContext(event);
                         afterLoad();
@@ -82,7 +82,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
     }
     
     private AbstractEventPlace getRealPlace() {
-        EventMetadataDTO event = ctx.getEventDTO();
+        EventViewDTO event = ctx.getEventDTO();
         if(event.getType() == EventType.SERIES_EVENT) {
             return new RegattaOverviewPlace(ctx);
         }

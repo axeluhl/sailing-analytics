@@ -330,10 +330,10 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventState;
-import com.sap.sailing.gwt.ui.shared.eventview.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
@@ -5493,7 +5493,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventMetadataDTO getEventMetadataById(UUID id) {
+    public EventViewDTO getEventViewById(UUID id) {
         EventDTO o;
         try {
             o = getEventById(id, false);
@@ -5501,15 +5501,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new RuntimeException("We can do better than MalformedURLException");
         }
 
-        EventMetadataDTO dto = new EventMetadataDTO();
-        dto.setId(id);
-        dto.setStartDate(o.startDate);
-        dto.setEndDate(o.endDate);
+        EventViewDTO dto = new EventViewDTO();
+        dto.id = id;
+        dto.startDate = o.startDate;
+        dto.endDate = o.endDate;
         dto.setLogoImageURL(o.getLogoImageURL());
         dto.setName(o.getName());
         dto.setOfficialWebsiteURL(o.getOfficialWebsiteURL());
-        dto.setVenue(o.venue.getName());
-        dto.setVenueCountry(null);
+        dto.venue = o.venue;
         
         dto.setState(EventState.FINISHED);
         if (o.isFakeSeries()) {

@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregat
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
-import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 
 /**
@@ -45,7 +45,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
-        EventMetadataDTO event = myPlace.getCtx().getEventDTO();
+        EventViewDTO event = myPlace.getCtx().getEventDTO();
         for (final RegattaReferenceDTO regatta : event.getRegattas()) {
             PushButton button = new PushButton();
             button.setText(regatta.getDisplayName());

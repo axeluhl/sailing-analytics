@@ -6,9 +6,9 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
-import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 
 public abstract class EventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements EventView.Presenter {
@@ -43,8 +43,8 @@ public abstract class EventActivity<PLACE extends AbstractEventPlace> extends Ab
 
     @Override
     public void forPlaceSelection(PlaceCallback callback) {
-        EventMetadataDTO event = ctx.getEventDTO();
-        if(event.getType() == EventType.SERIES_EVENT) {
+        EventViewDTO event = ctx.getEventDTO();
+        if (event.getType() == EventType.SERIES_EVENT) {
             for(EventReferenceDTO seriesEvent : event.getEventsOfSeries()) {
                 RegattaOverviewPlace place = new RegattaOverviewPlace(new EventContext().withId(seriesEvent.getId().toString()));
                 callback.forPlace(place, seriesEvent.getDisplayName());

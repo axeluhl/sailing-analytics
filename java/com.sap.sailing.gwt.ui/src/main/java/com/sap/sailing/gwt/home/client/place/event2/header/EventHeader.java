@@ -30,8 +30,8 @@ import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventState;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -62,7 +62,7 @@ public class EventHeader extends Composite {
     
     @UiField FlowPanel dropdownContent;
 
-    private EventMetadataDTO event;
+    private EventViewDTO event;
 
     private Presenter presenter;
 
@@ -87,7 +87,7 @@ public class EventHeader extends Composite {
         eventLogo.setAlt(event.getName());
         
         eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
-        String venue = event.getVenue();
+        String venue = event.getVenue().getName();
         if(event.getVenueCountry() != null && !event.getVenueCountry().isEmpty()) {
             venue += ", " + event.getVenueCountry();
         }

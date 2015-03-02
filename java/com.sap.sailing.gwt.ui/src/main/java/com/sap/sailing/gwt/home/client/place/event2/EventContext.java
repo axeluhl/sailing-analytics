@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
-import com.sap.sailing.gwt.ui.shared.eventview.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 
 /**
  * Common context used by the different tabs in the event place.
@@ -16,13 +16,13 @@ public class EventContext {
     /**
      * Common state required by all tabs/ places in event
      */
-    private EventMetadataDTO eventDTO;
+    private EventViewDTO eventDTO;
 
 
     public EventContext() {
     }
 
-    public EventContext(EventMetadataDTO dto) {
+    public EventContext(EventViewDTO dto) {
         updateContext(dto);
     }
 
@@ -48,17 +48,17 @@ public class EventContext {
      * @param dto
      * @return
      */
-    public EventContext updateContext(EventMetadataDTO dto) {
+    public EventContext updateContext(EventViewDTO dto) {
         this.eventDTO = dto;
         if (eventDTO == null) {
             withId(null);
         } else {
-            withId(dto.getId().toString());
+            withId(dto.id.toString());
         }
         return this;
     }
 
-    public EventMetadataDTO getEventDTO() {
+    public EventViewDTO getEventDTO() {
         return eventDTO;
     }
 
