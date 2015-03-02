@@ -1405,7 +1405,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
-            TimePoint fromTimePoint = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
+            TimePoint fromTimePoint = from == null ? trackedRace.getStartOfTracking() == null ? trackedRace
+                    .getStartOfRace() : trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             TimePoint toTimePoint = to == null ? trackedRace.getEndOfRace() == null ?
                     MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace() : new MillisecondsTimePoint(to);
             if (fromTimePoint != null && toTimePoint != null) {
