@@ -227,9 +227,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private boolean showAddedScores;
     
     private boolean showCompetitorSailId;
-    private int competitorSailIdColumnIndex = -1;
     private boolean showCompetitorFullName;
-    private int competitorFullNameColumnIndex = -1;
 
     /**
      * When <code>true</code> then an additional column just before the overall points is displayed that sums up
@@ -2498,7 +2496,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         int columnIndex = 0;
         columnIndex = ensureSelectionCheckboxColumn(columnIndex);
         columnIndex = ensureRankColumn(columnIndex);
-        columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
+        columnIndex = ensureSailIDAndCompetitorColumn();
         columnIndex = updateCarryColumn(leaderboard, columnIndex);
         adjustOverallDetailColumns(leaderboard, columnIndex);
         // first remove race columns no longer needed:
@@ -2820,50 +2818,42 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      *         method will always make sure that two columns are placed in the layout, one at
      *         <code>sailIdColumnIndex</code> and one at <code>sailIdColumnIndex+1</code>.
      */
-    private int ensureSailIDAndCompetitorColumn(int sailIdColumnIndex) {
-        final int nextColumnIndex;
-        int columnCounter = 0;
-        int leaderboardColumnCount = getLeaderboardTable().getColumnCount();
-        if (isShowCompetitorSailId()) { 
-            if (competitorSailIdColumnIndex == -1) {
-                competitorSailIdColumnIndex = sailIdColumnIndex;
-                if (leaderboardColumnCount > 1) {
-                    insertColumn(competitorSailIdColumnIndex, new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-                        @Override
-                        public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                            return t.competitor;
-                        }
-                    }));
-                } else {
-                    addColumn(new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-                        @Override
-                        public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                            return t.competitor;
-                        }
-                    }));
+    private int ensureSailIDAndCompetitorColumn() {
+        SailIDColumn<LeaderboardRowDTO> sailIdColumn = new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+            @Override
+            public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                return t.competitor;
+            }
+        });
+        if (getLeaderboardTable().getColumnCount() >= 3) { // table already filled with columns
+            if (isShowCompetitorSailId()) {
+                if (!(getLeaderboardTable().getColumn(2) instanceof SailIDColumn<?>)) {
+                    insertColumn(2, sailIdColumn);
+                }
+            } else {
+                if (getLeaderboardTable().getColumn(2) instanceof SailIDColumn<?>) {
+                    removeColumn(2);
                 }
             }
-            columnCounter++;
-        } else if (!isShowCompetitorSailId() && competitorSailIdColumnIndex != -1) {
-            removeColumn(competitorSailIdColumnIndex);
-            competitorSailIdColumnIndex = -1;
-        }
-        if (isShowCompetitorFullName()) {
-            if (competitorFullNameColumnIndex == -1) {
-                if (leaderboardColumnCount > 1) {
-                    insertColumn(sailIdColumnIndex+columnCounter, createCompetitorColumn());
-                } else {
-                    addColumn(createCompetitorColumn());
+            final int competitorFullNameColumnIndex = 2 + (isShowCompetitorSailId() ? 1 : 0);
+            if (isShowCompetitorFullName()) {
+                if (!(getLeaderboardTable().getColumn(competitorFullNameColumnIndex) instanceof CompetitorColumn)) {
+                    insertColumn(competitorFullNameColumnIndex, createCompetitorColumn());
                 }
-                competitorFullNameColumnIndex = sailIdColumnIndex+columnCounter;
+            } else {
+                if (getLeaderboardTable().getColumn(competitorFullNameColumnIndex) instanceof CompetitorColumn) {
+                    removeColumn(competitorFullNameColumnIndex);
+                }
             }
-            columnCounter++;
-        } else if (!isShowCompetitorFullName() && competitorFullNameColumnIndex != -1) {
-            removeColumn(competitorFullNameColumnIndex);
-            competitorFullNameColumnIndex = -1;
+        } else { // table just being initialized
+            if (isShowCompetitorSailId()) {
+                addColumn(sailIdColumn);
+            }
+            if (isShowCompetitorFullName()) {
+                addColumn(createCompetitorColumn());
+            }
         }
-        nextColumnIndex = sailIdColumnIndex + columnCounter;
-        return nextColumnIndex;
+        return (isShowRegattaRankColumn() ? 1 : 0) + (isShowCompetitorSailId() ? 1 : 0) + (isShowCompetitorFullName() ? 1 : 0);
     }
 
     protected CompetitorColumn createCompetitorColumn() {
