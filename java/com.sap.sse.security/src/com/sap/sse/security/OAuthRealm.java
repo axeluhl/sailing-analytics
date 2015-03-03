@@ -42,6 +42,7 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
     
     public OAuthRealm() {
         super();
+        setAuthenticationTokenClass(OAuthToken.class);
     }
 
     @Override
@@ -184,8 +185,6 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
                 throw new AuthenticationException(e.getMessage());
             }
         }
-        SessionUtils.saveUsername(user.getName());
-        
         SimpleAuthenticationInfo sai = new SimpleAuthenticationInfo();
         SimplePrincipalCollection spc = new SimplePrincipalCollection();
         spc.add(otoken.getPrincipal(), otoken.getPrincipal().toString());

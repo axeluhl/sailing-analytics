@@ -13,6 +13,7 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
     
     public UsernamePasswordRealm() {
         super();
+        setAuthenticationTokenClass(UsernamePasswordToken.class);
     }
     
     @Override
@@ -41,7 +42,7 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
         String saltedPassword = null;
         byte[] salt = null;
         User user = getUserStore().getUserByName(username);
-        if (user == null){
+        if (user == null) {
             return null;
         }
         UsernamePasswordAccount upa = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);

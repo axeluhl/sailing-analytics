@@ -111,6 +111,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @POST
     @Consumes({ "image/jpeg", "image/png" })
     @Path("{competitor-id}/team/image")
+    @Produces("application/json;charset=UTF-8")
     public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
             @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) {
 

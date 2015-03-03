@@ -13,7 +13,7 @@
   <!--
     The context root (the server) against which the tests should be executed.
   -->
-  <context-root>http://riccardo:riccardo@localhost:8085/</context-root>
+  <context-root>http://localhost:8085/</context-root>
   
   <!--
     The folder where screenshots (attachments) are stored.

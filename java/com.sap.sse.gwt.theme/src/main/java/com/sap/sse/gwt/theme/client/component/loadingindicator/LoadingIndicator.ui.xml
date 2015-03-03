@@ -2,8 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res" type="com.sap.sse.gwt.theme.client.resources.ThemeResources" />
-    <ui:with field="local_res" type="com.sap.sse.gwt.theme.client.component.sapheader.SAPHeaderResources" />
-	<g:HTMLPanel>
+    <ui:with field="local_res" type="com.sap.sse.gwt.theme.client.component.loadingindicator.LoadingIndicatorResources" />
+	<g:HTMLPanel styleName="{local_res.css.loadingIndicator}">
 		Loading...
 	</g:HTMLPanel>    
 </ui:UiBinder>    
