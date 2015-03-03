@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.polars.mining.IncrementalRegressionProcessor;
+import com.sap.sailing.polars.mining.MovingAverageProcessorImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -17,13 +17,13 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * <p>
  * 
  * Note that this class should only be used for a small wind interval on a polar sheet. The
- * {@link IncrementalRegressionProcessor} is one example for that. It has one instance of the {@link BoatSpeedEstimator}
+ * {@link MovingAverageProcessorImpl} is one example for that. It has one instance of the {@link MovingAverageBoatSpeedEstimator}
  * for each wind boatclass, speed level and rounded angle combination.
  * 
  * @author Frederik Petersen (D054528)
  * 
  */
-public class BoatSpeedEstimator implements Serializable {
+public class MovingAverageBoatSpeedEstimator implements Serializable {
 
     private static final long serialVersionUID = -254184914347332658L;
 
@@ -35,10 +35,7 @@ public class BoatSpeedEstimator implements Serializable {
     
     private int dataCount = 0;
 
-    /**
-     * @param useLinearRegression if false mean of wind interval is used, otherwise linear regression
-     */
-    public Speed estimateSpeed(double windSpeed, double angleToTheWind) throws NotEnoughDataHasBeenAddedException {
+    public Speed estimateSpeed() throws NotEnoughDataHasBeenAddedException {
         LockUtil.lockForRead(lock);
         if (dataCount < 1) {
             throw new NotEnoughDataHasBeenAddedException();
@@ -62,11 +59,21 @@ public class BoatSpeedEstimator implements Serializable {
     }
 
     public int getDataCount() {
-        return dataCount;
+        LockUtil.lockForRead(lock);
+        try {
+            return dataCount;
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
     }
 
     public double getConfidence() {
-        return confidenceSum / dataCount;
+        LockUtil.lockForRead(lock);
+        try {
+            return confidenceSum / dataCount;
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
     }
     
     private void readObject(ObjectInputStream ois) {

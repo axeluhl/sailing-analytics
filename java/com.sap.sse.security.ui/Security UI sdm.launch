@@ -5,12 +5,10 @@
 <booleanAttribute key="com.google.gdt.eclipse.suiteWarArgumentProcessor.IS_WAR_FROM_PROJECT_PROPERTIES" value="true"/>
 <stringAttribute key="com.google.gwt.eclipse.core.CODE_SERVER_PORT" value="9875"/>
 <listAttribute key="com.google.gwt.eclipse.core.ENTRY_POINT_MODULES">
-<listEntry value="com.sap.sse.security.ui.EditProfile"/>
-<listEntry value="com.sap.sse.security.ui.Login"/>
-<listEntry value="com.sap.sse.security.ui.EmailValidation"/>
+<listEntry value="com.sap.sse.security.ui.UserManagement"/>
 </listAttribute>
 <booleanAttribute key="com.google.gwt.eclipse.core.SUPERDEVMODE_ENABLED" value="true"/>
-<stringAttribute key="com.google.gwt.eclipse.core.URL" value="/gwt/Home.html"/>
+<stringAttribute key="com.google.gwt.eclipse.core.URL" value="/security/ui/Login.html"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/com.sap.sse.security.ui"/>
 </listAttribute>
@@ -43,7 +41,7 @@
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.DevMode"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-superDevMode -incremental -war &quot;${project_loc:com.sap.sse.security.ui}&quot; -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9875 -startupUrl /gwt/Home.html com.sap.sse.security.ui.Login -startupUrl /security/ui/EditProfile.html com.sap.sse.security.ui.EditProfile -startupUrl /security/ui/EmailValidation.html com.sap.sse.security.ui.EmailValidation com.sap.sse.security.ui.EditProfile com.sap.sse.security.ui.Login"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-superDevMode -incremental -war &quot;${project_loc:com.sap.sse.security.ui}&quot; -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9875 -startupUrl /security/ui/Login.html com.sap.sse.security.ui.Login -startupUrl /security/ui/EditProfile.html com.sap.sse.security.ui.EditProfile -startupUrl /security/ui/EmailValidation.html com.sap.sse.security.ui.EmailValidation -startupUrl /security/ui/UserManagement.html com.sap.sse.security.ui.UserManagement"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sse.security.ui"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms1024m -Xmx3072m"/>
 </launchConfiguration>
