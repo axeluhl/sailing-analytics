@@ -69,7 +69,7 @@ public class PolarSheetGenerationServiceTest {
         double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
-                0.05, false, windStepping, false);
+                0.05, false, windStepping, false, 0);
         
         List<RegattaAndRaceIdentifier> idList = new ArrayList<RegattaAndRaceIdentifier>();
         idList.add(new RegattaNameAndRaceName("IrgendeineRegatta", "IrgendeinRennen"));
