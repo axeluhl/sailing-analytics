@@ -1,5 +1,10 @@
 package com.sap.sailing.android.shared.logging;
 
+import android.content.Context;
+import android.provider.Settings.Secure;
+import android.text.TextUtils;
+import android.util.Log;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
@@ -7,22 +12,16 @@ import java.util.EnumSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import com.sap.sailing.android.shared.BuildConfig;
-
-import android.content.Context;
-import android.provider.Settings.Secure;
-import android.util.Log;
-
 /**
  * Simple wrapper for logging to various targets.
- * 
+ *
  * Log by using {@link ExLog#i(String, String)}, {@link ExLog#w(String, String)} and {@link ExLog#e(String, String)}.
  * Activate a set of targets by using {@link ExLog#activate(Target)} or {@link ExLog#activate(EnumSet)}. Currently
  * available are logging to android.util.Log LogCat and logging to a file on SD-card.
- * 
+ *
  * The file logging in very defensive in a way that opening and writing to the file is secured by various exception
  * handlers trying to silence all possible errors.
- * 
+ *
  */
 public class ExLog {
     private final static String TAG = "ExLogInternal";
@@ -65,7 +64,7 @@ public class ExLog {
     public synchronized static void e(Context context, String tag, String msg) {
         getInstance().error(context, tag, msg);
     }
-    
+
     public synchronized static void ex(Context context, String tag, Exception e) {
         getInstance().exception(context, tag, e);
     }
@@ -99,35 +98,48 @@ public class ExLog {
     }
 
     private void info(Context context, String tag, String msg) {
-        if (isTargetActive(Target.LOGCAT))
+        msg = (msg == null) ? "" : msg;
+        if (isTargetActive(Target.LOGCAT)) {
             Log.i(tag, msg);
+        }
 
-        if (isTargetActive(Target.FILE))
+        if (isTargetActive(Target.FILE)) {
             logToFile(context, LogLevel.INFORMATION, tag, msg);
+        }
     }
 
     private void warning(Context context, String tag, String msg) {
-        if (isTargetActive(Target.LOGCAT))
-            Log.w(tag, msg);
+        msg = (msg == null) ? "" : msg;
+        if (!TextUtils.isEmpty(msg)) {
+            if (isTargetActive(Target.LOGCAT)) {
+                Log.w(tag, msg);
+            }
 
-        if (isTargetActive(Target.FILE))
-            logToFile(context, LogLevel.WARNING, tag, msg);
+            if (isTargetActive(Target.FILE)) {
+                logToFile(context, LogLevel.WARNING, tag, msg);
+            }
+        }
     }
 
     private void error(Context context, String tag, String msg) {
-        if (isTargetActive(Target.LOGCAT))
-            Log.e(tag, msg);
+        msg = (msg == null) ? "" : msg;
+        if (!TextUtils.isEmpty(msg)) {
+            if (isTargetActive(Target.LOGCAT)) {
+                Log.e(tag, msg);
+            }
 
-        if (isTargetActive(Target.FILE))
-            logToFile(context, LogLevel.ERROR, tag, msg);
+            if (isTargetActive(Target.FILE)) {
+                logToFile(context, LogLevel.ERROR, tag, msg);
+            }
+        }
     }
-    
+
     private void exception(Context context, String tag, Exception e) {
         StringWriter stringWriter = new StringWriter();
         PrintWriter stream = new PrintWriter(stringWriter);
         e.printStackTrace(stream);
         String msg = stringWriter.toString();
-        
+
         if (isTargetActive(Target.LOGCAT))
             Log.e(tag, msg);
 
@@ -152,8 +164,9 @@ public class ExLog {
     }
 
     private void initializeFileLoggingTask(Context context) {
-        if (fileLoggingTaskInitialized)
+        if (fileLoggingTaskInitialized) {
             return;
+        }
 
         fileLoggingTaskInitialized = true;
         logBuffer = new ArrayBlockingQueue<String>(LogBufferCapacity);
@@ -166,5 +179,4 @@ public class ExLog {
             Log.w(TAG, "Logging to file couldn't be enabled.");
         }
     }
-
 }
