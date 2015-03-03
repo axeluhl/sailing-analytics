@@ -14,7 +14,6 @@ public class AmazonS3TestSupport {
         service.internalSetProperty("accessId", s3AccessId);
         service.internalSetProperty("accessKey", s3AccessKey);
         service.internalSetProperty("bucketName", s3BucketName);
-        service.internalSetProperty("endpoint", s3BucketEndpoint);
         service.testProperties();
         return service;
     }
