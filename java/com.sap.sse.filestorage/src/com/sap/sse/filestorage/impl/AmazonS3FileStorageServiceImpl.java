@@ -38,6 +38,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     private static final Logger logger = Logger.getLogger(AmazonS3FileStorageServiceImpl.class.getName());
 
     private static final String retrievalProtocol = "http";
+    private static final String regionRetrievalHost = "s3-eu-west-1.amazonaws.com";
 
     private final FileStorageServicePropertyImpl accessId = new FileStorageServicePropertyImpl("accessId", false,
             "s3AccessIdDesc");
@@ -80,9 +81,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     private URI getUri(String key) {
         try {
-            // FIXME: region is missing s3-... see:
-            // http://stackoverflow.com/questions/10975475/amazon-s3-upload-file-and-get-url
-            return new URI(retrievalProtocol, endpoint.getValue(), "/" + key, null);
+            return new URI(retrievalProtocol, regionRetrievalHost, "/" + bucketName.getValue() + "/" + key, null);
         } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "Could not create URI for uploaded file with key " + key, e);
             return null;
