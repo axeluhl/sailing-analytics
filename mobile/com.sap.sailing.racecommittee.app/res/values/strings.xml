@@ -171,6 +171,7 @@
     <string name="race_reset_time_schedule_race">Schedule race</string>
     <string name="race_reset_time_startmode_starttime">Select start mode and start time</string>
     <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
     <string name="start">Set start time</string>
     <string name="nationality">Nationality</string>
     <string name="number">Number</string>
@@ -235,6 +236,9 @@
     <string name="race_start_in_4_minutes">4 Minutes</string>
     <string name="race_start_in_2_minutes">2 Minutes</string>
     <string name="race_start_in_1_minute">1 Minute</string>
+    <string name="race_start_time_in">Start in #TIME#</string>
+    <string name="race_start_time_ago">Start #TIME# ago</string>
+    <string name="race_set_start">Set Start</string>
     <string name="race_reset_course">Reset course</string>
     <string name="no_course_active">No course active</string>
     <string name="toggle_group_race_mode">Group Race?</string>

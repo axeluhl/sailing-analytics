@@ -8,9 +8,12 @@ import android.widget.*;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +23,9 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
     private static final String TAG = StartTimeFragment.class.getName();
     private static final String STARTMODE = "startMode";
 
-    private DatePicker mDatePicker;
+    private NumberPicker mDatePicker;
     private TimePicker mTimePicker;
+    private TextView mCountdown;
 
     public static StartTimeFragment newInstance(int startMode) {
         StartTimeFragment fragment = new StartTimeFragment();
@@ -62,6 +66,8 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
             }
         }
 
+        mCountdown = (TextView) layout.findViewById(R.id.start_countdown);
+
         Button min5 = (Button) layout.findViewById(R.id.start_min_five);
         if (min5 != null) {
             min5.setOnClickListener(this);
@@ -92,15 +98,9 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
         }
 
         if (getView() != null) {
-            mDatePicker = (DatePicker) getView().findViewById(R.id.start_date_picker);
+            mDatePicker = (NumberPicker) getView().findViewById(R.id.start_date_picker);
             if (mDatePicker != null) {
-                mDatePicker.setCalendarViewShown(false);
-                if (time.getTimeInMillis() < System.currentTimeMillis()) {
-                    mDatePicker.setMinDate(time.getTimeInMillis() - 1000);
-                } else {
-                    mDatePicker.setMinDate(System.currentTimeMillis() - 1000);
-                }
-                mDatePicker.updateDate(time.get(Calendar.YEAR), time.get(Calendar.MONTH), time.get(Calendar.DAY_OF_MONTH));
+                initDatePicker();
             }
 
             mTimePicker = (TimePicker) getView().findViewById(R.id.start_time_picker);
@@ -126,6 +126,54 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
     }
 
     @Override
+    public void notifyTick() {
+        super.notifyTick();
+
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        MillisecondsTimePoint startTime = getPickerTime();
+        int resId;
+        String time;
+
+        if (startTime.asMillis() > now.asMillis()) {
+            resId = R.string.race_start_time_in;
+            time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
+        } else {
+            resId = R.string.race_start_time_ago;
+            time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
+        }
+        if (mCountdown != null) {
+            mCountdown.setText(getString(resId).replace("#TIME#", time));
+        }
+    }
+
+    private MillisecondsTimePoint getPickerTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue());
+        calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
+        calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return new MillisecondsTimePoint(calendar.getTime());
+    }
+
+    private void initDatePicker() {
+        DateFormat dateFormat = DateFormat.getDateInstance();
+        ArrayList<String> dates = new ArrayList<>();
+        dates.add(getString(R.string.today));
+        dates.add(getString(R.string.tomorrow));
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        for (int i = 3; i <= 30; i++) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            dates.add(dateFormat.format(calendar.getTime()));
+        }
+        mDatePicker.setDisplayedValues(dates.toArray(new String[dates.size()]));
+        mDatePicker.setMinValue(0);
+        mDatePicker.setMaxValue(dates.size() - 1);
+        mDatePicker.setWrapSelectorWheel(false);
+    }
+
+    @Override
     public void onClick(View view) {
         TimePoint now = new MillisecondsTimePoint(new Date());
         Calendar calendar = Calendar.getInstance();
@@ -140,10 +188,6 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
                 }
                 now = now.plus(TimeUnit.MINUTES.toMillis(minutes));
 
-                if (mDatePicker != null) {
-                    mDatePicker.getCalendarView().setDate(now.asMillis());
-                }
-
                 if (mTimePicker != null) {
                     mTimePicker.setCurrentHour(now.asDate().getHours());
                     mTimePicker.setCurrentMinute(now.asDate().getMinutes());
@@ -151,12 +195,11 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
                 break;
 
             case R.id.set_start_time:
-                calendar.set(Calendar.DAY_OF_MONTH, mDatePicker.getDayOfMonth());
-                calendar.set(Calendar.MONTH, mDatePicker.getMonth());
-                calendar.set(Calendar.YEAR, mDatePicker.getYear());
+                calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue());
                 calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
                 calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
                 calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
 
                 TimePoint startTime =  new MillisecondsTimePoint(calendar.getTimeInMillis());
                 changeFragment(startTime);
