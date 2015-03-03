@@ -57,11 +57,8 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     private View moreFlags;
     private TextView startProcedureValue;
     private ImageView startModeFlag;
-    private TextView timeStart;
-    private TextView timeFinish;
     private UpdateUiReceiver mReceiver;
     private FlagPoleCache flagPoleCache;
-    private SimpleDateFormat dateFormat;
 
     public BaseRaceInfoRaceFragment() {
         procedureListener = new ProcedureChangedListener();
@@ -72,7 +69,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         if (getView() != null) {
             raceHeader = getView().findViewById(R.id.race_content_header);
             if (raceHeader != null) {

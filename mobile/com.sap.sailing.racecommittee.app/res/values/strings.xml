@@ -65,7 +65,7 @@
     <string name="race_running_since_template">%1$s runs since %2$s</string>
     <string name="race_reset_confirmation_header">You are about to reset the race</string>
     <string name="race_reset_confirmation_warning">Resetting the race removes all its saved data permanently. All information regarding the race state has to be entered again. Only the entered course information are kept. We strongly recommend to not reset the race.</string>
-    <string name="race_reset_confirmation_title">Reset race</string>
+    <string name="race_reset_confirmation_title">Reset this Race?</string>
     <string name="race_reset_reset_button">Reset anyway</string>
     <string name="race_finished_start_time">Race started at:</string>
     <string name="race_finished_end_time">Race finished at:</string>
@@ -328,5 +328,8 @@
     <string name="flag_november_hotel"><![CDATA[November & Hotel]]></string>
     <string name="flag_november_alpha_desc">Abandon, no more racing today</string>
     <string name="flag_november_hotel_desc">Abandon, more information ashore</string>
+    <string name="race_reset_confirm">Reset Race</string>
+    <string name="race_reset_cancel">No Thanks</string>
+    <string name="race_reset_message">Do you really want to reset this race including all settings and actions that have be made? This can not be undone.</string>
 
 </resources>

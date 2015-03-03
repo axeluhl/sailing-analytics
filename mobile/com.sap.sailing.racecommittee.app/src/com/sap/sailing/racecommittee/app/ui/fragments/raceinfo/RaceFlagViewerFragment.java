@@ -90,16 +90,24 @@ public class RaceFlagViewerFragment extends RaceFragment {
             flagView.setBackgroundColor(getFleetColorId());
         }
 
-        downView.setVisibility(View.GONE);
-        upView.setVisibility(View.GONE);
-        textView.setVisibility(View.GONE);
+        textView.setText("");
         if (changeAt != null && next) {
             textView.setVisibility(View.VISIBLE);
             textView.setText(getDuration(changeAt.asDate(), Calendar.getInstance().getTime()).replace("-", ""));
-            if (!flag.isDisplayed()) {
-                upView.setVisibility(View.VISIBLE);
-            } else {
+            if (flag.isDisplayed()) {
                 downView.setVisibility(View.VISIBLE);
+                upView.setVisibility(View.GONE);
+            } else {
+                downView.setVisibility(View.GONE);
+                upView.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (flag.isDisplayed()) {
+                downView.setVisibility(View.INVISIBLE);
+                upView.setVisibility(View.GONE);
+            } else {
+                downView.setVisibility(View.GONE);
+                upView.setVisibility(View.INVISIBLE);
             }
         }
 

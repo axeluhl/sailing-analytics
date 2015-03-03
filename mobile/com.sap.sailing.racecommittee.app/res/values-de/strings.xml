@@ -55,7 +55,7 @@
     <string name="race_running_since_template">%1$s läuft seit %2$s</string>
     <string name="race_reset_confirmation_header">Zurücksetzen des Rennens</string>
     <string name="race_reset_confirmation_warning">Beim Zurücksetzen des Rennens werden alle Daten gelöscht. Alle Informationen zum Rennen müssen erneut eingegeben werden. Nur der eingegeben Kurs bleibt erhalten. Ein Zurücksetzen wird nicht empfohlen.</string>
-    <string name="race_reset_confirmation_title">Zurücksetzen</string>
+    <string name="race_reset_confirmation_title">Reset this Race?</string>
     <string name="race_reset_reset_button">Trotzdem zurücksetzen</string>
     <string name="race_finished_start_time">Rennstart um:</string>
     <string name="race_finished_end_time">Rennende um:</string>
@@ -314,5 +314,8 @@
     <string name="flag_november_hotel"><![CDATA[November & Hotel]]></string>
     <string name="flag_november_alpha_desc">Abandon, no more racing today</string>
     <string name="flag_november_hotel_desc">Abandon, more information ashore</string>
+    <string name="race_reset_confirm">Reset Race</string>
+    <string name="race_reset_cancel">No Thanks</string>
+    <string name="race_reset_message">Do you really want to reset this race including all settings and actions that have be made? This can not be undone.</string>
 
 </resources>

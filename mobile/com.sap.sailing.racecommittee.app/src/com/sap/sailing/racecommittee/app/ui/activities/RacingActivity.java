@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -389,6 +390,19 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         TickSingleton.INSTANCE.unregisterListener(this);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.options_menu_reset:
+                ExLog.i(this, TAG, "Clicked RESET RACE");
+                resetRace();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     public void onWindEntered(Wind windFix) {
         TextView windValue = (TextView) findViewById(R.id.wind_value);
         if (windFix != null) {
@@ -510,6 +524,30 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         resetMarker();
     }
+
+    public void resetRace() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.race_reset_confirmation_title));
+        builder.setMessage(getString(R.string.race_reset_message));
+        builder.setCancelable(true);
+        builder.setPositiveButton(getString(R.string.race_reset_confirm), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId().toString());
+                ExLog.w(RacingActivity.this, TAG, String.format("Race %s is selected for reset.", mSelectedRace.getId()));
+                mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
+            }
+        });
+        builder.setNegativeButton(getString(R.string.race_reset_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_NO, mSelectedRace.getId().toString());
+                dialog.cancel();
+            }
+        });
+        builder.create().show();
+    }
+
 
     public void setRightPanelVisibility(int visibility) {
         LinearLayout layout = (LinearLayout) findViewById(R.id.panel_right);

@@ -33,7 +33,6 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
         mFlags = new ArrayList<>();
         mFlags.add(new RecallFlag(context.getString(R.string.flag_xray), context.getString(R.string.flag_xray_desc), Flags.XRAY.name()));
         mFlags.add(new RecallFlag(context.getString(R.string.flag_first_subst), context.getString(R.string.flag_first_subst_desc), Flags.FIRSTSUBSTITUTE.name()));
-
     }
 
     @Override
