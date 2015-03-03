@@ -97,15 +97,16 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private SimpleDateFormat dateFormat;
 
     private void setupFragments() {
-        Handler handler = new Handler();
-        final Runnable r = new Runnable() {
+        new Handler().post(new Runnable() {
+
             public void run() {
                 loadRaces(mCourseArea);
                 loadNavDrawer(mCourseArea, mEvent);
-                loadWelcomeFragment();
+                if (mSelectedRace == null) {
+                    loadWelcomeFragment();
+                }
             }
-        };
-        handler.post(r);
+        });
     }
 
     private Serializable getCourseAreaIdFromIntent() {
@@ -137,6 +138,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     private void loadCourses(final EventBase event) {
         setSupportProgressBarIndeterminateVisibility(true);
+
         ExLog.i(this, TAG, "Issuing loading of courses from data manager");
         getLoaderManager().initLoader(CourseLoaderId, null,
                 dataManager.createCourseAreasLoader(event, new CourseLoadClient()));
@@ -152,6 +154,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     private void loadEvents() {
         setSupportProgressBarIndeterminateVisibility(true);
+
         ExLog.i(this, TAG, "Issuing loading of events from data manager");
         getLoaderManager().initLoader(EventsLoaderId, null, dataManager.createEventsLoader(new EventLoadClient()));
     }
