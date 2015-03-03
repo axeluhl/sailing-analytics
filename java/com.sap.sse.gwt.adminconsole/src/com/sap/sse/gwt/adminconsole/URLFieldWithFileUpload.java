@@ -78,11 +78,16 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String result = event.getResults();
                 JSONArray resultJson = (JSONArray) JSONParser.parseLenient(result.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
-                if (resultJson != null && resultJson.get(0).isObject().get("file_uri") != null) {
-                    uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
-                    urlTextBox.setValue(uri);
-                    removeButton.setEnabled(true);
-                    Window.alert(stringMessages.uploadSuccessful());
+                if (resultJson != null) {
+                    if (resultJson.get(0).isObject().get("file_uri") != null) {
+                        uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
+                        urlTextBox.setValue(uri);
+                        removeButton.setEnabled(true);
+                        Window.alert(stringMessages.uploadSuccessful());
+                    } else {
+                        Window.alert(stringMessages.fileUploadResult(resultJson.get(0).isObject().get("status").isString().stringValue(),
+                                resultJson.get(0).isObject().get("message").isString().stringValue()));
+                    }
                 }
             }
         });

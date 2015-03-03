@@ -106,11 +106,8 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
             public SafeHtml getValue(CompetitorDTO competitor) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 if (competitor.getImageURL() != null && !competitor.getImageURL().isEmpty()) {
-                    sb.appendHtmlConstant("<img src=\"/sailingserver/api/v1/file?uri=");
-                    sb.appendHtmlConstant(competitor.getImageURL());
-                    sb.appendHtmlConstant("\" height=\"40px\" title=\"");
-                    sb.appendHtmlConstant(competitor.getImageURL());
-                    sb.appendHtmlConstant("\"/>");
+                    sb.appendHtmlConstant("<img src=\"/sailingserver/api/v1/file?uri=" + competitor.getImageURL()
+                            + "\" height=\"40px\" title=\"" + competitor.getImageURL() + "\"/>");
                 }
                 return sb.toSafeHtml();
             }

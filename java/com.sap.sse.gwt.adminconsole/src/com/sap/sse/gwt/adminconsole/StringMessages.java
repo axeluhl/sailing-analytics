@@ -10,4 +10,6 @@ public interface StringMessages extends Messages {
     String removeResult(String status, String message);
 
     String uploadSuccessful();
+
+    String fileUploadResult(String status, String message);
 }

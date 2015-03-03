@@ -1152,6 +1152,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String selectEventForInvitation();
     String imageURL();
     String upload();
-    String removeResult(JSONValue jsonValue, JSONValue jsonValue2);
+    String removeResult(JSONValue status, JSONValue message);
     String uploadSuccessful();
+    String fileUploadResult(JSONValue status, JSONValue message);
 }
