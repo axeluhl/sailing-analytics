@@ -194,8 +194,10 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         txtmet = context2d.measureText("00:00:00");
         double timewidth = txtmet.getWidth();
         double txtmaxwidth = 0.0;
-        txtmet = context2d.measureText(racePath.getName().split("#")[1]);
-        txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
+        if (racePath != null) {
+            txtmet = context2d.measureText(racePath.getName().split("#")[1]);
+            txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
+        }
         PathDTO[] paths = this.simulationResult.getPaths();
         for (PathDTO path : paths) {
             txtmet = context2d.measureText(path.getName());
@@ -203,10 +205,12 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         }
         //canvas.setSize(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0+"px", rectHeight*(paths.length+1)+"px");
         int canvasWidth = (int)Math.ceil(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0 + 5.0);
-        int canvasHeight = (int)Math.ceil(yOffset + rectHeight*(paths.length+1));
+        int canvasHeight = (int)Math.ceil(yOffset + rectHeight*(paths.length + (racePath == null? 0 : 1)));
         setCanvasSize(canvas, canvasWidth, canvasHeight);
-        drawRectangleWithText(context2d, xOffset, yOffset, "rgba(255,255,255,0.8);",
+        if (racePath != null) {
+            drawRectangleWithText(context2d, xOffset, yOffset, "rgba(255,255,255,0.8);",
                 racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth);
+        }
         for (PathDTO path : paths) {
             drawRectangleWithText(context2d, xOffset, yOffset + (paths.length-index) * rectHeight, this.colors.getColor(paths.length-1-index),
                 path.getName().split("#")[1], getFormattedTime(path.getPathTime()), txtmaxwidth, timewidth);
@@ -267,12 +271,16 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                             if (result.getPaths() != null) {
                                 simulationResult = result;
                                 PathDTO[] paths = result.getPaths();
-                                racePath = new PathDTO();
-                                List<SimulatorWindDTO> racePathPoints = new ArrayList<SimulatorWindDTO>();
-                                racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint));
-                                racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint + result.getLegDuration()));
-                                racePath.setPoints(racePathPoints);
-                                racePath.setName("0#Race");
+                                if (result.getLegDuration() > 0) {
+                                    racePath = new PathDTO();
+                                    List<SimulatorWindDTO> racePathPoints = new ArrayList<SimulatorWindDTO>();
+                                    racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint));
+                                    racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint + result.getLegDuration()));
+                                    racePath.setPoints(racePathPoints);
+                                    racePath.setName("0#Race");
+                                } else {
+                                    racePath = null;
+                                }
                                 clearCanvas();
                                 drawPaths();
                             }

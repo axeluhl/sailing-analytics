@@ -2,6 +2,7 @@ package com.sap.sailing.server.simulation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -110,7 +111,12 @@ public class SimulationServiceImpl implements SimulationService {
             if (markPassing != null) {
                 startTimePoint = markPassing.getTimePoint();
             }
-            markPassing = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator().next();
+            Iterator<MarkPassing> markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
+            if (markPassingIterator.hasNext()) {
+                markPassing = markPassingIterator.next();
+            } else {
+                markPassing = null;
+            }
             if (markPassing != null) {
                 endTimePoint = markPassing.getTimePoint();
             }
