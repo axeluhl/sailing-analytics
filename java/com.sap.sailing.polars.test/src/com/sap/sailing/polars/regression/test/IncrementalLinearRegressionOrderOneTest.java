@@ -7,149 +7,139 @@ import static org.junit.Assert.assertTrue;
 import org.hamcrest.number.IsCloseTo;
 import org.junit.Test;
 
-import com.sap.sailing.polars.regression.IncrementalLinearRegressionProcessor;
+import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
-import com.sap.sailing.polars.regression.impl.IncrementalLeastSquaresProcessor;
+import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 
-public class IncrementalLinearRegressionTest {
+public class IncrementalLinearRegressionOrderOneTest {
 
     private static double EPSILON = 1E-12;
 
     private static double VAGUE_EPSILON = 0.1;
 
-    private IncrementalLinearRegressionProcessor createRegressionProcessor() {
-        IncrementalLinearRegressionProcessor processor = new IncrementalLeastSquaresProcessor();
-        return processor;
-    }
-
     @Test
     public void testRegressionWithTwoDataPoints() throws NotEnoughDataHasBeenAddedException {
-        IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
-
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
         double x1 = 3;
         double y1 = 7;
-        processor.addMeasuredPoint(x1, y1);
+        leastSquares.addData(x1, y1);
 
         double x2 = 6;
         double y2 = 14;
-        processor.addMeasuredPoint(x2, y2);
+        leastSquares.addData(x2, y2);
 
-        double y = processor.getEstimatedY(x1);
+        double y = leastSquares.getOrCreatePolynomialFunction().value(x1);
         assertThat(y, new IsCloseTo(y1, EPSILON));
 
-        y = processor.getEstimatedY(x2);
+        y = leastSquares.getOrCreatePolynomialFunction().value(x2);
         assertThat(y, new IsCloseTo(y2, EPSILON));
 
-        y = processor.getEstimatedY(4.5);
+        y = leastSquares.getOrCreatePolynomialFunction().value(4.5);
         assertThat(y, new IsCloseTo(10.5, EPSILON));
     }
 
     @Test
     public void testRegressionWithMultipleDataPoints() throws NotEnoughDataHasBeenAddedException {
-        IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
 
         for (int i = -50; i < 51; i++) {
-            processor.addMeasuredPoint(i, i);
+            leastSquares.addData(i, i);
         }
 
-        double y = processor.getEstimatedY(-2);
+        double y = leastSquares.getOrCreatePolynomialFunction().value(-2);
         assertThat(y, new IsCloseTo(-2, EPSILON));
 
         // 2 Points off the line
-        processor.addMeasuredPoint(-8, -3);
-        processor.addMeasuredPoint(8, -3);
+        leastSquares.addData(-8, -3);
+        leastSquares.addData(8, -3);
 
 
-        y = processor.getEstimatedY(-2);
+        y = leastSquares.getOrCreatePolynomialFunction().value(-2);
         assertThat(y, new IsCloseTo(-2, VAGUE_EPSILON));
-        y = processor.getEstimatedY(20);
+        y = leastSquares.getOrCreatePolynomialFunction().value(20);
         assertThat(y, new IsCloseTo(20, VAGUE_EPSILON));
     }
 
     @Test
     public void testRegressionWithABigAmountOfDataPoints() throws NotEnoughDataHasBeenAddedException {
-        IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
 
         for (int i = -1000; i < 1000; i++) {
             // For every even number + 1, else - 1
             double y = i % 2 == 0 ? i + 1 : i - 1;
-            processor.addMeasuredPoint(i, y);
+            leastSquares.addData(i, y);
         }
 
-        double y = processor.getEstimatedY(-2);
+        double y = leastSquares.getOrCreatePolynomialFunction().value(-2);
         assertThat(y, new IsCloseTo(-2, VAGUE_EPSILON));
-        y = processor.getEstimatedY(20);
+        y = leastSquares.getOrCreatePolynomialFunction().value(20);
         assertThat(y, new IsCloseTo(20, VAGUE_EPSILON));
     }
 
     @Test
     public void testRegressionWithZeroValueData() throws NotEnoughDataHasBeenAddedException {
-        IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
 
         double x1 = 0;
         double y1 = 0;
-        processor.addMeasuredPoint(x1, y1);
+        leastSquares.addData(x1, y1);
 
         double x2 = 5;
         double y2 = 0;
-        processor.addMeasuredPoint(x2, y2);
+        leastSquares.addData(x2, y2);
 
-        double y = processor.getEstimatedY(x1);
+        double y = leastSquares.getOrCreatePolynomialFunction().value(x1);
         assertThat(y, new IsCloseTo(y1, EPSILON));
 
-        y = processor.getEstimatedY(x2);
+        y = leastSquares.getOrCreatePolynomialFunction().value(x2);
         assertThat(y, new IsCloseTo(y2, EPSILON));
     }
 
     @Test
     public void testRegressionWithNegativeData() throws NotEnoughDataHasBeenAddedException {
-        IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
 
         double x1 = -5;
         double y1 = -5;
-        processor.addMeasuredPoint(x1, y1);
+        leastSquares.addData(x1, y1);
 
         double x2 = 5;
         double y2 = 5;
-        processor.addMeasuredPoint(x2, y2);
+        leastSquares.addData(x2, y2);
 
-        double y = processor.getEstimatedY(x1);
+        double y = leastSquares.getOrCreatePolynomialFunction().value(x1);
         assertThat(y, new IsCloseTo(y1, EPSILON));
 
-        y = processor.getEstimatedY(x2);
+        y = leastSquares.getOrCreatePolynomialFunction().value(x2);
         assertThat(y, new IsCloseTo(y2, EPSILON));
 
-        y = processor.getEstimatedY(0);
+        y = leastSquares.getOrCreatePolynomialFunction().value(0);
         assertThat(y, new IsCloseTo(0, EPSILON));
     }
 
     @Test
     public void testRegressionWithSmallValuedData() throws NotEnoughDataHasBeenAddedException {
-        IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
 
         double x1 = 5E-9;
         double y1 = 5E-9;
         for (int i = 0; i < 1000; i++) {
             double yTimesI = y1 * i;
             double xTimesI = x1 * i;
-            processor.addMeasuredPoint(xTimesI, yTimesI);
-            if (i > 0) {
-                double y = processor.getEstimatedY(xTimesI);
-                assertThat(y, new IsCloseTo(yTimesI, EPSILON));
-            }
+            leastSquares.addData(xTimesI, yTimesI);
         }
         // Add data that is off the line but offsetting each other
-        processor.addMeasuredPoint(-x1, y1);
-        processor.addMeasuredPoint(x1, -y1);
+        leastSquares.addData(-x1, y1);
+        leastSquares.addData(x1, -y1);
 
-        double y = processor.getEstimatedY(0);
+        double y = leastSquares.getOrCreatePolynomialFunction().value(0);
         assertThat(y, new IsCloseTo(0, EPSILON));
     }
 
     @Test(expected = NotEnoughDataHasBeenAddedException.class)
     public void testNoDataExceptionThrowing() throws NotEnoughDataHasBeenAddedException {
-        IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
-        processor.getEstimatedY(15);
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
+        leastSquares.getOrCreatePolynomialFunction().value(15);
     }
 
     /**
@@ -159,13 +149,13 @@ public class IncrementalLinearRegressionTest {
      */
     @Test
     public void testRegressionWithOneDataPoint() throws NotEnoughDataHasBeenAddedException {
-        IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
 
         double x1 = 3;
         double y1 = 5;
-        processor.addMeasuredPoint(x1, y1);
+        leastSquares.addData(x1, y1);
 
-        double y = processor.getEstimatedY(20);
+        double y = leastSquares.getOrCreatePolynomialFunction().value(20);
         assertThat(y, is(y1));
     }
     
@@ -196,37 +186,37 @@ public class IncrementalLinearRegressionTest {
 
     @Test
     public void testNorris() throws NotEnoughDataHasBeenAddedException {
-        IncrementalLinearRegressionProcessor regression = createRegressionProcessor();
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
         for (int i = 0; i < data.length; i++) {
-            regression.addMeasuredPoint(data[i][1], data[i][0]);
+            leastSquares.addData(data[i][1], data[i][0]);
         }
         // Tests against certified values from
         // http://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Norris.dat
-        assertThat(regression.getSlope(), new IsCloseTo(1.00211681802045, EPSILON));
-        assertThat(regression.getIntercept(), new IsCloseTo(-0.262323073774029, EPSILON));
+        assertThat(leastSquares.getOrCreatePolynomialFunction().getCoefficients()[1], new IsCloseTo(1.00211681802045, EPSILON));
+        assertThat(leastSquares.getOrCreatePolynomialFunction().getCoefficients()[0], new IsCloseTo(-0.262323073774029, EPSILON));
         // ------------ End certified data tests
-        assertThat(regression.getEstimatedY(0), new IsCloseTo(-0.262323073774029, EPSILON));
-        assertThat(regression.getEstimatedY(1), new IsCloseTo(1.00211681802045 - 0.26232307377402, EPSILON));
+        assertThat(leastSquares.getOrCreatePolynomialFunction().value(0), new IsCloseTo(-0.262323073774029, EPSILON));
+        assertThat(leastSquares.getOrCreatePolynomialFunction().value(1), new IsCloseTo(1.00211681802045 - 0.26232307377402, EPSILON));
     }
 
     @Test
-    public void testPerfect() {
-        IncrementalLinearRegressionProcessor regression = createRegressionProcessor();
+    public void testPerfect() throws NotEnoughDataHasBeenAddedException {
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
         int n = 100;
         for (int i = 0; i < n; i++) {
-            regression.addMeasuredPoint(((double) i) / (n - 1), i);
+            leastSquares.addData(((double) i) / (n - 1), i);
         }
-        assertTrue(regression.getSlope() > 0);
+        assertTrue(leastSquares.getOrCreatePolynomialFunction().getCoefficients()[1] > 0);
     }
 
     @Test
-    public void testPerfectNegative() {
-        IncrementalLinearRegressionProcessor regression = createRegressionProcessor();
+    public void testPerfectNegative() throws NotEnoughDataHasBeenAddedException {
+        IncrementalLeastSquares leastSquares = new IncrementalAnyOrderLeastSquaresImpl(1);
         int n = 100;
         for (int i = 0; i < n; i++) {
-            regression.addMeasuredPoint(-((double) i) / (n - 1), i);
+            leastSquares.addData(-((double) i) / (n - 1), i);
         }
-        assertTrue(regression.getSlope() < 0);
+        assertTrue(leastSquares.getOrCreatePolynomialFunction().getCoefficients()[1] < 0);
     }
 
 
