@@ -253,7 +253,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
         leaderboardsTable.setWidth("100%");
         leaderboardsTable.addColumnSortHandler(leaderboardsListHandler);
-        leaderboardsTable.addColumn(leaderboardTableSelectionColumn);
+        leaderboardsTable.addColumn(leaderboardTableSelectionColumn, leaderboardTableSelectionColumn.getHeader());
         leaderboardsTable.addColumn(leaderboardsNameColumn, stringMessages.leaderboardName());
         leaderboardsTable.addColumn(leaderboardsRacesColumn, stringMessages.races());
 
@@ -372,7 +372,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         };
 
         groupDetailsTable.setWidth("100%");
-        groupDetailsTable.addColumn(groupDetailsTableSelectionColumn);
+        groupDetailsTable.addColumn(groupDetailsTableSelectionColumn, groupDetailsTableSelectionColumn.getHeader());
         groupDetailsTable.addColumn(groupDetailsNameColumn, stringMessages.leaderboardName());
         groupDetailsTable.addColumn(groupDetailsRacesColumn, stringMessages.races());
 
