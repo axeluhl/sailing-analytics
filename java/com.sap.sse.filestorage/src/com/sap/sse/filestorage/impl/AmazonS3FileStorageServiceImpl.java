@@ -101,16 +101,12 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
         final PutObjectRequest request = new PutObjectRequest(bucketName.getValue(), key, is, metadata)
                 .withCannedAcl(CannedAccessControlList.PublicRead);
         final AmazonS3Client s3Client = createS3Client();
-
-        new Thread() {
-            public void run() {
-                try {
-                    s3Client.putObject(request);
-                } catch (AmazonClientException e) {
-                    logger.log(Level.WARNING, "Could not store file", e);
-                }
-            };
-        }.run();
+        try {
+            s3Client.putObject(request);
+        } catch (AmazonClientException e) {
+            logger.log(Level.SEVERE, "Could not store file", e);
+            throw new OperationFailedException(e.getMessage(), e);
+        }
         URI uri = getUri(key);
         logger.info("Stored file " + uri);
         return uri;
