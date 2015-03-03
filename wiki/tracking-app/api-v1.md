@@ -53,8 +53,8 @@ This information is represented in a URL with the following structure:
 ```
 http://<host>/tracking/checkin
   ?event_id=<event-id>
-  &leaderboard_name=<leaderboard-name>
-  &competitor_id=<competitor-id>
+  &leaderboardName=<leaderboard-name>
+  &competitorId=<competitor-id>
 ```
 
 **Additional Notes:**
