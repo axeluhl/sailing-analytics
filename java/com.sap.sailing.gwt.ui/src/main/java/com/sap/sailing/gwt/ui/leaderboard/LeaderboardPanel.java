@@ -2853,7 +2853,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 addColumn(createCompetitorColumn());
             }
         }
-        return (isShowRegattaRankColumn() ? 1 : 0) + (isShowCompetitorSailId() ? 1 : 0) + (isShowCompetitorFullName() ? 1 : 0);
+        return (isShowRegattaRankColumn() ? 2 : 1) + (isShowCompetitorSailId() ? 1 : 0) + (isShowCompetitorFullName() ? 1 : 0);
     }
 
     protected CompetitorColumn createCompetitorColumn() {
