@@ -46,12 +46,10 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             "s3AccessKeyDesc");
     private final FileStorageServicePropertyImpl bucketName = new FileStorageServicePropertyImpl("bucketName", true,
             "s3BucketNameDesc");
-    private final FileStorageServicePropertyImpl endpoint = new FileStorageServicePropertyImpl("endpoint", true,
-            "s3EndpointDesc");
 
     public AmazonS3FileStorageServiceImpl() {
         super(NAME, "s3Desc");
-        addProperties(accessId, accessKey, bucketName, endpoint);
+        addProperties(accessId, accessKey, bucketName);
     }
 
     private AmazonS3Client createS3Client() throws InvalidPropertiesException {
