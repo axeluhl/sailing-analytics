@@ -97,6 +97,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         beatSOG = pd.beatSOG;
         jibeAngles = pd.jibeAngles;
         jibeSOG = pd.jibeSOG;
+        current = pd.current;
     }
 
     // a constructor that allows a generic set of parameters
