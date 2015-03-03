@@ -41,11 +41,11 @@ public class FlagsResources {
                 break;
 
             case ESSTHREE:
-                fileName = "flag_ess2_" + size + "dp";
+                fileName = "flag_ess3_" + size + "dp";
                 break;
 
             case ESSTWO:
-                fileName = "flag_ess3_" + size + "dp";
+                fileName = "flag_ess2_" + size + "dp";
                 break;
 
             case FIRSTSUBSTITUTE:
