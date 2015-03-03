@@ -1155,4 +1155,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String removeResult(JSONValue status, JSONValue message);
     String uploadSuccessful();
     String fileUploadResult(JSONValue status, JSONValue message);
+    String showCompetitorSailIdColumn();
+    String showCompetitorFullNameColumn();
 }
