@@ -83,7 +83,8 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:text="@string/time_finish"
-                android:textSize="@dimen/textSize_22" />
+                android:textSize="@dimen/textSize_22"
+                android:visibility="invisible" />
         </RelativeLayout>
     </LinearLayout>
 </RelativeLayout>
