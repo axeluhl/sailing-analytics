@@ -21,7 +21,8 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  org.apache.shiro.core;bundle-version="1.2.2",
  org.apache.shiro.web;bundle-version="1.2.2",
  com.sap.sse.replication,
- com.sap.sse.security.common
+ com.sap.sse.security.common,
+ com.sap.sse.mail
 Web-ContextPath: /security/ui
 Export-Package: com.sap.sse.security.ui.client,
  com.sap.sse.security.ui.client.component,

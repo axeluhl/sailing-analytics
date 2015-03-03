@@ -92,9 +92,26 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
     }
+    
+    @Override
+    public String getEmail() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
+    public String getImageURL() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+    }
 
     @Override
     public CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
         return previousVersion.competitors.get(indexInPreviousCompetitorList);
+    }
+
+    @Override
+    public boolean hasEmail() {
+        return false;
     }
 }

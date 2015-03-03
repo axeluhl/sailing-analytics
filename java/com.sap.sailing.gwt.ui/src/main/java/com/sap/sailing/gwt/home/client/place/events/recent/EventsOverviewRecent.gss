@@ -1,0 +1,116 @@
+.eventteasercontainer {
+  font-size: 15px;
+  /* @alternate */ font-size: 1rem;
+  text-align: center;
+  width: 100%;
+  height: 24em;
+}
+.eventteaser {
+  font-size: 15px;
+  /* @alternate */ font-size: 1rem;
+  display: inline-block;
+  margin-bottom: 3em;
+  text-align: left;
+  max-width: 100%;
+}
+.eventteaser:hover {
+  text-decoration: none;
+}
+.eventteaser:hover .eventteaser_name {
+  text-decoration: underline;
+}
+.eventteaser:hover .eventteaser_image {
+  opacity: 0.9;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
+  filter: alpha(opacity=90);
+}
+.eventteaser_image {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+.eventteaser_series {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.eventteaser_name {
+  font-size: 1.466666666666667em;
+  font-weight: bold;
+  color: #008fcc;
+  margin-top: 0.333333333333333em;
+}
+.eventteaser_location {
+  color: #222;
+}
+.eventsoverviewnavigation {
+  font-size: 15px;
+  /* @alternate */ font-size: 1rem;
+}
+.eventsoverviewnavigation .gridalternator {
+  overflow: visible;
+}
+.eventsoverviewrecent {
+  font-size: 15px;
+  /* @alternate */ font-size: 1rem;
+}
+.eventsoverviewrecent_year {
+  border-bottom: 1px solid #ccc;
+  transiton: opacity 0.1s;
+}
+.eventsoverviewrecent_year:nth-child(even) {
+  background: #f8f8f8;
+}
+.eventsoverviewrecent_year:nth-child(even) .eventsoverviewrecent_year_header:hover,
+.eventsoverviewrecent_year:nth-child(even) .eventsoverviewrecent_year_header:focus {
+  background-color: #f3f3f3;
+}
+.eventsoverviewrecent_yearcollapsed .eventsoverviewrecent_year_header_info_arrow_image {
+  -webkit-transform: rotate(0deg);
+  -moz-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  transform: rotate(0deg);
+}
+.eventsoverviewrecent_year_header {
+  padding: 0.666666666666667em;
+  cursor: pointer;
+}
+.eventsoverviewrecent_year_header:hover,
+.eventsoverviewrecent_year_header:focus {
+  background-color: #fcfcfc;
+}
+.eventsoverviewrecent_year_header:hover .eventsoverviewrecent_year_header_title,
+.eventsoverviewrecent_year_header:focus .eventsoverviewrecent_year_header_title {
+  text-decoration: underline;
+}
+.eventsoverviewrecent_year_header_title {
+  margin-bottom: 0;
+}
+.eventsoverviewrecent_year_header_info {
+  float: right;
+}
+.eventsoverviewrecent_year_header_info_arrow {
+  padding: 0.466666666666667em 1.133333333333333em;
+}
+.eventsoverviewrecent_year_header_info_arrow_image {
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  -o-transform: rotate(180deg);
+  -ms-transform: rotate(180deg);
+  transform: rotate(180deg);
+  transiton: transform 0.4s;
+}
+.eventsoverviewrecent_year_header_info_item {
+  border-right: 1px solid #ccc;
+  padding: 0.466666666666667em 1.133333333333333em;
+}
+.eventsoverviewrecent_year_header_info_item_value {
+  font-weight: 700;
+  color: #008fcc;
+  margin-right: 0.533333333333333em;
+}
+.eventsoverviewrecent_year_content {
+  margin-top: 0.666666666666667em;
+  padding-bottom: 1.333333333333333em;
+}

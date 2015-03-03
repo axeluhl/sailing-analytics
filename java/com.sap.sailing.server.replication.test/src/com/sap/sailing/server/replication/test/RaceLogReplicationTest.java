@@ -38,35 +38,23 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, RaceLogEvent, RaceLogEventVisitor> {
-
-    private Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     private RaceLogEvent raceLogEvent;
     private RaceLogEvent anotherRaceLogEvent;
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
     
     @Before
-    @Override
-    public void setUp() throws Exception {
+    public void createEvents() throws Exception {
         raceLogEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(new MillisecondsTimePoint(1), author, 42, RaceLogRaceStatus.UNKNOWN);
         anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(new MillisecondsTimePoint(2), author, 42, RaceLogRaceStatus.UNKNOWN);
-        try {
-            replicationDescriptorPair = basicSetUp(/* dropDB */ true, null, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            tearDown();
-        }
     }
     
     @Test
@@ -77,7 +65,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         final String raceColumnName = "R1";
         Regatta regatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(regatta, seriesName, raceColumnName, fleetName);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, regatta);
         addAndValidateEventIds(masterLog, replicaLog);
     }
@@ -91,7 +79,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
         masterLog.add(raceLogEvent);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
         addAndValidateEventIds(masterLog, replicaLog);
     }
@@ -104,7 +92,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         final String raceColumnName = "R1";
         Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
         addAndValidateEventIds(masterLog, replicaLog, raceLogEvent);
     }
@@ -116,7 +104,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         final String raceColumnName = "R1";
         FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
         RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
         addAndValidateEventIds(masterLog, replicaLog, raceLogEvent);
     }
@@ -130,7 +118,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
         masterLog.add(raceLogEvent);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
         addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
     }
@@ -145,7 +133,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
         raceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), author, 43, createCourseData());
         masterLog.add(raceLogEvent);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
         anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), author, 43, createCourseData());
         addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
@@ -160,7 +148,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
         RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
         masterLog.add(raceLogEvent);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
         addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
     }
@@ -174,7 +162,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
         raceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), author, 43, createCourseData());
         masterLog.add(raceLogEvent);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
         anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), author, 43, createCourseData());
         addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
@@ -203,7 +191,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         final String raceColumnName = "R1";
         FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
         RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         masterLog.add(raceLogEvent);
         RenameLeaderboard renameOperation = new RenameLeaderboard(leaderboardName, leaderboardName + "new");
         master.apply(renameOperation);
@@ -217,7 +205,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
      * has been added to the DB and then race log is re-loaded on the master, the events added through the DB also show up on the replica.
      */
     @Test
-    public void testRaceLogReloadReplication() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceLogReloadReplication() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -225,7 +213,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
         masterLog.add(raceLogEvent);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
         addAndValidateEventIds(masterLog, replicaLog);
         

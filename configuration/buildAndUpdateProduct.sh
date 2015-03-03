@@ -65,6 +65,13 @@ HEAD_SHA=$(git show-ref --head -s | head -1)
 HEAD_DATE=$(date "+%Y%m%d%H%M")
 VERSION_INFO="$HEAD_SHA-$active_branch-$HEAD_DATE"
 SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
+# The number of worker threads to use for building GWT permutations.
+# Can be overridden using the -x option
+GWT_WORKERS=2
+
+# The number of worker threads to use for building GWT permutations.
+# Can be overridden using the -x option
+GWT_WORKERS=2
 
 MAVEN_SETTINGS="$PROJECT_HOME/configuration/maven-settings.xml"
 MAVEN_SETTINGS_PROXY="$PROJECT_HOME/configuration/maven-settings-proxy.xml"
@@ -88,7 +95,7 @@ parallelexecution=0
 p2local=0
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
+    echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port> -x <gwt-workers> -j <test-package>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
@@ -107,6 +114,8 @@ if [ $# -eq 0 ]; then
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
     echo "-v Build local p2 respository, and use this instead of p2.sapsailing.com"
+    echo "-x <number-of-workers> use this many worker threads for building GWT permutations (default: 2)."
+    echo "-j <test-package> only execute the provided test package during tests"
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo ""
@@ -143,7 +152,7 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocparvm:n:l:s:w:u'
+options=':bgtocparvm:n:l:s:w:x:j:u'
 while getopts $options option
 do
     case $option in
@@ -163,6 +172,8 @@ do
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
         u) suppress_confirmation=1;;
         v) p2local=1;;
+        x) GWT_WORKERS=$OPTARG;;
+        j) TESTCASE_TO_EXECUTE=$OPTARG;; 
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -170,6 +181,7 @@ done
 
 ACDIR=$SERVERS_HOME/$TARGET_SERVER_NAME
 echo INSTALL goes to $ACDIR
+extra="${extra} -Dgwt.workers=${GWT_WORKERS}"
 
 shift $((OPTIND-1))
 
@@ -249,7 +261,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
-    cp -v $PROJECT_HOME/java/target/configuration/security.properties configuration/
+    cp -v $PROJECT_HOME/java/target/configuration/mail.properties configuration/
     cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
@@ -525,7 +537,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         fi
 
 	cd $PROJECT_HOME/java
-	if [ $gwtcompile -eq 1 ]; then
+	if [ $gwtcompile -eq 1 ] && [[ "$clean" == "clean" ]]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*)"
 	    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
         GWT_XML_FILES=`find com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources -name '*.gwt.xml'`
@@ -577,6 +589,11 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     else
         extra="$extra -DskipTests=false"
         # TODO: Think about http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html
+        if [[ "$TESTCASE_TO_EXECUTE" != "" ]]; then
+            # http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
+            echo "Running only testcase $TESTCASE_TO_EXECUTE"
+            extra="$extra -Dtest=$TESTCASE_TO_EXECUTE"
+        fi
     fi
 
     if [ $android -eq 0 ] && [ $gwtcompile -eq 0 ] && [ $testing -eq 0 ]; then
@@ -718,7 +735,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties $ACDIR/configuration/
-        cp -v $PROJECT_HOME/java/target/configuration/security.properties $ACDIR/configuration/
+        cp -v $PROJECT_HOME/java/target/configuration/mail.properties $ACDIR/configuration/
         cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration/
     fi
 
@@ -799,7 +816,7 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/security.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
+        $SCP_CMD $PROJECT_HOME/java/target/configuration/mail.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
  
         $SCP_CMD $PROJECT_HOME/java/target/env.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/

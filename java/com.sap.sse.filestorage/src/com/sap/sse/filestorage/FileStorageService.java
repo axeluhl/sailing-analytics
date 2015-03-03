@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Locale;
 
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -33,7 +34,7 @@ public interface FileStorageService extends IsManagedByCache<FileStorageServiceR
     /**
      * From the given {@code uri} it should be possible to determine the file to remove.
      */
-    void removeFile(URI uri) throws OperationFailedException, InvalidPropertiesException;
+    void removeFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException;
 
     FileStorageServiceProperty[] getProperties();
 
@@ -50,10 +51,10 @@ public interface FileStorageService extends IsManagedByCache<FileStorageServiceR
     /**
      * Description text that explains the storage service.
      */
-    String getDescription();
+    String getDescription(Locale locale);
 
     /**
      * Test whether properties are valid, e.g. by trying to log in using access credentials provided as properties.
      */
-    void testProperties() throws InvalidPropertiesException;
+    void testProperties() throws InvalidPropertiesException, IOException;
 }

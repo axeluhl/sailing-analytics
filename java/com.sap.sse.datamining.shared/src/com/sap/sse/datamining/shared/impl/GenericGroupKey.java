@@ -39,7 +39,7 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
     
     @Override
     public String asString() {
-        return value.toString();
+        return value == null ? "null" : value.toString();
     }
 
     @Override

@@ -184,7 +184,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
         return result;
     }
-    
+
     /**
      * Assembles a dialog that other parts of the application can use to let the user parameterize a leaderboard and
      * obtain the according URL for it. This keeps the "secrets" of which URL parameters have which meaning encapsulated

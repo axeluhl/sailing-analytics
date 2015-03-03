@@ -48,6 +48,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final boolean autoExpandPreSelectedRace;
     private final boolean showAddedScores;
     private final boolean showOverallColumnWithNumberOfRacesSailedPerCompetitor;
+    private final boolean showCompetitorSailIdColumn;
+    private final boolean showCompetitorFullNameColumn;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final Integer numberOfLastRacesToShow;
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
@@ -56,6 +58,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private IntegerBox numberOfLastRacesToShowBox;
     private CheckBox showAddedScoresCheckBox;
     private CheckBox showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox;
+    private CheckBox showCompetitorSailIdColumnheckBox;
+    private CheckBox showCompetitorFullNameColumnCheckBox;
     
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection,
@@ -63,6 +67,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
             boolean autoExpandPreSelectedRace, boolean showAddedScores,
             long delayBetweenAutoAdvancesInMilliseconds, boolean showOverallColumnWithNumberOfRacesSailedPerCompetitor,
+            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
             StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.numberOfLastRacesToShow = raceColumnSelectionStrategy.getNumberOfLastRaceColumnsToShow();
@@ -82,6 +87,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.showAddedScores = showAddedScores;
         this.showOverallColumnWithNumberOfRacesSailedPerCompetitor = showOverallColumnWithNumberOfRacesSailedPerCompetitor;
+        this.showCompetitorSailIdColumn = showCompetitorSailIdColumn;
+        this.showCompetitorFullNameColumn = showCompetitorFullNameColumn;
     }
 
     @Override
@@ -184,6 +191,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         dialog.addTooltip(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox, stringMessages.showNumberOfRacesScored());
         showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.setValue(showOverallColumnWithNumberOfRacesSailedPerCompetitor);
         overallDetailDialogContent.add(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox);
+        showCompetitorSailIdColumnheckBox = dialog.createCheckbox(stringMessages.showCompetitorSailIdColumn());
+        showCompetitorSailIdColumnheckBox.setValue(showCompetitorSailIdColumn);
+        overallDetailDialogContent.add(showCompetitorSailIdColumnheckBox);
+        showCompetitorFullNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorFullNameColumn());
+        showCompetitorFullNameColumnCheckBox.setValue(showCompetitorFullNameColumn);
+        overallDetailDialogContent.add(showCompetitorFullNameColumnCheckBox);
         overallDetailDialog.add(overallDetailDialogContent);
         return overallDetailDialog;
     }
@@ -371,7 +384,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 null,
                 true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
                 /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue(),
-                /*showOverallColumnWithNumberOfRacesSailedPerCompetitor*/ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.getValue().booleanValue());
+                /*showOverallColumnWithNumberOfRacesSailedPerCompetitor*/ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.getValue().booleanValue(),
+                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue());
     }
 
     @Override

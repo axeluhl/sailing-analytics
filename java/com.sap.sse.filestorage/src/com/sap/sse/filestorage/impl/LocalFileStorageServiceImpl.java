@@ -1,6 +1,7 @@
 package com.sap.sse.filestorage.impl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,17 +39,15 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     private static final long serialVersionUID = -8661781258137340835L;
     private static final String testFile = "Bundesliga2014_Regatta6_eventteaser.jpg";
     public static final String NAME = "Local Storage";
-    public static final  String DESCRIPTION = "Service for storing files in the local file system. Files get stored in localPath+fileName and can be accessed at baseUrl+fileName Note that the content lying in baseUrl must therefore be accessible remotely. This can for examplebe achieved by mounting a remote file system for example from static.sapsailing.com on the replicas to localPath.";
     
     private static final Logger logger = Logger.getLogger(LocalFileStorageServiceImpl.class.getName());
 
-    private final FileStorageServicePropertyImpl baseURL = new FileStorageServicePropertyImpl("baseURL", true,
-            "Base URL: Base URL + fileName = URL where uploaded file will be accessible");
-    private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, "Local Path to use for file storage");
+    private final FileStorageServicePropertyImpl baseURL = new FileStorageServicePropertyImpl("baseURL", true, "localBaseUrlDesc");
+    private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, "localLocalPathDesc");
 
     
     protected LocalFileStorageServiceImpl() {
-        super(NAME, DESCRIPTION);
+        super(NAME, "localDesc");
         addProperties(baseURL, localPath);
     }
 
@@ -57,6 +56,7 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
         OutputStream outputStream = null;
         String fileName = getKey(fileExtension);
         String pathToFile = localPath.getValue() + "/" + fileName;
+        // TODO bug 2583: use something like SecurityUtil.getSubject().checkPermission("file:store:"+pathToFile)
 
         File outputFile = new File(pathToFile);
         logger.log(Level.FINE, "Storing file in " + outputFile.getAbsolutePath());
@@ -99,13 +99,16 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     }
 
     @Override
-    public void removeFile(URI uri) {
+    public void removeFile(URI uri) throws IOException {
         String filePath = uri.getPath();
         String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-        File file = new File(localPath + "/" + fileName);
-
+        File file = new File(localPath.getValue() + "/" + fileName);
+        if (!file.exists()) {
+            throw new FileNotFoundException(uri.toString());
+        }
         if (!file.delete()) {
             logger.warning("Could not delete file with path " + filePath);
+            throw new IOException("Could not delete file with path "+filePath);
         }
     }
 
@@ -117,7 +120,7 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     }
 
     @Override
-    public void testProperties() throws InvalidPropertiesException {
+    public void testProperties() throws InvalidPropertiesException, IOException {
         // write file to localPath and read file via http operation and check content
         URI testFileURI;
         try {

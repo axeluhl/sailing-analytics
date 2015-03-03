@@ -17,14 +17,14 @@ import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.i18n.CompoundDataMiningStringMessages;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 
 public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
-    private final CompoundDataMiningStringMessages stringMessages;
+    private final CompoundResourceBundleStringMessages stringMessages;
     private final ExecutorService executorService;
     
     private final QueryFactory queryFactory;
@@ -35,31 +35,31 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     private DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
 
     public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry, FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
-        this.stringMessages = new CompoundDataMiningStringMessages();
+        this.stringMessages = new CompoundResourceBundleStringMessages();
         this.executorService = executorService;
         this.queryFactory = new QueryFactory();
         this.functionRegistry = functionRegistry;
         this.functionProvider = functionProvider;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
     }
-    
+
     @Override
     public ExecutorService getExecutorService() {
         return executorService;
     }
     
     @Override
-    public DataMiningStringMessages getStringMessages() {
+    public ResourceBundleStringMessages getStringMessages() {
         return stringMessages;
     }
 
     @Override
-    public void addStringMessages(DataMiningStringMessages stringMessages) {
+    public void addStringMessages(ResourceBundleStringMessages stringMessages) {
         this.stringMessages.addStringMessages(stringMessages);
     }
 
     @Override
-    public void removeStringMessages(DataMiningStringMessages stringMessages) {
+    public void removeStringMessages(ResourceBundleStringMessages stringMessages) {
         this.stringMessages.removeStringMessages(stringMessages);
     }
 
@@ -154,7 +154,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     public <DataSourceType, DataType, ResultType> QueryDefinition<DataSourceType, DataType, ResultType> getQueryDefinitionForDTO(QueryDefinitionDTO queryDefinitionDTO) {
         ModifiableQueryDefinition<DataSourceType, DataType, ResultType> queryDefinition = null;
         
-        Locale locale = DataMiningStringMessages.Util.getLocaleFor(queryDefinitionDTO.getLocaleInfoName());
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(queryDefinitionDTO.getLocaleInfoName());
         DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain = getDataRetrieverChainDefinition(queryDefinitionDTO.getDataRetrieverChainDefinition().getId());
         @SuppressWarnings("unchecked")
         Function<ResultType> statisticToCalculate = (Function<ResultType>) getFunctionForDTO(queryDefinitionDTO.getStatisticToCalculate());

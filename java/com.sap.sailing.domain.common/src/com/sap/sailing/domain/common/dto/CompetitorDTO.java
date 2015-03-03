@@ -22,11 +22,17 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
     String getName();
     
     Color getColor();
+    
+    String getEmail();
+    
+    boolean hasEmail();
 
     /**
      * A regular instance will simply return this object. A compacted version may compute the result by looking it up
      * from the previous version of the enclosing leaderboard.
      */
     CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion);
+
+    String getImageURL();
     
 }
