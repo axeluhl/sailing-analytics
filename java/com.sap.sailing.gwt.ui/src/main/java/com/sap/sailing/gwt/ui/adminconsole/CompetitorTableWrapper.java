@@ -127,12 +127,25 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
                 return competitor.getIdAsString();
             }
         };
-
         competitorIdColumn.setSortable(true);
         competitorColumnListHandler.setComparator(competitorIdColumn, new Comparator<CompetitorDTO>() {
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
                 return new NaturalComparator(false).compare(o1.getIdAsString(), o2.getIdAsString());
+            }
+        });
+
+        TextColumn<CompetitorDTO> competitorEMailColumn = new TextColumn<CompetitorDTO>() {
+            @Override
+            public String getValue(CompetitorDTO competitor) {
+                return competitor.getEmail();
+            }
+        };
+        competitorEMailColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(competitorEMailColumn, new Comparator<CompetitorDTO>() {
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return new NaturalComparator(false).compare(o1.getEmail(), o2.getEmail());
             }
         });
 
@@ -155,6 +168,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(displayColorColumn, stringMessages.color());
         table.addColumn(imageColumn, stringMessages.imageURL());
+        table.addColumn(competitorEMailColumn, stringMessages.email());
         table.addColumn(competitorIdColumn, stringMessages.id());
     }
     
