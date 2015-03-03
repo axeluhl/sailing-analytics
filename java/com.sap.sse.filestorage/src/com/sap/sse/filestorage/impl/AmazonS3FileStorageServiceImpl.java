@@ -27,9 +27,8 @@ import com.sap.sse.filestorage.OperationFailedException;
  * following file: ~/.aws/credentials and add credentials to it (get the access id and secret key from
  * https://console.aws.amazon.com/iam/home?#security_credential).
  * 
- * TODO configure credentials in AdminConsole TODO configure bucket name in AdminConsole
- * 
  * @author Fredrik Teschke
+ * @author Axel Uhl
  *
  */
 public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl implements FileStorageService {
@@ -38,9 +37,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     private static final Logger logger = Logger.getLogger(AmazonS3FileStorageServiceImpl.class.getName());
 
-    private static final String baseUrl = "s3.amazonaws.com";
     private static final String retrievalProtocol = "http";
-    // private static final String bucketName = "ftes-sap-sailing";
 
     private final FileStorageServicePropertyImpl accessId = new FileStorageServicePropertyImpl("accessId", false,
             "s3AccessIdDesc");
@@ -48,10 +45,12 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             "s3AccessKeyDesc");
     private final FileStorageServicePropertyImpl bucketName = new FileStorageServicePropertyImpl("bucketName", true,
             "s3BucketNameDesc");
+    private final FileStorageServicePropertyImpl endpoint = new FileStorageServicePropertyImpl("endpoint", true,
+            "s3EndpointDesc");
 
     public AmazonS3FileStorageServiceImpl() {
         super(NAME, "s3Desc");
-        addProperties(accessId, accessKey, bucketName);
+        addProperties(accessId, accessKey, bucketName, endpoint);
     }
 
     private AmazonS3Client createS3Client() throws InvalidPropertiesException {
@@ -60,7 +59,6 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
         // first try to use properties
         if (accessId.getValue() != null && accessKey.getValue() != null) {
             creds = new BasicAWSCredentials(accessId.getValue(), accessKey.getValue());
-
         } else {
             // if properties are empty, read credentials from ~/.aws/credentials
             try {
@@ -84,7 +82,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
         try {
             // FIXME: region is missing s3-... see:
             // http://stackoverflow.com/questions/10975475/amazon-s3-upload-file-and-get-url
-            return new URI(retrievalProtocol, baseUrl, "/" + bucketName.getValue() + "/" + key, null);
+            return new URI(retrievalProtocol, endpoint.getValue(), "/" + key, null);
         } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "Could not create URI for uploaded file with key " + key, e);
             return null;
