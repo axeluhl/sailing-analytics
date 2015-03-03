@@ -2807,16 +2807,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     /**
-     * Assumes that the sail ID and competitor column are mandatory elements of a leaderboard; hence, if the leaderboard
-     * has columns where sail ID and competitor names are expected, it is silently assumed that those are already in the
-     * correct place because these columns are never optional.
-     * 
-     * @param sailIdColumnIndex
-     *            the 0-based index where the sail ID column is to be placed; the competitor name column will be at the
-     *            index greater by one
-     * @return the 0-based index for the next column; two greater than <code>sailIdColumnIndex</code> because this
-     *         method will always make sure that two columns are placed in the layout, one at
-     *         <code>sailIdColumnIndex</code> and one at <code>sailIdColumnIndex+1</code>.
+     * @return the 0-based index for the next column
      */
     private int ensureSailIDAndCompetitorColumn() {
         SailIDColumn<LeaderboardRowDTO> sailIdColumn = new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
