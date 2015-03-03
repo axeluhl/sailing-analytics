@@ -45,7 +45,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     
     public CompetitorEditDialog(final StringMessages stringMessages, CompetitorDTO competitorToEdit,
             DialogCallback<CompetitorDTO> callback) {
-        super(stringMessages.editCompetitor(), stringMessages.editCompetitor(), stringMessages.ok(), stringMessages
+        super(stringMessages.editCompetitor(), null, stringMessages.ok(), stringMessages
                 .cancel(), new Validator<CompetitorDTO>() {
                     @Override
                     public String getErrorMessage(CompetitorDTO valueToValidate) {
@@ -93,7 +93,6 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         
         this.name = createTextBox(competitorToEdit.getName());
         this.email = createTextBox(competitorToEdit.getEmail());
-        this.email.getElement().setPropertyString("placeholder", stringMessages.pleaseEnterAnEmail());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
