@@ -88,6 +88,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 
@@ -414,7 +415,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs);
 
-    CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor);
+    CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws Exception;
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
     
@@ -577,4 +578,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     EventViewDTO getEventViewById(UUID id);
 
+    void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
+            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
 }

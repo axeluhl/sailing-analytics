@@ -25,7 +25,9 @@ public class NaturalComparator implements Comparator<String> {
      * Compare the passed strings in natural order.
      */
     @Override
-    public int compare(String a, String b) {
+    public int compare(final String aOrNull, final String bOrNull) {
+        String a = aOrNull == null ? "" : aOrNull;
+        String b = bOrNull == null ? "" : bOrNull;
         if (!caseSensitive){
             a = a.toLowerCase();
             b = b.toLowerCase();

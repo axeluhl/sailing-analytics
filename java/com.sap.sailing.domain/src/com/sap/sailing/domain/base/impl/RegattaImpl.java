@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -299,13 +300,26 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public Iterable<Competitor> getCompetitors() {
+    public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<Competitor>();
         for (RaceDefinition race : getAllRaces()) {
             for (Competitor c : race.getCompetitors()) {
                 result.add(c);
             }
         }
+        for (Series series : getSeries()) {
+            for (RaceColumn rc : series.getRaceColumns()) {
+                for (Fleet fleet : rc.getFleets()) {
+                    TrackedRace trackedRace = rc.getTrackedRace(fleet);
+                    if (trackedRace != null) {
+                        Util.addAll(trackedRace.getRace().getCompetitors(), result);
+                    }
+                }
+            }
+        }
+        //consider {@link RegattaLog}
+        Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
+        result.addAll(viaLog);
         return result;
     }
 

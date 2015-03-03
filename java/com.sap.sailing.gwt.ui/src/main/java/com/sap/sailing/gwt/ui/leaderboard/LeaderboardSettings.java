@@ -85,6 +85,9 @@ public class LeaderboardSettings {
      */
     private final boolean showAddedScores;
     
+    private final boolean showCompetitorSailIdColumn;
+    private final boolean showCompetitorFullNameColumn;
+    
     /**
      * Show a column with total number of races completed
      */
@@ -98,7 +101,8 @@ public class LeaderboardSettings {
             List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
             boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
             boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
-            boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor) {
+            boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
+            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -116,6 +120,8 @@ public class LeaderboardSettings {
         this.sortAscending = sortAscending;
         this.updateUponPlayStateChange = updateUponPlayStateChange;
         this.showAddedScores = showAddedScores;
+        this.showCompetitorSailIdColumn = showCompetitorSailIdColumn;
+        this.showCompetitorFullNameColumn = showCompetitorFullNameColumn;
         this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor = showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
     }
   
@@ -197,5 +203,13 @@ public class LeaderboardSettings {
     
     public boolean isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor() {
         return showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+    }
+    
+    public boolean isShowCompetitorSailIdColumn() {
+        return showCompetitorSailIdColumn;
+    }
+    
+    public boolean isShowCompetitorFullNameColumn() {
+        return showCompetitorFullNameColumn;
     }
 }

@@ -48,11 +48,11 @@ public class ParallelGroupedDoubleDataMedianAggregationProcessor
     private Double getMedianOf(List<Double> values) {
         Collections.sort(values);
         if (listSizeIsEven(values)) {
-            int index1 = values.size() / 2;
+            int index1 = (values.size() / 2) - 1;
             int index2 = index1 + 1;
             return (values.get(index1) + values.get(index2)) / 2;
         } else {
-            int index = (values.size() + 1) / 2;
+            int index = ((values.size() + 1) / 2) - 1;
             return values.get(index);
         }
     }

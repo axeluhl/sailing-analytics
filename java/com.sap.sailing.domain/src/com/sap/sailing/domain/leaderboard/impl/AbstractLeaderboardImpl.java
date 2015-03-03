@@ -70,6 +70,10 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         return Collections.unmodifiableSet(trackedRaces);
     }
 
+    /**
+     * This default implementation collects all competitors by visiting all {@link TrackedRace}s associated with this
+     * leaderboard's columns (see {@link #getTrackedRaces()}).
+     */
     @Override
     public Iterable<Competitor> getAllCompetitors() {
         if (allCompetitorsCache == null) {

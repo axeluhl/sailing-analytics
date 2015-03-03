@@ -1,5 +1,7 @@
 package com.sap.sse.filestorage.services.test;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -36,8 +38,10 @@ public class AmazonS3Test {
         
         InputStream downloadStream = uri.toURL().openStream();
         stream = getClass().getClassLoader().getResourceAsStream(teamImageFile);
-        IOUtils.contentEquals(downloadStream, stream);
-        
-        storageService.removeFile(uri);
+        try {
+            assertTrue(IOUtils.contentEquals(downloadStream, stream));
+        } finally {
+            storageService.removeFile(uri);
+        }
     }
 }

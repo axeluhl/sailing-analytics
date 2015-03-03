@@ -19,7 +19,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
  */
 public abstract class TableWrapper<T, S extends SelectionModel<T>> implements IsWidget {
     protected final CellTable<T> table;
-    protected final S selectionModel;
+    private final S selectionModel;
     protected final ListDataProvider<T> dataProvider;
     protected VerticalPanel mainPanel;
     protected final SailingServiceAsync sailingService;
