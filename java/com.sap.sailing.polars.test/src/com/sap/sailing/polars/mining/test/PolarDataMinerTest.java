@@ -9,14 +9,18 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -26,12 +30,15 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -51,11 +58,27 @@ public class PolarDataMinerTest {
 
     private static final int MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED = 30;
     private static final double EPSILON = 1E-4;
+    
+    public static PolarSheetGenerationSettings createTestPolarSettings() {
+        List<Double> levelList = new ArrayList<Double>();
+        for (double levelValue = 0.5; levelValue < 35; levelValue = levelValue + 0.5) {
+            levelList.add(levelValue);
+        }
+        double[] levels = new double[levelList.size()];
+        int i=0;
+        for (Double level : levelList) {
+            levels[i++] = level;
+        }
+        WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 0.5);
+        return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
+                false, 3);
+    }
 
+    @Ignore
     @Test
     public void testGrouping() throws InterruptedException, TimeoutException, NoSuchMethodException,
             NotEnoughDataHasBeenAddedException {
-        PolarDataMiner miner = new PolarDataMiner();
+        PolarDataMiner miner = new PolarDataMiner(createTestPolarSettings());
 
         BoatClass mockedBoatClass = mock(BoatClass.class);
         
@@ -150,22 +173,26 @@ public class PolarDataMinerTest {
                 track.add(fix);
             }
         }
-
-        RaceDefinition mockedRaceDefinition = createMockedRaceDefinition();
-        when(mockedRaceDefinition.getBoatClass()).thenReturn(mockedBoatClass);
-        when(trackedRace.getRace()).thenReturn(mockedRaceDefinition);
-
-        for (Competitor competitor : fixesPerCompetitor.keySet()) {
-            MarkPassing markpassing = createMockedStartMarkPassing();
-            when(trackedRace.getMarkPassing(eq(competitor), any(Waypoint.class))).thenReturn(markpassing);
-        }
-
         Calendar cal = Calendar.getInstance();
         cal.set(2014, 4, 3, 12, 00);
         TimePoint startOfRace = new MillisecondsTimePoint(cal.getTime());
 
         cal.set(2014, 4, 3, 15, 00);
         TimePoint endOfRace = new MillisecondsTimePoint(cal.getTime());
+        Waypoint finishWaypoint = mock(Waypoint.class);
+        createWayPoint(fixesPerCompetitor, trackedRace, endOfRace, finishWaypoint);
+        Waypoint startWaypoint = mock(Waypoint.class);
+        createWayPoint(fixesPerCompetitor, trackedRace, startOfRace, startWaypoint);
+        RaceDefinition mockedRaceDefinition = createMockedRaceDefinition(startWaypoint, finishWaypoint);
+        when(mockedRaceDefinition.getBoatClass()).thenReturn(mockedBoatClass);
+        when(trackedRace.getRace()).thenReturn(mockedRaceDefinition);
+
+        for (Competitor competitor : fixesPerCompetitor.keySet()) {
+            MarkPassing markpassing = createMockedStartMarkPassing();
+            when(trackedRace.getMarkPassing(eq(competitor), eq(startWaypoint))).thenReturn(markpassing);
+        }
+
+
 
         when(trackedRace.getStartOfRace()).thenReturn(startOfRace);
         when(trackedRace.getEndOfRace()).thenReturn(endOfRace);
@@ -183,6 +210,21 @@ public class PolarDataMinerTest {
         return trackedRace;
     }
 
+    private void createWayPoint(Map<Competitor, Set<GPSFixMoving>> fixesPerCompetitor, TrackedRace trackedRace,
+            TimePoint endOfRace, Waypoint waypoint) {
+        List<MarkPassing> markPassings = new ArrayList<MarkPassing>();
+        Iterator<Competitor> competitorIterator = fixesPerCompetitor.keySet().iterator();
+        while (competitorIterator.hasNext()) {
+            MarkPassing markPassing = mock(MarkPassing.class);
+            when(markPassing.getTimePoint()).thenReturn(endOfRace);
+            Competitor competitor = competitorIterator.next();
+            when(markPassing.getCompetitor()).thenReturn(competitor);
+            when(trackedRace.getMarkPassing(competitor, waypoint)).thenReturn(markPassing);
+            markPassings.add(markPassing);
+        }
+        when(trackedRace.getMarkPassingsInOrder(waypoint)).thenReturn(markPassings);
+    }
+
     private MarkPassing createMockedStartMarkPassing() {
         Calendar cal = Calendar.getInstance();
         cal.set(2014, 4, 3, 12, 15);
@@ -193,9 +235,11 @@ public class PolarDataMinerTest {
         return passing;
     }
 
-    private RaceDefinition createMockedRaceDefinition() {
+    private RaceDefinition createMockedRaceDefinition(Waypoint startWaypoint, Waypoint finishWaypoint) {
         RaceDefinition raceDefinition = mock(RaceDefinition.class);
         Course mockedCourse = createMockedCourse();
+        when(mockedCourse.getLastWaypoint()).thenReturn(finishWaypoint);
+        when(mockedCourse.getFirstWaypoint()).thenReturn(startWaypoint);
         when(raceDefinition.getCourse()).thenReturn(mockedCourse);
         BoatClass mockedBoatClass = mock(BoatClass.class);
         when(mockedBoatClass.getManeuverDegreeAngleThreshold()).thenReturn(20.0);

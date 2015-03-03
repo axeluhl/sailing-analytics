@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# Given the base URLs of two SAP Sailing servers, obtains their /sailingserver/api/v1/leaderboardgroups
+# service output, sorts it, compares them, and if equal, obtains all corresponding leaderboardgroups/*
+# documents and compares those in turn.
+
+options='c'
+while getopts $options option
+do
+    case $option in
+        c) continue="1";;
+        \?) echo "Invalid option"
+            exit 4;;
+    esac
+done
+shift $((OPTIND-1))
+
+OLDSERVER=$1
+NEWSERVER=$2
+OLDGROUPS=leaderboardgroups.old.sed
+NEWGROUPS=leaderboardgroups.new.sed
+
+# If we continue, don't download again
+if [ "$continue" != "1" ]; then
+  wget -O - ${OLDSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/,/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' | grep -v "^$" | sort >$OLDGROUPS
+  wget -O - ${NEWSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/,/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' | grep -v "^$" | sort >$NEWGROUPS
+fi
+
+diff leaderboardgroups.old.sed leaderboardgroups.new.sed
+if [ "$?" = "0" ]; then
+  OLD_LB=`head -n 1 $OLDGROUPS`
+  NEW_LB=`head -n 1 $NEWGROUPS`
+  while [ "$OLD_LB" != "" ]; do
+    wget -O - "${OLDSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | sed -e 's/\b470W\b/470/g' -e 's/\b470M\b/470/g' -e 's/\<505\>/5O5/g' -e 's/Laser Int\./Laser/g' | python -m json.tool | grep -v timepoint >"${OLD_LB}.old.json"
+    wget -O - "${NEWSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $NEW_LB | sed -e 's/ /%20/g'`" | sed -e 's/\b470W\b/470/g' -e 's/\b470M\b/470/g' -e 's/\<505\>/5O5/g' -e 's/Laser Int\./Laser/g' | python -m json.tool | grep -v timepoint >"${NEW_LB}.new.json" 
+    diff -b -i -B "${OLD_LB}.old.json" "${NEW_LB}.new.json"
+    DIFFRESULT=$?
+    if [ "$DIFFRESULT" != "0" ]; then
+      echo "Difference detected in leaderboard group $OLD_LB vs. $NEW_LB; exiting"
+      exit $DIFFRESULT
+    else
+      # no diff; remove the leaderboards successfully compared from both leaderboardgroups lists in case a later -c invocation occurs
+      sed -i -e '1d' $OLDGROUPS
+      sed -i -e '1d' $NEWGROUPS
+    fi
+    OLD_LB=`head -n 1 $OLDGROUPS`
+    NEW_LB=`head -n 1 $NEWGROUPS`
+  done
+fi
+
+
