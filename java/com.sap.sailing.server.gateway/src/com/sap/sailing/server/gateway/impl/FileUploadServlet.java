@@ -17,6 +17,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
 
@@ -66,8 +67,8 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                         .storeFile(fileItem.getInputStream(), fileExtension, fileItem.getSize());
                 result.put(JSON_FILE_NAME, fileItem.getName());
                 result.put(JSON_FILE_URI, fileUri.toString());
-            } catch (IOException | OperationFailedException | InvalidPropertiesException e) {
-                final String errorMessage = "Could not store file: " + e.getMessage();
+            } catch (IOException | OperationFailedException | InvalidPropertiesException | NoCorrespondingServiceRegisteredException e) {
+                final String errorMessage = "Could not store file"+ (e.getMessage()==null?"":(": " + e.getMessage()));
                 logger.log(Level.WARNING, "Could not store file", e);
                 result.put("status", Status.INTERNAL_SERVER_ERROR.name());
                 result.put("message", errorMessage);
