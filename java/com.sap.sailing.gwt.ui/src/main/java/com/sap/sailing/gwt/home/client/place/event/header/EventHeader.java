@@ -18,8 +18,8 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
@@ -77,7 +77,7 @@ public class EventHeader extends AbstractEventComposite {
     
     private final HomePlacesNavigator placeNavigator;
     private PlaceNavigation<SeriesPlace> seriesAnalyticsNavigation = null; 
-    private PlaceNavigation<EventPlace> regattasNavigation = null;
+    private PlaceNavigation<MultiregattaRegattasPlace> regattasNavigation = null;
     
     public EventHeader(EventDTO event, HomePlacesNavigator placeNavigator, EventPlaceNavigator pageNavigator) {
         super(event, pageNavigator);
@@ -132,7 +132,7 @@ public class EventHeader extends AbstractEventComposite {
         eventHeaderWrapperDiv.setAttribute("data-navigationtype", "compact");
         EventDTO event = getEvent();
         
-        PlaceNavigation<EventPlace> regattaDetailsNavigation  = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        PlaceNavigation<MultiregattaRegattasPlace> regattaDetailsNavigation  = placeNavigator.getEventRegattasNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
         regattasLink.setHref(regattaDetailsNavigation.getTargetUrl());
         regattasLink2.setHref(regattaDetailsNavigation.getTargetUrl());
     }
@@ -156,7 +156,7 @@ public class EventHeader extends AbstractEventComposite {
 
         String eventName = event.getName();
         
-        regattasNavigation = placeNavigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        regattasNavigation = placeNavigator.getEventRegattasNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
         if(isSeries) {
             LeaderboardGroupDTO leaderboardGroupDTO = event.getLeaderboardGroups().get(0);
             eventName = leaderboardGroupDTO.getDisplayName() != null ? leaderboardGroupDTO.getDisplayName() : leaderboardGroupDTO.getName();

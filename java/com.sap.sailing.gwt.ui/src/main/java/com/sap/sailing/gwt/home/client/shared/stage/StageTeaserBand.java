@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
+import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public abstract class StageTeaserBand extends Composite {
@@ -31,7 +31,7 @@ public abstract class StageTeaserBand extends Composite {
 
     private final HomePlacesNavigator placeNavigator;
     private final EventBaseDTO event;
-    private final PlaceNavigation<EventPlace> eventNavigation;
+    private final PlaceNavigation<EventDefaultPlace> eventNavigation;
     
     public StageTeaserBand(EventBaseDTO event, HomePlacesNavigator placeNavigator) {
         this.event = event;
@@ -58,7 +58,7 @@ public abstract class StageTeaserBand extends Composite {
         return event;
     }
 
-    public PlaceNavigation<EventPlace> getEventNavigation() {
+    public PlaceNavigation<EventDefaultPlace> getEventNavigation() {
         return eventNavigation;
     }
 

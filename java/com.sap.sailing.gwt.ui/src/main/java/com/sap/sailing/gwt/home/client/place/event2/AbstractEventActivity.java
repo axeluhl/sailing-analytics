@@ -89,6 +89,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     @Override
     public SafeUri getUrl(Place place) {
+        // TODO implement global navigation for StartPlace/EventsPlace, ...
         String token = historyMapper.getToken(place);
         return UriUtils.fromString("#" + token);
     }

@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -35,7 +35,7 @@ public class CompactEventHeader extends Composite {
     
     private final EventDTO event;
     private final HomePlacesNavigator placeNavigator;
-    private final PlaceNavigation<EventPlace> regattaNavigation;
+    private final PlaceNavigation<AbstractEventRegattaPlace> regattaNavigation;
 
     public CompactEventHeader(EventDTO event, String leaderboardName, HomePlacesNavigator placeNavigator) {
         this.event = event;

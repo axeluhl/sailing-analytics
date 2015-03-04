@@ -30,7 +30,8 @@ import com.sap.sailing.gwt.home.client.place.event.header.CompactEventHeader;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources;
-import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaCompetitorAnalyticsPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -66,8 +67,8 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
     @UiField Anchor leaderboardAnchor;
     @UiField Anchor competitorChartsAnchor;
 
-    private final PlaceNavigation<RegattaPlace> leaderboardNavigation; 
-    private final PlaceNavigation<RegattaPlace> competitorChartsNavigation; 
+    private final PlaceNavigation<RegattaLeaderboardPlace> leaderboardNavigation; 
+    private final PlaceNavigation<RegattaCompetitorAnalyticsPlace> competitorChartsNavigation; 
 
     private RegattaAnalyticsDataManager regattaAnalyticsManager;
     private Timer autoRefreshTimer;
@@ -89,9 +90,9 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         leaderboardTabPanel.setVisible(false);
         liveRaceDiv.getStyle().setVisibility(Visibility.HIDDEN);
         
-        leaderboardNavigation = placesNavigator.getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.Leaderboard, leaderboardName, 
+        leaderboardNavigation = placesNavigator.getLeaderboardNavigation(event.id.toString(), leaderboardName, 
                 event.getBaseURL(), event.isOnRemoteServer());
-        competitorChartsNavigation = placesNavigator.getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.CompetitorAnalytics, leaderboardName, 
+        competitorChartsNavigation = placesNavigator.getCompetitorAnalyticsNavigation(event.id.toString(), leaderboardName, 
                 event.getBaseURL(), event.isOnRemoteServer());
         
         leaderboardAnchor.setHref(leaderboardNavigation.getTargetUrl());

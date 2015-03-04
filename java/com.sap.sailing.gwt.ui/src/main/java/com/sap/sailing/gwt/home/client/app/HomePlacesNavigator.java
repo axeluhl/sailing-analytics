@@ -1,13 +1,16 @@
 package com.sap.sailing.gwt.home.client.app;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace.EventNavigationTabs;
+import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaCompetitorAnalyticsPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
-import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
@@ -51,21 +54,32 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     public PlaceNavigation<ContactPlace> getContactNavigation() {
         return createGlobalPlaceNavigation(new ContactPlace(), new ContactPlace.Tokenizer());
     }
-
-    public PlaceNavigation<EventPlace> getEventNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
-        EventPlace eventPlace = new EventPlace(eventUuidAsString, EventNavigationTabs.Regattas, null);
-        return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new EventPlace.Tokenizer());
+    
+    public PlaceNavigation<MultiregattaRegattasPlace> getEventRegattasNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
+        MultiregattaRegattasPlace eventPlace = new MultiregattaRegattasPlace(eventUuidAsString);
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new MultiregattaRegattasPlace.Tokenizer());
     }
 
-    public PlaceNavigation<EventPlace> getRegattaNavigation(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
-        EventPlace eventPlace = new EventPlace(eventUuidAsString, EventNavigationTabs.Regatta, leaderboardIdAsNameString);
-        return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new EventPlace.Tokenizer());
+    public PlaceNavigation<EventDefaultPlace> getEventNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
+        EventDefaultPlace eventPlace = new EventDefaultPlace(eventUuidAsString);
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new EventDefaultPlace.Tokenizer());
     }
 
-    /** this place will be merged into the common regatta view as tab later on */
-    public PlaceNavigation<RegattaPlace> getRegattaAnalyticsNavigation(String eventUuidAsString, RegattaNavigationTabs navigationTab, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
-        RegattaPlace regattaPlace = new RegattaPlace(eventUuidAsString, navigationTab, leaderboardIdAsNameString, true, true);
-        return createPlaceNavigation(baseUrl, isOnRemoteServer, regattaPlace, new RegattaPlace.Tokenizer());
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
+        // TODO RegattaOverviewPlace not implemented yet
+        RegattaRacesPlace eventPlace = new RegattaRacesPlace(eventUuidAsString, leaderboardIdAsNameString);
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, (PlaceTokenizer)new RegattaRacesPlace.Tokenizer());
+    }
+
+    public PlaceNavigation<RegattaCompetitorAnalyticsPlace> getCompetitorAnalyticsNavigation(String eventUuidAsString, String regattaId, String baseUrl, boolean isOnRemoteServer) {
+        RegattaCompetitorAnalyticsPlace regattaPlace = new RegattaCompetitorAnalyticsPlace(eventUuidAsString, regattaId);
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, regattaPlace, new RegattaCompetitorAnalyticsPlace.Tokenizer());
+    }
+    
+    public PlaceNavigation<RegattaLeaderboardPlace> getLeaderboardNavigation(String eventUuidAsString, String regattaId, String baseUrl, boolean isOnRemoteServer) {
+        RegattaLeaderboardPlace regattaPlace = new RegattaLeaderboardPlace(eventUuidAsString, regattaId);
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, regattaPlace, new RegattaLeaderboardPlace.Tokenizer());
     }
 
     /** this place will be merged into the common series event view as tab later on */

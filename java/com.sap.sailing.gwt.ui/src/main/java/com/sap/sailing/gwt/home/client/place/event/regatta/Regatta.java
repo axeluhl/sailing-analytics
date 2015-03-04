@@ -22,10 +22,9 @@ import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.BoatClassImageResources;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
-import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -77,8 +76,8 @@ public class Regatta extends Composite {
     
     @UiField Image boatClassImage;
 
-    private PlaceNavigation<RegattaPlace> leaderboardNavigation;
-    private PlaceNavigation<EventPlace> regattaNavigation;
+    private PlaceNavigation<RegattaLeaderboardPlace> leaderboardNavigation;
+    private PlaceNavigation<AbstractEventRegattaPlace> regattaNavigation;
     private final HomePlacesNavigator placesNavigator;
     private final EventPlaceNavigator eventPlaceNavigator;
     
@@ -107,7 +106,7 @@ public class Regatta extends Composite {
 
         if(isSingleView) {
             regattaDetailsLink.setVisible(false);
-            leaderboardNavigation = placesNavigator.getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.Leaderboard, 
+            leaderboardNavigation = placesNavigator.getLeaderboardNavigation(event.id.toString(), 
                     leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
             leaderboardLink.setHref(leaderboardNavigation.getTargetUrl());
         } else {
