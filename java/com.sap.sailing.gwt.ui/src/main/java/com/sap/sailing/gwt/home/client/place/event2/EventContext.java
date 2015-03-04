@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 /**
@@ -68,7 +69,13 @@ public class EventContext {
     }
 
     public String getRegattaId() {
-        return regattaId;
+        if(regattaId != null) {
+            return regattaId;
+        }
+        if(eventDTO != null && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
+            return eventDTO.getLeaderboardGroups().get(0).getLeaderboards().get(0).regattaName;
+        }
+        return null;
     }
 
     public RegattaMetadataDTO getRegatta() {

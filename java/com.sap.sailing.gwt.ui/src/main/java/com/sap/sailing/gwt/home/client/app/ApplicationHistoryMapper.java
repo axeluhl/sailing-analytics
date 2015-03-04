@@ -6,12 +6,9 @@ import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
@@ -30,14 +27,15 @@ import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
         // Event tab places...
         EventDefaultPlace.Tokenizer.class,
         // Multiregatta places:
-        MultiregattaMediaPlace.Tokenizer.class,
-        MultiregattaOverviewPlace.Tokenizer.class,
+        // TODO not implemented: MultiregattaOverviewPlace.Tokenizer.class,
         MultiregattaRegattasPlace.Tokenizer.class,
+        // TODO not implemented: MultiregattaMediaPlace.Tokenizer.class,
         // Regatta places:
-        RegattaOverviewPlace.Tokenizer.class,
+        // TODO not implemented: RegattaOverviewPlace.Tokenizer.class,
         RegattaRacesPlace.Tokenizer.class,
         RegattaLeaderboardPlace.Tokenizer.class,
-        RegattaMediaPlace.Tokenizer.class,
+        RegattaCompetitorAnalyticsPlace.Tokenizer.class,
+        // TODO not implemented: RegattaMediaPlace.Tokenizer.class,
         // Fake series places:
         SeriesEventsPlace.Tokenizer.class
 

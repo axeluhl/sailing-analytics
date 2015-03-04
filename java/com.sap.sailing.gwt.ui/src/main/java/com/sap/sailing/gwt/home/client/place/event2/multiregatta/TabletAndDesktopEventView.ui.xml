@@ -49,9 +49,10 @@
 			<c:header>
 				<h:EventHeader ui:field="eventHeader" />
 			</c:header>
-			<c:tabcontent title="Overview">
+			<!-- Overview isn't implemented yet. -->
+			<!-- <c:tabcontent title="Overview">
 				<tabs:MultiregattaOverviewTabView />
-			</c:tabcontent>
+			</c:tabcontent> -->
 			<c:tabcontent title="Regattas">
 				<tabs:MultiregattaRegattasTabView />
 			</c:tabcontent>

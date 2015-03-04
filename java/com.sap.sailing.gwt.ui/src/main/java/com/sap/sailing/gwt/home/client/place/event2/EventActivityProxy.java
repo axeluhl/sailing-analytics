@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -9,14 +8,10 @@ import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaActivity;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaActivity;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
@@ -136,11 +131,17 @@ public class EventActivityProxy extends AbstractActivityProxy {
     private AbstractEventPlace getRealPlace() {
         EventViewDTO event = ctx.getEventDTO();
         if(event.getType() == EventType.SERIES_EVENT) {
-            return new RegattaOverviewPlace(ctx);
+            // TODO Overview isn't implemented yet
+//            return new RegattaOverviewPlace(new EventContext(ctx.getEventDTO()));
+            return new RegattaRacesPlace(new EventContext(ctx.getEventDTO()));
         }
         if(event.getType() == EventType.SINGLE_REGATTA) {
-            return new RegattaOverviewPlace(ctx.withRegattaId(event.getRegattas().get(0).getId()));
+            // TODO Overview isn't implemented yet
+//            return new RegattaOverviewPlace(new EventContext(ctx.getEventDTO()));
+            return new RegattaRacesPlace(new EventContext(ctx.getEventDTO()));
         }
-        return new MultiregattaOverviewPlace(place.getCtx());
+        // TODO Overview isn't implemented yet
+//        return new MultiregattaOverviewPlace(place.getCtx());
+        return new MultiregattaRegattasPlace(place.getCtx());
     }
 }

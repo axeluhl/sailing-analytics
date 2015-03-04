@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
@@ -48,7 +48,7 @@ public class RegattaPhase extends UIObject {
             RegattaPhaseRace race = new RegattaPhaseRace(raceColumn2, presenter.getTimerForClientServerOffset());
             phaseRacesDiv.appendChild(race.getElement());
            
-            final RegattaRacesPlace racesPlace = presenter.getPlaceForRegattaRaces(leaderboard.regattaName);
+            final AbstractEventRegattaPlace racesPlace = presenter.getPlaceForRegattaRaces(leaderboard.regattaName);
             phaseRacesAnchor.setHref(presenter.getUrl(racesPlace));
             Event.sinkEvents(phaseRacesAnchor, Event.ONCLICK);
             Event.setEventListener(phaseRacesAnchor, new EventListener() {

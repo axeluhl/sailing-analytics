@@ -8,12 +8,18 @@ import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactActivityProxy;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
+import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventActivityProxy;
+import com.sap.sailing.gwt.home.client.place.event2.EventContext;
+import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaCompetitorAnalyticsPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
-import com.sap.sailing.gwt.home.client.place.regatta.RegattaActivityProxy;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultActivityProxy;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
@@ -43,12 +49,11 @@ public class ApplicationActivityMapper implements ActivityMapper {
         } else if (place instanceof ContactPlace) {
             return new ContactActivityProxy((ContactPlace) place, clientFactory);
         } else if (place instanceof EventPlace) {
-            // work around
             // return new EventActivityProxy((EventPlace) place, clientFactory);
-            return new EventActivityProxy(new com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace(
-                    ((EventPlace) place).getEventUuidAsString()), clientFactory, clientFactory.getHomePlacesNavigator());
-        } else if (place instanceof com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace) {
-            com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace eventPlace = (com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace) place;
+            // rerouting old place to new place to make bookmarked URLs to work with the new interface.
+            return getActivity(getRealEventPlace((EventPlace) place));
+        } else if (place instanceof AbstractEventPlace) {
+            AbstractEventPlace eventPlace = (AbstractEventPlace) place;
             return new EventActivityProxy(eventPlace, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof SeriesEventsPlace) {
             return new com.sap.sailing.gwt.home.client.place.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory);
@@ -63,7 +68,9 @@ public class ApplicationActivityMapper implements ActivityMapper {
         } else if (place instanceof WhatsNewPlace) {
             return new WhatsNewActivityProxy((WhatsNewPlace) place, clientFactory);
         } else if (place instanceof RegattaPlace) {
-            return new RegattaActivityProxy((RegattaPlace) place, clientFactory);
+//            return new RegattaActivityProxy((RegattaPlace) place, clientFactory);
+            // rerouting old place to new place to make bookmarked URLs to work with the new interface.
+            return getActivity(getRealRegattaPlace((RegattaPlace) place));
         } else if (place instanceof SeriesPlace) {
             return new SeriesActivityProxy((SeriesPlace) place, clientFactory);
         } else if (place instanceof SearchResultPlace) {
@@ -71,5 +78,58 @@ public class ApplicationActivityMapper implements ActivityMapper {
         } else {
             return null;
         }
+    }
+
+    private Place getRealRegattaPlace(RegattaPlace place) {
+        String eventId = place.getEventUuidAsString();
+        if(eventId == null || eventId.isEmpty()) {
+            return new EventsPlace();
+        }
+        EventContext eventContext = new EventContext().withId(eventId);
+        String regattaId = place.getLeaderboardIdAsNameString();
+        boolean hasRegattaId = (regattaId != null && !regattaId.isEmpty());
+        if(hasRegattaId) {
+            switch (place.getNavigationTab()) {
+            case CompetitorAnalytics:
+                return new RegattaCompetitorAnalyticsPlace(eventContext);
+            case Leaderboard:
+                return new RegattaLeaderboardPlace(eventContext);
+            }
+        }
+        return new EventDefaultPlace(eventContext);
+    }
+
+    @SuppressWarnings("incomplete-switch")
+    private Place getRealEventPlace(EventPlace place) {
+        String eventId = place.getEventUuidAsString();
+        if(eventId == null || eventId.isEmpty()) {
+            return new EventsPlace();
+        }
+        EventContext eventContext = new EventContext().withId(eventId);
+        String regattaId = place.getLeaderboardIdAsNameString();
+        boolean hasRegattaId = (regattaId != null && !regattaId.isEmpty());
+        if(hasRegattaId) {
+            eventContext.withRegattaId(regattaId);
+            
+            switch (place.getNavigationTab()) {
+            // TODO some places aren't implemented yet 
+            case Media:
+            case Overview:
+            case Regatta:
+                return new RegattaRacesPlace(eventContext);
+            }
+        } else {
+            switch (place.getNavigationTab()) {
+            case Media:
+                // Media not implemented yet -> using regatta list
+            case Overview:
+                // Overview not implemented yet -> using regatta list
+            case Schedule:
+            case Regattas:
+                return new MultiregattaRegattasPlace(eventContext);
+            }
+        }
+        
+        return new EventDefaultPlace(eventContext);
     }
 }
