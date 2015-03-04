@@ -104,7 +104,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             }
             
             if (isValidConnector.matches(method)) {
-                handleConnectorMethod(method, previousFunctions);
+                handleConnectorMethod(method, previousFunctions, scanForStatistics);
             }
         }
     }
@@ -138,12 +138,12 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         statistics.get(declaringType).add(statistic);
     }
 
-    private void handleConnectorMethod(Method method, List<Function<?>> previousFunctions) {
+    private void handleConnectorMethod(Method method, List<Function<?>> previousFunctions, boolean scanForStatistics) {
         Function<?> function = functionFactory.createMethodWrappingFunction(method);
         Class<?> returnType = method.getReturnType();
         List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
         previousFunctionsClone.add(function);
-        scanInternalClass(returnType, previousFunctionsClone, method.getAnnotation(Connector.class).scanForStatistics()); 
+        scanInternalClass(returnType, previousFunctionsClone, !scanForStatistics ? false : method.getAnnotation(Connector.class).scanForStatistics()); 
     }
 
     @Override
