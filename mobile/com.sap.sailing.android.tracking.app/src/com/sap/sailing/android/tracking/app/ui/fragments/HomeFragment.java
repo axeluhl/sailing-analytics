@@ -422,7 +422,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         builder.setMessage(message1 + "\n\n" + message2);
         builder.setCancelable(true);
         builder.setPositiveButton(getString(R.string.confirm_data_is_correct), new DialogInterface.OnClickListener() {
-
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 clearScannedQRCodeInPrefs();
@@ -430,14 +429,12 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             }
 
         }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
-
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 clearScannedQRCodeInPrefs();
                 dialog.cancel();
             }
         });
-
         AlertDialog alert = builder.create();
         alert.show();
     }
@@ -456,7 +453,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
         if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(getActivity(),
                 checkinData.checkinDigest)) {
-
             try {
                 DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.getEvent(),
                         checkinData.getCompetitor(), checkinData.getLeaderboard());
@@ -476,7 +472,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG)
                     .show();
         }
-
         performAPICheckin(checkinData);
     }
 
@@ -487,21 +482,16 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
      */
     private void performAPICheckin(CheckinData checkinData) {
         Date date = new Date();
-
         StartActivity startActivity = (StartActivity) getActivity();
         startActivity.showProgressDialog(R.string.please_wait, R.string.checking_in);
-
         try {
             JSONObject requestObject = CheckinHelper.getCheckinJson(checkinData.competitorId, checkinData.deviceUid,
-                    "TODO!!", date.getTime());
-
+                    "TODO push device ID!!", date.getTime());
             HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkinData.checkinURL),
                     requestObject.toString(), getActivity());
-
             NetworkHelper.getInstance(getActivity())
                     .executeHttpJsonRequestAsnchronously(request, new CheckinListener(checkinData.checkinDigest),
                             new CheckinErrorListener(checkinData.checkinDigest));
-
         } catch (JSONException e) {
             ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
             displayAPIErrorRecommendRetry();
