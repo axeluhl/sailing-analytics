@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,6 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<DeviceConfigurationMatcherDTO> {
@@ -63,7 +63,6 @@ public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<Devi
         
     }
 
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private ListBox typeBox;
     private List<TextBox> devicesBoxes;
     
@@ -164,7 +163,7 @@ public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<Devi
     }
 
     private PushButton createRemoveButton(final Grid devicesGrid) {
-        PushButton removeButton = new PushButton(new Image(resources.removeIcon()));
+        PushButton removeButton = new PushButton(new Image(IconResources.INSTANCE.removeIcon()));
         removeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

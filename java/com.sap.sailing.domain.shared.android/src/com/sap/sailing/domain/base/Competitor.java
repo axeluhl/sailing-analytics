@@ -15,6 +15,10 @@ public interface Competitor extends Named, WithID, IsManagedByCache<SharedDomain
     
     Color getColor();
     
+    String getEmail();
+    
+    boolean hasEmail();
+    
     /**
      * Adds a listener to this competitor. The listener is also added to the boat and the team for changes.
      * Adding a listener that is already part of this competitor's listeners set remains without effect.

@@ -52,7 +52,7 @@ public class MultiLogAnalyzerTest {
     private AbstractLogEventAuthor author;
 
     private static Competitor createCompetitor(int n) {
-        return new CompetitorImpl(n, n + "", null, null, null);
+        return new CompetitorImpl(n, n + "", null, null, null, null);
     }
 
      private static DeviceIdentifier createDevice() {

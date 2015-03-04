@@ -1,18 +1,24 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
@@ -20,8 +26,13 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.GenericListBox;
+import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -43,15 +54,17 @@ public class CompetitorPanel extends SimplePanel {
         this(sailingService, null, stringMessages, errorReporter);
     }
 
-    public CompetitorPanel(final SailingServiceAsync sailingService, String leaderboardName, final StringMessages stringMessages,
-            final ErrorReporter errorReporter) {
+    public CompetitorPanel(final SailingServiceAsync sailingService, final String leaderboardName,
+            final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
-        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                new MultiSelectionModel<CompetitorDTO>(), false);
+        final Class<?> selectionModelType = MultiSelectionModel.class;
+        @SuppressWarnings("unchecked")
+        final Class<MultiSelectionModel<CompetitorDTO>> multiSelectionType = (Class<MultiSelectionModel<CompetitorDTO>>) selectionModelType;
+        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, multiSelectionType, false);
         this.competitorSelectionModel = competitorTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -79,16 +92,56 @@ public class CompetitorPanel extends SimplePanel {
         buttonPanel.add(allowReloadButton);
         Button addCompetitorButton = new Button(stringMessages.add());
         addCompetitorButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				openAddCompetitorDialog();
-			}
-		});
+            @Override
+            public void onClick(ClickEvent event) {
+                openAddCompetitorDialog();
+            }
+        });
         buttonPanel.add(addCompetitorButton);
+        
+        Button selectAllButton = new Button(stringMessages.selectAll());
+        selectAllButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                for (CompetitorDTO c : competitorTable.getDataProvider().getList()) {
+                    competitorSelectionModel.setSelected(c, true);
+                }
+            }
+        });
+        buttonPanel.add(selectAllButton);
+
+        //only if this competitor panel is connected to a leaderboard, we want to enable invitations
+        if (leaderboardName != null) {
+            final Button inviteCompetitorsButton = new Button(stringMessages.inviteCompetitors());
+            inviteCompetitorsButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    Set<CompetitorDTO> competitors = competitorSelectionModel.getSelectedSet();
+                    boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
+
+                    if (emailProvidedForAll) {
+                        openChooseEventDialogAndSendMails(competitors);
+                    } else {
+                        Window.alert(stringMessages.notAllCompetitorsProvideEmail());
+                    }
+                }
+
+                private boolean isEmailProvidedForAll(Iterable<CompetitorDTO> allCompetitors) {
+                    for (CompetitorDTO competitor : allCompetitors) {
+                        if (!competitor.hasEmail()) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            });
+            buttonPanel.add(inviteCompetitorsButton);
+        }
+
         competitorsPanel.add(buttonPanel);
 
-        
-        //competitor table
+        // competitor table
         ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
                 new CompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
@@ -112,21 +165,24 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
         allowReloadButton.setEnabled(!competitorSelectionModel.getSelectedSet().isEmpty());
-        
-        if(leaderboardName != null) {
+
+        if (leaderboardName != null) {
             refreshCompetitorList();
         }
     }
-    
+
     private void allowUpdate(final Iterable<CompetitorDTO> competitors) {
         List<CompetitorDTO> serializableSingletonList = new ArrayList<CompetitorDTO>();
         Util.addAll(competitors, serializableSingletonList);
         sailingService.allowCompetitorResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
-            @Override public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to allow resetting competitors "+competitors
-                        +" to defaults: "+caught.getMessage());
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to allow resetting competitors " + competitors
+                        + " to defaults: " + caught.getMessage());
             }
-            @Override public void onSuccess(Void result) {
+
+            @Override
+            public void onSuccess(Void result) {
                 Window.alert(stringMessages.successfullyAllowedCompetitorReset(competitors.toString()));
             }
         });
@@ -143,7 +199,7 @@ public class CompetitorPanel extends SimplePanel {
                 sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to update competitor: "+caught.getMessage());
+                        errorReporter.reportError("Error trying to update competitor: " + caught.getMessage());
                     }
 
                     @Override
@@ -159,6 +215,101 @@ public class CompetitorPanel extends SimplePanel {
         }).show();
     }
     
+    private class SelectEventAndHostnameDialog extends DataEntryDialog<Pair<EventDTO, String>> {
+        private GenericListBox<EventDTO> events;
+        private TextBox serverUrl;
+        
+        public SelectEventAndHostnameDialog(DialogCallback<Pair<EventDTO, String>> callback) {
+            super(stringMessages.selectEventForInvitation(), null, stringMessages.inviteCompetitors(), stringMessages.cancel(),
+                    new Validator<Pair<EventDTO, String>>() {
+                        @Override
+                        public String getErrorMessage(Pair<EventDTO, String> valueToValidate) {
+                            if (valueToValidate.getA() == null) {
+                                return stringMessages.pleaseSelectAnEvent();
+                            } else if (valueToValidate.getB() == null || valueToValidate.getB().isEmpty()) {
+                                return stringMessages.pleaseEnterA(stringMessages.hostname());
+                            }
+                            return null;
+                        }
+                    }, false, callback);
+        }        
+
+        @Override
+        protected Pair<EventDTO, String> getResult() {
+            EventDTO event = events.getValue();
+            String serverUrlString = serverUrl.getValue();
+            if (serverUrlString.endsWith("/")) {
+                serverUrlString = serverUrlString.substring(0, serverUrlString.length() - 1);
+            }
+            return new Pair<>(event, serverUrlString);
+        }
+        
+        @Override
+        protected Widget getAdditionalWidget() {
+            Grid grid = new Grid(2, 2);
+            grid.setWidget(0, 0, createLabel(stringMessages.hostname()));
+            serverUrl = createTextBox(Window.Location.getProtocol() + "//" + Window.Location.getHost());
+            grid.setWidget(0, 1, serverUrl);
+            
+            grid.setWidget(1, 0, createLabel(stringMessages.event()));
+            events = createGenericListBox(new ValueBuilder<EventDTO>() {
+                @Override
+                public String getValue(EventDTO item) {
+                    if (item == null) {
+                        return "";
+                    }
+                    return item.getName();
+                }
+            }, false);
+            grid.setWidget(1, 1, events);
+            
+            events.addItem((EventDTO) null);
+            sailingService.getEventsForLeaderboard(leaderboardName, new AsyncCallback<Collection<EventDTO>>() {
+                @Override
+                public void onSuccess(Collection<EventDTO> result) {
+                    events.addItems(result);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Could not load events: " + caught.getMessage());
+                }
+            });
+            return grid;
+        }        
+    }
+    
+    private String getLocaleInfo() {
+        return LocaleInfo.getCurrentLocale().getLocaleName();
+    }
+
+    private void openChooseEventDialogAndSendMails(final Set<CompetitorDTO> competitors) {
+        new SelectEventAndHostnameDialog(new DialogCallback<Pair<EventDTO, String>>() {
+
+            @Override
+            public void ok(Pair<EventDTO, String> result) {
+                sailingService.inviteCompetitorsForTrackingViaEmail(result.getB(), result.getA(), leaderboardName,
+                        competitors, getLocaleInfo(), new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Window.alert(stringMessages.sendingMailsSuccessfull());
+                            }
+                        });
+            }
+
+            @Override
+            public void cancel() {
+                
+            }
+        }).show();
+    }
+
     public void refreshCompetitorList() {
         competitorTable.refreshCompetitorList(leaderboardName);
     }

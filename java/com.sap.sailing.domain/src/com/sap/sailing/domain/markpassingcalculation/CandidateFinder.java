@@ -368,8 +368,13 @@ public class CandidateFinder implements AbstractCandidateFinder {
         boolean result = true;
         if (passingInstructions.get(w) == PassingInstruction.Port || passingInstructions.get(w) == PassingInstruction.Starboard
                 || passingInstructions.get(w) == PassingInstruction.FixedBearing) {
-            result = p.crossTrackError(race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, true),
-                    race.getCrossingBearing(w, t).add(new DegreeBearingImpl(90))).getMeters() < 0;
+            final Position estimatedMarkPosition = race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, true);
+            if (estimatedMarkPosition != null) {
+                result = p.crossTrackError(estimatedMarkPosition,
+                        race.getCrossingBearing(w, t).add(new DegreeBearingImpl(90))).getMeters() < 0;
+            } else {
+                // TODO
+            }
         } else if (passingInstructions.get(w) == PassingInstruction.Gate) {
             // TODO
         } else if (passingInstructions.get(w) == PassingInstruction.Offset) {
