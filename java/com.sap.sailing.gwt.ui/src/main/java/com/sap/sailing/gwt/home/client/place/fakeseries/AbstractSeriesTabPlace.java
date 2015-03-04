@@ -8,23 +8,21 @@ public abstract class AbstractSeriesTabPlace extends AbstractSeriesPlace {
         super(ctx);
     }
 
-    public AbstractSeriesTabPlace(String eventUuidAsString, String regattaId) {
+    public AbstractSeriesTabPlace(String eventUuidAsString) {
         super(eventUuidAsString);
-        getCtx().withRegattaId(regattaId);
     }
 
     public static abstract class Tokenizer<PLACE extends AbstractSeriesTabPlace> implements PlaceTokenizer<PLACE> {
         @Override
         public String getToken(PLACE place) {
-            return place.getEventUuidAsString() + ";" + place.getRegattaId();
+            return place.getEventUuidAsString();
         }
 
         @Override
         public PLACE getPlace(String token) {
-            String[] elements = token.split(";");
-            return getRealPlace(elements[0], elements[1]);
+            return getRealPlace(token);
         }
         
-        protected abstract PLACE getRealPlace(String eventId, String regattaId);
+        protected abstract PLACE getRealPlace(String seriesId);
     }
 }

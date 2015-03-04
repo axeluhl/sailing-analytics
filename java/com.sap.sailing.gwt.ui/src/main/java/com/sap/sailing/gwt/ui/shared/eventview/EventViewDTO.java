@@ -51,10 +51,6 @@ public class EventViewDTO extends EventDTO {
 
     }
 
-    public boolean isFakeSeries() {
-        return leaderboardGroups.size() == 1 && leaderboardGroups.get(0).hasOverallLeaderboard();
-    }
-
     public boolean isRunning() {
         return getCurrentServerTime().after(startDate) && getCurrentServerTime().before(endDate);
     }
@@ -112,4 +108,14 @@ public class EventViewDTO extends EventDTO {
         return "";
     }
 
+    public String getSeriesName() {
+        if(!isFakeSeries()) {
+            return null;
+        }
+        LeaderboardGroupDTO leaderboardGroupDTO = leaderboardGroups.get(0);
+        return leaderboardGroupDTO.getDisplayName() != null ? leaderboardGroupDTO.getDisplayName() : leaderboardGroupDTO.getName();
+    }
+    public String getSeriesIdAsString() {
+        return id.toString();
+    }
 }

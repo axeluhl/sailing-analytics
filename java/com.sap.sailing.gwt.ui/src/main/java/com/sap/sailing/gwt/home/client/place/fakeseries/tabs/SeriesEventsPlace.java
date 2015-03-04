@@ -4,8 +4,8 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesTabPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 
 public class SeriesEventsPlace extends AbstractSeriesTabPlace {
-    public SeriesEventsPlace(String id, String regattaId) {
-        super(id, regattaId);
+    public SeriesEventsPlace(String id) {
+        super(id);
     }
 
     public SeriesEventsPlace(SeriesContext context) {
@@ -15,8 +15,8 @@ public class SeriesEventsPlace extends AbstractSeriesTabPlace {
     public static class Tokenizer extends AbstractSeriesTabPlace.Tokenizer<SeriesEventsPlace> {
 
         @Override
-        protected SeriesEventsPlace getRealPlace(String eventId, String regattaId) {
-            return new SeriesEventsPlace(eventId, regattaId);
+        protected SeriesEventsPlace getRealPlace(String seriesId) {
+            return new SeriesEventsPlace(seriesId);
         }
     }
 }
