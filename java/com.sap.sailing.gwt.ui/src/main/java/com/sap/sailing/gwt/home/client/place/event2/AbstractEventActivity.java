@@ -75,13 +75,13 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if (event.getType() == EventType.SERIES_EVENT) {
             for(EventReferenceDTO seriesEvent : event.getEventsOfSeries()) {
                 RegattaOverviewPlace place = new RegattaOverviewPlace(new EventContext().withId(seriesEvent.getId().toString()));
-                callback.forPlace(place, seriesEvent.getDisplayName());
+                callback.forPlace(place, seriesEvent.getDisplayName(), (event.id.equals(seriesEvent.getId())));
             }
         } else {
             for(RegattaReferenceDTO regatta : event.getRegattas()) {
                 RegattaOverviewPlace place = new RegattaOverviewPlace(
                         new EventContext(ctx.getEventDTO()).withRegattaId(regatta.getId()));
-                callback.forPlace(place, regatta.getDisplayName());
+                callback.forPlace(place, regatta.getDisplayName(), (ctx.getRegattaId().equals(regatta.getId())));
             }
         }
     }

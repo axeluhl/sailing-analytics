@@ -195,8 +195,8 @@ public class EventHeader extends Composite {
         
         presenter.forPlaceSelection(new PlaceCallback() {
             @Override
-            public void forPlace(final AbstractEventPlace place, String title) {
-                DropdownItem dropdownItem = new DropdownItem(title, presenter.getUrl(place));
+            public void forPlace(final AbstractEventPlace place, String title, boolean active) {
+                DropdownItem dropdownItem = new DropdownItem(title, presenter.getUrl(place), active);
                 dropdownItem.addDomHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {

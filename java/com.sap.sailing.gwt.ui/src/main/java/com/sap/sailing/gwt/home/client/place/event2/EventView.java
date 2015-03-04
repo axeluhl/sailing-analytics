@@ -35,7 +35,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
     }
     
     public interface PlaceCallback {
-        void forPlace(AbstractEventPlace place, String title);
+        void forPlace(AbstractEventPlace place, String title, boolean active);
     }
 
     /**

@@ -15,6 +15,8 @@ public class DropdownItem extends Widget {
 
     interface DropdownItemUiBinder extends UiBinder<Element, DropdownItem> {
     }
+    
+    @UiField EventHeaderResources local_res;
 
     @UiField
     AnchorElement link;
@@ -22,8 +24,12 @@ public class DropdownItem extends Widget {
     @UiField
     DivElement title;
 
-    public DropdownItem(String text, SafeUri link) {
+    public DropdownItem(String text, SafeUri link, boolean active) {
         setElement(uiBinder.createAndBindUi(this));
+        
+        if(active) {
+            getElement().addClassName(local_res.css().dropdownregattas_content_linkactive());
+        }
         
         this.link.setHref(link);
         this.title.setInnerText(text);
