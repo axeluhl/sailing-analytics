@@ -25,9 +25,7 @@ public class AppPreferences {
     }
 
     public String getDeviceIdentifier() {
-        String DeviceIdentifier = PrefUtils.getString(context, R.string.preference_device_identifier_key,
-                R.string.preference_device_identifier_default);
-        return DeviceIdentifier;
+        return UniqueDeviceUuid.getUniqueId(context);
     }
     
     public String getServerUploadTeamImagePath() {

@@ -15,12 +15,14 @@ public class UniqueDeviceUuid {
 	public static String getUniqueId(Context context)
 	{
 		 AppPreferences prefs = new AppPreferences(context);
+        /*
 		 String existingDeviceIdentifier = prefs.getDeviceIdentifier();
 		 
 		 if (existingDeviceIdentifier != null && existingDeviceIdentifier.length() > 0)
 		 {
 			 return existingDeviceIdentifier;
 		 }
+		 */
 		
 		 final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
