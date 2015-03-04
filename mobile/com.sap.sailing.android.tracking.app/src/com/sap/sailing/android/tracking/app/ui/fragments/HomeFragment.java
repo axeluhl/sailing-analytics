@@ -352,12 +352,9 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
                                                                                 displayAPIErrorRecommendRetry();
                                                                                 return;
                                                                             }
-
                                                                             displayUserConfirmationScreen(data);
-
                                                                         }
                                                                     }, new NetworkHelperFailureListener() {
-
                                                                         @Override
                                                                         public void performAction(NetworkHelperError e) {
                                                                             ExLog.e(getActivity(), TAG,
