@@ -40,7 +40,6 @@ public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog
     @Override
     protected void addMainContent(Panel mainPanel) {
         super.addMainContent(mainPanel);
-
         CaptionPanel inputPanel = new CaptionPanel();
         Grid inputGrid = new Grid(1, 2);
         inputPanel.add(inputGrid);
