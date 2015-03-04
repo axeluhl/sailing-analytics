@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
 
 public class EventDefaultPlace extends AbstractEventPlace {
 
@@ -12,15 +11,10 @@ public class EventDefaultPlace extends AbstractEventPlace {
         super(eventUuidAsString);
     }
 
-    public static class Tokenizer implements PlaceTokenizer<EventDefaultPlace> {
+    public static class Tokenizer extends AbstractEventPlace.Tokenizer<EventDefaultPlace> {
         @Override
-        public String getToken(EventDefaultPlace place) {
-            return place.getEventUuidAsString();
-        }
-
-        @Override
-        public EventDefaultPlace getPlace(String token) {
-            return new EventDefaultPlace(token);
+        protected EventDefaultPlace getRealPlace(EventContext context) {
+            return new EventDefaultPlace(context);
         }
     }
 }

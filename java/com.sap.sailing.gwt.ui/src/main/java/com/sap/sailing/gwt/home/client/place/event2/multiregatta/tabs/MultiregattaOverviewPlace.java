@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.AbstractMultiregattaEventPlace;
 
@@ -13,15 +13,10 @@ public class MultiregattaOverviewPlace extends AbstractMultiregattaEventPlace {
         super(context);
     }
 
-    public static class Tokenizer implements PlaceTokenizer<MultiregattaOverviewPlace> {
+    public static class Tokenizer extends AbstractEventPlace.Tokenizer<MultiregattaOverviewPlace> {
         @Override
-        public String getToken(MultiregattaOverviewPlace place) {
-            return place.getEventUuidAsString();
-        }
-
-        @Override
-        public MultiregattaOverviewPlace getPlace(String token) {
-            return new MultiregattaOverviewPlace(token);
+        protected MultiregattaOverviewPlace getRealPlace(EventContext context) {
+            return new MultiregattaOverviewPlace(context);
         }
     }
 }

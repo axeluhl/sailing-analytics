@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2.regatta.tabs;
 
+import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 
@@ -17,11 +18,11 @@ public class RegattaMediaPlace extends AbstractEventRegattaPlace {
         return new RegattaMediaPlace(ctx);
     }
 
-    public static class Tokenizer extends AbstractEventRegattaPlace.Tokenizer<RegattaMediaPlace> {
+    public static class Tokenizer extends AbstractEventPlace.Tokenizer<RegattaMediaPlace> {
 
         @Override
-        protected RegattaMediaPlace getRealPlace(String eventId, String regattaId) {
-            return new RegattaMediaPlace(eventId, regattaId);
+        protected RegattaMediaPlace getRealPlace(EventContext context) {
+            return new RegattaMediaPlace(context);
         }
     }
 }
