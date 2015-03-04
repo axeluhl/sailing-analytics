@@ -23,6 +23,9 @@ import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 public class StartlineAnalysisCard extends Composite implements HasWidgets, StartAnalysisPageChangeListener {
 
     private StartAnalysisSimpleMap simpleMap;
+    
+    private final double WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 185;
+    private final double GEOMETRIC_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 210;
 
     private static StartlineAnalysisCardUiBinder uiBinder = GWT.create(StartlineAnalysisCardUiBinder.class);
 
@@ -101,7 +104,17 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
                     .setInnerHTML(NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.windDirectionInDegrees) + "°");
             startanalysis_card_wind_data_speed
                     .setInnerHTML(NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.windSpeedInKnots) + " kts");
+            setLineAdvantageDivWidth(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType);
             startanalysis_card_line_advantage.setInnerHTML(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType.getDisplayName()+": "+NumberFormat.getFormat("#0.0").format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantage)+" m");
+        }
+    }
+    
+    private void setLineAdvantageDivWidth(StartlineAdvantageType startlineAdvantageType) {
+        if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType
+                .equals(StartlineAdvantageType.GEOMETRIC)) {
+            startanalysis_card_line_advantage.getStyle().setWidth(GEOMETRIC_LINE_ADVANTAGE_DIV_WIDTH_IN_PT, Unit.PT);
+        } else {
+            startanalysis_card_line_advantage.getStyle().setWidth(WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT, Unit.PT);
         }
     }
 

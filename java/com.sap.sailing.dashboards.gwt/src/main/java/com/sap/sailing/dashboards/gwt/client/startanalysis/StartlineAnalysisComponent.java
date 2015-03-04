@@ -177,10 +177,10 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
                             if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
                                 removeAllStartAnalysisCards();
                             }
-                            addNewStartAnalysisCards(result);
                             if (result.size() != starts.size()) {
                                 showNotificationForNewStartAnalysis();
                             }
+                            addNewStartAnalysisCards(result);
                             settingsButtonWithSelectionIndicationLabel
                                     .setSelectionIndicationTextOnLabel(result.get(0).competitor.getName());
                         }

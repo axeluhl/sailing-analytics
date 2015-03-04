@@ -107,17 +107,21 @@ public class StartAnalysisSimpleMap extends AbsolutePanel implements TailFactory
 
         Map<CompetitorDTO, List<GPSFixDTO>> gpsFixesForCompetitors = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         for (StartAnalysisCompetitorDTO startAnalysisCompetitorDTO : startAnalysisDTO.startAnalysisCompetitorDTOs) {
-            gpsFixesForCompetitors.put(startAnalysisCompetitorDTO.competitorDTO,
-                    startAnalysisCompetitorDTO.gpsFixDTOs);
+            if (startAnalysisCompetitorDTO.gpsFixDTOs != null && !startAnalysisCompetitorDTO.gpsFixDTOs.isEmpty()) {
+                gpsFixesForCompetitors.put(startAnalysisCompetitorDTO.competitorDTO,
+                        startAnalysisCompetitorDTO.gpsFixDTOs);
+            }
         }
         return gpsFixesForCompetitors;
     }
-    
+
     private Map<CompetitorDTO, GPSFixDTO> createGPSPositionForCompetitors(StartAnalysisDTO startAnalysisDTO) {
         Map<CompetitorDTO, GPSFixDTO> gpsPositionForCompetitors = new HashMap<CompetitorDTO, GPSFixDTO>();
         for (StartAnalysisCompetitorDTO startAnalysisCompetitorDTO : startAnalysisDTO.startAnalysisCompetitorDTOs) {
-            gpsPositionForCompetitors.put(startAnalysisCompetitorDTO.competitorDTO,
-                    startAnalysisCompetitorDTO.gpsFixDTOs.get(startAnalysisCompetitorDTO.gpsFixDTOs.size()-1));
+            if (startAnalysisCompetitorDTO.gpsFixDTOs != null && !startAnalysisCompetitorDTO.gpsFixDTOs.isEmpty()) {
+                gpsPositionForCompetitors.put(startAnalysisCompetitorDTO.competitorDTO,
+                        startAnalysisCompetitorDTO.gpsFixDTOs.get(startAnalysisCompetitorDTO.gpsFixDTOs.size() - 1));
+            }
         }
         return gpsPositionForCompetitors;
     }
@@ -148,16 +152,15 @@ public class StartAnalysisSimpleMap extends AbsolutePanel implements TailFactory
             }
         }
     }
-    
-    private void drawLinesFromStartLineToFirstMark(List<MarkDTO> startlineMarks, MarkDTO firstMark){
+
+    private void drawLinesFromStartLineToFirstMark(List<MarkDTO> startlineMarks, MarkDTO firstMark) {
         if (map != null && startlineMarks != null && firstMark != null) {
             if (startlineMarks.size() == 2) {
                 LatLng startLinePoint1 = LatLng.newInstance(startlineMarks.get(0).position.latDeg,
                         startlineMarks.get(0).position.lngDeg);
                 LatLng startLinePoint2 = LatLng.newInstance(startlineMarks.get(1).position.latDeg,
                         startlineMarks.get(1).position.lngDeg);
-                LatLng firstMarkPoint = LatLng.newInstance(firstMark.position.latDeg,
-                        firstMark.position.lngDeg);
+                LatLng firstMarkPoint = LatLng.newInstance(firstMark.position.latDeg, firstMark.position.lngDeg);
 
                 PolylineOptions options = PolylineOptions.newInstance();
                 options.setGeodesic(true);
@@ -168,14 +171,14 @@ public class StartAnalysisSimpleMap extends AbsolutePanel implements TailFactory
                 MVCArray<LatLng> pointsAsArray1 = MVCArray.newInstance();
                 pointsAsArray1.insertAt(0, startLinePoint1);
                 pointsAsArray1.insertAt(1, firstMarkPoint);
-                
+
                 MVCArray<LatLng> pointsAsArray2 = MVCArray.newInstance();
                 pointsAsArray2.insertAt(0, startLinePoint2);
                 pointsAsArray2.insertAt(1, firstMarkPoint);
 
                 Polyline startMarkFirstMark1 = Polyline.newInstance(options);
                 Polyline startMarkFirstMark2 = Polyline.newInstance(options);
-                
+
                 startMarkFirstMark1.setPath(pointsAsArray1);
                 startMarkFirstMark2.setPath(pointsAsArray2);
 
@@ -194,10 +197,10 @@ public class StartAnalysisSimpleMap extends AbsolutePanel implements TailFactory
             }
         }
     }
-    
-    private void drawFirstMark(MarkDTO firstMark){
-        CourseMarkOverlay courseMarkOverlay = createCourseMarkOverlay(
-                RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX, firstMark);
+
+    private void drawFirstMark(MarkDTO firstMark) {
+        CourseMarkOverlay courseMarkOverlay = createCourseMarkOverlay(RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX,
+                firstMark);
         courseMarkOverlay.addToMap();
     }
 

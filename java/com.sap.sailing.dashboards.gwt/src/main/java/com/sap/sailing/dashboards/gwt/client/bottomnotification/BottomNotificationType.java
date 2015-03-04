@@ -2,7 +2,7 @@ package com.sap.sailing.dashboards.gwt.client.bottomnotification;
 
 public enum BottomNotificationType {
     
-    NEW_STARTANALYSIS_AVAILABLE("New Start Analysis available.", "#F0AB00", "#000000", true);
+    NEW_STARTANALYSIS_AVAILABLE("New start analysis available", "#F0AB00", "#000000", true);
 
     private String message;
     private String backgroundColorAsHex;
