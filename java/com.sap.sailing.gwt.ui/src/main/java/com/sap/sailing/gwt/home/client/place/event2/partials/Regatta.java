@@ -20,10 +20,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.BoatClassImageResources;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.event2.EventView;
+import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
@@ -32,7 +32,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.gwt.client.player.Timer;
 
 public class Regatta extends Composite {
     private static RegattaUiBinder uiBinder = GWT.create(RegattaUiBinder.class);
@@ -43,7 +42,6 @@ public class Regatta extends Composite {
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
     private final EventDTO event;
-    private final Timer timerForClientServerOffset;
     private RaceGroupDTO raceGroup;
     private final List<RegattaPhase> phasesElements;
     private LeaderboardGroupDTO leaderboardGroup;
@@ -79,16 +77,13 @@ public class Regatta extends Composite {
 
     private PlaceNavigation<RegattaPlace> leaderboardNavigation;
     private PlaceNavigation<EventPlace> regattaNavigation;
-    private final HomePlacesNavigator placesNavigator;
-    private final EventPlaceNavigator eventPlaceNavigator;
+
+    private Presenter presenter;
     
-    public Regatta(EventDTO event, Timer timerForClientServerOffset, boolean isSingleView,
-            HomePlacesNavigator placesNavigator, EventPlaceNavigator eventPlaceNavigator) {
-        this.event = event;
-        this.timerForClientServerOffset = timerForClientServerOffset;
+    public Regatta(boolean isSingleView, EventView.Presenter presenter) {
+        this.event = presenter.getCtx().getEventDTO();
         this.isSingleView = isSingleView;
-        this.placesNavigator = placesNavigator;
-        this.eventPlaceNavigator = eventPlaceNavigator;
+        this.presenter = presenter;
         
         phasesElements = new ArrayList<RegattaPhase>();
 
@@ -104,16 +99,16 @@ public class Regatta extends Composite {
 
         if(isSingleView) {
             regattaDetailsLink.setVisible(false);
-            leaderboardNavigation = placesNavigator.getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.Leaderboard, 
+            leaderboardNavigation = presenter.getHomePlaceNavigator().getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.Leaderboard, 
                     leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
             leaderboardLink.setHref(leaderboardNavigation.getTargetUrl());
         } else {
             leaderboardLink.setVisible(false);
-            regattaNavigation = placesNavigator.getRegattaNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
+            regattaNavigation = presenter.getHomePlaceNavigator().getRegattaNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
             regattaDetailsLink.setHref(regattaNavigation.getTargetUrl());
         }
 
-        boolean hasLiveRace = leaderboard.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
+        boolean hasLiveRace = leaderboard.hasLiveRace(presenter.getTimerForClientServerOffset().getLiveTimePointInMillis());
         if(!hasLiveRace) {
             isLiveDiv.getStyle().setDisplay(Display.NONE);
         }
@@ -153,7 +148,7 @@ public class Regatta extends Composite {
             } else {
                 for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
                     RegattaPhase regattaPhase = new RegattaPhase(series, leaderboardGroup,
-                            leaderboard, raceGroup, eventPlaceNavigator, timerForClientServerOffset); 
+                            leaderboard, raceGroup, presenter); 
                     regattaPhasesPanel.appendChild(regattaPhase.getElement());
                     phasesElements.add(regattaPhase);
                 }
@@ -176,7 +171,7 @@ public class Regatta extends Composite {
     
     private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
         if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
-            placesNavigator.goToPlace(placeNavigation);
+            presenter.getHomePlaceNavigator().goToPlace(placeNavigation);
             e.preventDefault();
          }
     }

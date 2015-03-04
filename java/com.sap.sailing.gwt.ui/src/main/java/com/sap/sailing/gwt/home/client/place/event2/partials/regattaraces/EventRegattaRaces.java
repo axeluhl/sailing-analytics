@@ -8,10 +8,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventComposite;
-import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
+import com.sap.sailing.gwt.home.client.place.event2.EventView;
+import com.sap.sailing.gwt.home.client.place.event2.partials.Regatta;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
@@ -33,14 +32,13 @@ public class EventRegattaRaces extends AbstractEventComposite {
     private final Timer timerForClientServerOffset;
     private final List<EventRegattaRacesPhase> phaseElements;
 
-    public EventRegattaRaces(EventViewDTO event, Timer timerForClientServerOffset, HomePlacesNavigator placeNavigator,
-            EventPlaceNavigator pageNavigator) {
-        super(event, pageNavigator);
+    public EventRegattaRaces(EventViewDTO event, Timer timerForClientServerOffset, EventView.Presenter presenter) {
+        super(event, presenter);
         this.timerForClientServerOffset = timerForClientServerOffset;
         
         phaseElements = new ArrayList<EventRegattaRacesPhase>();
         
-        regatta = new Regatta(event, timerForClientServerOffset, true, placeNavigator, pageNavigator);
+        regatta = new Regatta(true, presenter);
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));

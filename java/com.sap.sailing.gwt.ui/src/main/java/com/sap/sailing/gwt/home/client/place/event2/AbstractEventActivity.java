@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -94,6 +95,19 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return timerForClientServerOffset;
     }
     
+    @Override
+    public RegattaOverviewPlace getPlaceForRegatta(String regattaId) {
+        return new RegattaOverviewPlace(contextForRegatta(regattaId));
+    }
+    
+    @Override
+    public RegattaRacesPlace getPlaceForRegattaRaces(String regattaId) {
+        return new RegattaRacesPlace(contextForRegatta(regattaId));
+    }
+
+    private EventContext contextForRegatta(String regattaId) {
+        return new EventContext(ctx.getEventDTO()).withRegattaId(regattaId);
+    }
 
 
     @Override

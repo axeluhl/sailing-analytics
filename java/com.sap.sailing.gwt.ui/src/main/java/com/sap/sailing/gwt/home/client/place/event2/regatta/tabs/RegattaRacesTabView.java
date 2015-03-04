@@ -81,8 +81,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
                                     .get(selectedRegattaId);
 
                             regattaRaces = new EventRegattaRaces(eventDTO, currentPresenter
-                                    .getTimerForClientServerOffset(), currentPresenter.getHomePlaceNavigator(),
-                                    currentPresenter);
+                                    .getTimerForClientServerOffset(), currentPresenter);
 
                             regattaRaces.setRaces(selectedRegatta.getC(), false, selectedRegatta.getB(),
                                     selectedRegatta.getA());

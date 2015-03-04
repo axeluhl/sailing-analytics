@@ -1,22 +1,27 @@
 package com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.PushButton;
-import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.MultiregattaTabView;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.client.place.event2.partials.eventregatta.EventRegattaList;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -41,25 +46,78 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     }
 
     @Override
-    public void start(final MultiregattaRegattasPlace myPlace, AcceptsOneWidget contentArea) {
-
-        initWidget(ourUiBinder.createAndBindUi(this));
+    public void start(final MultiregattaRegattasPlace myPlace, final AcceptsOneWidget contentArea) {
         
-        EventViewDTO event = myPlace.getCtx().getEventDTO();
-        for (final RegattaReferenceDTO regatta : event.getRegattas()) {
-            PushButton button = new PushButton();
-            button.setText(regatta.getDisplayName());
-            button.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    currentPresenter.navigateTo(new RegattaOverviewPlace(new EventContext(myPlace.getCtx()
-                            .getEventDTO())
-                            .withRegattaId(regatta.getId())));
-                }
-            });
-            content.add(button);
+     // TODO: understand, and than move this into appropiate place (probably context)
+        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
+
+        final EventViewDTO eventDTO = myPlace.getCtx().getEventDTO();
+        
+        currentPresenter.getSailingService().getRegattaStructureOfEvent(eventDTO.id,
+                new AsyncCallback<List<RaceGroupDTO>>() {
+                    @Override
+                    public void onSuccess(List<RaceGroupDTO> raceGroups) {
+                        if (raceGroups.size() > 0) {
+                            for (LeaderboardGroupDTO leaderboardGroupDTO : eventDTO.getLeaderboardGroups()) {
+                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                                if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
+                                    currentPresenter.getTimerForClientServerOffset().setLivePlayDelayInMillis(
+                                            leaderboardGroupDTO
+                                            .getAverageDelayToLiveInMillis());
+                                }
+                                currentPresenter.getTimerForClientServerOffset().adjustClientServerOffset(
+                                        clientTimeWhenRequestWasSent,
+                                        leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                            }
+                            // createEventView(eventDTO, raceGroups, panel);
+
+                            // if (eventDTO.isRunning()) {
+                            // // create update time for race states only for running events
+                            // serverUpdateTimer.addTimeListener(new TimeListener() {
+                            // @Override
+                            // public void timeChanged(Date newTime, Date oldTime) {
+                            // loadAndUpdateEventRaceStatesLog();
+                            // }
+                            // });
+                            // }
+                            initView(raceGroups, contentArea);
+                        } else {
+                            // createEventWithoutRegattasView(event, panel);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // createErrorView(
+                        // "Error while loading the regatta structure with service getRegattaStructureOfEvent()",
+                        // caught, panel);
+                    }
+                });
+    }
+
+    protected void initView(List<RaceGroupDTO> raceGroups, AcceptsOneWidget contentArea) {
+        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(currentPresenter.getCtx().getEventDTO(), raceGroups);
+        EventRegattaList eventRegattaList = new EventRegattaList(regattaStructure, currentPresenter);
+//        initWidget(ourUiBinder.createAndBindUi(this));
+//        contentArea.setWidget(this);
+        contentArea.setWidget(eventRegattaList);
+    }
+    
+    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure(EventDTO event, List<RaceGroupDTO> raceGroups) {
+        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> result = new HashMap<>();
+        Map<String, RaceGroupDTO> raceGroupsMap = new HashMap<>();
+        for (RaceGroupDTO raceGroup: raceGroups) {
+            raceGroupsMap.put(raceGroup.getName(), raceGroup);
+        }            
+        
+        for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
+            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
+                String leaderboardName = leaderboard.name;
+                result.put(leaderboardName, new Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>(raceGroupsMap.get(leaderboardName),
+                        leaderboard, leaderboardGroup));
+            }
         }
-        contentArea.setWidget(this);
+        return result;
     }
 
     @Override

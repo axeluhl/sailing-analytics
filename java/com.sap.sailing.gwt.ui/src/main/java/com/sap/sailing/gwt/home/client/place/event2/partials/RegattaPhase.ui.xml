@@ -4,7 +4,7 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regatta.RegattaResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.partials.RegattaResources" />
 <div class="{local_res.css.regatta_intro_phases_phase}">
     <div class="{local_res.css.regatta_intro_phases_phase_name}"><span ui:field="phaseName" /></div>
   <a ui:field="phaseRacesAnchor" href="javascript:;">
