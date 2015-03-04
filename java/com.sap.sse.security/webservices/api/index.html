@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sport Sponsorships Engine Security Webservices API - Overview</h1>
+
+<p>
+The SAP Sport Sponsorships Engine (SSE) and the applications built with it support security with
+various authentication and authorization facilities. This module offers REST services that can be
+used to log in and log out a subject, obtain a bearer token for a subject and manage security concerns.
+By default, the base URL for these services is "/security", so a full login URL, for example, could
+be <code>http://sapsailing.com/security/api/restsecurity/login</code>.
+</p>
+<div style="height: 1em;"></div>
+<table>
+<thead>
+	<tr>
+		<td>Webservice URL</td>
+		<td>Description</td>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+		<td><a href="login.html">/api/restsecurity/login</a></td>
+		<td>Log in a subject</td>
+	</tr>
+	<tr>
+		<td><a href="logout.html">/api/restsecurity/logout</a></td>
+		<td>Log out a subject</td>
+	</tr>
+	<tr>
+		<td><a href="hello.html">/api/restsecurity/hello</a></td>
+		<td>Test that a subject is authenticated</td>
+	</tr>
+	<tr>
+		<td><a href="access_token">/api/restsecurity/access_token</a></td>
+		<td>Obtain a bearer access token</td>
+	</tr>
+</tbody>
+</table>
+</body>
+</html>

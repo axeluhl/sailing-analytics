@@ -113,17 +113,6 @@ public class SessionUtils {
         session.setAttribute(SOCIAL_USER, username);
     }
 
-    public static String loadUsername() {
-        final String result;
-        Session session = SecurityUtils.getSubject().getSession();
-        if (session == null) {
-            result = null;
-        } else {
-            result = (String) session.getAttribute(SOCIAL_USER);
-        }
-        return result;
-    }
-    
     public static void saveSessionIdToSession(String sessionId) throws AuthenticationException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {

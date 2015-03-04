@@ -9,6 +9,7 @@ Require-Bundle: com.google.gwt.osgi;bundle-version="2.7.0",
  com.sap.sse.gwt,
  com.sap.sse.security.ui,
  com.sap.sse.security,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.security.common
 Export-Package: com.sap.sse.gwt.adminconsole
 Bundle-ActivationPolicy: lazy

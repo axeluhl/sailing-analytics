@@ -162,7 +162,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
                 useOnlyWindGaugesForWindSpeedBox.getValue(), shouldRemoveOutliersBox.getValue(),
                 outlierRadiusBox.getValue(), outlierNeighborhoodPctBox.getValue(),
                 useOnlyEstimationForWindDirectionBox.getValue(), windSteppingBox.getStepping(windSteppingMaxDistanceBox
-                        .getValue()), splitByWindGaugesBox.getValue());
+                        .getValue()), splitByWindGaugesBox.getValue(), 0 /*TODO*/);
     }
 
     @Override

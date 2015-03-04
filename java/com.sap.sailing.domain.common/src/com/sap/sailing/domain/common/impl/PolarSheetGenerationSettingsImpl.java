@@ -11,7 +11,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
         double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 2.5);
         return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
-                false);
+                false, 0);
     }
     
     public static PolarSheetGenerationSettings createBackendPolarSettings() {
@@ -26,7 +26,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
         }
         WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 0.5);
         return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
-                false);
+                false, 1);
     }
 
     private static final long serialVersionUID = 2731616509404813790L;
@@ -42,6 +42,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     private boolean useOnlyEstimationForWindDirection;
     private WindSpeedSteppingWithMaxDistance windStepping;
     private boolean splitByWindGauges;
+    private int numberOfLeadingCompetitorsToInclude;
     
     //GWT
     PolarSheetGenerationSettingsImpl() {};
@@ -51,7 +52,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
             boolean useOnlyWindGaugesForWindSpeed, boolean shouldRemoveOutliers,
             double outlierDetectionNeighboorhoodRadius, double outlierMinimumNeighboorhoodPct,
             boolean useOnlyEstimationForWindDirection, WindSpeedSteppingWithMaxDistance windStepping,
-            boolean splitByWindGauges) {
+            boolean splitByWindGauges, int numberOfLeadingCompetitorsToInclude) {
         this.minimumDataCountPerGraph = minimumDataCountPerGraph;
         this.minimumWindConfidence = minimumWindConfidence;
         this.minimumDataCountPerAngle = minimumDataCountPerAngle;
@@ -64,6 +65,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
         this.useOnlyEstimationForWindDirection = useOnlyEstimationForWindDirection;
         this.windStepping = windStepping;
         this.splitByWindGauges = splitByWindGauges;
+        this.numberOfLeadingCompetitorsToInclude = numberOfLeadingCompetitorsToInclude;
     }
 
     @Override
@@ -204,6 +206,11 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
         } else if (!windStepping.equals(other.windStepping))
             return false;
         return true;
+    }
+
+    @Override
+    public int getNumberOfLeadingCompetitorsToInclude() {
+        return numberOfLeadingCompetitorsToInclude;
     }
 
 

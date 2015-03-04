@@ -33,5 +33,7 @@ Note the reduced performance which is largely due to the way the Java VM and the
 ## Curious Errors
 
 There's a randomly occuring error, since the update to GWT 2.7, where an entry point fails to load. The Development Mode view of Eclipse shows the error  
-**Your source appears not to live underneath a subpackage called 'client'; no problem, but you'll need to use the &lt;source&gt; directive in your module to make it accessible**  
+<pre>
+Your source appears not to live underneath a subpackage called 'client'; no problem, but you'll need to use the &lt;source&gt; directive in your module to make it accessible
+</pre>
 The problem can be "solved" by retrying until it works.
