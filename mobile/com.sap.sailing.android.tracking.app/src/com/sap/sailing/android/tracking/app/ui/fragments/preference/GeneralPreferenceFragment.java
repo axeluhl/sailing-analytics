@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.SwitchPreference;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;

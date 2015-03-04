@@ -18,8 +18,6 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.SqlDebugHelper;
 
-import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
-
 public class BaseActivity extends SendingServiceAwareActivity {
 	private static final String TAG = BaseActivity.class.getName();
 
