@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONValue;
 
-public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
+public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
     String tracTracEvents();
@@ -1149,6 +1150,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String sendingMailsFailed();
     String sendingMailsSuccessfull();
     String selectEventForInvitation();
+    String imageURL();
+    String upload();
+    String removeResult(JSONValue status, JSONValue message);
+    String uploadSuccessful();
+    String fileUploadResult(JSONValue status, JSONValue message);
     String showCompetitorSailIdColumn();
     String showCompetitorFullNameColumn();
 }

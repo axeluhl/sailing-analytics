@@ -4462,7 +4462,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) {
+    public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws URISyntaxException {
         Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
     	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
@@ -4480,7 +4480,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
-                                    .getColor(), competitor.getEmail(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
+                                    .getColor(), competitor.getEmail(), competitor.getSailID(), nationality,
+                                    competitor.getImageURL()==null?null:new URI(competitor.getImageURL()))));
         }
         return result;
     }
@@ -5379,7 +5380,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) {
+    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) throws IOException {
         try {
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {

@@ -31,8 +31,8 @@ if [ "$?" = "0" ]; then
   OLD_LB=`head -n 1 $OLDGROUPS`
   NEW_LB=`head -n 1 $NEWGROUPS`
   while [ "$OLD_LB" != "" ]; do
-    wget -O - "${OLDSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | sed -e 's/470W/470/g' -e 's/\<505\>/5O5/g' -e 's/Laser Int\./Laser/g' | python -m json.tool | grep -v timepoint >"${OLD_LB}.old.json"
-    wget -O - "${NEWSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $NEW_LB | sed -e 's/ /%20/g'`" | sed -e 's/470W/470/g' -e 's/\<505\>/5O5/g' -e 's/Laser Int\./Laser/g' | python -m json.tool | grep -v timepoint >"${NEW_LB}.new.json" 
+    wget -O - "${OLDSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | sed -e 's/\b470W\b/470/g' -e 's/\b470M\b/470/g' -e 's/\<505\>/5O5/g' -e 's/Laser Int\./Laser/g' | python -m json.tool | grep -v timepoint >"${OLD_LB}.old.json"
+    wget -O - "${NEWSERVER}/sailingserver/api/v1/leaderboardgroups/`echo $NEW_LB | sed -e 's/ /%20/g'`" | sed -e 's/\b470W\b/470/g' -e 's/\b470M\b/470/g' -e 's/\<505\>/5O5/g' -e 's/Laser Int\./Laser/g' | python -m json.tool | grep -v timepoint >"${NEW_LB}.new.json" 
     diff -b -i -B "${OLD_LB}.old.json" "${NEW_LB}.new.json"
     DIFFRESULT=$?
     if [ "$DIFFRESULT" != "0" ]; then

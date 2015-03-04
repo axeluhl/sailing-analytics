@@ -128,7 +128,7 @@
          id="com.sun.jersey.contribs.jersey-multipart"
          download-size="0"
          install-size="0"
-         version="1.17.1"
+         version="1.17.0"
          unpack="false"/>
 
    <plugin
