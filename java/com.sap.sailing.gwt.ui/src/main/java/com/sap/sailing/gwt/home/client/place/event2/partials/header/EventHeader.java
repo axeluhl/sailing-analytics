@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event2.partials.header;
 
+import java.util.Date;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -112,8 +114,11 @@ public class EventHeader extends Composite {
             } else {
                 hide(eventCategory);
             }
+            Date startDate = regattaMetadata.getStartDate() != null ? regattaMetadata.getStartDate() : event.startDate;
+            Date endDate = regattaMetadata.getEndDate() != null ? regattaMetadata.getEndDate() : event.endDate;
+            eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(startDate, endDate));
             
-            hide(eventDate, eventVenueContainer, eventLink);
+            hide(eventVenueContainer, eventLink);
         } else {
             nameToShow = event.getName();
             eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.eventview;
 
+import java.util.Date;
+
 public interface HasRegattaMetadata {
     
     String getDisplayName();
@@ -13,4 +15,8 @@ public interface HasRegattaMetadata {
     String getBoatClass();
     
     String getBoatCategory();
+
+    Date getStartDate();
+
+    Date getEndDate();
 }

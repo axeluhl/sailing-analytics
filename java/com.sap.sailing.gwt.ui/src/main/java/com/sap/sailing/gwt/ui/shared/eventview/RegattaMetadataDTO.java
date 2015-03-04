@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.eventview;
 
+import java.util.Date;
+
 
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
     private int raceCount;
@@ -7,6 +9,8 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private int trackedRacesCount;
     private String boatClass;
     private String boatCategory;
+    private Date startDate;
+    private Date endDate;
     
     public RegattaMetadataDTO() {
     }
@@ -58,5 +62,23 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setBoatCategory(String boatCategory) {
         this.boatCategory = boatCategory;
+    }
+
+    @Override
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    @Override
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 }
