@@ -1,12 +1,9 @@
 package com.sap.sailing.android.shared.data.http;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
 
 import android.content.Context;
 
