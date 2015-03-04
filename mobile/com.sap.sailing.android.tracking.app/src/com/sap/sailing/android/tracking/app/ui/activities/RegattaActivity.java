@@ -272,10 +272,8 @@ public class RegattaActivity extends BaseActivity {
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Sending imageFile to server: " + imageFile);
         }
-
         final String uploadURLStr = event.server
                 + prefs.getServerUploadTeamImagePath().replace("{competitor_id}", competitor.id);
-
         new UploadTeamImageTask(imageFile).execute(uploadURLStr);
     }
 
