@@ -1,10 +1,8 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
+package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
-import android.support.v4.content.LocalBroadcastManager;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 

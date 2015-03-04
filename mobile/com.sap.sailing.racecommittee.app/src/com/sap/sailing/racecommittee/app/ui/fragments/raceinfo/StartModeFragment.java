@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
+package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartModeFragment extends ScheduleFragment implements StartModeAdapter.StartModeClick {

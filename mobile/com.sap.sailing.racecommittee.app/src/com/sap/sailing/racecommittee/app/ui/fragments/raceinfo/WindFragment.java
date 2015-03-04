@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
+package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;

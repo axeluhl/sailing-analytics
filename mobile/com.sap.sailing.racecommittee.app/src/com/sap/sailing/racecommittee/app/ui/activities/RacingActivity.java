@@ -38,7 +38,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRa
 import com.sap.sailing.racecommittee.app.ui.fragments.*;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.WindFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;

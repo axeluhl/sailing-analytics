@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
+package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,7 +11,6 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;

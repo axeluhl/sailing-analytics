@@ -1,8 +1,6 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
+package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -13,8 +11,6 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
