@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ImageGallery extends Composite {
@@ -15,7 +16,8 @@ public class ImageGallery extends Composite {
     
     private final ImageGalleryData imageGalleryData;
     
-    @UiField DivElement galleryTitle;
+    @UiField DivElement titleUi;
+    @UiField HTMLPanel imagesPanel;
     
     public ImageGallery(ImageGalleryData data) {
         this.imageGalleryData = data;
@@ -24,6 +26,11 @@ public class ImageGallery extends Composite {
         
         initWidget(uiBinder.createAndBindUi(this));
         
-        galleryTitle.setInnerText(this.imageGalleryData.getName() != null ? this.imageGalleryData.getName() : "");
+        titleUi.setInnerText(this.imageGalleryData.getName() != null ? this.imageGalleryData.getName() : "");
+        
+        for(ImageDescriptor imageDesc: imageGalleryData.getImages()) {
+            Image image = new Image(imageDesc);
+            imagesPanel.add(image);
+        }
     }
 }

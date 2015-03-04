@@ -4,7 +4,9 @@
 	<ui:with field="res" type="com.sap.sse.gwt.theme.client.resources.ThemeResources" />
     <ui:with field="local_res" type="com.sap.sse.gwt.theme.client.component.imagegallery.ImageGalleryResources" />
 	<g:HTMLPanel styleName="{local_res.css.sampleCssClass}">
-		<div ui:field="titleUi" />
-		<g:HTMLPanel ui:field='imagesPanel' /> 
+		<div>
+			<img ui:field="image" />
+		</div>
+		<div ui:field='title'></div> 
 	</g:HTMLPanel>    
 </ui:UiBinder>    
