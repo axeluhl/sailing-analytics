@@ -7,7 +7,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.controls.tabbar.PlaceContextProvider;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -30,7 +29,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsV
     @UiField StringMessages i18n;
     
     @UiField(provided = true)
-    TabPanel<SeriesContext, SeriesTabsView.Presenter> tabPanelUi;
+    TabPanel<SeriesTabsView.Presenter> tabPanelUi;
     
     @UiField(provided = true)
     SeriesHeader seriesHeader;
@@ -41,14 +40,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsV
     @Override
     public void registerPresenter(final SeriesTabsView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
-        tabPanelUi = new TabPanel<>(new PlaceContextProvider<SeriesContext>() {
-            
-            @Override
-            public SeriesContext getContext() {
-                
-                return currentPresenter.getCtx();
-            }
-        }, currentPresenter, historyMapper);
+        tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
         
         seriesHeader = new SeriesHeader(currentPresenter);
         
@@ -64,7 +56,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsV
 
     @SuppressWarnings("unchecked")
     @UiHandler("tabPanelUi")
-    public void onTabSelection(TabPanelPlaceSelectionEvent<?> e) {
+    public void onTabSelection(TabPanelPlaceSelectionEvent e) {
         currentPresenter.handleTabPlaceSelection((TabView<?, SeriesTabView.Presenter>) e.getSelectedActivity());
     }
     

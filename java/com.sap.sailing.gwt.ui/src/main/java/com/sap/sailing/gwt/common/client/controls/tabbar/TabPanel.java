@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
  * Created by pgtaboada on 25.11.14.
  */
 
-public class TabPanel<PLACECONTEXT, PRESENTER> extends Composite {
+public class TabPanel<PRESENTER> extends Composite {
     private static TabPanelUiBinder ourUiBinder = GWT.create(TabPanelUiBinder.class);
     private final Map<Class<Place>, TabView<Place, PRESENTER>> knownTabs = new HashMap<>();
     @UiField
@@ -36,12 +36,10 @@ public class TabPanel<PLACECONTEXT, PRESENTER> extends Composite {
     @UiField BreadcrumbPane breadcrumbs;
     private TabView<Place, PRESENTER> currentTab;
     
-    private final PlaceContextProvider<PLACECONTEXT> contextProvider;
     private final PlaceHistoryMapper historyMapper;
     private final PRESENTER presenter;
 
-    public TabPanel(PlaceContextProvider<PLACECONTEXT> contextProvider, PRESENTER presenter, PlaceHistoryMapper historyMapper) {
-        this.contextProvider = contextProvider;
+    public TabPanel(PRESENTER presenter, PlaceHistoryMapper historyMapper) {
         this.presenter = presenter;
         this.historyMapper = historyMapper;
         initWidget(ourUiBinder.createAndBindUi(this));
@@ -92,7 +90,7 @@ public class TabPanel<PLACECONTEXT, PRESENTER> extends Composite {
             if (currentTab != null) {
                 currentTab.stop();
             }
-            fireEvent(new TabPanelPlaceSelectionEvent<PLACECONTEXT>(selectedTabActivity));
+            fireEvent(new TabPanelPlaceSelectionEvent(selectedTabActivity));
         }
 
     }
@@ -125,7 +123,7 @@ public class TabPanel<PLACECONTEXT, PRESENTER> extends Composite {
         return addHandler(handler, TabPanelPlaceSelectionEvent.TYPE);
     }
 
-    interface TabPanelUiBinder extends UiBinder<FlowPanel, TabPanel<?, ?>> {
+    interface TabPanelUiBinder extends UiBinder<FlowPanel, TabPanel<?>> {
     }
 
 }

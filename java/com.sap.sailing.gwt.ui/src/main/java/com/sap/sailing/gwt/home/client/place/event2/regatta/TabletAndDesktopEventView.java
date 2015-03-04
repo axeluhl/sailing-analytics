@@ -7,12 +7,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.controls.tabbar.PlaceContextProvider;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event2.partials.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
@@ -37,7 +35,7 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
     StringMessages i18n;
 
     @UiField(provided = true)
-    TabPanel<EventContext, EventRegattaView.Presenter> tabPanelUi;
+    TabPanel<EventRegattaView.Presenter> tabPanelUi;
 
     @UiField(provided = true)
     EventHeader eventHeader;
@@ -48,13 +46,7 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
     @Override
     public void registerPresenter(final Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
-        tabPanelUi = new TabPanel<>(new PlaceContextProvider<EventContext>() {
-
-            @Override
-            public EventContext getContext() {
-                return currentPresenter.getCtx();
-            }
-        }, currentPresenter, historyMapper);
+        tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
 
         eventHeader = new EventHeader(currentPresenter);
 
@@ -70,7 +62,7 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
 
     @SuppressWarnings("unchecked")
     @UiHandler("tabPanelUi")
-    public void onTabSelection(TabPanelPlaceSelectionEvent<?> e) {
+    public void onTabSelection(TabPanelPlaceSelectionEvent e) {
         currentPresenter.handleTabPlaceSelection((TabView<?, EventRegattaView.Presenter>) e.getSelectedActivity());
     }
 

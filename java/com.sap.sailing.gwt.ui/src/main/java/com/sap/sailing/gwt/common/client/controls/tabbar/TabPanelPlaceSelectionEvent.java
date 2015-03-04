@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.GwtEvent;
 /**
  * Created by pgtaboada on 01.12.14.
  */
-public class TabPanelPlaceSelectionEvent<CONTEXT> extends GwtEvent<TabPanelPlaceSelectionEvent.Handler> {
+public class TabPanelPlaceSelectionEvent extends GwtEvent<TabPanelPlaceSelectionEvent.Handler> {
 
     public final static Type<Handler> TYPE = new Type<Handler>();
 
@@ -33,7 +33,7 @@ public class TabPanelPlaceSelectionEvent<CONTEXT> extends GwtEvent<TabPanelPlace
 
     public interface Handler extends EventHandler {
 
-        void onTabSelected(TabPanelPlaceSelectionEvent<?> event);
+        void onTabSelected(TabPanelPlaceSelectionEvent event);
 
     }
 
