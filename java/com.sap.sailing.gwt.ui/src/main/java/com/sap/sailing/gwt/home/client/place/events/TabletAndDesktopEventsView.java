@@ -6,8 +6,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.events.recent.EventsOverviewRecent;
 import com.sap.sailing.gwt.home.client.place.events.upcoming.EventsOverviewUpcoming;
+import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopEventsView extends AbstractEventsView {
@@ -21,8 +23,11 @@ public class TabletAndDesktopEventsView extends AbstractEventsView {
     @UiField(provided=true) EventsOverviewUpcoming upcomingEventsWidget;
     @UiField BreadcrumbPane breadcrumbs;
     
+    private final HomePlacesNavigator navigator;
+    
     public TabletAndDesktopEventsView(HomePlacesNavigator navigator) {
         super();
+        this.navigator = navigator;
         recentEventsWidget = new EventsOverviewRecent(navigator);
         upcomingEventsWidget = new EventsOverviewUpcoming(navigator);
         
@@ -32,18 +37,18 @@ public class TabletAndDesktopEventsView extends AbstractEventsView {
     }
     
     private void initBreadCrumbs() {
-        breadcrumbs.addBreadcrumbItem(i18n.home(), "TODO", new Runnable() {
+        final PlaceNavigation<StartPlace> homeNavigation = navigator.getHomeNavigation();
+        breadcrumbs.addBreadcrumbItem(i18n.home(), homeNavigation.getTargetUrl(), new Runnable() {
             @Override
             public void run() {
-                // TODO Auto-generated method stub
-                
+                navigator.goToPlace(homeNavigation);
             }
         });
-        breadcrumbs.addBreadcrumbItem(i18n.events(), "TODO", new Runnable() {
+        final PlaceNavigation<EventsPlace> eventsNavigation = navigator.getEventsNavigation();
+        breadcrumbs.addBreadcrumbItem(i18n.events(), eventsNavigation.getTargetUrl(), new Runnable() {
             @Override
             public void run() {
-                // TODO Auto-generated method stub
-                
+                navigator.goToPlace(eventsNavigation);
             }
         });
     }

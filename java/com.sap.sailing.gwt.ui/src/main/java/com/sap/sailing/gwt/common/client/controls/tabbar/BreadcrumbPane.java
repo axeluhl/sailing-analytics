@@ -6,9 +6,12 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 
 /**
  * @author zhorvath
@@ -51,7 +54,10 @@ public class BreadcrumbPane extends Widget {
 	}
 
 	public void addBreadcrumbItem(String title, String link, final Runnable runnable) {
-
+	    addBreadcrumbItem(title, UriUtils.fromString(link), runnable);
+	}
+	
+	public void addBreadcrumbItem(String title, SafeUri link, final Runnable runnable) {
 		AnchorElement breadcrumItem = Document.get().createAnchorElement();
 		breadcrumItem.setHref(link);
 		breadcrumItem.setInnerText(title);
@@ -63,7 +69,7 @@ public class BreadcrumbPane extends Widget {
 		Event.setEventListener(breadcrumItem, new EventListener() {
 			@Override
 			public void onBrowserEvent(Event event) {
-				if (event.getTypeInt() == Event.ONCLICK) {
+				if (LinkUtil.handleLinkClick(event)) {
 					event.stopPropagation();
 					event.preventDefault();
 					runnable.run();

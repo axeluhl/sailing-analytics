@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
@@ -21,7 +22,7 @@ public class DropdownItem extends Widget {
     @UiField
     DivElement title;
 
-    public DropdownItem(String text, String link) {
+    public DropdownItem(String text, SafeUri link) {
         setElement(uiBinder.createAndBindUi(this));
         
         this.link.setHref(link);

@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -17,15 +18,12 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.BoatClassImageResources;
-import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
-import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
-import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace.RegattaNavigationTabs;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -38,8 +36,6 @@ public class Regatta extends Composite {
 
     interface RegattaUiBinder extends UiBinder<Widget, Regatta> {
     }
-
-    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
     private final EventDTO event;
     private RaceGroupDTO raceGroup;
@@ -71,14 +67,12 @@ public class Regatta extends Composite {
 //    @UiField(provided=true) RegattaCompetitor competitorWithRank3;
 
     @UiField Anchor regattaDetailsLink;
-    @UiField Anchor leaderboardLink;
     
     @UiField Image boatClassImage;
 
-    private PlaceNavigation<RegattaPlace> leaderboardNavigation;
-    private PlaceNavigation<EventPlace> regattaNavigation;
-
     private Presenter presenter;
+
+    private RegattaOverviewPlace regattaPlace;
     
     public Regatta(boolean isSingleView, EventView.Presenter presenter) {
         this.event = presenter.getCtx().getEventDTO();
@@ -99,13 +93,9 @@ public class Regatta extends Composite {
 
         if(isSingleView) {
             regattaDetailsLink.setVisible(false);
-            leaderboardNavigation = presenter.getHomePlaceNavigator().getRegattaAnalyticsNavigation(event.id.toString(), RegattaNavigationTabs.Leaderboard, 
-                    leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
-            leaderboardLink.setHref(leaderboardNavigation.getTargetUrl());
         } else {
-            leaderboardLink.setVisible(false);
-            regattaNavigation = presenter.getHomePlaceNavigator().getRegattaNavigation(event.id.toString(), leaderboard.name, event.getBaseURL(), event.isOnRemoteServer());
-            regattaDetailsLink.setHref(regattaNavigation.getTargetUrl());
+            regattaPlace = presenter.getPlaceForRegatta(leaderboard.regattaName);
+            regattaDetailsLink.setHref(presenter.getUrl(regattaPlace));
         }
 
         boolean hasLiveRace = leaderboard.hasLiveRace(presenter.getTimerForClientServerOffset().getLiveTimePointInMillis());
@@ -161,17 +151,12 @@ public class Regatta extends Composite {
 
     @UiHandler("regattaDetailsLink")
     void regattaDetailsLinkClicked(ClickEvent e) {
-        handleClickEvent(e, regattaNavigation);
-    }
-
-    @UiHandler("leaderboardLink")
-    void leaderboardLinkClicked(ClickEvent e) {
-        handleClickEvent(e, leaderboardNavigation);
+        handleClickEvent(e, regattaPlace);
     }
     
-    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
-        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
-            presenter.getHomePlaceNavigator().goToPlace(placeNavigation);
+    private void handleClickEvent(ClickEvent e, Place place) {
+        if (LinkUtil.handleLinkClick((Event) e.getNativeEvent())) {
+            presenter.navigateTo(place);
             e.preventDefault();
          }
     }

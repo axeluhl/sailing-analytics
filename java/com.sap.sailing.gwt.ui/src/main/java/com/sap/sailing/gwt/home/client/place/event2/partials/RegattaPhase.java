@@ -11,7 +11,9 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
@@ -46,14 +48,15 @@ public class RegattaPhase extends UIObject {
             RegattaPhaseRace race = new RegattaPhaseRace(raceColumn2, presenter.getTimerForClientServerOffset());
             phaseRacesDiv.appendChild(race.getElement());
            
+            final RegattaRacesPlace racesPlace = presenter.getPlaceForRegattaRaces(leaderboard.regattaName);
+            phaseRacesAnchor.setHref(presenter.getUrl(racesPlace));
             Event.sinkEvents(phaseRacesAnchor, Event.ONCLICK);
             Event.setEventListener(phaseRacesAnchor, new EventListener() {
                 @Override
                 public void onBrowserEvent(Event browserEvent) {
-                    switch (browserEvent.getTypeInt()) {
-                        case Event.ONCLICK:
-                        presenter.navigateTo(presenter.getPlaceForRegattaRaces(leaderboard.regattaName));
-                            break;
+                    if(LinkUtil.handleLinkClick(browserEvent)) {
+                        browserEvent.preventDefault();
+                        presenter.navigateTo(racesPlace);
                     }
                 }
             });

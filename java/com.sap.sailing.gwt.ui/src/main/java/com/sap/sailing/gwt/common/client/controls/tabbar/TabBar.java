@@ -16,6 +16,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 
@@ -49,7 +50,7 @@ public class TabBar extends Widget implements HasSelectionHandlers<Class<Place>>
             // An event target can be any JavaScript object, but we are interested in events related to DOM events only
             Element element = eventTarget.cast();
 
-            if (event.getTypeInt() == Event.ONCLICK) {
+            if (LinkUtil.handleLinkClick(event)) {
                 // The user clicked somewhere into the tab bar -> we have to find the tab that was clicked
                 for (int i = 0; i < tabBarDiv.getChildCount(); i++) {
                     if (tabBarDiv.getChild(i).isOrHasChild(element)) {

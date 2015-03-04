@@ -1,9 +1,13 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
 import com.google.gwt.activity.shared.AbstractActivity;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.place.shared.Place;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
@@ -15,8 +19,8 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -32,6 +36,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     private final Timer timerForClientServerOffset;
 
     private final HomePlacesNavigator homePlacesNavigator;
+    
+    private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
 
     public AbstractEventActivity(PLACE place, EventClientFactory clientFactory, HomePlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
@@ -81,9 +87,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public String getUrl(Place place) {
-        // TODO implement
-        return "TODO URL";
+    public SafeUri getUrl(Place place) {
+        String token = historyMapper.getToken(place);
+        return UriUtils.fromString("#" + token);
     }
 
     @Override

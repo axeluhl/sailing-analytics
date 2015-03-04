@@ -8,6 +8,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiChild;
 import com.google.gwt.uibinder.client.UiField;
@@ -116,7 +117,7 @@ public class TabPanel<PLACECONTEXT, PRESENTER> extends Composite {
 
     }
     
-    public void addBreadcrumbItem(String title, String link, final Runnable runnable) {
+    public void addBreadcrumbItem(String title, SafeUri link, final Runnable runnable) {
         breadcrumbs.addBreadcrumbItem(title, link, runnable);
     }
 

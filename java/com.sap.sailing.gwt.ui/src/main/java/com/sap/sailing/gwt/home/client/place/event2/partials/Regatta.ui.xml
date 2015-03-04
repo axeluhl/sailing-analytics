@@ -38,7 +38,6 @@
         <div ui:field="regattaPhasesInfoDiv" class="{local_res.css.regatta_intro_phases}">
             <div ui:field="regattaPhasesPanel" />
             <g:Anchor ui:field="regattaDetailsLink" styleName="{local_res.css.regatta_intro_phases_leaderboardlink} {res.mainCss.button}"><ui:text from='{i18n.regattaDetails}'/></g:Anchor>
-            <g:Anchor ui:field="leaderboardLink" styleName="{local_res.css.regatta_intro_phases_leaderboardlink} {res.mainCss.button}"><ui:text from='{i18n.leaderboard}'/></g:Anchor>
         </div>
         <!-- 
         <div ui:field="isScheduledDiv" class="{local_res.css.regatta_intro_scheduled}">

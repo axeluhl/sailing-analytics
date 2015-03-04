@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.HandlerRegistration;
+import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
@@ -194,8 +195,10 @@ public class EventHeader extends Composite {
                 dropdownItem.addDomHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        event.preventDefault();
-                        presenter.navigateTo(place);
+                        if(LinkUtil.handleLinkClick((Event) event.getNativeEvent())) {
+                            event.preventDefault();
+                            presenter.navigateTo(place);
+                        }
                     }
                 }, ClickEvent.getType());
                 dropdownContent.add(dropdownItem);
