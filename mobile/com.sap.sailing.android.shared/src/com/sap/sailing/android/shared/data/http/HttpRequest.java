@@ -54,15 +54,6 @@ public abstract class HttpRequest {
         this.context = context;
     }
     
-    public String getUrlAsString()
-    {
-    	if (url != null)
-    	{
-    		return url.toString();
-    	}
-    	return null;
-    }
-
     public boolean isCancelled() {
         return isCancelled;
     }
