@@ -334,7 +334,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -5429,6 +5429,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setOfficialWebsiteURL(o.getOfficialWebsiteURL());
         dto.venue = o.venue;
         dto.getLeaderboardGroups().addAll(o.getLeaderboardGroups());
+        // TODO implement properly
         dto.setState(EventState.FINISHED);
         if (o.isFakeSeries()) {
             dto.setType(EventType.SERIES_EVENT);
@@ -5442,7 +5443,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             for (LeaderboardGroupDTO lg : o.getLeaderboardGroups()) {
                 for (StrippedLeaderboardDTO sl : lg.leaderboards) {
-                    dto.getRegattas().add(new RegattaReferenceDTO(sl.regattaName, sl.regattaName));
+                    // TODO fill details
+                    RegattaMetadataDTO regatta = new RegattaMetadataDTO(sl.regattaName, sl.regattaName);
+                    if(o.getLeaderboardGroups().size() > 1) {
+                        regatta.setBoatCategory(lg.getName());
+                    }
+                    regatta.setCompetitorsCount(sl.competitorsCount);
+                    regatta.setRaceCount(sl.getRacesCount());
+                    if(sl.getBoatClasses().size() == 1) {
+                        BoatClassDTO boatClass = sl.getBoatClasses().iterator().next();
+                        regatta.setBoatClass(boatClass.getDisplayName() != null ? boatClass.getDisplayName() : boatClass.getName());
+                    }
+                    dto.getRegattas().add(regatta);
                 }
                 dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
             }

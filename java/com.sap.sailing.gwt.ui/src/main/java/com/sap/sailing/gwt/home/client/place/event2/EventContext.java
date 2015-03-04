@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 /**
  * Common context used by the different tabs in the event place.
@@ -70,6 +71,17 @@ public class EventContext {
         return regattaId;
     }
 
+    public RegattaMetadataDTO getRegatta() {
+        if(regattaId == null || eventDTO == null) {
+            return null;
+        }
+        for (RegattaMetadataDTO regatta : eventDTO.getRegattas()) {
+            if(regattaId.equals(regatta.getId())) {
+                return regatta;
+            }
+        }
+        return null;
+    }
 
 
 }

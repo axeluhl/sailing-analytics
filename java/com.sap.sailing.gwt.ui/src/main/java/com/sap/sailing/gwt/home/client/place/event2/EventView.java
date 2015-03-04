@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sse.gwt.client.player.Timer;
 
 public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventView.Presenter> extends IsWidget {
@@ -21,13 +22,15 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         void navigateTo(Place place);
         boolean needsSelectionInHeader();
         void forPlaceSelection(PlaceCallback callback);
-        String getEventName();
         Timer getTimerForClientServerOffset();
         HomePlacesNavigator getHomePlaceNavigator();
         SailingServiceAsync getSailingService();
         
         RegattaOverviewPlace getPlaceForRegatta(String regattaId);
         RegattaRacesPlace getPlaceForRegattaRaces(String regattaId);
+
+        boolean showRegattaMetadata();
+        HasRegattaMetadata getRegattaMetadata();
     }
     
     public interface PlaceCallback {

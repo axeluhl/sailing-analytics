@@ -5,10 +5,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class RegattaReferenceDTO implements IsSerializable {
     private String id;
     private String displayName;
-//    private int raceCount;
-//    private int competitorsCount;
-//    private int trackedRacesCount;
-//    private String boatClass;
     
     public RegattaReferenceDTO() {
     }

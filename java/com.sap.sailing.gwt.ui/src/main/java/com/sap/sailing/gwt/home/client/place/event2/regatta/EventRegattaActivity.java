@@ -31,13 +31,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     }
     
     @Override
-    public String getEventName() {
-        if(ctx.getEventDTO().getType() == EventType.MULTI_REGATTA) {
-            return ctx.getRegattaId();
-        }
-        return super.getEventName();
+    public boolean showRegattaMetadata() {
+        return ctx.getEventDTO().getType() == EventType.MULTI_REGATTA && ctx.getRegatta() != null;
     }
-
-
-
 }

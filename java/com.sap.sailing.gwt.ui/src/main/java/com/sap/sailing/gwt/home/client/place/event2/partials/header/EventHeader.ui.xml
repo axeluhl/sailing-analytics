@@ -42,7 +42,7 @@
               <!-- IF event.venue && event.eventType !== 'multi-regatta-event' -->
               <div ui:field="eventDate" class="{local_res.css.eventheader_intro_details_item}">
               </div>
-              <div class="{local_res.css.eventheader_intro_details_item}">
+              <div ui:field="eventVenueContainer" class="{local_res.css.eventheader_intro_details_item}">
                 <img src="images/home/location-icon.png" class="{local_res.css.locationicon}"></img>
                 <span ui:field="eventVenue"></span>
               </div>

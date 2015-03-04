@@ -21,10 +21,14 @@ public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMul
         panel.setWidget(currentView);
         currentView.navigateTabsTo(currentPlace);
     }
-
     
     @Override
     public boolean needsSelectionInHeader() {
+        return false;
+    }
+    
+    @Override
+    public boolean showRegattaMetadata() {
         return false;
     }
 }

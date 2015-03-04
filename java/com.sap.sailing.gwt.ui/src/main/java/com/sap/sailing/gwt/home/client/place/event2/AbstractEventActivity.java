@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -84,10 +85,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         // TODO implement
         return "TODO URL";
     }
-    
+
     @Override
-    public String getEventName() {
-        return ctx.getEventDTO().getName();
+    public HasRegattaMetadata getRegattaMetadata() {
+        return ctx.getRegatta();
     }
 
     @Override

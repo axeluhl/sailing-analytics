@@ -19,7 +19,7 @@ public class EventViewDTO extends EventDTO {
         UPCOMMING, RUNNING, FINISHED
     }
 
-    private List<RegattaReferenceDTO> regattas = new ArrayList<>();
+    private List<RegattaMetadataDTO> regattas = new ArrayList<>();
     private List<EventReferenceDTO> eventsOfSeries = new ArrayList<>();
 
     private Date currentServerTime;
@@ -95,7 +95,7 @@ public class EventViewDTO extends EventDTO {
         this.state = state;
     }
 
-    public List<RegattaReferenceDTO> getRegattas() {
+    public List<RegattaMetadataDTO> getRegattas() {
         return regattas;
     }
 
