@@ -128,6 +128,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     interface MyBinder extends UiBinder<HTMLPanel, MultiregattaRegattasTabView> {
     }
 
+    @SuppressWarnings("unused")
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
