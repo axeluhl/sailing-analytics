@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -93,7 +94,11 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
     public void onServiceAdded(FileStorageService service) {
         logger.info("Found new FileStorageService: adding properties to " + service.getName());
         for (Entry<String, String> property : propertyStore.readAllProperties(service.getName()).entrySet()) {
-            service.internalSetProperty(property.getKey(), property.getValue());
+            try {
+                service.internalSetProperty(property.getKey(), property.getValue());
+            } catch (IllegalArgumentException e) {
+                logger.log(Level.WARNING, "Couldn't add property "+property.getValue()+": "+e.getMessage(), e);
+            }
         }
     }
 
