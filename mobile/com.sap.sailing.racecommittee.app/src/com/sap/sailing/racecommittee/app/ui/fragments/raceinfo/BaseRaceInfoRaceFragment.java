@@ -50,7 +50,9 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     private View postponeFlags;
     private View courseFlags;
     private View moreFlags;
+    private TextView courseValue;
     private TextView startProcedureValue;
+    private ImageView courseIcon;
     private ImageView startModeFlag;
     private UpdateUiReceiver mReceiver;
     private FlagPoleCache flagPoleCache;
@@ -89,6 +91,8 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 course.setOnClickListener(new CourseClick());
             }
             courseLock = getView().findViewById(R.id.course_lock);
+            courseIcon = (ImageView) getView().findViewById(R.id.course_icon);
+            courseValue = (TextView) getView().findViewById(R.id.course_value);
 
             wind = getView().findViewById(R.id.wind);
             if (wind != null) {
@@ -245,6 +249,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     }
 
     private void updateUi() {
+
+        if (courseIcon != null) {
+            courseIcon.setImageDrawable(getResources().getDrawable(R.drawable.course_updown_64dp));
+        }
+
+        if (courseValue != null) {
+            courseValue.setText(getRaceState().getCourseDesign().getName());
+        }
 
         if (startProcedureValue != null) {
             startProcedureValue.setText(getRacingProcedure().getType().toString());
@@ -470,7 +482,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                         break;
 
                     case 1:
-                        replaceFragment(EmptyFragment.newInstance());
+                        replaceFragment(CourseFragmentHelper.newInstance(1));
                         break;
 
                     default:

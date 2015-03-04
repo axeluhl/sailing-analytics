@@ -313,7 +313,7 @@
     <string name="time_up">Up in #TIME#</string>
     <string name="time_down">Down in #TIME#</string>
     <string name="time_start">Start #TIME#</string>
-    <string name="time_finish">Finish ~#TIME#</string>
+    <string name="time_finish">Finish N/A</string>
     <string name="time">#TIME#</string>
     <string name="set_signal">Set Signal</string>
     <string name="flag_ap_desc">Postpone upcoming races</string>
