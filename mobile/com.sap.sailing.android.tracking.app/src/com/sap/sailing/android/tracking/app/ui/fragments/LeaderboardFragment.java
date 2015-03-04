@@ -60,8 +60,8 @@ public class LeaderboardFragment extends BaseFragment {
 		String leaderboardName = URLEncoder.encode(activity.leaderboardName, "UTF-8");
 		String serverUrl = activity.serverUrl;
 
-		String formatString = "%s/gwt/Home.html#LeaderboardPlace:eventId=%s" + 
-		"&leaderboardName=%s&showRaceDetails=true&showSettings=true";
-		return String.format(formatString, serverUrl, eventId, leaderboardName);
+        String formatString = "%s/gwt/Leaderboard.html?name=%s" +
+                "&showRaceDetails=false&embedded=true&hideToolbar=true";
+        return String.format(formatString, serverUrl, leaderboardName);
 	}
 }
