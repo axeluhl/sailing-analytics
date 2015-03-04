@@ -28,8 +28,9 @@ public class CheckinData {
         md.update(checkinString.getBytes("UTF-8"));
         byte[] digest = md.digest();
         StringBuffer buf = new StringBuffer();
-        for (byte byt : digest)
+        for (byte byt : digest) {
             buf.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
+        }
         checkinDigest = buf.toString();
     }
 
