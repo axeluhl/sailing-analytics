@@ -35,7 +35,7 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
         @Override
         protected String generateEncodedQRCodeContent() {
             if (identifierBox.getValue().contains("#")) {
-                Window.alert("I'm not capable of generating a code for this identifier.");
+                Window.alert("I'm not capable of generating a code for this identifier."); // TODO i18n
             } else if (!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
                 String apkUrl = getServerUrlWithoutFinalSlash() + rcAppApkPath;
                 return DeviceConfigurationQRCodeUtils.composeQRContent(identifierBox.getValue(), apkUrl);

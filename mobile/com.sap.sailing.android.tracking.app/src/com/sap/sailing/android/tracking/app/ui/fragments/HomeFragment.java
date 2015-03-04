@@ -55,6 +55,7 @@ import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFai
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 
@@ -175,7 +176,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 
         String leaderboardNameFromQR;
         try {
-            leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(CheckinHelper.LEADERBOARD_NAME), "UTF-8")
+            leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
                     .replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
             ExLog.e(getActivity(), TAG, "Failed to encode leaderboard name: " + e.getMessage());
@@ -186,10 +187,10 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
             return;
         }
 
-        final String competitorId = uri.getQueryParameter(CheckinHelper.COMPETITOR_ID);
+        final String competitorId = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
         final String checkinURLStr = hostWithPort
                 + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
-        final String eventId = uri.getQueryParameter(CheckinHelper.EVENT_ID);
+        final String eventId = uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID);
         final String leaderboardName = leaderboardNameFromQR;
 
         final DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
