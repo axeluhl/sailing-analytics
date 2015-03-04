@@ -6,7 +6,7 @@
         android:top="30dp">
         <bitmap
             android:gravity="top"
-            android:src="@drawable/flag_hotel_96dp" />
+            android:src="@drawable/flag_blank_96dp" />
     </item>
 
     <item
