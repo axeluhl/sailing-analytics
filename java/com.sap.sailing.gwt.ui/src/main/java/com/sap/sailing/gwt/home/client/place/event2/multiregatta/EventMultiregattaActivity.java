@@ -5,6 +5,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.AbstractEventActivity;
+import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 
 public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMultiregattaEventPlace> implements EventMultiregattaView.Presenter {
 
@@ -25,6 +26,10 @@ public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMul
     @Override
     public boolean needsSelectionInHeader() {
         return false;
+    }
+    
+    @Override
+    public void forPlaceSelection(PlaceCallback callback) {
     }
     
     @Override

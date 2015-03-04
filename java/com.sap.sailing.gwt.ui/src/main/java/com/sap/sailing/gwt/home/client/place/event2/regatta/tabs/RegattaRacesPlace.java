@@ -12,6 +12,11 @@ public class RegattaRacesPlace extends AbstractEventRegattaPlace {
         super(context);
     }
 
+    @Override
+    public AbstractEventRegattaPlace newInstanceWithContext(EventContext ctx) {
+        return new RegattaRacesPlace(ctx);
+    }
+
     public static class Tokenizer extends AbstractEventRegattaPlace.Tokenizer<RegattaRacesPlace> {
         @Override
         protected RegattaRacesPlace getRealPlace(String eventId, String leaderboardName) {

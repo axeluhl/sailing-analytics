@@ -10,7 +10,6 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
-import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
@@ -18,11 +17,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -69,23 +64,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public void navigateTo(Place place) {
         clientFactory.getPlaceController().goTo(place);
     }
-
-    @Override
-    public void forPlaceSelection(PlaceCallback callback) {
-        EventViewDTO event = ctx.getEventDTO();
-        if (event.getType() == EventType.SERIES_EVENT) {
-            for(EventReferenceDTO seriesEvent : event.getEventsOfSeries()) {
-                RegattaOverviewPlace place = new RegattaOverviewPlace(new EventContext().withId(seriesEvent.getId().toString()));
-                callback.forPlace(place, seriesEvent.getDisplayName(), (event.id.equals(seriesEvent.getId())));
-            }
-        } else {
-            for(RegattaReferenceDTO regatta : event.getRegattas()) {
-                RegattaOverviewPlace place = new RegattaOverviewPlace(
-                        new EventContext(ctx.getEventDTO()).withRegattaId(regatta.getId()));
-                callback.forPlace(place, regatta.getDisplayName(), (ctx.getRegattaId().equals(regatta.getId())));
-            }
-        }
-    }
     
     @Override
     public SafeUri getUrl(Place place) {
@@ -116,7 +94,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return new RegattaRacesPlace(contextForRegatta(regattaId));
     }
 
-    private EventContext contextForRegatta(String regattaId) {
+    protected EventContext contextForRegatta(String regattaId) {
         return new EventContext(ctx.getEventDTO()).withRegattaId(regattaId);
     }
 

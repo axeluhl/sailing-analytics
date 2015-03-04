@@ -14,6 +14,8 @@ public abstract class AbstractEventRegattaPlace extends AbstractEventPlace {
         super(eventUuidAsString);
         getCtx().withRegattaId(regattaId);
     }
+    
+    public abstract AbstractEventRegattaPlace newInstanceWithContext(EventContext ctx);
 
     public static abstract class Tokenizer<PLACE extends AbstractEventRegattaPlace> implements PlaceTokenizer<PLACE> {
         @Override
