@@ -189,7 +189,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             TimePoint startTime = mSelectedRace.getState().getStartTime();
 
             timeStart = (TextView) findViewById(R.id.time_start);
-            if (timeStart != null) {
+            if (timeStart != null && startTime != null) {
                 timeStart.setText(getString(R.string.time_start).replace("#TIME#", dateFormat.format(startTime.asDate())));
             }
 
@@ -197,7 +197,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             //TODO Add this later
 
             headerTime = (TextView) findViewById(R.id.timer_text);
-            if (headerTime != null) {
+            if (headerTime != null && startTime != null) {
                 String time;
                 if (startTime.asMillis() > now.asMillis()) {
                     time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());

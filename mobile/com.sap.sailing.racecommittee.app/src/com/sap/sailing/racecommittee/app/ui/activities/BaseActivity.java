@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -39,10 +40,12 @@ public class BaseActivity extends SendingServiceAwareActivity {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.options_menu_settings:
                 ExLog.i(this, TAG, "Clicked SETTINGS");
-                fadeActivity(PreferenceActivity.class, false);
+                intent = new Intent(this, PreferenceActivity.class);
+                startActivity(intent);
 //                Intent intent = new Intent(this, PreferenceActivity.class);
 //                Bundle info = new Bundle();
 //                intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, RegattaPreferenceFragment.class.getName());
@@ -59,7 +62,8 @@ public class BaseActivity extends SendingServiceAwareActivity {
 
             case R.id.options_menu_info:
                 ExLog.i(this, TAG, "Clicked INFO");
-                fadeActivity(SystemInformationActivity.class, false);
+                intent = new Intent(this, SystemInformationActivity.class);
+                startActivity(intent);
                 return true;
 
             default:
