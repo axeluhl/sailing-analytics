@@ -427,7 +427,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
                 clearScannedQRCodeInPrefs();
                 checkInWithAPIAndDisplayTrackingActivity(checkinData);
             }
-
         }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
