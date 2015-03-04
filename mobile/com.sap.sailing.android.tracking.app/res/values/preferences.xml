@@ -31,7 +31,7 @@
 
     <string name="preference_heading_with_declination_subtracted_is_enabled">On</string>
     <string name="preference_heading_with_declination_subtracted_is_disabled">Off</string>
-    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Display: Subtract declination</string>
-    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Display: Course over ground</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Display: True</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Display: Magnetic</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Heading</string>
 </resources>
