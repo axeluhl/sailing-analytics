@@ -176,6 +176,58 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     @Override
     public void notifyTick() {
         super.notifyTick();
+
+        setLockUnlock();
+    }
+
+    private void setLockUnlock() {
+        changeVisibility(startProcedureLock, View.GONE);
+        changeVisibility(startModeLock, View.GONE);
+        changeVisibility(courseLock, View.GONE);
+        changeVisibility(windLock, View.GONE);
+
+        changeVisibility(postponeFlags, View.VISIBLE);
+        changeVisibility(abandonFlags, View.VISIBLE);
+        changeVisibility(recallFlags, View.VISIBLE);
+        changeVisibility(moreFlags, View.VISIBLE);
+
+        switch (getRace().getStatus()) {
+            case UNSCHEDULED:
+                break;
+
+            case SCHEDULED:
+            case STARTPHASE:
+                changeVisibility(abandonFlags, View.GONE);
+                changeVisibility(recallFlags, View.GONE);
+                changeVisibility(moreFlags, View.GONE);
+                uncheckMarker(abandonFlags);
+                uncheckMarker(recallFlags);
+                uncheckMarker(moreFlags);
+                break;
+
+            case RUNNING:
+                changeVisibility(startProcedureLock, View.VISIBLE);
+                changeVisibility(startModeLock, View.VISIBLE);
+                break;
+
+            case FINISHING:
+                changeVisibility(startProcedureLock, View.VISIBLE);
+                changeVisibility(startModeLock, View.VISIBLE);
+                changeVisibility(courseLock, View.VISIBLE);
+                break;
+
+            case FINISHED:
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void changeVisibility(View view, int visibility) {
+        if (view != null) {
+            view.setVisibility(visibility);
+        }
     }
 
     protected ProcedureType getRacingProcedure() {
