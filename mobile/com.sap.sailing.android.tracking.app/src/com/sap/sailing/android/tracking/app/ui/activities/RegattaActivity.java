@@ -506,9 +506,8 @@ public class RegattaActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-
-            super.onBackPressed();
-	}
+        super.onBackPressed();
+    }
 
     private void startTrackingActivity(String checkinDigest) {
         Intent intent = new Intent(this, TrackingActivity.class);
