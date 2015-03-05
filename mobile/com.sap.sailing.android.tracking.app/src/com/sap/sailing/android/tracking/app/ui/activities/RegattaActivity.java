@@ -60,6 +60,8 @@ public class RegattaActivity extends BaseActivity {
     public CompetitorInfo competitor;
     public LeaderboardInfo leaderboard;
 
+    private boolean hasPicture;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +92,6 @@ public class RegattaActivity extends BaseActivity {
             getSupportActionBar().setTitle(leaderboard.name);
             getSupportActionBar().setSubtitle(event.name);
         }
-
         replaceFragment(R.id.content_frame, new RegattaFragment());
     }
 
@@ -111,6 +112,20 @@ public class RegattaActivity extends BaseActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem teamPhotoItem = menu.findItem(R.id.options_menu_add_team_image);
+        if(hasPicture)
+        {
+            teamPhotoItem.setTitle(getString(R.string.options_replace_team_photo));
+        }
+        else
+        {
+            teamPhotoItem.setTitle(getString(R.string.options_add_team_photo));
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.options_menu_settings:
@@ -120,6 +135,10 @@ public class RegattaActivity extends BaseActivity {
         case R.id.options_menu_checkout:
             ExLog.i(this, TAG, "Clicked CHECKOUT.");
             checkout();
+            return true;
+        case R.id.options_menu_add_team_image:
+            ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
+            getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -134,6 +153,7 @@ public class RegattaActivity extends BaseActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                hasPicture = true;
                 LinearLayout addTeamPhotoTextView = (LinearLayout) findViewById(R.id.add_photo);
                 addTeamPhotoTextView.setVisibility(View.INVISIBLE);
 
@@ -142,6 +162,7 @@ public class RegattaActivity extends BaseActivity {
         });
     }
 
+    // TODO What's this code? Is it still needed?
     // private void flagImageUpdated() {
     // runOnUiThread(new Runnable() {
     // @Override
@@ -159,6 +180,7 @@ public class RegattaActivity extends BaseActivity {
         TextView sailIdTextView = (TextView) findViewById(R.id.sail_id);
         sailIdTextView.setText(competitor.sailId);
 
+        // TODO What's this code? Is it still needed?
         // ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
         // String flagStr = String.format("%s.png", countryCode);
         // String uri = "@drawable/" + competitor.countryCode.toLowerCase(Locale.getDefault());
@@ -177,7 +199,6 @@ public class RegattaActivity extends BaseActivity {
 
         ImageView imageView = (ImageView) findViewById(R.id.userImage);
         Bitmap storedImage = getStoredImage(getLeaderboardImageFileName(leaderboard.name));
-
         if (storedImage == null) {
             if (event.imageUrl != null) {
                 new DownloadLeaderboardImageTask(imageView).execute(event.imageUrl);
@@ -187,10 +208,21 @@ public class RegattaActivity extends BaseActivity {
             userImageUpdated();
         }
 
+        // TODO What's this code? Is it still needed?
+        //if(imageView.getDrawable() != null)
+        //{
+        //    addTeamPhoto.setVisible(false);
+        //    replaceTeamPhoto.setVisible(true);
+        //}
+        //else
+        //{
+        //    addTeamPhoto.setVisible(true);
+        //    replaceTeamPhoto.setVisible(false);
+        //}
+
         ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);
         Bitmap storedFlagImage = getStoredImage(getFlagImageFileName(competitor.countryCode.toLowerCase(Locale
                 .getDefault())));
-
         if (storedFlagImage == null) {
             String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
                     competitor.countryCode.toLowerCase(Locale.getDefault()));
@@ -198,7 +230,6 @@ public class RegattaActivity extends BaseActivity {
         } else {
             flagImageView.setImageBitmap(storedFlagImage);
         }
-
         super.onResume();
     }
 
@@ -215,7 +246,6 @@ public class RegattaActivity extends BaseActivity {
                 imageView.setImageBitmap(bitmap);
             }
         });
-
         userImageUpdated();
     }
 
@@ -487,7 +517,6 @@ public class RegattaActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         RegattaFragment fragment = (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
-
         if (fragment.isShowingBigCheckoutButton()) {
             // do nothing, user must checkout himself at this point.
         } else {

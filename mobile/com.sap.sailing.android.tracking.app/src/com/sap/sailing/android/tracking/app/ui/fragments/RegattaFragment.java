@@ -184,7 +184,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     /**
      * Ask user if he wants to take a new picture or select an existing one.
      */
-    private void showChooseExistingPictureOrTakeNewPhotoAlert() {
+    public void showChooseExistingPictureOrTakeNewPhotoAlert() {
         AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.add_photo_select)
                 .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
                 .setIcon(android.R.drawable.ic_dialog_alert)
