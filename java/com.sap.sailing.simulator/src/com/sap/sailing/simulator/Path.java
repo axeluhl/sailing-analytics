@@ -19,4 +19,6 @@ public interface Path {
     List<TimedPositionWithSpeed> getTurns();
 
     Path getEvenTimedPath(long timeStep);
+    
+    int getTurnCount();
 }

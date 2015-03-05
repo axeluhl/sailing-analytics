@@ -1,6 +1,7 @@
 package com.sap.sailing.simulator.test;
 
 import java.sql.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,11 +14,12 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularGrid;
-import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
+import com.sap.sailing.simulator.impl.SimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
@@ -56,15 +58,16 @@ public class SimulatorTest {
 
         SimulationParameters param = new SimulationParametersImpl(course, pd, wf, null,
                 SailingSimulatorConstants.ModeFreestyle, true, true);
-        SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
+        SimulatorImpl sailingSim = new SimulatorImpl(param);
 
-        // Map<String, Path> paths = sailingSim.getAllPathsForLeg(new SimulatorUISelectionImpl(0, 0, 0, 0));
-        Map<String, Path> paths = sailingSim.getAllPaths();
-
-        // System.out.println("opportunistic path points: "+paths.get("2#Opportunist Left").getPathPoints().size());
-        Assert.assertNotNull(paths.get("2#Opportunist Left").getPathPoints());
-        // System.out.println("omnciscient path points: "+paths.get("1#Omniscient").getPathPoints().size());
-        Assert.assertNotNull(paths.get("1#Omniscient").getPathPoints());
+        Path pathOmniscient = sailingSim.getPath(PathType.OMNISCIENT, null);
+        Path pathOpportunist = sailingSim.getPath(PathType.OPPORTUNIST_LEFT, null);
+        Map<PathType, Path> paths = new HashMap<PathType, Path>();
+        paths.put(PathType.OMNISCIENT, pathOmniscient);
+        paths.put(PathType.OPPORTUNIST_LEFT, pathOpportunist);
+        
+        Assert.assertNotNull(paths.get(PathType.OPPORTUNIST_LEFT).getPathPoints());
+        Assert.assertNotNull(paths.get(PathType.OMNISCIENT).getPathPoints());
     }
 
 }

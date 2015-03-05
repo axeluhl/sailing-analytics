@@ -120,9 +120,11 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             turnloss = turnloss / timeStepScale;
         }
 
-        if ((maxTurnTimes.left > 0) || (maxTurnTimes.right > 0)) {
-            this.maxLeft = (int) Math.floor((double) maxTurnTimes.left / (double) timeStep);
-            this.maxRight = (int) Math.floor((double) maxTurnTimes.right / (double) timeStep);
+        if (maxTurnTimes != null) {
+            if ((maxTurnTimes.left > 0) || (maxTurnTimes.right > 0)) {
+                this.maxLeft = (int) Math.floor((double) maxTurnTimes.left / (double) timeStep);
+                this.maxRight = (int) Math.floor((double) maxTurnTimes.right / (double) timeStep);
+            }
         }
         logger.info("Leg Direction: " + legType);
 
@@ -339,7 +341,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             path.addAll(rightPath.getPathPoints());
         }
 
-        return new PathImpl(path, wf);
+        return new PathImpl(path, wf, getTurns());
 
     }
 

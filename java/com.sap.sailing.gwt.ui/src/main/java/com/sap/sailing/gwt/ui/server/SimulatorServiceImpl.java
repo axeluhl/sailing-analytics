@@ -64,7 +64,7 @@ import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
-import com.sap.sailing.simulator.SailingSimulator;
+import com.sap.sailing.simulator.Simulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
@@ -74,7 +74,7 @@ import com.sap.sailing.simulator.impl.PathGenerator1Turner;
 import com.sap.sailing.simulator.impl.PathImpl;
 import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.ReadingConfigurationFileStatus;
-import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
+import com.sap.sailing.simulator.impl.SimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
@@ -406,7 +406,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null,
+        Simulator simulator = new SimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null,
                 null, SailingSimulatorConstants.ModeMeasured, true, true));
         Path gpsTrack = simulator.getLegGPSTrack(SimulatorServiceUtils.toSimulatorUISelection(requestData.selection));
 
@@ -503,7 +503,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null,
+        Simulator simulator = new SimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null,
                 null, SailingSimulatorConstants.ModeMeasured, true, true));
         Path gpsTrack = simulator.getLegGPSTrack(SimulatorServiceUtils.toSimulatorUISelection(requestData.selection));
 
@@ -582,7 +582,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         SimulationParameters simulationParameters = new SimulationParametersImpl(null, polarDiagram, null, null,
                 SailingSimulatorConstants.ModeMeasured, true, true);
-        SailingSimulator sailingSimulator = new SailingSimulatorImpl(simulationParameters);
+        Simulator sailingSimulator = new SimulatorImpl(simulationParameters);
         Path gpsWind = sailingSimulator.getLegGPSTrack(SimulatorServiceUtils
                 .toSimulatorUISelection(requestData.selection));
 
@@ -658,7 +658,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             selectedRaceIndex = 0;
         }
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, null,
+        Simulator simulator = new SimulatorImpl(new SimulationParametersImpl(null, null, null, null,
                 SailingSimulatorConstants.ModeMeasured, true, true));
 
         return simulator.getLegsNames(selectedRaceIndex);
@@ -667,7 +667,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     @Override
     public List<String> getRacesNames() {
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, null,
+        Simulator simulator = new SimulatorImpl(new SimulationParametersImpl(null, null, null, null,
                 SailingSimulatorConstants.ModeMeasured, true, true));
 
         return simulator.getRacesNames();
@@ -680,10 +680,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             selectedRaceIndex = 0;
         }
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, null,
+        Simulator simulator = new SimulatorImpl(new SimulationParametersImpl(null, null, null, null,
                 SailingSimulatorConstants.ModeMeasured, true, true));
 
-        return simulator.getComeptitorsNames(selectedRaceIndex);
+        return simulator.getCompetitorsNames(selectedRaceIndex);
     }
 
     private void retreiveWindControlParameters(WindPatternDisplay pattern) {

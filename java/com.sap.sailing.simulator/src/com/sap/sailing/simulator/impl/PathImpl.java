@@ -27,6 +27,7 @@ public class PathImpl implements Path, Serializable {
     private static final long serialVersionUID = -6354445155884413937L;
     private List<TimedPositionWithSpeed> pathPoints;
     private WindField windField;
+    private int turnCount;
     private long maxTurnTime;
 
     private static final double TRESHOLD_DEGREES = 25.0;
@@ -35,18 +36,32 @@ public class PathImpl implements Path, Serializable {
     public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf) {
         this.pathPoints = pointsList;
         this.windField = wf;
+        this.turnCount = 0;
         this.maxTurnTime = 0;
     }
 
     public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, long maxTurnTime) {
         this.pathPoints = pointsList;
         this.windField = wf;
+        this.turnCount = 0;
         this.maxTurnTime = maxTurnTime;
+    }
+
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, int turnCount) {
+        this.pathPoints = pointsList;
+        this.windField = wf;
+        this.turnCount = turnCount;
+        this.maxTurnTime = 0;
     }
 
     @Override
     public List<TimedPositionWithSpeed> getPathPoints() {
         return this.pathPoints;
+    }
+    
+    @Override
+    public int getTurnCount() {
+        return this.turnCount;
     }
 
     @Override

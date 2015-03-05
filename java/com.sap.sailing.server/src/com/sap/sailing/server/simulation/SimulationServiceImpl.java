@@ -26,12 +26,12 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
-import com.sap.sailing.simulator.SailingSimulator;
+import com.sap.sailing.simulator.Simulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulationResults;
 import com.sap.sailing.simulator.impl.MaximumTurnTimes;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
-import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
+import com.sap.sailing.simulator.impl.SimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.SparsePolarDataException;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -181,14 +181,14 @@ public class SimulationServiceImpl implements SimulationService {
         return result;
     }
 
-    public Map<PathType, Path> getAllPaths(SimulationParameters simuPars) throws InterruptedException,
+    public Map<PathType, Path> getAllPaths(SimulationParameters simulationParameters) throws InterruptedException,
             ExecutionException {
 
-        SailingSimulator simulator = new SailingSimulatorImpl(simuPars);
+        Simulator simulator = new SimulatorImpl(simulationParameters);
         Map<PathType, Path> result = new HashMap<PathType, Path>();
 
         FutureTask<Path> taskOmniscient = null;
-        if (simuPars.showOmniscient()) {
+        if (simulationParameters.showOmniscient()) {
             // schedule omniscient task
             taskOmniscient = new FutureTask<Path>(() -> simulator.getPath(PathType.OMNISCIENT, null));
             executor.execute(taskOmniscient);
@@ -206,7 +206,7 @@ public class SimulationServiceImpl implements SimulationService {
 
         FutureTask<Path> taskOpportunistLeft = null;
         FutureTask<Path> taskOpportunistRight = null;
-        if (simuPars.showOpportunist()) {        
+        if (simulationParameters.showOpportunist()) {        
             // maximum turn times
             MaximumTurnTimes maxTurnTimes = new MaximumTurnTimes(task1TurnerLeft.get().getMaxTurnTime(), task1TurnerRight.get().getMaxTurnTime());
 
@@ -217,11 +217,19 @@ public class SimulationServiceImpl implements SimulationService {
             executor.execute(taskOpportunistRight);
 
             // collect opportunist results
-            result.put(PathType.OPPORTUNIST_LEFT, taskOpportunistLeft.get());
-            result.put(PathType.OPPORTUNIST_RIGHT, taskOpportunistRight.get());
+            Path pathOpportunistLeft = taskOpportunistLeft.get();
+            if (pathOpportunistLeft.getTurnCount() == 1) {
+                pathOpportunistLeft = result.get(PathType.ONE_TURNER_LEFT);
+            }
+            result.put(PathType.OPPORTUNIST_LEFT, pathOpportunistLeft);
+            Path pathOpportunistRight = taskOpportunistRight.get();
+            if (pathOpportunistRight.getTurnCount() == 1) {
+                pathOpportunistRight = result.get(PathType.ONE_TURNER_RIGHT);
+            }
+            result.put(PathType.OPPORTUNIST_RIGHT, pathOpportunistRight);
         }
 
-        if (simuPars.showOmniscient()) {
+        if (simulationParameters.showOmniscient()) {
             // collect omniscient result (last, since usually slowest calculation)
             result.put(PathType.OMNISCIENT, taskOmniscient.get());
         }
