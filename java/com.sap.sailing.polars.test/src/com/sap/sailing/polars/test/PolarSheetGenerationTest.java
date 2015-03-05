@@ -81,7 +81,7 @@ public class PolarSheetGenerationTest {
         double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
-                0.05, false, windStepping, false);
+                0.05, false, windStepping, false, 0);
         
         TimePoint startTime = new MillisecondsTimePoint(9);
         TimePoint endTime = new MillisecondsTimePoint(80);
@@ -91,8 +91,8 @@ public class PolarSheetGenerationTest {
                 settings, executor);
 
         BoatClass forelle = new BoatClassImpl("Forelle", true);
-        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, new TeamImpl("SAP", null, null),
-                new BoatImpl("Schnelle Forelle", forelle, "GER000"));
+        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, null,
+                new TeamImpl("SAP", null, null), new BoatImpl("Schnelle Forelle", forelle, "GER000"));
 
         PolarFixAggregationWorker task = new PolarFixAggregationWorker(race,
  resultContainer, startTime, endTime,
@@ -121,7 +121,7 @@ public class PolarSheetGenerationTest {
         double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 10, 0, false, true, 5,
-                0.05, false, windStepping, false);
+                0.05, false, windStepping, false, 0);
         PolarSheetHistogramBuilder builder = new PolarSheetHistogramBuilder(settings);
         
         

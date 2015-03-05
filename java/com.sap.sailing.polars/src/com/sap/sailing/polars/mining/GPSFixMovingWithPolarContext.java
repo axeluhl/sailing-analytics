@@ -7,9 +7,11 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
@@ -24,7 +26,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 
-public class GPSFixMovingWithPolarContext implements PolarClusterKey {
+public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKey, AngleClusterPolarClusterKey {
 
     private final GPSFixMoving fix;
     private final TrackedRace race;
@@ -32,15 +34,23 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     private final ClusterGroup<Speed> windSpeedClusterGroup;
     private final Set<WindSource> windSourcesToExcludeForBearing;
     private final Set<WindSource> windSourcesToExcludeForSpeed;
+    private final ClusterGroup<Bearing> angleClusterGroup;
+    private final BearingWithConfidence<Integer> trueWindAngle;
+    private final WindWithConfidence<Pair<Position, TimePoint>> wind;
+    private final SpeedWithBearingWithConfidence<TimePoint> boatSpeed;
 
     public GPSFixMovingWithPolarContext(GPSFixMoving fix, TrackedRace race, Competitor competitor,
-            ClusterGroup<Speed> windSpeedClusterGroup) {
+            ClusterGroup<Speed> windSpeedClusterGroup, ClusterGroup<Bearing> angleClusterGroup) {
         this.fix = fix;
         this.race = race;
         this.competitor = competitor;
         this.windSpeedClusterGroup = windSpeedClusterGroup;
+        this.angleClusterGroup = angleClusterGroup;
         this.windSourcesToExcludeForBearing = collectWindSourcesToIgnoreForBearing();
         this.windSourcesToExcludeForSpeed = collectWindSourcesToIgnoreForSpeed();
+        this.trueWindAngle = computeTrueWindAngle();
+        this.wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint(), windSourcesToExcludeForSpeed);
+        this.boatSpeed = computeBoatSpeed();
     }
 
     public GPSFixMoving getFix() {
@@ -55,13 +65,11 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
         return competitor;
     }
 
-    @Override
-    public RoundedTrueWindAngle getRoundedTrueWindAngle() {
-        final BearingWithConfidence<Integer> angleToTheWind = getAngleToTheWind();
-        return angleToTheWind == null ? null : new RoundedTrueWindAngle(angleToTheWind.getObject());
+    public BearingWithConfidence<Integer> getAngleToTheWind() {
+        return trueWindAngle;
     }
 
-    public BearingWithConfidence<Integer> getAngleToTheWind() {
+    private BearingWithConfidence<Integer> computeTrueWindAngle() {
         SpeedWithBearing boatSpeed = race.getTrack(competitor).getEstimatedSpeed(fix.getTimePoint());
         WindWithConfidence<Pair<Position, TimePoint>> wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint(), windSourcesToExcludeForBearing);
         
@@ -76,16 +84,19 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
 
     @Override
     public Cluster<Speed> getWindSpeedCluster() {
-        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWindSpeed();
+        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWind();
         return windWithConfidence == null ? null : windSpeedClusterGroup.getClusterFor(windWithConfidence.getObject());
     }
 
-    public WindWithConfidence<Pair<Position, TimePoint>> getWindSpeed() {
-        WindWithConfidence<Pair<Position, TimePoint>> wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint(), windSourcesToExcludeForSpeed);
+    public WindWithConfidence<Pair<Position, TimePoint>> getWind() {
         return wind;
     }
 
     public SpeedWithBearingWithConfidence<TimePoint> getBoatSpeed() {  
+        return boatSpeed;
+    }
+    
+    private SpeedWithBearingWithConfidence<TimePoint> computeBoatSpeed() {
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
         return track.getEstimatedSpeed(fix.getTimePoint(), ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                 // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
@@ -146,6 +157,36 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     @Override
     public BoatClass getBoatClass() {
         return race.getRace().getBoatClass();
+    }
+
+    @Override
+    public Tack getTack() {
+        return getTack(getAngleToTheWind().getObject());
+    }
+
+    public static Tack getTack(Bearing angleDifferenceWindToBoat) {
+        return angleDifferenceWindToBoat.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
+    }
+
+    @Override
+    public LegType getLegType() {
+        return getLegTypeWithPolarConstraints(getAngleToTheWind().getObject());
+    }
+
+    public static LegType getLegTypeWithPolarConstraints(Bearing angleDifferenceWindToBoat) {
+        double absoluteDiffInDeg = Math.abs(angleDifferenceWindToBoat.getDegrees());
+        LegType result = null;
+        if (absoluteDiffInDeg > 20 && absoluteDiffInDeg < 75) {
+            result = LegType.UPWIND;
+        } else if (absoluteDiffInDeg > 105) {
+            result = LegType.DOWNWIND;
+        }
+        return result;
+    }
+
+    @Override
+    public Cluster<Bearing> getAngleCluster() {
+        return angleClusterGroup.getClusterFor(getAngleToTheWind().getObject());
     }
 
 }

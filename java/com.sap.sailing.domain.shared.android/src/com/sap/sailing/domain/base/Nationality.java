@@ -6,7 +6,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 
 public interface Nationality extends Named, IsManagedByCache<SharedDomainFactory> {
-    @Dimension(messageKey="NationalityAcronym")
+    @Dimension(messageKey="Acronym")
     String getThreeLetterIOCAcronym();
     
     CountryCode getCountryCode();

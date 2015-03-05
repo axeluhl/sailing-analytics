@@ -27,6 +27,16 @@ public class LeaderboardUrlSettings {
     public static final String PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED = "showNumberOfRacesCompleted";
     
     /**
+     * Parameter to control the visibility of the competitor name columns. The following
+     * values are supported: SailId and Name. If the value is empty then none of the two columns are displayed.
+     * If the value can not be read then both are displayed.
+     */
+    public static final String PARAM_SHOW_COMPETITOR_NAME_COLUMNS="showCompetitorNameColumns";
+    
+    public static final String COMPETITOR_NAME_COLUMN_SAIL_ID = "SailId";
+    public static final String COMPETITOR_NAME_COLUMN_FULL_NAME = "Name";
+    
+    /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the
      * CSS3 zoom property or by applying scale operation to the body element. This comes in handy
      * when having to deal with screens that have high resolutions and that can't be controlled manually.

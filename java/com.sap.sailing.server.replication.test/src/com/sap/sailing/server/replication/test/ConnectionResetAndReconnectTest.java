@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.rabbitmq.client.Channel;
@@ -32,6 +31,10 @@ import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 
 public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTest {
     static final Logger logger = Logger.getLogger(ConnectionResetAndReconnectTest.class.getName());
+    
+    public ConnectionResetAndReconnectTest() {
+        super(new ServerReplicationTestSetUp());
+    }
     
     public static boolean forceStopDelivery = false;
     
@@ -81,16 +84,19 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         
     }
 
-    @Before
-    @Override
-    public void setUp() throws Exception {
-        try {
-            Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result = basicSetUp(/* dropDB */ true,
-                    /* master=null means create a new one */ null, /* replica=null means create a new one */null);
-            masterDescriptor = MasterReplicationDescriptorMock.from(result.getB());
-        } catch (Exception e) {
-            e.printStackTrace();
-            tearDown();
+    private static class ServerReplicationTestSetUp extends
+            com.sap.sailing.server.replication.test.AbstractServerReplicationTest.ServerReplicationTestSetUp {
+        @Override
+        public void setUp() throws Exception {
+            try {
+                Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> result = basicSetUp(
+                        /* dropDB */true,
+                        /* master=null means create a new one */null, /* replica=null means create a new one */null);
+                masterDescriptor = MasterReplicationDescriptorMock.from(result.getB());
+            } catch (Exception e) {
+                e.printStackTrace();
+                tearDown();
+            }
         }
     }
 

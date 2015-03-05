@@ -42,7 +42,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.functionProvider = functionProvider;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
     }
-    
+
     @Override
     public ExecutorService getExecutorService() {
         return executorService;

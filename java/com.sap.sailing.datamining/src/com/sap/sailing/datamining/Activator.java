@@ -9,6 +9,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
+import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
@@ -31,7 +32,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     
     public Activator() {
         dataRetrieverChainDefinitions = new SailingDataRetrieverChainDefinitions();
-        sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, Activator.class.getClassLoader());
+        sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader());
         clusterGroups = new SailingClusterGroups();
     }
 
@@ -59,6 +60,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
         internalClasses.add(HasTrackedLegContext.class);
         internalClasses.add(HasTrackedLegOfCompetitorContext.class);
         internalClasses.add(HasGPSFixContext.class);
+        internalClasses.add(HasMarkPassingContext.class);
         return internalClasses;
     }
 

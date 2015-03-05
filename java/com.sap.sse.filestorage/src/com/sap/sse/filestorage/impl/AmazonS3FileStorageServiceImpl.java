@@ -27,9 +27,8 @@ import com.sap.sse.filestorage.OperationFailedException;
  * following file: ~/.aws/credentials and add credentials to it (get the access id and secret key from
  * https://console.aws.amazon.com/iam/home?#security_credential).
  * 
- * TODO configure credentials in AdminConsole TODO configure bucket name in AdminConsole
- * 
  * @author Fredrik Teschke
+ * @author Axel Uhl
  *
  */
 public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl implements FileStorageService {
@@ -38,9 +37,8 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     private static final Logger logger = Logger.getLogger(AmazonS3FileStorageServiceImpl.class.getName());
 
-    private static final String baseUrl = "s3.amazonaws.com";
     private static final String retrievalProtocol = "http";
-    // private static final String bucketName = "ftes-sap-sailing";
+    private static final String regionRetrievalHost = "s3-eu-west-1.amazonaws.com";
 
     private final FileStorageServicePropertyImpl accessId = new FileStorageServicePropertyImpl("accessId", false,
             "s3AccessIdDesc");
@@ -60,7 +58,6 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
         // first try to use properties
         if (accessId.getValue() != null && accessKey.getValue() != null) {
             creds = new BasicAWSCredentials(accessId.getValue(), accessKey.getValue());
-
         } else {
             // if properties are empty, read credentials from ~/.aws/credentials
             try {
@@ -82,9 +79,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     private URI getUri(String key) {
         try {
-            // FIXME: region is missing s3-... see:
-            // http://stackoverflow.com/questions/10975475/amazon-s3-upload-file-and-get-url
-            return new URI(retrievalProtocol, baseUrl, "/" + bucketName.getValue() + "/" + key, null);
+            return new URI(retrievalProtocol, regionRetrievalHost, "/" + bucketName.getValue() + "/" + key, null);
         } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "Could not create URI for uploaded file with key " + key, e);
             return null;
@@ -97,19 +92,16 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
         final ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(lengthInBytes);
         final String key = getKey(fileExtension);
+        // TODO bug 2583: use something like SecurityUtil.getSubject().checkPermission("file:store:"+key)
         final PutObjectRequest request = new PutObjectRequest(bucketName.getValue(), key, is, metadata)
                 .withCannedAcl(CannedAccessControlList.PublicRead);
         final AmazonS3Client s3Client = createS3Client();
-
-        new Thread() {
-            public void run() {
-                try {
-                    s3Client.putObject(request);
-                } catch (AmazonClientException e) {
-                    logger.log(Level.WARNING, "Could not store file", e);
-                }
-            };
-        }.run();
+        try {
+            s3Client.putObject(request);
+        } catch (AmazonClientException e) {
+            logger.log(Level.SEVERE, "Could not store file", e);
+            throw new OperationFailedException(e.getMessage(), e);
+        }
         URI uri = getUri(key);
         logger.info("Stored file " + uri);
         return uri;

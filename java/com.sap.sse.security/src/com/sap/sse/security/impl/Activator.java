@@ -1,11 +1,7 @@
 package com.sap.sse.security.impl;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,11 +10,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -42,6 +40,10 @@ public class Activator implements BundleActivator {
         UsernamePasswordRealm.setTestUserStore(theTestUserStore);
     }
     
+    public static void setSecurityService(SecurityService securityService) {
+        Activator.securityService = securityService;
+    }
+    
     public static BundleContext getContext() {
         return context;
     }
@@ -57,25 +59,16 @@ public class Activator implements BundleActivator {
      * registered as an OSGi service.
      */
     public void start(BundleContext bundleContext) throws Exception {
-        // Load mail properties
-        final String jettyHome = System.getProperty("jetty.home", "configuration");
-        final File propertiesDir = new File(jettyHome).getParentFile();
-        File propertiesfile = new File(propertiesDir, "security.properties");
-        Properties mailProperties = new Properties();
-        try {
-            mailProperties.load(new FileReader(propertiesfile));
-        } catch (IOException ioe) {
-            logger.log(Level.SEVERE, "Couldn't read security properties from "+propertiesfile.getCanonicalPath(), ioe);
-        }
+        context = bundleContext;
         if (testUserStore != null) {
-            createAndRegisterSecurityService(testUserStore, mailProperties);
+            createAndRegisterSecurityService(bundleContext, testUserStore);
         } else {
-            waitForUserStoreService(bundleContext, mailProperties);
+            waitForUserStoreService(bundleContext);
         }
     }
 
-    private void createAndRegisterSecurityService(UserStore store, Properties mailProperties) {
-        securityService = new SecurityServiceImpl(store, mailProperties);
+    private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore store) {
+        securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class), store, /* setAsActivatorSecurityService */ true);
         registration = context.registerService(SecurityService.class.getName(),
                 securityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
@@ -85,7 +78,7 @@ public class Activator implements BundleActivator {
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
 
-    private void waitForUserStoreService(BundleContext bundleContext, final Properties mailProperties) {
+    private void waitForUserStoreService(BundleContext bundleContext) {
         context = bundleContext;
         final ServiceTracker<UserStore, UserStore> tracker = new ServiceTracker<>(bundleContext, UserStore.class, /* customizer */ null);
         tracker.open();
@@ -97,7 +90,7 @@ public class Activator implements BundleActivator {
                     logger.info("Waiting for UserStore service...");
                     UserStore userStore = tracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);
-                    createAndRegisterSecurityService(userStore, mailProperties);
+                    createAndRegisterSecurityService(bundleContext, userStore);
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }

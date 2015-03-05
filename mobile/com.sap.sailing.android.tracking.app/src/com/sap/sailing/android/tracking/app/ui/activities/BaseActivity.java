@@ -18,95 +18,93 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.SqlDebugHelper;
 
-import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
-
 public class BaseActivity extends SendingServiceAwareActivity {
-	private static final String TAG = BaseActivity.class.getName();
+    private static final String TAG = BaseActivity.class.getName();
 
-	protected AppPreferences prefs;
-	private ProgressDialog progressDialog;
+    protected AppPreferences prefs;
+    private ProgressDialog progressDialog;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		prefs = new AppPreferences(this);
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        prefs = new AppPreferences(this);
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.options_menu, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        return true;
+    }
 
-	@Override
-	protected void onResume() {
-		super.onResume();
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-		// TODO: Remove debug string
-		SqlDebugHelper.dumpAllTablesToConsole(this);
-	}
+        // TODO: Remove debug string
+        SqlDebugHelper.dumpAllTablesToConsole(this);
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.options_menu_settings:
-			ExLog.i(this, TAG, "Clicked SETTINGS.");
-			startActivity(new Intent(this, SettingsActivity.class));
-			return true;
-			// case R.id.options_menu_info:
-			// ExLog.i(this, TAG, "Clicked INFO.");
-			// startActivity(new Intent(this, SystemInformationActivity.class));
-			// return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.options_menu_settings:
+            ExLog.i(this, TAG, "Clicked SETTINGS.");
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+            // case R.id.options_menu_info:
+            // ExLog.i(this, TAG, "Clicked INFO.");
+            // startActivity(new Intent(this, SystemInformationActivity.class));
+            // return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
 
-	public void replaceFragment(int view, Fragment fragment) {
-		ExLog.i(this, TAG, "Set new Fragment: " + fragment.toString());
+    public void replaceFragment(int view, Fragment fragment) {
+        ExLog.i(this, TAG, "Set new Fragment: " + fragment.toString());
 
-		FragmentManager manager = getSupportFragmentManager();
-		FragmentTransaction transaction = manager.beginTransaction();
-		transaction.replace(view, fragment);
-		transaction.commit();
-	}
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(view, fragment);
+        transaction.commit();
+    }
 
-	public void showProgressDialog(String title, String message) {
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setTitle(title);
-		progressDialog.setMessage(message);
-		progressDialog.show();
-	}
+    public void showProgressDialog(String title, String message) {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(title);
+        progressDialog.setMessage(message);
+        progressDialog.show();
+    }
 
-	public void showProgressDialog(int string1Id, int string2Id) {
-		showProgressDialog(getString(string1Id), getString(string2Id));
-	}
+    public void showProgressDialog(int string1Id, int string2Id) {
+        showProgressDialog(getString(string1Id), getString(string2Id));
+    }
 
-	public void dismissProgressDialog() {
-		if (progressDialog.isShowing()) {
-			progressDialog.dismiss();
-		}
-	}
+    public void dismissProgressDialog() {
+        if (progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
 
-	public void showErrorPopup(String title, String message) {
-		AlertDialog dialog = new AlertDialog.Builder(this).setTitle(title).setMessage(message)
-				.setIcon(android.R.drawable.ic_dialog_alert)
-				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						dialog.dismiss();
-					}
-				}).create();
+    public void showErrorPopup(String title, String message) {
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(title).setMessage(message)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.dismiss();
+                    }
+                }).create();
 
-		dialog.show();
-	}
+        dialog.show();
+    }
 
-	public void showErrorPopup(int string1Id, int string2Id) {
-		showErrorPopup(getString(string1Id), getString(string2Id));
-	}
+    public void showErrorPopup(int string1Id, int string2Id) {
+        showErrorPopup(getString(string1Id), getString(string2Id));
+    }
 
-	@Override
-	protected int getOptionsMenuResId() {
-		return R.menu.options_menu;
-	}
+    @Override
+    protected int getOptionsMenuResId() {
+        return R.menu.options_menu;
+    }
 }
