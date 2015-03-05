@@ -64,7 +64,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         ValueListBox<DataRetrieverChainDefinitionDTO> retrieverChainsListBox = new ValueListBox<>(new AbstractRenderer<DataRetrieverChainDefinitionDTO>() {
             @Override
             public String render(DataRetrieverChainDefinitionDTO retrieverChain) {
-                return retrieverChain.getName();
+                return retrieverChain == null ? "" : retrieverChain.getName();
             }
             
         });
