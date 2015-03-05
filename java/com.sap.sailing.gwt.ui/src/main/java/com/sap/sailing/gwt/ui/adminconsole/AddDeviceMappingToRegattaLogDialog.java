@@ -95,7 +95,7 @@ public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog
             public String createURL(String baseUrlWithoutTrailingSlash, String mappedItemType, String mappedItemId)
                     throws QRCodeURLCreationException {
                 if (events.getValue() == null) {
-                    throw new QRCodeURLCreationException("no event selected");
+                    throw new QRCodeURLCreationException(stringMessages.noEventSelected());
                 }
                 String eventIdAsString = events.getValue().id.toString();
                 return DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash, eventIdAsString,

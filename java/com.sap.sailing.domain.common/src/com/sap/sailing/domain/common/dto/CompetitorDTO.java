@@ -32,5 +32,7 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
      * from the previous version of the enclosing leaderboard.
      */
     CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion);
+
+    String getImageURL();
     
 }
