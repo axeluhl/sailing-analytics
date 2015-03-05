@@ -524,14 +524,7 @@ public class RegattaActivity extends BaseActivity {
 	public void onBackPressed() {
 		RegattaFragment fragment = (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
 
-		if (fragment.isShowingBigCheckoutButton())
-		{
-			//do nothing, user must checkout himself at this point.
-		}
-		else
-		{
 			super.onBackPressed();
-		}
 	}
 	
 	private void startTrackingActivity(String checkinDigest) {
