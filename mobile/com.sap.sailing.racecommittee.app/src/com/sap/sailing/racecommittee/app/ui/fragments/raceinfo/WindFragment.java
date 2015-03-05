@@ -137,30 +137,41 @@ public class WindFragment extends ScheduleFragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View layout = inflater.inflate(R.layout.wind_view, container, false);
 
-        View view = inflater.inflate(R.layout.wind_view, container, false);
+        if (getArguments() != null) {
+            switch (getArguments().getInt(STARTMODE, 0)) {
+                case 1:
+                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                    View header = layout.findViewById(R.id.header);
+                    header.setVisibility(View.GONE);
+                    break;
 
-        mHeader = view.findViewById(R.id.header_text);
-        mDarkLayer = view.findViewById(R.id.dark_layer);
-        mLayoutDirection = view.findViewById(R.id.layout_direction);
-        mLayoutSpeed = view.findViewById(R.id.layout_speed);
-        mLayoutAddress = view.findViewById(R.id.address);
-        mPositionHeader = view.findViewById(R.id.position_header);
-        mWindOff = view.findViewById(R.id.wind_off);
-        mWindOn = view.findViewById(R.id.wind_on);
-        mAddressSearch = view.findViewById(R.id.address_search);
-        mSetData = view.findViewById(R.id.set_data);
-        mSetPosition = view.findViewById(R.id.set_position);
+                default:
+                    break;
+            }
+        }
 
-        mCompassView = (CompassView) view.findViewById(R.id.compassView);
-        mWindSpeed = (NumberPicker) view.findViewById(R.id.wind_speed);
-        mAddressInput = (EditText) view.findViewById(R.id.address_input);
+        mHeader = layout.findViewById(R.id.header_text);
+        mDarkLayer = layout.findViewById(R.id.dark_layer);
+        mLayoutDirection = layout.findViewById(R.id.layout_direction);
+        mLayoutSpeed = layout.findViewById(R.id.layout_speed);
+        mLayoutAddress = layout.findViewById(R.id.address);
+        mPositionHeader = layout.findViewById(R.id.position_header);
+        mWindOff = layout.findViewById(R.id.wind_off);
+        mWindOn = layout.findViewById(R.id.wind_on);
+        mAddressSearch = layout.findViewById(R.id.address_search);
+        mSetData = layout.findViewById(R.id.set_data);
+        mSetPosition = layout.findViewById(R.id.set_position);
 
-        mEnterPosition = (Button) view.findViewById(R.id.enter_position);
+        mCompassView = (CompassView) layout.findViewById(R.id.compassView);
+        mWindSpeed = (NumberPicker) layout.findViewById(R.id.wind_speed);
+        mAddressInput = (EditText) layout.findViewById(R.id.address_input);
 
-        return view;
+        mEnterPosition = (Button) layout.findViewById(R.id.enter_position);
+
+        return layout;
     }
 
     @Override
@@ -392,14 +403,21 @@ public class WindFragment extends ScheduleFragment
         Wind wind = getResultingWindFix();
         getRaceState().setWindFix(MillisecondsTimePoint.now(), wind);
         saveEntriesInPreferences(wind);
-        openMainScheduleFragment();
+        switch (getArguments().getInt(STARTMODE, 0)) {
+            case 1:
+                replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+                break;
+
+            default:
+                openMainScheduleFragment();
+                break;
+        }
     }
 
     /**
      * saves the boat position for later sendage of the entered windData
      */
     private void onPositionSetClick() {
-        showElements(true);
         bigMap = false;
 
         windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
@@ -410,6 +428,7 @@ public class WindFragment extends ScheduleFragment
         windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
         windMap.windMarker.setDraggable(false);
         windMap.centerMap(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        showElements(true);
     }
 
     /**
@@ -427,7 +446,7 @@ public class WindFragment extends ScheduleFragment
     private void showElements(boolean show) {
         if (mSetData != null) {
             mSetData.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-            mSetData.setEnabled(windMap != null && windMap.windMarker != null && windMap.windMarker.getPosition() != null);
+            mSetData.setEnabled(windMap != null && windMap.windMarker != null && windMap.windMarker.getPosition() != null && mCurrentLocation != null);
         }
         if (mSetPosition != null) {
             mSetPosition.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
