@@ -208,7 +208,6 @@ public class RegattaActivity extends BaseActivity {
      */
     public void updateLeaderboardPictureChosenByUser(final Bitmap bitmap) {
         storeImageAndSendToServer(bitmap, getLeaderboardImageFileName(leaderboard.name), true);
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -235,7 +234,6 @@ public class RegattaActivity extends BaseActivity {
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();
-
             if (sendToServer) {
                 sendTeamImageToServer(pictureFile);
             }
@@ -331,13 +329,11 @@ public class RegattaActivity extends BaseActivity {
 
         protected String doInBackground(String... urls) {
             uploadUrl = urls[0];
-
             try {
                 if (imageFile != null) {
                     HttpClient httpclient = new DefaultHttpClient();
                     HttpPost httppost = new HttpPost(uploadUrl);
-
-                    InputStreamEntity reqEntity = new InputStreamEntity(new FileInputStream(imageFile), -1);
+                    InputStreamEntity reqEntity = new InputStreamEntity(new FileInputStream(imageFile), imageFile.length());
                     reqEntity.setContentType("image/jpeg");
                     reqEntity.setChunked(true); // Send in multiple parts if needed
                     httppost.setEntity(reqEntity);

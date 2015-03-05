@@ -156,7 +156,7 @@ public class DatabaseHelper {
             competitor.countryCode = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_COUNTRY_CODE));
             competitor.sailId = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_SAIL_ID));
             competitor.rowId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-            competitor.id = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_CHECKIN_DIGEST));
+            competitor.id = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_ID));
         }
 
         cursor.close();
