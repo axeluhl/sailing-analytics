@@ -210,17 +210,6 @@ public class RegattaActivity extends BaseActivity {
 			imageView.setImageBitmap(storedImage);
 			userImageUpdated();
 		}
-
-        //if(imageView.getDrawable() != null)
-        //{
-        //    addTeamPhoto.setVisible(false);
-        //    replaceTeamPhoto.setVisible(true);
-        //}
-        //else
-        //{
-        //    addTeamPhoto.setVisible(true);
-        //    replaceTeamPhoto.setVisible(false);
-        //}
 		
 		ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
 		Bitmap storedFlagImage = getStoredImage(getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault())));
