@@ -51,15 +51,18 @@ public class SimulationServiceImpl implements SimulationService {
 
     public SimulationServiceImpl(Executor executor, RacingEventService racingEventService) {
         this.executor = executor;
-        this.cache = new SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>(
-                new SmartFutureCache.AbstractCacheUpdater<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>() {
-                    @Override
-                    public SimulationResults computeCacheUpdate(LegIdentifier key, EmptyUpdateInterval updateInterval)
-                            throws Exception {
-                        return computeSimulationResults(key);
-                    }
-                }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
         this.racingEventService = racingEventService;
+        if (racingEventService != null) {
+            this.cache = new SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>(
+                    new SmartFutureCache.AbstractCacheUpdater<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>() {
+                        @Override
+                        public SimulationResults computeCacheUpdate(LegIdentifier key, EmptyUpdateInterval updateInterval) throws Exception {
+                            return computeSimulationResults(key);
+                        }
+                    }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
+        } else {
+            this.cache = null;
+        }
     }
 
     private class Listener extends AbstractRaceChangeListener {
@@ -166,7 +169,7 @@ public class SimulationServiceImpl implements SimulationService {
                     / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
             Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
             SimulationParameters simulationPars = new SimulationParametersImpl(course, polarDiagram, windField,
-                    simuStep, SailingSimulatorConstants.ModeEvent, true, true);
+                    simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
             Map<PathType, Path> paths = null;
             if ((polarDiagram != null)&&(legType != LegType.REACHING)) {
                 paths = getAllPathsEvenTimed(simulationPars, timeStep.asMillis());
@@ -183,9 +186,13 @@ public class SimulationServiceImpl implements SimulationService {
 
         SailingSimulator simulator = new SailingSimulatorImpl(simuPars);
         Map<PathType, Path> result = new HashMap<PathType, Path>();
-        // schedule omniscient task
-        FutureTask<Path> taskOmniscient = new FutureTask<Path>(() -> simulator.getPath(PathType.OMNISCIENT, null));
-        executor.execute(taskOmniscient);
+
+        FutureTask<Path> taskOmniscient = null;
+        if (simuPars.showOmniscient()) {
+            // schedule omniscient task
+            taskOmniscient = new FutureTask<Path>(() -> simulator.getPath(PathType.OMNISCIENT, null));
+            executor.execute(taskOmniscient);
+        }
 
         // schedule 1-turner tasks
         FutureTask<Path> task1TurnerLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_LEFT, null));
@@ -197,23 +204,27 @@ public class SimulationServiceImpl implements SimulationService {
         result.put(PathType.ONE_TURNER_LEFT, task1TurnerLeft.get());
         result.put(PathType.ONE_TURNER_RIGHT, task1TurnerRight.get());
 
-        // maximum turn times
-        MaximumTurnTimes maxTurnTimes = new MaximumTurnTimes(task1TurnerLeft.get().getMaxTurnTime(), task1TurnerRight
-                .get().getMaxTurnTime());
+        FutureTask<Path> taskOpportunistLeft = null;
+        FutureTask<Path> taskOpportunistRight = null;
+        if (simuPars.showOpportunist()) {        
+            // maximum turn times
+            MaximumTurnTimes maxTurnTimes = new MaximumTurnTimes(task1TurnerLeft.get().getMaxTurnTime(), task1TurnerRight.get().getMaxTurnTime());
 
-        // schedule opportunist tasks (which depend on 1-turner results)
-        FutureTask<Path> taskOpportunistLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT, maxTurnTimes));
-        FutureTask<Path> taskOpportunistRight = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT, maxTurnTimes));
-        executor.execute(taskOpportunistLeft);
-        executor.execute(taskOpportunistRight);
+            // schedule opportunist tasks (which depend on 1-turner results)
+            taskOpportunistLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT, maxTurnTimes));
+            taskOpportunistRight = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT, maxTurnTimes));
+            executor.execute(taskOpportunistLeft);
+            executor.execute(taskOpportunistRight);
 
-        // collect opportunist results
-        result.put(PathType.OPPORTUNIST_LEFT, taskOpportunistLeft.get());
-        result.put(PathType.OPPORTUNIST_RIGHT, taskOpportunistRight.get());
+            // collect opportunist results
+            result.put(PathType.OPPORTUNIST_LEFT, taskOpportunistLeft.get());
+            result.put(PathType.OPPORTUNIST_RIGHT, taskOpportunistRight.get());
+        }
 
-        // collect omniscient result (last, since usually slowest calculation)
-        result.put(PathType.OMNISCIENT, taskOmniscient.get());
-
+        if (simuPars.showOmniscient()) {
+            // collect omniscient result (last, since usually slowest calculation)
+            result.put(PathType.OMNISCIENT, taskOmniscient.get());
+        }
         // return combined result
         return result;
     }

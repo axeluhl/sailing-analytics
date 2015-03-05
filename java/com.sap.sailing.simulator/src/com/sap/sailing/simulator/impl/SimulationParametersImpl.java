@@ -2,6 +2,7 @@ package com.sap.sailing.simulator.impl;
 
 import java.util.List;
 
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.PolarDiagram;
@@ -18,6 +19,7 @@ public class SimulationParametersImpl implements SimulationParameters {
     private char mode;
     private boolean showOmniscient;
     private boolean showOpportunist;
+    private LegType legType;
 
     public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, Duration simuStep,
             char mode, boolean showOmniscient, boolean showOpportunist) {
@@ -28,6 +30,19 @@ public class SimulationParametersImpl implements SimulationParameters {
         this.mode = mode;
         this.showOmniscient = showOmniscient;
         this.showOpportunist = showOpportunist;
+        this.legType = null;
+    }
+
+    public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, Duration simuStep,
+            char mode, boolean showOmniscient, boolean showOpportunist, LegType legType) {
+        this.course = crs;
+        this.polarDiagram = pd;
+        this.windField = wf;
+        this.simuStep = simuStep;
+        this.mode = mode;
+        this.showOmniscient = showOmniscient;
+        this.showOpportunist = showOpportunist;
+        this.legType = legType;
     }
 
     @Override
@@ -74,5 +89,9 @@ public class SimulationParametersImpl implements SimulationParameters {
     public boolean showOpportunist() {
         return showOpportunist;
     }
-
+    
+    @Override
+    public LegType getLegType() {
+        return legType;
+    }
 }

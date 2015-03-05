@@ -9,6 +9,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -21,6 +26,7 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
@@ -51,9 +57,12 @@ import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternNotFoundException;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternSetting;
+import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.simulator.BoatClassProperties;
 import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -91,11 +100,23 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     // private static final double TOTAL_TIME_SCALE_FACTOR = 0.9;
     private static final int DEFAULT_STEP_MAX = 800;
     private static final long DEFAULT_TIMESTEP = 6666;
+    private final SimulationService simulationService;
 
     private double stepSizeMeters = 0.0;
     private WindControlParameters controlParameters = new WindControlParameters(0, 0);
     private SpeedWithBearing averageWind = null;
 
+    public SimulatorServiceImpl() {
+        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+        Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
+        /* maximumPoolSize */THREAD_POOL_SIZE,
+        /* keepAliveTime */60, TimeUnit.SECONDS,
+        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
+        simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, null);        
+    }
+    
+    
     @Override
     public PositionDTO[] getRaceLocations() {
         PositionDTO lakeGarda = new PositionDTO();
@@ -888,24 +909,43 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private SimulatedPathsEvenTimedResultDTO getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf,
             char mode, SimulatorUISelectionDTO selection, boolean showOmniscient, boolean showOpportunist)
             throws ConfigurationException {
-
         LOGGER.info("Retrieving simulated paths");
-
-        Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this
-                .getPolarDiagram(selection.boatClassIndex);
+        Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(selection.boatClassIndex);
         PolarDiagram pd = polarDiagramAndNotificationMessage.getA();
-
-        SimulationParameters sp = new SimulationParametersImpl(course, pd, wf, null, mode, showOmniscient,
-                showOpportunist);
-        SailingSimulator simulator = new SailingSimulatorImpl(sp);
-
-        Map<String, Path> pathsAndNames = null;
-
-        pathsAndNames = simulator.getAllPathsEvenTimed(
-                wf.getTimeStep().asMillis(),
-                (mode == SailingSimulatorConstants.ModeMeasured) ? SimulatorServiceUtils
-                        .toSimulatorUISelection(selection) : null);
-
+        int[] gridRes = wf.getGridResolution();
+        Position[] gridArea = wf.getGridAreaGps();
+        LOGGER.info("showOmniscient : "+showOmniscient);
+        LOGGER.info("showOpportunist: "+showOpportunist);        
+        if (gridArea != null) {
+            // initialize grid of supporting location for windfield
+            Grid bd = new CurvedGrid(gridArea[0], gridArea[1]);
+            // set base wind bearing
+            wf.getWindParameters().baseWindBearing += bd.getSouth().getDegrees();
+            LOGGER.info("base wind: " + pd.getWind().getKnots() + " kn, "
+                    + ((wf.getWindParameters().baseWindBearing) % 360.0) + "\u00B0");
+            // set water current
+            pd.setCurrent(new KnotSpeedWithBearingImpl(wf.getWindParameters().curSpeed, new DegreeBearingImpl(wf
+                    .getWindParameters().curBearing)));
+            if (pd.getCurrent() != null) {
+                LOGGER.info("water current: " + pd.getCurrent().getKnots() + " kn, "
+                        + pd.getCurrent().getBearing().getDegrees() + "\u00B0");
+            }
+            wf.setBoundary(bd);
+            Position[][] positionGrid = bd.generatePositions(gridRes[0], gridRes[1], gridRes[2], gridRes[3]);
+            wf.setPositionGrid(positionGrid);
+            wf.generate(wf.getStartTime(), wf.getEndTime(), wf.getTimeStep());
+        }
+        SimulationParameters sp = new SimulationParametersImpl(course, pd, wf, null, mode, showOmniscient, showOpportunist);        
+        Map<PathType, Path> pathsAndNames = null;
+        try {
+            pathsAndNames = simulationService.getAllPathsEvenTimed(sp, wf.getTimeStep().asMillis());
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         int noOfPaths = pathsAndNames.size();
         if (mode == SailingSimulatorConstants.ModeMeasured) {
             noOfPaths++; // the last path is the polyline
@@ -918,12 +958,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
         }
 
-        for (Entry<String, Path> entry : pathsAndNames.entrySet()) {
-            LOGGER.info("Path " + entry.getKey());
+        for (Entry<PathType, Path> entry : pathsAndNames.entrySet()) {
+            LOGGER.info("Path " + entry.getKey().getTxtId());
 
             // NOTE: pathName convention is: sort-digit + "#" + path-name
             // pathsAndNames is TreeMap which ensures sorting
-            pathDTOs[index] = new PathDTO(entry.getKey());
+            pathDTOs[index] = new PathDTO(entry.getKey().getTxtId());
 
             // fill pathDTO with path points where speed is true wind speed
             List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
@@ -941,13 +981,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             rcDTO = new RaceMapDataDTO();
             rcDTO.coursePositions = new CoursePositionsDTO();
             rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();
-
-            Path rc = simulator.getRaceCourse();
             PositionDTO posDTO;
-            posDTO = SimulatorServiceUtils.toPositionDTO(rc.getPathPoints().get(0).getPosition());
-
+            posDTO = SimulatorServiceUtils.toPositionDTO(course.get(0));
             rcDTO.coursePositions.waypointPositions.add(posDTO);
-            posDTO = SimulatorServiceUtils.toPositionDTO(rc.getPathPoints().get(1).getPosition());
+            posDTO = SimulatorServiceUtils.toPositionDTO(course.get(1));
             rcDTO.coursePositions.waypointPositions.add(posDTO);
         } else {
             rcDTO = null;

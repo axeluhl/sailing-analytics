@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.Wind;
@@ -31,7 +32,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
     public PathGeneratorOpportunistEuclidian(SimulationParameters params) {
         PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
         simulationParameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
-                params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist());
+                params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist(), params.getLegType());
     }
 
     public void setEvaluationParameters(int maxLeft, int maxRight, boolean startLeft) {
@@ -93,13 +94,23 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
         logger.info("Time step :" + timeStep);
         // while there is more than 5% of the total distance to the finish
 
-        Bearing bearRCWind = wndStart.getBearing().getDifferenceTo(bearStart);
-        String legType = "downwind";
-        this.upwindLeg = false;
-
-        if ((Math.abs(bearRCWind.getDegrees()) > 90.0) && (Math.abs(bearRCWind.getDegrees()) < 270.0)) {
-            legType = "upwind";
-            this.upwindLeg = true;
+        String legType = "none";
+        if (this.simulationParameters.getLegType() == null) {
+            Bearing bearRCWind = wndStart.getBearing().getDifferenceTo(bearStart);
+            legType = "downwind";
+            this.upwindLeg = false;
+            if ((Math.abs(bearRCWind.getDegrees()) > 90.0) && (Math.abs(bearRCWind.getDegrees()) < 270.0)) {
+                legType = "upwind";
+                this.upwindLeg = true;
+            }
+        } else {
+            if (this.simulationParameters.getLegType() == LegType.UPWIND) {
+                legType = "upwind";
+                this.upwindLeg = true;
+            } else {
+                legType = "downwind";
+                this.upwindLeg = false;
+            }
         }
 
         int timeStepScale = 1;

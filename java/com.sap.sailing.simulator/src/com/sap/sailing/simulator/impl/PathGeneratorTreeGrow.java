@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -45,7 +46,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
     public PathGeneratorTreeGrow(SimulationParameters params) {
         PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
         this.parameters = new SimulationParametersImpl(params.getCourse(), polarDiagramClone, params.getWindField(),
-                params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist());
+                params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist(), params.getLegType());
     }
 
     public void setEvaluationParameters(String startDirection, int maxTurns, String gridFile) {
@@ -486,13 +487,23 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         // Bearing bearHrz = bearVrt.add(new DegreeBearingImpl(90.0));
         Position middlePos = startPos.translateGreatCircle(bearVrt, distStartEnd.scale(0.5));
 
-        Bearing bearRCWind = wndStart.getBearing().getDifferenceTo(bearVrt);
-        String legType = "downwind";
-        this.upwindLeg = false;
-
-        if ((Math.abs(bearRCWind.getDegrees()) > 90.0) && (Math.abs(bearRCWind.getDegrees()) < 270.0)) {
-            legType = "upwind";
-            this.upwindLeg = true;
+        String legType = "none";
+        if (this.parameters.getLegType() == null) {
+            Bearing bearRCWind = wndStart.getBearing().getDifferenceTo(bearVrt);
+            legType = "downwind";
+            this.upwindLeg = false;
+            if ((Math.abs(bearRCWind.getDegrees()) > 90.0) && (Math.abs(bearRCWind.getDegrees()) < 270.0)) {
+                legType = "upwind";
+                this.upwindLeg = true;
+            }
+        } else {
+            if (this.parameters.getLegType() == LegType.UPWIND) {
+                legType = "upwind";
+                this.upwindLeg = true;
+            } else {
+                legType = "downwind";
+                this.upwindLeg = false;
+            }
         }
 
         if (debugMsgOn) {
