@@ -227,14 +227,16 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     @Override
     public List<StartAnalysisDTO> getStartAnalysisListForCompetitorIDAndLeaderboardName(String competitorIdAsString,
             String leaderboardName) {
-        logger.log(Level.INFO, "Recevied getStartAnalysisListForCompetitorIDAndLeaderboardName(...) Request.");
+        List<StartAnalysisDTO> startAnalysisDTOs = new ArrayList<StartAnalysisDTO>();
         Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(
                 competitorIdAsString);
         List<TrackedRace> trackedRacesForLeaderBoardName = getTrackedRacesFromLeaderboard(leaderboardName);
         for (TrackedRace trackedRace : trackedRacesForLeaderBoardName) {
-            startAnalysisCreationController.checkForNewStartAnalysisForCompetitorInTrackedRace(competitor, trackedRace);
+            StartAnalysisDTO startAnalysisDTO = startAnalysisCreationController.checkStartAnalysisForCompetitorInTrackedRace(competitor, trackedRace);
+            if (startAnalysisDTO != null)
+                startAnalysisDTOs.add(startAnalysisDTO);
         }
-        return startAnalysisCreationController.getStartAnalysisCache().getStartAnalysisDTOsForCompetitor(competitor);
+        return startAnalysisDTOs;
     }
 
     @Override
