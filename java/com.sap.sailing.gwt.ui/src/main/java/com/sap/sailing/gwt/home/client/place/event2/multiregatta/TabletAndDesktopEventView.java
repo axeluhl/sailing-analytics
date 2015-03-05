@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event2.partials.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
@@ -63,16 +64,16 @@ public class TabletAndDesktopEventView extends Composite implements EventMultire
     }
     
     private void initBreadCrumbs() {
-        addBreadCrumbItem(i18n.home(), new StartPlace());
-        addBreadCrumbItem(i18n.events(), new EventsPlace());
-        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getName(), new EventDefaultPlace(currentPresenter.getCtx()));
+        addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
+        addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
+        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getName(), currentPresenter.getCurrentEventNavigation());
     }
     
-    private void addBreadCrumbItem(String label, final Place place) {
-        tabPanelUi.addBreadcrumbItem(label, currentPresenter.getUrl(place), new Runnable() {
+    private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
+        tabPanelUi.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
             @Override
             public void run() {
-                currentPresenter.navigateTo(place);
+                placeNavigation.goToPlace();
             }
         });
     }

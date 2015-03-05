@@ -1,21 +1,28 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
+import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sse.gwt.client.player.Timer;
@@ -31,7 +38,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     private final Timer timerForClientServerOffset;
 
-    private final HomePlacesNavigator homePlacesNavigator;
+    protected final HomePlacesNavigator homePlacesNavigator;
     
     private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
 
@@ -42,8 +49,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         this.timerForClientServerOffset = new Timer(PlayModes.Replay);
 
         this.clientFactory = clientFactory;
-
-
     }
 
     public SailingServiceAsync getSailingService() {
@@ -66,8 +71,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public SafeUri getUrl(Place place) {
-        // TODO implement global navigation for StartPlace/EventsPlace, ...
+    public SafeUri getUrl(AbstractEventPlace place) {
         String token = historyMapper.getToken(place);
         return UriUtils.fromString("#" + token);
     }
@@ -90,66 +94,59 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public AbstractEventRegattaPlace getPlaceForRegattaRaces(String regattaId) {
+    public RegattaRacesPlace getPlaceForRegattaRaces(String regattaId) {
         return new RegattaRacesPlace(contextForRegatta(regattaId));
     }
 
     protected EventContext contextForRegatta(String regattaId) {
         return new EventContext(ctx.getEventDTO()).withRegattaId(regattaId);
     }
-
-
-    @Override
-    public HomePlacesNavigator getHomePlaceNavigator() {
-        return homePlacesNavigator;
-    }
-
-    @Override
-    public void goToOverview() {
-        clientFactory.getPlaceController().goTo(new RegattaOverviewPlace(this.ctx));
-
-    }
-
-    @Override
-    public void goToRegattas() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void goToSchedule() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void goToMedia() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void goToRegattaRaces(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard,
-            RaceGroupDTO raceGroup) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
+    
     public String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
-        // TODO Auto-generated method stub
-        return null;
+        RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
+        return EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboard.name, raceIdentifier));
+    }
+    
+    private Map<String, String> createRaceBoardLinkParameters(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
+        Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("eventId", ctx.getEventId());
+        linkParams.put("leaderboardName", leaderboardName);
+        linkParams.put("raceName", raceIdentifier.getRaceName());
+        // TODO this must only be forwarded if there is a logged-on user
+//        linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
+        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, "true");
+        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
+        linkParams.put("regattaName", raceIdentifier.getRegattaName());
+        return linkParams;
+    }
+    
+    @Override
+    public PlaceNavigation<StartPlace> getHomeNavigation() {
+        return homePlacesNavigator.getHomeNavigation();
     }
 
     @Override
-    public void openOverallLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup) {
-        // TODO Auto-generated method stub
-        
+    public PlaceNavigation<EventsPlace> getEventsNavigation() {
+        return homePlacesNavigator.getEventsNavigation();
     }
-
+    
     @Override
-    public void openLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
-        // TODO Auto-generated method stub
-        
+    public PlaceNavigation<EventDefaultPlace> getCurrentEventNavigation() {
+        return homePlacesNavigator.getEventNavigation(ctx.getEventId(), ctx.getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
+    }
+    
+    @Override
+    public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
+        return homePlacesNavigator.getEventSeriesNavigation(ctx.getEventId(), ctx.getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
+    }
+    
+    @Override
+    public PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaId) {
+        return homePlacesNavigator.getEventNavigation(getPlaceForRegattaRaces(regattaId), new RegattaRacesPlace.Tokenizer(), ctx.getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
+    }
+    
+    @Override
+    public PlaceNavigation<RegattaRacesPlace> getRegattaNavigation(String regattaId) {
+        return homePlacesNavigator.getEventNavigation(getPlaceForRegattaRaces(regattaId), new RegattaRacesPlace.Tokenizer(), ctx.getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
     }
 }

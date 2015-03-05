@@ -10,19 +10,22 @@ public class PlaceNavigation<T extends Place> {
     private final PlaceTokenizer<T> tokenizer;
     private final String baseUrl;
     private final boolean isDestinationOnRemoteServer;
+    private final PlaceNavigator placeNavigator;
     
-    public PlaceNavigation(T destinationPlace, PlaceTokenizer<T> tokenizer) {
+    public PlaceNavigation(T destinationPlace, PlaceTokenizer<T> tokenizer, PlaceNavigator placeNavigator) {
         this.destinationPlace = destinationPlace;
         this.tokenizer = tokenizer;
+        this.placeNavigator = placeNavigator;
         String locationURL = getLocationURL();
         this.isDestinationOnRemoteServer = !(isLocationOnLocalhost(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
         this.baseUrl = isDestinationOnRemoteServer ? AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL : locationURL; 
     }
 
-    public PlaceNavigation(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer, boolean isDestinationOnRemoteServer) {
+    public PlaceNavigation(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer, boolean isDestinationOnRemoteServer, PlaceNavigator placeNavigator) {
         this.destinationPlace = destinationPlace;
         this.tokenizer = tokenizer;
         this.isDestinationOnRemoteServer = isDestinationOnRemoteServer;
+        this.placeNavigator = placeNavigator;
         this.baseUrl = isDestinationOnRemoteServer ? baseUrl : getLocationURL(); 
     }
 
@@ -74,5 +77,9 @@ public class PlaceNavigation<T extends Place> {
     
     private String getLocationURL() {
         return Window.Location.getProtocol() + "//" + Window.Location.getHostName() + ":" + Window.Location.getPort();
+    }
+    
+    public void goToPlace() {
+        placeNavigator.goToPlace(this);
     }
 }

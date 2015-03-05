@@ -13,11 +13,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.gwt.client.player.Timer;
 
 public class EventRegattaRacesFleetGroup extends Composite {
     private static EventRegattaRacesFleetGroupUiBinder uiBinder = GWT.create(EventRegattaRacesFleetGroupUiBinder.class);
@@ -29,7 +28,7 @@ public class EventRegattaRacesFleetGroup extends Composite {
     @UiField DivElement racesFromToDate;
     @UiField DivElement racesFleetPanel;
     
-    public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, List<FleetDTO> fleetsToShow, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
+    public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, List<FleetDTO> fleetsToShow, EventView.Presenter presenter) {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
@@ -37,28 +36,28 @@ public class EventRegattaRacesFleetGroup extends Composite {
             EventRegattaRacesFleet eventRegattaRacesFleet = new EventRegattaRacesFleet(fleet, 0);
             fleetsPanel.appendChild(eventRegattaRacesFleet.getElement());
 
-            updateFleetRacesUI(leaderboard, series, fleet, timerForClientServerOffset, pageNavigator);
+            updateFleetRacesUI(leaderboard, series, fleet, presenter);
         }
     }
 
-    public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
+    public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, EventView.Presenter presenter) {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
         fleetsPanel.getStyle().setDisplay(Display.NONE);
 
         FleetDTO defaultFleet = series.getFleets().get(0);
-        updateFleetRacesUI(leaderboard, series, defaultFleet, timerForClientServerOffset, pageNavigator);
+        updateFleetRacesUI(leaderboard, series, defaultFleet, presenter);
     }
 
-    private void updateFleetRacesUI(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, FleetDTO fleet, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
+    private void updateFleetRacesUI(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, FleetDTO fleet, EventView.Presenter presenter) {
         Date fromDate = null;
         Date toDate = null;
 
         List<RaceColumnDTO> racesOfFleet = getRacesOfFleet(leaderboard, series, fleet);
         for(RaceColumnDTO raceColumn: racesOfFleet) {
             RaceColumnDTO raceColumnFromLeaderboard = leaderboard.getRaceColumnByName(raceColumn.getName());
-            EventRegattaRacesRace race = new EventRegattaRacesRace(leaderboard, fleet, raceColumnFromLeaderboard, timerForClientServerOffset, pageNavigator);
+            EventRegattaRacesRace race = new EventRegattaRacesRace(leaderboard, fleet, raceColumnFromLeaderboard, presenter);
             racesFleetPanel.appendChild(race.getElement());
             
             Date startDate = raceColumnFromLeaderboard.getStartDate(fleet);

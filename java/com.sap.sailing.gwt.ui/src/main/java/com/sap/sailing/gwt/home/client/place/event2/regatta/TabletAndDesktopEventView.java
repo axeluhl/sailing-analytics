@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2.regatta;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -11,12 +10,8 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.partials.header.EventHeader;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
@@ -67,25 +62,23 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
     }
 
     private void initBreadCrumbs() {
-        addBreadCrumbItem(i18n.home(), new StartPlace());
-        addBreadCrumbItem(i18n.events(), new EventsPlace());
+        addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
+        addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
         if(currentPresenter.getCtx().getEventDTO().getType() == EventType.SERIES_EVENT) {
-            addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getSeriesName(),
-                    new SeriesEventsPlace(currentPresenter.getCtx().getEventDTO().getSeriesIdAsString()));
+            addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getSeriesName(),  currentPresenter.getCurrentEventSeriesNavigation());
         }
-        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getName(),
-                new EventDefaultPlace(currentPresenter.getCtx()));
+        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getName(), currentPresenter.getCurrentEventNavigation());
         
         if(currentPresenter.showRegattaMetadata()) {
-            addBreadCrumbItem(currentPresenter.getRegattaMetadata().getDisplayName(), new RegattaOverviewPlace(currentPresenter.getCtx()));
+            addBreadCrumbItem(currentPresenter.getRegattaMetadata().getDisplayName(), currentPresenter.getCurrentRegattaOverviewNavigation());
         }
     }
 
-    private void addBreadCrumbItem(String label, final Place place) {
-        tabPanelUi.addBreadcrumbItem(label, currentPresenter.getUrl(place), new Runnable() {
+    private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
+        tabPanelUi.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
             @Override
             public void run() {
-                currentPresenter.navigateTo(place);
+                placeNavigation.goToPlace();
             }
         });
     }

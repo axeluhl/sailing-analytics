@@ -16,9 +16,9 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.home.client.place.event.EventPlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.event2.EventView;
+import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.gwt.client.player.Timer;
 
 public class EventRegattaRacesRace extends Composite {
     private static EventRegattaRacesRaceUiBinder uiBinder = GWT.create(EventRegattaRacesRaceUiBinder.class);
@@ -65,14 +65,14 @@ public class EventRegattaRacesRace extends Composite {
     private final FleetDTO fleet;
     private final RaceColumnDTO raceColumn;
     private final RaceDTO race;
-    private final Timer timerForClientServerOffset;
 
     private Element[] allConditionalElements;
+    private final Presenter presenter;
     
-    public EventRegattaRacesRace(StrippedLeaderboardDTO leaderboard, FleetDTO fleet, RaceColumnDTO raceColumn, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
+    public EventRegattaRacesRace(StrippedLeaderboardDTO leaderboard, FleetDTO fleet, RaceColumnDTO raceColumn, EventView.Presenter presenter) {
         this.fleet = fleet;
         this.raceColumn = raceColumn;
-        this.timerForClientServerOffset = timerForClientServerOffset;
+        this.presenter = presenter;
         race = raceColumn.getRace(fleet);
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
@@ -89,7 +89,7 @@ public class EventRegattaRacesRace extends Composite {
         raceName2.setInnerText(raceColumn.getName());
 
         if(race != null && race.trackedRace != null) {
-            String raceViewerURL = pageNavigator.getRaceViewerURL(leaderboard, race);
+            String raceViewerURL = presenter.getRaceViewerURL(leaderboard, race);
             analyzeRaceLink.setHref(raceViewerURL);
             watchRaceLink.setHref(raceViewerURL);
         }
@@ -113,7 +113,7 @@ public class EventRegattaRacesRace extends Composite {
     }
 
     private boolean isLive() {
-        return raceColumn.isLive(fleet, timerForClientServerOffset.getLiveTimePointInMillis());
+        return raceColumn.isLive(fleet, presenter.getTimerForClientServerOffset().getLiveTimePointInMillis());
     }
     
     private void updateUI() {

@@ -9,7 +9,6 @@ import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -21,9 +20,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.BoatClassImageResources;
 import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -72,7 +72,7 @@ public class Regatta extends Composite {
 
     private Presenter presenter;
 
-    private AbstractEventRegattaPlace regattaPlace;
+    private PlaceNavigation<RegattaRacesPlace> regattaNavigation;
     
     public Regatta(boolean isSingleView, EventView.Presenter presenter) {
         this.event = presenter.getCtx().getEventDTO();
@@ -94,8 +94,8 @@ public class Regatta extends Composite {
         if(isSingleView) {
             regattaDetailsLink.setVisible(false);
         } else {
-            regattaPlace = presenter.getPlaceForRegatta(leaderboard.regattaName);
-            regattaDetailsLink.setHref(presenter.getUrl(regattaPlace));
+            regattaNavigation = presenter.getRegattaNavigation(leaderboard.regattaName);
+            regattaDetailsLink.setHref(regattaNavigation.getTargetUrl());
         }
 
         boolean hasLiveRace = leaderboard.hasLiveRace(presenter.getTimerForClientServerOffset().getLiveTimePointInMillis());
@@ -151,12 +151,12 @@ public class Regatta extends Composite {
 
     @UiHandler("regattaDetailsLink")
     void regattaDetailsLinkClicked(ClickEvent e) {
-        handleClickEvent(e, regattaPlace);
+        handleClickEvent(e, regattaNavigation);
     }
     
-    private void handleClickEvent(ClickEvent e, Place place) {
+    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> place) {
         if (LinkUtil.handleLinkClick((Event) e.getNativeEvent())) {
-            presenter.navigateTo(place);
+            place.goToPlace();
             e.preventDefault();
          }
     }

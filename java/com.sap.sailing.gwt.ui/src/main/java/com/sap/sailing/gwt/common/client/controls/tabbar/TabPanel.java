@@ -115,6 +115,10 @@ public class TabPanel<PRESENTER> extends Composite {
 
     }
     
+    public void addBreadcrumbItem(String title, String link, final Runnable runnable) {
+        breadcrumbs.addBreadcrumbItem(title, link, runnable);
+    }
+    
     public void addBreadcrumbItem(String title, SafeUri link, final Runnable runnable) {
         breadcrumbs.addBreadcrumbItem(title, link, runnable);
     }

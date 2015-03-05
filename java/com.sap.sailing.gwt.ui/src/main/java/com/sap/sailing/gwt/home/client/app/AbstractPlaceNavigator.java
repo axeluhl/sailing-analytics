@@ -26,15 +26,15 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
     }
 
     protected <T extends Place> PlaceNavigation<T> createLocalPlaceNavigation(T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        return new PlaceNavigation<T>(null, destinationPlace, tokenizer, false);
+        return new PlaceNavigation<T>(null, destinationPlace, tokenizer, false, this);
     }
 
     protected <T extends Place> PlaceNavigation<T> createGlobalPlaceNavigation(T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        return new PlaceNavigation<T>(destinationPlace, tokenizer);
+        return new PlaceNavigation<T>(destinationPlace, tokenizer, this);
     }
 
     protected <T extends Place> PlaceNavigation<T> createPlaceNavigation(String baseUrl, boolean isOnRemoteServer, T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        return new PlaceNavigation<T>(baseUrl, destinationPlace, tokenizer, isOnRemoteServer);
+        return new PlaceNavigation<T>(baseUrl, destinationPlace, tokenizer, isOnRemoteServer, this);
     }
     
     public <T extends Place> void pushPlaceToHistoryStack(T destinationPlace, PlaceTokenizer<T> tokenizer) {

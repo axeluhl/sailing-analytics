@@ -4,6 +4,7 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
+import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
@@ -11,6 +12,7 @@ import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaCompetit
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
@@ -59,10 +61,19 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         MultiregattaRegattasPlace eventPlace = new MultiregattaRegattasPlace(eventUuidAsString);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new MultiregattaRegattasPlace.Tokenizer());
     }
+    
+    public PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(String seriesId, String baseUrl, boolean isOnRemoteServer) {
+        SeriesDefaultPlace place = new SeriesDefaultPlace(seriesId);
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, place, new SeriesDefaultPlace.Tokenizer());
+    }
 
     public PlaceNavigation<EventDefaultPlace> getEventNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
         EventDefaultPlace eventPlace = new EventDefaultPlace(eventUuidAsString);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace, new EventDefaultPlace.Tokenizer());
+    }
+    
+    public <P extends AbstractEventPlace> PlaceNavigation<P> getEventNavigation(P place, PlaceTokenizer<P> tokenizer, String baseUrl, boolean isOnRemoteServer) {
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, place, tokenizer);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
