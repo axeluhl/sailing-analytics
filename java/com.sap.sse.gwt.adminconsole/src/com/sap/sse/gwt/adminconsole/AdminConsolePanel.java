@@ -1,8 +1,11 @@
 package com.sap.sse.gwt.adminconsole;
 
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -20,6 +23,9 @@ import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.BuildVersionRetriever;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
+import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
@@ -27,29 +33,35 @@ import com.sap.sse.security.ui.loginpanel.LoginPanelCss;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
- * A panel that can be used to implement an administration console. Widgets can be arranged in vertical and horizontal tabs ("L-shape").
- * The top-level element is the vertical tab panel. Widgets may either be added directly as the content of one vertical tab, or a horizontal
- * tab panel can be added as the content widget of a vertical tab, in turn holding widgets in horizontal tabs.<p>
+ * A panel that can be used to implement an administration console. Widgets can be arranged in vertical and horizontal
+ * tabs ("L-shape"). The top-level element is the vertical tab panel. Widgets may either be added directly as the
+ * content of one vertical tab, or a horizontal tab panel can be added as the content widget of a vertical tab, in turn
+ * holding widgets in horizontal tabs.
+ * <p>
  * 
- * After constructing an instance of this class, there are three ways for adding widgets:<ul>
- *   <li>{@link #addToVerticalTabPanel(RefreshableAdminConsolePanel, String, AdminConsoleFeatures)} adds a widget as a content element
- *   of a vertical tab</li>
- *   <li>{@link #addVerticalTab(String, String, AdminConsoleFeatures)} creates a horizontal tab panel and adds it as a content element of
- *   a vertical tab</li>
- *   <li>{@link #addToTabPanel(TabLayoutPanel, RefreshableAdminConsolePanel, String, AdminConsoleFeatures)} adds a widget as a content element
- *   of a horizontal tab</li>
+ * After constructing an instance of this class, there are three ways for adding widgets:
+ * <ul>
+ * <li>{@link #addToVerticalTabPanel(RefreshableAdminConsolePanel, String, Permission)} adds a widget as a content
+ * element of a vertical tab</li>
+ * <li>{@link #addVerticalTab(String, String, Permission)} creates a horizontal tab panel and adds it as a content
+ * element of a vertical tab</li>
+ * <li>{@link #addToTabPanel(TabLayoutPanel, RefreshableAdminConsolePanel, String, Permission)} adds a widget as a
+ * content element of a horizontal tab</li>
  * </ul>
  * 
- * Widgets to be added need to be wrapped as {@link RefreshableAdminConsolePanel} holding the widget and receiving the refresh call when
- * the widget is shown because the user has selected the tab. If the component doesn't require any refresh logic, an instance of
- * {@link DefaultRefreshableAdminConsolePanel} can be used to wrap the widget.<p>
+ * Widgets to be added need to be wrapped as {@link RefreshableAdminConsolePanel} holding the widget and receiving the
+ * refresh call when the widget is shown because the user has selected the tab. If the component doesn't require any
+ * refresh logic, an instance of {@link DefaultRefreshableAdminConsolePanel} can be used to wrap the widget.
+ * <p>
  * 
- * After the widgets have been added, {@link #initUI()} must be called to assemble all tabs for the current user's roles. The {@link #initUI()}
- * method must be called each time more widgets have been added dynamically.<p>
+ * After the widgets have been added, {@link #initUI()} must be called to assemble all tabs for the current user's
+ * roles. The {@link #initUI()} method must be called each time more widgets have been added dynamically.
+ * <p>
  * 
- * For each widget added, a {@link AdminConsoleFeatures feature} needs to be specified. The feature tells the roles of which the logged-in user
- * needs to have at least one in order to see the tab. When the user changes or has his/her roles updated the set of tabs visible will be
- * adjusted according to the new roles available for the logged-in user.<p> 
+ * For each widget added, a {@link Permission set of permissions} needs to be specified, any of which is sufficient to
+ * get to see the widget. When the user changes or has his/her permissions updated the set of tabs visible will be
+ * adjusted according to the new roles available for the logged-in user.
+ * <p>
  * 
  * @author Axel Uhl (D043530)
  *
@@ -59,10 +71,14 @@ public class AdminConsolePanel extends DockLayoutPanel {
     
     /**
      * The administration console's UI depends on the user's roles. When the roles change then so shall the display of
-     * tabs. {@link AdminConsoleFeatures} list the roles to which they are made available. This map keeps track of the
-     * dependencies and allows the UI to adjust to role changes.
+     * tabs. Required {@link Permission}s tell when they are to be made available based on the user's actual
+     * permissions. This map keeps track of the dependencies and allows the UI to adjust to role changes.<p>
+     * 
+     * The values are the permissions, at least one of which is required from the user to be able to see the widget.
      */
-    private final LinkedHashMap<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, AdminConsoleFeatures> roleSpecificTabs;
+    private final LinkedHashSet<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>> roleSpecificTabs;
+    
+    private final Map<Widget, Set<Permission>> permissionsAnyOfWhichIsRequiredToSeeWidget;
     
     private final SelectionHandler<Integer> tabSelectionHandler;
     
@@ -78,6 +94,8 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * allows the panel to find the refresh target when a widget has been selected in a tab panel.
      */
     private final Map<Widget, RefreshableAdminConsolePanel> panelsByWidget;
+    
+    private final PermissionsForRoleProvider permissionsForRoleProvider;
     
     /**
      * Generic selection handler that forwards selected tabs to a refresher that ensures that data gets reloaded. If
@@ -130,12 +148,14 @@ public class AdminConsolePanel extends DockLayoutPanel {
         }
     }
     
-    public AdminConsolePanel(UserService userService, BuildVersionRetriever buildVersionRetriever,
-            String releaseNotesAnchorLabel, String releaseNotesURL,
-            ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
+    public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
+            BuildVersionRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
+            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
         super(Unit.EM);
+        this.permissionsForRoleProvider = permissionsForRoleProvider;
+        this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
         this.userService = userService;
-        roleSpecificTabs = new LinkedHashMap<>();
+        roleSpecificTabs = new LinkedHashSet<>();
         this.panelsByWidget = new HashMap<>();
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
@@ -157,6 +177,11 @@ public class AdminConsolePanel extends DockLayoutPanel {
             @Override
             public void remove(Widget child) {
                 topLevelTabPanel.remove(child);
+            }
+
+            @Override
+            public Widget getPanel() {
+                return topLevelTabPanel;
             }
         };
         final DockPanel informationPanel = new DockPanel();
@@ -197,6 +222,8 @@ public class AdminConsolePanel extends DockLayoutPanel {
         void add(Widget child, String text, boolean asHtml);
 
         void remove(Widget child);
+        
+        Widget getPanel();
     }
 
     /**
@@ -205,12 +232,12 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * @return the horizontal tab panel that was created and added to the top-level vertical tab panel; the panel returned can be specified
      * as argument to {@link #addToTabPanel(TabLayoutPanel, Widget, String, AdminConsoleFeatures)}.
      */
-    public TabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, AdminConsoleFeatures feature) {
+    public TabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, Permission... requiresAnyOfThesePermissions) {
         final TabLayoutPanel newTabPanel = new TabLayoutPanel(2.5, Unit.EM);
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
         newTabPanel.ensureDebugId(tabDebugId);
-        remeberWidgetLocationAndFeature(topLevelTabPanelWrapper, newTabPanel, tabTitle, feature);
+        remeberWidgetLocationAndPermissions(topLevelTabPanelWrapper, newTabPanel, tabTitle, requiresAnyOfThesePermissions);
         return newTabPanel;
     }
 
@@ -219,8 +246,8 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * This is useful for panels that form a top-level category of its own but don't require multiple panels to represent this
      * top-level category.
      */
-    public void addToVerticalTabPanel(final RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        addToTabPanel(topLevelTabPanelWrapper, panelToAdd, tabTitle, feature);
+    public void addToVerticalTabPanel(final RefreshableAdminConsolePanel panelToAdd, String tabTitle, Permission... requiresAnyOfThesePermissions) {
+        addToTabPanel(topLevelTabPanelWrapper, panelToAdd, tabTitle, requiresAnyOfThesePermissions);
     }
 
     private ScrollPanel wrapInScrollPanel(Widget panelToAdd) {
@@ -230,7 +257,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         return scrollPanel;
     }
 
-    public void addToTabPanel(final TabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+    public void addToTabPanel(final TabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, Permission... requiresAnyOfThesePermissions) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
             public void add(Widget child, String text, boolean asHtml) {
@@ -242,8 +269,13 @@ public class AdminConsolePanel extends DockLayoutPanel {
             public void remove(Widget child) {
                 tabPanel.remove(child);
             }
+
+            @Override
+            public Widget getPanel() {
+                return tabPanel;
+            }
         };
-        addToTabPanel(wrapper, panelToAdd, tabTitle, feature);
+        addToTabPanel(wrapper, panelToAdd, tabTitle, requiresAnyOfThesePermissions);
     }
 
     /**
@@ -251,18 +283,34 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * a hook so that when the <code>panelToAdd</code>'s widget is selected then the {@link RefreshableAdminConsolePanel#refreshAfterBecomingVisible()}
      * method can be called.
      */
-    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
-        remeberWidgetLocationAndFeature(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, feature);
+    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, Permission... requiresAnyOfThesePermissions) {
+        remeberWidgetLocationAndPermissions(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, requiresAnyOfThesePermissions);
         panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
     }
 
     /**
-     * Remembers the tab panel in which the <code>widgetToAdd</code> is to be displayed and for which feature.
+     * Remembers the tab panel in which the <code>widgetToAdd</code> is to be displayed and which permissions are
+     * sufficient to see the widget. For the <code>tabPanel</code>, all permissions provided here are added to the tab
+     * panel's permissions so that the user will see the tab panel as soon as the user may see any of the widgets inside
+     * that panel
+     * 
+     * @param requiresAnyOfThesePermissions
+     *            zero or more permissions; if no permissions are provided, the user will never be able to see the
+     *            widget. Otherwise, if any of these permissions implies any of the permissions the user has, the user
+     *            will be shown the widget. In particular, a "*" wildcard permission will show the widget to all users,
+     *            regardless their actual permissions.
      */
-    private void remeberWidgetLocationAndFeature(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
-            String tabTitle, AdminConsoleFeatures feature) {
-        roleSpecificTabs.put(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel,
-                widgetToAdd, tabTitle), feature);
+    private void remeberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
+            String tabTitle, Permission... requiresAnyOfThesePermissions) {
+        roleSpecificTabs.add(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel, widgetToAdd, tabTitle));
+        final HashSet<Permission> permissionsAsSet = new HashSet<>(Arrays.asList(requiresAnyOfThesePermissions));
+        permissionsAnyOfWhichIsRequiredToSeeWidget.put(widgetToAdd, permissionsAsSet);
+        Set<Permission> permissionsForTabPanel = permissionsAnyOfWhichIsRequiredToSeeWidget.get(tabPanel.getPanel());
+        if (permissionsForTabPanel == null) {
+            permissionsForTabPanel = new HashSet<>();
+            permissionsAnyOfWhichIsRequiredToSeeWidget.put(tabPanel.getPanel(), permissionsForTabPanel);
+        }
+        permissionsForTabPanel.addAll(permissionsAsSet);
     }
 
     /**
@@ -270,26 +318,37 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * to see which tabs. See {@link #roleSpecificTabs}.
      */
     private void updateTabDisplayForCurrentUser(UserDTO user) {
-        for (Map.Entry<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>, AdminConsoleFeatures> e : roleSpecificTabs
-                .entrySet()) {
-            final Widget panelToAdd = e.getKey().getB();
-            if (user != null && isUserInRole(e.getValue().getEnabledRoles())) {
-                e.getKey().getA().add(panelToAdd, e.getKey().getC(), /* asHtml */false);
+        for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
+            final Widget widgetToAdd = e.getB();
+            if (user != null && userHasPermissionsToSeeWidget(user, e.getB())) {
+                e.getA().add(widgetToAdd, e.getC(), /* asHtml */false);
             } else {
-                e.getKey().getA().remove(panelToAdd);
+                e.getA().remove(widgetToAdd);
             }
         }
     }
 
-    private boolean isUserInRole(String... roles) {
-        boolean result = false;
-        UserDTO user = getUserService().getCurrentUser();
-        for (String enabledRole : roles) {
-            if (user.hasRole(enabledRole)) {
-                result = true;
-                break;
+    /**
+     * A user is defined to have permission to see a widget if the widget's required permissions imply any of the permissions the
+     * user has. This may at first seem the wrong way around. However, the problem is that a widget cannot express a general permission
+     * that is implied by any detailed permissions. Wildcard permissions don't work this way. Instead, a wildcard permission implies
+     * detailed permissions. This way, if the widget requires, say, "event:*:*" (or "event" for short), this permission implies
+     * all more detailed event permissions such as "event:write:9456192873". Therefore, the permissions provided for widgets
+     * must imply a permission the user has in order for the user to see the tab. More detailed permissions checks can then be
+     * applied at a more detailed level of the UI and, of course, in the back end. Additionally, if any of the user's permissions
+     * implies the required permission (e.g., the user having "*" as the administrator's permission), permission to see the widget
+     * is also implied.
+     */
+    private boolean userHasPermissionsToSeeWidget(UserDTO user, Widget widget) {
+        for (Permission requiredStringPermission : permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget)) {
+            WildcardPermission requiredPermission = new WildcardPermission(requiredStringPermission.getStringPermission());
+            for (String userStringPermission : user.getAllPermissions(permissionsForRoleProvider)) {
+                WildcardPermission userPermission = new WildcardPermission(userStringPermission);
+                if (requiredPermission.implies(userPermission) || userPermission.implies(requiredPermission)) {
+                    return true;
+                }
             }
         }
-        return result;
+        return false;
     }
 }

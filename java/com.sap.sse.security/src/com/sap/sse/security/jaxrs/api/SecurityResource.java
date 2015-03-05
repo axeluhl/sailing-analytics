@@ -1,53 +1,76 @@
 package com.sap.sse.security.jaxrs.api;
 
-import java.util.logging.Logger;
-
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
+import org.json.simple.JSONObject;
 
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
-import com.sap.sse.security.shared.UserManagementException;
 
 @Path("/restsecurity")
 public class SecurityResource extends AbstractSecurityResource {
-    private static final Logger logger = Logger.getLogger(SecurityResource.class.getName());
-    
-    private Response getSecurityErrorResponse(String msg) {
-        return  Response.status(Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
-    }
-
+    /**
+     * Can be used to figure out the current subject. Accepts the GET method. If the subject is
+     * authenticated, the service will respond with a "Hello &lt;subjectname&gt;" message, otherwise
+     * with a generic "Hello!".
+     */
     @GET
     @Path("/hello")
     @Produces("application/json;charset=UTF-8")
     public Response sayHello() {
-        return Response.ok("Hello!", MediaType.TEXT_PLAIN).build();
+        return doSayHello();
     }
-    
+
+    private Response doSayHello() {
+        final Subject subject = SecurityUtils.getSubject();
+        final JSONObject result = new JSONObject();
+        result.put("principal", subject.getPrincipal().toString());
+        result.put("authenticated", subject.isAuthenticated());
+        result.put("remembered", subject.isRemembered());
+        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
+    }
+
+    /**
+     * Can be used to figure out the current subject. Accepts the POST method. If the subject is
+     * authenticated, the service will respond with a "Hello &lt;subjectname&gt;" message, otherwise
+     * with a generic "Hello!".
+     */
     @POST
-    @Path("/login")
-    @Produces("application/json;charset=UTF-8")
-    public Response login(@FormParam("username") String username, @FormParam("password") String password) {
-        try {
-            getService().login(username, password);
-            logger.info("Successfully logged in " + username + " with password");
-        } catch (UserManagementException e) {
-            logger.info("Logging in " + username + " with password failed: "+e.getMessage());
-            return getSecurityErrorResponse(e.getMessage());
-        }
-        return Response.ok("Logged in!", MediaType.TEXT_PLAIN).build();
+    @Path("/hello")
+    @Produces("text/plain;charset=UTF-8")
+    public Response sayHelloPost() {
+        return doSayHello();
     }
-    
+
     @GET
-    @Path("/logout")
-    public Response logout() {
-        getService().logout();
-        return Response.ok("Logged out", MediaType.TEXT_PLAIN).build();
+    @Path("/access_token")
+    @Produces("application/json;charset=UTF-8")
+    public Response accessToken() {
+        return respondWithAccessTokenForAuthenticatedSubject();
+    }
+
+    @POST
+    @Path("/access_token")
+    @Produces("application/json;charset=UTF-8")
+    public Response accessTokenPost() {
+        return respondWithAccessTokenForAuthenticatedSubject();
+    }
+
+    private Response respondWithAccessTokenForAuthenticatedSubject() {
+        final String username = SecurityUtils.getSubject().getPrincipal().toString();
+        return respondWithAccessTokenForUser(username);
+    }
+
+    Response respondWithAccessTokenForUser(final String username) {
+        JSONObject response = new JSONObject();
+        response.put("username", username);
+        response.put("access_token", getService().createAccessToken(username));
+        return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
     }
 }
- 

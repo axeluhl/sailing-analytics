@@ -1,0 +1,21 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="res" type="com.sap.sse.gwt.theme.client.resources.ThemeResources" />
+    <ui:with field="local_res" type="com.sap.sse.gwt.theme.client.component.sapheader.SAPHeaderResources" />
+	<g:HTMLPanel>
+		<header class="{local_res.css.siteheader}">
+		    <div class="{local_res.css.siteheaderLeft}">
+				<g:Image resource="{local_res.logo}" pixelSize="80, 40" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
+				<p ui:field="applicationNameUi" class="{local_res.css.logotitle}"></p>
+			</div>
+		    <div class="{local_res.css.siteheaderCentered}">
+		    	<div ui:field="pageTitleUi" class="{local_res.css.pagetitle}"></div>
+		    </div>
+		    <div class="{local_res.css.siteheaderRight}">
+		        <g:Button ui:field="startFullScreenButton" styleName="{res.mainCss.button}" text="Fullscreen" />
+		        <span>&nbsp;</span>
+			</div>		        
+		</header>
+	</g:HTMLPanel>    
+</ui:UiBinder>    

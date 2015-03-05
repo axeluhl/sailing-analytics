@@ -5,5 +5,7 @@ Bundle-SymbolicName: com.sap.sse.gwt.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Require-Bundle: org.junit4;bundle-version="4.8.2"
-Fragment-Host: com.sap.sse.gwt;bundle-version="1.0.0.qualifier"
+Require-Bundle: com.sap.sse.gwt;bundle-version="1.0.0",
+ com.sap.sse.common;bundle-version="1.0.0",
+ org.junit4;bundle-version="4.8.2",
+ com.google.gwt.osgi;bundle-version="2.7.0"

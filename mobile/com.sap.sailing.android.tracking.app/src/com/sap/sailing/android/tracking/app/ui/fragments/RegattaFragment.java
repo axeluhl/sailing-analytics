@@ -35,385 +35,366 @@ import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
-	private final String TAG = RegattaFragment.class.toString();
+    private final String TAG = RegattaFragment.class.toString();
 
-	private final int CAMERA_REQUEST_CODE = 3118;
-	private final int SELECT_PHOTO_REQUEST_CODE = 1693;
-	private final int IMAGE_MAX_SIZE = 2000;
-	
-	private final String CAMERA_TEMP_FILE = "cameraTempFile";
-	
-	private boolean showingThankYouNote;
+    private final int CAMERA_REQUEST_CODE = 3118;
+    private final int SELECT_PHOTO_REQUEST_CODE = 1693;
+    private final int IMAGE_MAX_SIZE = 2000;
 
-	private TimerRunnable timer;
+    private final String CAMERA_TEMP_FILE = "cameraTempFile";
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		super.onCreateView(inflater, container, savedInstanceState);
+    private boolean showingThankYouNote;
 
-		View view = inflater.inflate(R.layout.fragment_regatta, container, false);
+    private TimerRunnable timer;
 
-		Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
-		startTrackingButton.setOnClickListener(this);
-		
-		Button showLeaderboardButton = (Button) view.findViewById(R.id.show_leaderboards_button);
-		showLeaderboardButton.setOnClickListener(this);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
 
-		Button changePhotoButton = (Button) view.findViewById(R.id.change_photo_button);
-		changePhotoButton.setOnClickListener(this);
+        View view = inflater.inflate(R.layout.fragment_regatta, container, false);
 
-		ImageButton addPhotoButton = (ImageButton) view.findViewById(R.id.add_photo_button);
-		addPhotoButton.setOnClickListener(this);
+        Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
+        startTrackingButton.setOnClickListener(this);
 
-		TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
-		addPhotoText.setOnClickListener(this);
+        Button showLeaderboardButton = (Button) view.findViewById(R.id.show_leaderboards_button);
+        showLeaderboardButton.setOnClickListener(this);
 
-		return view;
-	}
+        Button changePhotoButton = (Button) view.findViewById(R.id.change_photo_button);
+        changePhotoButton.setOnClickListener(this);
 
-	private void checkAndSwitchToThankYouScreenIfRegattaOver() {
-		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		long regattaEnd = regattaActivity.event.endMillis;
+        ImageButton addPhotoButton = (ImageButton) view.findViewById(R.id.add_photo_button);
+        addPhotoButton.setOnClickListener(this);
 
-		if (System.currentTimeMillis() > regattaEnd) {
-			switchToThankYouScreen();
-		}
-	}
-	
-	/**
-	 * If the regatta started, don't display the countdown any more.
-	 */
-	private void checkAndHideCountdownIfRegattaIsInProgress() {
-		TextView textView = (TextView)getActivity().findViewById(R.id.regatta_starts_in);
-		
-		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		long regattaStart = regattaActivity.event.startMillis;
-		
-		LinearLayout threeBoxesLayout = (LinearLayout) getActivity()
-				.findViewById(R.id.three_boxes_regatta_starts);
-		
-		if (System.currentTimeMillis() > regattaStart)
-		{
-			textView.setText(getString(R.string.regatta_in_progress));
-			threeBoxesLayout.setVisibility(View.INVISIBLE);	
-		}
-		else
-		{
-			textView.setText(getString(R.string.regatta_starts_in));
-			threeBoxesLayout.setVisibility(View.VISIBLE);
-		}
-	}
+        TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
+        addPhotoText.setOnClickListener(this);
 
-	public boolean isShowingBigCheckoutButton() {
-		return showingThankYouNote;
-	}
-	
-	@SuppressWarnings("deprecation")
-	@SuppressLint("NewApi")
-	private void switchToThankYouScreen() {
-		showingThankYouNote = true;
+        return view;
+    }
 
-		RelativeLayout startsInLayout = (RelativeLayout) getActivity()
-				.findViewById(R.id.start_date_layout);
-		startsInLayout.setVisibility(View.INVISIBLE);
+    private void checkAndSwitchToThankYouScreenIfRegattaOver() {
+        RegattaActivity regattaActivity = (RegattaActivity) getActivity();
+        long regattaEnd = regattaActivity.event.endMillis;
 
-		Button startTrackingButton = (Button) getActivity().findViewById(R.id.start_tracking);
-		
-		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-			startTrackingButton.setBackgroundDrawable(getResources().getDrawable(
-					R.drawable.rounded_btn_yellow));
-		} else {
-			startTrackingButton.setBackground(getResources().getDrawable(
-					R.drawable.rounded_btn_yellow));
-		}
-		
-		startTrackingButton.setText(getActivity().getString(R.string.close));
+        if (System.currentTimeMillis() > regattaEnd) {
+            switchToThankYouScreen();
+        }
+    }
 
-		TextView bottomAnnouncement = (TextView) getActivity().findViewById(R.id.bottom_announcement);
-		bottomAnnouncement.setVisibility(View.INVISIBLE);
+    /**
+     * If the regatta started, don't display the countdown any more.
+     */
+    private void checkAndHideCountdownIfRegattaIsInProgress() {
+        TextView textView = (TextView) getActivity().findViewById(R.id.regatta_starts_in);
 
-		RelativeLayout thankYouLayout = (RelativeLayout) getActivity().findViewById(R.id.thank_you_layout);
-		thankYouLayout.setVisibility(View.VISIBLE);
-	}
+        RegattaActivity regattaActivity = (RegattaActivity) getActivity();
+        long regattaStart = regattaActivity.event.startMillis;
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		timer = new TimerRunnable();
-		timer.start();
-		checkAndSwitchToThankYouScreenIfRegattaOver();
-		checkAndHideCountdownIfRegattaIsInProgress();
-	}
+        LinearLayout threeBoxesLayout = (LinearLayout) getActivity().findViewById(R.id.three_boxes_regatta_starts);
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		timer.stop();
-	}
+        if (System.currentTimeMillis() > regattaStart) {
+            textView.setText(getString(R.string.regatta_in_progress));
+            threeBoxesLayout.setVisibility(View.INVISIBLE);
+        } else {
+            textView.setText(getString(R.string.regatta_starts_in));
+            threeBoxesLayout.setVisibility(View.VISIBLE);
+        }
+    }
 
-	@Override
-	public void onClick(View view) {
-		switch (view.getId()) {
-		case R.id.show_leaderboards_button:
-			startLeaderboardActivity();
-			break;
-		case R.id.start_tracking:
-			if (showingThankYouNote) {
-				RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-				regattaActivity.checkout();
-			} else {
-				startTrackingActivity();
-			}
-			break;
-		case R.id.add_photo_button:
-			showChooseExistingPictureOrTakeNewPhotoAlert();
-			break;
-		case R.id.add_photo_text:
-			showChooseExistingPictureOrTakeNewPhotoAlert();
-			break;
-		case R.id.change_photo_button:
-			showChooseExistingPictureOrTakeNewPhotoAlert();
-			break;
-		default:
-			break;
-		}
-	}
+    public boolean isShowingBigCheckoutButton() {
+        return showingThankYouNote;
+    }
 
-	public void setChangePhotoButtonHidden(boolean hidden) {
-		LinearLayout changePhotoLayout = (LinearLayout) getActivity()
-				.findViewById(R.id.change_photo);
-		if (hidden) {
-			changePhotoLayout.setVisibility(View.INVISIBLE);
-		} else {
-			changePhotoLayout.setVisibility(View.VISIBLE);
-		}
-	}
+    @SuppressWarnings("deprecation")
+    @SuppressLint("NewApi")
+    private void switchToThankYouScreen() {
+        showingThankYouNote = true;
 
-	/**
-	 * Ask user if he wants to take a new picture or select an existing one.
-	 */
-	public void showChooseExistingPictureOrTakeNewPhotoAlert() {
-		AlertDialog dialog = new AlertDialog.Builder(getActivity())
-				.setTitle(R.string.add_photo_select)
-				.setMessage(
-						R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
-				.setIcon(android.R.drawable.ic_dialog_alert)
-				.setPositiveButton(R.string.existing_image,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-								pickExistingImage();
-							}
-						})
-				.setNegativeButton(R.string.take_photo,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								showTakePhotoActivity();
-							}
-						}).create();
+        RelativeLayout startsInLayout = (RelativeLayout) getActivity().findViewById(R.id.start_date_layout);
+        startsInLayout.setVisibility(View.INVISIBLE);
 
-		dialog.show();
-	}
+        Button startTrackingButton = (Button) getActivity().findViewById(R.id.start_tracking);
 
-	private void pickExistingImage() {
-		Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-		photoPickerIntent.setType("image/*");
-		startActivityForResult(photoPickerIntent, SELECT_PHOTO_REQUEST_CODE);
-	}
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            startTrackingButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded_btn_yellow));
+        } else {
+            startTrackingButton.setBackground(getResources().getDrawable(R.drawable.rounded_btn_yellow));
+        }
 
-	private void showTakePhotoActivity() {
-		Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		File photoFile = ((RegattaActivity)getActivity()).getImageFile(CAMERA_TEMP_FILE);
-		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
-		startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
-	}
+        startTrackingButton.setText(getActivity().getString(R.string.close));
 
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode == Activity.RESULT_OK) {
-			RegattaActivity activity = (RegattaActivity) getActivity();
+        TextView bottomAnnouncement = (TextView) getActivity().findViewById(R.id.bottom_announcement);
+        bottomAnnouncement.setVisibility(View.INVISIBLE);
 
-			if (requestCode == CAMERA_REQUEST_CODE) {
-				File photoFile = ((RegattaActivity)getActivity()).getImageFile(CAMERA_TEMP_FILE);
-				Bitmap photo;
-				try {
-					photo = decodeUri(Uri.fromFile(photoFile));
-					activity.updateLeaderboardPictureChosenByUser(photo);
-				} catch (FileNotFoundException e) {
-					if (BuildConfig.DEBUG)
-					{
-						ExLog.i(getActivity(), TAG, "update photo, file not found: " + photoFile);
-					}
-				} catch (IOException e) {
-					if (BuildConfig.DEBUG)
-					{
-						ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
-					}
-				} finally {
-					((RegattaActivity)getActivity()).deleteFile(CAMERA_TEMP_FILE);
-				}
-			} else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
-				Uri selectedImage = data.getData();
-				
-				try {
-					Bitmap photo = decodeUri(selectedImage);
-					activity.updateLeaderboardPictureChosenByUser(photo);
-				} catch (FileNotFoundException e) {
-					ExLog.e(getActivity(), TAG,
-							"File not found exception after picking image from gallery");
-				} catch (IOException e) {
-					if (BuildConfig.DEBUG)
-					{
-						ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
-					}
-				}
-			}
-		}
+        RelativeLayout thankYouLayout = (RelativeLayout) getActivity().findViewById(R.id.thank_you_layout);
+        thankYouLayout.setVisibility(View.VISIBLE);
+    }
 
-		super.onActivityResult(requestCode, resultCode, data);
-	}
-	
-	/**
-	 * Decode image with maximum size 
-	 * @param uri
-	 * @return
-	 * @throws IOException
-	 */
-	private Bitmap decodeUri(Uri uri) throws IOException{
-	    Bitmap bitmap = null;
+    @Override
+    public void onResume() {
+        super.onResume();
+        timer = new TimerRunnable();
+        timer.start();
+        checkAndSwitchToThankYouScreenIfRegattaOver();
+        checkAndHideCountdownIfRegattaIsInProgress();
+    }
 
-	    BitmapFactory.Options options = new BitmapFactory.Options();
-	    options.inJustDecodeBounds = true;
+    @Override
+    public void onPause() {
+        super.onPause();
+        timer.stop();
+    }
 
-	    InputStream fis = getActivity().getContentResolver().openInputStream(uri);
-	    BitmapFactory.decodeStream(fis, null, options);
-	    fis.close();
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+        case R.id.show_leaderboards_button:
+            startLeaderboardActivity();
+            break;
+        case R.id.start_tracking:
+            if (showingThankYouNote) {
+                RegattaActivity regattaActivity = (RegattaActivity) getActivity();
+                regattaActivity.checkout();
+            } else {
+                startTrackingActivity();
+            }
+            break;
+        case R.id.add_photo_button:
+            showChooseExistingPictureOrTakeNewPhotoAlert();
+            break;
+        case R.id.add_photo_text:
+            showChooseExistingPictureOrTakeNewPhotoAlert();
+            break;
+        case R.id.change_photo_button:
+            showChooseExistingPictureOrTakeNewPhotoAlert();
+            break;
+        default:
+            break;
+        }
+    }
 
-	    int scale = 1;
-	    if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
-	        scale = (int)Math.pow(2, (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / 
-	           (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
-	    }
+    public void setChangePhotoButtonHidden(boolean hidden) {
+        LinearLayout changePhotoLayout = (LinearLayout) getActivity().findViewById(R.id.change_photo);
+        if (hidden) {
+            changePhotoLayout.setVisibility(View.INVISIBLE);
+        } else {
+            changePhotoLayout.setVisibility(View.VISIBLE);
+        }
+    }
 
-	    BitmapFactory.Options options2 = new BitmapFactory.Options();
-	    options2.inSampleSize = scale;
-	    fis = getActivity().getContentResolver().openInputStream(uri);
-	    bitmap = BitmapFactory.decodeStream(fis, null, options2);
-	    fis.close();
+    /**
+     * Ask user if he wants to take a new picture or select an existing one.
+     */
+    public void showChooseExistingPictureOrTakeNewPhotoAlert() {
+        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.add_photo_select)
+                .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        pickExistingImage();
+                    }
+                }).setNegativeButton(R.string.take_photo, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showTakePhotoActivity();
+                    }
+                }).create();
 
-	    return bitmap;
-	}
-	
-	private void startLeaderboardActivity() {
-		RegattaActivity activity = (RegattaActivity)getActivity();
-		
-		Intent intent = new Intent(getActivity(), LeaderboardWebViewActivity.class);
-		intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_SERVER_URL, activity.event.server);
-		intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_EVENT_ID, activity.event.id);
-		intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_LEADERBOARD_NAME, activity.leaderboard.name);
-		
-		getActivity().startActivity(intent);
-	}
+        dialog.show();
+    }
 
-	private void startTrackingActivity() {
-		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		Intent intent = new Intent(getActivity(), TrackingActivity.class);
-		String checkinDigest = regattaActivity.event.checkinDigest;
-		intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
-		getActivity().startActivity(intent);
-	}
+    private void pickExistingImage() {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, SELECT_PHOTO_REQUEST_CODE);
+    }
 
-	private void timerFired() {
-		RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-		if (regattaActivity != null)
-		{
-			updateCountdownTimer(regattaActivity.event.startMillis);
-		}
-	}
+    private void showTakePhotoActivity() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+        startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+    }
 
-	private void updateCountdownTimer(long startTime) {
-		long diff = startTime - System.currentTimeMillis();
-		if (diff < 0) // start of event is in the past
-		{
-			setCountdownTime(0, 0, 0);
-		} else {
-			int days = (int) TimeUnit.MILLISECONDS.toDays(diff);
-			int hours = (int) TimeUnit.MILLISECONDS.toHours(diff) - (days * 24);
-			int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(diff)
-					- (hours * 60) - (days * 24 * 60);
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            RegattaActivity activity = (RegattaActivity) getActivity();
 
-			setCountdownTime(days, hours, minutes);
-		}
-	}
+            if (requestCode == CAMERA_REQUEST_CODE) {
+                File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
+                Bitmap photo;
+                try {
+                    photo = decodeUri(Uri.fromFile(photoFile));
+                    activity.updateLeaderboardPictureChosenByUser(photo);
+                } catch (FileNotFoundException e) {
+                    if (BuildConfig.DEBUG) {
+                        ExLog.i(getActivity(), TAG, "update photo, file not found: " + photoFile);
+                    }
+                } catch (IOException e) {
+                    if (BuildConfig.DEBUG) {
+                        ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
+                    }
+                } finally {
+                    ((RegattaActivity) getActivity()).deleteFile(CAMERA_TEMP_FILE);
+                }
+            } else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
+                Uri selectedImage = data.getData();
 
-	private void setCountdownTime(int days, int hours, int minutes) {
-		TextView daysTextView = (TextView) getActivity().findViewById(R.id.starts_in_days);
-		TextView hoursTextView = (TextView) getActivity().findViewById(R.id.starts_in_hours);
-		TextView minutesTextView = (TextView) getActivity().findViewById(R.id.starts_in_minutes);
+                try {
+                    Bitmap photo = decodeUri(selectedImage);
+                    activity.updateLeaderboardPictureChosenByUser(photo);
+                } catch (FileNotFoundException e) {
+                    ExLog.e(getActivity(), TAG, "File not found exception after picking image from gallery");
+                } catch (IOException e) {
+                    if (BuildConfig.DEBUG) {
+                        ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
+                    }
+                }
+            }
+        }
 
-		TextView daysTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_days_label);
-		TextView hoursTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_hours_label);
-		TextView minutesTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_minutes_label);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
-		daysTextView.setText(String.format("%02d", days));
-		hoursTextView.setText(String.format("%02d", hours));
-		minutesTextView.setText(String.format("%02d", minutes));
+    /**
+     * Decode image with maximum size
+     * 
+     * @param uri
+     * @return
+     * @throws IOException
+     */
+    private Bitmap decodeUri(Uri uri) throws IOException {
+        Bitmap bitmap = null;
 
-		if (days == 1) {
-			daysTextViewLabel.setText(R.string.day);
-		} else {
-			daysTextViewLabel.setText(R.string.days);
-		}
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
 
-		if (hours == 1) {
-			hoursTextViewLabel.setText(R.string.hour);
-		} else {
-			hoursTextViewLabel.setText(R.string.hours);
-		}
+        InputStream fis = getActivity().getContentResolver().openInputStream(uri);
+        BitmapFactory.decodeStream(fis, null, options);
+        fis.close();
 
-		if (minutes == 1) {
-			minutesTextViewLabel.setText(R.string.minute);
-		} else {
-			minutesTextViewLabel.setText(R.string.minutes);
-		}
-	}
+        int scale = 1;
+        if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
+            scale = (int) Math.pow(
+                    2,
+                    (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth))
+                            / Math.log(0.5)));
+        }
 
-	private class TimerRunnable implements Runnable {
+        BitmapFactory.Options options2 = new BitmapFactory.Options();
+        options2.inSampleSize = scale;
+        fis = getActivity().getContentResolver().openInputStream(uri);
+        bitmap = BitmapFactory.decodeStream(fis, null, options2);
+        fis.close();
 
-		public Thread t;
-		public volatile boolean running = true;
+        return bitmap;
+    }
 
-		public void start() {
-			running = true;
-			if (t == null) {
-				t = new Thread(this);
-				t.start();
-			}
-		}
+    private void startLeaderboardActivity() {
+        RegattaActivity activity = (RegattaActivity) getActivity();
 
-		@Override
-		public void run() {
-			while (running) {
-				getActivity().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						timerFired();
-					}
-				});
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+        Intent intent = new Intent(getActivity(), LeaderboardWebViewActivity.class);
+        intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_SERVER_URL, activity.event.server);
+        intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_EVENT_ID, activity.event.id);
+        intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_LEADERBOARD_NAME, activity.leaderboard.name);
 
-		public void stop() {
-			running = false;
-		}
-	}
+        getActivity().startActivity(intent);
+    }
+
+    private void startTrackingActivity() {
+        RegattaActivity regattaActivity = (RegattaActivity) getActivity();
+        Intent intent = new Intent(getActivity(), TrackingActivity.class);
+        String checkinDigest = regattaActivity.event.checkinDigest;
+        intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
+        getActivity().startActivity(intent);
+    }
+
+    private void timerFired() {
+        RegattaActivity regattaActivity = (RegattaActivity) getActivity();
+        if (regattaActivity != null) {
+            updateCountdownTimer(regattaActivity.event.startMillis);
+        }
+    }
+
+    private void updateCountdownTimer(long startTime) {
+        long diff = startTime - System.currentTimeMillis();
+        if (diff < 0) // start of event is in the past
+        {
+            setCountdownTime(0, 0, 0);
+        } else {
+            int days = (int) TimeUnit.MILLISECONDS.toDays(diff);
+            int hours = (int) TimeUnit.MILLISECONDS.toHours(diff) - (days * 24);
+            int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(diff) - (hours * 60) - (days * 24 * 60);
+
+            setCountdownTime(days, hours, minutes);
+        }
+    }
+
+    private void setCountdownTime(int days, int hours, int minutes) {
+        TextView daysTextView = (TextView) getActivity().findViewById(R.id.starts_in_days);
+        TextView hoursTextView = (TextView) getActivity().findViewById(R.id.starts_in_hours);
+        TextView minutesTextView = (TextView) getActivity().findViewById(R.id.starts_in_minutes);
+
+        TextView daysTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_days_label);
+        TextView hoursTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_hours_label);
+        TextView minutesTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_minutes_label);
+
+        daysTextView.setText(String.format("%02d", days));
+        hoursTextView.setText(String.format("%02d", hours));
+        minutesTextView.setText(String.format("%02d", minutes));
+
+        if (days == 1) {
+            daysTextViewLabel.setText(R.string.day);
+        } else {
+            daysTextViewLabel.setText(R.string.days);
+        }
+
+        if (hours == 1) {
+            hoursTextViewLabel.setText(R.string.hour);
+        } else {
+            hoursTextViewLabel.setText(R.string.hours);
+        }
+
+        if (minutes == 1) {
+            minutesTextViewLabel.setText(R.string.minute);
+        } else {
+            minutesTextViewLabel.setText(R.string.minutes);
+        }
+    }
+
+    private class TimerRunnable implements Runnable {
+
+        public Thread t;
+        public volatile boolean running = true;
+
+        public void start() {
+            running = true;
+            if (t == null) {
+                t = new Thread(this);
+                t.start();
+            }
+        }
+
+        @Override
+        public void run() {
+            while (running) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        timerFired();
+                    }
+                });
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void stop() {
+            running = false;
+        }
+    }
 
 }

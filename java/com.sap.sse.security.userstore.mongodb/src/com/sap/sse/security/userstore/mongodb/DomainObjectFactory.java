@@ -15,4 +15,5 @@ public interface DomainObjectFactory {
     User loadUser(String name);
 
     Map<String, Map<String, String>> loadPreferences();
+
 }

@@ -33,7 +33,6 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
 
     static interface CompetitorRegistrationHandler {
         void getRegisteredCompetitors(Callback<Collection<CompetitorDTO>, Throwable> callback);
-
         void setRegisteredCompetitors(Set<CompetitorDTO> competitors);
     }
 
@@ -42,7 +41,6 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
             CompetitorRegistrationHandler competitorRegistrationHandler) {
         super(sailingService, stringMessages, errorReporter, editable);
         this.competitorRegistrationsHandler = competitorRegistrationHandler;
-
         setupUi();
         refreshCompetitors();
     }
@@ -57,22 +55,20 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
             }
         });
         buttonPanel.add(addCompetitorButton);
-
         super.addButtons(buttonPanel);
     }
 
     private void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Collection<CompetitorDTO> toMove) {
-        if (toMove.isEmpty()) {
-            return;
+        if (!toMove.isEmpty()) {
+            List<CompetitorDTO> newFromList = new ArrayList<>();
+            Util.addAll(from.getFilterField().getAll(), newFromList);
+            newFromList.removeAll(toMove);
+            from.getFilterField().updateAll(newFromList);
+            List<CompetitorDTO> newToList = new ArrayList<>();
+            Util.addAll(to.getFilterField().getAll(), newToList);
+            newToList.addAll(toMove);
+            to.getFilterField().updateAll(newToList);
         }
-        List<CompetitorDTO> newFromList = new ArrayList<>();
-        Util.addAll(from.getFilterField().getAll(), newFromList);
-        newFromList.removeAll(toMove);
-        from.getFilterField().updateAll(newFromList);
-        List<CompetitorDTO> newToList = new ArrayList<>();
-        Util.addAll(to.getFilterField().getAll(), newToList);
-        newToList.addAll(toMove);
-        to.getFilterField().updateAll(newToList);
     }
 
     private void moveSelected(CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> from,
@@ -83,15 +79,15 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
     @Override
     protected void addMainContent(Panel mainPanel) {
         super.addMainContent(mainPanel);
-
         HorizontalPanel panel = new HorizontalPanel();
         mainPanel.add(panel);
         CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
-        allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                new MultiSelectionModel<CompetitorDTO>(), true);
-        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                new MultiSelectionModel<CompetitorDTO>(), true);
+        final Class<?> selectionModelType = MultiSelectionModel.class;
+        @SuppressWarnings("unchecked")
+        final Class<MultiSelectionModel<CompetitorDTO>> multiSelectionType = (Class<MultiSelectionModel<CompetitorDTO>>) selectionModelType;
+        allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, multiSelectionType, true);
+        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, multiSelectionType, true);
         allCompetitorsPanel.add(allCompetitorsTable);
         registeredCompetitorsPanel.add(registeredCompetitorsTable);
         VerticalPanel movePanel = new VerticalPanel();
@@ -145,7 +141,6 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
 
     protected void refreshCompetitors() {
         registeredCompetitorsTable.getDataProvider().getList().clear();
-
         allCompetitorsTable.refreshCompetitorList(null, true, new Callback<Iterable<CompetitorDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {

@@ -48,7 +48,13 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sse.shared.android,
  com.sap.sse.filestorage,
- com.sun.jersey.contribs.jersey-multipart;bundle-version="1.17.1"
+ com.sun.jersey.contribs.jersey-multipart;bundle-version="1.17.0",
+ com.sap.sse.security,
+ org.apache.commons.math;bundle-version="2.1.0",
+ org.apache.shiro.core;bundle-version="1.2.2",
+ org.apache.shiro.web;bundle-version="1.2.2",
+ org.apache.shiro.ehcache;bundle-version="1.2.3",
+ org.jvnet.mimepull;bundle-version="1.9.4"
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
@@ -90,7 +91,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         if (name != null && !name.isEmpty()) {
             return name;
         }
-        if (!isLocatable()) {
+        if (!isLocalizable()) {
             return getSimpleName();
         }
         
@@ -98,9 +99,9 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     }
     
     @Override
-    public boolean isLocatable() {
+    public boolean isLocalizable() {
         for (Function<?> function : functions) {
-            if (function.isLocatable()) {
+            if (function.isLocalizable()) {
                 return true;
             }
         }
@@ -111,7 +112,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         for (Function<?> function : functions) {
-            if (function.isLocatable()) {
+            if (function.isLocalizable()) {
                 if (!first) {
                     builder.append(LOCALIZED_NAME_CHAIN_CONNECTOR);
                 }
@@ -124,16 +125,16 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
 
     @Override
     public ReturnType tryToInvoke(Object instance) {
-        return tryToInvoke(instance, new Object[0]);
+        return tryToInvoke(instance, ParameterProvider.NULL);
     }
-
-    @SuppressWarnings("unchecked") // The cast has to work. The types were checked in the constructor.
+    
+    @SuppressWarnings("unchecked")
     @Override
-    public ReturnType tryToInvoke(Object instance, Object... parameters) {
+    public ReturnType tryToInvoke(Object instance, ParameterProvider parameterProvider) {
         Iterator<Function<?>> functionsIterator = functions.iterator();
-        Object result = functionsIterator.next().tryToInvoke(instance, parameters);
+        Object result = functionsIterator.next().tryToInvoke(instance, parameterProvider);
         while (functionsIterator.hasNext()) {
-            Function<?> function = (Function<?>) functionsIterator.next();
+            Function<?> function = functionsIterator.next();
             result = function.tryToInvoke(result);
             if (result == null) {
                 return null;
