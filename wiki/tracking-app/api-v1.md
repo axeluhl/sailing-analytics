@@ -273,7 +273,7 @@ $ curl -H "Content-Type:image/jpeg" --data-binary @<path-to-jpeg> \
 The leaderboard buttons loads the online leaderboard into an web-view. 
 
 ```
-http://<host>/gwt/Home.html#RegattaPlace:eventId=<eventId>&navigationTab=Leaderboard&leaderboardName=<leaderboardName>&showRaceDetails=false&showSettings=false
+http://<host>/gwt/Leaderboard.html?name=<leaderboardName>&showRaceDetails=false&embedded=true&hideToolbar=true
 ```
 
 # Buoy Tender (Tonnenleger) App
