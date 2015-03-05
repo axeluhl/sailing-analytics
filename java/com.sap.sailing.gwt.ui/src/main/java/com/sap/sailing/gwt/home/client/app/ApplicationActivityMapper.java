@@ -19,7 +19,6 @@ import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPla
 import com.sap.sailing.gwt.home.client.place.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultActivityProxy;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
@@ -55,8 +54,8 @@ public class ApplicationActivityMapper implements ActivityMapper {
         } else if (place instanceof AbstractEventPlace) {
             AbstractEventPlace eventPlace = (AbstractEventPlace) place;
             return new EventActivityProxy(eventPlace, clientFactory, clientFactory.getHomePlacesNavigator());
-        } else if (place instanceof SeriesEventsPlace) {
-            return new com.sap.sailing.gwt.home.client.place.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory);
+        } else if (place instanceof AbstractSeriesPlace) {
+            return new com.sap.sailing.gwt.home.client.place.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof EventsPlace) {
             return new EventsActivityProxy((EventsPlace) place, clientFactory);
         } else if (place instanceof StartPlace) {

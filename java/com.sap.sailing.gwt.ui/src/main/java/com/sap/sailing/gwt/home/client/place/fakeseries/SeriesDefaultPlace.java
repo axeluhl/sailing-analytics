@@ -15,7 +15,7 @@ public class SeriesDefaultPlace extends AbstractSeriesPlace {
     public static class Tokenizer implements PlaceTokenizer<SeriesDefaultPlace> {
         @Override
         public String getToken(SeriesDefaultPlace place) {
-            return place.getEventUuidAsString();
+            return place.getSeriesUuidAsString();
         }
 
         @Override

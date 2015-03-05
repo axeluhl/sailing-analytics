@@ -4,9 +4,10 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesClientFactory;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class SeriesActivityProxy extends AbstractActivityProxy {
@@ -14,23 +15,26 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
     private final AbstractSeriesPlace place;
     private SeriesContext ctx;
     private SeriesClientFactory clientFactory;
+    private final HomePlacesNavigator homePlacesNavigator;
 
-    public SeriesActivityProxy(AbstractSeriesPlace place, SeriesClientFactory clientFactory) {
+    public SeriesActivityProxy(AbstractSeriesPlace place, SeriesClientFactory clientFactory,
+            HomePlacesNavigator homePlacesNavigator) {
         this.place = place;
         this.ctx = place.getCtx();
         this.clientFactory = clientFactory;
+        this.homePlacesNavigator = homePlacesNavigator;
     }
 
     @Override
     protected void startAsync() {
-        if (ctx.getEventDTO() != null) {
+        if (ctx.getSeriesDTO() != null) {
             afterLoad();
         } else {
-            final UUID eventUUID = UUID.fromString(ctx.getEventId());
+            final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
             
-            clientFactory.getSailingService().getEventViewById(eventUUID, new AsyncCallback<EventViewDTO>() {
+            clientFactory.getSailingService().getEventSeriesViewById(seriesUUID, new AsyncCallback<EventSeriesViewDTO>() {
                 @Override
-                public void onSuccess(final EventViewDTO event) {
+                public void onSuccess(final EventSeriesViewDTO event) {
                     if (event != null) {
                         ctx.updateContext(event);
                         afterLoad();
@@ -61,7 +65,7 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
                     placeToStart = place;
                 }
                 
-                super.onSuccess(new SeriesTabActivity((AbstractSeriesTabPlace) placeToStart, clientFactory));
+                super.onSuccess(new SeriesTabActivity((AbstractSeriesTabPlace) placeToStart, clientFactory, homePlacesNavigator));
             }
 
         });

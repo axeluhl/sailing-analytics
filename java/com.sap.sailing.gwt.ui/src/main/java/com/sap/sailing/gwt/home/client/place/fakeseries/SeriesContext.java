@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.fakeseries;
 
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 
 /**
  * Common context used by the different tabs in the series place.
@@ -10,34 +10,26 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
  */
 public class SeriesContext {
 
-    private String eventId;
-    private String regattaId;
+    private String seriesId;
 
-    private EventViewDTO eventDTO;
+    private EventSeriesViewDTO seriesDTO;
 
 
     public SeriesContext() {
     }
 
-    public SeriesContext(EventViewDTO dto) {
+    public SeriesContext(EventSeriesViewDTO dto) {
         updateContext(dto);
     }
 
     public SeriesContext(SeriesContext ctx) {
-        updateContext(ctx.getEventDTO());
-        withRegattaId(ctx.regattaId);
+        updateContext(ctx.getSeriesDTO());
     }
 
     public SeriesContext withId(String eventId) {
-        this.eventId = eventId;
+        this.seriesId = eventId;
         return this;
     }
-
-    public SeriesContext withRegattaId(String regattaId) {
-        this.regattaId = regattaId;
-        return this;
-    }
-
 
     /**
      * Used to update context with dto instance
@@ -45,28 +37,21 @@ public class SeriesContext {
      * @param dto
      * @return
      */
-    public SeriesContext updateContext(EventViewDTO dto) {
-        this.eventDTO = dto;
-        if (eventDTO == null) {
+    public SeriesContext updateContext(EventSeriesViewDTO dto) {
+        this.seriesDTO = dto;
+        if (seriesDTO == null) {
             withId(null);
         } else {
-            withId(dto.id.toString());
+            withId(dto.getId().toString());
         }
         return this;
     }
 
-    public EventViewDTO getEventDTO() {
-        return eventDTO;
+    public EventSeriesViewDTO getSeriesDTO() {
+        return seriesDTO;
     }
 
-    public String getEventId() {
-        return eventId;
+    public String getSeriesId() {
+        return seriesId;
     }
-
-    public String getRegattaId() {
-        return regattaId;
-    }
-
-
-
 }

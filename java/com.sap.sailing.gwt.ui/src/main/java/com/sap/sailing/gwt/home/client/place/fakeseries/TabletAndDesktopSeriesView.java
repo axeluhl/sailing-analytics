@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.fakeseries;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -11,9 +10,8 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.fakeseries.partials.header.SeriesHeader;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsView {
@@ -61,16 +59,16 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsV
     }
     
     private void initBreadCrumbs() {
-        addBreadCrumbItem(i18n.home(), new StartPlace());
-        addBreadCrumbItem(i18n.events(), new EventsPlace());
-        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getName(), new SeriesDefaultPlace(currentPresenter.getCtx()));
+        addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
+        addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
+        addBreadCrumbItem(currentPresenter.getCtx().getSeriesDTO().getDisplayName(),  currentPresenter.getCurrentEventSeriesNavigation());
     }
-    
-    private void addBreadCrumbItem(String label, final Place place) {
-        tabPanelUi.addBreadcrumbItem(label, currentPresenter.getUrl(place), new Runnable() {
+
+    private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
+        tabPanelUi.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
             @Override
             public void run() {
-                currentPresenter.navigateTo(place);
+                placeNavigation.goToPlace();
             }
         });
     }

@@ -335,6 +335,8 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
+import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -5474,5 +5476,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
                 competitors, getLocale(localeInfoName));
+    }
+
+    @Override
+    public EventSeriesViewDTO getEventSeriesViewById(UUID id) {
+        EventDTO o;
+        try {
+            o = getEventById(id, false);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("We can do better than MalformedURLException");
+        }
+        if(!o.isFakeSeries()) {
+            throw new IllegalArgumentException("Event is not part of a series!");
+        }
+        EventSeriesViewDTO dto = new EventSeriesViewDTO();
+        dto.setId(id);
+        dto.setBaseUrl(o.getBaseURL());
+        dto.setOnRemoteServer(o.isOnRemoteServer());
+        
+        LeaderboardGroupDTO lg = o.getLeaderboardGroups().get(0);
+        dto.setDisplayName(lg.getDisplayName() != null ? lg.getDisplayName() : lg.getName());
+        for (StrippedLeaderboardDTO sl : lg.leaderboards) {
+            EventSeriesEventDTO eventOfSeries = new EventSeriesEventDTO();
+            eventOfSeries.setId(id);
+            eventOfSeries.setDisplayName(sl.displayName != null ? sl.displayName : sl.name);
+            eventOfSeries.setStartDate(o.startDate);
+            eventOfSeries.setEndDate(o.endDate);
+            eventOfSeries.setState(EventState.UPCOMMING);
+            eventOfSeries.setVenue(o.venue.getName());
+            dto.addEvents(eventOfSeries);
+        }
+        return dto;
     }
 }

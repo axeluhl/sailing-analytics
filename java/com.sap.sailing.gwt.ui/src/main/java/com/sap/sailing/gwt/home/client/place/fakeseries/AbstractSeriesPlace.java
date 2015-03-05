@@ -23,11 +23,7 @@ public abstract class AbstractSeriesPlace extends Place {
         return TextMessages.INSTANCE.sapSailing() + " - " + eventName;
     }
 
-    public String getEventUuidAsString() {
-        return ctx.getEventId();
-    }
-    
-    public String getRegattaId() {
-        return ctx.getRegattaId();
+    public String getSeriesUuidAsString() {
+        return ctx.getSeriesId();
     }
 }

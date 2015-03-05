@@ -15,7 +15,7 @@ public abstract class AbstractSeriesTabPlace extends AbstractSeriesPlace {
     public static abstract class Tokenizer<PLACE extends AbstractSeriesTabPlace> implements PlaceTokenizer<PLACE> {
         @Override
         public String getToken(PLACE place) {
-            return place.getEventUuidAsString();
+            return place.getSeriesUuidAsString();
         }
 
         @Override

@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaCompetit
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
@@ -37,6 +38,7 @@ import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
         RegattaCompetitorAnalyticsPlace.Tokenizer.class,
         // TODO not implemented: RegattaMediaPlace.Tokenizer.class,
         // Fake series places:
+        SeriesDefaultPlace.Tokenizer.class,
         SeriesEventsPlace.Tokenizer.class
 
 })
