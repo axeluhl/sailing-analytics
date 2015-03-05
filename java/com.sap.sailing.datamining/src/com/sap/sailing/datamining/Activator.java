@@ -4,9 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
@@ -16,10 +14,11 @@ import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.DataSourceProvider;
+import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
-public class Activator implements BundleActivator, DataMiningBundleService {
+public class Activator extends AbstractDataMiningActivator implements DataMiningBundleService {
     
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Sailing_StringMessages";
     
@@ -29,8 +28,6 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     private final SailingDataRetrievalChainDefinitions dataRetrieverChainDefinitions;
     private final SailingClusterGroups clusterGroups;
     private DataSourceProvider<?> racingEventServiceProvider;
-    
-    private ServiceReference<DataMiningBundleService> dataMiningBundleServiceReference;
     
     public Activator() {
         dataRetrieverChainDefinitions = new SailingDataRetrievalChainDefinitions();
@@ -42,13 +39,19 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     public void start(BundleContext context) throws Exception {
         INSTANCE = this;
         racingEventServiceProvider = new RacingEventServiceProvider(context);
-        
-        dataMiningBundleServiceReference = context.registerService(DataMiningBundleService.class, this, null).getReference();
+        super.start(context);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        context.ungetService(dataMiningBundleServiceReference);
+        super.stop(context);
+        INSTANCE = null;
+        racingEventServiceProvider = null;
+    }
+    
+    @Override
+    protected DataMiningBundleService getDataMiningBundleService() {
+        return this;
     }
     
     @Override

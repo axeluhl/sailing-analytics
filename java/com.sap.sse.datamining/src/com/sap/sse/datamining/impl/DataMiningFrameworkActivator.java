@@ -23,26 +23,26 @@ import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.impl.functions.FunctionManager;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
-public class DataMiningActivator implements BundleActivator {
+public class DataMiningFrameworkActivator implements BundleActivator {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
     
-    private static DataMiningActivator INSTANCE;
+    private static DataMiningFrameworkActivator INSTANCE;
 
     private ServiceTracker<DataMiningBundleService, DataMiningBundleService> dataMiningBundleServiceTracker;
     private final Collection<ServiceRegistration<?>> serviceRegistrations;
     
     private final ModifiableDataMiningServer dataMiningServer;
     
-    public DataMiningActivator() {
+    public DataMiningFrameworkActivator() {
         ExecutorService executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>());
 
         FunctionManager functionManager = new FunctionManager();
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
         dataMiningServer = new DataMiningServerImpl(executor, functionManager, functionManager, dataRetrieverChainDefinitionRegistry);
-        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningActivator.class.getClassLoader()));
+        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningFrameworkActivator.class.getClassLoader()));
         
         serviceRegistrations = new HashSet<>();
     }
@@ -108,9 +108,9 @@ public class DataMiningActivator implements BundleActivator {
         }
     }
     
-    public static DataMiningActivator getDefault() {
+    public static DataMiningFrameworkActivator getDefault() {
         if (INSTANCE == null) {
-            INSTANCE = new DataMiningActivator(); // probably non-OSGi case, as in test execution
+            INSTANCE = new DataMiningFrameworkActivator(); // probably non-OSGi case, as in test execution
         }
         return INSTANCE;
     }
