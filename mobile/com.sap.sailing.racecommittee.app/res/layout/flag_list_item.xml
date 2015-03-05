@@ -14,16 +14,26 @@
         android:padding="5dp"
         tools:src="@drawable/flag_ap_alpha_96dp" />
 
-    <Button
-        android:id="@+id/confirm"
+    <ImageView
+        android:id="@+id/more_data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="@dimen/default_margin"
+        android:src="@drawable/ic_chevron_right_grey600_24dp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/confirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/default_margin"
         android:background="@color/sap_blue_1"
         android:paddingLeft="@dimen/default_padding"
         android:paddingRight="@dimen/default_padding"
+        android:layout_toLeftOf="@id/more_data"
         android:text="@string/set_signal"
         android:textAllCaps="true"
         android:visibility="gone" />

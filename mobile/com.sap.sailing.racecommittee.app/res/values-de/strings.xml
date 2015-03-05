@@ -321,5 +321,8 @@
     <string name="race_start_time_in">Start in #TIME#</string>
     <string name="race_start_time_ago">Start #TIME# ago</string>
     <string name="tomorrow">Morgen</string>
+    <string name="race_begin_finish_header">Begin Finish</string>
+    <string name="race_begin_finish_current">Use Current Time</string>
+    <string name="race_begin_finish_custom">Use Custom Time</string>
 
 </resources>

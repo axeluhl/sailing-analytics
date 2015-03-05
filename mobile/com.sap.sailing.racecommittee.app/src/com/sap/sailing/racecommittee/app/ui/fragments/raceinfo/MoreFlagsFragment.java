@@ -1,18 +1,26 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TimePicker;
 import android.widget.Toast;
+import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class MoreFlagsFragment extends RaceFragment implements MoreFlagItemClick {
+import java.util.Calendar;
+
+public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemClick {
 
     private MoreFlagsAdapter mAdapter;
 
@@ -42,5 +50,124 @@ public class MoreFlagsFragment extends RaceFragment implements MoreFlagItemClick
     public void onClick(MoreFlag flag) {
         mAdapter.notifyDataSetChanged();
         Toast.makeText(getActivity(), flag.file_name, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showMore(MoreFlag flag) {
+        switch (flag.flag) {
+            case BLUE:
+                replaceFragment(FinishingTimeFragment.newInstance(), R.id.race_frame);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    public static class FinishingTimeFragment extends ScheduleFragment implements View.OnClickListener {
+
+        private TimePicker mTimePicker;
+
+        public FinishingTimeFragment() {
+
+        }
+
+        public static FinishingTimeFragment newInstance() {
+            FinishingTimeFragment fragment = new FinishingTimeFragment();
+            Bundle args = new Bundle();
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View layout = inflater.inflate(R.layout.race_finish_config, container, false);
+
+            View header = ViewHolder.get(layout, R.id.header_text);
+            if (header != null) {
+                header.setOnClickListener(this);
+            }
+
+            mTimePicker = (TimePicker) layout.findViewById(R.id.time_picker);
+            if (mTimePicker != null) {
+                mTimePicker.setIs24HourView(true);
+            }
+
+            View currentTime = layout.findViewById(R.id.finish_current);
+            if (currentTime != null) {
+                currentTime.setOnClickListener(this);
+            }
+
+            View customTime = layout.findViewById(R.id.finish_custom);
+            if (customTime != null) {
+                customTime.setOnClickListener(this);
+            }
+
+            return layout;
+        }
+
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                case R.id.finish_current:
+                    setFinishTime(true);
+                    break;
+
+                case R.id.finish_custom:
+                    setFinishTime(false);
+                    break;
+
+                default:
+                    replaceFragment(MoreFlagsFragment.newInstance(), R.id.race_frame);
+                    break;
+            }
+        }
+
+        private void setFinishTime(boolean current) {
+            TimePoint finishedTime;
+            if (current) {
+                finishedTime = MillisecondsTimePoint.now();
+            } else {
+                finishedTime = getFinishedTime();
+            }
+            FinishingTimeFinder finishingTimeFinder = new FinishingTimeFinder(getRace().getRaceLog());
+            if (finishingTimeFinder.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
+                if (finishingTimeFinder.analyze().before(finishedTime)) {
+                    getRaceState().setFinishedTime(finishedTime);
+                    replaceFragment(FinishingWaitingFragment.newInstance(), R.id.race_frame);
+                }else{
+                    Toast.makeText(getActivity(), "The given finish time is earlier than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+
+        private TimePoint getFinishedTime() {
+            Calendar time = Calendar.getInstance();
+            time.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
+            time.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
+            time.set(Calendar.SECOND, 0);
+            time.set(Calendar.MILLISECOND, 0);
+            return new MillisecondsTimePoint(time.getTime());
+        }
+    }
+
+    public static class FinishingWaitingFragment extends ScheduleFragment {
+
+        public FinishingWaitingFragment() {
+
+        }
+
+        public static FinishingWaitingFragment newInstance() {
+            FinishingWaitingFragment fragment = new FinishingWaitingFragment();
+            return fragment;
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View layout = inflater.inflate(R.layout.race_finish_wait, container, false);
+
+            return layout;
+        }
     }
 }

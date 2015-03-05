@@ -8,7 +8,7 @@ import android.widget.Button;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
-public class CourseFragmentMarks extends RaceFragment {
+public class CourseFragmentMarks extends CourseFragment {
 
     public CourseFragmentMarks() {
         

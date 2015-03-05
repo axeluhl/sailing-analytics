@@ -62,6 +62,7 @@ public class WindFragment extends ScheduleFragment
         TextView.OnEditorActionListener {
 
     private final static String TAG = WindFragment.class.getName();
+    private final static String STARTMODE = "startMode";
     private final static int FIVE_SEC = 5000;
     private final static int EVERY_POSITION_CHANGE = 0;
     private final static int MAX_KTS = 50;
@@ -97,6 +98,9 @@ public class WindFragment extends ScheduleFragment
 
     public static WindFragment newInstance(int startMode) {
         WindFragment fragment = new WindFragment();
+        Bundle args = new Bundle();
+        args.putInt(STARTMODE, startMode);
+        fragment.setArguments(args);
         return fragment;
     }
 

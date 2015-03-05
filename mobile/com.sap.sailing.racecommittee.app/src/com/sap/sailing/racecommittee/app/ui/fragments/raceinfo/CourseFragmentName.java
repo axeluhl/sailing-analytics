@@ -15,7 +15,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.CourseNameAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CourseFragmentName extends ScheduleFragment implements CourseNameAdapter.CourseItemClick {
+public class CourseFragmentName extends CourseFragment implements CourseNameAdapter.CourseItemClick {
 
     private static final String TAG = CourseFragmentName.class.getName();
     private static final String STARTMODE = "startMode";
