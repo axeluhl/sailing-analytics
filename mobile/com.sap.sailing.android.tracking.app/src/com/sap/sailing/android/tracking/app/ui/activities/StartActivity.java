@@ -59,14 +59,12 @@ public class StartActivity extends BaseActivity {
     	// get url if launched via url intent-filter
        
         Intent intent = getIntent();
-        String urlStr = intent.getDataString();
-        
-		if (urlStr != null) {
+        Uri uri = intent.getData();
+
+		if (uri != null) {
 			if (BuildConfig.DEBUG) {
 				ExLog.i(this, TAG, "Matched URL, handling scanned or matched URL.");
 			}
-			
-			Uri uri = Uri.parse(urlStr);
 			
 			HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
 					.findFragmentById(R.id.content_frame);
