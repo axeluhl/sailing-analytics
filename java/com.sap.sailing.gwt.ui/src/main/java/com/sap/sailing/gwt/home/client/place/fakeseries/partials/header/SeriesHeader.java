@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
@@ -38,15 +37,14 @@ public class SeriesHeader extends Composite {
     @UiField DivElement eventState;
     @UiField FlowPanel venues;
 
-    private EventSeriesViewDTO event;
+    private EventSeriesViewDTO series;
 
     private Presenter presenter;
 
-    private HandlerRegistration reg;
     boolean dropdownShown = false;
     
     public SeriesHeader(SeriesView.Presenter presenter) {
-        this.event = presenter.getCtx().getSeriesDTO();
+        this.series = presenter.getCtx().getSeriesDTO();
         this.presenter = presenter;
         
         SeriesHeaderResources.INSTANCE.css().ensureInjected();
@@ -56,14 +54,16 @@ public class SeriesHeader extends Composite {
     }
 
     private void initFields() {
-//        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : SeriesHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
-//        eventLogo.setSrc(logoUrl);
-//        eventLogo.setAlt(event.getName());
-        eventName.setInnerText(event.getDisplayName());
+        String logoUrl = series.getLogoImageURL() != null ? series.getLogoImageURL() : SeriesHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
+        eventLogo.setSrc(logoUrl);
+        eventLogo.setAlt(series.getDisplayName());
+        eventName.setInnerText(series.getDisplayName());
         fillEventState(eventState);
         
-        for (EventSeriesEventDTO eventOfSeries : event.getEvents()) {
-            Anchor eventAnchor = new Anchor(eventOfSeries.getDisplayName());
+        for (EventSeriesEventDTO eventOfSeries : series.getEvents()) {
+            // TODO upcomming is not a link
+            Anchor eventAnchor = new Anchor(eventOfSeries.getVenue());
+            eventAnchor.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
             final PlaceNavigation<EventDefaultPlace> eventNavigation = presenter.getEventNavigation(eventOfSeries.getId());
             eventAnchor.setHref(eventNavigation.getTargetUrl());
             venues.add(eventAnchor);

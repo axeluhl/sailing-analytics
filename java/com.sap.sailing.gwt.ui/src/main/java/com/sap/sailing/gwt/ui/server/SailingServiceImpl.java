@@ -5493,6 +5493,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setId(id);
         dto.setBaseUrl(o.getBaseURL());
         dto.setOnRemoteServer(o.isOnRemoteServer());
+        dto.setLogoImageURL(o.getLogoImageURL());
         
         LeaderboardGroupDTO lg = o.getLeaderboardGroups().get(0);
         dto.setDisplayName(lg.getDisplayName() != null ? lg.getDisplayName() : lg.getName());
