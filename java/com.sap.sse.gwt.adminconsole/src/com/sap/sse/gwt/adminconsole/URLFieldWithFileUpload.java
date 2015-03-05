@@ -1,21 +1,27 @@
 package com.sap.sse.gwt.adminconsole;
 
 import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * A {@link TextBox} together with an upload button that can use the file storage service to
@@ -24,7 +30,7 @@ import com.google.gwt.user.client.ui.TextBox;
  * @author Axel Uhl (d043530)
  *
  */
-public class URLFieldWithFileUpload extends HorizontalPanel {
+public class URLFieldWithFileUpload extends Composite {
     private final TextBox urlTextBox;
     
     private final FileUpload fileUploadField;
@@ -34,6 +40,10 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
     private final PushButton removeButton;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
+        final VerticalPanel mainPanel = new VerticalPanel();
+        final HorizontalPanel imageUrlPanel = new HorizontalPanel(); 
+        mainPanel.add(imageUrlPanel);
+        
         final FormPanel removePanel = new FormPanel();
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
@@ -59,21 +69,38 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
         });
         removePanel.add(removeButton);
         urlTextBox = new TextBox();
-        add(urlTextBox);
-        FormPanel formPanel = new FormPanel();
-        HorizontalPanel formPanelContent = new HorizontalPanel();
-        formPanel.add(formPanelContent);
-        formPanel.setAction("/sailingserver/fileupload");
-        formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
-        formPanel.setMethod(FormPanel.METHOD_POST);
+        urlTextBox.setWidth("400px");
+        imageUrlPanel.add(urlTextBox);
+        imageUrlPanel.add(removePanel);
+        
+        // the upload panel
+        FormPanel uploadFormPanel = new FormPanel();
+        mainPanel.add(uploadFormPanel);
+        HorizontalPanel uploadPanel = new HorizontalPanel();
+        uploadPanel.setSpacing(3);
+        uploadFormPanel.add(uploadPanel);
+        uploadFormPanel.setAction("/sailingserver/fileupload");
+        uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
-        formPanelContent.add(fileUploadField);
+        final Label uploadLabel = new Label(stringMessages.upload()+ ":");
+        uploadPanel.add(uploadLabel);
+        uploadPanel.setCellVerticalAlignment(uploadLabel, HasVerticalAlignment.ALIGN_MIDDLE);
+        uploadPanel.add(fileUploadField);
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
-        SubmitButton submitButton = new SubmitButton(stringMessages.upload());
-        formPanelContent.add(submitButton);
-        add(formPanel);
-        formPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+        final SubmitButton submitButton = new SubmitButton("Send...");
+        submitButton.setEnabled(false);
+        fileUploadField.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                if(fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty()) {
+                    submitButton.setEnabled(true);
+                }
+            }
+        });
+        uploadPanel.add(submitButton);
+        uploadFormPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String result = event.getResults();
@@ -91,7 +118,7 @@ public class URLFieldWithFileUpload extends HorizontalPanel {
                 }
             }
         });
-        add(removePanel);
+        initWidget(mainPanel);
     }
     
     /**
