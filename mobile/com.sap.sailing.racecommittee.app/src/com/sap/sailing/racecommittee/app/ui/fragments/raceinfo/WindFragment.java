@@ -65,7 +65,8 @@ public class WindFragment extends ScheduleFragment
     private final static String STARTMODE = "startMode";
     private final static int FIVE_SEC = 5000;
     private final static int EVERY_POSITION_CHANGE = 0;
-    private final static int MAX_KTS = 50;
+    private final static int MIN_KTS = 3;
+    private final static int MAX_KTS = 30;
 
     private View mHeader;
     private View mLayoutDirection;
@@ -118,7 +119,7 @@ public class WindFragment extends ScheduleFragment
     private String[] generateNumbers() {
         ArrayList<String> numbers = new ArrayList<>();
 
-        for (float i = 0; i <= MAX_KTS; i += .5f) {
+        for (float i = MIN_KTS; i <= MAX_KTS; i += .5f) {
             numbers.add(String.format("%.1f %s", i, getString(R.string.wind_kn)));
         }
         return numbers.toArray(new String[numbers.size()]);
