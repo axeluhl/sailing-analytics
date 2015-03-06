@@ -124,11 +124,11 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
                     mStartMode.setVisibility(View.GONE);
                 }
                 if (mStartProcedureValue != null) {
-                    mStartProcedureValue.setText(getRaceState().getRacingProcedure().getType().toString());
+                    mStartProcedureValue.setText(getRaceState().getRacingProcedure().getType()==null?"":getRaceState().getRacingProcedure().getType().toString());
                 }
 
                 if (mCourseValue != null) {
-                    mCourseValue.setText(getRaceState().getCourseDesign().getName());
+                    mCourseValue.setText(getRaceState().getCourseDesign()==null?"":getRaceState().getCourseDesign().getName());
                 }
             }
         }
