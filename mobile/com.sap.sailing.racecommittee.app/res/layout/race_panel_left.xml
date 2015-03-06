@@ -170,28 +170,16 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/course_header">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/course_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_centerInParent="true"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/course_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:src="@drawable/course_updown_64dp" />
-
-                    <TextView
-                        android:id="@+id/course_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:textSize="@dimen/textSize_22"
-                        android:textColor="@color/white"
-                        tools:text="012"/>
-                </LinearLayout>
+                    android:gravity="center_horizontal"
+                    android:textSize="@dimen/textSize_22"
+                    android:textColor="@color/white"
+                    android:drawableTop="@drawable/course_updown_64dp"
+                    tools:text="012"/>
             </RelativeLayout>
         </RelativeLayout>
 
@@ -241,16 +229,15 @@
                 android:layout_below="@id/wind_header">
 
                 <TextView
+                    android:drawableTop="@drawable/wind_off"
                     android:id="@+id/wind_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
+                    android:gravity="center"
                     android:layout_centerInParent="true"
-                    android:gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/wind_no_data"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/textSize_22"
-                    tools:text="@string/wind_unknown" />
+                    android:textSize="@dimen/textSize_22"/>
             </RelativeLayout>
         </RelativeLayout>
     </LinearLayout>

@@ -48,12 +48,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class WindFragment extends ScheduleFragment
@@ -84,6 +86,7 @@ public class WindFragment extends ScheduleFragment
     private NumberPicker mWindSpeed;
     private Button mEnterPosition;
     private EditText mAddressInput;
+    private TextView mWindSensor;
 
     private WindMap windMap;
 
@@ -168,6 +171,7 @@ public class WindFragment extends ScheduleFragment
         mCompassView = (CompassView) layout.findViewById(R.id.compassView);
         mWindSpeed = (NumberPicker) layout.findViewById(R.id.wind_speed);
         mAddressInput = (EditText) layout.findViewById(R.id.address_input);
+        mWindSensor = (TextView) layout.findViewById(R.id.wind_sensor);
 
         mEnterPosition = (Button) layout.findViewById(R.id.enter_position);
 
@@ -178,6 +182,15 @@ public class WindFragment extends ScheduleFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        if (mWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
+            String sensorData = getString(R.string.wind_sensor);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+            Wind wind = getRaceState().getWindFix();
+            sensorData = sensorData.replace("#AT#", dateFormat.format(wind.getTimePoint().asDate()));
+            sensorData = sensorData.replace("#FROM#", String.format("%.0f", wind.getFrom().getDegrees()));
+            sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
+            mWindSensor.setText(sensorData);
+        }
         setupButtons();
         setupWindSpeedPicker();
         setupPositionPoller();
@@ -245,7 +258,7 @@ public class WindFragment extends ScheduleFragment
         }
 
         mCompassView.setDirection((float) enteredWindBearingFrom);
-        mWindSpeed.setValue(((int) (enteredWindSpeed * 2)));
+        mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
     }
 
     /**
@@ -406,6 +419,7 @@ public class WindFragment extends ScheduleFragment
         switch (getArguments().getInt(STARTMODE, 0)) {
             case 1:
                 replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+                sendIntent(R.string.intent_uncheck_all);
                 break;
 
             default:
@@ -559,7 +573,7 @@ public class WindFragment extends ScheduleFragment
 
     private Wind getResultingWindFix() throws NumberFormatException {
         Position currentPosition = new DegreePosition(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        double windSpeed = mWindSpeed.getValue() / 2;
+        double windSpeed = mWindSpeed.getValue() / 2 + MIN_KTS;
         double windBearing = mCompassView.getDirection();
         Bearing bearing_from = new DegreeBearingImpl(windBearing);
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing_from.reverse());

@@ -9,7 +9,9 @@ import android.widget.*;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
@@ -27,12 +29,14 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
     private TextView mStartTime;
     private String mStartTimeString;
     private TimePoint mProtestTime;
+    private TextView mWindValue;
     private RacingProcedureType mRacingProcedureType;
 
     private TextView mStartProcedureValue;
     private View mStartMode;
     private TextView mStartModeValue;
     private ImageView mStartModeFlag;
+    private TextView mCourseValue;
 
     public static MainScheduleFragment newInstance() {
         MainScheduleFragment fragment = new MainScheduleFragment();
@@ -41,44 +45,46 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.race_schedule, container, false);
+        View layout = inflater.inflate(R.layout.race_schedule, container, false);
 
-        View startTime = view.findViewById(R.id.start_time);
+        View startTime = layout.findViewById(R.id.start_time);
         if (startTime != null) {
             startTime.setOnClickListener(this);
         }
-        mStartTime = (TextView) view.findViewById(R.id.start_time_value);
+        mStartTime = (TextView) layout.findViewById(R.id.start_time_value);
 
-        View startProcedure = view.findViewById(R.id.start_procedure);
+        View startProcedure = layout.findViewById(R.id.start_procedure);
         if (startProcedure != null) {
             startProcedure.setOnClickListener(this);
         }
 
-        mStartProcedureValue = (TextView) view.findViewById(R.id.start_procedure_value);
+        mStartProcedureValue = (TextView) layout.findViewById(R.id.start_procedure_value);
 
-        mStartMode = view.findViewById(R.id.start_mode);
+        mStartMode = layout.findViewById(R.id.start_mode);
         if (mStartMode != null) {
             mStartMode.setOnClickListener(this);
         }
-        mStartModeValue = (TextView) view.findViewById(R.id.start_mode_value);
-        mStartModeFlag = (ImageView) view.findViewById(R.id.start_mode_flag);
+        mStartModeValue = (TextView) layout.findViewById(R.id.start_mode_value);
+        mStartModeFlag = (ImageView) layout.findViewById(R.id.start_mode_flag);
 
-        View course = view.findViewById(R.id.start_course);
+        View course = layout.findViewById(R.id.start_course);
         if (course != null) {
             course.setOnClickListener(this);
         }
+        mCourseValue = (TextView) layout.findViewById(R.id.start_course_value);
 
-        View start = view.findViewById(R.id.start_race);
+        View start = layout.findViewById(R.id.start_race);
         if (start != null) {
             start.setOnClickListener(this);
         }
 
-        View wind = view.findViewById(R.id.wind);
+        View wind = layout.findViewById(R.id.wind);
         if (wind != null) {
             wind.setOnClickListener(this);
         }
+        mWindValue = (TextView) layout.findViewById(R.id.wind_value);
 
-        return view;
+        return layout;
     }
 
     @Override
@@ -87,16 +93,22 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
 
         TickSingleton.INSTANCE.registerListener(this);
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         if (getRace() != null) {
             if (getRaceState() != null) {
-                if (getArguments() != null) {
-                    TimePoint timePoint = (TimePoint) getArguments().getSerializable(STARTTIME);
-                    if (timePoint != null && mStartTime != null) {
-                        mProtestTime = timePoint;
-                        mStartTimeString = simpleDateFormat.format(timePoint.asDate());
-                    }
+                TimePoint timePoint = (TimePoint) getArguments().getSerializable(STARTTIME);
+                RacingActivity activity = (RacingActivity) getActivity();
+                if (timePoint == null && activity != null) {
+                    timePoint = activity.getStartTime();
                 }
+                if (timePoint != null) {
+                    if (activity != null) {
+                        activity.setStartTime(timePoint);
+                    }
+                    mProtestTime = timePoint;
+                    mStartTimeString = dateFormat.format(timePoint.asDate());
+                }
+
                 mRacingProcedureType = getRaceState().getRacingProcedure().getType();
                 if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure) {
                     mStartMode.setVisibility(View.VISIBLE);
@@ -113,6 +125,10 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
                 }
                 if (mStartProcedureValue != null) {
                     mStartProcedureValue.setText(getRaceState().getRacingProcedure().getType().toString());
+                }
+
+                if (mCourseValue != null) {
+                    mCourseValue.setText(getRaceState().getCourseDesign().getName());
                 }
             }
         }
@@ -167,6 +183,16 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
 
         if (mStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
             mStartTime.setText(mStartTimeString);
+        }
+
+        if (mWindValue != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
+            String sensorData = getString(R.string.wind_sensor);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+            Wind wind = getRaceState().getWindFix();
+            sensorData = sensorData.replace("#AT#", dateFormat.format(wind.getTimePoint().asDate()));
+            sensorData = sensorData.replace("#FROM#", String.format("%.0f", wind.getFrom().getDegrees()));
+            sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
+            mWindValue.setText(sensorData);
         }
     }
 
