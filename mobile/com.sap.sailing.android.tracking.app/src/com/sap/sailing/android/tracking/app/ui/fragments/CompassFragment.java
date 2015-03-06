@@ -24,7 +24,7 @@ public class CompassFragment extends BaseFragment {
 		if (isAdded())
 		{
 			TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
-			headingText.setText(String.valueOf(Math.round(heading)) + "°");
+			headingText.setText(String.valueOf(Math.round(heading)) + (char) 0x00B0 );
 			
 			TrackingActivity activity = (TrackingActivity) getActivity();
 
