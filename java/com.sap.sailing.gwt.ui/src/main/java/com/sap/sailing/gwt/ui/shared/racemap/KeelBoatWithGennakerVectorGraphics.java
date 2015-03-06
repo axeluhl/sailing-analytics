@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 public class KeelBoatWithGennakerVectorGraphics extends BoatClassVectorGraphics {
     
     public KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata... compatibleBoatClasses) {
-        super(794, 235, 454, compatibleBoatClasses);
+        super(800, 235, 655, compatibleBoatClasses);
     }
 
     @Override
@@ -15,8 +15,13 @@ public class KeelBoatWithGennakerVectorGraphics extends BoatClassVectorGraphics 
         ctx.translate(0,-803);
         
         //draw hull
-        ctx.setFillStyle ("#FFFFFF");
-        ctx.setStrokeStyle("#FFFFFF");
+        if(isSelected) {
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+        } else {
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+        }
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(2.4885714,1009.9999);
@@ -48,8 +53,13 @@ public class KeelBoatWithGennakerVectorGraphics extends BoatClassVectorGraphics 
         ctx.stroke();
         
         //draw cockpit
-        ctx.setFillStyle (color);
-        ctx.setStrokeStyle(color);
+        if(isSelected) {
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+        } else {
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+        }
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(343.42857,966.99996);
@@ -266,112 +276,5 @@ public class KeelBoatWithGennakerVectorGraphics extends BoatClassVectorGraphics 
 
     @Override
     protected void drawKillingSails(Context2d ctx) {
-    }
-
-    protected void drawAlien(Context2d ctx) {
-        ctx.save();
-        ctx.setFillStyle("#88bd64");
-        ctx.transform(0.015,1,-1,0.015,722,-135);
-        ctx.beginPath();
-        ctx.moveTo(268,564);
-        ctx.bezierCurveTo(283.1878306203468,564,295.5,583.699471007445,295.5,608);
-        ctx.bezierCurveTo(295.5,632.300528992555,283.1878306203468,652,268,652);
-        ctx.bezierCurveTo(252.81216937965317,652,240.5,632.300528992555,240.5,608);
-        ctx.bezierCurveTo(240.5,583.699471007445,252.81216937965317,564,268,564);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle("#fafafa");
-        ctx.transform(0.015,1,-1,0.015,722,-135);
-        ctx.beginPath();
-        ctx.moveTo(255,578.5);
-        ctx.bezierCurveTo(260.10863393593485,578.5,264.25,587.2304473782996,264.25,598);
-        ctx.bezierCurveTo(264.25,608.7695526217004,260.10863393593485,617.5,255,617.5);
-        ctx.bezierCurveTo(249.89136606406515,617.5,245.75,608.7695526217004,245.75,598);
-        ctx.bezierCurveTo(245.75,587.2304473782996,249.89136606406515,578.5,255,578.5);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle("#fafafa");
-        ctx.transform(0.015,1,-1,0.015,722,-135);
-        ctx.beginPath();
-        ctx.moveTo(282,580.5);
-        ctx.bezierCurveTo(287.10863393593485,580.5,291.25,589.2304473782996,291.25,600);
-        ctx.bezierCurveTo(291.25,610.7695526217004,287.10863393593485,619.5,282,619.5);
-        ctx.bezierCurveTo(276.89136606406515,619.5,272.75,610.7695526217004,272.75,600);
-        ctx.bezierCurveTo(272.75,589.2304473782996,276.89136606406515,580.5,282,580.5);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle("#010202");
-        ctx.transform(0.011,0.741,-0.783,0.011,594,-59.8);
-        ctx.beginPath();
-        ctx.moveTo(281,580);
-        ctx.bezierCurveTo(285.69442037356174,580,289.5,583.5817220013537,289.5,588);
-        ctx.bezierCurveTo(289.5,592.4182779986463,285.69442037356174,596,281,596);
-        ctx.bezierCurveTo(276.30557962643826,596,272.5,592.4182779986463,272.5,588);
-        ctx.bezierCurveTo(272.5,583.5817220013537,276.30557962643826,580,281,580);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.setFillStyle("#010202");
-        ctx.beginPath();
-        ctx.moveTo(94.1,129);
-        ctx.bezierCurveTo(94.1,129,88.1,155,97.1,159);
-        ctx.bezierCurveTo(106,163,79.1,148,94.1,129);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.setFillStyle("#88bd64");
-        ctx.beginPath();
-        ctx.moveTo(59.1,98);
-        ctx.bezierCurveTo(59.1,98,54.1,188,65.1,185);
-        ctx.bezierCurveTo(76.1,182,80.1,160,82.1,147);
-        ctx.bezierCurveTo(84.1,134,68.1,99,59.099999999999994,98);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.setFillStyle("#010202");
-        ctx.beginPath();
-        ctx.moveTo(146,144);
-        ctx.bezierCurveTo(146,144,189,168,144,187);
-        ctx.bezierCurveTo(99,205,184,180,146,144);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(148,140);
-        ctx.bezierCurveTo(148,140,190,114,144,97);
-        ctx.bezierCurveTo(99,79,185,102,148,140);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.save();
-        ctx.transform(0.011,0.741,-0.783,0.011,595,-87.8);
-        ctx.beginPath();
-        ctx.moveTo(281,580);
-        ctx.bezierCurveTo(285.69442037356174,580,289.5,583.5817220013537,289.5,588);
-        ctx.bezierCurveTo(289.5,592.4182779986463,285.69442037356174,596,281,596);
-        ctx.bezierCurveTo(276.30557962643826,596,272.5,592.4182779986463,272.5,588);
-        ctx.bezierCurveTo(272.5,583.5817220013537,276.30557962643826,580,281,580);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
     }
 }
