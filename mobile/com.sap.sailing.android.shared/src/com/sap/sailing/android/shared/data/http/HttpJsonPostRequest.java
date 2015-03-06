@@ -44,9 +44,4 @@ public class HttpJsonPostRequest extends HttpRequest {
             outputStream.write(requestBody.getBytes(Charset.forName("UTF-8")));
         }
     }
-    
-    public String getRequestBody()
-    {
-    	return requestBody;
-    }
 }

@@ -11,4 +11,6 @@ public interface PolarSheetsXYDiagramData extends Serializable {
     
     List<Pair<Double, Double>> getPointsForAverageConfidence(Tack tack, LegType legType);
 
+    List<Pair<Double, Double>> getPointsForAverageSpeedRegression(Tack tack, LegType legType);
+
 }

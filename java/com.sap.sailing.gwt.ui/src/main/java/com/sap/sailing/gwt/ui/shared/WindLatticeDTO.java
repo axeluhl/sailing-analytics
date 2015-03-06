@@ -9,7 +9,7 @@ public class WindLatticeDTO implements Serializable {
 	/**
 	 * Generated uid for serialisation
 	 */
-	private static final long serialVersionUID = 2110785502151983845L;
+	private static final long serialVersionUID = -2110785502151983845L;
 	private PositionDTO[][] matrix;
 
 	public WindLatticeDTO() {

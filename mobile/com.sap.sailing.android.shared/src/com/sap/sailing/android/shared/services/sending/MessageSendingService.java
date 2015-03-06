@@ -370,71 +370,69 @@ public class MessageSendingService extends Service implements MessageSendingList
 				URLEncoder.encode(fleetName, charsetName), uuid);
         return url;
     }
-    
+
     /**
-	 * Register listener for API-connectivity
-	 * 
-	 * @param listener class that wants to be notified of api-connectivity changes
-	 */
-	public void registerAPIConnectivityListener(APIConnectivityListener listener) {
-		apiConnectivityListener = listener;
-	}
+     * Register listener for API-connectivity
+     * 
+     * @param listener
+     *            class that wants to be notified of api-connectivity changes
+     */
+    public void registerAPIConnectivityListener(APIConnectivityListener listener) {
+        apiConnectivityListener = listener;
+    }
 
-	/**
-	 * Unregister listener for API-connectivity
-	 */
-	public void unregisterAPIConnectivityListener() {
-		apiConnectivityListener = null;
-	}
-	
-	/**
-	 * Enum for reporting of network connectivity.
-	 */
-	public enum APIConnectivity {
-		notReachable(0),
-		transmissionSuccess(1), 
-		transmissionError(2), 
-		noAttempt(4);
+    /**
+     * Unregister listener for API-connectivity
+     */
+    public void unregisterAPIConnectivityListener() {
+        apiConnectivityListener = null;
+    }
 
-		private final int apiConnectivity;
+    /**
+     * Enum for reporting of network connectivity.
+     */
+    public enum APIConnectivity {
+        notReachable(0), transmissionSuccess(1), transmissionError(2), noAttempt(4);
 
-		APIConnectivity(int connectivity) {
-			this.apiConnectivity = connectivity;
-		}
+        private final int apiConnectivity;
 
-		public int toInt() {
-			return this.apiConnectivity;
-		}
-	}
+        APIConnectivity(int connectivity) {
+            this.apiConnectivity = connectivity;
+        }
 
-	/**
-	 * Listener interface for reporting of connectivity and number of 
-	 * unsent GPS-fixes.
-	 */
-	public interface APIConnectivityListener {
-		public void apiConnectivityUpdated(APIConnectivity apiConnectivity);
-		public void setUnsentGPSFixesCount(int count);
-	}
-	
-	/**
-	 * Report API connectivity to listening activity
-	 * 
-	 * @param apiConnectivity
-	 */
-	private void reportApiConnectivity(APIConnectivity apiConnectivity) {
-		if (apiConnectivityListener != null) {
-			apiConnectivityListener.apiConnectivityUpdated(apiConnectivity);
-		}
-	}
-	
-	/**
-	 * Report the number of currently unsent GPS-fixes
-	 * 
-	 * @param unsentGPSFixesCount
-	 */
-	private void reportUnsentGPSFixesCount() {
-		if (apiConnectivityListener != null) {
-			apiConnectivityListener.setUnsentGPSFixesCount(getDelayedIntentsCount());
-		}
-	}
+        public int toInt() {
+            return this.apiConnectivity;
+        }
+    }
+
+    /**
+     * Listener interface for reporting of connectivity and number of unsent GPS-fixes.
+     */
+    public interface APIConnectivityListener {
+        public void apiConnectivityUpdated(APIConnectivity apiConnectivity);
+
+        public void setUnsentGPSFixesCount(int count);
+    }
+
+    /**
+     * Report API connectivity to listening activity
+     * 
+     * @param apiConnectivity
+     */
+    private void reportApiConnectivity(APIConnectivity apiConnectivity) {
+        if (apiConnectivityListener != null) {
+            apiConnectivityListener.apiConnectivityUpdated(apiConnectivity);
+        }
+    }
+
+    /**
+     * Report the number of currently unsent GPS-fixes
+     * 
+     * @param unsentGPSFixesCount
+     */
+    private void reportUnsentGPSFixesCount() {
+        if (apiConnectivityListener != null) {
+            apiConnectivityListener.setUnsentGPSFixesCount(getDelayedIntentsCount());
+        }
+    }
 }

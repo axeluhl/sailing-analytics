@@ -35,9 +35,11 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         this.selected = selected;
         this.errorReporter = errorReporter;
         
+        final Class<?> selectionModelType = SingleSelectionModel.class;
+        @SuppressWarnings("unchecked")
+        final Class<SingleSelectionModel<CompetitorDTO>> singleSelectionType = (Class<SingleSelectionModel<CompetitorDTO>>) selectionModelType;
+        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, singleSelectionType, true);
         final SingleSelectionModel<MarkDTO> markSelectionModel = new SingleSelectionModel<MarkDTO>();
-        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                new SingleSelectionModel<CompetitorDTO>(), true);
         markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(markSelectionModel, sailingService,
                 stringMessages, errorReporter);
 

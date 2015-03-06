@@ -2,34 +2,40 @@ package com.sap.sse.security.replication.test;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Properties;
 
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.replication.testsupport.AbstractServerReplicationTest;
+import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp;
+import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
-public abstract class AbstractSecurityReplicationTest extends AbstractServerReplicationTest<SecurityService, SecurityServiceImpl> {
-    private MongoDBService mongoDBService;
+public abstract class AbstractSecurityReplicationTest extends AbstractServerWithSingleServiceReplicationTest<SecurityService, SecurityServiceImpl> {
+    public AbstractSecurityReplicationTest() {
+        super(new SecurityServerReplicationTestSetUp());
+    }
 
-    @Override
-    protected void persistenceSetUp(boolean dropDB) {
-        mongoDBService = MongoDBService.INSTANCE;
-        if (dropDB) {
-            mongoDBService.getDB().dropDatabase();
+    public static class SecurityServerReplicationTestSetUp extends AbstractServerReplicationTestSetUp<SecurityService, SecurityServiceImpl> {
+        private MongoDBService mongoDBService;
+        
+        @Override
+        protected void persistenceSetUp(boolean dropDB) {
+            mongoDBService = MongoDBService.INSTANCE;
+            if (dropDB) {
+                mongoDBService.getDB().dropDatabase();
+            }
         }
-    }
 
-    @Override
-    protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException {
-        SecurityServiceImpl result = new SecurityServiceImpl(new UserStoreImpl(), new Properties());
-        result.clearReplicaState();
-        return result;
-    }
+        @Override
+        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException {
+            SecurityServiceImpl result = new SecurityServiceImpl(new UserStoreImpl());
+            result.clearReplicaState();
+            return result;
+        }
 
-    @Override
-    protected SecurityServiceImpl createNewReplica() {
-        return new SecurityServiceImpl(new UserStoreImpl(), new Properties());
+        @Override
+        protected SecurityServiceImpl createNewReplica() {
+            return new SecurityServiceImpl(new UserStoreImpl());
+        }
     }
 }

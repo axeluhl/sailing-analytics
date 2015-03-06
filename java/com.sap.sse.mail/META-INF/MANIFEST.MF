@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Sse Email
+Bundle-SymbolicName: com.sap.sse.mail
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.sap.sse.mail.impl.Activator
+Export-Package: com.sap.sse.mail,
+ com.sap.sse.mail.impl
+Import-Package: javax.mail,
+ javax.mail.internet,
+ org.osgi.framework
+Require-Bundle: com.sap.sse.replication,
+ com.sap.sse.operationaltransformation,
+ com.sap.sse.common,
+ com.sap.sse

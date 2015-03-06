@@ -15,15 +15,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -35,7 +30,7 @@ import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
+import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -57,7 +52,7 @@ import com.sap.sse.common.Util.Pair;
  * @author Fredrik Teschke
  * 
  */
-public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
+public class TrackFilesImportServlet extends AbstractFileUploadServlet {
     public static final String PREFERRED_IMPORTER = "preferredImporter";
     private static final long serialVersionUID = 1120226743039934620L;
     private static final Logger logger = Logger.getLogger(TrackFilesImportServlet.class.getName());
@@ -159,26 +154,11 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         return deviceIds;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!ServletFileUpload.isMultipartContent(req)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        Set<Pair<String, InputStream>> files = new HashSet<>();
-        FileItemFactory factory = new DiskFileItemFactory();
-        ServletFileUpload upload = new ServletFileUpload(factory);
-        List<FileItem> items;
-        try {
-            items = (List<FileItem>) upload.parseRequest(req);
-        } catch (FileUploadException e) {
-            throw new IOException("Could not parse request");
-        }
-        
+    protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String prefImporterType = null;
-        for (FileItem item : items) {
+        List<Pair<String, InputStream>> files = new ArrayList<>();
+        for (FileItem item : fileItems) {
             if (!item.isFormField())
                 files.add(new Pair<String, InputStream>(item.getName(), item.getInputStream()));
             else {

@@ -7,8 +7,6 @@ import java.util.EnumSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import com.sap.sailing.android.shared.BuildConfig;
-
 import android.content.Context;
 import android.provider.Settings.Secure;
 import android.util.Log;

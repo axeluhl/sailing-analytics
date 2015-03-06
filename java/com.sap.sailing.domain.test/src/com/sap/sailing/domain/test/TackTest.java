@@ -34,11 +34,11 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
     @Override
     @Before
     public void setUp() {
-        competitor = new CompetitorImpl(123, "Wolfgang Hunger", Color.RED, new TeamImpl("STG", Collections.singleton(
-                new PersonImpl("Wolfgang Hunger", new NationalityImpl("GER"),
-                /* dateOfBirth */null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas",
-                        new NationalityImpl("NED"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat",
+        competitor = new CompetitorImpl(123, "Wolfgang Hunger", Color.RED, null, new TeamImpl("STG", Collections.singleton(
+                                new PersonImpl("Wolfgang Hunger", new NationalityImpl("GER"),
+                                /* dateOfBirth */null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas",
+                                        new NationalityImpl("NED"),
+                                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", Collections.singleton(competitor),
                 new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime())));

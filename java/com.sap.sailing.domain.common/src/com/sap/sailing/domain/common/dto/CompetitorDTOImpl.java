@@ -19,22 +19,26 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     private String twoLetterIsoCountryCode;
     private String threeLetterIocCountryCode;
     private Color color;
+    private String email;
     private String sailID;
     private String idAsString;
     private BoatClassDTO boatClass;
+    private String imageURL;
     
     public CompetitorDTOImpl() {}
     
-    public CompetitorDTOImpl(String name, Color color, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
-            String countryName, String sailID, String idAsString, BoatClassDTO boatClass) {
+    public CompetitorDTOImpl(String name, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
+            String countryName, String sailID, String idAsString, String imageURL, BoatClassDTO boatClass) {
         super(name);
         this.color = color;
+        this.email = email;
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
         this.sailID = sailID;
         this.idAsString = idAsString;
         this.boatClass = boatClass;
+        this.imageURL = imageURL;
     }
 
     @Override
@@ -45,7 +49,9 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         result = prime * result + ((idAsString == null) ? 0 : idAsString.hashCode());
         result = prime * result + ((sailID == null) ? 0 : sailID.hashCode());
         result = prime * result + ((color == null) ? 0 : color.hashCode());
+        result = prime * result + ((email == null) ? 0 : email.hashCode());
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
+        result = prime * result + ((imageURL == null) ? 0 : imageURL.hashCode());
         return result;
     }
 
@@ -83,6 +89,16 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
                 return false;
         } else if (!color.equals(other.color))
             return false;
+        if (email == null) {
+            if (other.email != null)
+                return false;
+        } else if (!email.equals(other.email))
+            return false;
+        if (imageURL == null) {
+            if (other.imageURL != null)
+                return false;
+        } else if (!imageURL.equals(other.imageURL))
+            return false;
         return true;
     }
 
@@ -105,6 +121,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     public String getSailID() {
         return sailID;
     }
+    
+    @Override
+    public String getImageURL() {
+        return imageURL;
+    }
 
     @Override
     public String getIdAsString() {
@@ -123,5 +144,18 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
 
     public Color getColor() {
         return color;
+    }
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public String email(){
+        return email;
+    }
+
+    @Override
+    public boolean hasEmail() {
+        return email != null && !email.isEmpty();
     }
 }

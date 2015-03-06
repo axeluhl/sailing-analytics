@@ -88,7 +88,9 @@ public interface Leaderboard extends LeaderboardBase {
      * in a regular view of the leaderboard. Editors for leaderboards shall, though, also display the suppressed competitors
      * together with a visual indication showing which competitors are currently suppressed. The "suppressed-state" of a
      * competitor can change over the life cycle of a leaderboard. A typical use case for suppressing a competitor is
-     * removing one-time entries from a series (meta-)leaderboard or suppressing a camera boat in scoring.
+     * removing one-time entries from a series (meta-)leaderboard or suppressing a camera boat in scoring.<p>
+     * 
+     * @return all competitors in this leaderboard, including the suppressed ones.
      */
     Iterable<Competitor> getAllCompetitors();
     

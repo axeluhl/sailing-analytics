@@ -1,15 +1,15 @@
 package com.sap.sse.security.shared;
 
-public enum DefaultPermissions {
+public enum DefaultPermissions implements Permission {
     ALL_EVENTS("event:*");
     
-    private DefaultPermissions(String permissionname) {
-        this.permissionname = permissionname;
+    private DefaultPermissions(String stringPermission) {
+        this.stringPermission = stringPermission;
     }
     
-    public String getPermissionname() {
-        return permissionname;
+    public String getStringPermission() {
+        return stringPermission;
     }
     
-    private final String permissionname;
+    private final String stringPermission;
 }

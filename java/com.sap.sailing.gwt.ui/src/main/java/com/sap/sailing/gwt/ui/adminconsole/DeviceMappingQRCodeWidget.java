@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.http.client.URL;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.QRCodeComposite;
 
@@ -13,15 +14,8 @@ public class DeviceMappingQRCodeWidget extends BaseQRIdentifierWidget {
     private String mappedItemId;
     private String mappedItemType;
     
-    static class QRCodeURLCreationException extends Exception {
-        private static final long serialVersionUID = -8243995470804772458L;
-        public QRCodeURLCreationException(String message) {
-            super(message);
-        }
-    }
-    
     static interface URLFactory {
-        String createURL(String baseUrlWithoutTrailingSlash, String mappedItemQueryParam)
+        String createURL(String baseUrlWithoutTrailingSlash, String mappedItemType, String mappedItemId)
             throws QRCodeURLCreationException;
     }
     
@@ -52,6 +46,6 @@ public class DeviceMappingQRCodeWidget extends BaseQRIdentifierWidget {
             throw new QRCodeURLCreationException("No item selected for mapping");
         }
         
-        return urlFactory.createURL(serverUrl, mappedItemType + "=" + encode(mappedItemId));
+        return urlFactory.createURL(serverUrl, mappedItemType, mappedItemId);
     }
 }
