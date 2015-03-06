@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 public class KeelBoatWithGennakerVectorGraphics extends BoatClassVectorGraphics {
     
     public KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata... compatibleBoatClasses) {
-        super(794, 235, 454, compatibleBoatClasses);
+        super(800, 235, 655, compatibleBoatClasses);
     }
 
     @Override

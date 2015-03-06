@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
     
     public DinghyWithSpinnakerVectorGraphics(BoatClassMasterdata... compatibleBoatClasses) {
-        super(499, 290, 499, compatibleBoatClasses);
+        super(520, 290, 580, compatibleBoatClasses);
     }
 
     @Override
