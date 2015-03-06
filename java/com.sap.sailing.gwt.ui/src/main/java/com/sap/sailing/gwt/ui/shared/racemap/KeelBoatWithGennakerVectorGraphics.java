@@ -15,8 +15,13 @@ public class KeelBoatWithGennakerVectorGraphics extends BoatClassVectorGraphics 
         ctx.translate(0,-803);
         
         //draw hull
-        ctx.setFillStyle ("#FFFFFF");
-        ctx.setStrokeStyle("#FFFFFF");
+        if(isSelected) {
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+        } else {
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+        }
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(2.4885714,1009.9999);
@@ -48,8 +53,13 @@ public class KeelBoatWithGennakerVectorGraphics extends BoatClassVectorGraphics 
         ctx.stroke();
         
         //draw cockpit
-        ctx.setFillStyle (color);
-        ctx.setStrokeStyle(color);
+        if(isSelected) {
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+        } else {
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+        }
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(343.42857,966.99996);
