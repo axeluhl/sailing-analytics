@@ -120,7 +120,7 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
                 if (mStartProcedureValue != null) {
                     mStartProcedureValue.setText(getRaceState().getRacingProcedure().getType().toString());
                 }
-                
+
                 if (mCourseValue != null) {
                     mCourseValue.setText(getRaceState().getCourseDesign().getName());
                 }
