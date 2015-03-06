@@ -33,14 +33,14 @@ public class TestMethodWrappingFunctionInvocation {
     @Test
     public void testInvocationWithParameters() {
         SimpleClassWithMarkedMethods instance = new SimpleClassWithMarkedMethods();
-        int valueToIncrement = 10;
-        assertThat(increment.tryToInvoke(instance, valueToIncrement), is(instance.increment(valueToIncrement)));
+        final int valueToIncrement = 10;
+        assertThat(increment.tryToInvoke(instance, () -> {return new Object[] {valueToIncrement};} ), is(instance.increment(valueToIncrement)));
     }
     
     @Test
     public void testInvocationWithWrongParameters() {
         DataTypeWithContext dataEntry = new DataTypeWithContextImpl("Regatta Name", "Race Name", 7);
-        assertThat(getRegattaName.tryToInvoke(dataEntry, "Wrong Parameter"), is(nullValue()));
+        assertThat(getRegattaName.tryToInvoke(dataEntry, () -> {return new Object[] {"Wrong Parameter"};} ), is(nullValue()));
 
         SimpleClassWithMarkedMethods instance = new SimpleClassWithMarkedMethods();
         assertThat(increment.tryToInvoke(instance), is(nullValue()));

@@ -188,7 +188,8 @@ public class StructureImportManagementPanel extends FlowPanel implements Regatta
      */
     private void createEventSelectionAndCreateEventButtonUI() {
         Grid grid = new Grid(1, 2);
-        sailingEventsListBox = new ListBox(false);
+        sailingEventsListBox = new ListBox();
+        sailingEventsListBox.setMultipleSelect(false);
         sailingEventsListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {

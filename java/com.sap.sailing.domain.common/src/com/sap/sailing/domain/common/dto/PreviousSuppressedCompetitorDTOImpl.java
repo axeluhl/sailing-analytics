@@ -24,6 +24,4 @@ public class PreviousSuppressedCompetitorDTOImpl extends PreviousCompetitorDTOIm
     public CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
         return Util.get(previousVersion.getSuppressedCompetitors(), getIndexInPreviousCompetitorList());
     }
-
-    
 }

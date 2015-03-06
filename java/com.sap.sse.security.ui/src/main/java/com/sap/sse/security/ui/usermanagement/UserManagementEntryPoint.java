@@ -33,7 +33,8 @@ public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
                 UserManagementEntryPoint.this.user = user;
             }
         });
-        UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), getStringMessages());
+        UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), getStringMessages(),
+                /* permissionsForRoleProvider is null in this generic entry point */ null);
         center.add(new ScrollPanel(userManagementPanel), getStringMessages().users());
         final SettingsPanel settingsPanel = new SettingsPanel(getUserManagementService(), getStringMessages());
         center.add(new ScrollPanel(settingsPanel), getStringMessages().settings());

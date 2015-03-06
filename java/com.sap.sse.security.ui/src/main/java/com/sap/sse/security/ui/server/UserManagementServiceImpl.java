@@ -27,15 +27,14 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
-import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
@@ -108,7 +107,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo login(String username, String password) {
         try {
             String redirectURL = getSecurityService().login(username, password);
-            return new SuccessInfo(true, "Success. Redirecting to "+redirectURL, redirectURL, createUserDTOFromUser(getSecurityService().getUserByName(username)));
+            return new SuccessInfo(true, "Success. Redirecting to "+redirectURL, redirectURL,
+                    createUserDTOFromUser(getSecurityService().getUserByName(username)));
         } catch (UserManagementException | AuthenticationException e) {
             return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
         }
@@ -116,7 +116,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo logout() {
-        logger.info("Logging out user: " + SessionUtils.loadUsername());
+        logger.info("Logging out user: " + SecurityUtils.getSubject());
         getSecurityService().logout();
         getHttpSession().invalidate();
         logger.info("Invalidated HTTP session");
@@ -166,7 +166,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
         final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(SessionUtils.loadUsername())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
             getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
@@ -272,7 +272,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
 
-    private UserDTO createUserDTOFromUser(User user){
+    private UserDTO createUserDTOFromUser(User user) {
         UserDTO userDTO;
         Map<AccountType, Account> accounts = user.getAllAccounts();
         List<AccountDTO> accountDTOs = new ArrayList<>();
@@ -288,9 +288,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 break;
             }
         }
-        userDTO = new UserDTO(user.getName(), user.getEmail(), user.isEmailValidated(), accountDTOs);
-        userDTO.addRoles(user.getRoles());
-        userDTO.addPermissions(user.getPermissions());
+        userDTO = new UserDTO(user.getName(), user.getEmail(), user.isEmailValidated(), accountDTOs, user.getRoles(), user.getPermissions());
         return userDTO;
     }
 

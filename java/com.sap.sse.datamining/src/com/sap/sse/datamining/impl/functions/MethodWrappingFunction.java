@@ -6,11 +6,12 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.logging.Level;
 
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.annotations.Statistic;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
@@ -81,9 +82,13 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         return tryToInvoke(instance, new Object[0]);
     }
     
-    @SuppressWarnings("unchecked") // The cast has to work, because the constructor checks, that the return types match
     @Override
-    public ReturnType tryToInvoke(Object instance, Object... parameters) {
+    public ReturnType tryToInvoke(Object instance, ParameterProvider parameterProvider) {
+        return tryToInvoke(instance, parameterProvider.getParameters());
+    }
+    
+    @SuppressWarnings("unchecked") // The cast has to work, because the constructor checks, that the return types match
+    private ReturnType tryToInvoke(Object instance, Object... parameters) {
         if (instance != null) {
             try {
                 return (ReturnType) method.invoke(instance, parameters);
@@ -115,15 +120,15 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
     
     @Override
-    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
-        if (!isLocatable()) {
+    public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
+        if (!isLocalizable()) {
             return getSimpleName();
         }
         return stringMessages.get(locale, additionalData.getMessageKey());
     }
 
     @Override
-    public boolean isLocatable() {
+    public boolean isLocalizable() {
         return additionalData != null && !additionalData.getMessageKey().isEmpty();
     }
     

@@ -10,9 +10,6 @@
 	</parent>
 	<artifactId>com.sap.sse.security.ui</artifactId>
 	<packaging>eclipse-plugin</packaging>
-        <properties>
-            <gwt.version>2.6.1</gwt.version>
-        </properties>
 	<dependencies>
 		<dependency>
 			<groupId>javax.validation</groupId>
@@ -69,12 +66,11 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<version>2.6.1</version>
+				<version>${gwt.version}</version>
 				<executions>
 					<!-- GWT version detected from dependencyManagement -->
 					<execution>
 						<configuration>
-							<extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
 							<!-- <userAgents>chrome</userAgents> -->
 							<modules>
 								<module>com.sap.sse.security.ui.UserManagement</module>
@@ -86,7 +82,6 @@
 								<module>com.sap.sse.security.ui.EmailValidation</module>
 							</modules>
 							<gen>${basedir}/.generated</gen>
-							<localWorkers>7</localWorkers>
 							<webappDirectory>${basedir}</webappDirectory>
 							<warSourceDirectory>${basedir}/src/main/resources
 							</warSourceDirectory>

@@ -1,8 +1,11 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -10,6 +13,17 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
+
+import org.osgi.framework.ServiceReference;
+
+import com.google.zxing.WriterException;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -32,6 +46,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -42,7 +57,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogRaceTrackerExistsException;
@@ -58,9 +73,14 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.mail.MailException;
+import com.sap.sse.mail.MailService;
+import com.sap.sse.qrcode.QRCodeGenerationUtil;
+import com.sap.sse.util.impl.NonGwtUrlHelper;
 
 public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     private static final Logger logger = Logger.getLogger(RaceLogTrackingAdapterImpl.class.getName());
@@ -324,5 +344,67 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         registerCompetitors(service.getServerAuthor(), regattaLog, competitors,
                 c -> new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(),
                         MillisecondsTimePoint.now(), UUID.randomUUID(), c));
+    }
+    
+    private MailService getMailService() {
+        ServiceReference<MailService> ref = Activator.getContext()
+                .getServiceReference(MailService.class);
+        if (ref == null) {
+            logger.warning("No file storage management service registered");
+            return null;
+        }
+        return Activator.getContext().getService(ref);
+    }
+    
+    @Override
+    public void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
+            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException {
+        StringBuilder occuredExceptions = new StringBuilder();
+
+        for (Competitor competitor : competitors){
+            final String toAddress = competitor.getEmail();
+            if (toAddress != null) {
+                String leaderboardName = leaderboard.getName();
+                String competitorName = competitor.getName();
+
+                String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(serverUrlWithoutTrailingSlash,
+                        event.getId().toString(), leaderboardName, DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
+                        competitor.getId().toString(), NonGwtUrlHelper.INSTANCE);
+                String subject = String.format("%s %s",
+                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "trackingInvitationFor"), competitorName);
+
+                // taken from http://www.tutorialspoint.com/javamail_api/javamail_api_send_inlineimage_in_email.htm
+                BodyPart messageTextPart = new MimeBodyPart();
+                String htmlText = String.format("<h1>%s %s</h1>" + "<p>%s <b>%s</b></p>"
+                        + "<img src=\"cid:image\" title=\"%s\"><br/>"
+                        + "<a href=\"%s\">%s</a>",
+                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "welcomeTo"), leaderboardName,
+                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs"), competitorName,
+                        url, url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "alternativelyVisitThisLink"));
+                
+                try {
+                    messageTextPart.setContent(htmlText, "text/html");
+
+                    BodyPart messageImagePart = new MimeBodyPart();
+                    InputStream imageIs = QRCodeGenerationUtil.create(url, 250);
+                    DataSource imageDs = new ByteArrayDataSource(imageIs, "image/png");
+                    messageImagePart.setDataHandler(new DataHandler(imageDs));
+                    messageImagePart.setHeader("Content-ID", "<image>");
+
+                    MimeMultipart multipart = new MimeMultipart();
+                    multipart.addBodyPart(messageTextPart);
+                    multipart.addBodyPart(messageImagePart);
+
+                    getMailService().sendMail(toAddress, subject, multipart);
+                } catch (MessagingException | MailException | WriterException | IOException e) {
+                    logger.log(Level.SEVERE, "Error trying to send mail to " + competitor.getName()
+                            + " with e-mail address " + toAddress, e);
+                    occuredExceptions.append(e.getMessage()+"\r\n");
+                }
+            }
+        }
+        if (!(occuredExceptions.length() == 0)){
+            throw new MailException(occuredExceptions.toString());
+        }
     }
 }

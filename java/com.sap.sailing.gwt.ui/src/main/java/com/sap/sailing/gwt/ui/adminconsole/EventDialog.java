@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -28,11 +27,11 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 
 public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO> {
-    private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
     protected TextArea descriptionEntryField;
@@ -122,7 +121,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                 callback);
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroups = availableLeaderboardGroups;
-        getDialogBox().setWidth("750px");
+        getDialogBox().getWidget().setWidth("730px");
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
@@ -131,22 +130,22 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         };
 
         courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(), /* suggestValues */
+                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
         courseAreaNameList.addValueChangeHandler(valueChangeHandler);
         final List<String> imageSuggestionURLs = Arrays.asList(new String[] { "http://", "https://", "http://www.", "https://www" });
         imageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
+                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                 /* suggestValues */ imageSuggestionURLs, stringMessages.enterImageURL(), 80));
         imageURLList.addValueChangeHandler(valueChangeHandler);
         List<String> videoURLSuggestions = new ArrayList<>(imageSuggestionURLs);
         videoURLSuggestions.add("http://www.youtube.com/watch?v=");
         videoURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
+                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                 /* suggestValues */ videoURLSuggestions, stringMessages.enterVideoURL(), 80));
         videoURLList.addValueChangeHandler(valueChangeHandler);
         sponsorImageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
+                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                 /* suggestValues */ imageSuggestionURLs, stringMessages.enterSponsorImageURL(), 80));
         sponsorImageURLList.addValueChangeHandler(valueChangeHandler);
         List<String> leaderboardGroupNames = new ArrayList<>();
@@ -154,7 +153,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             leaderboardGroupNames.add(leaderboardGroupDTO.getName());
         }
         leaderboardGroupList = new StringConstantsListEditorComposite(Collections.<String> emptyList(),
-                new StringConstantsListEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
+                new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, "Select a leaderboard group..."));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
     }

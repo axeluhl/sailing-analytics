@@ -3,6 +3,7 @@ package com.sap.sailing.server.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.URI;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -10,11 +11,11 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.mongodb.MongoDBService;
 
 /**
@@ -95,8 +96,10 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     }
 
     @Override
-    public Competitor updateCompetitor(String idAsString, String newName, Color newRgbDisplayColor, String newSailId, Nationality newNationality) {
-        Competitor result = super.updateCompetitor(idAsString, newName, newRgbDisplayColor, newSailId, newNationality);
+    public Competitor updateCompetitor(String idAsString, String newName, Color newRgbDisplayColor, String newEmail, String newSailId,
+            Nationality newNationality, URI newTeamImageUri) {
+        Competitor result = super.updateCompetitor(idAsString, newName, newRgbDisplayColor, newEmail, newSailId, newNationality,
+                newTeamImageUri);
         storeTo.storeCompetitor(result);
         return result;
     }

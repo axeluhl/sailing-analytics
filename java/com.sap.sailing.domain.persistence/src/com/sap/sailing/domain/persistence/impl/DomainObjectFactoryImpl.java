@@ -124,10 +124,7 @@ import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -169,8 +166,11 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJs
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
@@ -277,14 +277,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private void ensureIndicesOnWindTracks(DBCollection windTracks) {
-        windTracks.ensureIndex(FieldNames.RACE_ID.name()); // for new programmatic access
-        windTracks.ensureIndex(FieldNames.REGATTA_NAME.name()); // for export or human look-up
+        windTracks.createIndex(new BasicDBObject(FieldNames.RACE_ID.name(), 1)); // for new programmatic access
+        windTracks.createIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), 1)); // for export or human look-up
         // for legacy access to not yet migrated fixes
-        windTracks.ensureIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1)
+        windTracks.createIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1)
                 .add(FieldNames.RACE_NAME.name(), 1).get());
         // Unique index
         try {
-            windTracks.ensureIndex(
+            windTracks.createIndex(
                     new BasicDBObjectBuilder().add(FieldNames.RACE_ID.name(), 1)
                             .add(FieldNames.WIND_SOURCE_NAME.name(), 1).add(FieldNames.WIND_SOURCE_ID.name(), 1)
                             .add(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1).get(),

@@ -33,7 +33,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeUser(User user) {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
-        usersCollection.ensureIndex(FieldNames.User.NAME.name());
+        usersCollection.createIndex(new BasicDBObject(FieldNames.User.NAME.name(), null));
         DBObject dbUser = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.User.NAME.name(), user.getName());
         dbUser.put(FieldNames.User.NAME.name(), user.getName());
@@ -46,13 +46,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.PERMISSIONS.name(), user.getPermissions());
         usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
-
+    
     @Override
     public void deleteUser(User user) {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
         DBObject dbUser = new BasicDBObject();
         dbUser.put(FieldNames.User.NAME.name(), user.getName());
-
         usersCollection.remove(dbUser);
     }
 
@@ -84,7 +83,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeSettings(Map<String, Object> settings) {
         DBCollection settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
-        settingCollection.ensureIndex(FieldNames.Settings.NAME.name());
+        settingCollection.createIndex(new BasicDBObject(FieldNames.Settings.NAME.name(), null));
         DBObject dbSettings = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
         dbSettings.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
@@ -96,7 +95,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storePreferences(String username, Map<String, String> userMap) {
         DBCollection settingCollection = db.getCollection(CollectionNames.PREFERENCES.name());
-        settingCollection.ensureIndex(FieldNames.Preferences.USERNAME.name());
+        settingCollection.createIndex(new BasicDBObject(FieldNames.Preferences.USERNAME.name(), null));
         BasicDBList dbSettings = new BasicDBList();
         for (Entry<String, String> e : userMap.entrySet()) {
             DBObject entry = new BasicDBObject();
@@ -113,7 +112,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeSettingTypes(Map<String, Class<?>> settingTypes) {
         DBCollection settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
-        settingCollection.ensureIndex(FieldNames.Settings.NAME.name());
+        settingCollection.createIndex(new BasicDBObject(FieldNames.Settings.NAME.name(), null));
         DBObject dbSettingTypes = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
         dbSettingTypes.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());

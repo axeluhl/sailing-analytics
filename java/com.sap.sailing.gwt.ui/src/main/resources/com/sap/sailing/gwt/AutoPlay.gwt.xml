@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Could not determine the version of your GWT SDK; using the module DTD 
 	from GWT 1.6.4. You may want to change this. -->
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.4.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.4.0/distro-source/core/src/gwt-module.dtd">
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
 <module>
-	<stylesheet src="../base.css" />
-
 	<!-- Inherit the core Web Toolkit stuff. -->
 	<inherits name='com.google.gwt.user.User' />
 
-	<stylesheet src="../LeaderboardNewHome.css" />
-	<stylesheet src="../RaceBoard.css" />
-		
 	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name='com.sap.sailing.gwt.FormFactor'/>
 	
@@ -60,12 +55,12 @@
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 
 	<set-property name="gwt.logging.logLevel" value="INFO"/>
 	
-	<set-property name="gwt.logging.firebugHandler" value="ENABLED" />
-	<set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
 	<set-property name="gwt.logging.consoleHandler" value="ENABLED" />
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
-	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
+	
+	<set-configuration-property name="CssResource.enableGss" value="true" />
+	<set-configuration-property name="CssResource.legacy" value="true" />
 	
 	<source path='ui/common' />
 	<source path='ui/client' />

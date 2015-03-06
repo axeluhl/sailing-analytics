@@ -39,6 +39,8 @@ import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 public class WindStatusServlet extends SailingServerHttpServlet implements IgtimiWindListener, BulkFixReceiver {
     private static final long serialVersionUID = -6791613843435003810L;
     
+    private static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
+
     private final int NUMBER_OF_MESSAGES_TO_SHOW=20;
     
     private static List<ExpeditionMessageInfo> lastExpeditionMessages;
@@ -58,15 +60,24 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         isIgtimiListenerRegistered = false;
     }
     
-    private void initializeWindReceiver() {
+    private void initializeWindReceiver(boolean reinitialize) {
         synchronized (lock) {
-            if (!isExpeditionListenerRegistered) {
+            if (!isExpeditionListenerRegistered || reinitialize) {
                 isExpeditionListenerRegistered = registerExpeditionListener();
                 lastExpeditionMessages = new ArrayList<WindStatusServlet.ExpeditionMessageInfo>();
             }
         }
         synchronized (lock) {
-            if (!isIgtimiListenerRegistered) {
+            if (!isIgtimiListenerRegistered || reinitialize) {
+                if (reinitialize) {
+                    try {
+                        if (liveDataConnection != null) {
+                            liveDataConnection.stop();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
                 isIgtimiListenerRegistered = registerIgtimiListener();
                 lastIgtimiMessages = new ArrayList<WindStatusServlet.IgtimiMessageInfo>();
                 igtimiRawMessageCount = 0;
@@ -76,17 +87,17 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        initializeWindReceiver();
+        String reinitializeWindReceiverParameter = req.getParameter(PARAM_RELOAD_WIND_RECEIVER);
+        initializeWindReceiver(reinitializeWindReceiverParameter != null && reinitializeWindReceiverParameter.equalsIgnoreCase("true"));
         resp.setContentType("text/html");
-
         PrintWriter out = resp.getWriter();
-        
         out.println("<html>");
         out.println("<head>");
         out.println("<title>Wind Status</title>");
-        out.println("<meta http-equiv=refresh content=10>");
+        out.println("<meta http-equiv=refresh content='10; url="+req.getRequestURI()+"'>");
         out.println("</head>");
         out.println("<body>");
+        out.println("<p>Reload wind connectors with parameter reloadWindReceiver=true. This will force a connection reset and a reloading of the wind receivers.</p>");
         out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3>");
         if (lastIgtimiMessages != null && !lastIgtimiMessages.isEmpty()) {
             final List<IgtimiMessageInfo> copyOfLastIgtimiMessages;

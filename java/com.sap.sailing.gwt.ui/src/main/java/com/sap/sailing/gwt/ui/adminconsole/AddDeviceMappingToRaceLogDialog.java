@@ -18,11 +18,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
-import com.sap.sailing.gwt.ui.adminconsole.DeviceMappingQRCodeWidget.QRCodeURLCreationException;
+import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
+import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
@@ -103,24 +103,24 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
         });
 
         deviceId = createTextBox("");
-        
+
         itemSelectionPanel = new ItemToMapToDeviceSelectionPanel(sailingService, stringMessages, errorReporter,
                 new SelectionChangedHandler() {
                     @Override
                     public void onSelectionChange(MarkDTO mark) {
-                        qrWidget.setMappedItem(DeviceMappingConstants.MARK_ID_AS_STRING, mark.getIdAsString());
+                        qrWidget.setMappedItem(DeviceMappingConstants.URL_MARK_ID_AS_STRING, mark.getIdAsString());
                         validate();
                     }
 
                     @Override
                     public void onSelectionChange(CompetitorDTO competitor) {
-                        qrWidget.setMappedItem(DeviceMappingConstants.COMPETITOR_ID_AS_STRING,
+                        qrWidget.setMappedItem(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                                 competitor.getIdAsString());
                         validate();
                     }
                 }, mapping != null ? mapping.mappedTo : null);
 
-        //load table content
+        // load table content
         sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName, fleetName,
                 itemSelectionPanel.getSetCompetitorsCallback());
 
@@ -136,7 +136,7 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
         qrWidget = new DeviceMappingQRCodeWidget(stringMessages, new DeviceMappingQRCodeWidget.URLFactory() {
             @SuppressWarnings("deprecation")
             @Override
-            public String createURL(String baseUrlWithoutTrailingSlash, String mappedItemQueryParam)
+            public String createURL(String baseUrlWithoutTrailingSlash, String mappedItemType, String mappedItemId)
                     throws QRCodeURLCreationException {
                 if (from.getValue() == null) {
                     throw new QRCodeURLCreationException("from not set");
@@ -147,14 +147,11 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                 long fromMillis = from.getValue().getTime();
                 long toMillis = to.getValue().getTime();
                 if (fromMillis > toMillis) {
-                    throw new QRCodeURLCreationException("from cannt lie after to");
+                    throw new QRCodeURLCreationException("from can't lie after to");
                 }
-                return baseUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
-                        + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + DeviceMappingQRCodeWidget.encode(leaderboardName) + "&"
-                        + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + DeviceMappingQRCodeWidget.encode(raceColumnName)
-                        + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + DeviceMappingQRCodeWidget.encode(fleetName)
-                        + "&" + mappedItemQueryParam + "&" + DeviceMappingConstants.FROM_MILLIS + "=" + fromMillis
-                        + "&" + DeviceMappingConstants.TO_MILLIS + "=" + toMillis;
+                return DeviceMappingConstants.getDeviceMappingForRaceLogUrl(baseUrlWithoutTrailingSlash,
+                        leaderboardName, raceColumnName, fleetName, mappedItemType, mappedItemId, fromMillis, toMillis,
+                        GwtUrlHelper.INSTANCE);
             }
         });
         qrWidget.generateQRCode();

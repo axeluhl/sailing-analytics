@@ -82,7 +82,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("OBMR 2012", "event_20121031_OBMR-OBMR_2012_VR_Fr_Fleet_1_2");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(222, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
+        assertEquals(222, average.getFrom().getDegrees(), 20.0); // wind is shifty in this race and goes from 195..245 (measured)
     }
 
     @Test
@@ -91,7 +91,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_Race_2");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(235, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
+        assertEquals(235, average.getFrom().getDegrees(), 5.0);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_Race_3");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(245, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
+        assertEquals(245, average.getFrom().getDegrees(), 5.0);
     }
 
     @Test
@@ -109,7 +109,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_race_4");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(275, average.getFrom().getDegrees(), 5.0); // wind in this race was from 075deg on average
+        assertEquals(270, average.getFrom().getDegrees(), 5.0);
     }
     
     @Test
@@ -139,8 +139,11 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
                 .sorted((c1, c2) -> (int) -Math.signum(getAverageLikelihood(c1, ManeuverType.TACK)
                         - getAverageLikelihood(c2, ManeuverType.TACK))).collect(Collectors.toList());
         // expecting a wind direction that is from around 245deg, +/- 10deg
-        assertEquals(245., windTrack.getWeightedAverageMiddleManeuverCOGDeg(clustersSortedByAverageTackLikelihood.get(0), ManeuverType.TACK).getDegrees(), 10.);
-        assertEquals(245., windTrack.getWeightedAverageMiddleManeuverCOGDeg(clustersSortedByAverageTackLikelihood.get(1), ManeuverType.TACK).getDegrees(), 10.);
+        assertEquals(
+                245., windTrack.getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(
+                                clustersSortedByAverageTackLikelihood.get(0), ManeuverType.TACK).getA().getDegrees(), 10.);
+        assertEquals(245., windTrack.getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(
+                                clustersSortedByAverageTackLikelihood.get(1), ManeuverType.TACK).getA().getDegrees(), 10.);
     }
 
     private double getAverageLikelihood(

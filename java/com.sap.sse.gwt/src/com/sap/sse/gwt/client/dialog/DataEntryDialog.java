@@ -30,6 +30,8 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.sap.sse.gwt.client.controls.GenericListBox;
+import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 
 /**
@@ -417,9 +419,25 @@ public abstract class DataEntryDialog<T> {
         result.setWordWrap(false);
         return result;
     }
+
+    public <ListItemT> GenericListBox<ListItemT> createGenericListBox(ValueBuilder<ListItemT> valueBuilder,
+            boolean isMultipleSelect) {
+        GenericListBox<ListItemT> result = new GenericListBox<>(valueBuilder);
+        result.setMultipleSelect(isMultipleSelect);
+        result.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        DialogUtils.linkEnterToButton(getOkButton(), result);
+        DialogUtils.linkEscapeToButton(getCancelButton(), result);
+        return result;
+    }
     
     public ListBox createListBox(boolean isMultipleSelect) {
-        ListBox result = new ListBox(isMultipleSelect);
+        ListBox result = new ListBox();
+        result.setMultipleSelect(isMultipleSelect);
         result.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {

@@ -13,6 +13,8 @@ public interface UserStore extends Named {
     User getUserByName(String name);
 
     User getUserByEmail(String email);
+    
+    User getUserByAccessToken(String accessToken);
 
     User createUser(String name, String email, Account... accounts) throws UserManagementException;
 
@@ -86,5 +88,15 @@ public interface UserStore extends Named {
      * representation of this store and is meant for use on a replica only; the replica's database state is undefined.
      */
     void replaceContentsFrom(UserStore newUserStore);
+
+    /**
+     * Stores an access token that can be used to authenticate the user identified by <code>username</code>.
+     * If there is no user by that name, calling this method has no effect and it will return <code>false</code>.
+     * 
+     * @return whether a user could be identified by <code>username</code>
+     */
+    boolean setAccessToken(String username, String accessToken);
+
+    void removeAccessToken(String username, String accessToken);
 
 }
