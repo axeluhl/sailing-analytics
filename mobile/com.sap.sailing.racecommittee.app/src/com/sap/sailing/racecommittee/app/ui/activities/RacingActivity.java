@@ -96,6 +96,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private ImageView mCourseFlagsMarker;
     private ImageView mMoreFlagsMarker;
     private SimpleDateFormat dateFormat;
+    private TimePoint startTime;
 
     private void setupFragments() {
         new Handler().post(new Runnable() {
@@ -316,6 +317,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 .beginTransaction()
                 .replace(R.id.racing_view_container, WelcomeFragment.newInstance())
                 .commit();
+    }
+
+    public TimePoint getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(TimePoint startTime) {
+        this.startTime = startTime;
     }
 
     @Override
@@ -540,6 +549,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId().toString());
                 ExLog.w(RacingActivity.this, TAG, String.format("Race %s is selected for reset.", mSelectedRace.getId()));
                 mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
+                onRaceItemClicked(mSelectedRace);
             }
         });
         builder.setNegativeButton(getString(R.string.race_reset_cancel), new DialogInterface.OnClickListener() {
@@ -557,42 +567,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         LinearLayout layout = (LinearLayout) findViewById(R.id.panel_right);
         if (layout != null) {
             layout.setVisibility(visibility);
-        }
-    }
-
-    public void showRightButtonCount(int count) {
-        switch (count) {
-            case 2:
-                mAbandonFlagsLayout.setVisibility(View.GONE);
-                mRecallFlagsLayout.setVisibility(View.GONE);
-                mPostponeFlagsLayout.setVisibility(View.VISIBLE);
-                mCourseFlagsMarker.setVisibility(View.VISIBLE);
-                mMoreFlagsLayout.setVisibility(View.GONE);
-                break;
-
-            case 3:
-                mAbandonFlagsLayout.setVisibility(View.VISIBLE);
-                mRecallFlagsLayout.setVisibility(View.VISIBLE);
-                mPostponeFlagsMarker.setVisibility(View.GONE);
-                mCourseFlagsLayout.setVisibility(View.GONE);
-                mMoreFlagsLayout.setVisibility(View.VISIBLE);
-                break;
-
-            case 4:
-                mAbandonFlagsLayout.setVisibility(View.VISIBLE);
-                mRecallFlagsLayout.setVisibility(View.VISIBLE);
-                mPostponeFlagsLayout.setVisibility(View.GONE);
-                mCourseFlagsLayout.setVisibility(View.VISIBLE);
-                mMoreFlagsLayout.setVisibility(View.VISIBLE);
-                break;
-
-            default:
-                mAbandonFlagsLayout.setVisibility(View.GONE);
-                mRecallFlagsLayout.setVisibility(View.GONE);
-                mPostponeFlagsLayout.setVisibility(View.GONE);
-                mCourseFlagsLayout.setVisibility(View.GONE);
-                mMoreFlagsLayout.setVisibility(View.GONE);
-                break;
         }
     }
 

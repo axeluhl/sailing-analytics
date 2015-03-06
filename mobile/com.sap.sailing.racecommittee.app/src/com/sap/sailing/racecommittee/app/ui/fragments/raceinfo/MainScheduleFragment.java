@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
@@ -92,15 +93,20 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
 
         TickSingleton.INSTANCE.registerListener(this);
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         if (getRace() != null) {
             if (getRaceState() != null) {
-                if (getArguments() != null) {
-                    TimePoint timePoint = (TimePoint) getArguments().getSerializable(STARTTIME);
-                    if (timePoint != null && mStartTime != null) {
-                        mProtestTime = timePoint;
-                        mStartTimeString = simpleDateFormat.format(timePoint.asDate());
+                TimePoint timePoint = (TimePoint) getArguments().getSerializable(STARTTIME);
+                RacingActivity activity = (RacingActivity) getActivity();
+                if (timePoint == null && activity != null) {
+                    timePoint = activity.getStartTime();
+                }
+                if (timePoint != null) {
+                    if (activity != null) {
+                        activity.setStartTime(timePoint);
                     }
+                    mProtestTime = timePoint;
+                    mStartTimeString = dateFormat.format(timePoint.asDate());
                 }
 
                 mRacingProcedureType = getRaceState().getRacingProcedure().getType();
