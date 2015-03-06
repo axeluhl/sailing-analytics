@@ -246,7 +246,7 @@ public class WindFragment extends ScheduleFragment
         mWindSpeed.setDisplayedValues(nums);
         mWindSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
-        double enteredWindSpeed = preferences.getWindSpeed() - MIN_KTS;
+        double enteredWindSpeed = preferences.getWindSpeed();
         double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
 
         if (getRace() != null && getRaceState() != null) {
@@ -258,7 +258,7 @@ public class WindFragment extends ScheduleFragment
         }
 
         mCompassView.setDirection((float) enteredWindBearingFrom);
-        mWindSpeed.setValue(((int) (enteredWindSpeed * 2)));
+        mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
     }
 
     /**
@@ -419,6 +419,7 @@ public class WindFragment extends ScheduleFragment
         switch (getArguments().getInt(STARTMODE, 0)) {
             case 1:
                 replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+                sendIntent(R.string.intent_uncheck_all);
                 break;
 
             default:
