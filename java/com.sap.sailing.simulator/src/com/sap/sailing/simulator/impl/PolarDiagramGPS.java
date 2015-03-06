@@ -55,9 +55,9 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         for (int i = 0; i < windSpeeds.size(); i++) {
             try {
                 beatPort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND,
-                        Tack.PORT).getObject();
+                        Tack.PORT, true).getObject();
                 beatStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND,
-                        Tack.STARBOARD).getObject();
+                        Tack.STARBOARD, true).getObject();
             } catch (NotEnoughDataHasBeenAddedException e) {
                 beatPort = null;
                 beatStar = null;
@@ -83,9 +83,9 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         for (int i = 0; i < windSpeeds.size(); i++) {
             try {
                 jibePort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i),
-                        LegType.DOWNWIND, Tack.PORT).getObject();
+                        LegType.DOWNWIND, Tack.PORT, true).getObject();
                 jibeStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i),
-                        LegType.DOWNWIND, Tack.STARBOARD).getObject();
+                        LegType.DOWNWIND, Tack.STARBOARD, true).getObject();
             } catch (NotEnoughDataHasBeenAddedException e) {
                 jibePort = null;
                 jibeStar = null;

@@ -23,11 +23,12 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     private String sailID;
     private String idAsString;
     private BoatClassDTO boatClass;
+    private String imageURL;
     
     public CompetitorDTOImpl() {}
     
     public CompetitorDTOImpl(String name, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
-            String countryName, String sailID, String idAsString, BoatClassDTO boatClass) {
+            String countryName, String sailID, String idAsString, String imageURL, BoatClassDTO boatClass) {
         super(name);
         this.color = color;
         this.email = email;
@@ -37,6 +38,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         this.sailID = sailID;
         this.idAsString = idAsString;
         this.boatClass = boatClass;
+        this.imageURL = imageURL;
     }
 
     @Override
@@ -49,6 +51,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         result = prime * result + ((color == null) ? 0 : color.hashCode());
         result = prime * result + ((email == null) ? 0 : email.hashCode());
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
+        result = prime * result + ((imageURL == null) ? 0 : imageURL.hashCode());
         return result;
     }
 
@@ -91,6 +94,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
                 return false;
         } else if (!email.equals(other.email))
             return false;
+        if (imageURL == null) {
+            if (other.imageURL != null)
+                return false;
+        } else if (!imageURL.equals(other.imageURL))
+            return false;
         return true;
     }
 
@@ -112,6 +120,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     @Override
     public String getSailID() {
         return sailID;
+    }
+    
+    @Override
+    public String getImageURL() {
+        return imageURL;
     }
 
     @Override

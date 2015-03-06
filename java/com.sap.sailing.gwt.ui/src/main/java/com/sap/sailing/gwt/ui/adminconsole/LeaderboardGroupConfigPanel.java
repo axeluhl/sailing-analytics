@@ -44,6 +44,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -62,6 +63,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
         SafeHtml cell(String url, String displayName);
     }
+
+    private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
@@ -186,6 +189,16 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         ListHandler<StrippedLeaderboardDTO> leaderboardsListHandler = new ListHandler<StrippedLeaderboardDTO>(leaderboardsProvider.getList());
         leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
         leaderboardsTable.ensureDebugId("LeaderboardsCellTable");
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> leaderboardTableSelectionColumn =
+                new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
+                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+                            @Override
+                            protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
+                                return leaderboardsProvider;
+                            }
+        };
+        leaderboardsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
+        leaderboardsTable.setSelectionModel(leaderboardsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
         leaderboardsFilterablePanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
@@ -240,10 +253,10 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
         leaderboardsTable.setWidth("100%");
         leaderboardsTable.addColumnSortHandler(leaderboardsListHandler);
+        leaderboardsTable.addColumn(leaderboardTableSelectionColumn, leaderboardTableSelectionColumn.getHeader());
         leaderboardsTable.addColumn(leaderboardsNameColumn, stringMessages.leaderboardName());
         leaderboardsTable.addColumn(leaderboardsRacesColumn, stringMessages.races());
 
-        leaderboardsSelectionModel = new MultiSelectionModel<StrippedLeaderboardDTO>();
         leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -251,11 +264,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 moveToGroupButton.setEnabled(selectedLeaderboards != null && selectedLeaderboards.size() > 0);
             }
         });
-        leaderboardsTable.setSelectionModel(leaderboardsSelectionModel);
-
         leaderboardsProvider.addDataDisplay(leaderboardsTable);
         leaderboardsPanel.add(leaderboardsTable);
-
         return leaderboardsCaptionPanel;
     }
 
@@ -350,11 +360,23 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
         groupDetailsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
         groupDetailsTable.ensureDebugId("LeaderboardGroupsCellTable");
+        groupDetailsProvider = new ListDataProvider<StrippedLeaderboardDTO>();
+        groupDetailsProvider.addDataDisplay(groupDetailsTable);
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> groupDetailsTableSelectionColumn =
+                new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
+                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+                            @Override
+                            protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
+                                return groupDetailsProvider;
+                            }
+        };
+
         groupDetailsTable.setWidth("100%");
+        groupDetailsTable.addColumn(groupDetailsTableSelectionColumn, groupDetailsTableSelectionColumn.getHeader());
         groupDetailsTable.addColumn(groupDetailsNameColumn, stringMessages.leaderboardName());
         groupDetailsTable.addColumn(groupDetailsRacesColumn, stringMessages.races());
 
-        groupDetailsSelectionModel = new MultiSelectionModel<StrippedLeaderboardDTO>();
+        groupDetailsSelectionModel = groupDetailsTableSelectionColumn.getSelectionModel();
         groupDetailsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -364,10 +386,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 leaderboardUpButton.setEnabled(selectedLeaderboardsInGroup != null && selectedLeaderboardsInGroup.size() == 1);
             }
         });
-        groupDetailsTable.setSelectionModel(groupDetailsSelectionModel);
-
-        groupDetailsProvider = new ListDataProvider<StrippedLeaderboardDTO>();
-        groupDetailsProvider.addDataDisplay(groupDetailsTable);
+        groupDetailsTable.setSelectionModel(groupDetailsSelectionModel, groupDetailsTableSelectionColumn.getSelectionManager());
         groupDetailsPanel.add(groupDetailsTable);
 
         //Create details functionality

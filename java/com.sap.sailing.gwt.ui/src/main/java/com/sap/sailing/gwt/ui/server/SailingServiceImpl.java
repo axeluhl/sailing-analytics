@@ -764,7 +764,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.races = convertToRaceDTOs(regatta);
         regattaDTO.series = convertToSeriesDTOs(regatta);
         regattaDTO.startDate = regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null;
-        regattaDTO.endDate = regatta.getStartDate() != null ? regatta.getEndDate().asDate() : null;
+        regattaDTO.endDate = regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null;
         BoatClass boatClass = regatta.getBoatClass();
         if (boatClass != null) {
             regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength().getMeters());
@@ -1401,7 +1401,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
-            TimePoint fromTimePoint = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
+            TimePoint fromTimePoint = from == null ? trackedRace.getStartOfTracking() == null ? trackedRace
+                    .getStartOfRace() : trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             TimePoint toTimePoint = to == null ? trackedRace.getEndOfRace() == null ?
                     MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace() : new MillisecondsTimePoint(to);
             if (fromTimePoint != null && toTimePoint != null) {
@@ -4399,7 +4400,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) {
+    public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws URISyntaxException {
         Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
     	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
@@ -4417,7 +4418,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
-                                    .getColor(), competitor.getEmail(), competitor.getSailID(), nationality, existingCompetitor.getTeam().getImage())));
+                                    .getColor(), competitor.getEmail(), competitor.getSailID(), nationality,
+                                    competitor.getImageURL()==null?null:new URI(competitor.getImageURL()))));
         }
         return result;
     }
@@ -5227,73 +5229,58 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public PolarSheetsXYDiagramData createXYDiagramForBoatClass(String boatClassName) {
         BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
-        List<Pair<Double, Double>> pointsForUpwindStarboardAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
-        List<Pair<Double, Double>> pointsForUpwindStarboardAverageConfidence = new ArrayList<Pair<Double, Double>>();
-        List<Pair<Double, Double>> pointsForUpwindPortAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
-        List<Pair<Double, Double>> pointsForUpwindPortAverageConfidence = new ArrayList<Pair<Double, Double>>();
-        List<Pair<Double, Double>> pointsForDownwindStarboardAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
-        List<Pair<Double, Double>> pointsForDownwindStarboardAverageConfidence = new ArrayList<Pair<Double, Double>>();
-        List<Pair<Double, Double>> pointsForDownwindPortAverageSpeedMovingAverage = new ArrayList<Pair<Double, Double>>();
-        List<Pair<Double, Double>> pointsForDownwindPortAverageConfidence = new ArrayList<Pair<Double, Double>>();
-        for (double windInKnots = 0.1; windInKnots < 30; windInKnots = windInKnots + 0.1) {
-            try {
-                SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService()
-                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
-                                LegType.UPWIND, Tack.STARBOARD);
-                pointsForUpwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
-                        averageUpwindStarboardMovingAverage.getObject().getKnots()));
-
-                pointsForUpwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
-                        averageUpwindStarboardMovingAverage.getConfidence()));
-            } catch (NotEnoughDataHasBeenAddedException e) {
-                // Do not add a point to the result
+        Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> movingAverageSpeedDataLists = new HashMap<>();
+        Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> regressionSpeedDataLists = new HashMap<>();
+        Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> averageConfidenceDataLists = new HashMap<>();
+        for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
+            for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
+                movingAverageSpeedDataLists.put(new Pair<LegType, Tack>(legType, tack),
+                        new ArrayList<Pair<Double, Double>>());
+                regressionSpeedDataLists.put(new Pair<LegType, Tack>(legType, tack),
+                        new ArrayList<Pair<Double, Double>>());
+                averageConfidenceDataLists.put(new Pair<LegType, Tack>(legType, tack),
+                        new ArrayList<Pair<Double, Double>>());
             }
-
-            try {
-                SpeedWithBearingWithConfidence<Void> averageUpwindPortMovingAverage = getService()
-                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
-                                LegType.UPWIND, Tack.PORT);
-                pointsForUpwindPortAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
-                        averageUpwindPortMovingAverage.getObject().getKnots()));
-
-                pointsForUpwindPortAverageConfidence.add(new Pair<Double, Double>(windInKnots,
-                        averageUpwindPortMovingAverage.getConfidence()));
-            } catch (NotEnoughDataHasBeenAddedException e) {
-                // Do not add a point to the result
-            }
-
-            try {
-                SpeedWithBearingWithConfidence<Void> averageDownwindStarboardMovingAverage = getService()
-                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
-                                LegType.DOWNWIND, Tack.STARBOARD);
-                pointsForDownwindStarboardAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
-                        averageDownwindStarboardMovingAverage.getObject().getKnots()));
-
-                pointsForDownwindStarboardAverageConfidence.add(new Pair<Double, Double>(windInKnots,
-                        averageDownwindStarboardMovingAverage.getConfidence()));
-            } catch (NotEnoughDataHasBeenAddedException e) {
-                // Do not add a point to the result
-            }
-
-            try {
-                SpeedWithBearingWithConfidence<Void> averageDownwindPortMovingAverage = getService()
-                        .getPolarDataService().getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(windInKnots),
-                                LegType.DOWNWIND, Tack.PORT);
-                pointsForDownwindPortAverageSpeedMovingAverage.add(new Pair<Double, Double>(windInKnots,
-                        averageDownwindPortMovingAverage.getObject().getKnots()));
-
-                pointsForDownwindPortAverageConfidence.add(new Pair<Double, Double>(windInKnots,
-                        averageDownwindPortMovingAverage.getConfidence()));
-            } catch (NotEnoughDataHasBeenAddedException e) {
-                // Do not add a point to the result
-            }
-
         }
-        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(
-                pointsForUpwindStarboardAverageSpeedMovingAverage, pointsForUpwindStarboardAverageConfidence,
-                pointsForUpwindPortAverageSpeedMovingAverage, pointsForUpwindPortAverageConfidence,
-                pointsForDownwindStarboardAverageSpeedMovingAverage, pointsForDownwindStarboardAverageConfidence,
-                pointsForDownwindPortAverageSpeedMovingAverage, pointsForDownwindPortAverageConfidence);
+        for (double windInKnots = 0.1; windInKnots < 30; windInKnots = windInKnots + 0.1) {
+            for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
+                for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
+
+                    try {
+                        SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService()
+                                .getPolarDataService().getAverageSpeedWithBearing(boatClass,
+                                        new KnotSpeedImpl(windInKnots), legType, tack, false);
+
+                        movingAverageSpeedDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
+                                new Pair<Double, Double>(windInKnots, averageUpwindStarboardMovingAverage.getObject()
+                                        .getKnots()));
+                        
+
+                        averageConfidenceDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
+                                new Pair<Double, Double>(windInKnots, averageUpwindStarboardMovingAverage
+                                        .getConfidence()));
+                        
+                    } catch (NotEnoughDataHasBeenAddedException e) {
+                        // Do not add a point to the result
+                    }
+                    
+                    try {
+                        SpeedWithBearingWithConfidence<Void> averageUpwindStarboardRegression = getService()
+                                .getPolarDataService().getAverageSpeedWithBearing(boatClass,
+                                        new KnotSpeedImpl(windInKnots), legType, tack, true);
+
+                        regressionSpeedDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
+                                new Pair<Double, Double>(windInKnots, averageUpwindStarboardRegression.getObject()
+                                        .getKnots()));
+                    } catch (NotEnoughDataHasBeenAddedException e) {
+                        // Do not add a point to the result
+                    }
+                }
+            }
+        }
+
+        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(movingAverageSpeedDataLists,
+                regressionSpeedDataLists, averageConfidenceDataLists);
 
         return data;
     }
@@ -5331,7 +5318,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) {
+    public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) throws IOException {
         try {
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {
@@ -5351,7 +5338,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public String getActiveFileStorageServiceName() {
         try {
-            return getService().getFileStorageManagementService().getActiveFileStorageService().getName();
+            final FileStorageService activeFileStorageService = getService().getFileStorageManagementService().getActiveFileStorageService();
+            return activeFileStorageService == null ? null : activeFileStorageService.getName();
         } catch (NoCorrespondingServiceRegisteredException e) {
             return null;
         }

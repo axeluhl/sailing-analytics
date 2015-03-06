@@ -415,7 +415,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs);
 
-    CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor);
+    CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws Exception;
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
     

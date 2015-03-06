@@ -45,7 +45,8 @@ public class LeaderboardSettingsFactory {
      *            overall details if and only if this parameter is <code>true</code>
      */
     public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
-            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection, Boolean showRegattaRank) {
+            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection, Boolean showRegattaRank, boolean showCompetitorSailIdColumn,
+            boolean showCompetitorNameColumn) {
         if (nameOfRaceColumnToShow != null && nameOfRaceToShow != null) {
             throw new IllegalArgumentException("Can identify only one race to show, either by race name or by its column name, but not both");
         }
@@ -76,7 +77,8 @@ public class LeaderboardSettingsFactory {
                         /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
                         /* refresh interval */ null, /* name of race to sort */ nameOfRaceToSort,
                         /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
-                        /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false);
+                        /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false,
+                        /*showCompetitorSailIdColumns*/showCompetitorSailIdColumn, /*showCompetitorFullNameColumn*/showCompetitorNameColumn);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
@@ -165,7 +167,8 @@ public class LeaderboardSettingsFactory {
                 namesOfRacesToShow, numberOfLastRacesToShow,
                 autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ nameOfRaceToSort,
                 /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelectionStrategy,
-                /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false);
+                /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false,
+                /*showCompetitorSailIdColumns*/true, /*showCompetitorFullNameColumn*/true);
     }
     
     public LeaderboardSettings mergeLeaderboardSettings(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
@@ -180,6 +183,8 @@ public class LeaderboardSettingsFactory {
         List<String> namesOfRacesToShow = copyRaceNamesList(settingsWithRaceSelection.getNamesOfRacesToShow());
         Integer numberOfLastRacesToShow = settingsWithRaceSelection.getNumberOfLastRacesToShow();
         boolean autoExpandPreSelectedRace = settingsWithRaceSelection.isAutoExpandPreSelectedRace();
+        boolean showCompetitorSailIdColumn = settingsWithRaceSelection.isShowCompetitorSailIdColumn();
+        boolean showCompetitorFullNameColumns = settingsWithRaceSelection.isShowCompetitorFullNameColumn();
         String nameOfRaceToSort = settingsWithRaceSelection.getNameOfRaceToSort();
         boolean sortAscending = settingsWithRaceSelection.isSortAscending();
         boolean updateUponPlayStateChange = settingsWithRaceSelection.isUpdateUponPlayStateChange();
@@ -187,7 +192,7 @@ public class LeaderboardSettingsFactory {
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, namesOfRacesToShow, numberOfLastRacesToShow, autoExpandPreSelectedRace, refreshIntervalInMs,
                 nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
-                /*showOverallRacesCompleted*/ false);
+                /*showOverallRacesCompleted*/ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns);
     }
     
     private List<DetailType> copyDetailTypes(List<DetailType> detailTypes) {

@@ -134,7 +134,7 @@ if [ $# -eq 0 ]; then
     echo "local-deploy: performs deployment of one or more bundles into a local directory"
     echo "Example: $0 -n com.sap.sailing.www -s /home/user/myserver local-deploy"
     echo ""
-    echo "remote-deploy: performs hot deployment of the java code to a remote server"
+    echo "remote-deploy: deploys the last build results to a remote server and optionally re-starts it"
     echo "Example: $0 -s dev -w trac@sapsailing.com remote-deploy"
     echo ""
     echo "clean: cleans all code and GWT files"
