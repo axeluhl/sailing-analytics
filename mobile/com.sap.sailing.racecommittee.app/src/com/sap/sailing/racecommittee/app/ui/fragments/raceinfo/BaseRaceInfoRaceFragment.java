@@ -24,6 +24,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -56,7 +57,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     private View moreFlags;
     private TextView courseValue;
     private TextView startProcedureValue;
-    private ImageView courseIcon;
+    private TextView windValue;
     private ImageView startModeFlag;
     private UpdateUiReceiver mReceiver;
     private FlagPoleCache flagPoleCache;
@@ -97,7 +98,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 course.setOnClickListener(new CourseClick());
             }
             courseLock = getView().findViewById(R.id.course_lock);
-            courseIcon = (ImageView) getView().findViewById(R.id.course_icon);
             courseValue = (TextView) getView().findViewById(R.id.course_value);
 
             wind = getView().findViewById(R.id.wind);
@@ -105,6 +105,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 wind.setOnClickListener(new WindClick());
             }
             windLock = getView().findViewById(R.id.wind_lock);
+            windValue = (TextView) getView().findViewById(R.id.wind_value);
 
             abandonFlags = getView().findViewById(R.id.abandon_flags);
             if (abandonFlags != null) {
@@ -359,16 +360,11 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     }
 
     private void updateUi() {
-
-        if (courseIcon != null) {
-            courseIcon.setImageDrawable(getResources().getDrawable(R.drawable.course_updown_64dp));
-        }
-
-        if (courseValue != null) {
+        if (courseValue != null && getRaceState().getCourseDesign() != null) {
             courseValue.setText(getRaceState().getCourseDesign().getName());
         }
 
-        if (startProcedureValue != null) {
+        if (startProcedureValue != null && getRacingProcedure() != null) {
             startProcedureValue.setText(getRacingProcedure().getType().toString());
         }
 
@@ -384,6 +380,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                     startMode.setVisibility(View.GONE);
                 }
             }
+        }
+
+        Wind wind = getRaceState().getWindFix();
+        if (windValue != null && wind != null) {
+            String sensorData = getString(R.string.wind_panel);
+            sensorData = sensorData.replace("#FROM#", String.format("%.0f", wind.getFrom().getDegrees()));
+            sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
+            windValue.setText(sensorData);
         }
     }
 

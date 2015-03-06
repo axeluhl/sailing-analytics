@@ -64,6 +64,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private TextView headerTime;
     private TextView timeStart;
     private TextView timeFinish;
+    private TextView windValue;
     private ReadonlyDataManager dataManager;
     private RaceInfoFragment infoFragment;
     private Wind mWind;

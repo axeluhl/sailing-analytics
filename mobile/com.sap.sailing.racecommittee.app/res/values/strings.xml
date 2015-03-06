@@ -309,6 +309,9 @@
     <string name="wind_enter_position">Set Your Position</string>
     <string name="wind_kn">kn</string>
     <string name="wind_address_hint">Enter Address</string>
+    <string name="wind_sensor"><![CDATA[at #AT# / from #FROM#° / #SPEED# kn]]></string>
+    <string name="wind_panel"><![CDATA[from #FROM#°\n#SPEED# kn]]></string>
+    <string name="wind_no_data">No Data</string>
 
     <string name="time_up">Up in #TIME#</string>
     <string name="time_down">Down in #TIME#</string>

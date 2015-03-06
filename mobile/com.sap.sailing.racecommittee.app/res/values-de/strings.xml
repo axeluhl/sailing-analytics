@@ -324,5 +324,8 @@
     <string name="race_begin_finish_header">Begin Finish</string>
     <string name="race_begin_finish_current">Use Current Time</string>
     <string name="race_begin_finish_custom">Use Custom Time</string>
+    <string name="wind_sensor"><![CDATA[at #AT# / from #FROM#° / #SPEED# kn]]></string>
+    <string name="wind_no_data">No Data</string>
+    <string name="wind_panel"><![CDATA[from #FROM#°\n#SPEED# kn]]></string>
 
 </resources>
