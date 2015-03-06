@@ -19,6 +19,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
 
     private static final String TAG = StartTimeFragment.class.getName();
     private static final String STARTMODE = "startMode";
+    private static final int MAX_DAYS = 30;
 
     private NumberPicker mDatePicker;
     private TimePicker mTimePicker;
@@ -161,7 +162,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
         dates.add(getString(R.string.tomorrow));
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, 1);
-        for (int i = 3; i <= 30; i++) {
+        for (int i = 3; i <= MAX_DAYS; i++) {
             calendar.add(Calendar.DAY_OF_MONTH, 1);
             dates.add(dateFormat.format(calendar.getTime()));
         }
@@ -183,6 +184,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
                 } catch (Exception ex) {
                     minutes = 0;
                 }
+                minutes++;
                 now.add(Calendar.MINUTE, minutes);
 
                 if (mTimePicker != null) {
