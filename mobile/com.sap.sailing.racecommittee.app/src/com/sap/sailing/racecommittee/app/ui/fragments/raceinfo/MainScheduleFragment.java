@@ -110,7 +110,7 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
                 }
 
                 mRacingProcedureType = getRaceState().getRacingProcedure().getType();
-                if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure) {
+                if (getRaceState().getRacingProcedure().getType().equals(RacingProcedureType.RRS26)) {
                     mStartMode.setVisibility(View.VISIBLE);
                     RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                     Flags flag = procedure.getStartModeFlag();
@@ -157,10 +157,19 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
                 break;
 
             case R.id.start_race:
+                RRS26RacingProcedure procedure = null;
+                Flags flag = null;
+                if (getRaceState().getRacingProcedure().getType().equals(RacingProcedureType.RRS26)) {
+                    procedure = getRaceState().getTypedRacingProcedure();
+                    flag = procedure.getStartModeFlag();
+                }
                 TimePoint now = MillisecondsTimePoint.now();
                 getRaceState().setAdvancePass(now);
                 getRaceState().setRacingProcedure(now, mRacingProcedureType);
                 getRaceState().forceNewStartTime(now, mProtestTime);
+                if (procedure != null) {
+                    procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
+                }
                 openFragment(RaceInfoRaceFragment.newInstance());
                 break;
 
