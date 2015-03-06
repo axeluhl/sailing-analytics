@@ -35,6 +35,7 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
     private View mStartMode;
     private TextView mStartModeValue;
     private ImageView mStartModeFlag;
+    private TextView mCourseValue;
 
     public static MainScheduleFragment newInstance() {
         MainScheduleFragment fragment = new MainScheduleFragment();
@@ -69,6 +70,7 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
         if (course != null) {
             course.setOnClickListener(this);
         }
+        mCourseValue = (TextView) layout.findViewById(R.id.start_course_value);
 
         View start = layout.findViewById(R.id.start_race);
         if (start != null) {
@@ -117,6 +119,10 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
                 }
                 if (mStartProcedureValue != null) {
                     mStartProcedureValue.setText(getRaceState().getRacingProcedure().getType().toString());
+                }
+                
+                if (mCourseValue != null) {
+                    mCourseValue.setText(getRaceState().getCourseDesign().getName());
                 }
             }
         }
