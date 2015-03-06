@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.Extreme40VectorGraphics;
+import com.sap.sailing.gwt.ui.shared.racemap.KeelBoatWithGennakerVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.LaserVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.SmallMultihullVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap._49erVectorGraphics;
@@ -27,9 +28,10 @@ public class BoatClassVectorGraphicsResolver {
         BoatClassVectorGraphics smallMultihull = new SmallMultihullVectorGraphics(BoatClassMasterdata.NACRA_17,
                 BoatClassMasterdata.F_16, BoatClassMasterdata.F_18, BoatClassMasterdata.HOBIE_WILD_CAT,
                 BoatClassMasterdata.HOBIE_TIGER, BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO);
+        BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.J70, BoatClassMasterdata.B_ONE, BoatClassMasterdata.J80);
 
         defaultBoatVectorGraphics = laser; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.
-        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull }) {
+        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker}) {
             for (BoatClassMasterdata b : g.getCompatibleBoatClasses()) {
                 compatibleBoatVectorGraphicsMap.put(b, g);
             }
