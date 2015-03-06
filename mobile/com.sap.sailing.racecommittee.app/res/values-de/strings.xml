@@ -294,7 +294,7 @@
     <string name="wind_address_hint">Enter Address</string>
     <string name="time_down">Down in #TIME#</string>
     <string name="time_up">Up in #TIME#</string>
-    <string name="time_finish">Finish ~#TIME#</string>
+    <string name="time_finish">Finish N/A</string>
     <string name="time_start">Start #TIME#</string>
     <string name="time">#TIME#</string>
     <string name="set_signal">Set Signal</string>
@@ -321,5 +321,8 @@
     <string name="race_start_time_in">Start in #TIME#</string>
     <string name="race_start_time_ago">Start #TIME# ago</string>
     <string name="tomorrow">Morgen</string>
+    <string name="race_begin_finish_header">Begin Finish</string>
+    <string name="race_begin_finish_current">Use Current Time</string>
+    <string name="race_begin_finish_custom">Use Custom Time</string>
 
 </resources>

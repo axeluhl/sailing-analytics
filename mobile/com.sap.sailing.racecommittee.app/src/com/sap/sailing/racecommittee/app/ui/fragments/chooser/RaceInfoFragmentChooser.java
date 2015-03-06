@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.StartTimeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
 
 public abstract class RaceInfoFragmentChooser {
     private static final String TAG = RaceInfoFragmentChooser.class.getName();

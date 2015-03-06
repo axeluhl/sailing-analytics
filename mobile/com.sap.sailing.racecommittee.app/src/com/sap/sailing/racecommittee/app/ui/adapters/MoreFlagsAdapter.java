@@ -11,7 +11,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 import java.util.ArrayList;
 
@@ -19,8 +21,8 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
 
     public class MoreFlag extends FlagItem {
 
-        public MoreFlag(String line1, String line2, String fileName) {
-            super(line1, line2, fileName, null);
+        public MoreFlag(String line1, String line2, String fileName, Boolean more, Flags flag) {
+            super(line1, line2, fileName, more, flag);
         }
     }
 
@@ -33,7 +35,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
         mListener = listener;
 
         mFlags = new ArrayList<>();
-        mFlags.add(new MoreFlag(context.getString(R.string.flag_blue), context.getString(R.string.flag_blue_desc), "flag_blue_96dp"));
+        mFlags.add(new MoreFlag(context.getString(R.string.flag_blue), context.getString(R.string.flag_blue_desc), null, true, Flags.BLUE));
     }
 
     @Override
@@ -63,10 +65,14 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
         final ImageView flagImage = ViewHolder.get(convertView, R.id.flag);
         if (flagImage != null) {
             flagImage.setVisibility(View.INVISIBLE);
-            int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
-            if (flagResId != 0) {
-                Drawable flagDrawable = mContext.getResources().getDrawable(flagResId);
-                flagImage.setImageDrawable(flagDrawable);
+            if (!TextUtils.isEmpty(item.file_name)) {
+                int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
+                if (flagResId != 0) {
+                    flagImage.setImageDrawable(mContext.getResources().getDrawable(flagResId));
+                    flagImage.setVisibility(View.VISIBLE);
+                }
+            } else if (item.flag != null) {
+                flagImage.setImageDrawable(FlagsResources.getFlagDrawable(mContext, item.flag.name(), 96));
                 flagImage.setVisibility(View.VISIBLE);
             }
         }
@@ -104,15 +110,29 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
             });
         }
 
+        final ImageView more_data = ViewHolder.get(convertView, R.id.more_data);
+        if (more_data != null) {
+            more_data.setVisibility(View.GONE);
+            if (item.more) {
+                more_data.setVisibility(View.VISIBLE);
+            }
+        }
+
         final RelativeLayout layout = ViewHolder.get(convertView, R.id.line);
         if (layout != null) {
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    for (MoreFlag flag : mFlags) {
-                        flag.touched = flag.file_name.equals(item.file_name);
+                    if (item.more) {
+                        if (mListener != null) {
+                            mListener.showMore(item);
+                        }
+                    } else {
+                        for (MoreFlag flag : mFlags) {
+                            flag.touched = flag.file_name.equals(item.file_name);
+                        }
+                        notifyDataSetChanged();
                     }
-                    notifyDataSetChanged();
                 }
             });
         }
@@ -122,5 +142,6 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
 
     public interface MoreFlagItemClick {
         void onClick(MoreFlag flag);
+        void showMore(MoreFlag flag);
     }
 }

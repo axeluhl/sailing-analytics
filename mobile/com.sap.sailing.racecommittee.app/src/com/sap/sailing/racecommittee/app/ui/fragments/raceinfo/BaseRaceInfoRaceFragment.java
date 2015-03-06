@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -21,13 +23,11 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRa
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.StartModeFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.StartProcedureFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.StartTimeFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -54,10 +54,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     private View postponeFlags;
     private View courseFlags;
     private View moreFlags;
+    private TextView courseValue;
     private TextView startProcedureValue;
+    private ImageView courseIcon;
     private ImageView startModeFlag;
     private UpdateUiReceiver mReceiver;
     private FlagPoleCache flagPoleCache;
+
+    private RaceLogRaceStatus lastStatus = null;
 
     public BaseRaceInfoRaceFragment() {
         procedureListener = new ProcedureChangedListener();
@@ -93,6 +97,8 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 course.setOnClickListener(new CourseClick());
             }
             courseLock = getView().findViewById(R.id.course_lock);
+            courseIcon = (ImageView) getView().findViewById(R.id.course_icon);
+            courseValue = (TextView) getView().findViewById(R.id.course_value);
 
             wind = getView().findViewById(R.id.wind);
             if (wind != null) {
@@ -176,6 +182,110 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     @Override
     public void notifyTick() {
         super.notifyTick();
+
+        if (!getRace().getStatus().equals(lastStatus)) {
+            lastStatus = getRace().getStatus();
+            setLockUnlock();
+        }
+    }
+
+    private void setLockUnlock() {
+        switch (getRace().getStatus()) {
+            case UNSCHEDULED:
+                changeVisibility(startProcedureLock, View.GONE);
+                changeVisibility(startModeLock, View.GONE);
+                changeVisibility(courseLock, View.GONE);
+                changeVisibility(windLock, View.GONE);
+
+                changeVisibility(postponeFlags, View.VISIBLE);
+                changeVisibility(abandonFlags, View.VISIBLE);
+                changeVisibility(recallFlags, View.VISIBLE);
+                changeVisibility(moreFlags, View.VISIBLE);
+                break;
+
+            case SCHEDULED:
+            case STARTPHASE:
+                changeVisibility(startProcedureLock, View.GONE);
+                changeVisibility(startModeLock, View.GONE);
+                changeVisibility(courseLock, View.GONE);
+                changeVisibility(windLock, View.GONE);
+
+                changeVisibility(postponeFlags, View.VISIBLE);
+                changeVisibility(abandonFlags, View.GONE);
+                changeVisibility(recallFlags, View.GONE);
+                changeVisibility(moreFlags, View.GONE);
+                uncheckMarker(abandonFlags);
+                uncheckMarker(recallFlags);
+                uncheckMarker(moreFlags);
+                break;
+
+            case RUNNING:
+                changeVisibility(startProcedureLock, View.VISIBLE);
+                changeVisibility(startModeLock, View.VISIBLE);
+                changeVisibility(courseLock, View.GONE);
+                changeVisibility(windLock, View.GONE);
+                uncheckMarker(startProcedure);
+                uncheckMarker(startMode);
+
+                changeVisibility(postponeFlags, View.VISIBLE);
+                changeVisibility(abandonFlags, View.VISIBLE);
+                changeVisibility(recallFlags, View.VISIBLE);
+                changeVisibility(moreFlags, View.VISIBLE);
+                break;
+
+            case FINISHING:
+                changeVisibility(startProcedureLock, View.VISIBLE);
+                changeVisibility(startModeLock, View.VISIBLE);
+                changeVisibility(courseLock, View.VISIBLE);
+                changeVisibility(windLock, View.GONE);
+                uncheckMarker(startProcedure);
+                uncheckMarker(startMode);
+                uncheckMarker(courseLock);
+
+                changeVisibility(postponeFlags, View.VISIBLE);
+                changeVisibility(abandonFlags, View.VISIBLE);
+                changeVisibility(recallFlags, View.VISIBLE);
+                changeVisibility(moreFlags, View.VISIBLE);
+                break;
+
+            case FINISHED:
+                changeVisibility(startProcedureLock, View.GONE);
+                changeVisibility(startModeLock, View.GONE);
+                changeVisibility(courseLock, View.GONE);
+                changeVisibility(windLock, View.GONE);
+                uncheckMarker(startProcedure);
+                uncheckMarker(startMode);
+                uncheckMarker(course);
+                uncheckMarker(wind);
+
+                changeVisibility(postponeFlags, View.VISIBLE);
+                changeVisibility(abandonFlags, View.VISIBLE);
+                changeVisibility(recallFlags, View.VISIBLE);
+                changeVisibility(moreFlags, View.VISIBLE);
+                break;
+
+            default:
+                changeVisibility(startProcedureLock, View.VISIBLE);
+                changeVisibility(startModeLock, View.VISIBLE);
+                changeVisibility(courseLock, View.VISIBLE);
+                changeVisibility(windLock, View.VISIBLE);
+                uncheckMarker(startProcedure);
+                uncheckMarker(startMode);
+                uncheckMarker(course);
+                uncheckMarker(wind);
+
+                changeVisibility(postponeFlags, View.GONE);
+                changeVisibility(abandonFlags, View.GONE);
+                changeVisibility(recallFlags, View.GONE);
+                changeVisibility(moreFlags, View.GONE);
+                break;
+        }
+    }
+
+    private void changeVisibility(View view, int visibility) {
+        if (view != null) {
+            view.setVisibility(visibility);
+        }
     }
 
     protected ProcedureType getRacingProcedure() {
@@ -250,6 +360,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
     private void updateUi() {
 
+        if (courseIcon != null) {
+            courseIcon.setImageDrawable(getResources().getDrawable(R.drawable.course_updown_64dp));
+        }
+
+        if (courseValue != null) {
+            courseValue.setText(getRaceState().getCourseDesign().getName());
+        }
+
         if (startProcedureValue != null) {
             startProcedureValue.setText(getRacingProcedure().getType().toString());
         }
@@ -270,40 +388,46 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     }
 
     private void uncheckMarker(View v) {
-        if (!v.equals(startProcedure)) {
-            setMarkerLevel(startProcedure, R.id.start_procedure_marker, 0);
-        }
+        if (v != null) {
+            if (!v.equals(startProcedure)) {
+                resetFragment(startProcedureLock, StartProcedureFragment.class);
+                setMarkerLevel(startProcedure, R.id.start_procedure_marker, 0);
+            }
 
-        if (!v.equals(startMode)) {
-            setMarkerLevel(startMode, R.id.start_mode_marker, 0);
-        }
+            if (!v.equals(startMode)) {
+                resetFragment(startModeLock, StartModeFragment.class);
+                setMarkerLevel(startMode, R.id.start_mode_marker, 0);
+            }
 
-        if (!v.equals(course)) {
-            setMarkerLevel(course, R.id.course_marker, 0);
-        }
+            if (!v.equals(course)) {
+                resetFragment(courseLock, CourseFragment.class);
+                setMarkerLevel(course, R.id.course_marker, 0);
+            }
 
-        if (!v.equals(wind)) {
-            setMarkerLevel(wind, R.id.wind_marker, 0);
-        }
+            if (!v.equals(wind)) {
+                resetFragment(windLock, WindFragment.class);
+                setMarkerLevel(wind, R.id.wind_marker, 0);
+            }
 
-        if (!v.equals(abandonFlags)) {
-            setMarkerLevel(abandonFlags, R.id.abandon_flags_marker, 0);
-        }
+            if (!v.equals(abandonFlags)) {
+                setMarkerLevel(abandonFlags, R.id.abandon_flags_marker, 0);
+            }
 
-        if (!v.equals(recallFlags)) {
-            setMarkerLevel(recallFlags, R.id.recall_flags_marker, 0);
-        }
+            if (!v.equals(recallFlags)) {
+                setMarkerLevel(recallFlags, R.id.recall_flags_marker, 0);
+            }
 
-        if (!v.equals(postponeFlags)) {
-            setMarkerLevel(postponeFlags, R.id.postpone_flags_marker, 0);
-        }
+            if (!v.equals(postponeFlags)) {
+                setMarkerLevel(postponeFlags, R.id.postpone_flags_marker, 0);
+            }
 
-        if (!v.equals(courseFlags)) {
-            setMarkerLevel(courseFlags, R.id.course_flags_marker, 0);
-        }
+            if (!v.equals(courseFlags)) {
+                setMarkerLevel(courseFlags, R.id.course_flags_marker, 0);
+            }
 
-        if (!v.equals(moreFlags)) {
-            setMarkerLevel(moreFlags, R.id.more_flags_marker, 0);
+            if (!v.equals(moreFlags)) {
+                setMarkerLevel(moreFlags, R.id.more_flags_marker, 0);
+            }
         }
     }
 
@@ -318,6 +442,16 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         }
 
         return retValue;
+    }
+
+    private void resetFragment(View lockIcon, Class cls) {
+        if (lockIcon != null && lockIcon.getVisibility() == View.VISIBLE) {
+            Fragment fragment = getFragmentManager().findFragmentById(R.id.race_frame);
+            if (fragment != null) {
+                //TODO Reset only if current fragment will be invalid
+//                replaceFragment(RaceFlagViewerFragment.newInstance());
+            }
+        }
     }
 
     private int setMarkerLevel(View v, @IdRes int resId, int level) {
@@ -474,7 +608,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                         break;
 
                     case 1:
-                        replaceFragment(EmptyFragment.newInstance());
+                        replaceFragment(CourseFragment.newInstance(1));
                         break;
 
                     default:

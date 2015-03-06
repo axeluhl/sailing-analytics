@@ -24,7 +24,7 @@
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
             android:text="@string/wind_off"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textSize="@dimen/textSize_26"/>
 
         <ImageView
             android:id="@+id/wind_off"
@@ -74,20 +74,28 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:text="@string/wind"
-                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="@dimen/textSize_26"
                 android:textColor="@color/white" />
         </LinearLayout>
     </RelativeLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header"
+        android:orientation="vertical"
         android:background="@color/sap_gray_black_30">
+
+        <ViewStub android:id="@+id/race_header"
+            android:layout="@layout/race_content_header"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_width="match_parent" />
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="3"
             android:layout_centerInParent="true"
             android:layout_margin="@dimen/default_margin"
             android:orientation="vertical">
@@ -101,6 +109,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_margin="@dimen/default_margin_half"
                 android:background="@color/sap_blue_1"
+                android:enabled="false"
                 android:padding="@dimen/default_padding_half"
                 android:text="@string/wind_set_data"
                 android:textAllCaps="true"
@@ -138,7 +147,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_margin="@dimen/default_margin"
-                        android:text="@string/wind_from" />
+                        android:text="@string/wind_from"
+                        android:textSize="@dimen/textSize_22"/>
 
                     <com.sap.sailing.racecommittee.app.ui.views.CompassView
                         android:id="@+id/compassView"
@@ -161,7 +171,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_margin="@dimen/default_margin"
-                        android:text="@string/wind_speed" />
+                        android:text="@string/wind_speed"
+                        android:textSize="@dimen/textSize_22"/>
 
                     <NumberPicker
                         android:id="@+id/wind_speed"
@@ -183,6 +194,7 @@
                         android:layout_centerHorizontal="true"
                         android:layout_margin="@dimen/default_margin"
                         android:text="@string/wind_position"
+                        android:textSize="@dimen/textSize_22"
                         android:visibility="visible" />
 
                     <RelativeLayout
@@ -259,5 +271,5 @@
                 </RelativeLayout>
             </LinearLayout>
         </RelativeLayout>
-    </RelativeLayout>
+    </LinearLayout>
 </RelativeLayout>

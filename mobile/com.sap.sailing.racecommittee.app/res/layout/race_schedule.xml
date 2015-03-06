@@ -265,7 +265,7 @@
             android:layout_margin="@dimen/default_margin_half"
             android:layout_toLeftOf="@+id/wind_value"
             android:layout_toStartOf="@+id/wind_value"
-            android:src="@drawable/wind_on" />
+            android:src="@drawable/wind_off" />
 
         <TextView
             android:id="@+id/wind_value"

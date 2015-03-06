@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled;
+package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -15,8 +14,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 public class StartTimeFragment extends RaceFragment implements View.OnClickListener {
 
@@ -121,6 +118,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
                 }
                 mTimePicker.setCurrentHour(hours);
                 mTimePicker.setCurrentMinute(minutes);
+                mTimePicker.setTag(time.get(Calendar.SECOND));
             }
         }
     }
@@ -175,8 +173,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        TimePoint now = new MillisecondsTimePoint(new Date());
-        Calendar calendar = Calendar.getInstance();
+        Calendar now = Calendar.getInstance();
         switch (view.getId()) {
             case R.id.start_min_five:
             case R.id.start_min_one:
@@ -186,23 +183,17 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
                 } catch (Exception ex) {
                     minutes = 0;
                 }
-                now = now.plus(TimeUnit.MINUTES.toMillis(minutes));
+                now.add(Calendar.MINUTE, minutes);
 
                 if (mTimePicker != null) {
-                    mTimePicker.setCurrentHour(now.asDate().getHours());
-                    mTimePicker.setCurrentMinute(now.asDate().getMinutes());
+                    mTimePicker.setCurrentHour(now.get(Calendar.HOUR_OF_DAY));
+                    mTimePicker.setCurrentMinute(now.get(Calendar.MINUTE));
+                    mTimePicker.setTag(now.get(Calendar.SECOND));
                 }
                 break;
 
             case R.id.set_start_time:
-                calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue());
-                calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
-                calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
-
-                TimePoint startTime =  new MillisecondsTimePoint(calendar.getTimeInMillis());
-                changeFragment(startTime);
+                changeFragment(getPickerTime());
                 break;
 
             case R.id.header_text:

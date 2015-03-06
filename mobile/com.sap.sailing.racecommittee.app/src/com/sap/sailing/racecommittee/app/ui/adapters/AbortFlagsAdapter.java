@@ -21,7 +21,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
     public class AbortFlag extends FlagItem {
 
         public AbortFlag(String line1, String line2, String fileName, Flags flag) {
-            super(line1, line2, fileName, flag);
+            super(line1, line2, fileName, false, flag);
         }
     }
 

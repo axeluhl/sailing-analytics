@@ -38,7 +38,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRa
 import com.sap.sailing.racecommittee.app.ui.fragments.*;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.unscheduled.WindFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -189,7 +189,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             TimePoint startTime = mSelectedRace.getState().getStartTime();
 
             timeStart = (TextView) findViewById(R.id.time_start);
-            if (timeStart != null) {
+            if (timeStart != null && startTime != null) {
                 timeStart.setText(getString(R.string.time_start).replace("#TIME#", dateFormat.format(startTime.asDate())));
             }
 
@@ -197,7 +197,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             //TODO Add this later
 
             headerTime = (TextView) findViewById(R.id.timer_text);
-            if (headerTime != null) {
+            if (headerTime != null && startTime != null) {
                 String time;
                 if (startTime.asMillis() > now.asMillis()) {
                     time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());

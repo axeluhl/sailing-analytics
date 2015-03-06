@@ -18,7 +18,7 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
     public class RecallFlag extends FlagItem {
 
         public RecallFlag(String line1, String line2, String fileName) {
-            super(line1, line2, fileName, null);
+            super(line1, line2, fileName, false, null);
         }
     }
 
