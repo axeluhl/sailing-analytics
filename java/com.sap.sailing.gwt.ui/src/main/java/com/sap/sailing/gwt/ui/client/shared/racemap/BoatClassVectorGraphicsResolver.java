@@ -22,13 +22,19 @@ public class BoatClassVectorGraphicsResolver {
     static {
     	compatibleBoatVectorGraphicsMap = new HashMap<>();
     	
-    	BoatClassVectorGraphics laser = new LaserVectorGraphics(BoatClassMasterdata.LASER_INT, BoatClassMasterdata.LASER_RADIAL);
-    	BoatClassVectorGraphics _49er = new _49erVectorGraphics(BoatClassMasterdata._49ER, BoatClassMasterdata._49ERFX, BoatClassMasterdata._29ER);
-    	BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics(BoatClassMasterdata.EXTREME_40, BoatClassMasterdata.D_35);
+        BoatClassVectorGraphics laser = new LaserVectorGraphics(BoatClassMasterdata.LASER_INT,
+                BoatClassMasterdata.LASER_RADIAL, BoatClassMasterdata.LASER_4_7, BoatClassMasterdata.CONTENDER,
+                BoatClassMasterdata.FINN, BoatClassMasterdata.MUSTO_SKIFF, BoatClassMasterdata.OPEN_BIC,
+                BoatClassMasterdata.OPTIMIST, BoatClassMasterdata.RS_X, BoatClassMasterdata.STAR);
+        BoatClassVectorGraphics _49er = new _49erVectorGraphics(BoatClassMasterdata._49ER, BoatClassMasterdata._49ERFX,
+                BoatClassMasterdata._29ER);
+        BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics(BoatClassMasterdata.EXTREME_40,
+                BoatClassMasterdata.D_35);
         BoatClassVectorGraphics smallMultihull = new SmallMultihullVectorGraphics(BoatClassMasterdata.NACRA_17,
                 BoatClassMasterdata.F_16, BoatClassMasterdata.F_18, BoatClassMasterdata.HOBIE_WILD_CAT,
                 BoatClassMasterdata.HOBIE_TIGER, BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO);
-        BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.J70, BoatClassMasterdata.B_ONE, BoatClassMasterdata.J80);
+        BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.J70,
+                BoatClassMasterdata.B_ONE, BoatClassMasterdata.J80, BoatClassMasterdata.LASER_SB3);
 
         defaultBoatVectorGraphics = laser; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.
         for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker}) {
