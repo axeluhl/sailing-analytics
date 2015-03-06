@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
+import com.sap.sailing.gwt.ui.shared.racemap.DinghyWithSpinnakerVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.Extreme40VectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.KeelBoatWithGennakerVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.LaserVectorGraphics;
@@ -35,9 +36,15 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.HOBIE_TIGER, BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO);
         BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.J70,
                 BoatClassMasterdata.B_ONE, BoatClassMasterdata.J80, BoatClassMasterdata.LASER_SB3);
+        BoatClassVectorGraphics dinghyWithSpinnaker = new DinghyWithSpinnakerVectorGraphics(BoatClassMasterdata._420,
+                BoatClassMasterdata._470, BoatClassMasterdata._5O5, BoatClassMasterdata.FLYING_DUTCHMAN,
+                BoatClassMasterdata.FOLKBOAT, BoatClassMasterdata.DYAS, BoatClassMasterdata.DRAGON_INT,
+                BoatClassMasterdata.ELLIOTT_6M, BoatClassMasterdata.H_BOAT, BoatClassMasterdata.ALBIN_EXPRESS,
+                BoatClassMasterdata.FARR_30, BoatClassMasterdata.J24, BoatClassMasterdata.PLATU_25,
+                BoatClassMasterdata.STREAMLINE, BoatClassMasterdata.SWAN_45, BoatClassMasterdata.X_99);
 
-        defaultBoatVectorGraphics = laser; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.
-        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker}) {
+        defaultBoatVectorGraphics = dinghyWithSpinnaker; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.
+        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker, dinghyWithSpinnaker}) {
             for (BoatClassMasterdata b : g.getCompatibleBoatClasses()) {
                 compatibleBoatVectorGraphicsMap.put(b, g);
             }
