@@ -25,79 +25,79 @@ public class SailingClusterGroups {
         Comparator<Speed> comparableComparator = new ComparableComparator<Speed>();
         
         Speed lowerBoundWindSpeed = new KnotSpeedImpl(0.0);
-        ClusterBoundary<Speed> lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        ClusterBoundary<Speed> lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         Speed upperBoundWindSpeed = new KnotSpeedImpl(1.0);
-        ClusterBoundary<Speed> upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        ClusterBoundary<Speed> upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft0", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(1.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(4.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft1", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(4.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(7.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft2", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(7.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(11.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft3", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(11.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(16.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft4", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(16.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(22.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft5", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(22.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(28.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft6", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(28.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(34.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft7", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(34.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(41.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft8", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(41.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(48.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft9", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(48.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(56.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft10", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(56.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         upperBoundWindSpeed = new KnotSpeedImpl(64.0);
-        upperBound = new ComparatorClusterBoundary<Speed>(comparableComparator, upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN);
+        upperBound = new ComparatorClusterBoundary<Speed>(upperBoundWindSpeed, ComparisonStrategy.LOWER_THAN, comparableComparator);
         clusters.add(new ClusterWithLowerAndUpperBoundaries<Speed>("Bft11", lowerBound, upperBound));
         
         lowerBoundWindSpeed = new KnotSpeedImpl(64.0);
-        lowerBound = new ComparatorClusterBoundary<Speed>(comparableComparator, lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
+        lowerBound = new ComparatorClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN, comparableComparator);
         clusters.add(new ClusterWithSingleBoundary<Speed>("Bft12", lowerBound));
         
         windStrengthInBeaufortCluster = new FixClusterGroup<Speed>("BftClusterGroup", clusters);

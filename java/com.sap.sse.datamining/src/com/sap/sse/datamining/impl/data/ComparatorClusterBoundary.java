@@ -6,8 +6,8 @@ public class ComparatorClusterBoundary<ElementType> extends AbstractClusterBound
 
     private final Comparator<? super ElementType> comparator;
 
-    public ComparatorClusterBoundary(Comparator<? super ElementType> comparator, ElementType boundaryValue,
-                                     ComparisonStrategy strategy) {
+    public ComparatorClusterBoundary(ElementType boundaryValue, ComparisonStrategy strategy,
+                                     Comparator<? super ElementType> comparator) {
         super(boundaryValue, strategy);
         this.comparator = comparator;
     }
