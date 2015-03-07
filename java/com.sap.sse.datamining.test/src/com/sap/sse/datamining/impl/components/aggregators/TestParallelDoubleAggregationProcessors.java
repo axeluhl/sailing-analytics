@@ -102,6 +102,44 @@ public class TestParallelDoubleAggregationProcessors {
         return result;
     }
 
+    @Test
+    public void testMaxAggregationProcessor() throws InterruptedException {
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> maxAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Max, Double.class);
+        Collection<GroupedDataEntry<Double>> elements = createElements();
+        ConcurrencyTestsUtil.processElements(maxAggregationProcessor, elements);
+        
+        maxAggregationProcessor.finish();
+        Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedMaxAggregations();
+        ConcurrencyTestsUtil.verifyResultData(receivedAggregations, expectedReceivedAggregations);
+    }
+
+    private Map<GroupKey, Double> computeExpectedMaxAggregations() {
+        Map<GroupKey, Double> result = new HashMap<>();
+        result.put(new GenericGroupKey<Integer>(1), 10.0);
+        result.put(new GenericGroupKey<Integer>(2), 7.0);
+        result.put(new GenericGroupKey<Integer>(3), 5.0);
+        return result;
+    }
+
+    @Test
+    public void testMinAggregationProcessor() throws InterruptedException {
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> minAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Min, Double.class);
+        Collection<GroupedDataEntry<Double>> elements = createElements();
+        ConcurrencyTestsUtil.processElements(minAggregationProcessor, elements);
+        
+        minAggregationProcessor.finish();
+        Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedMinAggregations();
+        ConcurrencyTestsUtil.verifyResultData(receivedAggregations, expectedReceivedAggregations);
+    }
+
+    private Map<GroupKey, Double> computeExpectedMinAggregations() {
+        Map<GroupKey, Double> result = new HashMap<>();
+        result.put(new GenericGroupKey<Integer>(1), 5.0);
+        result.put(new GenericGroupKey<Integer>(2), 3.0);
+        result.put(new GenericGroupKey<Integer>(3), 5.0);
+        return result;
+    }
+
     private Collection<GroupedDataEntry<Double>> createElements() {
         Collection<GroupedDataEntry<Double>> elements = new ArrayList<>();
         
