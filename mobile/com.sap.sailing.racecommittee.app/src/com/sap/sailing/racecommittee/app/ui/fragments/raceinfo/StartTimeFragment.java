@@ -89,6 +89,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
     @Override
     public void onDestroy() {
         getRaceState().removeChangedListener(raceStateChangedListener);
+        super.onDestroy();
     }
 
     @Override
@@ -138,11 +139,12 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
     @Override
     public void notifyTick() {
         super.notifyTick();
-
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         int resId;
         String time;
-
+        if (startTime == null) {
+            startTime = getPickerTime();
+        }
         if (startTime.after(now)) {
             resId = R.string.race_start_time_in;
             time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
@@ -193,7 +195,6 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
                 } catch (Exception ex) {
                     minutes = 0;
                 }
-                minutes++;
                 Calendar newStartTime = Calendar.getInstance();
                 newStartTime.add(Calendar.MINUTE, minutes);
                 getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), new MillisecondsTimePoint(newStartTime.getTime()));
