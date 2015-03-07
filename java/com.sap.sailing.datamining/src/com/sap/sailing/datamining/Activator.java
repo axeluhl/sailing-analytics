@@ -11,9 +11,11 @@ import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.DataSourceProvider;
+import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
@@ -21,18 +23,17 @@ import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 public class Activator extends AbstractDataMiningActivator implements DataMiningBundleService {
     
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Sailing_StringMessages";
+    private static final SailingClusterGroups clusterGroups = new SailingClusterGroups();
     
     private static Activator INSTANCE;
 
     private final ResourceBundleStringMessages sailingServerStringMessages;
     private final SailingDataRetrievalChainDefinitions dataRetrieverChainDefinitions;
-    private final SailingClusterGroups clusterGroups;
     private DataSourceProvider<?> racingEventServiceProvider;
     
     public Activator() {
         dataRetrieverChainDefinitions = new SailingDataRetrievalChainDefinitions();
         sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader());
-        clusterGroups = new SailingClusterGroups();
     }
 
     @Override
@@ -82,8 +83,8 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
         return dataSourceProviders;
     }
     
-    public SailingClusterGroups getClusterGroups() {
-        return clusterGroups;
+    public static ClusterGroup<Speed> getWindStrengthInBeaufortClusterGroup() {
+        return clusterGroups.getWindStrengthInBeaufortCluster();
     }
     
     public static Activator getDefault() {
