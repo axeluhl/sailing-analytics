@@ -5,7 +5,7 @@ import java.util.Set;
 
 import android.os.Handler;
 
-/*
+/**
  * Reports a tick every second as a singleton
  * 
  * TODO: make it possible to report ticks in other times (e.g. 2s...)

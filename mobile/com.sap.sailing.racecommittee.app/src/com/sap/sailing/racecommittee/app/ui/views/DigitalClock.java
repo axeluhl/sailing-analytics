@@ -11,7 +11,7 @@ import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
 public class DigitalClock extends TextView implements TickListener {
-    Calendar calendar = Calendar.getInstance();
+    private Calendar calendar = Calendar.getInstance();
     private final static String mFormat = "k:mm:ss";
 
     private boolean timerIsStopped = false;
