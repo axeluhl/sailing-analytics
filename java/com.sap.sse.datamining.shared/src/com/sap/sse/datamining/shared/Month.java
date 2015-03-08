@@ -16,7 +16,7 @@ public enum Month {
      */
     public static Month fromInt(int month) {
         if (month < 1 || month > 12) {
-            throw new IllegalArgumentException("Invalid value for MonthOfYear: " + month);
+            throw new IllegalArgumentException("Invalid value for month: " + month);
         }
         return VALUES[month - 1];
     }
