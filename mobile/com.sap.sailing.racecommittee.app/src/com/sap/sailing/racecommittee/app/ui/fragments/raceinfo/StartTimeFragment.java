@@ -1,19 +1,23 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.TextView;
+import android.widget.TimePicker;
+
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 
 public class StartTimeFragment extends RaceFragment implements View.OnClickListener {
 
@@ -129,11 +133,11 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
         super.notifyTick();
 
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        MillisecondsTimePoint startTime = getPickerTime();
+        TimePoint startTime = getPickerTime();
         int resId;
         String time;
 
-        if (startTime.asMillis() > now.asMillis()) {
+        if (startTime.after(now)) {
             resId = R.string.race_start_time_in;
             time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
         } else {
@@ -145,7 +149,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
         }
     }
 
-    private MillisecondsTimePoint getPickerTime() {
+    private TimePoint getPickerTime() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue());
         calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
