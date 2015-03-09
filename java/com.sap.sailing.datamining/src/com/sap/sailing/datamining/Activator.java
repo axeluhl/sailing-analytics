@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
@@ -47,7 +48,6 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     public void stop(BundleContext context) throws Exception {
         super.stop(context);
         INSTANCE = null;
-        racingEventServiceProvider = null;
     }
     
     @Override
@@ -64,6 +64,7 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     public Iterable<Class<?>> getClassesWithMarkedMethods() {
         Set<Class<?>> internalClasses = new HashSet<>();
         internalClasses.add(HasTrackedRaceContext.class);
+        internalClasses.add(HasRaceResultOfCompetitorContext.class);
         internalClasses.add(HasTrackedLegContext.class);
         internalClasses.add(HasTrackedLegOfCompetitorContext.class);
         internalClasses.add(HasGPSFixContext.class);
