@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
@@ -12,6 +13,8 @@ import com.sap.sse.datamining.shared.annotations.Dimension;
 public interface HasTrackedRaceContext {
     
     public TrackedRace getTrackedRace();
+    
+    public Leaderboard getLeaderboard();
     
     @Connector(messageKey="Regatta", ordinal=0)
     public Regatta getRegatta();

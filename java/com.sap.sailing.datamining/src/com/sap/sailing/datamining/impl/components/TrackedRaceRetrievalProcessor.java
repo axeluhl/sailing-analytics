@@ -30,7 +30,7 @@ public class TrackedRaceRetrievalProcessor extends
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
                     Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
-                    HasTrackedRaceContext trackedRaceWithContext = new TrackedRaceWithContext(regatta, fleet, trackedRace);
+                    HasTrackedRaceContext trackedRaceWithContext = new TrackedRaceWithContext(element, regatta, fleet, trackedRace);
                     trackedRacesWithContext.add(trackedRaceWithContext);
                 }
             }

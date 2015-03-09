@@ -10,13 +10,13 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.impl.components.GPSFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardGroupRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.LeaderboardRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.MarkPassingRetrievalProcessor;
-import com.sap.sailing.datamining.impl.components.RegattaLeaderboardRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
@@ -31,9 +31,9 @@ public class SailingDataRetrievalChainDefinitions {
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> trackedRaceRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 RacingEventService.class, HasTrackedLegOfCompetitorContext.class, "RaceSailingDomainRetrieverChain");
         trackedRaceRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardGroup.class, "LeaderboardGroup");
-        trackedRaceRetrieverChainDefinition.addAfter(LeaderboardGroupRetrievalProcessor.class, RegattaLeaderboardRetrievalProcessor.class,
-                RegattaLeaderboard.class, "RegattaLeaderboard");
-        trackedRaceRetrieverChainDefinition.addAfter(RegattaLeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class,
+        trackedRaceRetrieverChainDefinition.addAfter(LeaderboardGroupRetrievalProcessor.class, LeaderboardRetrievalProcessor.class,
+                Leaderboard.class, "Leaderboard");
+        trackedRaceRetrieverChainDefinition.addAfter(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class,
                 HasTrackedRaceContext.class, "Race");
 
         final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(

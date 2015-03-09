@@ -8,21 +8,30 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 
 public class TrackedRaceWithContext implements HasTrackedRaceContext {
 
+    private final Leaderboard leaderboard;
     private final Regatta regatta;
     private final Fleet fleet;
     private final TrackedRace trackedRace;
+    
     private Integer year;
     private boolean yearHasBeenInitialized;
 
-    public TrackedRaceWithContext(Regatta regatta, Fleet fleet, TrackedRace trackedRace) {
+    public TrackedRaceWithContext(Leaderboard leaderboard, Regatta regatta, Fleet fleet, TrackedRace trackedRace) {
+        this.leaderboard = leaderboard;
         this.regatta = regatta;
         this.fleet = fleet;
         this.trackedRace = trackedRace;
+    }
+    
+    @Override
+    public Leaderboard getLeaderboard() {
+        return leaderboard;
     }
     
     @Override
