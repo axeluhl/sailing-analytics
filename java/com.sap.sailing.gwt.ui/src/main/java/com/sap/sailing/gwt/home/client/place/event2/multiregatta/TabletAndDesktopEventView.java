@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2.multiregatta;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -12,10 +11,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionE
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event2.partials.header.EventHeader;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopEventView extends Composite implements EventMultiregattaView {
