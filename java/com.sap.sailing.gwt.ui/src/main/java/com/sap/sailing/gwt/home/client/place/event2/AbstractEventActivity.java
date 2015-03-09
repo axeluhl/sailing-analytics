@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -197,5 +198,18 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                         callback.onFailure(caught);
                     }
                 });
+    }
+    
+    @Override
+    public void ensureMedia(AsyncCallback<MediaDTO> callback) {
+        getSailingService().getMediaForEvent(ctx.getEventDTO().id, callback);
+    }
+    
+    @Override
+    public boolean hasMedia() {
+        if(showRegattaMetadata()) {
+            return false;
+        }
+        return ctx.getEventDTO().isHasMedia();
     }
 }

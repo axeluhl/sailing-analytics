@@ -14,18 +14,24 @@ public class ImageGallery extends Composite {
     interface ImageGalleryUiBinder extends UiBinder<Widget, ImageGallery> {
     }
     
-    private final ImageGalleryData imageGalleryData;
+    private ImageGalleryData imageGalleryData;
     
     @UiField DivElement titleUi;
     @UiField HTMLPanel imagesPanel;
     
-    public ImageGallery(ImageGalleryData data) {
-        this.imageGalleryData = data;
-        
+    public ImageGallery() {
         ImageGalleryResources.INSTANCE.css().ensureInjected();
         
         initWidget(uiBinder.createAndBindUi(this));
-        
+    }
+    
+    public ImageGallery(ImageGalleryData data) {
+        this();
+        setData(data);
+    }
+    
+    public void setData(ImageGalleryData data) {
+        this.imageGalleryData = data;
         titleUi.setInnerText(this.imageGalleryData.getName() != null ? this.imageGalleryData.getName() : "");
         
         for(ImageDescriptor imageDesc: imageGalleryData.getImages()) {

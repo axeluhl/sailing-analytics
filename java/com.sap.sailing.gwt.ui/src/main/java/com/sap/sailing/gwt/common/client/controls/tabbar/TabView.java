@@ -10,6 +10,10 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
  * Created by pgtaboada on 25.11.14.
  */
 public interface TabView<PLACE extends Place, PRESENTER> {
+    
+    public enum State {
+        VISIBLE, INVISIBLE, NOT_AVAILABLE
+    }
 
     /**
      * The place type that activates this tab.
@@ -34,4 +38,7 @@ public interface TabView<PLACE extends Place, PRESENTER> {
     void stop();
 
     PLACE placeToFire();
+    
+    // TODO implement as defender method when Java 8 is ready as this is "VISIBLE" in most cases
+    State getState();
 }

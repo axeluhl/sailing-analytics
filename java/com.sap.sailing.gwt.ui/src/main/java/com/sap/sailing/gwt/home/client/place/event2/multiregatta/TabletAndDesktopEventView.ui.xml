@@ -56,6 +56,9 @@
 			<c:tabcontent title="{i18n.regattas}">
 				<tabs:MultiregattaRegattasTabView />
 			</c:tabcontent>
+			<c:tabcontent title="{i18n.media}">
+				<tabs:MultiregattaMediaTabView />
+			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 

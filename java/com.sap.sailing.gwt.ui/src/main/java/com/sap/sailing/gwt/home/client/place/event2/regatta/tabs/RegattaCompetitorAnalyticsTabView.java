@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
@@ -54,6 +55,11 @@ public class RegattaCompetitorAnalyticsTabView extends Composite implements
     @Override
     public Class<RegattaCompetitorAnalyticsPlace> getPlaceClassForActivation() {
         return RegattaCompetitorAnalyticsPlace.class;
+    }
+    
+    @Override
+    public TabView.State getState() {
+        return TabView.State.VISIBLE;
     }
 
     @Override

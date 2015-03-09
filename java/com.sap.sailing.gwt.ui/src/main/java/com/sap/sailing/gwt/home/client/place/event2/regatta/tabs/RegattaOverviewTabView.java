@@ -5,6 +5,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
@@ -21,6 +22,11 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     @Override
     public Class<RegattaOverviewPlace> getPlaceClassForActivation() {
         return RegattaOverviewPlace.class;
+    }
+    
+    @Override
+    public TabView.State getState() {
+        return TabView.State.VISIBLE;
     }
 
     @Override

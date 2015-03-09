@@ -5543,10 +5543,4 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // TODO implement correctly
         return new MediaDTO();
     }
-
-    @Override
-    public MediaDTO getMediaForEventRegatta(UUID eventId, String regattaId) {
-        // TODO implement correctly
-        return new MediaDTO();
-    }
 }

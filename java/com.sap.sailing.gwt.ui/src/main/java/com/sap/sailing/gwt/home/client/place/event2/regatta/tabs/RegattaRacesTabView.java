@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event2.partials.regattaraces.EventRegattaRaces;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
@@ -45,6 +46,12 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         this.currentPresenter = currentPresenter;
 
     }
+    
+    @Override
+    public TabView.State getState() {
+        return TabView.State.VISIBLE;
+    }
+    
     @Override
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
 

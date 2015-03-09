@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.common.client.controls.tabbar;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
 
 /**
  * Defines whole layout for site, including the header with the breadcrumbs and tab bar, and the content.
@@ -26,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabPanel<PRESENTER> extends Composite {
     private static TabPanelUiBinder ourUiBinder = GWT.create(TabPanelUiBinder.class);
-    private final Map<Class<Place>, TabView<Place, PRESENTER>> knownTabs = new HashMap<>();
+    private final Map<Class<Place>, TabView<Place, PRESENTER>> knownTabs = new LinkedHashMap<>();
     @UiField
     SimplePanel additionalHeader;
     @UiField
@@ -71,8 +72,10 @@ public class TabPanel<PRESENTER> extends Composite {
         tab.setPresenter(presenter);
         knownTabs.put(tab.getPlaceClassForActivation(), tab);
 
-        String link = "#" + historyMapper.getToken(tab.placeToFire());
-        tabBar.addTab(title, tab.getPlaceClassForActivation(), link);
+        if(tab.getState() == State.VISIBLE) {
+            String link = "#" + historyMapper.getToken(tab.placeToFire());
+            tabBar.addTab(title, tab.getPlaceClassForActivation(), link);
+        }
     }
 
     /**
@@ -103,13 +106,24 @@ public class TabPanel<PRESENTER> extends Composite {
      */
     public void activatePlace(Place placeToGo) {
         if (knownTabs.containsKey(placeToGo.getClass())) {
+            final TabView<Place, PRESENTER> newTab = knownTabs.get(placeToGo.getClass());
+            
+            if(newTab.getState() == State.NOT_AVAILABLE) {
+                for(TabView<Place, PRESENTER> tab : knownTabs.values()) {
+                    if(tab.getState() == State.VISIBLE) {
+                        // TODO is this redirect wanted? Just silently select another tab?
+                        if (currentTab != null) {
+                            currentTab.stop();
+                        }
+                        fireEvent(new TabPanelPlaceSelectionEvent(tab));
+                    }
+                }
+            }
 
-            final TabView<Place, PRESENTER> newTabActivity = knownTabs.get(placeToGo.getClass());
-
-            newTabActivity.start(placeToGo, tabContentPanelUi);
+            newTab.start(placeToGo, tabContentPanelUi);
             tabBar.select(placeToGo);
 
-            currentTab = newTabActivity;
+            currentTab = newTab;
 
         }
 

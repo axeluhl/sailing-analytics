@@ -4,7 +4,7 @@
 	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
 	xmlns:tabs="urn:import:com.sap.sailing.gwt.home.client.place.event2.regatta.tabs" 
 	xmlns:h="urn:import:com.sap.sailing.gwt.home.client.place.event2.partials.header">
-	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:style>
 		.header {
 		position: relative;
@@ -63,9 +63,9 @@
 			<c:tabcontent title="{i18n.competitorsAnalytics}">
 				<tabs:RegattaCompetitorAnalyticsTabView />
 			</c:tabcontent>
-<!-- 			<c:tabcontent title="{i18n.media}"> -->
-<!-- 				<tabs:RegattaMediaTabView /> -->
-<!-- 			</c:tabcontent> -->
+			<c:tabcontent title="{i18n.media}">
+				<tabs:RegattaMediaTabView />
+			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 

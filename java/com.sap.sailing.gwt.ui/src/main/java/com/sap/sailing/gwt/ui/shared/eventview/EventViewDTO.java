@@ -29,6 +29,7 @@ public class EventViewDTO extends EventDTO {
     // TODO: frank, please implement
     private EventType type;
     private EventState state;
+    private boolean hasMedia;
 
     public EventViewDTO() {
         this(new ArrayList<LeaderboardGroupDTO>());
@@ -117,5 +118,13 @@ public class EventViewDTO extends EventDTO {
     }
     public String getSeriesIdAsString() {
         return id.toString();
+    }
+
+    public boolean isHasMedia() {
+        return hasMedia;
+    }
+
+    public void setHasMedia(boolean hasMedia) {
+        this.hasMedia = hasMedia;
     }
 }
