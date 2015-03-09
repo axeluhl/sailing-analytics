@@ -36,17 +36,33 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
 
     @Override
     public AdditionalResultData build(long calculationTimeInNanos, ResourceBundleStringMessages stringMessages, Locale locale) {
-        return new AdditionalResultDataImpl(retrievedDataAmount, buildResultSignifier(stringMessages, locale), unit, resultDecimals, calculationTimeInNanos);
+        String unitSignifier = buildUnitSignifier(stringMessages, locale);
+        String resultSignifier = buildResultSignifier(stringMessages, locale, unitSignifier);
+        return new AdditionalResultDataImpl(retrievedDataAmount, resultSignifier, unit, unitSignifier,
+                resultDecimals, calculationTimeInNanos);
     }
 
-    private String buildResultSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
+    private String buildResultSignifier(ResourceBundleStringMessages stringMessages, Locale locale, String unitSignifier) {
         if (extractionFunction == null || aggregationNameMessageKey == null) {
             return "";
         }
         
         String extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
         String aggregationName = stringMessages.get(locale, aggregationNameMessageKey);
-        return stringMessages.get(locale, "ResultSignifier", extractedStatisticName, aggregationName);
+        String resultSignifier = stringMessages.get(locale, "ResultSignifier", extractedStatisticName, aggregationName);
+        if (unit == null || unit == Unit.None || unitSignifier.isEmpty()) {
+            return resultSignifier;
+        } else {
+            return stringMessages.get(locale, "SignifierInUnit", resultSignifier, unitSignifier);
+        }
+    }
+
+    private String buildUnitSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
+        if (unit == null || unit == Unit.None) {
+            return "";
+        }
+        
+        return stringMessages.get(locale, unit.toString());
     }
 
     @Override
