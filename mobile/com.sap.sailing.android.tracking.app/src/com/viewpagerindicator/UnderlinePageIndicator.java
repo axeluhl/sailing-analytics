@@ -15,12 +15,15 @@
  */
 package com.viewpagerindicator;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.view.MotionEventCompat;
@@ -80,6 +83,10 @@ public class UnderlinePageIndicator extends View implements PageIndicator {
         this(context, attrs, R.attr.vpiUnderlinePageIndicatorStyle);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    // Allows code which, is not part of the minSDK.
+    @SuppressWarnings("deprecation")
+    // Deprecated method will only be called if API level is below 16.
     public UnderlinePageIndicator(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         if (isInEditMode()) return;
@@ -102,7 +109,13 @@ public class UnderlinePageIndicator extends View implements PageIndicator {
 
         Drawable background = a.getDrawable(R.styleable.UnderlinePageIndicator_android_background);
         if (background != null) {
-          setBackgroundDrawable(background);
+        	if (background != null) {
+            	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    setBackground(background);
+                } else {
+                    setBackgroundDrawable(background);
+                }
+            }
         }
 
         a.recycle();
@@ -180,6 +193,8 @@ public class UnderlinePageIndicator extends View implements PageIndicator {
         canvas.drawRect(left, top, right, bottom, mPaint);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    // OnClick method is not overridden. This has no impact on the app.
     public boolean onTouchEvent(MotionEvent ev) {
         if (super.onTouchEvent(ev)) {
             return true;

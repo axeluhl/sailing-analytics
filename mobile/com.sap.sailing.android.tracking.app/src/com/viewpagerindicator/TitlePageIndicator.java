@@ -19,6 +19,8 @@ package com.viewpagerindicator;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -28,6 +30,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.view.MotionEventCompat;
@@ -37,6 +40,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+
 import com.sap.sailing.android.tracking.app.R;
 
 
@@ -158,7 +162,11 @@ public class TitlePageIndicator extends View implements PageIndicator {
         this(context, attrs, R.attr.vpiTitlePageIndicatorStyle);
     }
 
-    public TitlePageIndicator(Context context, AttributeSet attrs, int defStyle) {
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    // Allows code which, is not part of the minSDK.
+    @SuppressWarnings("deprecation")
+    // Deprecated method will only be called if API level is below 16.
+	public TitlePageIndicator(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         if (isInEditMode()) return;
 
@@ -208,7 +216,11 @@ public class TitlePageIndicator extends View implements PageIndicator {
 
         Drawable background = a.getDrawable(R.styleable.TitlePageIndicator_android_background);
         if (background != null) {
-          setBackgroundDrawable(background);
+        	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                setBackground(background);
+            } else {
+                setBackgroundDrawable(background);
+            }
         }
 
         a.recycle();
@@ -540,9 +552,14 @@ public class TitlePageIndicator extends View implements PageIndicator {
                 canvas.drawPath(mPath, mPaintFooterIndicator);
                 mPaintFooterIndicator.setAlpha(0xFF);
                 break;
+		default:
+			break;
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    // OnClick method is not overridden. This has no impact on the app.
+	@Override
     public boolean onTouchEvent(android.view.MotionEvent ev) {
         if (super.onTouchEvent(ev)) {
             return true;
