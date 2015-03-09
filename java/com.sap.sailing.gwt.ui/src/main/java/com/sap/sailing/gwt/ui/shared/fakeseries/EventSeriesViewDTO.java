@@ -13,7 +13,18 @@ public class EventSeriesViewDTO implements IsSerializable {
     private String baseUrl;
     private boolean onRemoteServer;
     private String logoImageURL;
+    private boolean hasMedia;
 
+    public enum EventSeriesState {
+        UPCOMING, RUNNING, IN_PROGRESS, FINISHED
+    }
+
+    // TODO: frank, please implement
+    public EventSeriesState state;
+
+    public EventSeriesViewDTO() {
+    }
+    
     public UUID getId() {
         return id;
     }
@@ -60,5 +71,13 @@ public class EventSeriesViewDTO implements IsSerializable {
     
     public void setLogoImageURL(String logoImageURL) {
         this.logoImageURL = logoImageURL;
+    }
+
+    public boolean isHasMedia() {
+        return hasMedia;
+    }
+
+    public void setHasMedia(boolean hasMedia) {
+        this.hasMedia = hasMedia;
     }
 }

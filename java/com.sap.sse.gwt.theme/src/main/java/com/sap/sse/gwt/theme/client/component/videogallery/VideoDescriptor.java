@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class VideoDescriptor {
     private String title;
+    private String subtitle;
     private Date createdAtDate;
     private String author;
 
@@ -89,5 +90,13 @@ public class VideoDescriptor {
 
     public void setThumbnailHeightInPx(int thumbnailHeightInPx) {
         this.thumbnailHeightInPx = thumbnailHeightInPx;
+    }
+
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
     }
 }

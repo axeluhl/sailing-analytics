@@ -5497,18 +5497,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setOnRemoteServer(o.isOnRemoteServer());
         dto.setLogoImageURL(o.getLogoImageURL());
         
-        LeaderboardGroupDTO lg = o.getLeaderboardGroups().get(0);
-        dto.setDisplayName(lg.getDisplayName() != null ? lg.getDisplayName() : lg.getName());
-        for (StrippedLeaderboardDTO sl : lg.leaderboards) {
-            EventSeriesEventDTO eventOfSeries = new EventSeriesEventDTO();
-            eventOfSeries.setId(id);
-            eventOfSeries.setDisplayName(sl.displayName != null ? sl.displayName : sl.name);
-            eventOfSeries.setStartDate(o.startDate);
-            eventOfSeries.setEndDate(o.endDate);
-            eventOfSeries.setState(EventState.UPCOMMING);
-            eventOfSeries.setVenue(o.venue.getName());
-            dto.addEvent(eventOfSeries);
+        if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
+            LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
+            dto.setDisplayName(overallLeaderboardGroupDTO.getDisplayName() != null ? overallLeaderboardGroupDTO.getDisplayName() : overallLeaderboardGroupDTO.getName());
+            for (StrippedLeaderboardDTO eventSeriesEventLeaderboardDTO : overallLeaderboardGroupDTO.leaderboards) {
+                Leaderboard leaderboard = getService().getLeaderboardByName(eventSeriesEventLeaderboardDTO.name);
+                Event eventOfLeaderboard = null;
+                eventLoop:
+                for (Event e : getService().getAllEvents()) {
+                    for (LeaderboardGroup g : e.getLeaderboardGroups()) {
+                        for (Leaderboard l : g.getLeaderboards()) {
+                            if (leaderboard.equals(l)) {
+                                eventOfLeaderboard = e;
+                                break eventLoop;
+                            }
+                        }
+                    }
+                }
+                if (eventOfLeaderboard != null) {
+                    EventSeriesEventDTO eventOfSeries = new EventSeriesEventDTO();
+                    eventOfSeries.setId(eventOfLeaderboard.getId());
+                    eventOfSeries.setDisplayName(eventOfLeaderboard.getName());
+                    eventOfSeries.setStartDate(eventOfLeaderboard.getStartDate().asDate());
+                    eventOfSeries.setEndDate(eventOfLeaderboard.getEndDate().asDate());
+                    eventOfSeries.setState(EventState.UPCOMING);
+                    eventOfSeries.setVenue(eventOfLeaderboard.getVenue().getName());
+                    dto.addEvent(eventOfSeries);
+                } else {
+                    // not sure what to do here yet
+                }
+            }
         }
+
         return dto;
     }
 
@@ -5520,12 +5540,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public MediaDTO getMediaForEventSeries(UUID seriesId) {
-        // TODO implement correctly
-        return new MediaDTO();
-    }
-
-    @Override
-    public MediaDTO getMediaForEventRegatta(UUID eventId, String regattaId) {
         // TODO implement correctly
         return new MediaDTO();
     }

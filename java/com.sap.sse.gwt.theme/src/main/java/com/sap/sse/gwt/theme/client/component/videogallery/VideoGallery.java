@@ -13,16 +13,23 @@ public class VideoGallery extends Composite {
     interface VideoGalleryUiBinder extends UiBinder<Widget, VideoGallery> {
     }
     
-    private final VideoGalleryData videoGalleryData;
+    private VideoGalleryData videoGalleryData;
    
     @UiField DivElement galleryTitle;
 
-    public VideoGallery(VideoGalleryData data) {
-        this.videoGalleryData = data;
-        
+    public VideoGallery() {
         VideoGalleryResources.INSTANCE.css().ensureInjected();
         
         initWidget(uiBinder.createAndBindUi(this));
+    }
+    
+    public VideoGallery(VideoGalleryData data) {
+        this();
+        setData(data);
+    }
+    
+    public void setData(VideoGalleryData data) {
+        this.videoGalleryData = data;
         
         galleryTitle.setInnerText(this.videoGalleryData.getName() != null ? this.videoGalleryData.getName() : "");
     }

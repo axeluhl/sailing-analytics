@@ -699,6 +699,4 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getMediaForEvent(UUID eventId, AsyncCallback<MediaDTO> callback); 
 
     void getMediaForEventSeries(UUID seriesId, AsyncCallback<MediaDTO> callback);
-
-    void getMediaForEventRegatta(UUID eventId, String regattaId, AsyncCallback<MediaDTO> callback);
 }

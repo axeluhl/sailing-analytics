@@ -46,7 +46,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sse.security.common,
  com.sap.sse.filestorage,
- org.apache.shiro.core;bundle-version="1.2.2"
+ org.apache.shiro.core;bundle-version="1.2.2",
+ com.sap.sse.gwt.theme
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.polars,

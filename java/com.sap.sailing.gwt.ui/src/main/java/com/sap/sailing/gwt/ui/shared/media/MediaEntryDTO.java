@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.shared.media;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class MediaEntryDTO {
+public class MediaEntryDTO implements Serializable {
+    private static final long serialVersionUID = -5670933802349086626L;
+    
     private String title;
     private String subtitle;
     private Date createdAtDate;

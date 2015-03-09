@@ -588,6 +588,4 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     MediaDTO getMediaForEvent(UUID eventId);
     
     MediaDTO getMediaForEventSeries(UUID seriesId);
-    
-    MediaDTO getMediaForEventRegatta(UUID eventId, String regattaId);
 }

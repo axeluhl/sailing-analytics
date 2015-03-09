@@ -5,6 +5,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.MultiregattaTabView;
@@ -29,6 +30,11 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     public void setPresenter(EventMultiregattaView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
         
+    }
+    
+    @Override
+    public TabView.State getState() {
+        return TabView.State.VISIBLE;
     }
 
     @Override

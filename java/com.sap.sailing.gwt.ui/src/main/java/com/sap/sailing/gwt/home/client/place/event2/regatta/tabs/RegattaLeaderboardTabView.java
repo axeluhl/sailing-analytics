@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView;
@@ -56,6 +57,11 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
     @Override
     public void setPresenter(EventRegattaView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
+    }
+    
+    @Override
+    public TabView.State getState() {
+        return TabView.State.VISIBLE;
     }
 
     @Override

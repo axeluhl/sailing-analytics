@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
@@ -35,6 +36,11 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
     @Override
     public Class<SeriesEventsPlace> getPlaceClassForActivation() {
         return SeriesEventsPlace.class;
+    }
+    
+    @Override
+    public TabView.State getState() {
+        return TabView.State.VISIBLE;
     }
 
     @Override
