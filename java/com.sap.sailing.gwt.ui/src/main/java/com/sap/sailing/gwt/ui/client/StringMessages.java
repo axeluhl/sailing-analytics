@@ -1047,6 +1047,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
     String competitorsAnalytics();
+    String mediaNoContent();
     String media();
     String photos();
     String videos();

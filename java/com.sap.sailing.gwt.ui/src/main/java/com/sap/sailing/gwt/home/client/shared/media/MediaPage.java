@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -28,6 +29,7 @@ public class MediaPage extends Composite {
     @UiField ImageGallery photos;
     
     @UiField VideoGallery videos;
+    @UiField HeadingElement noContent;
 
     public MediaPage() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -48,6 +50,9 @@ public class MediaPage extends Composite {
             videos.setData(data);
         }
         
+        if(!hasPhotos && !hasVideos) {
+            noContent.getStyle().clearDisplay();
+        }
     }
 
     private ImageGalleryData mapPhotoData(ArrayList<MediaEntryDTO> photos) {

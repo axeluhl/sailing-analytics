@@ -9,10 +9,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.fakeseries.partials.header.SeriesHeader;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsView {
     private static final ApplicationHistoryMapper historyMapper = GWT.<ApplicationHistoryMapper> create(ApplicationHistoryMapper.class);
@@ -24,7 +24,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsV
     interface MyBinder extends UiBinder<Widget, TabletAndDesktopSeriesView> {
     }
 
-    @UiField TextMessages i18n;
+    @UiField StringMessages i18n;
     
     @UiField(provided = true)
     TabPanel<SeriesTabsView.Presenter> tabPanelUi;

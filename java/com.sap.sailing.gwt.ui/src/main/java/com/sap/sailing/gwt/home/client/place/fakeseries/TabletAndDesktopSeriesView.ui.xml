@@ -4,7 +4,7 @@
 	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
 	xmlns:tabs="urn:import:com.sap.sailing.gwt.home.client.place.fakeseries.tabs" 
 	xmlns:h="urn:import:com.sap.sailing.gwt.home.client.place.fakeseries.partials.header">
-	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:style>
 		.header {
 		position: relative;
@@ -51,6 +51,9 @@
 			</c:header>
 			<c:tabcontent title="{i18n.events}">
 				<tabs:SeriesEventsTabView />
+			</c:tabcontent>
+			<c:tabcontent title="{i18n.media}">
+				<tabs:SeriesMediaTabView />
 			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>
