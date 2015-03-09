@@ -2,9 +2,11 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res" type="com.sap.sse.gwt.theme.client.resources.ThemeResources" />
-    <ui:with field="local_res" type="com.sap.sse.gwt.theme.client.component.videogallery.VideoGalleryResources" />
+    <ui:with field="local_res" type="com.sap.sse.gwt.theme.client.component.imagegallery.ImageGalleryResources" />
 	<g:HTMLPanel styleName="{local_res.css.sampleCssClass}">
-		Video gallery...
-		<div ui:field='galleryTitle'></div> 
+		<div>
+			<img ui:field="image" />
+		</div>
+		<div ui:field='title'></div> 
 	</g:HTMLPanel>    
 </ui:UiBinder>    
