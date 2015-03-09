@@ -2,6 +2,6 @@
 		     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.place.event"
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <g:HTMLPanel>
-		<s:regattaanalytics.RegattaAnalytics ui:field='regattaAnalytics'/>
+		<s:oldcompetitorcharts.OldCompetitorCharts ui:field='competitorCharts'/>
     </g:HTMLPanel>
 </ui:UiBinder>
