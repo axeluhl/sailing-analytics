@@ -148,37 +148,40 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
      * </ol>
      */
     public String getStageImageURL() {
-        String result = null;
-        List<String> imageCandidates = new ArrayList<String>();
-        for(String imageUrl: imageURLs) {
-            if(imageUrl.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
-                imageCandidates.add(imageUrl);
-            }
-        }
-        if(imageCandidates.isEmpty()) {
-            for(String imageUrl: imageURLs) {
-                if(!imageUrl.toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE)) {
-                    imageCandidates.add(imageUrl);
-                }
-            }
-        }
-        if(!imageCandidates.isEmpty()) {
-            if(imageCandidates.size() == 1) {
-                result = imageCandidates.get(0);
-            } else {
-                Collections.sort(imageCandidates, new Comparator<String>() {
-                    @Override
-                    public int compare(String o1, String o2) {
-                        ImageSize o1Size = getImageSize(o1);
-                        ImageSize o2Size = getImageSize(o2);
-                        return (o1Size == null ? 0 : (o1Size.getWidth() * o1Size.getHeight()))
-                                - (o2Size == null ? 0 : (o2Size.getWidth() * o2Size.getHeight()));
+        final String result;
+        if (imageURLs.isEmpty()) {
+            result = null;
+        } else {
+            Comparator<String> stageImageComparator = new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    final int result;
+                    int o1NameHack = o1.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE) ? 1 :
+                           o1.toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE) ? -1 : 0;
+                    int o2NameHack = o2.toLowerCase().contains(STAGE_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE) ? 1 :
+                        o2.toLowerCase().contains(THUMBNAIL_IMAGE_URL_SUBSTRING_INDICATOR_CASE_INSENSITIVE) ? -1 : 0;
+                    final int preResultBasedOnNameHack = o1NameHack - o2NameHack;
+                    if (preResultBasedOnNameHack == 0) {
+                        result = compareBySize(o1, o2);
+                    } else {
+                        result = preResultBasedOnNameHack;
                     }
-                });
-                result = imageCandidates.get(imageCandidates.size() - 1);
-            }
-        }
+                    return result;
+                }
 
+                private int compareBySize(String o1, String o2) {
+                    final int result;
+                    final ImageSize o1Size = getImageSize(o1);
+                    final ImageSize o2Size = getImageSize(o2);
+                    result = (o1Size == null ? 0 : (o1Size.getWidth() * o1Size.getHeight()))
+                            - (o2Size == null ? 0 : (o2Size.getWidth() * o2Size.getHeight()));
+                    return result;
+                }
+            };
+            List<String> sortedImageURLs = new ArrayList<>(imageURLs);
+            Collections.sort(sortedImageURLs, stageImageComparator);
+            result = sortedImageURLs.get(sortedImageURLs.size() - 1);
+        }
         return result;
     }
 

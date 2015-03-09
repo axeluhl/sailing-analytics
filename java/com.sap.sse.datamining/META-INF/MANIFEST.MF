@@ -22,5 +22,5 @@ Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sse.common;bundle-version="1.0.0",
  org.eclipse.osgi,
  com.sap.sse
-Bundle-Activator: com.sap.sse.datamining.impl.DataMiningActivator
+Bundle-Activator: com.sap.sse.datamining.impl.DataMiningFrameworkActivator
 Bundle-ActivationPolicy: lazy
