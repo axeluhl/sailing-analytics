@@ -13,6 +13,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
@@ -21,6 +22,7 @@ import com.sap.sailing.gwt.home.client.place.event2.partials.sharing.SharingMeta
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 
@@ -73,19 +75,25 @@ public class SeriesHeader extends Composite {
         fillEventState(eventState);
         
         for (EventSeriesEventDTO eventOfSeries : series.getEvents()) {
-            // TODO upcomming is not a link but with light gray color
-            Anchor eventAnchor = new Anchor(eventOfSeries.getVenue());
-            eventAnchor.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
-            final PlaceNavigation<EventDefaultPlace> eventNavigation = presenter.getEventNavigation(eventOfSeries.getId());
-            eventAnchor.setHref(eventNavigation.getTargetUrl());
-            venues.add(eventAnchor);
-            eventAnchor.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    event.preventDefault();
-                    eventNavigation.goToPlace();
-                }
-            });
+            if(eventOfSeries.getState() == EventState.UPCOMMING) {
+                InlineLabel eventLabel = new InlineLabel(eventOfSeries.getVenue());
+                // TODO light gray color
+                eventLabel.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
+                venues.add(eventLabel);
+            } else {
+                Anchor eventAnchor = new Anchor(eventOfSeries.getVenue());
+                eventAnchor.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
+                final PlaceNavigation<EventDefaultPlace> eventNavigation = presenter.getEventNavigation(eventOfSeries.getId());
+                eventAnchor.setHref(eventNavigation.getTargetUrl());
+                venues.add(eventAnchor);
+                eventAnchor.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        event.preventDefault();
+                        eventNavigation.goToPlace();
+                    }
+                });
+            }
         }
     }
 
