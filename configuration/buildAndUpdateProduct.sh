@@ -629,21 +629,22 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         TARGET_API=21
         TEST_API=18
         ANDROID_ABI=armeabi-v7a
+        AVD_NAME=androidTest
         echo "Updating Android SDK...."
-        echo yes | android update sdk --filter platform-tools --no-ui --force > /dev/null
-        echo yes | android update sdk --filter build-tools-${BUILD_TOOLS} --no-ui --force > /dev/null
-        echo yes | android update sdk --filter android-${TARGET_API} --no-ui --force > /dev/null
-        echo yes | android update sdk --filter extra-android-m2repository --no-ui --force > /dev/null
-        echo yes | android update sdk --filter extra-google-m2repository --no-ui --force > /dev/null
+        echo yes | android update sdk --filter platform-tools --no-ui --force --all > /dev/null
+        echo yes | android update sdk --filter build-tools-${BUILD_TOOLS} --no-ui --force --all > /dev/null
+        echo yes | android update sdk --filter android-${TARGET_API} --no-ui --force --all > /dev/null
+        echo yes | android update sdk --filter extra-android-m2repository --no-ui --force --all > /dev/null
+        echo yes | android update sdk --filter extra-google-m2repository --no-ui --force --all > /dev/null
         ./gradlew clean build
         if [[ $? != 0 ]]; then
             exit 100
         fi
         if [ $testing -eq 1 ]; then
             echo "Downloading and installing emulator image..."
-            echo yes | android update sdk -u -a -t sys-img-${ANDROID_ABI}-android-${TEST_API} > /dev/null
-            echo no | android create avd --force -n androidTest -t android-${TEST_API} --abi ${ANDROID_ABI}
-            emulator -avd androidTest -no-skin -no-audio -no-window &
+            echo yes | android update sdk --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
+            echo no | android create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force
+            emulator -avd ${AVD_NAME} -no-skin -no-audio -no-window &
             echo "Waiting for device to start..."
             adb wait-for-device
             echo "Waiting 10 seconds to complete startup..."
@@ -651,10 +652,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             adb shell input keyevent 82 &
             ./gradlew deviceCheck connectedCheck
             if [[ $? != 0 ]]; then
-              exit 101
               adb emu kill
+              android delete avd --name ${AVD_NAME}
+              exit 101
             fi
             adb emu kill
+            android delete avd --name ${AVD_NAME}
         fi
     else
         echo "INFO: Deactivating mobile modules"
