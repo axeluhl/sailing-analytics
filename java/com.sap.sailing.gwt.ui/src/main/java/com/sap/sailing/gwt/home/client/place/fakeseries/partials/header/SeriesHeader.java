@@ -5,7 +5,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -17,10 +16,10 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.event2.partials.sharing.SharingButtons;
-import com.sap.sailing.gwt.home.client.place.event2.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView.Presenter;
+import com.sap.sailing.gwt.home.client.shared.sharing.SharingButtons;
+import com.sap.sailing.gwt.home.client.shared.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
@@ -112,7 +111,7 @@ public class SeriesHeader extends Composite {
 
     private void hide(Element... elementsToHide) {
         for (Element element : elementsToHide) {
-            element.getStyle().setDisplay(Display.NONE);
+            element.removeFromParent();
         }
     }
 }

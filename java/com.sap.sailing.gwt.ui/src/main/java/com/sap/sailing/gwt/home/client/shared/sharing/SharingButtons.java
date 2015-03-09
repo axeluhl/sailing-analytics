@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2.partials.sharing;
+package com.sap.sailing.gwt.home.client.shared.sharing;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
