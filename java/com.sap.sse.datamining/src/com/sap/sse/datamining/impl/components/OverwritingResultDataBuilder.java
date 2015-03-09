@@ -37,24 +37,19 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     @Override
     public AdditionalResultData build(long calculationTimeInNanos, ResourceBundleStringMessages stringMessages, Locale locale) {
         String unitSignifier = buildUnitSignifier(stringMessages, locale);
-        String resultSignifier = buildResultSignifier(stringMessages, locale, unitSignifier);
+        String resultSignifier = buildResultSignifier(stringMessages, locale);
         return new AdditionalResultDataImpl(retrievedDataAmount, resultSignifier, unit, unitSignifier,
                 resultDecimals, calculationTimeInNanos);
     }
 
-    private String buildResultSignifier(ResourceBundleStringMessages stringMessages, Locale locale, String unitSignifier) {
+    private String buildResultSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
         if (extractionFunction == null || aggregationNameMessageKey == null) {
             return "";
         }
         
         String extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
         String aggregationName = stringMessages.get(locale, aggregationNameMessageKey);
-        String resultSignifier = stringMessages.get(locale, "ResultSignifier", extractedStatisticName, aggregationName);
-        if (unit == null || unit == Unit.None || unitSignifier.isEmpty()) {
-            return resultSignifier;
-        } else {
-            return stringMessages.get(locale, "SignifierInUnit", resultSignifier, unitSignifier);
-        }
+        return stringMessages.get(locale, "ResultSignifier", extractedStatisticName, aggregationName);
     }
 
     private String buildUnitSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
