@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
+import java.util.List;
+
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
@@ -14,6 +17,7 @@ public class EventContext {
 
     private String eventId;
     private String regattaId;
+    private List<RaceGroupDTO> raceGroups;
 
     /**
      * Common state required by all tabs/ places in event
@@ -24,12 +28,9 @@ public class EventContext {
     public EventContext() {
     }
 
-    public EventContext(EventViewDTO dto) {
-        updateContext(dto);
-    }
-
     public EventContext(EventContext ctx) {
         updateContext(ctx.getEventDTO());
+        withRaceGroups(ctx.raceGroups);
         withRegattaId(ctx.regattaId);
     }
 
@@ -88,6 +89,15 @@ public class EventContext {
             }
         }
         return null;
+    }
+
+    public List<RaceGroupDTO> getRaceGroups() {
+        return raceGroups;
+    }
+
+    public EventContext withRaceGroups(List<RaceGroupDTO> raceGroups) {
+        this.raceGroups = raceGroups;
+        return this;
     }
 
 

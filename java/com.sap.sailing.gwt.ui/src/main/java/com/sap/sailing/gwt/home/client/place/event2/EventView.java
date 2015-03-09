@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
+import java.util.List;
+
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -12,6 +15,7 @@ import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sse.gwt.client.player.Timer;
@@ -45,6 +49,8 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
 
         PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaName);
         PlaceNavigation<RegattaRacesPlace> getRegattaNavigation(String regattaName);
+        
+        void ensureRegattaStructure(AsyncCallback<List<RaceGroupDTO>> callback);
     }
     
     public interface PlaceCallback {

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -8,6 +9,7 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -23,7 +25,10 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -99,7 +104,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
 
     protected EventContext contextForRegatta(String regattaId) {
-        return new EventContext(ctx.getEventDTO()).withRegattaId(regattaId);
+        return new EventContext(ctx).withRegattaId(regattaId);
     }
     
     public String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
@@ -148,5 +153,49 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public PlaceNavigation<RegattaRacesPlace> getRegattaNavigation(String regattaId) {
         return homePlacesNavigator.getEventNavigation(getPlaceForRegattaRaces(regattaId), new RegattaRacesPlace.Tokenizer(), ctx.getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
+    }
+    
+    @Override
+    public void ensureRegattaStructure(final AsyncCallback<List<RaceGroupDTO>> callback) {
+        if(ctx.getRaceGroups() != null) {
+            callback.onSuccess(ctx.getRaceGroups());
+        }
+        
+        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
+
+        final EventViewDTO eventDTO = ctx.getEventDTO();
+        
+        getSailingService().getRegattaStructureOfEvent(eventDTO.id,
+                new AsyncCallback<List<RaceGroupDTO>>() {
+                    @Override
+                    public void onSuccess(List<RaceGroupDTO> raceGroups) {
+                        if (raceGroups.size() > 0) {
+                            for (LeaderboardGroupDTO leaderboardGroupDTO : eventDTO.getLeaderboardGroups()) {
+                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                                if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
+                                    timerForClientServerOffset.setLivePlayDelayInMillis(
+                                            leaderboardGroupDTO
+                                            .getAverageDelayToLiveInMillis());
+                                }
+                                timerForClientServerOffset.adjustClientServerOffset(
+                                        clientTimeWhenRequestWasSent,
+                                        leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                            }
+                            ctx.withRaceGroups(raceGroups);
+                            callback.onSuccess(raceGroups);
+                        } else {
+                            // TODO
+                            // createEventWithoutRegattasView(event, panel);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // createErrorView(
+                        // "Error while loading the regatta structure with service getRegattaStructureOfEvent()",
+                        // caught, panel);
+                        callback.onFailure(caught);
+                    }
+                });
     }
 }

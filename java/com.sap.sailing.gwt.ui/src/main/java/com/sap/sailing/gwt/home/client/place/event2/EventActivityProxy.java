@@ -133,12 +133,12 @@ public class EventActivityProxy extends AbstractActivityProxy {
         if(event.getType() == EventType.SERIES_EVENT) {
             // TODO Overview isn't implemented yet
 //            return new RegattaOverviewPlace(new EventContext(ctx.getEventDTO()));
-            return new RegattaRacesPlace(new EventContext(ctx.getEventDTO()));
+            return new RegattaRacesPlace(new EventContext(ctx).withRegattaId(null));
         }
         if(event.getType() == EventType.SINGLE_REGATTA) {
             // TODO Overview isn't implemented yet
 //            return new RegattaOverviewPlace(new EventContext(ctx.getEventDTO()));
-            return new RegattaRacesPlace(new EventContext(ctx.getEventDTO()));
+            return new RegattaRacesPlace(new EventContext(ctx).withRegattaId(null));
         }
         // TODO Overview isn't implemented yet
 //        return new MultiregattaOverviewPlace(place.getCtx());

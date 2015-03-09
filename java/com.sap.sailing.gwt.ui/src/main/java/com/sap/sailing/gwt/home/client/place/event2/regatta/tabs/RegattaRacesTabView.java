@@ -49,33 +49,15 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
 
         // TODO: understand, and than move this into appropiate place (probably context)
-        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-
-
         final EventViewDTO eventDTO = myPlace.getCtx().getEventDTO();
         final String selectedRegattaId = myPlace.getCtx().getRegattaId();
-
-        currentPresenter.getSailingService().getRegattaStructureOfEvent(eventDTO.id,
-                new AsyncCallback<List<RaceGroupDTO>>() {
+        
+        currentPresenter.ensureRegattaStructure(new AsyncCallback<List<RaceGroupDTO>>() {
                     @Override
                     public void onSuccess(List<RaceGroupDTO> raceGroups) {
                         if (raceGroups.size() > 0) {
-                            for (LeaderboardGroupDTO leaderboardGroupDTO : eventDTO.getLeaderboardGroups()) {
-                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
-                                if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
-                                    currentPresenter.getTimerForClientServerOffset().setLivePlayDelayInMillis(
-                                            leaderboardGroupDTO
-                                            .getAverageDelayToLiveInMillis());
-                                }
-                                currentPresenter.getTimerForClientServerOffset().adjustClientServerOffset(
-                                        clientTimeWhenRequestWasSent,
-                                        leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
-                            }
-                            // createEventView(eventDTO, raceGroups, panel);
-
                             Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(
                                     eventDTO, raceGroups);
-
 
                             Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> selectedRegatta = regattaStructure
                                     .get(selectedRegattaId);
@@ -108,12 +90,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
                         // caught, panel);
                     }
                 });
-
-
-
-
-       
-
     }
 
     @Override

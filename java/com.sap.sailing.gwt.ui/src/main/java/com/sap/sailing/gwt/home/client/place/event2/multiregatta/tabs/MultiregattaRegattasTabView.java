@@ -20,7 +20,6 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -49,37 +48,10 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     public void start(final MultiregattaRegattasPlace myPlace, final AcceptsOneWidget contentArea) {
         
      // TODO: understand, and than move this into appropiate place (probably context)
-        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-
-        final EventViewDTO eventDTO = myPlace.getCtx().getEventDTO();
-        
-        currentPresenter.getSailingService().getRegattaStructureOfEvent(eventDTO.id,
-                new AsyncCallback<List<RaceGroupDTO>>() {
+        currentPresenter.ensureRegattaStructure(new AsyncCallback<List<RaceGroupDTO>>() {
                     @Override
                     public void onSuccess(List<RaceGroupDTO> raceGroups) {
                         if (raceGroups.size() > 0) {
-                            for (LeaderboardGroupDTO leaderboardGroupDTO : eventDTO.getLeaderboardGroups()) {
-                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
-                                if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
-                                    currentPresenter.getTimerForClientServerOffset().setLivePlayDelayInMillis(
-                                            leaderboardGroupDTO
-                                            .getAverageDelayToLiveInMillis());
-                                }
-                                currentPresenter.getTimerForClientServerOffset().adjustClientServerOffset(
-                                        clientTimeWhenRequestWasSent,
-                                        leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
-                            }
-                            // createEventView(eventDTO, raceGroups, panel);
-
-                            // if (eventDTO.isRunning()) {
-                            // // create update time for race states only for running events
-                            // serverUpdateTimer.addTimeListener(new TimeListener() {
-                            // @Override
-                            // public void timeChanged(Date newTime, Date oldTime) {
-                            // loadAndUpdateEventRaceStatesLog();
-                            // }
-                            // });
-                            // }
                             initView(raceGroups, contentArea);
                         } else {
                             // createEventWithoutRegattasView(event, panel);
