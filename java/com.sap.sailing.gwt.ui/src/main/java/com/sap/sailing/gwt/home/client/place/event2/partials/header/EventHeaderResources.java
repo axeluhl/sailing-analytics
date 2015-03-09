@@ -43,11 +43,6 @@ public interface EventHeaderResources extends ClientBundle {
         String eventheader_intro_details();
         String eventheader_intro_details_item();
         String eventheader_intro_details_itemlink();
-        String eventheader_sharing();
-        String eventheader_sharing_item();
-        String eventheader_sharing_itememail();
-        String eventheader_sharing_itemtwitter();
-        String eventheader_sharing_itemfacebook();
         String eventheader_status();
         String eventheader_status_title();
         String eventheader_status_body();

@@ -12,7 +12,6 @@ import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -181,7 +180,7 @@ public class EventHeader extends Composite {
                 if(dropdownShown) {
                     return;
                 }
-                dropdownContent.getElement().getStyle().setDisplay(Display.BLOCK);
+                dropdownTitle.addClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
                 dropdownShown = true;
                 reg = Event.addNativePreviewHandler(new NativePreviewHandler() {
                     @Override
@@ -195,7 +194,7 @@ public class EventHeader extends Composite {
                             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                                 @Override
                                 public void execute() {
-                                    dropdownContent.getElement().getStyle().clearDisplay();
+                                    dropdownTitle.removeClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
                                     dropdownShown = false;
                                     reg.removeHandler();
                                     reg = null;
