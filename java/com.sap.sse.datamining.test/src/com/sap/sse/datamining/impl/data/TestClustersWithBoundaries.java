@@ -20,8 +20,8 @@ public class TestClustersWithBoundaries {
     private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessages();
 
     private static final Comparator<Integer> comparator = new ComparableComparator<Integer>();
-    private static final ClusterBoundary<Integer> lowerBound = new ComparatorClusterBoundary<Integer>(comparator, 0, ComparisonStrategy.GREATER_EQUALS_THAN);
-    private static final ClusterBoundary<Integer> upperBound = new ComparatorClusterBoundary<Integer>(comparator, 10, ComparisonStrategy.LOWER_THAN);
+    private static final ClusterBoundary<Integer> lowerBound = new ComparatorClusterBoundary<Integer>(0, ComparisonStrategy.GREATER_EQUALS_THAN, comparator);
+    private static final ClusterBoundary<Integer> upperBound = new ComparatorClusterBoundary<Integer>(10, ComparisonStrategy.LOWER_THAN, comparator);
 
 
     @Test

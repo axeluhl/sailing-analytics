@@ -7,7 +7,7 @@ import com.sap.sse.datamining.shared.annotations.Dimension;
 
 public interface HasTrackedLegContext {
     
-    @Connector
+    @Connector(scanForStatistics=false)
     public HasTrackedRaceContext getTrackedRaceContext();
 
     public TrackedLeg getTrackedLeg();
