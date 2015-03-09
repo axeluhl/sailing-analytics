@@ -3,7 +3,7 @@ package com.sap.sse.datamining.shared;
 import java.io.Serializable;
 
 
-public interface GroupKey extends Serializable {
+public interface GroupKey extends Serializable, Comparable<GroupKey> {
     
     /**
      * @return a string representation of this group key.

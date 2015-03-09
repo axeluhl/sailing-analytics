@@ -850,6 +850,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String noCustomGrouperScriptTextError();
     String noDimensionToGroupBySelectedError();
     String noGrouperSelectedError();
+    String noDataRetrieverChainDefinitonSelectedError();
     String windImport_Upload();
     String windImport_Title();
     String windImport_BoatId();
