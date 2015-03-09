@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.partials.sharing.SharingButtonsResources" />
+  <ui:style>
+  </ui:style>
+  <g:HTMLPanel addStyleNames="{local_res.css.eventheader_sharing}">
+    <a ui:field="mail" title="undefined" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itememail}"></a>
+    <a ui:field="twitter" title="undefined" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></a>
+    <a ui:field="facebook" title="undefined" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a>
+  </g:HTMLPanel>
+</ui:UiBinder> 

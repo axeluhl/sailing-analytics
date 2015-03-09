@@ -31,6 +31,8 @@ import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event2.partials.sharing.SharingButtons;
+import com.sap.sailing.gwt.home.client.place.event2.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -66,6 +68,8 @@ public class EventHeader extends Composite {
     @UiField DivElement eventCategory;
     
     @UiField FlowPanel dropdownContent;
+    
+    @UiField SharingButtons sharing;
 
     private EventViewDTO event;
 
@@ -82,6 +86,16 @@ public class EventHeader extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         initFields();
+        initSharing();
+    }
+
+    private void initSharing() {
+        sharing.setUp(new SharingMetadataProvider() {
+            @Override
+            public String getSharingTitle() {
+                return event.getName();
+            }
+        });
     }
 
     private void initFields() {

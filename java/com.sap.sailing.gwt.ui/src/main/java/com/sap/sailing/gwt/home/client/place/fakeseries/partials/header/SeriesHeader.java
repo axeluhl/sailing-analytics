@@ -16,6 +16,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event2.partials.sharing.SharingButtons;
+import com.sap.sailing.gwt.home.client.place.event2.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -34,6 +36,8 @@ public class SeriesHeader extends Composite {
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
     @UiField FlowPanel venues;
+    
+    @UiField SharingButtons sharing;
 
     private EventSeriesViewDTO series;
 
@@ -49,6 +53,16 @@ public class SeriesHeader extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         initFields();
+        initSharing();
+    }
+
+    private void initSharing() {
+        sharing.setUp(new SharingMetadataProvider() {
+            @Override
+            public String getSharingTitle() {
+                return series.getDisplayName();
+            }
+        });
     }
 
     private void initFields() {

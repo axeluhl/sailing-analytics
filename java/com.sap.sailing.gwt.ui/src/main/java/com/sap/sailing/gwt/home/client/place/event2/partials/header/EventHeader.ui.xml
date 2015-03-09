@@ -1,7 +1,8 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
-  xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared" xmlns:t="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar">
+  xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared" xmlns:t="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
+  xmlns:sharing="urn:import:com.sap.sailing.gwt.home.client.place.event2.partials.sharing">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event2.partials.header.EventHeaderResources" />
@@ -69,11 +70,7 @@
           </div>
         </div>
         <div class="{res.mediaCss.showonlarge} {res.mediaCss.large3} {res.mediaCss.columns}">
-          <div class="{local_res.css.eventheader_sharing}">
-            <a href="mailto:?&amp;subject=Lorem%20Ipsum%20Delorem&amp;body=Lorem%20ipsum%20dolor%20sit%20amet%2C%20consectetuer%20adipiscing%20elit.%20Aenean%20commodo%20ligula%20eget%20dolor.%20https%3A%2F%2Fstorage.ubidev.net%3Asap-sailing-analytics%3A6120578021%3Adev%3Aindex.html" title="undefined" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itememail}"></a>
-            <a href="https://twitter.com/intent/tweet?text=Lorem%20ipsum%20dolor%20sit%20amet%2C%20consectetuer%20adipiscing%20elit.%20Aenean%20commodo%20ligula%20eget%20dolor.&amp;url=https%3A%2F%2Fwww.ubilabs.net&amp;short_url_length=8" title="undefined" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></a>
-            <a href="https://www.facebook.com/dialog/feed?app_id=145634995501895&amp;display=page&amp;caption=Lorem%20ipsum%20dolor%20sit%20amet%2C%20consectetuer%20adipiscing%20elit.%20Aenean%20commodo%20ligula%20eget%20dolor.&amp;link=https%3A%2F%2Fstorage.ubidev.net%3Asap-sailing-analytics%3A6120578021%3Adev%3Aindex.html&amp;redirect_uri=https%3A%2F%2Fstorage.ubidev.net%3Asap-sailing-analytics%3A6120578021%3Adev%3Aindex.html" title="undefined" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a>
-          </div>
+          <sharing:SharingButtons ui:field="sharing" />
         </div>
   </g:HTMLPanel>
 </ui:UiBinder>
