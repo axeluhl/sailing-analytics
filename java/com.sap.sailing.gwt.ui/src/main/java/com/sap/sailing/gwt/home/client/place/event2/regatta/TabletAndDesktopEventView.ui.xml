@@ -4,7 +4,7 @@
 	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
 	xmlns:tabs="urn:import:com.sap.sailing.gwt.home.client.place.event2.regatta.tabs" 
 	xmlns:h="urn:import:com.sap.sailing.gwt.home.client.place.event2.partials.header">
-	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:style>
 		.header {
 		position: relative;
@@ -51,19 +51,19 @@
 				<h:EventHeader ui:field="eventHeader" />
 			</c:header>
 			<!-- Overview isn't implemented yet. -->
-<!-- 			<c:tabcontent title="Overview"> -->
+<!-- 			<c:tabcontent title="{i18n.overview}"> -->
 <!-- 				<tabs:RegattaOverviewTabView /> -->
 <!-- 			</c:tabcontent> -->
-			<c:tabcontent title="Races">
+			<c:tabcontent title="{i18n.races}">
 				<tabs:RegattaRacesTabView />
 			</c:tabcontent>
-			<c:tabcontent title="Leaderboard">
+			<c:tabcontent title="{i18n.leaderboard}">
 				<tabs:RegattaLeaderboardTabView />
 			</c:tabcontent>
-			<c:tabcontent title="Competitor Analytics">
+			<c:tabcontent title="{i18n.competitorsAnalytics}">
 				<tabs:RegattaCompetitorAnalyticsTabView />
 			</c:tabcontent>
-<!-- 			<c:tabcontent title="Media"> -->
+<!-- 			<c:tabcontent title="{i18n.media}"> -->
 <!-- 				<tabs:RegattaMediaTabView /> -->
 <!-- 			</c:tabcontent> -->
 		</c:TabPanel>
