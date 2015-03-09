@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.client.place.fakeseries.partials.header;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -32,7 +31,6 @@ public class SeriesHeader extends Composite {
     @UiField StringMessages i18n;
     
     @UiField ImageElement eventLogo;
-    @UiField HeadingElement staticTitle;
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
     @UiField FlowPanel venues;
@@ -61,7 +59,7 @@ public class SeriesHeader extends Composite {
         fillEventState(eventState);
         
         for (EventSeriesEventDTO eventOfSeries : series.getEvents()) {
-            // TODO upcomming is not a link
+            // TODO upcomming is not a link but with light gray color
             Anchor eventAnchor = new Anchor(eventOfSeries.getVenue());
             eventAnchor.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
             final PlaceNavigation<EventDefaultPlace> eventNavigation = presenter.getEventNavigation(eventOfSeries.getId());

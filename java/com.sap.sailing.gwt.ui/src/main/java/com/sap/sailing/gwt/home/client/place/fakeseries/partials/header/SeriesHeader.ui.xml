@@ -11,16 +11,14 @@
             <div class="{local_res.css.eventheader_intro_logo}">
               <img ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" />
             </div>
-            <h2 ui:field="staticTitle" class="{local_res.css.eventheader_intro_name}">
+            <h2 class="{local_res.css.eventheader_intro_name}">
               <span ui:field="eventName"></span>
               <!-- IF event.state === 'live' -->
               <div ui:field="eventState" data-labeltype="live" class="{res.mainCss.label}">
               </div>
               <!-- IFEND event.state === 'live' -->
             </h2>
-            <g:FlowPanel ui:field="venues" addStyleNames="{local_res.css.eventheader_intro_details}">
-                
-            </g:FlowPanel>
+            <g:FlowPanel ui:field="venues" addStyleNames="{local_res.css.eventheader_intro_details}" />
           </div>
         </div>
         <div class="{res.mediaCss.showonlarge} {res.mediaCss.large3} {res.mediaCss.columns}">
