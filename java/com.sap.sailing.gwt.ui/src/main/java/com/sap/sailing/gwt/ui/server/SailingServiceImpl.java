@@ -5440,13 +5440,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setState(EventState.FINISHED);
         if (o.isFakeSeries()) {
             dto.setType(EventType.SERIES_EVENT);
-            
-            dto.getEventsOfSeries().add(new EventReferenceDTO(id, o.getName()));
-            // FIXME
-            dto.getEventsOfSeries().add(
-                    new EventReferenceDTO(UUID.fromString("212385a0-fff7-432a-a63f-df2420faefc4"), "Series Event 2"));
-            dto.getEventsOfSeries().add(
-                    new EventReferenceDTO(UUID.fromString("312385a0-fff7-432a-a63f-df2420faefc4"), "Series Event 3"));
+
+            if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
+                LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
+
+                LeaderboardGroup overallLeaderboardGroup = getService().getLeaderboardGroupByName(overallLeaderboardGroupDTO.getName());
+                for (Event event : getService().getAllEvents()) {
+                    for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                        if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                            dto.getEventsOfSeries().add(new EventReferenceDTO(event.getId(), event.getName()));
+                        }
+                    }
+                }
+            }
         } else {
             for (LeaderboardGroupDTO lg : o.getLeaderboardGroups()) {
                 for (StrippedLeaderboardDTO sl : lg.leaderboards) {
