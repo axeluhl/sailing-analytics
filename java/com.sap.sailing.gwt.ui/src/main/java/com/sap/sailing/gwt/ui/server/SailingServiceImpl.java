@@ -5505,31 +5505,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
             LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
             dto.setDisplayName(overallLeaderboardGroupDTO.getDisplayName() != null ? overallLeaderboardGroupDTO.getDisplayName() : overallLeaderboardGroupDTO.getName());
-            for (StrippedLeaderboardDTO eventSeriesEventLeaderboardDTO : overallLeaderboardGroupDTO.leaderboards) {
-                Leaderboard leaderboard = getService().getLeaderboardByName(eventSeriesEventLeaderboardDTO.name);
-                Event eventOfLeaderboard = null;
-                eventLoop:
-                for (Event e : getService().getAllEvents()) {
-                    for (LeaderboardGroup g : e.getLeaderboardGroups()) {
-                        for (Leaderboard l : g.getLeaderboards()) {
-                            if (leaderboard.equals(l)) {
-                                eventOfLeaderboard = e;
-                                break eventLoop;
-                            }
-                        }
+
+            LeaderboardGroup overallLeaderboardGroup = getService().getLeaderboardGroupByName(overallLeaderboardGroupDTO.getName());
+            for (Event event : getService().getAllEvents()) {
+                for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                    if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                        EventSeriesEventDTO eventOfSeries = new EventSeriesEventDTO();
+                        eventOfSeries.setId(event.getId());
+                        eventOfSeries.setDisplayName(event.getName());
+                        eventOfSeries.setStartDate(event.getStartDate().asDate());
+                        eventOfSeries.setEndDate(event.getEndDate().asDate());
+                        eventOfSeries.setState(EventState.UPCOMING);
+                        eventOfSeries.setVenue(event.getVenue().getName());
+                        dto.addEvent(eventOfSeries);
                     }
-                }
-                if (eventOfLeaderboard != null) {
-                    EventSeriesEventDTO eventOfSeries = new EventSeriesEventDTO();
-                    eventOfSeries.setId(eventOfLeaderboard.getId());
-                    eventOfSeries.setDisplayName(eventOfLeaderboard.getName());
-                    eventOfSeries.setStartDate(eventOfLeaderboard.getStartDate().asDate());
-                    eventOfSeries.setEndDate(eventOfLeaderboard.getEndDate().asDate());
-                    eventOfSeries.setState(EventState.UPCOMING);
-                    eventOfSeries.setVenue(eventOfLeaderboard.getVenue().getName());
-                    dto.addEvent(eventOfSeries);
-                } else {
-                    // not sure what to do here yet
                 }
             }
         }
