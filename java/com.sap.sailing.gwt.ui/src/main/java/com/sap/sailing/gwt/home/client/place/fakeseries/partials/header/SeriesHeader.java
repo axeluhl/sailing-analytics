@@ -74,7 +74,7 @@ public class SeriesHeader extends Composite {
         fillEventState(eventState);
         
         for (EventSeriesEventDTO eventOfSeries : series.getEvents()) {
-            if(eventOfSeries.getState() == EventState.UPCOMMING) {
+            if(eventOfSeries.getState() == EventState.UPCOMING) {
                 InlineLabel eventLabel = new InlineLabel(eventOfSeries.getVenue());
                 // TODO light gray color
                 eventLabel.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());

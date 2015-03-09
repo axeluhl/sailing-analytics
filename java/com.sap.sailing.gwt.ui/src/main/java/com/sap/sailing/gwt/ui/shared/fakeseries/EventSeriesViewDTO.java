@@ -14,6 +14,16 @@ public class EventSeriesViewDTO implements IsSerializable {
     private boolean onRemoteServer;
     private String logoImageURL;
 
+    public enum EventSeriesState {
+        UPCOMING, RUNNING, IN_PROGRESS, FINISHED
+    }
+
+    // TODO: frank, please implement
+    public EventSeriesState state;
+
+    public EventSeriesViewDTO() {
+    }
+    
     public UUID getId() {
         return id;
     }
