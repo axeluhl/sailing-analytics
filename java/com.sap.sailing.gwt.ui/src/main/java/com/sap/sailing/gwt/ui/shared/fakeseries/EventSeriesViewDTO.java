@@ -34,7 +34,7 @@ public class EventSeriesViewDTO implements IsSerializable {
         return events;
     }
 
-    public void addEvents(EventSeriesEventDTO event) {
+    public void addEvent(EventSeriesEventDTO event) {
         this.events.add(event);
     }
 

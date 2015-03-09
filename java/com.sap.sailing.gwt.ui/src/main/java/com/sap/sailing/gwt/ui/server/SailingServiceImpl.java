@@ -5507,7 +5507,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventOfSeries.setEndDate(o.endDate);
             eventOfSeries.setState(EventState.UPCOMMING);
             eventOfSeries.setVenue(o.venue.getName());
-            dto.addEvents(eventOfSeries);
+            dto.addEvent(eventOfSeries);
         }
         return dto;
     }
