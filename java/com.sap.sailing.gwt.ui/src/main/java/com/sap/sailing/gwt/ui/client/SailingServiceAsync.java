@@ -76,6 +76,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.BuildVersionRetriever;
@@ -693,5 +694,11 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
 
-    void getEventSeriesViewById(UUID id, AsyncCallback<EventSeriesViewDTO> asyncCallback); 
+    void getEventSeriesViewById(UUID id, AsyncCallback<EventSeriesViewDTO> asyncCallback);
+    
+    void getMediaForEvent(UUID eventId, AsyncCallback<MediaDTO> callback); 
+
+    void getMediaForEventSeries(UUID seriesId, AsyncCallback<MediaDTO> callback);
+
+    void getMediaForEventRegatta(UUID eventId, String regattaId, AsyncCallback<MediaDTO> callback);
 }

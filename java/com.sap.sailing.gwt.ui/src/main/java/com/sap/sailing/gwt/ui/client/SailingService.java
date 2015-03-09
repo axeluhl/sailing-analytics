@@ -86,6 +86,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -583,4 +584,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
 
     EventSeriesViewDTO getEventSeriesViewById(UUID id);
+    
+    MediaDTO getMediaForEvent(UUID eventId);
+    
+    MediaDTO getMediaForEventSeries(UUID seriesId);
+    
+    MediaDTO getMediaForEventRegatta(UUID eventId, String regattaId);
 }

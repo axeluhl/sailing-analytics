@@ -337,6 +337,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -5509,5 +5510,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             dto.addEvents(eventOfSeries);
         }
         return dto;
+    }
+
+    @Override
+    public MediaDTO getMediaForEvent(UUID eventId) {
+        // TODO implement correctly
+        return new MediaDTO();
+    }
+
+    @Override
+    public MediaDTO getMediaForEventSeries(UUID seriesId) {
+        // TODO implement correctly
+        return new MediaDTO();
+    }
+
+    @Override
+    public MediaDTO getMediaForEventRegatta(UUID eventId, String regattaId) {
+        // TODO implement correctly
+        return new MediaDTO();
     }
 }
