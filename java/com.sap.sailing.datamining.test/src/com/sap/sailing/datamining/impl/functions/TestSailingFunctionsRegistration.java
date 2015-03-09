@@ -34,7 +34,7 @@ public class TestSailingFunctionsRegistration {
     @Before
     public void setUpFunctionRegistryAndProvider() {
         functionRegistry = new OpenFunctionManager();
-        functionRegistry.registerAllWithInternalFunctionPolicy(Activator.getDefault().getInternalClassesWithMarkedMethods());
+        functionRegistry.registerAllClasses(Activator.getDefault().getClassesWithMarkedMethods());
     }
     
     @Test
