@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
@@ -102,6 +103,11 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
                     currentPresenter.getAutoRefreshTimer());
 
             leaderboardPanel.addLeaderboardUpdateListener(this);
+
+            if (currentPresenter.getCtx().getEventDTO().getState() != EventState.RUNNING) {
+
+                this.leaderboard.hideRefresh();
+            }
 
             regattaAnalyticsManager.hideCompetitorChart();
 
