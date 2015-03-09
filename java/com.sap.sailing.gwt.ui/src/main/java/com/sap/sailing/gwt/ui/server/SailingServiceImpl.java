@@ -5434,7 +5434,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setName(o.getName());
         dto.setOfficialWebsiteURL(o.getOfficialWebsiteURL());
         dto.venue = o.venue;
-        dto.setHasMedia(!o.getImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
+        dto.setHasMedia(!o.getPhotoGalleryImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
         dto.getLeaderboardGroups().addAll(o.getLeaderboardGroups());
         // TODO implement properly
         dto.setState(EventState.FINISHED);
@@ -5500,7 +5500,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setOnRemoteServer(o.isOnRemoteServer());
         dto.setLogoImageURL(o.getLogoImageURL());
         // TODO implement correctly. This only checks media of one event of the series.
-//        dto.setHasMedia(!o.getImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
+//        dto.setHasMedia(!o.getPhotoGalleryImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
         
         if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
             LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
@@ -5547,7 +5547,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         // TODO implement correctly and fill metadata
         MediaDTO media = new MediaDTO();
-        for(String url : o.getImageURLs()) {
+        for(String url : o.getPhotoGalleryImageURLs()) {
             ImageSize imageSize = o.getImageSize(url);
             MediaEntryDTO entry = new MediaEntryDTO(o.getName(), url);
             entry.setWidthInPx(imageSize.getWidth());
