@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 public class EventRegattaActivity extends AbstractEventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
 
@@ -61,5 +62,10 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     public PlaceNavigation<RegattaRacesPlace> getCurrentRegattaOverviewNavigation() {
         // TODO Overview isn't implemented yet
         return homePlacesNavigator.getEventNavigation(new RegattaRacesPlace(ctx), new RegattaRacesPlace.Tokenizer(), ctx.getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
+    }
+
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return clientFactory.getErrorReporter();
     }
 }
