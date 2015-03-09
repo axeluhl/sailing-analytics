@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -54,7 +55,12 @@ public class PolarDataMiner {
 
     private static ThreadPoolExecutor createExecutor() {
         return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(100));
+                new LinkedBlockingQueue<Runnable>(100), new RejectedExecutionHandler() {
+            @Override
+            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                r.run();
+            }
+        });
     }
 
 
@@ -197,7 +203,7 @@ public class PolarDataMiner {
         
         // The following is an estimation function. It only serves as a fallback. It's the same for all boatclasses and returns
         // default maneuver angles.
-        // The function is able to return boat speed values for windspeed alues between 5kn and 25kn , which are some kind of realistic
+        // The function is able to return boat speed values for windspeed values between 5kn and 25kn , which are some kind of realistic
         // for sailing boats. They are taken from the 505 polars we gathered in the races until now.
 
         Set<SpeedWithBearingWithConfidence<Void>> resultSet = new HashSet<>();

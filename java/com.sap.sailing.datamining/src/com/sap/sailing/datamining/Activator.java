@@ -1,51 +1,58 @@
 package com.sap.sailing.datamining;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.DataSourceProvider;
+import com.sap.sse.datamining.data.ClusterGroup;
+import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
-public class Activator implements BundleActivator, DataMiningBundleService {
+public class Activator extends AbstractDataMiningActivator implements DataMiningBundleService {
     
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Sailing_StringMessages";
+    private static final SailingClusterGroups clusterGroups = new SailingClusterGroups();
     
     private static Activator INSTANCE;
 
     private final ResourceBundleStringMessages sailingServerStringMessages;
-    private final SailingDataRetrieverChainDefinitions dataRetrieverChainDefinitions;
-    private final SailingClusterGroups clusterGroups;
-    
-    private ServiceReference<DataMiningBundleService> dataMiningBundleServiceReference;
+    private final SailingDataRetrievalChainDefinitions dataRetrieverChainDefinitions;
+    private DataSourceProvider<?> racingEventServiceProvider;
     
     public Activator() {
-        dataRetrieverChainDefinitions = new SailingDataRetrieverChainDefinitions();
+        dataRetrieverChainDefinitions = new SailingDataRetrievalChainDefinitions();
         sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader());
-        clusterGroups = new SailingClusterGroups();
     }
 
     @Override
     public void start(BundleContext context) throws Exception {
         INSTANCE = this;
-        
-        dataMiningBundleServiceReference = context.registerService(DataMiningBundleService.class, this, null).getReference();
+        racingEventServiceProvider = new RacingEventServiceProvider(context);
+        super.start(context);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        context.ungetService(dataMiningBundleServiceReference);
+        super.stop(context);
+        INSTANCE = null;
+        racingEventServiceProvider = null;
+    }
+    
+    @Override
+    protected DataMiningBundleService getDataMiningBundleService() {
+        return this;
     }
     
     @Override
@@ -54,7 +61,7 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     }
 
     @Override
-    public Iterable<Class<?>> getInternalClassesWithMarkedMethods() {
+    public Iterable<Class<?>> getClassesWithMarkedMethods() {
         Set<Class<?>> internalClasses = new HashSet<>();
         internalClasses.add(HasTrackedRaceContext.class);
         internalClasses.add(HasTrackedLegContext.class);
@@ -65,17 +72,19 @@ public class Activator implements BundleActivator, DataMiningBundleService {
     }
 
     @Override
-    public Iterable<Class<?>> getExternalLibraryClasses() {
-        return Collections.emptySet();
-    }
-
-    @Override
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions();
     }
     
-    public SailingClusterGroups getClusterGroups() {
-        return clusterGroups;
+    @Override
+    public Iterable<DataSourceProvider<?>> getDataSourceProviders() {
+        Collection<DataSourceProvider<?>> dataSourceProviders = new HashSet<>();
+        dataSourceProviders.add(racingEventServiceProvider);
+        return dataSourceProviders;
+    }
+    
+    public static ClusterGroup<Speed> getWindStrengthInBeaufortClusterGroup() {
+        return clusterGroups.getWindStrengthInBeaufortCluster();
     }
     
     public static Activator getDefault() {

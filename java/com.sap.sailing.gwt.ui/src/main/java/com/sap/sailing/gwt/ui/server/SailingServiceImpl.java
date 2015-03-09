@@ -5407,7 +5407,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public String getActiveFileStorageServiceName() {
         try {
-            return getService().getFileStorageManagementService().getActiveFileStorageService().getName();
+            final FileStorageService activeFileStorageService = getService().getFileStorageManagementService().getActiveFileStorageService();
+            return activeFileStorageService == null ? null : activeFileStorageService.getName();
         } catch (NoCorrespondingServiceRegisteredException e) {
             return null;
         }

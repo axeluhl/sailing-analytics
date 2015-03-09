@@ -35,7 +35,7 @@ import com.sap.sse.common.Util.Pair;
  * which also returns the average angle for the parameters provided.
  * 
  * @author Frederik Petersen (D054528)
- * @autho Axel Uhl (D043530)
+ * @author Axel Uhl (D043530)
  * 
  */
 public interface PolarDataService {

@@ -268,6 +268,13 @@ $ curl -H "Content-Type:image/jpeg" --data-binary @<path-to-jpeg> \
   "teamImageUri" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
 }
 ```
+## Leaderboard Integration
+
+The leaderboard buttons loads the online leaderboard into an web-view. 
+
+```
+http://<host>/gwt/Leaderboard.html?name=<leaderboardName>&showRaceDetails=false&embedded=true&hideToolbar=true
+```
 
 # Buoy Tender (Tonnenleger) App
 <div id="buoy-tender-app"></div>

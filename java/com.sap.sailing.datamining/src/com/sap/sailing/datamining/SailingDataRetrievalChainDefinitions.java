@@ -21,11 +21,11 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
 
-public class SailingDataRetrieverChainDefinitions {
+public class SailingDataRetrievalChainDefinitions {
 
     private final Collection<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions;
     
-    public SailingDataRetrieverChainDefinitions() {
+    public SailingDataRetrievalChainDefinitions() {
         dataRetrieverChainDefinitions = new ArrayList<>();
 
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> trackedRaceRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
@@ -55,7 +55,7 @@ public class SailingDataRetrieverChainDefinitions {
         dataRetrieverChainDefinitions.add(gpsFixRetrieverChainDefinition);
     }
 
-    public Collection<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions;
     }
 

@@ -10,7 +10,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public interface HasGPSFixContext {
     
-    @Connector
+    @Connector(scanForStatistics=false)
     public HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext();
     
     @Connector(ordinal=1)
