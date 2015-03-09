@@ -69,7 +69,12 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
     public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
         if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
             retrieverChain = newDataRetrieverChainDefinition;
-            updateRetrievalLevels();
+            if (retrieverChain != null) {
+                updateRetrievalLevels();
+            } else {
+                contentPanel.clear();
+                singleRetrieverLevelSelectionProviders.clear();
+            }
         }
     }
 

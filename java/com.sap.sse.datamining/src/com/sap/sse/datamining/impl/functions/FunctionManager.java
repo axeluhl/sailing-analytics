@@ -26,6 +26,7 @@ import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFil
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidExternalFunctionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidStatisticFilterCriterion;
+import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class FunctionManager implements FunctionRegistry, FunctionProvider {
@@ -85,25 +86,25 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
     
     @Override
-    public void registerAllWithInternalFunctionPolicy(Iterable<Class<?>> internalClassesToScan) {
+    public void registerAllClasses(Iterable<Class<?>> internalClassesToScan) {
         for (Class<?> internalClass : internalClassesToScan) {
             scanInternalClass(internalClass);
         }
     }
     
     private void scanInternalClass(Class<?> internalClass) {
-        scanInternalClass(internalClass, new ArrayList<Function<?>>());
+        scanInternalClass(internalClass, new ArrayList<Function<?>>(), true);
     }
 
-    private void scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions) {
+    private void scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions, boolean scanForStatistics) {
         for (Method method : internalClass.getMethods()) {
-            if (isValidDimension.matches(method) || isValidStatistic.matches(method)) {
+            if (isValidDimension.matches(method) || (scanForStatistics && isValidStatistic.matches(method) )) {
                 registerFunction(previousFunctions, method);
                 continue;
             }
             
             if (isValidConnector.matches(method)) {
-                handleConnectorMethod(method, previousFunctions);
+                handleConnectorMethod(method, previousFunctions, scanForStatistics);
             }
         }
     }
@@ -137,12 +138,12 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         statistics.get(declaringType).add(statistic);
     }
 
-    private void handleConnectorMethod(Method method, List<Function<?>> previousFunctions) {
+    private void handleConnectorMethod(Method method, List<Function<?>> previousFunctions, boolean scanForStatistics) {
         Function<?> function = functionFactory.createMethodWrappingFunction(method);
         Class<?> returnType = method.getReturnType();
         List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
         previousFunctionsClone.add(function);
-        scanInternalClass(returnType, previousFunctionsClone); 
+        scanInternalClass(returnType, previousFunctionsClone, !scanForStatistics ? false : method.getAnnotation(Connector.class).scanForStatistics()); 
     }
 
     @Override

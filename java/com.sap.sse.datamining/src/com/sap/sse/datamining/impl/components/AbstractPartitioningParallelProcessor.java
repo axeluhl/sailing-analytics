@@ -58,14 +58,11 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
                         }
                     };
                     unfinishedInstructionsCounter.increment();
-                    /**
-                     * Run in executer if queue is not full. Otherwise run in current thread.
-                     * 
-                     * TODO: Maybe shortcut by asking executor if queue is full
-                     */
                     try {
                         executor.execute(instructionWrapper);
                     } catch (RejectedExecutionException exc){
+                        LOGGER.log(Level.WARNING, "A " + RejectedExecutionException.class.getSimpleName() +
+                                                  " appeared during the processing.");
                         instructionWrapper.run();
                     }
                 }

@@ -49,7 +49,7 @@ public class TestFunctionManagerAsFunctionProvider {
         Collection<Class<?>> internalClassesToScan = new HashSet<>();
         internalClassesToScan.add(Test_HasLegOfCompetitorContext.class);
         internalClassesToScan.add(Test_HasRaceContext.class);
-        functionManager.registerAllWithInternalFunctionPolicy(internalClassesToScan);
+        functionManager.registerAllClasses(internalClassesToScan);
         
         Collection<Class<?>> externalClassesToScan = new HashSet<>();
         externalClassesToScan.add(Test_ExternalLibraryClass.class);
