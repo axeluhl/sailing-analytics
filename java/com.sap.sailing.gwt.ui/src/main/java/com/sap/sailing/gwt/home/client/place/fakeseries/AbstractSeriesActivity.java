@@ -7,6 +7,7 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
@@ -15,6 +16,7 @@ import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesClientFactory;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
 public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> extends AbstractActivity implements SeriesView.Presenter {
 
@@ -72,5 +74,15 @@ public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> 
     @Override
     public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
         return homePlacesNavigator.getEventSeriesNavigation(ctx.getSeriesId(), ctx.getSeriesDTO().getBaseURL(), ctx.getSeriesDTO().isOnRemoteServer());
+    }
+    
+    @Override
+    public void ensureMedia(AsyncCallback<MediaDTO> callback) {
+        clientFactory.getSailingService().getMediaForEventSeries(ctx.getSeriesDTO().getId(), callback);
+    }
+    
+    @Override
+    public boolean hasMedia() {
+        return ctx.getSeriesDTO().isHasMedia();
     }
 }

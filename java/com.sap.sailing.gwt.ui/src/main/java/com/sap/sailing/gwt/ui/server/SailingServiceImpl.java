@@ -130,6 +130,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
@@ -338,6 +339,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaEntryDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -5432,6 +5434,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setName(o.getName());
         dto.setOfficialWebsiteURL(o.getOfficialWebsiteURL());
         dto.venue = o.venue;
+        dto.setHasMedia(!o.getImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
         dto.getLeaderboardGroups().addAll(o.getLeaderboardGroups());
         // TODO implement properly
         dto.setState(EventState.FINISHED);
@@ -5496,6 +5499,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setBaseUrl(o.getBaseURL());
         dto.setOnRemoteServer(o.isOnRemoteServer());
         dto.setLogoImageURL(o.getLogoImageURL());
+        // TODO implement correctly. This only checks media of one event of the series.
+//        dto.setHasMedia(!o.getImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
         
         if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
             LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
@@ -5534,13 +5539,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public MediaDTO getMediaForEvent(UUID eventId) {
-        // TODO implement correctly
-        return new MediaDTO();
+        EventDTO o;
+        try {
+            o = getEventById(eventId, false);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("We can do better than MalformedURLException");
+        }
+        // TODO implement correctly and fill metadata
+        MediaDTO media = new MediaDTO();
+        for(String url : o.getImageURLs()) {
+            ImageSize imageSize = o.getImageSize(url);
+            MediaEntryDTO entry = new MediaEntryDTO(o.getName(), url);
+            entry.setWidthInPx(imageSize.getWidth());
+            entry.setHeightInPx(imageSize.getHeight());
+            media.addPhoto(entry);
+        }
+        for(String url : o.getVideoURLs()) {
+            media.addVideo(new MediaEntryDTO(o.getName(), url));
+        }
+        return media;
     }
 
     @Override
     public MediaDTO getMediaForEventSeries(UUID seriesId) {
         // TODO implement correctly
-        return new MediaDTO();
+        return getMediaForEvent(seriesId);
     }
 }
