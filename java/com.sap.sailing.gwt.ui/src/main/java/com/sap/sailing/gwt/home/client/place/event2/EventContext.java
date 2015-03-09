@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.client.place.event2;
 
 import java.util.List;
 
+import com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
@@ -19,6 +20,8 @@ public class EventContext {
     private String regattaId;
     private List<RaceGroupDTO> raceGroups;
 
+    private RegattaAnalyticsDataManager regattaAnalyticsManager;
+
     /**
      * Common state required by all tabs/ places in event
      */
@@ -32,6 +35,7 @@ public class EventContext {
         updateContext(ctx.getEventDTO());
         withRaceGroups(ctx.raceGroups);
         withRegattaId(ctx.regattaId);
+        withRegattaAnalyticsManager(ctx.regattaAnalyticsManager);
     }
 
     public EventContext withId(String eventId) {
@@ -100,5 +104,13 @@ public class EventContext {
         return this;
     }
 
+    public RegattaAnalyticsDataManager getRegattaAnalyticsManager() {
+        return regattaAnalyticsManager;
+    }
+
+    public EventContext withRegattaAnalyticsManager(RegattaAnalyticsDataManager regattaAnalyticsManager) {
+        this.regattaAnalyticsManager = regattaAnalyticsManager;
+        return this;
+    }
 
 }

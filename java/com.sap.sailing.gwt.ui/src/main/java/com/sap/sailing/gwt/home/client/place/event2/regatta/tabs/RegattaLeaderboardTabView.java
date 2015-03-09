@@ -25,17 +25,11 @@ import com.sap.sailing.gwt.home.client.place.event2.regatta.EventRegattaView.Pre
 import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
-import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
@@ -44,14 +38,12 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 public class RegattaLeaderboardTabView extends Composite implements RegattaTabView<RegattaLeaderboardPlace>,
         LeaderboardUpdateListener {
 
-    private LeaderboardDTO leaderboardDTO;
     private Presenter currentPresenter;
 
     @UiField
     protected OldLeaderboard leaderboard;
-    private RegattaAnalyticsDataManager regattaAnalyticsManager;
-    private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
-    private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
+
+
     public RegattaLeaderboardTabView() {
 
     }
@@ -76,14 +68,10 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
         if (regattaId != null && !regattaId.isEmpty()) {
 
             String leaderboardName = regattaId;
+          
+            RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
+                    .getRegattaAnalyticsManager();
 
-            long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-            Timer autoRefreshTimer = new Timer(PlayModes.Live, PlayStates.Paused,
-                    delayBetweenAutoAdvancesInMilliseconds);
-
-            ErrorReporter errorReporter = currentPresenter.getErrorReporter();
-
-            SailingServiceAsync sailingService = currentPresenter.getSailingService();
 
             boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
                     LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
@@ -93,14 +81,8 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
 
             final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
 
-            regattaAnalyticsManager = new RegattaAnalyticsDataManager( //
-                    sailingService, //
-                    asyncActionsExecutor, //
-                    autoRefreshTimer, //
-                    errorReporter, //
-                    userAgent);
 
-            regattaAnalyticsManager.createLeaderboardPanel( //
+            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel( //
                     leaderboardSettings, //
                     preselectedRace, //
                     "leaderboardGroupName", // TODO: keep using magic string? ask frank!
@@ -108,20 +90,14 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
                     true, // this information came from place, now hard coded. check with frank
                     autoExpandLastRaceColumn);
 
-            List<DetailType> availableDetailsTypes = new ArrayList<DetailType>();
-            DetailType initialDetailType = DetailType.REGATTA_RANK;
-            availableDetailsTypes.add(DetailType.REGATTA_RANK);
-            availableDetailsTypes.add(DetailType.REGATTA_TOTAL_POINTS_SUM);
-            regattaAnalyticsManager.createMultiCompetitorChart(leaderboardName, initialDetailType);
-
             initWidget(ourUiBinder.createAndBindUi(this));
 
-            leaderboard.setLeaderboard(regattaAnalyticsManager.getLeaderboardPanel(), autoRefreshTimer);
+            leaderboard.setLeaderboard(leaderboardPanel,
+                    currentPresenter.getAutoRefreshTimer());
 
-            regattaAnalyticsManager.getLeaderboardPanel().addLeaderboardUpdateListener(this);
+            leaderboardPanel.addLeaderboardUpdateListener(this);
 
             regattaAnalyticsManager.hideCompetitorChart();
-
 
             contentArea.setWidget(this);
         } else {
@@ -134,6 +110,12 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
             }.schedule(3000);
 
         }
+
+    }
+
+    @Override
+    public void updatedLeaderboard(LeaderboardDTO leaderboard) {
+        this.leaderboard.updatedLeaderboard(leaderboard, true);
     }
 
     @Override
@@ -278,13 +260,5 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
         }
         return result;
     }
-
-    @Override
-    public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        // TODO Auto-generated method stub
-
-    }
-
-
 
 }
