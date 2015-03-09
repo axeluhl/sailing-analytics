@@ -108,4 +108,10 @@ public class OldLeaderboard extends Composite {
             lastScoringUpdateTimeDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
         }
     }
+
+    public void hideRefresh() {
+        autoRefreshAnchor.setVisible(false);
+        lastScoringUpdateTextDiv.getStyle().setVisibility(Visibility.HIDDEN);
+        lastScoringUpdateTimeDiv.getStyle().setVisibility(Visibility.HIDDEN);
+    }
 }
