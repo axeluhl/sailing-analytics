@@ -71,7 +71,7 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
             ScalableSpeed windSpeedSum = new ScalableSpeed(Speed.NULL);
             long count = 0;
             final List<Leg> legs = trackedRace.getRace().getCourse().getLegs();
-            if (!legs.isEmpty()) {
+            if (legs.isEmpty()) {
                 result = null;
             } else {
                 final Leg firstLeg = legs.get(0);
