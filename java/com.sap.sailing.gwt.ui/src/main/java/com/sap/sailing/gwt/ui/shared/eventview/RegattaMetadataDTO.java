@@ -11,6 +11,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private String boatCategory;
     private Date startDate;
     private Date endDate;
+    private RegattaState state;
     
     public RegattaMetadataDTO() {
     }
@@ -80,5 +81,14 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    @Override
+    public RegattaState getState() {
+        return state;
+    }
+
+    public void setState(RegattaState state) {
+        this.state = state;
     }
 }

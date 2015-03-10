@@ -4,6 +4,10 @@ import java.util.Date;
 
 public interface HasRegattaMetadata {
     
+    public enum RegattaState {
+        UPCOMING, RUNNING, FINISHED, UNKNOWN
+    }
+    
     String getDisplayName();
 
     int getRaceCount();
@@ -19,4 +23,6 @@ public interface HasRegattaMetadata {
     Date getStartDate();
 
     Date getEndDate();
+    
+    RegattaState getState();
 }

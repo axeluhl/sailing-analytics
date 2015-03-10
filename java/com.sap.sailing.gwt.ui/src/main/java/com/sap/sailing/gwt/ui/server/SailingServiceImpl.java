@@ -335,6 +335,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
@@ -5467,6 +5468,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         BoatClassDTO boatClass = sl.getBoatClasses().iterator().next();
                         regatta.setBoatClass(boatClass.getDisplayName() != null ? boatClass.getDisplayName() : boatClass.getName());
                     }
+                     // TODO implement properly
+                    regatta.setState(RegattaState.FINISHED);
                     dto.getRegattas().add(regatta);
                 }
                 dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);

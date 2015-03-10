@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -224,14 +225,27 @@ public class EventHeader extends Composite {
     }
 
     private void fillEventState(DivElement eventStateElement) {
-        if(event.getState() == EventState.FINISHED) {
-            eventStateElement.setInnerText(i18n.finished());
-            eventStateElement.setAttribute("data-labeltype", "finished");
-        } else if(event.getState() == EventState.RUNNING) {
-            eventStateElement.setInnerText(i18n.live());
-            eventStateElement.setAttribute("data-labeltype", "live");
+        if(presenter.showRegattaMetadata()) {
+            RegattaState regattaState = presenter.getRegattaMetadata().getState();
+            if(regattaState == RegattaState.FINISHED) {
+                eventStateElement.setInnerText(i18n.finished());
+                eventStateElement.setAttribute("data-labeltype", "finished");
+            } else if(regattaState == RegattaState.RUNNING) {
+                eventStateElement.setInnerText(i18n.live());
+                eventStateElement.setAttribute("data-labeltype", "live");
+            } else {
+                hide(eventStateElement);
+            }
         } else {
-            hide(eventStateElement);
+            if(event.getState() == EventState.FINISHED) {
+                eventStateElement.setInnerText(i18n.finished());
+                eventStateElement.setAttribute("data-labeltype", "finished");
+            } else if(event.getState() == EventState.RUNNING) {
+                eventStateElement.setInnerText(i18n.live());
+                eventStateElement.setAttribute("data-labeltype", "live");
+            } else {
+                hide(eventStateElement);
+            }
         }
     }
 
