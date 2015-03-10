@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -335,7 +336,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public Iterable<Competitor> getCompetitors() {
+                    public Iterable<Competitor> getAllCompetitors() {
                         // TODO Auto-generated method stub
                         return null;
                     }
@@ -514,6 +515,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void removeListener(RegattaLikeListener listener) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
                         // TODO Auto-generated method stub
                         
                     }

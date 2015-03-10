@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.ws.rs.GET;
@@ -13,6 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -42,10 +44,10 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.kmeans.Cluster;
 
 /**
- * Right now this service is only used for quick debugging and testing of the polar api. It used plain text responses.
- * JSON should be used if this resource is to be consumed.
+ * Right now this service is only used for quick debugging and testing of the polar api. Some services use plain text
+ * responses. JSON or other common formats should be used if the series are to be consumed in production.
  * 
- * @author Frederik Petersen
+ * @author Frederik Petersen / Axel Uhl (maneuver-based wind estimation)
  *
  */
 @Path("/v1/polars")
@@ -75,6 +77,34 @@ public class PolarResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("text/plain;charset=UTF-8")
+    @Path("functions")
+    public Response getFunctions() {
+        PolarDataService polarDataService = getService().getPolarDataService();
+        Set<BoatClass> boatClasses = polarDataService.getAllBoatClassesWithPolarSheetsAvailable();
+        ResponseBuilder responseBuilder;
+        StringBuilder stringBuilder = new StringBuilder();
+        for (BoatClass boatClass : boatClasses) {
+            for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
+                for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
+                    try {
+                        PolynomialFunction speedFunction = polarDataService.getSpeedRegressionFunction(boatClass, legType, tack);
+                        stringBuilder.append("Speed: " + boatClass + " " + legType + " " + tack + ": " + speedFunction.toString() + "\n");
+                        PolynomialFunction angleFunction = polarDataService.getAngleRegressionFunction(boatClass, legType, tack);
+                        stringBuilder.append("Angle: " + boatClass + " " + legType + " " + tack + ": " + angleFunction.toString() + "\n");
+                    } catch (NotEnoughDataHasBeenAddedException e) {
+                        stringBuilder.append("No data for " + boatClass + " " + legType + " " + tack + "\n");
+                    }
+                }
+            }
+            stringBuilder.append("\n\n");
+        }
+
+        responseBuilder = Response.ok(stringBuilder.toString(), MediaType.TEXT_PLAIN);
+        return responseBuilder.build();
+    }
+    
+    @GET
+    @Produces("text/plain;charset=UTF-8")
     @Path("average/{boatClassName}")
     public Response getAverageSpeedAndBearing(@PathParam("boatClassName") String boatClassName,
             @QueryParam("windspeedInKnots") double wSpeed, @QueryParam("legtype") LegType legType, @QueryParam("tack") Tack tack) {
@@ -85,7 +115,7 @@ public class PolarResource extends AbstractSailingServerResource {
         try {
             PolarDataService service = getService().getPolarDataService();
             SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithBearing(boatClass,
-                    windSpeed, legType, tack);
+                    windSpeed, legType, tack, true);
             String resultString = "Speed: " + speedWithBearing.getObject().getKnots() + "kn; Angle: "
                     + speedWithBearing.getObject().getBearing().getDegrees() + "°; Confidence: "
                     + speedWithBearing.getConfidence();

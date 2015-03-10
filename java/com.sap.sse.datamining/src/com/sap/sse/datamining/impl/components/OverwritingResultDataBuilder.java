@@ -4,10 +4,10 @@ import java.util.Locale;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
  * For general information see {@link AdditionalResultDataBuilder}.<br />
@@ -35,11 +35,14 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     }
 
     @Override
-    public AdditionalResultData build(long calculationTimeInNanos, DataMiningStringMessages stringMessages, Locale locale) {
-        return new AdditionalResultDataImpl(retrievedDataAmount, buildResultSignifier(stringMessages, locale), unit, resultDecimals, calculationTimeInNanos);
+    public AdditionalResultData build(long calculationTimeInNanos, ResourceBundleStringMessages stringMessages, Locale locale) {
+        String unitSignifier = buildUnitSignifier(stringMessages, locale);
+        String resultSignifier = buildResultSignifier(stringMessages, locale);
+        return new AdditionalResultDataImpl(retrievedDataAmount, resultSignifier, unit, unitSignifier,
+                resultDecimals, calculationTimeInNanos);
     }
 
-    private String buildResultSignifier(DataMiningStringMessages stringMessages, Locale locale) {
+    private String buildResultSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
         if (extractionFunction == null || aggregationNameMessageKey == null) {
             return "";
         }
@@ -47,6 +50,14 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
         String extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
         String aggregationName = stringMessages.get(locale, aggregationNameMessageKey);
         return stringMessages.get(locale, "ResultSignifier", extractedStatisticName, aggregationName);
+    }
+
+    private String buildUnitSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
+        if (unit == null || unit == Unit.None) {
+            return "";
+        }
+        
+        return stringMessages.get(locale, unit.toString());
     }
 
     @Override

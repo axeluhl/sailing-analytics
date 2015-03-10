@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -20,11 +19,11 @@ import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
-import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 
 public class Footer extends Composite {
     private static FooterPanelUiBinder uiBinder = GWT.create(FooterPanelUiBinder.class);
@@ -52,7 +51,6 @@ public class Footer extends Composite {
         localeAndLanguages.put("de", "Deutsch");
         
         FooterResources.INSTANCE.css().ensureInjected();
-        StyleInjector.injectAtEnd("@media (min-width: 25em) { "+FooterResources.INSTANCE.mediumCss().getText()+"}");
 
         initWidget(uiBinder.createAndBindUi(this));
         

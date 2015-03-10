@@ -58,6 +58,8 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public Double speedOverGroundAtPassingStartWaypointInKnots;
     
+    public Double timeBetweenRaceStartAndCompetitorStartInSeconds;
+    
     public Double distanceToStarboardSideOfStartLineInMeters;
     
     public Tack startTack;
@@ -109,6 +111,10 @@ public class LeaderboardEntryDTO implements Serializable {
                 * result
                 + ((distanceToStarboardSideOfStartLineInMeters == null) ? 0
                         : distanceToStarboardSideOfStartLineInMeters.hashCode());
+        result = prime
+                * result
+                + ((timeBetweenRaceStartAndCompetitorStartInSeconds == null) ? 0
+                        : timeBetweenRaceStartAndCompetitorStartInSeconds.hashCode());
         result = prime
                 * result
                 + ((distanceToStartLineAtStartOfRaceInMeters == null) ? 0 : distanceToStartLineAtStartOfRaceInMeters
@@ -167,6 +173,16 @@ public class LeaderboardEntryDTO implements Serializable {
             if (other.distanceToStartLineAtStartOfRaceInMeters != null)
                 return false;
         } else if (!distanceToStartLineAtStartOfRaceInMeters.equals(other.distanceToStartLineAtStartOfRaceInMeters))
+            return false;
+        if (timeBetweenRaceStartAndCompetitorStartInSeconds == null) {
+            if (other.timeBetweenRaceStartAndCompetitorStartInSeconds != null)
+                return false;
+        } else if (!timeBetweenRaceStartAndCompetitorStartInSeconds.equals(other.timeBetweenRaceStartAndCompetitorStartInSeconds))
+            return false;
+        if (timeBetweenRaceStartAndCompetitorStartInSeconds == null) {
+            if (other.timeBetweenRaceStartAndCompetitorStartInSeconds != null)
+                return false;
+        } else if (!timeBetweenRaceStartAndCompetitorStartInSeconds.equals(other.timeBetweenRaceStartAndCompetitorStartInSeconds))
             return false;
         if (fleet == null) {
             if (other.fleet != null)

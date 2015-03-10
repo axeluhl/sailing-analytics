@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -165,7 +166,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
                     @Override
                     public void cancel() {
                     }
-                }).show();;
+                }).show();
             }
         });
         
@@ -206,7 +207,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         List<String> initialValues = originalConfiguration.allowedCourseAreaNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.allowedCourseAreaNames;
                 
-        allowedCourseAreasList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseAreas(), resources.removeIcon(),
+        allowedCourseAreasList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseAreas(), IconResources.INSTANCE.removeIcon(),
                 SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName());
         allowedCourseAreasList.setWidth("80%");
         allowedCourseAreasList.addValueChangeHandler(dirtyValueMarker);
@@ -219,7 +220,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         List<String> initialValues = originalConfiguration.byNameDesignerCourseNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.byNameDesignerCourseNames;
         
-        courseNamesList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseNames(), resources.removeIcon(), suggestedCourseNames,
+        courseNamesList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseNames(), IconResources.INSTANCE.removeIcon(), suggestedCourseNames,
                 stringMessages.enterCourseName());
         courseNamesList.setWidth("80%");
         courseNamesList.addValueChangeHandler(dirtyValueMarker);

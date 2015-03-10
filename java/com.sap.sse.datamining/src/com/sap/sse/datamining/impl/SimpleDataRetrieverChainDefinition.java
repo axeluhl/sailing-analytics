@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implements
         DataRetrieverChainDefinition<DataSourceType, DataType> {
@@ -46,7 +46,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     }
     
     @Override
-    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+    public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
         return stringMessages.get(locale, nameMessageKey);
     }
 
@@ -61,7 +61,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     }
 
     @Override
-    public <ResultType> void startWith(Class<Processor<DataSourceType, ResultType>> retrieverType,
+    public <ResultType> void startWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
                                        Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
         if (isInitialized()) {
             throw new UnsupportedOperationException("This retriever chain definition already has been started with '"
@@ -79,8 +79,8 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
 
     @Override
     public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType> void addAfter(
-            Class<Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
-            Class<Processor<NextInputType, NextResultType>> nextRetrieverType,
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
+            Class<? extends Processor<NextInputType, NextResultType>> nextRetrieverType,
             Class<NextResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
         if (!isInitialized()) {
             throw new UnsupportedOperationException("This retriever chain definition hasn't been started yet");
@@ -103,7 +103,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     }
 
     private <InputType, ResultType> void checkThatRetrieverHasUsableConstructor(
-            Class<Processor<InputType, ResultType>> retrieverType) {
+            Class<? extends Processor<InputType, ResultType>> retrieverType) {
         try {
             retrieverType.getConstructor(ExecutorService.class, Collection.class);
         } catch (NoSuchMethodException | SecurityException e) {
@@ -114,8 +114,8 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     
     @Override
     public <NextInputType, PreviousInputType, PreviousResultType extends NextInputType> void endWith(
-            Class<Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
-            Class<Processor<NextInputType, DataType>> lastRetrieverType, Class<DataType> retrievedDataType,
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
+            Class<? extends Processor<NextInputType, DataType>> lastRetrieverType, Class<DataType> retrievedDataType,
             String retrievedDataTypeMessageKey) {
         addAfter(previousRetrieverType, lastRetrieverType, retrievedDataType, retrievedDataTypeMessageKey);
         isComplete = true;

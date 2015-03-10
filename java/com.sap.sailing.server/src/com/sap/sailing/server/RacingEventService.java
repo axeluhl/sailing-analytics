@@ -43,7 +43,6 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -66,11 +65,13 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
+import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
 /**
@@ -574,4 +575,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
 
+    /**
+     * @return {@code null} if no service can be found in the OSGi registry
+     */
+    FileStorageManagementService getFileStorageManagementService();
 }

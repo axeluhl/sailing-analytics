@@ -10,14 +10,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.util.DateParser;
 
 public abstract class SailingServerHttpServlet extends HttpServlet {

@@ -15,12 +15,12 @@ import org.junit.Test;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.datamining.data.ClusterGroup;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestFixClusterGroup {
 
-    private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessages();
+    private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessages();
     
     private static final Comparator<Integer> comparator = new ComparableComparator<Integer>();
     private Cluster<Integer> clusterLowerThanZero;
@@ -80,22 +80,22 @@ public class TestFixClusterGroup {
 
     @Before
     public void initializeClusters() {
-        ClusterBoundary<Integer> lowerThanZero = new ComparatorClusterBoundary<Integer>(comparator, 0, ComparisonStrategy.LOWER_THAN);
+        ClusterBoundary<Integer> lowerThanZero = new ComparatorClusterBoundary<Integer>(0, ComparisonStrategy.LOWER_THAN, comparator);
         clusterLowerThanZero = new ClusterWithSingleBoundary<>("Test", lowerThanZero);
         
-        ClusterBoundary<Integer> greaterEqualsThanZero = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 0, ComparisonStrategy.GREATER_EQUALS_THAN);
-        ClusterBoundary<Integer> lowerEqualsThanTen = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 10, ComparisonStrategy.LOWER_EQUALS_THAN);
+        ClusterBoundary<Integer> greaterEqualsThanZero = new ComparatorClusterBoundary<Integer>(0, ComparisonStrategy.GREATER_EQUALS_THAN, new ComparableComparator<Integer>());
+        ClusterBoundary<Integer> lowerEqualsThanTen = new ComparatorClusterBoundary<Integer>(10, ComparisonStrategy.LOWER_EQUALS_THAN, new ComparableComparator<Integer>());
         clusterFromZeroToTen = new ClusterWithLowerAndUpperBoundaries<>("Test", greaterEqualsThanZero, lowerEqualsThanTen);
 
-        ClusterBoundary<Integer> greaterThanTen = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 10, ComparisonStrategy.GREATER_THAN);
-        ClusterBoundary<Integer> lowerEqualsThanTwenty = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 20, ComparisonStrategy.LOWER_EQUALS_THAN);
+        ClusterBoundary<Integer> greaterThanTen = new ComparatorClusterBoundary<Integer>(10, ComparisonStrategy.GREATER_THAN, new ComparableComparator<Integer>());
+        ClusterBoundary<Integer> lowerEqualsThanTwenty = new ComparatorClusterBoundary<Integer>(20, ComparisonStrategy.LOWER_EQUALS_THAN, new ComparableComparator<Integer>());
         clusterFromElevenToTwenty = new ClusterWithLowerAndUpperBoundaries<>("Test", greaterThanTen, lowerEqualsThanTwenty);
 
-        ClusterBoundary<Integer> greaterThanTwenty = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 20, ComparisonStrategy.GREATER_THAN);
-        ClusterBoundary<Integer> lowerEqualsThanThirty = new ComparatorClusterBoundary<Integer>(new ComparableComparator<Integer>(), 30, ComparisonStrategy.LOWER_EQUALS_THAN);
+        ClusterBoundary<Integer> greaterThanTwenty = new ComparatorClusterBoundary<Integer>(20, ComparisonStrategy.GREATER_THAN, new ComparableComparator<Integer>());
+        ClusterBoundary<Integer> lowerEqualsThanThirty = new ComparatorClusterBoundary<Integer>(30, ComparisonStrategy.LOWER_EQUALS_THAN, new ComparableComparator<Integer>());
         clusterFromTwentyOneToThirty = new ClusterWithLowerAndUpperBoundaries<>("Test", greaterThanTwenty, lowerEqualsThanThirty);
 
-        ClusterBoundary<Integer> greaterThanThirty = new ComparatorClusterBoundary<Integer>(comparator, 30, ComparisonStrategy.GREATER_THAN);
+        ClusterBoundary<Integer> greaterThanThirty = new ComparatorClusterBoundary<Integer>(30, ComparisonStrategy.GREATER_THAN, comparator);
         clusterGreaterThanThirty = new ClusterWithSingleBoundary<>("Test", greaterThanThirty);
     }
 

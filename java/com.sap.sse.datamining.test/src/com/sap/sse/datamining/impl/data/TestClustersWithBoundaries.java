@@ -10,18 +10,18 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestClustersWithBoundaries {
 
     private static final char INFINITE = '\u221e';
     
-    private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessages();
+    private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessages();
 
     private static final Comparator<Integer> comparator = new ComparableComparator<Integer>();
-    private static final ClusterBoundary<Integer> lowerBound = new ComparatorClusterBoundary<Integer>(comparator, 0, ComparisonStrategy.GREATER_EQUALS_THAN);
-    private static final ClusterBoundary<Integer> upperBound = new ComparatorClusterBoundary<Integer>(comparator, 10, ComparisonStrategy.LOWER_THAN);
+    private static final ClusterBoundary<Integer> lowerBound = new ComparatorClusterBoundary<Integer>(0, ComparisonStrategy.GREATER_EQUALS_THAN, comparator);
+    private static final ClusterBoundary<Integer> upperBound = new ComparatorClusterBoundary<Integer>(10, ComparisonStrategy.LOWER_THAN, comparator);
 
 
     @Test

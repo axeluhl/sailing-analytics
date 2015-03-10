@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -146,7 +147,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     protected void initializeFleetListComposite(StringMessages stringMessages) {
         fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO(
-                LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, resources.removeIcon());
+                LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)), stringMessages, IconResources.INSTANCE.removeIcon());
         fleetListComposite.ensureDebugId("FleetListEditorComposite");
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<Iterable<FleetDTO>>() {
             @Override

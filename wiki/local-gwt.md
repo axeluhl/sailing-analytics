@@ -29,3 +29,11 @@ One of the great strengths of GWT is the use of Eclipse as a Java source-level d
 You can set breakpoints in your GWT Java code and inspect values for suspended threads as usual for any Java development.
 
 Note the reduced performance which is largely due to the way the Java VM and the browser plug-in communicate. In particular, many fine-grained changes to the DOM can be quite costly. Therefore, if you're only interested in server-side debugging, consider [compiling](#Local-GWT-Compile) the GWT code for better performance.
+
+## Curious Errors
+
+There's a randomly occuring error, since the update to GWT 2.7, where an entry point fails to load. The Development Mode view of Eclipse shows the error  
+<pre>
+Your source appears not to live underneath a subpackage called 'client'; no problem, but you'll need to use the &lt;source&gt; directive in your module to make it accessible
+</pre>
+The problem can be "solved" by retrying until it works.

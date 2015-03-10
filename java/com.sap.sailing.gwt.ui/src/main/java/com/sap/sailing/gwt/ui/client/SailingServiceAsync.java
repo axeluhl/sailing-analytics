@@ -77,11 +77,12 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.BuildVersionRetriever;
+import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 
 /**
  * The async counterpart of {@link SailingService}
  */
-public interface SailingServiceAsync extends BuildVersionRetriever {
+public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageManagementGwtServiceAsync {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
@@ -205,8 +206,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
     void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-
-    void getLeaderboardsByRegatta(RegattaDTO regatta, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void getLeaderboardsByRaceAndRegatta(RaceDTO race, RegattaIdentifier regattaIdentifier,
             AsyncCallback<List<StrippedLeaderboardDTO>> callback);
@@ -561,9 +560,9 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
     
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
     
-
     void showCachedPolarSheetForBoatClass(String boatClassName,
             AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
+    
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void denoteForRaceLogTracking(String leaderboardName,
@@ -683,6 +682,10 @@ public interface SailingServiceAsync extends BuildVersionRetriever {
     void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
 
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames,
-			EventDTO newEvent, AsyncCallback<Void> asyncCallback); 
+			EventDTO newEvent, AsyncCallback<Void> asyncCallback);
 
+    void getActiveFileStorageServiceName(AsyncCallback<String> callback);
+
+    void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
+            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback); 
 }

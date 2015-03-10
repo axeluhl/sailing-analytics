@@ -69,7 +69,7 @@ public class PolarSheetGenerationServiceTest {
         double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
-                0.05, false, windStepping, false);
+                0.05, false, windStepping, false, 0);
         
         List<RegattaAndRaceIdentifier> idList = new ArrayList<RegattaAndRaceIdentifier>();
         idList.add(new RegattaNameAndRaceName("IrgendeineRegatta", "IrgendeinRennen"));
@@ -163,8 +163,8 @@ public class PolarSheetGenerationServiceTest {
             waypoints.add(new WaypointImpl(null));
             waypoints.add(new WaypointImpl(null));
             ArrayList<Competitor> competitors = new ArrayList<Competitor>();
-            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, new TeamImpl("SAP", null, null),
-                    new BoatImpl("Schnelle Forelle", forelle, "GER000"));
+            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, null,
+                    new TeamImpl("SAP", null, null), new BoatImpl("Schnelle Forelle", forelle, "GER000"));
             competitors.add(competitor);
             RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", waypoints), forelle, competitors);
             return race;

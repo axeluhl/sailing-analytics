@@ -14,12 +14,13 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -38,10 +39,11 @@ import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRaceWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestDimensionsValuesQuery {
 
-    private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
+    private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     private static final Locale locale = Locale.ENGLISH;
     
     private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition;
@@ -71,16 +73,16 @@ public class TestDimensionsValuesQuery {
             protected Processor<Collection<Test_Regatta>, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> resultCollector = ComponentTestsUtil.getProcessorFactory().createGroupedDataCollectingAsSetProcessor(this); 
                 
-                Collection<Function<?>> legDimensions = new ArrayList<>();
-                legDimensions.add(dimensionLegNumber);
-                legDimensions.add(dimensionCompetitorName);
-                legDimensions.add(dimensionCompetitorSailID);
+                Collection<Pair<Function<?>, ParameterProvider>> legDimensions = new ArrayList<>();
+                legDimensions.add(new Pair<>(dimensionLegNumber, ParameterProvider.NULL));
+                legDimensions.add(new Pair<>(dimensionCompetitorName, ParameterProvider.NULL));
+                legDimensions.add(new Pair<>(dimensionCompetitorSailID, ParameterProvider.NULL));
                 
-                Collection<Function<?>> raceDimensions = new ArrayList<>();
-                raceDimensions.add(dimensionRegattaName);
-                raceDimensions.add(dimensionRaceName);
-                raceDimensions.add(dimensionBoatClassName);
-                raceDimensions.add(dimensionYear);
+                Collection<Pair<Function<?>, ParameterProvider>> raceDimensions = new ArrayList<>();
+                raceDimensions.add(new Pair<>(dimensionRegattaName, ParameterProvider.NULL));
+                raceDimensions.add(new Pair<>(dimensionRaceName, ParameterProvider.NULL));
+                raceDimensions.add(new Pair<>(dimensionBoatClassName, ParameterProvider.NULL));
+                raceDimensions.add(new Pair<>(dimensionYear, ParameterProvider.NULL));
                 
                 DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
                 chainBuilder.stepFurther(); //Initialization

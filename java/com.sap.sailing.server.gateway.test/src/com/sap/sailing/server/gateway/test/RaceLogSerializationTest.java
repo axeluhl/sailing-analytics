@@ -24,7 +24,6 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiJsonHandler;
@@ -42,6 +41,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSer
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogSerializationTest {
@@ -49,8 +49,8 @@ public class RaceLogSerializationTest {
     private JsonDeserializer<RaceLogEvent> deserializer;
     private final AbstractLogEventAuthor author = new LogEventAuthorImpl("test", 0);
     private static final Competitor competitor = new CompetitorImpl("a", "b", null,
-            new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null),
-            new BoatImpl("a", new BoatClassImpl("a", true), "abc"));
+            null,
+            new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null), new BoatImpl("a", new BoatClassImpl("a", true), "abc"));
     
     @Before
     public void setup() {

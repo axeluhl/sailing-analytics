@@ -29,13 +29,20 @@ public class UserStoreImpl implements UserStore {
 
     private static final Logger logger = Logger.getLogger(UserStoreImpl.class.getName());
 
+    private static final String ACCESS_TOKEN_KEY = "___access_token___";
+
     private String name = "MongoDB user store";
 
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
+    private final ConcurrentHashMap<String, User> usersByAccessToken;
     private final ConcurrentHashMap<String, String> emailForUsername;
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
+    
+    /**
+     * Keys are the usernames, values are the key/value pairs representing the user's preferences
+     */
     private final ConcurrentHashMap<String, Map<String, String>> preferences;
     
     /**
@@ -48,7 +55,8 @@ public class UserStoreImpl implements UserStore {
         usersByEmail = new ConcurrentHashMap<>();
         emailForUsername = new ConcurrentHashMap<>();
         settings = new ConcurrentHashMap<>();
-        settingTypes = new ConcurrentHashMap<String, Class<?>>();
+        settingTypes = new ConcurrentHashMap<>();
+        usersByAccessToken = new ConcurrentHashMap<>();
         preferences = new ConcurrentHashMap<>();
         final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
@@ -98,6 +106,33 @@ public class UserStoreImpl implements UserStore {
         }
         for (Entry<String, Class<?>> settingType : newUserStore.getAllSettingTypes().entrySet()) {
             settingTypes.put(settingType.getKey(), settingType.getValue());
+        }
+    }
+
+    @Override
+    public boolean setAccessToken(String username, String accessToken) {
+        final boolean result;
+        final User user = getUserByName(username);
+        if (user == null) {
+            result = false;
+        } else {
+            result = true;
+            final String oldAccessToken = getPreference(username, ACCESS_TOKEN_KEY);
+            if (oldAccessToken != null) {
+                usersByAccessToken.remove(oldAccessToken);
+            }
+            usersByAccessToken.put(accessToken, user);
+            setPreference(username, ACCESS_TOKEN_KEY, accessToken);
+        }
+        return result;
+    }
+
+    @Override
+    public void removeAccessToken(String username, String accessToken) {
+        User user = usersByAccessToken.remove(accessToken);
+        if (user != null) {
+            // the access token actually existed; now we need to update the preferences
+            unsetPreference(username, ACCESS_TOKEN_KEY);
         }
     }
 
@@ -175,10 +210,24 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public User getUserByName(String name) {
+        final User result;
         if (name == null) {
-            return null;
+            result = null;
+        } else {
+            result = users.get(name);
         }
-        return users.get(name);
+        return result;
+    }
+
+    @Override
+    public User getUserByAccessToken(String accessToken) {
+        final User result;
+        if (accessToken == null) {
+            result = null;
+        } else {
+            result = usersByAccessToken.get(accessToken);
+        }
+        return result;
     }
 
     @Override

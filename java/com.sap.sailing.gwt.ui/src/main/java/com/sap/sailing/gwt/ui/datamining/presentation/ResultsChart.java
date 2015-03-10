@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.datamining.presentation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.ResizingSimplePanel;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
-import com.sap.sailing.gwt.ui.datamining.UnitFormatter;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 
@@ -103,7 +101,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
     private void updateYAxisLabels(QueryResult<? extends Number> result) {
         chart.getYAxis().setAxisTitleText(result.getResultSignifier());
         chart.setToolTip(new ToolTip().setValueDecimals(result.getValueDecimals()).setValueSuffix(
-                UnitFormatter.format(result.getUnit())));
+                result.getUnitSignifier()));
     }
 
     private boolean resultHasComplexKeys(QueryResult<? extends Number> result) {
@@ -148,12 +146,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
 
     public List<GroupKey> getSortedKeysFrom(QueryResult<? extends Number> result) {
         List<GroupKey> sortedKeys = new ArrayList<GroupKey>(result.getResults().keySet());
-        Collections.sort(sortedKeys, new Comparator<GroupKey>() {
-            @Override
-            public int compare(GroupKey key1, GroupKey key2) {
-                return key1.asString().compareTo(key2.asString());
-            }
-        });
+        Collections.sort(sortedKeys);
         return sortedKeys;
     }
 

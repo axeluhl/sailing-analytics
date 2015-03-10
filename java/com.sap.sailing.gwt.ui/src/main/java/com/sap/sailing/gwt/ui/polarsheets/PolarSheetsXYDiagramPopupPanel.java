@@ -64,6 +64,12 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
         speedSeriesMovingAverage.setPoints(pointsForUpwindStarboardAverageSpeedMovingAverage);
         chart.addSeries(speedSeriesMovingAverage, false, false);
         
+        Point[] pointsForUpwindStarboardAverageSpeedRegression = toPointArray(result.getPointsForAverageSpeedRegression(tack, legType));
+        Series speedSeriesRegression = chart.createSeries();
+        speedSeriesRegression.setName(tack + " " + legType + " Speed - Regression");
+        speedSeriesRegression.setPoints(pointsForUpwindStarboardAverageSpeedRegression);
+        chart.addSeries(speedSeriesRegression, false, false);
+        
         Point[] pointsForUpwindStarboardAverageConfidence = toPointArray(result.getPointsForAverageConfidence(tack, legType));
         Series confidenceSeries = chart
                 .createSeries()
@@ -77,7 +83,7 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
         chart.addSeries(confidenceSeries, false, false);
         
         if (!showByDefault) {
-            speedSeriesMovingAverage.setVisible(false, false);
+            speedSeriesRegression.setVisible(false, false);
             confidenceSeries.setVisible(false, false);
         }
     }

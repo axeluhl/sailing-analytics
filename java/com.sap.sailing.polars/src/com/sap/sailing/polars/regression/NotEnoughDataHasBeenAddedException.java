@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.regression;
 
+
 public class NotEnoughDataHasBeenAddedException extends Exception {
 
     private static final long serialVersionUID = 4134116458606258315L;
@@ -10,6 +11,10 @@ public class NotEnoughDataHasBeenAddedException extends Exception {
 
     public NotEnoughDataHasBeenAddedException(String string) {
         super(string);
+    }
+
+    public NotEnoughDataHasBeenAddedException(String string, Throwable cause) {
+        super(string, cause);
     }
 
 }

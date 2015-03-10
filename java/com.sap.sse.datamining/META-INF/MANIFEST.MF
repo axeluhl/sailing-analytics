@@ -11,17 +11,16 @@ Export-Package: com.sap.sse.datamining,
  com.sap.sse.datamining.data,
  com.sap.sse.datamining.factories,
  com.sap.sse.datamining.functions,
- com.sap.sse.datamining.i18n,
  com.sap.sse.datamining.impl,
  com.sap.sse.datamining.impl.components,
  com.sap.sse.datamining.impl.components.aggregators,
  com.sap.sse.datamining.impl.criterias,
  com.sap.sse.datamining.impl.data,
  com.sap.sse.datamining.impl.functions,
- com.sap.sse.datamining.impl.functions.criterias,
- com.sap.sse.datamining.impl.i18n
+ com.sap.sse.datamining.impl.functions.criterias
 Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sse.common;bundle-version="1.0.0",
- org.eclipse.osgi
-Bundle-Activator: com.sap.sse.datamining.impl.DataMiningActivator
+ org.eclipse.osgi,
+ com.sap.sse
+Bundle-Activator: com.sap.sse.datamining.impl.DataMiningFrameworkActivator
 Bundle-ActivationPolicy: lazy

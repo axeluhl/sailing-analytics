@@ -2,6 +2,7 @@ package com.sap.sailing.datamining.impl.data;
 
 import java.util.Calendar;
 
+import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
@@ -13,16 +14,24 @@ import com.sap.sse.common.TimePoint;
 
 public class TrackedRaceWithContext implements HasTrackedRaceContext {
 
+    private final HasLeaderboardContext leaderboardContext;
     private final Regatta regatta;
     private final Fleet fleet;
     private final TrackedRace trackedRace;
+    
     private Integer year;
     private boolean yearHasBeenInitialized;
 
-    public TrackedRaceWithContext(Regatta regatta, Fleet fleet, TrackedRace trackedRace) {
+    public TrackedRaceWithContext(HasLeaderboardContext leaderboardContext, Regatta regatta, Fleet fleet, TrackedRace trackedRace) {
+        this.leaderboardContext = leaderboardContext;
         this.regatta = regatta;
         this.fleet = fleet;
         this.trackedRace = trackedRace;
+    }
+    
+    @Override
+    public HasLeaderboardContext getLeaderboardContext() {
+        return leaderboardContext;
     }
     
     @Override

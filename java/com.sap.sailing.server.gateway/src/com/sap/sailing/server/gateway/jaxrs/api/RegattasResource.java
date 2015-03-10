@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -32,6 +34,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -64,6 +67,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
+    private static final Logger logger = Logger.getLogger(RegattasResource.class.getName());
 
     private Response getBadRegattaErrorResponse(String regattaName) {
         return  Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
@@ -460,9 +464,39 @@ public class RegattasResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/windsources")
+    public Response getWindSources(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "'.").type(MediaType.TEXT_PLAIN).build();
+            } else {     
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                JSONArray windSourcesAvailable = new JSONArray();
+                if (trackedRace != null) {
+                    for (WindSource windSource : trackedRace.getWindSources()) {
+                        JSONObject windSourceJson = new JSONObject();
+                        windSourceJson.put("typeName", windSource.getType().name());
+                        windSourceJson.put("id", windSource.getId() != null ? windSource.getId().toString() : "");
+                        windSourcesAvailable.add(windSourceJson);
+                    }
+                }
+                return Response.ok(windSourcesAvailable.toString(), MediaType.APPLICATION_JSON).build();
+            }
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/wind")
     public Response getWind(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
             @DefaultValue("COMBINED") @QueryParam("windsource") String windSource,
+            @QueryParam("windsourceid") String windSourceId,
             @QueryParam("fromtime") String fromtime, @QueryParam("fromtimeasmillis") Long fromtimeasmillis,
             @QueryParam("totime") String totime, @QueryParam("totimeasmillis") Long totimeasmillis) {
         Response response;
@@ -493,6 +527,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
                 TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(new DefaultWindTrackJsonSerializer());
                 serializer.setWindSource(windSource);
+                serializer.setWindSourceId(windSourceId);
                 serializer.setFromTime(from);
                 serializer.setToTime(to);
 
@@ -619,6 +654,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                 jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
                             } catch (NoWindException e) {
+                                logger.log(Level.FINE,
+                                        "No wind information while trying to determing maneuvers for competitor "
+                                                + competitor.getName(), e);
                             }
 
                             TimePoint startTime = trackedLegOfCompetitor.getStartTime();
