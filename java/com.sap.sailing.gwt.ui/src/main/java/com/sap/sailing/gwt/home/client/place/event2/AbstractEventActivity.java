@@ -201,8 +201,23 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public void ensureMedia(AsyncCallback<MediaDTO> callback) {
-        getSailingService().getMediaForEvent(ctx.getEventDTO().id, callback);
+    public void ensureMedia(final AsyncCallback<MediaDTO> callback) {
+        if(ctx.getMedia() != null) {
+            callback.onSuccess(ctx.getMedia());
+            return;
+        }
+        getSailingService().getMediaForEvent(ctx.getEventDTO().id, new AsyncCallback<MediaDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(MediaDTO result) {
+                ctx.withMedia(result);
+                callback.onSuccess(result);
+            }
+        });
     }
     
     @Override

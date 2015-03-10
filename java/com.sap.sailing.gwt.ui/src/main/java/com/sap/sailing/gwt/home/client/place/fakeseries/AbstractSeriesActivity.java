@@ -77,8 +77,23 @@ public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> 
     }
     
     @Override
-    public void ensureMedia(AsyncCallback<MediaDTO> callback) {
-        clientFactory.getSailingService().getMediaForEventSeries(ctx.getSeriesDTO().getId(), callback);
+    public void ensureMedia(final AsyncCallback<MediaDTO> callback) {
+        if(ctx.getMedia() != null) {
+            callback.onSuccess(ctx.getMedia());
+            return;
+        }
+        clientFactory.getSailingService().getMediaForEventSeries(ctx.getSeriesDTO().getId(), new AsyncCallback<MediaDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+            
+            @Override
+            public void onSuccess(MediaDTO result) {
+                ctx.withMedia(result);
+                callback.onSuccess(result);
+            }
+        });
     }
     
     @Override
