@@ -11,7 +11,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -101,7 +100,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
         return trackedRace == null ? 0
                 : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race, trackedRace, timePoint, trackedRace
@@ -126,7 +125,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      *         competitors whose tracked rank is better (lower) than <code>rank</code>.
      */
     private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
-            TimePoint timePoint, int rank) throws NoWindException {
+            TimePoint timePoint, int rank) {
         int correctedRank = rank;
         List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
         int betterCompetitorRank = 1;

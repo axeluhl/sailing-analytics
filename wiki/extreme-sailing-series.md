@@ -23,7 +23,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ## Official information
 
-The current notice of race and other information can be accessed on the following page: https://octpftp.egnyte.com/. The username is `ess_main` and the password is `x402014ess`.
+The current notice of race and other information can be accessed on the following page: https://octpftp.egnyte.com/. The username is `ess_main` and the password can be retrieved from Simon or Clem.
 
 ## Boats
 To achieve the goal of providing invitees an exciting event a new type of boats have been designed. Capable of reaching speeds usually reserved to motorboats even in medium wind conditions, the Extreme 40 has been designed by Olympic champions Yves Loday and Mitch Booth, with the aim to provide the international sailing arena with a visually stunning and 100% performance-focused multihull. 
@@ -516,6 +516,10 @@ coredump_dir /var/spool/squid
 </pre>
 
 There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` that enables you to access some stats from http://192.168.1.202/Squid/cgi-bin/cachemgr.cgi. 
+
+## Backup
+
+There exists a backup of all data and configurations (DNS, TracTrac, SAP Analytics) on a USB harddisk that can be found in the suitcase that holds the tablets and other stuff.
 
 ## Additional information bits
 

@@ -140,17 +140,13 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     private void fillLiveRaceInfoDTOWithRaceData(RibDashboardRaceInfoDTO lRInfo, TimePoint now) {
         if (runningRace != null) {
             lRInfo.idOfLastTrackedRace = runningRace.getRaceIdentifier();
-            try {
-                List<Competitor> competitors = runningRace.getCompetitorsFromBestToWorst(now);
-                List<String> competitorNames = new ArrayList<String>();
-                for (Competitor competitor : competitors) {
-                    competitorNames.add(competitor.getName());
-                }
-                Collections.sort(competitorNames);
-                lRInfo.competitorNamesFromLastTrackedRace = competitorNames;
-            } catch (NoWindException e) {
-                e.printStackTrace();
+            List<Competitor> competitors = runningRace.getCompetitorsFromBestToWorst(now);
+            List<String> competitorNames = new ArrayList<String>();
+            for (Competitor competitor : competitors) {
+                competitorNames.add(competitor.getName());
             }
+            Collections.sort(competitorNames);
+            lRInfo.competitorNamesFromLastTrackedRace = competitorNames;
         }
     }
 
