@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -5444,14 +5445,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
                 LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
+                List<Event> fakeSeriesEvents = new ArrayList<Event>();
 
                 LeaderboardGroup overallLeaderboardGroup = getService().getLeaderboardGroupByName(overallLeaderboardGroupDTO.getName());
                 for (Event event : getService().getAllEvents()) {
                     for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
                         if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                            dto.getEventsOfSeries().add(new EventReferenceDTO(event.getId(), event.getName()));
+                            fakeSeriesEvents.add(event);
                         }
                     }
+                }
+                Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
+                    public int compare(Event e1, Event e2) {
+                        return e1.getStartDate().compareTo(e2.getEndDate());
+                    }
+                });
+                for(Event eventInSeries: fakeSeriesEvents) {
+                    dto.getEventsOfSeries().add(new EventReferenceDTO(eventInSeries.getId(), eventInSeries.getName()));
                 }
             }
         } else {
@@ -5516,19 +5526,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             dto.setDisplayName(overallLeaderboardGroupDTO.getDisplayName() != null ? overallLeaderboardGroupDTO.getDisplayName() : overallLeaderboardGroupDTO.getName());
 
             LeaderboardGroup overallLeaderboardGroup = getService().getLeaderboardGroupByName(overallLeaderboardGroupDTO.getName());
+            List<Event> fakeSeriesEvents = new ArrayList<Event>();
             for (Event event : getService().getAllEvents()) {
                 for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
                     if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                        EventSeriesEventDTO eventOfSeries = new EventSeriesEventDTO();
-                        eventOfSeries.setId(event.getId());
-                        eventOfSeries.setDisplayName(event.getName());
-                        eventOfSeries.setStartDate(event.getStartDate().asDate());
-                        eventOfSeries.setEndDate(event.getEndDate().asDate());
-                        eventOfSeries.setState(EventState.UPCOMING);
-                        eventOfSeries.setVenue(event.getVenue().getName());
-                        dto.addEvent(eventOfSeries);
+                        fakeSeriesEvents.add(event);
                     }
                 }
+            }
+            Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
+                public int compare(Event e1, Event e2) {
+                    return e1.getStartDate().compareTo(e2.getEndDate());
+                }
+            });
+            for(Event eventInSeries: fakeSeriesEvents) {
+                EventSeriesEventDTO eventOfSeries = new EventSeriesEventDTO();
+                eventOfSeries.setId(eventInSeries.getId());
+                eventOfSeries.setDisplayName(eventInSeries.getName());
+                eventOfSeries.setStartDate(eventInSeries.getStartDate().asDate());
+                eventOfSeries.setEndDate(eventInSeries.getEndDate().asDate());
+                eventOfSeries.setState(EventState.UPCOMING);
+                eventOfSeries.setVenue(eventInSeries.getVenue().getName());
+                dto.addEvent(eventOfSeries);
             }
         }
 
