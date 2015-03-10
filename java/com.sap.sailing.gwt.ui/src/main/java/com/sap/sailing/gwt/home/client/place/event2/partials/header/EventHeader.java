@@ -10,7 +10,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.HeadingElement;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -46,7 +45,7 @@ public class EventHeader extends Composite {
     
     @UiField StringMessages i18n;
     
-    @UiField ImageElement eventLogo;
+    @UiField DivElement eventLogo;
     @UiField HeadingElement staticTitle;
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
@@ -99,8 +98,8 @@ public class EventHeader extends Composite {
 
     private void initFields() {
         String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
-        eventLogo.setSrc(logoUrl);
-        eventLogo.setAlt(event.getName());
+        eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
+        eventLogo.setTitle(event.getName());
         
         String nameToShow;
         if(presenter.showRegattaMetadata()) {

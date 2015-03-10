@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.client.place.fakeseries.partials.header;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -33,7 +32,7 @@ public class SeriesHeader extends Composite {
     
     @UiField StringMessages i18n;
     
-    @UiField ImageElement eventLogo;
+    @UiField DivElement eventLogo;
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
     @UiField FlowPanel venues;
@@ -68,8 +67,8 @@ public class SeriesHeader extends Composite {
 
     private void initFields() {
         String logoUrl = series.getLogoImageURL() != null ? series.getLogoImageURL() : SeriesHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
-        eventLogo.setSrc(logoUrl);
-        eventLogo.setAlt(series.getDisplayName());
+        eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
+        eventLogo.setTitle(series.getDisplayName());
         eventName.setInnerText(series.getDisplayName());
         fillEventState(eventState);
         

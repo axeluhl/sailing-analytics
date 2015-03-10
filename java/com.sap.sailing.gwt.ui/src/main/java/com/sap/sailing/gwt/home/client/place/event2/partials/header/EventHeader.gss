@@ -186,15 +186,17 @@
   position: absolute;
   top: 0;
   left: 0;
-  max-width: 5em;
-  max-height: 5em;
-  width: auto;
-  height: auto;
+  width: 5em;
+  height: 5em;
   border: 0.333333333333333em solid #f6f9fc;
   box-shadow: 0 0 5px rgba(238,238,238,0.5);
 }
 .eventheader_intro_logo_image {
-  max-height: 100%;
+  height: 100%;
+  width: 100%;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 .eventheader_intro_name {
   display: inline-block;

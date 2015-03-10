@@ -10,7 +10,7 @@
         <div class="{res.mediaCss.small12} {res.mediaCss.large9} {res.mediaCss.columns}">
           <div class="{local_res.css.eventheader_intro}">
             <div class="{local_res.css.eventheader_intro_logo}">
-              <img ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" />
+              <div ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" />
             </div>
             <!-- IF header.dropdown === 'regattas' -->
             <div ui:field="dropdownTitle" class="{local_res.css.dropdown} {local_res.css.dropdownregattas} {local_res.css.jsdropdown}">
