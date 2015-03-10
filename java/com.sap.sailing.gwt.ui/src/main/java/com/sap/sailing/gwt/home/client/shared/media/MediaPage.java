@@ -13,6 +13,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaVideo;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -43,10 +44,13 @@ public class MediaPage extends Composite {
 
     public MediaPage() {
         MediaPageResources.INSTANCE.css().ensureInjected();
-        initWidget(uiBinder.createAndBindUi(this));
+        contentPanel = new SimplePanel();
+        initWidget(contentPanel);
     }
     
     public void setMedia(MediaDTO media) {
+        contentPanel.setWidget(uiBinder.createAndBindUi(this));
+        
         boolean hasPhotos = !media.getPhotos().isEmpty();
      // TODO use this when ImageGallery is implemented correctly
 //        photos.setVisible(hasPhotos);
@@ -108,6 +112,7 @@ public class MediaPage extends Composite {
  // TODO remove -> temporary solution to get contents on the page
     private static final int MAX_VIDEO_COUNT = 3;
     private final HashSet<String> addedVideoUrls = new HashSet<String>(MAX_VIDEO_COUNT);
+    private SimplePanel contentPanel;
     private void addVideoToVideoPanel(String youtubeUrl, String title) {
         if (addedVideoUrls.contains(youtubeUrl)) {
             return;
