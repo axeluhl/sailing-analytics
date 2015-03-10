@@ -517,6 +517,10 @@ coredump_dir /var/spool/squid
 
 There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` that enables you to access some stats from http://192.168.1.202/Squid/cgi-bin/cachemgr.cgi. 
 
+## Backup
+
+There exists a backup of all data and configurations (DNS, TracTrac, SAP Analytics) on a USB harddisk that can be found in the suitcase that holds the tablets and other stuff.
+
 ## Additional information bits
 
 ### Useful tools to get information about system
