@@ -1,0 +1,13 @@
+.media {
+  font-size: 15px;
+  font-size: 1rem;
+}
+
+.mediavideos {
+  background: #333;
+  color: #fff;
+}
+
+.mediaimages {
+  margin-top: 2em;
+}

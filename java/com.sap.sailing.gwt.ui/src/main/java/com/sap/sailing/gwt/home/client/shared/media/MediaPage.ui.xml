@@ -1,21 +1,31 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:c="urn:import:com.sap.sse.gwt.theme.client.component">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
-    .important {
-        font-weight: bold;
-    }
-    </ui:style>
-    <g:HTMLPanel>
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:c="urn:import:com.sap.sse.gwt.theme.client.component"
+  xmlns:sse="urn:import:com.sap.sse.gwt.client.controls">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.media.MediaPageResources" />
+  <ui:style>
+  </ui:style>
+  <g:HTMLPanel>
     <div class="{res.mediaCss.grid}">
-        <div class="{res.mediaCss.small12} {res.mediaCss.columns}" style="min-height: 300px;">
-            <h3 ui:field="noContent" style="display: none; padding-top: 2em;"><ui:text from="{i18n.mediaNoContent}" /></h3>
-            <c:imagegallery.ImageGallery ui:field="photos" visible="false" />
-            <c:videogallery.VideoGallery ui:field="videos" visible="false" />
-        </div>
+      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+          <h3 ui:field="noContent" style="display: none; padding-top: 2em;"><ui:text from="{i18n.mediaNoContent}" /></h3>
+          <c:imagegallery.ImageGallery ui:field="photos" visible="false" />
+          <c:videogallery.VideoGallery ui:field="videos" visible="false" />
       </div>
-    </g:HTMLPanel>
+    </div>
+    <div class="{res.mediaCss.grid} {local_res.css.media} {local_res.css.mediaimages}">
+      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+        <sse:carousel.ImageCarousel ui:field="imageCarousel" /> 
+      </div>
+    </div>
+    <div ui:field="videoWrapper" style="display: none;" class="{res.mainCss.mainsection} {local_res.css.media} {local_res.css.mediavideos}">
+      <div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
+        <div ui:field="videoLightBoxData" class="{res.mainCss.lightbox_content}"></div>
+        <g:FlowPanel ui:field="videosPanel" />
+      </div>
+    </div>
+  </g:HTMLPanel>
 </ui:UiBinder> 

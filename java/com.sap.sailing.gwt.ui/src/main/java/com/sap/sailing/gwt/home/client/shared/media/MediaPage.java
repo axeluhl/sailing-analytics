@@ -1,22 +1,28 @@
 package com.sap.sailing.gwt.home.client.shared.media;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaVideo;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaEntryDTO;
+import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 import com.sap.sse.gwt.theme.client.component.imagegallery.ImageDescriptor;
-import com.sap.sse.gwt.theme.client.component.imagegallery.ImageGallery;
 import com.sap.sse.gwt.theme.client.component.imagegallery.ImageGalleryData;
 import com.sap.sse.gwt.theme.client.component.videogallery.VideoDescriptor;
-import com.sap.sse.gwt.theme.client.component.videogallery.VideoGallery;
 import com.sap.sse.gwt.theme.client.component.videogallery.VideoGalleryData;
 
 public class MediaPage extends Composite {
@@ -26,32 +32,91 @@ public class MediaPage extends Composite {
     interface MediaPageUiBinder extends UiBinder<Widget, MediaPage> {
     }
     
-    @UiField ImageGallery photos;
-    
-    @UiField VideoGallery videos;
     @UiField HeadingElement noContent;
+    // TODO use this when ImageGallery and VideoGallery is implemented correctly
+//    @UiField ImageGallery photos;
+//    @UiField VideoGallery videos;
+    // TODO remove -> temporary solution to get contents on the page
+    @UiField ImageCarousel imageCarousel;
+    @UiField DivElement videoWrapper;
+    @UiField FlowPanel videosPanel;
 
     public MediaPage() {
+        MediaPageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
     
     public void setMedia(MediaDTO media) {
         boolean hasPhotos = !media.getPhotos().isEmpty();
-        photos.setVisible(hasPhotos);
+     // TODO use this when ImageGallery is implemented correctly
+//        photos.setVisible(hasPhotos);
+//        if(hasPhotos) {
+//            ImageGalleryData data = mapPhotoData(media.getPhotos());
+//            photos.setData(data);
+//        }
+     // TODO remove -> temporary solution to get contents on the page
+        imageCarousel.setVisible(hasPhotos);
         if(hasPhotos) {
-            ImageGalleryData data = mapPhotoData(media.getPhotos());
-            photos.setData(data);
+            Random random = new Random();
+            List<MediaEntryDTO> shuffledPhotoGallery = new ArrayList<>(media.getPhotos());
+            final int gallerySize = media.getPhotos().size();
+            for (int i = 0; i < gallerySize; i++) {
+                Collections.swap(shuffledPhotoGallery, i, random.nextInt(gallerySize));
+            }
+            for (MediaEntryDTO holder : shuffledPhotoGallery) {
+                imageCarousel.addImage(holder.getMediaURL(), holder.getHeightInPx(), holder.getWidthInPx());
+            }
         }
         
         boolean hasVideos = !media.getVideos().isEmpty();
-        videos.setVisible(hasVideos);
-        if(hasPhotos) {
-            VideoGalleryData data = mapVideoData(media.getVideos());
-            videos.setData(data);
+        // TODO use this when VideoGallery is implemented correctly
+//        videos.setVisible(hasVideos);
+//        if(hasPhotos) {
+//            VideoGalleryData data = mapVideoData(media.getVideos());
+//            videos.setData(data);
+//        }
+     // TODO remove -> temporary solution to get contents on the page
+        if(hasVideos) {
+            videoWrapper.getStyle().clearDisplay();
+            final int numberOfCandidatesAvailable = media.getVideos().size();
+            if (numberOfCandidatesAvailable <= (MAX_VIDEO_COUNT - addedVideoUrls.size())) {
+                // add all we have, no randomize
+                for (MediaEntryDTO videoCandidateInfo : media.getVideos()) {
+                    addVideoToVideoPanel(videoCandidateInfo.getMediaURL(), videoCandidateInfo.getTitle());
+                }
+            } else {
+                // fill up the list randomly from videoCandidates
+                final Random videosRandomizer = new Random(numberOfCandidatesAvailable);
+                randomlyPick: for (int i = 0; i < numberOfCandidatesAvailable; i++) {
+                    int nextVideoindex = videosRandomizer.nextInt(numberOfCandidatesAvailable);
+                    final MediaEntryDTO videoCandidateInfo = media.getVideos().get(nextVideoindex);
+                    final String youtubeUrl = videoCandidateInfo.getMediaURL();
+                    addVideoToVideoPanel(youtubeUrl, videoCandidateInfo.getTitle());
+                    if (addedVideoUrls.size() == MAX_VIDEO_COUNT) {
+                        break randomlyPick;
+                    }
+                }
+            }
         }
+        
         
         if(!hasPhotos && !hasVideos) {
             noContent.getStyle().clearDisplay();
+        }
+    }
+    
+ // TODO remove -> temporary solution to get contents on the page
+    private static final int MAX_VIDEO_COUNT = 3;
+    private final HashSet<String> addedVideoUrls = new HashSet<String>(MAX_VIDEO_COUNT);
+    private void addVideoToVideoPanel(String youtubeUrl, String title) {
+        if (addedVideoUrls.contains(youtubeUrl)) {
+            return;
+        }
+        String youtubeId = YoutubeApi.getIdByUrl(youtubeUrl);
+        if (youtubeId != null && !youtubeId.trim().isEmpty()) {
+            MainMediaVideo video = new MainMediaVideo(title, youtubeId);
+            videosPanel.add(video);
+            addedVideoUrls.add(youtubeUrl);
         }
     }
 
