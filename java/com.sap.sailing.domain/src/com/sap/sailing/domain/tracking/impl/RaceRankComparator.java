@@ -10,7 +10,6 @@ import java.util.SortedSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -46,7 +45,7 @@ public class RaceRankComparator implements Comparator<Competitor> {
     private final DummyMarkPassingWithTimePointOnly markPassingWithTimePoint;
     private final Map<Competitor, Distance> windwardDistanceToGoInLegCache;
     
-    public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint) throws NoWindException {
+    public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint) {
         super();
         this.trackedRace = trackedRace;
         this.timePoint = timePoint;

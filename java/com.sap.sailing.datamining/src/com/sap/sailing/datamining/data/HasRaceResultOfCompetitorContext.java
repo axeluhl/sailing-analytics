@@ -12,7 +12,10 @@ public interface HasRaceResultOfCompetitorContext {
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
+    /**
+     * 0 means the competitor won the race, 1 means the competitor ranked last
+     */
     @Statistic(messageKey="RelativeRankInRace", ordinal=3)
-    public double getRank();
+    public double getRelativeRank();
 
 }
