@@ -20,8 +20,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -495,7 +497,15 @@ public class WindFragment extends ScheduleFragment
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
         windMap.centerMap(location.getLatitude(), location.getLongitude());
-        windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
+
+        GoogleMap map = windMap.getMap();
+        if (map != null) {
+            UiSettings uiSettings = map.getUiSettings();
+            if (uiSettings != null) {
+                uiSettings.setAllGesturesEnabled(false);
+            }
+        }
+
         windMap.addAccuracyCircle(location);
         if (windMap.windMarker != null) {
             windMap.windMarker.setDraggable(false);
@@ -504,6 +514,7 @@ public class WindFragment extends ScheduleFragment
         if (mDarkLayer != null) {
             mDarkLayer.setVisibility(View.GONE);
         }
+
         setWind(true);
         showElements(true);
         if (mDarkLayer != null) {

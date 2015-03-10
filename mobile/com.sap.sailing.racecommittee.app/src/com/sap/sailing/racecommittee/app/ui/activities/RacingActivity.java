@@ -185,6 +185,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         currentTime = (TextView) findViewById(R.id.current_time);
         if (currentTime != null) {
             currentTime.setText(dateFormat.format(now.asMillis()));
+            currentTime.setVisibility(View.VISIBLE);
         }
 
         if (mSelectedRace != null && mSelectedRace.getState() != null) {

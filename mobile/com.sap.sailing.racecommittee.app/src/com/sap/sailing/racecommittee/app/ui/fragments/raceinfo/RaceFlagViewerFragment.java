@@ -88,6 +88,13 @@ public class RaceFlagViewerFragment extends RaceFragment {
         flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.getUpperFlag().name(), 96));
         if (flag.getUpperFlag() == Flags.CLASS && getRace().getFleet().getColor() != null) {
             flagView.setBackgroundColor(getFleetColorId());
+            flagView.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(view.getContext(), flag.getUpperFlag().name() + "|" + flag.getLowerFlag().name(), Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
         textView.setText("");
@@ -109,17 +116,6 @@ public class RaceFlagViewerFragment extends RaceFragment {
                 downView.setVisibility(View.GONE);
                 upView.setVisibility(View.INVISIBLE);
             }
-        }
-
-        View layoutFlag = layout.findViewById(R.id.layout_flag);
-        if (layoutFlag != null) {
-            layoutFlag.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(view.getContext(), flag.getUpperFlag().name() + "|" + flag.getLowerFlag().name(), Toast.LENGTH_SHORT).show();
-                }
-            });
         }
 
         return layout;
