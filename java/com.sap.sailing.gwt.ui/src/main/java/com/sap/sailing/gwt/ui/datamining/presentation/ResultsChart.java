@@ -26,7 +26,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.ResizingSimplePanel;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
-import com.sap.sailing.gwt.ui.datamining.UnitFormatter;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 
@@ -102,7 +101,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
     private void updateYAxisLabels(QueryResult<? extends Number> result) {
         chart.getYAxis().setAxisTitleText(result.getResultSignifier());
         chart.setToolTip(new ToolTip().setValueDecimals(result.getValueDecimals()).setValueSuffix(
-                UnitFormatter.format(result.getUnit())));
+                result.getUnitSignifier()));
     }
 
     private boolean resultHasComplexKeys(QueryResult<? extends Number> result) {

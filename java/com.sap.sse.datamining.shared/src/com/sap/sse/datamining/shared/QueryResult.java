@@ -14,6 +14,7 @@ public interface QueryResult<AggregatedType> extends Serializable {
     public String getResultSignifier();
     
     public Unit getUnit();
+    public String getUnitSignifier();
     public int getValueDecimals();
 
     public boolean isEmpty();
