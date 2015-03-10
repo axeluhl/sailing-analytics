@@ -54,14 +54,16 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
   * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
   * [[Uploading Media Content|wiki/uploading-media-content]]
+* Information for Event Managers
+  * [[Operating Igtimi WindBots/windbot-operations]]
+  * [[Linking Race Videos|wiki/linking-race-videos]]
+  * [[Import official results|wiki/results-import]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
   * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
   * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
   * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
-* Event Content Management
-  * [[Link Race Videos|wiki/linking-race-videos]]
 
 ### Internal services (not related to wiki but useful)
 
