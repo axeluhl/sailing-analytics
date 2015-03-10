@@ -16,15 +16,26 @@
           <c:videogallery.VideoGallery ui:field="videos" visible="false" />
       </div>
     </div>
-    <div class="{res.mediaCss.grid} {local_res.css.media} {local_res.css.mediaimages}">
+    <div ui:field="photoWrapper" style="display: none;" class="{res.mediaCss.grid} {local_res.css.media}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+        <header class="{res.mainCss.mainsection_header}">
+          <h3 class="{res.mainCss.mainsection_header_title}">
+            <ui:text from='{i18n.photos}' />
+          </h3>
+        </header>
         <sse:carousel.ImageCarousel ui:field="imageCarousel" /> 
       </div>
     </div>
-    <div ui:field="videoWrapper" style="display: none;" class="{res.mainCss.mainsection} {local_res.css.media} {local_res.css.mediavideos}">
+    <div ui:field="videoWrapper" style="display: none;" class="{res.mainCss.mainsection} {local_res.css.media}">
       <div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
-        <div ui:field="videoLightBoxData" class="{res.mainCss.lightbox_content}"></div>
-        <g:FlowPanel ui:field="videosPanel" />
+        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+          <header class="{res.mainCss.mainsection_header}">
+            <h3 class="{res.mainCss.mainsection_header_title}">
+             <ui:text from='{i18n.videos}' />
+            </h3>
+           </header>
+          <div ui:field="videosPanel" />
+        </div>
       </div>
     </div>
   </g:HTMLPanel>

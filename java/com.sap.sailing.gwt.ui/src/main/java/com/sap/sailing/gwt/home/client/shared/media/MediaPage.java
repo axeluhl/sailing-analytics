@@ -12,10 +12,8 @@ import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaVideo;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
@@ -39,8 +37,9 @@ public class MediaPage extends Composite {
 //    @UiField VideoGallery videos;
     // TODO remove -> temporary solution to get contents on the page
     @UiField ImageCarousel imageCarousel;
+    @UiField DivElement photoWrapper;
     @UiField DivElement videoWrapper;
-    @UiField FlowPanel videosPanel;
+    @UiField DivElement videosPanel;
 
     public MediaPage() {
         MediaPageResources.INSTANCE.css().ensureInjected();
@@ -59,8 +58,8 @@ public class MediaPage extends Composite {
 //            photos.setData(data);
 //        }
      // TODO remove -> temporary solution to get contents on the page
-        imageCarousel.setVisible(hasPhotos);
         if(hasPhotos) {
+            photoWrapper.getStyle().clearDisplay();
             Random random = new Random();
             List<MediaEntryDTO> shuffledPhotoGallery = new ArrayList<>(media.getPhotos());
             final int gallerySize = media.getPhotos().size();
@@ -82,6 +81,9 @@ public class MediaPage extends Composite {
      // TODO remove -> temporary solution to get contents on the page
         if(hasVideos) {
             videoWrapper.getStyle().clearDisplay();
+            if(hasPhotos) {
+                videoWrapper.addClassName(MediaPageResources.INSTANCE.css().dark());
+            }
             final int numberOfCandidatesAvailable = media.getVideos().size();
             if (numberOfCandidatesAvailable <= (MAX_VIDEO_COUNT - addedVideoUrls.size())) {
                 // add all we have, no randomize
@@ -119,8 +121,8 @@ public class MediaPage extends Composite {
         }
         String youtubeId = YoutubeApi.getIdByUrl(youtubeUrl);
         if (youtubeId != null && !youtubeId.trim().isEmpty()) {
-            MainMediaVideo video = new MainMediaVideo(title, youtubeId);
-            videosPanel.add(video);
+            MediaPageVideo video = new MediaPageVideo(title, youtubeId);
+            videosPanel.appendChild(video.getElement());
             addedVideoUrls.add(youtubeUrl);
         }
     }

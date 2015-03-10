@@ -12,7 +12,10 @@ public interface MediaPageResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String media();
-        String mediaimages();
-        String mediavideos();
+        String dark();
+        String videopreview();
+        String videopreview_videocontainer();
+        String videopreview_videocontainer_video();
+        String videopreview_title();
     }
 }
