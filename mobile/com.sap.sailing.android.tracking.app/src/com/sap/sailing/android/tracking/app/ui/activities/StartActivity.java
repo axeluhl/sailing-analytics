@@ -1,6 +1,5 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import net.hockeyapp.android.CrashManager;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -13,8 +12,11 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
+import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 
-public class StartActivity extends BaseActivity {
+import net.hockeyapp.android.CrashManager;
+
+public class StartActivity extends CheckinDataActivity {
     
     private final static String TAG = StartActivity.class.getName();
 
@@ -66,8 +68,7 @@ public class StartActivity extends BaseActivity {
 				ExLog.i(this, TAG, "Matched URL, handling scanned or matched URL.");
 			}
 			
-			HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
-					.findFragmentById(R.id.content_frame);
+			HomeFragment homeFragment = getHomeFragment();
 			
 			homeFragment.handleScannedOrUrlMatchedUri(uri);
 		}
@@ -80,6 +81,12 @@ public class StartActivity extends BaseActivity {
         	startRegatta(checkinDigest);
         }
     }
+
+	public HomeFragment getHomeFragment() {
+		HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.content_frame);
+		return homeFragment;
+	}
 
     /**
      * Hockeyapp integration method.
@@ -101,4 +108,9 @@ public class StartActivity extends BaseActivity {
 		intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
 		startActivity(intent);
 	}
+
+    @Override
+    public void onCheckinDataAvailable(CheckinData data) {
+        getHomeFragment().displayUserConfirmationScreen(data);
+    }
 }

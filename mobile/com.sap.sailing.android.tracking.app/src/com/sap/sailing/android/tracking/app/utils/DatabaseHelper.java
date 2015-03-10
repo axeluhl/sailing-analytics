@@ -1,7 +1,5 @@
 package com.sap.sailing.android.tracking.app.utils;
 
-import java.util.ArrayList;
-
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -21,6 +19,8 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboa
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
+
+import java.util.ArrayList;
 
 public class DatabaseHelper {
 

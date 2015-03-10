@@ -1,7 +1,5 @@
 package com.sap.sailing.android.tracking.app.provider;
 
-import java.util.Arrays;
-
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -20,6 +18,8 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+
+import java.util.Arrays;
 
 public class AnalyticsProvider extends ContentProvider {
 
