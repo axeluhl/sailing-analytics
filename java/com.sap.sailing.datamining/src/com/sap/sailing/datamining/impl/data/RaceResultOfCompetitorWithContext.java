@@ -19,8 +19,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.datamining.data.Cluster;
-import com.sap.sse.datamining.data.ClusterGroup;
 
 public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompetitorContext {
 
@@ -54,10 +52,10 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         return result;
     }
     
-    public Cluster<Speed> getAverageWindSpeedCluster() {
+    @Override
+    public int getAverageWindSpeedInRoundedBeaufort() {
         Speed exactResult = getAverageWindSpeed();
-        // TODO continue here...
-        return null;
+        return (int) exactResult.getBeaufort();
     }
     
     /**
