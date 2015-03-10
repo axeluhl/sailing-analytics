@@ -160,6 +160,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public void ensureRegattaStructure(final AsyncCallback<List<RaceGroupDTO>> callback) {
         if(ctx.getRaceGroups() != null) {
             callback.onSuccess(ctx.getRaceGroups());
+            return;
         }
         
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
