@@ -1,4 +1,6 @@
-# Importing official results from external regatta management systems
+# Importing official results
+
+This page describes how to import official regatta results from different external regatta management systems.
 
 ## Sailwave
 
