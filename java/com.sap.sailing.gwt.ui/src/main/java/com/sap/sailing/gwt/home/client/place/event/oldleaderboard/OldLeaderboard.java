@@ -111,7 +111,6 @@ public class OldLeaderboard extends Composite {
 
     public void hideRefresh() {
         autoRefreshAnchor.setVisible(false);
-        lastScoringUpdateTextDiv.getStyle().setVisibility(Visibility.HIDDEN);
         lastScoringUpdateTimeDiv.getStyle().setVisibility(Visibility.HIDDEN);
     }
 }
