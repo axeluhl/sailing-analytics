@@ -8,7 +8,7 @@ import com.sap.sse.datamining.shared.annotations.Statistic;
 
 public interface HasTrackedLegOfCompetitorContext {
     
-    @Connector
+    @Connector(scanForStatistics=false)
     public HasTrackedLegContext getTrackedLegContext();
     
     public TrackedLegOfCompetitor getTrackedLegOfCompetitor();

@@ -1,5 +1,5 @@
 package com.sap.sse.datamining.shared.components;
 
 public enum AggregatorType {
-    Sum, Average, Median;
+    Sum, Average, Median, Max, Min;
 }

@@ -42,7 +42,7 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing>{
                 return new Double(arg0.getDegrees()).compareTo(new Double(arg1.getDegrees()));
             }
         };
-        return new ComparatorClusterBoundary<Bearing>(comparator, angle, strategy);
+        return new ComparatorClusterBoundary<Bearing>(angle, strategy, comparator);
     }
 
     @Override
