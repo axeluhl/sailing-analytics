@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.fakeseries;
 
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
 /**
  * Common context used by the different tabs in the series place.
@@ -14,16 +15,15 @@ public class SeriesContext {
 
     private EventSeriesViewDTO seriesDTO;
 
+    private MediaDTO media;
+
 
     public SeriesContext() {
     }
 
-    public SeriesContext(EventSeriesViewDTO dto) {
-        updateContext(dto);
-    }
-
     public SeriesContext(SeriesContext ctx) {
         updateContext(ctx.getSeriesDTO());
+        withMedia(ctx.media);
     }
 
     public SeriesContext withId(String eventId) {
@@ -53,5 +53,14 @@ public class SeriesContext {
 
     public String getSeriesId() {
         return seriesId;
+    }
+    
+    public MediaDTO getMedia() {
+        return media;
+    }
+
+    public SeriesContext withMedia(MediaDTO media) {
+        this.media = media;
+        return this;
     }
 }

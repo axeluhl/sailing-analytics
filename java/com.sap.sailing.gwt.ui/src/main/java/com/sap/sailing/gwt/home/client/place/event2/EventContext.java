@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
 /**
  * Common context used by the different tabs in the event place.
@@ -26,6 +27,7 @@ public class EventContext {
      * Common state required by all tabs/ places in event
      */
     private EventViewDTO eventDTO;
+    private MediaDTO media;
 
 
     public EventContext() {
@@ -34,6 +36,7 @@ public class EventContext {
     public EventContext(EventContext ctx) {
         updateContext(ctx.getEventDTO());
         withRaceGroups(ctx.raceGroups);
+        withMedia(ctx.media);
         withRegattaId(ctx.regattaId);
         withRegattaAnalyticsManager(ctx.regattaAnalyticsManager);
     }
@@ -112,5 +115,13 @@ public class EventContext {
         this.regattaAnalyticsManager = regattaAnalyticsManager;
         return this;
     }
+    
+    public MediaDTO getMedia() {
+        return media;
+    }
 
+    public EventContext withMedia(MediaDTO mediaDTO) {
+        this.media = mediaDTO;
+        return this;
+    }
 }
