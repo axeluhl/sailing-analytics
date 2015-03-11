@@ -169,13 +169,9 @@ public class StartAnalysisRacesStore {
 
     private Map<String, Date> createPerCompetitorIdAsString(TrackedRace currentRace, Date fiveSecondsBeforeStart) {
         Map<String, Date> fromPerCompetitorIdAsString = new HashMap<String, Date>();
-        try {
-            for (Competitor competitor : currentRace.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(new Date()
-                    .getTime()))) {
-                fromPerCompetitorIdAsString.put(competitor.getId().toString(), fiveSecondsBeforeStart);
-            }
-        } catch (NoWindException e) {
-            e.printStackTrace();
+        for (Competitor competitor : currentRace.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(new Date()
+                .getTime()))) {
+            fromPerCompetitorIdAsString.put(competitor.getId().toString(), fiveSecondsBeforeStart);
         }
         return fromPerCompetitorIdAsString;
     }

@@ -196,7 +196,7 @@ public interface TrackedRace extends Serializable {
      * @return <code>0</code> in case the competitor hasn't participated in the race; a rank starting with
      *         <code>1</code> where rank <code>1</code> identifies the leader otherwise
      */
-    int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    int getRank(Competitor competitor, TimePoint timePoint);
 
     /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
@@ -550,7 +550,7 @@ public interface TrackedRace extends Serializable {
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
     /**
      * When provided with a {@link WindStore} during construction, the tracked race will

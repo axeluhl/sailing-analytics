@@ -12,10 +12,10 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 
-public class CompetitorOfTrackedRaceRetrievalProcessor extends
+public class CompetitorOfRaceInLeaderboardRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<HasLeaderboardContext, HasRaceResultOfCompetitorContext> {
 
-    public CompetitorOfTrackedRaceRetrievalProcessor(ExecutorService executor,
+    public CompetitorOfRaceInLeaderboardRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasRaceResultOfCompetitorContext, ?>> resultReceivers) {
         super(HasLeaderboardContext.class, HasRaceResultOfCompetitorContext.class, executor, resultReceivers);
     }

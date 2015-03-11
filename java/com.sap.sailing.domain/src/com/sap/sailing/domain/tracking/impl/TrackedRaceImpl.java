@@ -1059,22 +1059,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        try {
-            int result;
-            if (getMarkPassings(competitor).isEmpty()) {
-                result = 0;
-            } else {
-                result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
-            }
-            return result;
-        } catch (NoWindError e) {
-            throw e.getCause();
+    public int getRank(Competitor competitor, TimePoint timePoint) {
+        int result;
+        if (getMarkPassings(competitor).isEmpty()) {
+            result = 0;
+        } else {
+            result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
         }
+        return result;
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         NamedReentrantReadWriteLock readWriteLock;
         synchronized (competitorRankingsLocks) {
             readWriteLock = competitorRankingsLocks.get(timePoint);
