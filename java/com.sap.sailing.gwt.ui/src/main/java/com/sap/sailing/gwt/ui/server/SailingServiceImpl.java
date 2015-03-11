@@ -5526,7 +5526,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             dto.setDisplayName(overallLeaderboardGroupDTO.getDisplayName() != null ? overallLeaderboardGroupDTO.getDisplayName() : overallLeaderboardGroupDTO.getName());
 
             LeaderboardGroup overallLeaderboardGroup = getService().getLeaderboardGroupByName(overallLeaderboardGroupDTO.getName());
-            dto.setLeaderboardGroup(overallLeaderboardGroupDTO.getName());
+
+            if (overallLeaderboardGroup.getOverallLeaderboard() != null) {
+                dto.setLeaderboardId(overallLeaderboardGroup.getOverallLeaderboard().getName());
+            }
+
             List<Event> fakeSeriesEvents = new ArrayList<Event>();
             for (Event event : getService().getAllEvents()) {
                 for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
@@ -5551,7 +5555,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 dto.addEvent(eventOfSeries);
             }
         }
-
         return dto;
     }
 
