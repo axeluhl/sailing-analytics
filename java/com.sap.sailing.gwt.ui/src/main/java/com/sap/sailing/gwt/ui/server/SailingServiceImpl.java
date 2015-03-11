@@ -5439,8 +5439,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.venue = o.venue;
         dto.setHasMedia(!o.getPhotoGalleryImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
         dto.getLeaderboardGroups().addAll(o.getLeaderboardGroups());
-        // TODO implement properly
-        dto.setState(EventState.FINISHED);
+        dto.setState(calculateEventState(o));
         if (o.isFakeSeries()) {
             dto.setType(EventType.SERIES_EVENT);
 
@@ -5468,19 +5467,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             for (LeaderboardGroupDTO lg : o.getLeaderboardGroups()) {
                 for (StrippedLeaderboardDTO sl : lg.leaderboards) {
-                    // TODO fill details
                     RegattaMetadataDTO regatta = new RegattaMetadataDTO(sl.regattaName, sl.regattaName);
                     if(o.getLeaderboardGroups().size() > 1) {
                         regatta.setBoatCategory(lg.getName());
                     }
                     regatta.setCompetitorsCount(sl.competitorsCount);
                     regatta.setRaceCount(sl.getRacesCount());
+                    regatta.setTrackedRacesCount(sl.getTrackedRacesCount());
                     if(sl.getBoatClasses().size() == 1) {
                         BoatClassDTO boatClass = sl.getBoatClasses().iterator().next();
                         regatta.setBoatClass(boatClass.getDisplayName() != null ? boatClass.getDisplayName() : boatClass.getName());
                     }
-                     // TODO implement properly
-                    regatta.setState(RegattaState.FINISHED);
+                    if(o.getLeaderboardGroups().size() > 1) {
+                        regatta.setBoatCategory(lg.getName());
+                    }
+                    Regatta regattaEntity = getService().getRegattaByName(sl.regattaName);
+                    regatta.setStartDate(regattaEntity.getStartDate() != null ? regattaEntity.getStartDate().asDate() : null);
+                    regatta.setEndDate(regattaEntity.getEndDate() != null ? regattaEntity.getEndDate().asDate() : null);
+                    regatta.setState(calculateRegattaState(regatta));
                     dto.getRegattas().add(regatta);
                 }
                 dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
@@ -5490,6 +5494,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return dto;
     }
     
+    private RegattaState calculateRegattaState(RegattaMetadataDTO regatta) {
+        Date now = new Date();
+        if(regatta.getStartDate() != null && now.compareTo(regatta.getStartDate()) < 0) {
+            return RegattaState.UPCOMING;
+        }
+        if(regatta.getEndDate() != null && now.compareTo(regatta.getStartDate()) > 0) {
+            return RegattaState.UPCOMING;
+        }
+        if(regatta.getStartDate() != null && now.compareTo(regatta.getStartDate()) >= 0 && regatta.getEndDate() != null && now.compareTo(regatta.getStartDate()) <= 0) {
+            return RegattaState.RUNNING;
+        }
+        return RegattaState.UNKNOWN;
+    }
+
+    private EventState calculateEventState(EventDTO o) {
+        return calculateEventState(o.isPublic, o.startDate, o.endDate);
+    }
+    
+    private EventState calculateEventState(boolean isPublic, Date startDate, Date endDate) {
+        Date now = new Date();
+        if(now.compareTo(startDate) < 0) {
+            if(isPublic) {
+                return EventState.UPCOMING;
+            }
+            return EventState.PLANNED;
+        }
+        if(now.compareTo(endDate) > 0) {
+            return EventState.FINISHED;
+        }
+        return EventState.RUNNING;
+    }
+
     @Override
     public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
             String leaderboardName, Set<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
@@ -5519,8 +5555,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setBaseUrl(o.getBaseURL());
         dto.setOnRemoteServer(o.isOnRemoteServer());
         dto.setLogoImageURL(o.getLogoImageURL());
-        // TODO implement correctly. This only checks media of one event of the series.
-        dto.setHasMedia(!o.getPhotoGalleryImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
+        // TODO implement correctly
+        dto.setHasMedia(false);
         // TODO implement correctly
         dto.setState(EventSeriesState.FINISHED);
         
@@ -5553,8 +5589,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 eventOfSeries.setDisplayName(eventInSeries.getName());
                 eventOfSeries.setStartDate(eventInSeries.getStartDate().asDate());
                 eventOfSeries.setEndDate(eventInSeries.getEndDate().asDate());
-                // TODO implement correctly
-                eventOfSeries.setState(eventInSeries.isPublic() ? EventState.UPCOMING : EventState.PLANNED);
+                eventOfSeries.setState(calculateEventState(eventInSeries.isPublic(), eventInSeries.getStartDate().asDate(), eventInSeries.getEndDate().asDate()));
                 eventOfSeries.setVenue(eventInSeries.getVenue().getName());
                 dto.addEvent(eventOfSeries);
             }
@@ -5574,7 +5609,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         MediaDTO media = new MediaDTO();
         for(String url : o.getPhotoGalleryImageURLs()) {
             ImageSize imageSize = o.getImageSize(url);
-            MediaEntryDTO entry = new MediaEntryDTO(o.getName(), url);
+            MediaEntryDTO entry = new MediaEntryDTO(url);
             entry.setWidthInPx(imageSize.getWidth());
             entry.setHeightInPx(imageSize.getHeight());
             media.addPhoto(entry);

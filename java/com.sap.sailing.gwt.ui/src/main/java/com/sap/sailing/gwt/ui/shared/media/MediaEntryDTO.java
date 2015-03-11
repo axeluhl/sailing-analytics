@@ -23,7 +23,11 @@ public class MediaEntryDTO implements Serializable {
     }
 
     public MediaEntryDTO(String title, String mediaURL) {
+        this(mediaURL);
         this.title = title;
+    }
+    
+    public MediaEntryDTO(String mediaURL) {
         this.mediaURL = mediaURL;
     }
 
