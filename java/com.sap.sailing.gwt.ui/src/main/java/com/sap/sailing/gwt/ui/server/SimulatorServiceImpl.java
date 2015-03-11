@@ -327,7 +327,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                                                                                               // params.getSeedLines());
         }
 
-        return new SimulatorResultsDTO(null, timeStep.asMillis(), 0, rcDTO, pathDTOs, windFieldDTO,
+        return new SimulatorResultsDTO(0, null, timeStep.asMillis(), 0, rcDTO, pathDTOs, windFieldDTO,
                 simulatedPaths.notificationMessage);
     }
 

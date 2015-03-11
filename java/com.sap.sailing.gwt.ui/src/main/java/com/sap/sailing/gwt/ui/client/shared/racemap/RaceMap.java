@@ -647,7 +647,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // next, do the full thing; being the later call, if request throttling kicks in, the later call
                     // supersedes the earlier call which may get dropped then
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
-                            useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
+                            useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true, (simulationOverlay==null ? null : simulationOverlay.getLegIdentifier()));
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY,
                             getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
                     
@@ -725,7 +725,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         final GetRaceMapDataAction result;
         if (!fromTimes.isEmpty()) {
             result = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(),
-                race, useNullAsTimePoint() ? null : newTime, fromTimes, toTimes, /* extrapolate */true);
+                race, useNullAsTimePoint() ? null : newTime, fromTimes, toTimes, /* extrapolate */true, (simulationOverlay==null ? null: simulationOverlay.getLegIdentifier()));
         } else {
             result = null;
         }
@@ -748,7 +748,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if (map != null && raceMapDataDTO != null) {
                     quickRanks = raceMapDataDTO.quickRanks;
                     if (showViewSimulation && settings.isShowSimulationOverlay()) {
-                    	simulationOverlay.updateLeg(getCurrentLeg(), /* clearCanvas */ false);
+                    	simulationOverlay.updateLeg(getCurrentLeg(), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                     }
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
@@ -2025,7 +2025,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
-            simulationOverlay.updateLeg(getCurrentLeg(), true);
+            simulationOverlay.updateLeg(getCurrentLeg(), true, 0);
         }
         if (requiredRedraw) {
             redraw();

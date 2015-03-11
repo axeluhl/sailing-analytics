@@ -11,6 +11,8 @@ import com.sap.sailing.simulator.SimulationResults;
 
 public interface SimulationService {
 
+    int getSimulationResultsVersion(LegIdentifier legIdentifier);
+    
     SimulationResults getSimulationResults(LegIdentifier legIdentifier);
 
     Map<PathType, Path> getAllPathsEvenTimed(SimulationParameters simuPars, long millisecondsStep)

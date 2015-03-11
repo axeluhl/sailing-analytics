@@ -1460,7 +1460,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             rcDTO.coursePositions.waypointPositions.add(posDTO);
             posDTO = SimulatorServiceUtils.toPositionDTO(simulationResults.getEndPosition());
             rcDTO.coursePositions.waypointPositions.add(posDTO);
-            result = new SimulatorResultsDTO(simulationResults.getStartTime(), simulationResults.getTimeStep(),
+            result = new SimulatorResultsDTO(simulationResults.hashCode(), simulationResults.getStartTime(), simulationResults.getTimeStep(),
                     simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
         }
         return result;
@@ -1538,13 +1538,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate) throws NoWindException {
+            boolean extrapolate, LegIdentifier simulationLegIdentifier) throws NoWindException {
         final Map<CompetitorDTO, List<GPSFixDTO>> boatPositions = getBoatPositions(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
         final List<QuickRankDTO> quickRanks = getQuickRanks(raceIdentifier, date);
-        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks);
+        int simulationResultVersion = 0;
+        if (simulationLegIdentifier != null) {
+            SimulationService simulationService = getService().getSimulationService();
+            simulationResultVersion = simulationService.getSimulationResultsVersion(simulationLegIdentifier);
+        }
+        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks, simulationResultVersion);
     }
 
     /**

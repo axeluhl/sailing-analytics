@@ -26,13 +26,13 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
-import com.sap.sailing.simulator.Simulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulationResults;
+import com.sap.sailing.simulator.Simulator;
 import com.sap.sailing.simulator.impl.MaximumTurnTimes;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
-import com.sap.sailing.simulator.impl.SimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
+import com.sap.sailing.simulator.impl.SimulatorImpl;
 import com.sap.sailing.simulator.impl.SparsePolarDataException;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
@@ -82,6 +82,16 @@ public class SimulationServiceImpl implements SimulationService {
         public void delayToLiveChanged(long delayToLiveInMillis) {
         }
 
+    }
+
+    @Override
+    public int getSimulationResultsVersion(LegIdentifier legIdentifier) {
+        SimulationResults result = cache.get(legIdentifier, false);
+        if (result == null) {
+            return 0;
+        } else {
+            return result.hashCode();
+        }
     }
 
     @Override

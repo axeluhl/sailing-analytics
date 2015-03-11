@@ -65,8 +65,8 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         this.colors = new ColorPaletteGenerator();
     }
     
-    public void updateLeg(int newLeg, boolean clearCanvas) {
-        if ((newLeg != raceLeg) && (this.isVisible())) {
+    public void updateLeg(int newLeg, boolean clearCanvas, int newVersion) {
+        if (((newLeg != raceLeg)||(newLeg == raceLeg)&&(newVersion != (simulationResult==null ? 0 : simulationResult.getVersion()))) && (this.isVisible())) {
             raceLeg = newLeg;
             if (clearCanvas) {
                 this.clearCanvas();
@@ -75,6 +75,18 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         }
     }
 
+    public LegIdentifier getLegIdentifier() {
+        return new LegIdentifierImpl(raceIdentifier, String.valueOf(raceLeg));
+    }
+    
+    public int getVersion() {
+        if (this.simulationResult == null) {
+            return 0;
+        } else {
+            return this.simulationResult.getVersion();
+        }
+    }
+    
     @Override
     public void setVisible(boolean isVisible) {
         super.setVisible(isVisible);
@@ -212,7 +224,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth);
         }
         for (PathDTO path : paths) {
-            drawRectangleWithText(context2d, xOffset, yOffset + (paths.length-index) * rectHeight, this.colors.getColor(paths.length-1-index),
+            drawRectangleWithText(context2d, xOffset, yOffset + (paths.length-index-(racePath==null?1:0)) * rectHeight, this.colors.getColor(paths.length-1-index),
                 path.getName().split("#")[1], getFormattedTime(path.getPathTime()), txtmaxwidth, timewidth);
             index++;
         }

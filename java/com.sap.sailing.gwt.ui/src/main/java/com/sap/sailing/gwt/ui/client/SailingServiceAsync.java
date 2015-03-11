@@ -332,7 +332,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
      *            identified by <code>raceIdentifier</code> will be used, considering that race's delay.
      */
     void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<String, Date> fromPerCompetitorIdAsString,
-            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, AsyncCallback<CompactRaceMapDataDTO> callback);
+            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, LegIdentifier simulationLegIdentifier, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getReplicaInfo(AsyncCallback<ReplicationStateDTO> callback);
 

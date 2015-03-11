@@ -145,7 +145,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier);
 
     CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<String, Date> fromPerCompetitorIdAsString,
-            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate) throws NoWindException;
+            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, LegIdentifier simulationLegIdentifier) throws NoWindException;
     
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier);
     
