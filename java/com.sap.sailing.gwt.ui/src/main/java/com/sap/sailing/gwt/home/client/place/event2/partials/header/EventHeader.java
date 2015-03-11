@@ -30,13 +30,12 @@ import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.Presenter;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.client.shared.sharing.SharingButtons;
 import com.sap.sailing.gwt.home.client.shared.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -161,11 +160,11 @@ public class EventHeader extends Composite {
     private void initTitleAndSelection(String nameToShow) {
         if(!presenter.needsSelectionInHeader()) {
             eventName.setInnerText(nameToShow);
-            fillEventState(eventState);
+            LabelTypeUtil.renderLabelType(eventState, presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker() : event.getState().getStateMarker());
             hide(dropdownTitle);
         } else {
             dropdownEventName.setInnerText(nameToShow);
-            fillEventState(dropdownEventState);
+            LabelTypeUtil.renderLabelType(dropdownEventState, event.getState().getStateMarker());
             hide(staticTitle);
             
             initDropdown();
@@ -222,31 +221,6 @@ public class EventHeader extends Composite {
                 dropdownContent.add(dropdownItem);
             }
         });
-    }
-
-    private void fillEventState(DivElement eventStateElement) {
-        if(presenter.showRegattaMetadata()) {
-            RegattaState regattaState = presenter.getRegattaMetadata().getState();
-            if(regattaState == RegattaState.FINISHED) {
-                eventStateElement.setInnerText(i18n.finished());
-                eventStateElement.setAttribute("data-labeltype", "finished");
-            } else if(regattaState == RegattaState.RUNNING) {
-                eventStateElement.setInnerText(i18n.live());
-                eventStateElement.setAttribute("data-labeltype", "live");
-            } else {
-                hide(eventStateElement);
-            }
-        } else {
-            if(event.getState() == EventState.FINISHED) {
-                eventStateElement.setInnerText(i18n.finished());
-                eventStateElement.setAttribute("data-labeltype", "finished");
-            } else if(event.getState() == EventState.RUNNING) {
-                eventStateElement.setInnerText(i18n.live());
-                eventStateElement.setAttribute("data-labeltype", "live");
-            } else {
-                hide(eventStateElement);
-            }
-        }
     }
 
     private String withoutPrefix(String title, String... prefixes) {

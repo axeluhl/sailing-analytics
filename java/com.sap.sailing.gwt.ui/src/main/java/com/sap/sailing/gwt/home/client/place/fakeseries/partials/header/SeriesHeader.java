@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.client.place.fakeseries.partials.header;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -17,13 +16,13 @@ import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView.Presenter;
+import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.client.shared.sharing.SharingButtons;
 import com.sap.sailing.gwt.home.client.shared.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 
 public class SeriesHeader extends Composite {
     private static SeriesHeaderUiBinder uiBinder = GWT.create(SeriesHeaderUiBinder.class);
@@ -71,7 +70,7 @@ public class SeriesHeader extends Composite {
         eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
         eventLogo.setTitle(series.getDisplayName());
         eventName.setInnerText(series.getDisplayName());
-        fillSeriesState(eventState);
+        LabelTypeUtil.renderLabelType(eventState, series.getState().getStateMarker());
         
         for (EventSeriesEventDTO eventOfSeries : series.getEvents()) {
             if(eventOfSeries.getState() == EventState.PLANNED) {
@@ -93,25 +92,6 @@ public class SeriesHeader extends Composite {
                     }
                 });
             }
-        }
-    }
-
-    private void fillSeriesState(DivElement stateElement) {
-        // TODO do we need more state markers
-        if(series.getState() == EventSeriesState.FINISHED) {
-            stateElement.setInnerText(i18n.finished());
-            stateElement.setAttribute("data-labeltype", "finished");
-        } else if(series.getState() == EventSeriesState.RUNNING) {
-            stateElement.setInnerText(i18n.live());
-            stateElement.setAttribute("data-labeltype", "live");
-        } else {
-            hide(stateElement);
-        }
-    }
-
-    private void hide(Element... elementsToHide) {
-        for (Element element : elementsToHide) {
-            element.removeFromParent();
         }
     }
 }

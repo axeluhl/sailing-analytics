@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class EventSeriesViewDTO implements IsSerializable {
     private UUID id;
@@ -18,7 +19,17 @@ public class EventSeriesViewDTO implements IsSerializable {
     private String leaderboardId;
 
     public enum EventSeriesState {
-        UPCOMING, RUNNING, IN_PROGRESS, FINISHED
+        UPCOMING(LabelType.UPCOMMING), RUNNING(LabelType.LIVE), FINISHED(LabelType.NONE), IN_PROGRESS(LabelType.NONE);
+        
+        private final LabelType stateMarker;
+
+        private EventSeriesState(LabelType stateMarker) {
+            this.stateMarker = stateMarker;
+        }
+        
+        public LabelType getStateMarker() {
+            return stateMarker;
+        }
     }
 
     // TODO: frank, please implement

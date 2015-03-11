@@ -7,6 +7,7 @@ import java.util.List;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class EventViewDTO extends EventDTO {
     private static final long serialVersionUID = -7100030301376959817L;
@@ -16,7 +17,17 @@ public class EventViewDTO extends EventDTO {
     }
 
     public enum EventState {
-        UPCOMING, RUNNING, FINISHED, PLANNED
+        UPCOMING(LabelType.UPCOMMING), RUNNING(LabelType.LIVE), FINISHED(LabelType.FINISHED), PLANNED(LabelType.NONE);
+        
+        private final LabelType stateMarker;
+
+        private EventState(LabelType stateMarker) {
+            this.stateMarker = stateMarker;
+        }
+        
+        public LabelType getStateMarker() {
+            return stateMarker;
+        }
     }
 
     private List<RegattaMetadataDTO> regattas = new ArrayList<>();
