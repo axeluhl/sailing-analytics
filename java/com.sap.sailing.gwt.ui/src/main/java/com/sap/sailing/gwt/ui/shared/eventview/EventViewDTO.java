@@ -16,7 +16,7 @@ public class EventViewDTO extends EventDTO {
     }
 
     public enum EventState {
-        UPCOMING, RUNNING, FINISHED
+        UPCOMING, RUNNING, FINISHED, PLANNED
     }
 
     private List<RegattaMetadataDTO> regattas = new ArrayList<>();
