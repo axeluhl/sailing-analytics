@@ -5526,6 +5526,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             dto.setDisplayName(overallLeaderboardGroupDTO.getDisplayName() != null ? overallLeaderboardGroupDTO.getDisplayName() : overallLeaderboardGroupDTO.getName());
 
             LeaderboardGroup overallLeaderboardGroup = getService().getLeaderboardGroupByName(overallLeaderboardGroupDTO.getName());
+            dto.setLeaderboardGroup(overallLeaderboardGroupDTO.getName());
             List<Event> fakeSeriesEvents = new ArrayList<Event>();
             for (Event event : getService().getAllEvents()) {
                 for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {

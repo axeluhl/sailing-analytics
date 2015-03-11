@@ -15,6 +15,8 @@ public class EventSeriesViewDTO implements IsSerializable {
     private String logoImageURL;
     private boolean hasMedia;
 
+    private String leaderboardGroup;
+
     public enum EventSeriesState {
         UPCOMING, RUNNING, IN_PROGRESS, FINISHED
     }
@@ -79,5 +81,13 @@ public class EventSeriesViewDTO implements IsSerializable {
 
     public void setHasMedia(boolean hasMedia) {
         this.hasMedia = hasMedia;
+    }
+
+    public String getLeaderboardGroup() {
+        return leaderboardGroup;
+    }
+
+    public void setLeaderboardGroup(String leaderboardGroup) {
+        this.leaderboardGroup = leaderboardGroup;
     }
 }
