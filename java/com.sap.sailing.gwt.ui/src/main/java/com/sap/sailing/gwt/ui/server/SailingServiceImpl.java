@@ -340,6 +340,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaEntryDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
@@ -5520,6 +5521,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setLogoImageURL(o.getLogoImageURL());
         // TODO implement correctly. This only checks media of one event of the series.
         dto.setHasMedia(!o.getPhotoGalleryImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
+        // TODO implement correctly
+        dto.setState(EventSeriesState.FINISHED);
         
         if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
             LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
@@ -5550,7 +5553,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 eventOfSeries.setDisplayName(eventInSeries.getName());
                 eventOfSeries.setStartDate(eventInSeries.getStartDate().asDate());
                 eventOfSeries.setEndDate(eventInSeries.getEndDate().asDate());
-                eventOfSeries.setState(EventState.UPCOMING);
+                // TODO implement correctly
+                eventOfSeries.setState(eventInSeries.isPublic() ? EventState.UPCOMING : EventState.PLANNED);
                 eventOfSeries.setVenue(eventInSeries.getVenue().getName());
                 dto.addEvent(eventOfSeries);
             }

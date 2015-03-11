@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 
 public class SeriesHeader extends Composite {
     private static SeriesHeaderUiBinder uiBinder = GWT.create(SeriesHeaderUiBinder.class);
@@ -70,10 +71,10 @@ public class SeriesHeader extends Composite {
         eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
         eventLogo.setTitle(series.getDisplayName());
         eventName.setInnerText(series.getDisplayName());
-        fillEventState(eventState);
+        fillSeriesState(eventState);
         
         for (EventSeriesEventDTO eventOfSeries : series.getEvents()) {
-            if(eventOfSeries.getState() == EventState.UPCOMING) {
+            if(eventOfSeries.getState() == EventState.PLANNED) {
                 InlineLabel eventLabel = new InlineLabel(eventOfSeries.getVenue());
                 // TODO light gray color
                 eventLabel.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
@@ -95,17 +96,17 @@ public class SeriesHeader extends Composite {
         }
     }
 
-    private void fillEventState(DivElement eventStateElement) {
-        // TODO
-//        if(event.getState() == EventState.FINISHED) {
-//            eventStateElement.setInnerText(i18n.finished());
-//            eventStateElement.setAttribute("data-labeltype", "finished");
-//        } else if(event.getState() == EventState.RUNNING) {
-//            eventStateElement.setInnerText(i18n.live());
-//            eventStateElement.setAttribute("data-labeltype", "live");
-//        } else {
-            hide(eventStateElement);
-//        }
+    private void fillSeriesState(DivElement stateElement) {
+        // TODO do we need more state markers
+        if(series.getState() == EventSeriesState.FINISHED) {
+            stateElement.setInnerText(i18n.finished());
+            stateElement.setAttribute("data-labeltype", "finished");
+        } else if(series.getState() == EventSeriesState.RUNNING) {
+            stateElement.setInnerText(i18n.live());
+            stateElement.setAttribute("data-labeltype", "live");
+        } else {
+            hide(stateElement);
+        }
     }
 
     private void hide(Element... elementsToHide) {
