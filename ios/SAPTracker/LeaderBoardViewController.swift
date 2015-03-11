@@ -15,10 +15,10 @@ class LeaderBoardViewController: UIViewController, UIWebViewDelegate, UIAlertVie
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let serverUrl = DataManager.sharedManager.selectedEvent!.serverUrl
-        let eventId = DataManager.sharedManager.selectedEvent!.eventId
-        let leaderBoardName = DataManager.sharedManager.selectedEvent!.leaderBoard!.name.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
-        let url = "\(serverUrl)/gwt/Home.html#LeaderboardPlace:eventId=\(eventId)&leaderboardName=\(leaderBoardName)&showRaceDetails=true&showSettings=true"
+        let serverUrl = DataManager.sharedManager.selectedCheckIn!.serverUrl
+        let eventId = DataManager.sharedManager.selectedCheckIn!.eventId
+        let leaderBoardName = DataManager.sharedManager.selectedCheckIn!.leaderBoardName.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+        let url = "\(serverUrl)/gwt/Leaderboard.html?name=\(leaderBoardName)&showRaceDetails=false&embedded=true&hideToolbar=true"
         webView!.loadRequest(NSURLRequest(URL: NSURL(string: url)!))
     }
     
@@ -32,7 +32,7 @@ class LeaderBoardViewController: UIViewController, UIWebViewDelegate, UIAlertVie
     
     func wwebView(webView: UIWebView, didFailLoadWithError error: NSError) {
         activityIndicator.hidden = true
-        let alertView = UIAlertView(title: "Couldn't load about view", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+        let alertView = UIAlertView(title: NSLocalizedString("Couldn't load about view", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
         alertView.show()
     }
     

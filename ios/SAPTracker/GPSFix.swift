@@ -17,8 +17,8 @@ public class GPSFix: NSManagedObject {
     @NSManaged var longitude: Double
     @NSManaged var speed: Double
     @NSManaged var timestamp: Double
-    @NSManaged var event: Event
-    
+    @NSManaged var checkIn: CheckIn?
+
     func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
         timestamp = round(dictionary["timestamp"] as Double * 1000)
         latitude = dictionary["latitude"] as Double

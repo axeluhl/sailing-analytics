@@ -12,17 +12,12 @@ import CoreData
 @objc(Event)
 public class Event: NSManagedObject {
 
-    @NSManaged public var serverUrl: String
     @NSManaged public var eventId: String
     @NSManaged public var name: String
     @NSManaged public var startDate: NSDate
     @NSManaged public var endDate: NSDate
-    @NSManaged public var imageUrl: String?
-    @NSManaged public var leaderBoard: LeaderBoard?
-    @NSManaged public var userImage: NSData?
-    @NSManaged public var gpsFixes: NSSet?
-    @NSManaged public var lastSyncDate: NSDate?
-    
+    @NSManaged public var checkIn: CheckIn?
+
     public func initWithDictionary(dictionary: [String: AnyObject]) {
         eventId = dictionary["id"] as String
         name = dictionary["name"] as String
@@ -31,7 +26,7 @@ public class Event: NSManagedObject {
         if (dictionary["imageURLs"] != nil) {
             let imageUrls = dictionary["imageURLs"] as Array<String>
             if (imageUrls.count > 0) {
-                imageUrl = imageUrls[0]
+                checkIn!.imageUrl = imageUrls[0]
             }
         }
     }

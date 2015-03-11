@@ -48,12 +48,6 @@
 #define COCOAPODS_VERSION_MINOR_AFNetworking_UIKit 5
 #define COCOAPODS_VERSION_PATCH_AFNetworking_UIKit 0
 
-// HockeySDK
-#define COCOAPODS_POD_AVAILABLE_HockeySDK
-#define COCOAPODS_VERSION_MAJOR_HockeySDK 3
-#define COCOAPODS_VERSION_MINOR_HockeySDK 6
-#define COCOAPODS_VERSION_PATCH_HockeySDK 2
-
 // Debug build configuration
 #ifdef DEBUG
 

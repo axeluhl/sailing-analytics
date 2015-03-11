@@ -282,6 +282,8 @@
 		7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */; };
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
+		7F4EEDBA1A6D2BAC0026F711 /* CheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */; };
+		7F509AC01A69549D0043EC69 /* AcceptTermsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F509ABF1A69549D0043EC69 /* AcceptTermsViewController.swift */; };
 		7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
 		7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* HomeViewController.swift */; };
@@ -293,9 +295,11 @@
 		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
 		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
 		7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F87CAA61A2CD6BA0076C617 /* Appearance.m */; };
+		7F87DDDB1A97339300704AC4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7F87DDDD1A97339300704AC4 /* Localizable.strings */; };
+		7F87DDE01A973C7400704AC4 /* eula-ios.html in Resources */ = {isa = PBXBuildFile; fileRef = 7F87DDE21A973C7400704AC4 /* eula-ios.html */; };
 		7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */; };
 		7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */; };
-		7F8B8D431A373D4400C34B88 /* HeadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* HeadingViewController.swift */; };
+		7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* CourseViewController.swift */; };
 		7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */; };
 		7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */; };
 		7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaViewController.swift */; };
@@ -604,6 +608,8 @@
 		7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendGPSFixController.swift; sourceTree = "<group>"; };
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 		7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckIn.swift; sourceTree = "<group>"; };
+		7F509ABF1A69549D0043EC69 /* AcceptTermsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AcceptTermsViewController.swift; sourceTree = "<group>"; };
 		7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplashScreenDummy.swift; sourceTree = "<group>"; };
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F15419F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -620,14 +626,20 @@
 		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
 		7F87CAA51A2CD6BA0076C617 /* Appearance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appearance.h; sourceTree = "<group>"; };
 		7F87CAA61A2CD6BA0076C617 /* Appearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appearance.m; sourceTree = "<group>"; };
+		7F87DDDC1A97339300704AC4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7F87DDDE1A9733B200704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Main.strings; sourceTree = "<group>"; };
+		7F87DDDF1A9733B200704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7F87DDE11A973C7400704AC4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = "Base.lproj/eula-ios.html"; sourceTree = "<group>"; };
+		7F87DDE31A973C7900704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = de; path = "de.lproj/eula-ios.html"; sourceTree = "<group>"; };
 		7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingPageViewController.swift; sourceTree = "<group>"; };
 		7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeedViewController.swift; sourceTree = "<group>"; };
-		7F8B8D421A373D4400C34B88 /* HeadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeadingViewController.swift; sourceTree = "<group>"; };
+		7F8B8D421A373D4400C34B88 /* CourseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseViewController.swift; sourceTree = "<group>"; };
 		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderBoardViewController.swift; sourceTree = "<group>"; };
 		7F99DE3B1A126554009B3619 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
 		7FA6551919F6661900A1B92D /* DataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7FAFA7941A126B5700D230F1 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
+		7FAFB0B51A603C3E0054D457 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		7FCDB65E1A1636610075D7D9 /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
 		7FCDB65F1A1636610075D7D9 /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
@@ -688,6 +700,7 @@
 			isa = PBXGroup;
 			children = (
 				7F0658FE19F7EE910077FF95 /* QRCodeData.swift */,
+				7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */,
 				7FCDB65F1A1636610075D7D9 /* Event.swift */,
 				7FCDB6601A1636610075D7D9 /* LeaderBoard.swift */,
 				7FCDB6611A1636610075D7D9 /* Competitor.swift */,
@@ -701,6 +714,7 @@
 			isa = PBXGroup;
 			children = (
 				7F83F15719F154F000C53328 /* HomeViewController.swift */,
+				7F509ABF1A69549D0043EC69 /* AcceptTermsViewController.swift */,
 				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
@@ -711,7 +725,7 @@
 				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
 				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
 				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
-				7F8B8D421A373D4400C34B88 /* HeadingViewController.swift */,
+				7F8B8D421A373D4400C34B88 /* CourseViewController.swift */,
 				7F72C73F1A2DEA2100F48EE8 /* Resources */,
 				7F72C7401A2DEA3300F48EE8 /* Helpers */,
 			);
@@ -1010,6 +1024,8 @@
 				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
 				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
 				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
+				7F87DDE21A973C7400704AC4 /* eula-ios.html */,
+				7F87DDDD1A97339300704AC4 /* Localizable.strings */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1028,6 +1044,7 @@
 		7F83F14719F154F000C53328 = {
 			isa = PBXGroup;
 			children = (
+				7FAFB0B51A603C3E0054D457 /* LICENSE.txt */,
 				7F83F15219F154F000C53328 /* SAPTracker */,
 				7F83F16819F154F000C53328 /* SAPTrackerTests */,
 				7F83F15119F154F000C53328 /* Products */,
@@ -1162,6 +1179,7 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
 			);
 			mainGroup = 7F83F14719F154F000C53328;
 			productRefGroup = 7F83F15119F154F000C53328 /* Products */;
@@ -1264,6 +1282,7 @@
 				7F14A1351A13B9A6001C1ECB /* BI.png in Resources */,
 				7F14A1BB1A13B9A6001C1ECB /* NA.png in Resources */,
 				7F14A1B71A13B9A6001C1ECB /* MW.png in Resources */,
+				7F87DDDB1A97339300704AC4 /* Localizable.strings in Resources */,
 				7F14A1711A13B9A6001C1ECB /* GN.png in Resources */,
 				7F14A19C1A13B9A6001C1ECB /* LICENSE.txt in Resources */,
 				7F14A18C1A13B9A6001C1ECB /* JP.png in Resources */,
@@ -1412,6 +1431,7 @@
 				7F14A12B1A13B9A6001C1ECB /* AW.png in Resources */,
 				7F14A10D1A13B9A6001C1ECB /* _commonwealth.png in Resources */,
 				7F14A1521A13B9A6001C1ECB /* CY.png in Resources */,
+				7F87DDE01A973C7400704AC4 /* eula-ios.html in Resources */,
 				7F14A1391A13B9A6001C1ECB /* BN.png in Resources */,
 				7F14A1231A13B9A6001C1ECB /* AM.png in Resources */,
 				7F14A10F1A13B9A6001C1ECB /* _gosquared.png in Resources */,
@@ -1515,7 +1535,7 @@
 			files = (
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
 				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
-				7F8B8D431A373D4400C34B88 /* HeadingViewController.swift in Sources */,
+				7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
@@ -1528,9 +1548,11 @@
 				7FCDB6621A1636610075D7D9 /* GPSFix.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
+				7F4EEDBA1A6D2BAC0026F711 /* CheckIn.swift in Sources */,
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
 				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
+				7F509AC01A69549D0043EC69 /* AcceptTermsViewController.swift in Sources */,
 				7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
@@ -1568,8 +1590,27 @@
 			isa = PBXVariantGroup;
 			children = (
 				7F83F15A19F154F000C53328 /* Base */,
+				7F87DDDE1A9733B200704AC4 /* de */,
 			);
 			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		7F87DDDD1A97339300704AC4 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7F87DDDC1A97339300704AC4 /* Base */,
+				7F87DDDF1A9733B200704AC4 /* de */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		7F87DDE21A973C7400704AC4 /* eula-ios.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7F87DDE11A973C7400704AC4 /* Base */,
+				7F87DDE31A973C7900704AC4 /* de */,
+			);
+			name = "eula-ios.html";
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

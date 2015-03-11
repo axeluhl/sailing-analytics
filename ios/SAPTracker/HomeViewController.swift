@@ -27,7 +27,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         qrCodeManager = QRCodeManager(delegate: self)
         
         // set up data source for list
-        fetchedResultsController = DataManager.sharedManager.eventsFetchedResultsController()
+        fetchedResultsController = DataManager.sharedManager.checkInFetchedResultsController()
         fetchedResultsController!.delegate = self
         fetchedResultsController!.performFetch(nil)
         
@@ -38,11 +38,16 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let imageView = UIImageView(image: UIImage(named: "sap_logo"))
         let barButtonItem = UIBarButtonItem(customView: imageView)
         navigationItem.leftBarButtonItem = barButtonItem
+        
+        // check that user accepted terms
+        if !AcceptTermsViewController.acceptedTerms() {
+            performSegueWithIdentifier("EULA", sender: nil)
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        DataManager.sharedManager.selectedEvent = nil;
+        DataManager.sharedManager.selectedCheckIn = nil;
     }
 
     func openUrl(notification: NSNotification) {
@@ -53,22 +58,17 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - UIActionSheetDelegate
     
     @IBAction func showActionSheet(sender: AnyObject) {
-        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Feedback", "Settings", "About", "Cancel")
+        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: NSLocalizedString("Settings", comment: ""), NSLocalizedString("About", comment: ""), NSLocalizedString("Cancel", comment: ""))
         actionSheet.cancelButtonIndex = 3
         actionSheet.showInView(view)
     }
     
     func actionSheet(actionSheet: UIActionSheet!, clickedButtonAtIndex buttonIndex: Int) {
         switch buttonIndex{
-        case 0:
-            let feedbackComposeViewController = BITHockeyManager.sharedHockeyManager().feedbackManager.feedbackComposeViewController()
-            let navController = UINavigationController(rootViewController: feedbackComposeViewController)
-            navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet;
-            presentViewController(navController, animated: true, completion: nil)
-        case 1:
+         case 0:
             performSegueWithIdentifier("Settings", sender: actionSheet)
             break
-        case 2:
+        case 1:
             performSegueWithIdentifier("About", sender: actionSheet)
             break
         default:
@@ -100,7 +100,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "Your Regattas"
+        return NSLocalizedString("Your Regattas", comment: "")
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -110,8 +110,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        let event = fetchedResultsController!.objectAtIndexPath(indexPath) as Event
-        cell.textLabel?.text = event.leaderBoard?.name
+        let checkIn = fetchedResultsController!.objectAtIndexPath(indexPath) as CheckIn
+        cell.textLabel?.text = checkIn.leaderBoardName
     }
     
     // MARK: - NSFetchedResultsControllerDelegate
@@ -128,8 +128,10 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
             case .Update:
                 let cell = tableView.cellForRowAtIndexPath(indexPath)
-                configureCell(cell!, atIndexPath: indexPath)
-                tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                if cell != nil {
+                    configureCell(cell!, atIndexPath: indexPath)
+                    tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                }
             case .Move:
                 tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
                 tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
@@ -148,7 +150,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - UITableViewDelegate
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        DataManager.sharedManager.selectedEvent = (fetchedResultsController!.objectAtIndexPath(indexPath) as Event)
+        DataManager.sharedManager.selectedCheckIn = (fetchedResultsController!.objectAtIndexPath(indexPath) as CheckIn)
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         performSegueWithIdentifier("Regatta", sender: tableView)
     }
@@ -157,14 +159,14 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     @IBAction func scanButtonTap(sender: AnyObject) {
         if !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-            let alertView = UIAlertView(title: "No camera available.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+            let alertView = UIAlertView(title: NSLocalizedString("No camera available.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
             alertView.tag = AlertView.NoCameraAvailable.rawValue;
             alertView.show()
             return
         }
         
         if (!QRCodeManager.deviceCanReadQRCodes()) {
-            let alertView = UIAlertView(title: "Cannot read QR codes with this device.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+            let alertView = UIAlertView(title: NSLocalizedString("Cannot read QR codes with this device.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
             alertView.tag = AlertView.NoCameraAvailable.rawValue;
             alertView.show()
             return
@@ -172,13 +174,11 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         performSegueWithIdentifier("Scan", sender: sender)
     }
     
-    // Für die Verwendung des Regatta-Trackers ist ein Checkin mit QR-Code oder ein Checkin-Link aus der E-Mail notwendig. Sollten Sie diesen nicht erhalten haben, wenden Sie sich bitte an die Wettfahrtleitung.
-    
     @IBAction func noQrCodeButtonTap(sender: AnyObject) {
-        let alertView = UIAlertView(title:  "In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.", message: nil, delegate: nil, cancelButtonTitle: "Cancel")
+        let alertView = UIAlertView(title:  NSLocalizedString("In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
         alertView.tag = AlertView.NoCameraAvailable.rawValue;
         alertView.show()
     }
-    
+
 }
 

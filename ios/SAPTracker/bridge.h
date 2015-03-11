@@ -11,7 +11,6 @@
 
 #import <AFNetworking/AFNetworking.h>
 #import "UIImageView+AFNetworking.h"
-#import "HockeySDK.h"
 #import "Appearance.h"
 
 #if DEBUG

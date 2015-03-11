@@ -54,8 +54,8 @@ public class APIManager: NSObject {
         }
         
         self.serverUrlString = serverUrlString
-
-        manager = AFHTTPRequestOperationManager(baseURL: NSURL(string: serverUrlString)) // baseUrl needed for checking reachability
+        
+        manager = AFHTTPRequestOperationManager(baseURL: NSURL(string: self.serverUrlString!)) // baseUrl needed for checking reachability
         
         // encode/decode body as JSON
         manager!.requestSerializer = AFJSONRequestSerializer() as AFHTTPRequestSerializer
@@ -89,7 +89,7 @@ public class APIManager: NSObject {
     
     /* Get leader board */
     public func getLeaderBoard(leaderBoardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName)"
+        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
@@ -144,6 +144,30 @@ public class APIManager: NSObject {
         body["fixes"] = array
         
         manager!.POST(urlString, parameters: body, success: success, failure: failure)
+    }
+    
+    
+    /* Send GPS location to server. Delete row from cache. */
+    public func postTeamImage(competitorId: String!, imageData: NSData!, success: (AnyObject!) -> Void, failure: (AnyObject!) -> Void) {
+        let urlString = baseUrlString + "/competitors/\(competitorId)/team/image"
+        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
+        let sessionManager = AFURLSessionManager(sessionConfiguration: configuration)
+        sessionManager.responseSerializer = AFJSONResponseSerializer() as AFHTTPResponseSerializer
+        let url = NSURL(string: self.serverUrlString! + urlString)
+        let request = NSMutableURLRequest(URL: url!)
+        request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
+        request.HTTPBody = imageData;
+        request.HTTPMethod = "POST"
+        let dataTask = sessionManager.dataTaskWithRequest(request, completionHandler:{ (response, responseObject, error) in
+            if (error != nil) {
+                failure(error)
+            }
+            else {
+                success(responseObject)
+            }
+        })
+        dataTask.resume();
+
     }
     
 }

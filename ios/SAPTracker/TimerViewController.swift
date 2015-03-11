@@ -41,7 +41,7 @@ class TimerViewController: UIViewController, UIAlertViewDelegate {
     
     /* Stop tracking, go back to regattas view */
     @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-        let alertView = UIAlertView(title: "Stop tracking?", message: "", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "Stop")
+        let alertView = UIAlertView(title: NSLocalizedString("Stop tracking?", comment: ""), message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("Stop", comment: ""))
         alertView.tag = AlertView.StopTracking.rawValue;
         alertView.show()
     }
@@ -56,7 +56,7 @@ class TimerViewController: UIViewController, UIAlertViewDelegate {
                 break
             default:
                 LocationManager.sharedManager.stopTracking()
-                SendGPSFixController.sharedManager.trackingEvent = nil
+                SendGPSFixController.sharedManager.checkIn = nil
                 self.dismissViewControllerAnimated(true, nil)
             }
             break

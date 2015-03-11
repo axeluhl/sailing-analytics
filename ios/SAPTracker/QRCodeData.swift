@@ -13,14 +13,14 @@ public class QRCodeData {
     struct Keys {
         static let eventId = "event_id"
         static let leaderBoardName = "leaderboard_name"
-        static let competitorId = "competitor_id"        
+        static let competitorId = "competitor_id"
     }
     
     public var serverUrl: String?
     public var eventId: String?
     public var leaderBoardName: String?
     public var competitorId: String?
- 
+
     public init() {
     }
     
@@ -57,7 +57,11 @@ public class QRCodeData {
         }
         eventId = queryStringDictionary[QRCodeData.Keys.eventId]
         leaderBoardName = queryStringDictionary[QRCodeData.Keys.leaderBoardName]
+        // change %20 to space
+        if leaderBoardName != nil {
+            leaderBoardName = leaderBoardName!.stringByReplacingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+        }
         competitorId = queryStringDictionary[QRCodeData.Keys.competitorId]
         return eventId != nil && leaderBoardName != nil && competitorId != nil
-     }
+    }
 }

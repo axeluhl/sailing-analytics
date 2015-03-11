@@ -13,9 +13,8 @@ import CoreData
 public class LeaderBoard: NSManagedObject {
 
     @NSManaged public var name: String
-    @NSManaged public var competitor: Competitor?
-    @NSManaged public var event: Event?
-    
+    @NSManaged public var checkIn: CheckIn?
+
     public func initWithDictionary(dictionary: Dictionary<NSObject, AnyObject>) {
         name = dictionary["name"] as String
     }

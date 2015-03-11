@@ -29,7 +29,7 @@ class SendGPSFixController: NSObject {
         }
     }
     
-    var trackingEvent: Event?
+    var checkIn: CheckIn?
     
     /* Singleton */
     class var sharedManager: SendGPSFixController {
@@ -58,16 +58,16 @@ class SendGPSFixController: NSObject {
         for gpsFix in lastestGPSFixes {
             
             // If currently tracking, don't upload locations for another (previous) event
-            if trackingEvent != nil && gpsFix.event != trackingEvent {
+            if checkIn != nil && gpsFix.checkIn != checkIn {
                 break
             }
             
             // location for another server
-            if serverUrl != nil && serverUrl != gpsFix.event.serverUrl {
+            if serverUrl != nil && serverUrl != gpsFix.checkIn!.serverUrl {
                 sendGPSFixes(serverUrl!, gpsFixes: gpsFixesForServer)
                 gpsFixesForServer = []
             }
-            serverUrl = gpsFix.event.serverUrl
+            serverUrl = gpsFix.checkIn!.serverUrl
             gpsFixesForServer.append(gpsFix)
         }
         if gpsFixesForServer.count > 0 {
