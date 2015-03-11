@@ -1,9 +1,9 @@
 package com.sap.sailing.android.tracking.app.utils;
 
-import java.util.UUID;
-
 import android.content.Context;
 import android.telephony.TelephonyManager;
+
+import java.util.UUID;
 
 /**
  * I'm picking a device id based on this reply on Stack Overflow: http://stackoverflow.com/a/2853253/3589281

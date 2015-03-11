@@ -1,18 +1,5 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -36,7 +23,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
@@ -47,17 +33,22 @@ import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
+import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFailureListener;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
-import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
-import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Date;
+import java.util.List;
 
 public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor> {
 
@@ -68,6 +59,8 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 
     private int requestCodeQRCode = 442;
     private RegattaAdapter adapter;
+
+    private CheckinData checkinData;
 
     @SuppressLint("InflateParams")
     @Override
@@ -163,248 +156,9 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     }
 
     public void handleScannedOrUrlMatchedUri(Uri uri) {
-        // TODO: assuming scheme is http, is this valid?
-        String scheme = uri.getScheme();
-        if (scheme != "http" && scheme != "https") {
-            scheme = "http";
-        }
-
-        final String uriStr = uri.toString();
-        final String server = scheme + "://" + uri.getHost();
-        final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
-        final String hostWithPort = server + ":" + port;
-
-        String leaderboardNameFromQR;
-        try {
-            leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
-                    .replace("+", "%20");
-        } catch (UnsupportedEncodingException e) {
-            ExLog.e(getActivity(), TAG, "Failed to encode leaderboard name: " + e.getMessage());
-            leaderboardNameFromQR = "";
-        } catch (NullPointerException e) {
-            ExLog.e(getActivity(), TAG, "Invalid Barcode (no leaderboard-name set): " + e.getMessage());
-            Toast.makeText(this.getActivity(), getString(R.string.error_invalid_qr_code), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        final String competitorId = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
-        final String checkinURLStr = hostWithPort
-                + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
-        final String eventId = uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID);
-        final String leaderboardName = leaderboardNameFromQR;
-
-        final DeviceIdentifier deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
-                .getUniqueId(this.getActivity())));
-
-        // There are 5 Stages after the QR-Code scan is complete:
-        // 1. Get Event
-        // 2. Get Leaderboard
-        // 3. Get Competitor
-        // 4. Let user confirm that the information is correct
-        // 5. Checkin
-
-        final StartActivity startActivity = (StartActivity) getActivity();
-
-        final String getEventUrl = hostWithPort + prefs.getServerEventPath(eventId);
-        final String getLeaderboardUrl = hostWithPort + prefs.getServerLeaderboardPath(leaderboardName);
-        final String getCompetitorUrl = hostWithPort + prefs.getServerCompetitorPath(competitorId);
-
-        startActivity.showProgressDialog(R.string.please_wait, R.string.getting_leaderboard);
-
-        try {
-            HttpGetRequest getLeaderboardRequest = new HttpGetRequest(new URL(getLeaderboardUrl), getActivity());
-            NetworkHelper.getInstance(getActivity()).executeHttpJsonRequestAsnchronously(getLeaderboardRequest,
-                    new NetworkHelperSuccessListener() {
-
-                        @Override
-                        public void performAction(JSONObject response) {
-                            // TODO Auto-generated method stub
-
-                            startActivity.dismissProgressDialog();
-
-                            final String leaderboardName;
-
-                            try {
-                                leaderboardName = response.getString("name");
-                            } catch (JSONException e) {
-                                ExLog.e(getActivity(), TAG, "Error getting data from call on URL: " + getLeaderboardUrl
-                                        + ", Error: " + e.getMessage());
-                                startActivity.dismissProgressDialog();
-                                displayAPIErrorRecommendRetry();
-                                return;
-                            }
-
-                            startActivity.showProgressDialog(R.string.please_wait, R.string.getting_event);
-
-                            HttpGetRequest getEventRequest;
-                            try {
-                                getEventRequest = new HttpGetRequest(new URL(getEventUrl), getActivity());
-                                NetworkHelper.getInstance(getActivity()).executeHttpJsonRequestAsnchronously(
-                                        getEventRequest, new NetworkHelperSuccessListener() {
-
-                                            @Override
-                                            public void performAction(JSONObject response) {
-                                                startActivity.dismissProgressDialog();
-
-                                                final String eventId;
-                                                final String eventName;
-                                                final String eventStartDateStr;
-                                                final String eventEndDateStr;
-                                                final String eventFirstImageUrl;
-
-                                                try {
-                                                    eventId = response.getString("id");
-                                                    eventName = response.getString("name");
-                                                    eventStartDateStr = response.getString("startDate");
-                                                    eventEndDateStr = response.getString("endDate");
-
-                                                    JSONArray imageUrls = response.getJSONArray("imageURLs");
-
-                                                    if (imageUrls.length() > 0) {
-                                                        eventFirstImageUrl = imageUrls.getString(0);
-                                                    } else {
-                                                        eventFirstImageUrl = null;
-                                                    }
-
-                                                } catch (JSONException e) {
-                                                    ExLog.e(getActivity(), TAG, "Error getting data from call on URL: "
-                                                            + getEventUrl + ", Error: " + e.getMessage());
-                                                    displayAPIErrorRecommendRetry();
-                                                    return;
-                                                }
-
-                                                startActivity.showProgressDialog(R.string.please_wait,
-                                                        R.string.getting_competitor);
-
-                                                HttpGetRequest getCompetitorRequest;
-                                                try {
-                                                    getCompetitorRequest = new HttpGetRequest(
-                                                            new URL(getCompetitorUrl), getActivity());
-                                                    NetworkHelper.getInstance(getActivity())
-                                                            .executeHttpJsonRequestAsnchronously(getCompetitorRequest,
-                                                                    new NetworkHelperSuccessListener() {
-
-                                                                        @Override
-                                                                        public void performAction(JSONObject response) {
-                                                                            startActivity.dismissProgressDialog();
-
-                                                                            final String competitorName;
-                                                                            final String competitorId;
-                                                                            final String competitorSailId;
-                                                                            final String competitorNationality;
-                                                                            final String competitorCountryCode;
-
-                                                                            try {
-                                                                                competitorName = response
-                                                                                        .getString("name");
-                                                                                competitorId = response.getString("id");
-                                                                                competitorSailId = response
-                                                                                        .getString("sailID");
-                                                                                competitorNationality = response
-                                                                                        .getString("nationality");
-                                                                                competitorCountryCode = response
-                                                                                        .getString("countryCode");
-                                                                            } catch (JSONException e) {
-                                                                                ExLog.e(getActivity(),
-                                                                                        TAG,
-                                                                                        "Error getting data from call on URL: "
-                                                                                                + getCompetitorUrl
-                                                                                                + ", Error: "
-                                                                                                + e.getMessage());
-                                                                                displayAPIErrorRecommendRetry();
-                                                                                return;
-                                                                            }
-
-                                                                            CheckinData data = new CheckinData();
-                                                                            data.competitorName = competitorName;
-                                                                            data.competitorId = competitorId;
-                                                                            data.competitorSailId = competitorSailId;
-                                                                            data.competitorNationality = competitorNationality;
-                                                                            data.competitorCountryCode = competitorCountryCode;
-                                                                            data.eventId = eventId;
-                                                                            data.eventName = eventName;
-                                                                            data.eventStartDateStr = eventStartDateStr;
-                                                                            data.eventEndDateStr = eventEndDateStr;
-                                                                            data.eventFirstImageUrl = eventFirstImageUrl;
-                                                                            data.eventServerUrl = hostWithPort;
-                                                                            data.checkinURL = checkinURLStr;
-                                                                            data.leaderboardName = leaderboardName;
-                                                                            data.deviceUid = deviceUuid
-                                                                                    .getStringRepresentation();
-                                                                            try {
-                                                                                data.setCheckinDigestFromString(uriStr);
-                                                                            } catch (UnsupportedEncodingException e) {
-                                                                                ExLog.e(getActivity(),
-                                                                                        TAG,
-                                                                                        "Failed to get generate digest of qr-code string ("
-                                                                                                + uriStr + "). "
-                                                                                                + e.getMessage());
-                                                                                startActivity.dismissProgressDialog();
-                                                                                displayAPIErrorRecommendRetry();
-                                                                                return;
-                                                                            } catch (NoSuchAlgorithmException e) {
-                                                                                ExLog.e(getActivity(),
-                                                                                        TAG,
-                                                                                        "Failed to get generate digest of qr-code string ("
-                                                                                                + uriStr + "). "
-                                                                                                + e.getMessage());
-                                                                                startActivity.dismissProgressDialog();
-                                                                                displayAPIErrorRecommendRetry();
-                                                                                return;
-                                                                            }
-                                                                            displayUserConfirmationScreen(data);
-                                                                        }
-                                                                    }, new NetworkHelperFailureListener() {
-                                                                        @Override
-                                                                        public void performAction(NetworkHelperError e) {
-                                                                            ExLog.e(getActivity(), TAG,
-                                                                                    "Failed to get competitor from API: "
-                                                                                            + e.getMessage());
-                                                                            startActivity.dismissProgressDialog();
-                                                                            displayAPIErrorRecommendRetry();
-                                                                            return;
-                                                                        }
-                                                                    });
-
-                                                } catch (MalformedURLException e2) {
-                                                    ExLog.e(getActivity(), TAG,
-                                                            "Error: Failed to perform checking due to a MalformedURLException: "
-                                                                    + e2.getMessage());
-                                                }
-                                            }
-                                        }, new NetworkHelperFailureListener() {
-
-                                            @Override
-                                            public void performAction(NetworkHelperError e) {
-                                                ExLog.e(getActivity(), TAG,
-                                                        "Failed to get leaderboard from API: " + e.getMessage());
-                                                startActivity.dismissProgressDialog();
-                                                displayAPIErrorRecommendRetry();
-                                                return;
-                                            }
-                                        });
-                            } catch (MalformedURLException e1) {
-                                ExLog.e(getActivity(),
-                                        TAG,
-                                        "Error: Failed to perform checking due to a MalformedURLException: "
-                                                + e1.getMessage());
-                            }
-                        }
-                    }, new NetworkHelperFailureListener() {
-
-                        @Override
-                        public void performAction(NetworkHelperError e) {
-                            ExLog.e(getActivity(), TAG, "Failed to get event from API: " + e.getMessage());
-                            startActivity.dismissProgressDialog();
-                            displayAPIErrorRecommendRetry();
-                        }
-                    });
-
-        } catch (MalformedURLException e) {
-            ExLog.e(getActivity(), TAG,
-                    "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
-        }
-
+        String uriString = uri.toString();
+        CheckinManager manager = new CheckinManager(uriString, (StartActivity)getActivity());
+        manager.callServerAndGenerateCheckinData();
     }
 
     /**
@@ -412,7 +166,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
      * 
      * @param checkinData
      */
-    private void displayUserConfirmationScreen(final CheckinData checkinData) {
+    public void displayUserConfirmationScreen(final CheckinData checkinData) {
         String message1 = getString(R.string.confirm_data_hello_name)
                 .replace("{full_name}", checkinData.competitorName);
         String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}",
@@ -664,5 +418,5 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
                     .show();
         }
     }
-
+    
 }

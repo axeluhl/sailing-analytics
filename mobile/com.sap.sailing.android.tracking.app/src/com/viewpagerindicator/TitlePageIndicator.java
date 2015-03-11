@@ -17,8 +17,6 @@
  */
 package com.viewpagerindicator;
 
-import java.util.ArrayList;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -42,6 +40,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.sap.sailing.android.tracking.app.R;
+
+import java.util.ArrayList;
 
 
 /**
