@@ -11,7 +11,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -23,6 +25,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
     private static final long serialVersionUID = 7465253094290674423L;
 
+    protected BoatClass boatClass;
     // the current speed and direction of the wind
     protected SpeedWithBearing windprev = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
     protected SpeedWithBearing wind = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
@@ -88,10 +91,10 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
     // this constructor creates an instance with a hard-coded set of values
     public PolarDiagramBase() {
-        // do nothing
     }
 
     public PolarDiagramBase(PolarDiagramBase pd) {
+        boatClass = pd.boatClass;
         speedTable = pd.speedTable;
         beatAngles = pd.beatAngles;
         beatSOG = pd.beatSOG;
@@ -107,6 +110,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
         wind = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180));
 
+        boatClass = null;
         speedTable = speeds;
         beatAngles = beats;
         jibeAngles = jibes;
@@ -806,8 +810,16 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
     @Override
     public long getTurnLoss() {
-        // TODO Auto-generated method stub
-        return 4000;
+        // TODO: retrieve values from polar data mining
+        int turnLoss;
+        if (this.boatClass.getDisplayName().equals(BoatClassMasterdata.EXTREME_40.getDisplayName())) {
+            turnLoss = 1000;
+        } else if (this.boatClass.getDisplayName().equals(BoatClassMasterdata._5O5.getDisplayName())) {
+            turnLoss = 5000;
+        } else {
+            turnLoss = 4000; // default value
+        }
+        return turnLoss;
     }
 
     @Override

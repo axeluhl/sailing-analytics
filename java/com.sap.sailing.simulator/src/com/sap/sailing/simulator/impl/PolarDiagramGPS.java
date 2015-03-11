@@ -22,7 +22,6 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 public class PolarDiagramGPS extends PolarDiagramBase {
 
     private static final long serialVersionUID = -9219705955440602679L;
-    private final BoatClass boatClass;
     private final PolarDataService polarData;
     private double avgSpeed;
 
