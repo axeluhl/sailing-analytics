@@ -45,10 +45,8 @@ public class StartActivity extends BaseActivity {
         //checkForUpdates();
         
     	int googleServicesResultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-    	if (googleServicesResultCode != ConnectionResult.SUCCESS)
-    	{
-    		Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googleServicesResultCode, this, 0);
-    		dialog.show();
+    	if (!BuildConfig.DEBUG && googleServicesResultCode != ConnectionResult.SUCCESS) {
+            GooglePlayServicesUtil.getErrorDialog(googleServicesResultCode, this, 0).show();
     	}
     }
     
