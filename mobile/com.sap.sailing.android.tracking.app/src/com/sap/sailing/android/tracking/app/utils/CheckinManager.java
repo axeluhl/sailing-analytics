@@ -48,8 +48,8 @@ public class CheckinManager {
             scheme = "http";
         }
 
-        final URLData urlData = new URLData();
-        if (extractRequestParametersFromUri(uri, scheme, urlData))
+        final URLData urlData = extractRequestParametersFromUri(uri, scheme);
+        if (urlData == null)
         {
             return;
         }
@@ -66,39 +66,39 @@ public class CheckinManager {
         }
     }
 
-    private boolean extractRequestParametersFromUri(Uri uri, String scheme, URLData urlData) {
-        boolean error = false;
+    private URLData extractRequestParametersFromUri(Uri uri, String scheme) {
+        URLData urlData = new URLData();
         urlData.uriStr = uri.toString();
         urlData.server = scheme + "://" + uri.getHost();
         urlData.port = (uri.getPort() == -1) ? 80 : uri.getPort();
         urlData.hostWithPort = urlData.server + ":" + urlData.port;
 
-        String leaderboardNameFromQR;
+        String leaderboardNameFromQR = "";
         try {
             leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
                     .replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
             ExLog.e(activity, TAG, "Failed to encode leaderboard name: " + e.getMessage());
-            leaderboardNameFromQR = "";
         } catch (NullPointerException e) {
             ExLog.e(activity, TAG, "Invalid Barcode (no leaderboard-name set): " + e.getMessage());
             Toast.makeText(activity, activity.getString(R.string.error_invalid_qr_code), Toast.LENGTH_LONG).show();
-            return true;
+            urlData = null;
         }
+        if(urlData != null) {
+            urlData.competitorId = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
+            urlData.checkinURLStr = urlData.hostWithPort
+                    + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
+            urlData.eventId = uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID);
+            urlData.leaderboardName = leaderboardNameFromQR;
 
-        urlData.competitorId = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
-        urlData.checkinURLStr = urlData.hostWithPort
-                + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
-        urlData.eventId = uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID);
-        urlData.leaderboardName = leaderboardNameFromQR;
+            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
+                    .getUniqueId(activity)));
 
-        urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
-                .getUniqueId(activity)));
-
-        urlData.getEventUrl = urlData.hostWithPort + prefs.getServerEventPath(urlData.eventId);
-        urlData.getLeaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
-        urlData.getCompetitorUrl = urlData.hostWithPort + prefs.getServerCompetitorPath(urlData.competitorId);
-        return error;
+            urlData.getEventUrl = urlData.hostWithPort + prefs.getServerEventPath(urlData.eventId);
+            urlData.getLeaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
+            urlData.getCompetitorUrl = urlData.hostWithPort + prefs.getServerCompetitorPath(urlData.competitorId);
+        }
+        return urlData;
     }
 
     private void getLeaderBoardFromServer(final URLData urlData, HttpGetRequest getLeaderboardRequest) {
