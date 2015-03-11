@@ -25,7 +25,13 @@ public class MainMediaVideo extends Composite {
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
-        youtubeEmbed.setSrc("//www.youtube.com/embed/" + youtubeId + "?modestbranding=1&rel=0&showinfo=0&autohide=1&fs=1");
+        youtubeEmbed.setSrc("//www.youtube.com/embed/" + youtubeId);
+
+        youtubeEmbed.setAttribute("modestbranding", "modestbranding");
+        youtubeEmbed.setAttribute("autohide", "1");
+        youtubeEmbed.setAttribute("allowfullscreen", "allowfullscreen");
+        youtubeEmbed.setAttribute("showinfo", "false");
+        youtubeEmbed.setAttribute("frameborder", "0");
         
         SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(eventName);
         videoTitle.setInnerSafeHtml(safeHtmlEventName); 
