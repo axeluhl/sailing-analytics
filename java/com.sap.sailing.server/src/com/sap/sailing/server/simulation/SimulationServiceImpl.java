@@ -40,6 +40,7 @@ import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
@@ -67,14 +68,22 @@ public class SimulationServiceImpl implements SimulationService {
 
     private class Listener extends AbstractRaceChangeListener {
         private final LegIdentifier legIdentifier;
+        private final Duration waitingDuration = new MillisecondsDurationImpl(15000); // update simulation every 15 seconds
+        private TimePoint lastUpdate;
+        
 
         public Listener(LegIdentifier legIdentifier) {
             this.legIdentifier = legIdentifier;
+            this.lastUpdate = MillisecondsTimePoint.now(); // first cache-update follows creation of listener
         }
 
         @Override
         protected void defaultAction() {
-            cache.triggerUpdate(legIdentifier, null);
+            TimePoint now = MillisecondsTimePoint.now();
+            if (now.after(lastUpdate.plus(waitingDuration))) { // avoid cache-updates for waiting duration
+                lastUpdate = now;
+                cache.triggerUpdate(legIdentifier, null);
+            }
         }
 
         // simulation is not influenced by live-delay
