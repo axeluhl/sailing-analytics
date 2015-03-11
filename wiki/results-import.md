@@ -9,9 +9,17 @@ Sailwave is a offline Windows software which can export regatta results in diffe
 Although a XRR-Format-export does exist (which would be the best solution) we use the .csv export as the XRR-Export does not export race results (only regatta results).
 
 How to use the .csv export:
-1. In the file menu use the 'Export series summary to windows clipboard...' menu item.
-2. As our Sailwave importer expects the .csv file in a certain format, some adjustments in the settings dialog has to be made:
+Before we can start the .csv export we must change some settings to export the data in the right format:
+###1. Select data columns to export
 
+###2. Set points/discard format
+
+###3. Set ranking format
+
+###4. Set language locale
+
+###5. Set column separator and export the data...
+In the file menu use the 'Export series summary to windows clipboard...' menu item.
 
 ## Manage2Sail
 
