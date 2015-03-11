@@ -199,7 +199,6 @@ public class CheckinManager {
                                 "Failed to get leaderboard from API: " + e.getMessage());
                         activity.dismissProgressDialog();
                         displayAPIErrorRecommendRetry();
-                        return;
                     }
                 });
     }
@@ -243,7 +242,6 @@ public class CheckinManager {
                                                 + e.getMessage());
                                 activity.dismissProgressDialog();
                                 displayAPIErrorRecommendRetry();
-                                return;
                             }
                         });
     }
@@ -265,6 +263,7 @@ public class CheckinManager {
         data.leaderboardName = leaderboardName;
         data.deviceUid = urlData.deviceUuid
                 .getStringRepresentation();
+        data.uriString = urlData.uriStr;
         try {
             data.setCheckinDigestFromString(urlData.uriStr);
             setCheckinData(data);
@@ -276,7 +275,6 @@ public class CheckinManager {
                             + e.getMessage());
             activity.dismissProgressDialog();
             displayAPIErrorRecommendRetry();
-            return;
         } catch (NoSuchAlgorithmException e) {
             ExLog.e(activity,
                     TAG,
@@ -285,7 +283,6 @@ public class CheckinManager {
                             + e.getMessage());
             activity.dismissProgressDialog();
             displayAPIErrorRecommendRetry();
-            return;
         }
     }
 

@@ -20,6 +20,7 @@ public class CheckinData {
     public String competitorNationality;
     public String competitorCountryCode;
     public String deviceUid;
+    public String uriString;
     public String checkinDigest;
 
     public void setCheckinDigestFromString(String checkinString) throws UnsupportedEncodingException,
@@ -62,5 +63,12 @@ public class CheckinData {
         competitor.countryCode = competitorCountryCode;
         competitor.checkinDigest = checkinDigest;
         return competitor;
+    }
+
+    public CheckinUrlInfo getCheckinUrl(){
+        CheckinUrlInfo checkinUrl = new CheckinUrlInfo();
+        checkinUrl.urlString = uriString;
+        checkinUrl.checkinDigest = checkinDigest;
+        return checkinUrl;
     }
 }

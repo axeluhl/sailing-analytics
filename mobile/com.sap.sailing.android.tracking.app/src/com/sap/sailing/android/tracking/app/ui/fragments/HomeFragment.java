@@ -60,8 +60,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     private int requestCodeQRCode = 442;
     private RegattaAdapter adapter;
 
-    private CheckinData checkinData;
-
     @SuppressLint("InflateParams")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -208,7 +206,7 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
                 checkinData.checkinDigest)) {
             try {
                 DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.getEvent(),
-                        checkinData.getCompetitor(), checkinData.getLeaderboard());
+                        checkinData.getCompetitor(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
 
                 adapter.notifyDataSetChanged();
             } catch (GeneralDatabaseHelperException e) {
