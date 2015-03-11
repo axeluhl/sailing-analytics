@@ -12,7 +12,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -100,12 +99,9 @@ public class Header extends Composite {
 
     @UiHandler("searchButton")
     void searchButtonClick(ClickEvent event) {
-        if(searchText.getText().isEmpty()) {
-            Window.alert(TextMessages.INSTANCE.pleaseEnterASearchTerm());
-        } else {
-            PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText.getText());
-            navigator.goToPlace(searchResultNavigation);
-        }
+        PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText
+                .getText());
+        navigator.goToPlace(searchResultNavigation);
     }
     
     private void setActiveLink(Anchor link) {
