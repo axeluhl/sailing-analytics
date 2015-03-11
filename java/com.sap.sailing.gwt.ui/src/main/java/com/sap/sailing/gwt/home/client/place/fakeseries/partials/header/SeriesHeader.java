@@ -59,8 +59,13 @@ public class SeriesHeader extends Composite {
     private void initSharing() {
         sharing.setUp(new SharingMetadataProvider() {
             @Override
-            public String getSharingTitle() {
-                return series.getDisplayName();
+            public String getShortText() {
+                return StringMessages.INSTANCE.seriesSharingShortText(series.getDisplayName());
+            }
+
+            @Override
+            public String getLongText(String url) {
+                return StringMessages.INSTANCE.seriesSharingLongText(series.getDisplayName(), url);
             }
         });
     }

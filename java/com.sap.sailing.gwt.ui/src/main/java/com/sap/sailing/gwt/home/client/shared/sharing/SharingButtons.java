@@ -27,14 +27,15 @@ public class SharingButtons extends Composite {
     }
     
     public void setUp(SharingMetadataProvider provider) {
-        String lorem = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. ";
+        String shortText = provider.getShortText();
+        String longText = provider.getLongText(Window.Location.getHref());
         
         // URLBuilder doesn't work for the Mail link as spaces in parameters are encodes using "+" instead of "%20". This causes problems in Mail programs that do not decode "+" as space.
-        String mailLink = "mailto:?subject="+ URL.encode(provider.getSharingTitle())+"&body=" + URL.encode(lorem + Window.Location.getHref());
+        String mailLink = "mailto:?subject="+ URL.encode(shortText)+"&body=" + URL.encode(longText);
         mail.setHref(mailLink);
-        UrlBuilder twitterLink = new UrlBuilder().setProtocol("https").setHost("twitter.com").setPath("intent/tweet").setParameter("text", provider.getSharingTitle()).setParameter("url", Window.Location.getHref()).setParameter("short_url_length", "8");
+        UrlBuilder twitterLink = new UrlBuilder().setProtocol("https").setHost("twitter.com").setPath("intent/tweet").setParameter("text", shortText).setParameter("url", Window.Location.getHref()).setParameter("short_url_length", "8");
         twitter.setHref(twitterLink.buildString());
-        UrlBuilder facebookLink = new UrlBuilder().setProtocol("https").setHost("www.facebook.com").setPath("dialog/feed").setParameter("app_id", "145634995501895").setParameter("display", "page").setParameter("caption", provider.getSharingTitle()).setParameter("link", Window.Location.getHref()).setParameter("redirect_uri", Window.Location.getHref());
+        UrlBuilder facebookLink = new UrlBuilder().setProtocol("https").setHost("www.facebook.com").setPath("dialog/feed").setParameter("app_id", "145634995501895").setParameter("display", "page").setParameter("caption", shortText).setParameter("link", Window.Location.getHref()).setParameter("redirect_uri", Window.Location.getHref());
         facebook.setHref(facebookLink.buildString());
     }
 }

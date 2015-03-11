@@ -90,8 +90,17 @@ public class EventHeader extends Composite {
     private void initSharing() {
         sharing.setUp(new SharingMetadataProvider() {
             @Override
-            public String getSharingTitle() {
-                return event.getName();
+            public String getShortText() {
+                // TODO regatta details?
+                String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate);
+                return StringMessages.INSTANCE.eventSharingShortText(event.getName(), event.getVenue().getName(), dateString);
+            }
+
+            @Override
+            public String getLongText(String url) {
+                // TODO regatta details?
+                String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate);
+                return StringMessages.INSTANCE.eventSharingLongText(event.getName(), event.getVenue().getName(), dateString, url);
             }
         });
     }
