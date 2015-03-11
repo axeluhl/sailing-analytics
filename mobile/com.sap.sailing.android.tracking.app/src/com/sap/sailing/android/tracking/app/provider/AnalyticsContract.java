@@ -134,8 +134,12 @@ public class AnalyticsContract {
                 + "/vnd.sap_sailing_analytics.uri";
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
 
-        public static Uri buildLeaderboardUri(String leaderboardId) {
-            return CONTENT_URI.buildUpon().appendPath(leaderboardId).build();
+        public static Uri builCheckInUri(String checkinUriId) {
+            return CONTENT_URI.buildUpon().appendPath(checkinUriId).build();
+        }
+
+        public static String getCheckinUriId(Uri uri) {
+            return uri.getPathSegments().get(1);
         }
     }
 

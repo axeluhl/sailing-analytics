@@ -23,6 +23,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperError;
@@ -30,6 +31,7 @@ import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFai
 import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.CheckinUrlInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
@@ -60,8 +62,11 @@ public class RegattaActivity extends CheckinDataActivity {
     public EventInfo event;
     public CompetitorInfo competitor;
     public LeaderboardInfo leaderboard;
+    public CheckinUrlInfo checkinUrl;
 
     private boolean hasPicture;
+    private String checkinDigest;
+    private CheckinManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +78,11 @@ public class RegattaActivity extends CheckinDataActivity {
         competitor = new CompetitorInfo();
         leaderboard = new LeaderboardInfo();
 
-        String checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
+        checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
+
+        checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
+        manager = new CheckinManager(checkinUrl.urlString, this);
+        manager.callServerAndGenerateCheckinData();
 
         competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
         event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
@@ -342,7 +351,19 @@ public class RegattaActivity extends CheckinDataActivity {
 
     @Override
     public void onCheckinDataAvailable(CheckinData data) {
-
+        try {
+            DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
+            DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(),
+                    data.getCompetitor(), data.getLeaderboard(), data.getCheckinUrl());
+            competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
+            event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+            leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
+            checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
+            replaceFragment(R.id.content_frame, new RegattaFragment());
+        } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+            ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
+            displayDatabaseError();
+        }
     }
 
     private class UploadTeamImageTask extends AsyncTask<String, Void, String> {

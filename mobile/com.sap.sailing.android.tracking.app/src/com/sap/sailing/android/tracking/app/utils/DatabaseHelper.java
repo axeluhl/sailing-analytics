@@ -309,10 +309,10 @@ public class DatabaseHelper {
         ContentValues ccuv = new ContentValues();
 
         ccuv.put(CheckinUri.CHECKIN_URI_VALUE, checkinURL.urlString);
-        ccuv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, checkinURL.checkinDigest);
-        cr.insert(Leaderboard.CONTENT_URI, ccuv);
+        ccuv.put(CheckinUri.CHECKIN_URI_CHECKIN_DIGEST, checkinURL.checkinDigest);
+        cr.insert(CheckinUri.CONTENT_URI, ccuv);
 
-        opList.add(ContentProviderOperation.newInsert(Competitor.CONTENT_URI).withValues(ccuv).build());
+        opList.add(ContentProviderOperation.newInsert(CheckinUri.CONTENT_URI).withValues(ccuv).build());
 
         try {
             cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);

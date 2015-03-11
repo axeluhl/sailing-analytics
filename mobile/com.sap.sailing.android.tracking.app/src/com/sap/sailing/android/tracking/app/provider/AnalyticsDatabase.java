@@ -12,6 +12,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardColumns;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinUriColumns;
 
 public class AnalyticsDatabase extends SQLiteOpenHelper {
 
@@ -29,6 +30,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String EVENTS = "events";
         String EVENTS_COMPETITORS = "events_competitors";
         String LEADERBOARDS = "leaderboards";
+        String CHECKIN_URIS= "checkin_uris";
         String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS +
         " INNER JOIN " + Tables.EVENTS + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST 
         + " = " + Tables.EVENTS + "." + Event.EVENT_CHECKIN_DIGEST + ") " +
@@ -50,7 +52,12 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
     			+ LeaderboardColumns.LEADERBOARD_CHECKIN_DIGEST + " TEXT, "
     			+ LeaderboardColumns.LEADERBOARD_NAME + " TEXT );");
-    	
+
+        db.execSQL("CREATE TABLE " + Tables.CHECKIN_URIS + " ("
+    			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+    			+ CheckinUriColumns.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
+    			+ CheckinUriColumns.CHECKIN_URI_VALUE + " TEXT );");
+
         db.execSQL("CREATE TABLE " + Tables.COMPETITORS + " ("
                 + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + CompetitorColumns.COMPETITOR_ID + " TEXT, "
@@ -83,7 +90,8 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
            db.execSQL("DROP TABLE IF EXISTS " + Tables.COMPETITORS);
            db.execSQL("DROP TABLE IF EXISTS " + Tables.EVENTS);
            db.execSQL("DROP TABLE IF EXISTS " + Tables.LEADERBOARDS);
-           
+           db.execSQL("DROP TABLE IF EXISTS " + Tables.CHECKIN_URIS);
+
            onCreate(db);
            version = CUR_DATABASE_VERSION;
        }

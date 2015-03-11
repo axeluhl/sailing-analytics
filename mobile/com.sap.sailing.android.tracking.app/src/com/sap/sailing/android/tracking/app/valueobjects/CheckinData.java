@@ -66,9 +66,9 @@ public class CheckinData {
     }
 
     public CheckinUrlInfo getCheckinUrl(){
-        CheckinUrlInfo checkinUrl = new CheckinUrlInfo();
-        checkinUrl.urlString = uriString;
-        checkinUrl.checkinDigest = checkinDigest;
-        return checkinUrl;
+        CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
+        checkinUrlInfo.urlString = uriString;
+        checkinUrlInfo.checkinDigest = checkinDigest;
+        return checkinUrlInfo;
     }
 }
