@@ -131,8 +131,10 @@ public class EventSeriesAnalyticsDataManager {
 
     public void hideCompetitorChart() {
         MultiCompetitorLeaderboardChart multiCompetitorChart = getMultiCompetitorChart();
-        multiCompetitorChart.setVisible(false);
-        timer.removeTimeListener(multiCompetitorChart);
+        if (multiCompetitorChart != null) {
+            multiCompetitorChart.setVisible(false);
+            timer.removeTimeListener(multiCompetitorChart);
+        }
     }
     
     public void showOverallLeaderboardSettingsDialog() {

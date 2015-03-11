@@ -105,6 +105,8 @@ public class OldLeaderboard extends Composite {
                 lastScoringUpdateTimeDiv.setInnerText("");
                 lastScoringUpdateTextDiv.setInnerText("");
             }
+
+            lastScoringUpdateTextDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
             lastScoringUpdateTimeDiv.getStyle().setVisibility(!hasLiveRace ? Visibility.VISIBLE : Visibility.HIDDEN);
         }
     }
