@@ -14,6 +14,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaVideo;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
@@ -121,7 +122,7 @@ public class MediaPage extends Composite {
         }
         String youtubeId = YoutubeApi.getIdByUrl(youtubeUrl);
         if (youtubeId != null && !youtubeId.trim().isEmpty()) {
-            MediaPageVideo video = new MediaPageVideo(title, youtubeId);
+            MainMediaVideo video = new MainMediaVideo(title, youtubeId);
             videosPanel.appendChild(video.getElement());
             addedVideoUrls.add(youtubeUrl);
         }
