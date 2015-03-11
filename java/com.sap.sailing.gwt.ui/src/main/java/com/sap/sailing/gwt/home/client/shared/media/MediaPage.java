@@ -67,9 +67,13 @@ public class MediaPage extends Composite {
             for (int i = 0; i < gallerySize; i++) {
                 Collections.swap(shuffledPhotoGallery, i, random.nextInt(gallerySize));
             }
-            for (MediaEntryDTO holder : shuffledPhotoGallery) {
-                imageCarousel.addImage(holder.getMediaURL(), holder.getHeightInPx(), holder.getWidthInPx());
-            }
+            int count = 0;
+            do {
+                for (MediaEntryDTO holder : shuffledPhotoGallery) {
+                    imageCarousel.addImage(holder.getMediaURL(), holder.getHeightInPx(), holder.getWidthInPx());
+                    count++;
+                }
+            } while (count < 3);
         }
         
         boolean hasVideos = !media.getVideos().isEmpty();
