@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabsView;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.shared.media.MediaPage;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
@@ -18,7 +18,7 @@ public class SeriesMediaTabView extends Composite implements SeriesTabView<Serie
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
-    private SeriesTabsView.Presenter currentPresenter;
+    private SeriesView.Presenter currentPresenter;
 
     public SeriesMediaTabView() {
     }
@@ -69,7 +69,7 @@ public class SeriesMediaTabView extends Composite implements SeriesTabView<Serie
     }
 
     @Override
-    public void setPresenter(SeriesTabsView.Presenter currentPresenter) {
+    public void setPresenter(SeriesView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
     }
 }

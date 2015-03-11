@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.fakeseries;
 
+import com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
@@ -17,6 +18,8 @@ public class SeriesContext {
 
     private MediaDTO media;
 
+    private EventSeriesAnalyticsDataManager analyticsManager;
+
 
     public SeriesContext() {
     }
@@ -24,6 +27,7 @@ public class SeriesContext {
     public SeriesContext(SeriesContext ctx) {
         updateContext(ctx.getSeriesDTO());
         withMedia(ctx.media);
+        withAnalyticsManager(ctx.analyticsManager);
     }
 
     public SeriesContext withId(String eventId) {
@@ -61,6 +65,15 @@ public class SeriesContext {
 
     public SeriesContext withMedia(MediaDTO media) {
         this.media = media;
+        return this;
+    }
+    
+    public EventSeriesAnalyticsDataManager getAnalyticsManager() {
+        return analyticsManager;
+    }
+
+    public SeriesContext withAnalyticsManager(EventSeriesAnalyticsDataManager regattaAnalyticsManager) {
+        this.analyticsManager = regattaAnalyticsManager;
         return this;
     }
 }

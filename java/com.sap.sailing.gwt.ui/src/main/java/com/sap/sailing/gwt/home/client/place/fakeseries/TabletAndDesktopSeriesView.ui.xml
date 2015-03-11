@@ -52,6 +52,12 @@
 			<c:tabcontent title="{i18n.events}">
 				<tabs:SeriesEventsTabView />
 			</c:tabcontent>
+			<c:tabcontent title="{i18n.leaderboard}">
+				<tabs:EventSeriesLeaderboardTabView />
+			</c:tabcontent>
+			<c:tabcontent title="{i18n.competitorsAnalytics}">
+				<tabs:EventSeriesCompetitorAnalyticsTabView />
+			</c:tabcontent>
 			<c:tabcontent title="{i18n.media}">
 				<tabs:SeriesMediaTabView />
 			</c:tabcontent>

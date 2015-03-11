@@ -37,7 +37,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         super(place, clientFactory, homePlacesNavigator);
 
         if (this.ctx.getRegattaAnalyticsManager() == null) {
-
             ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager( //
                     clientFactory.getSailingService(), //
                     asyncActionsExecutor, //

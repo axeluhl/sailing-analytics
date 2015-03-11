@@ -14,12 +14,12 @@ import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.fakeseries.partials.header.SeriesHeader;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsView {
+public class TabletAndDesktopSeriesView extends Composite implements SeriesView<AbstractSeriesTabPlace, SeriesView.Presenter> {
     private static final ApplicationHistoryMapper historyMapper = GWT.<ApplicationHistoryMapper> create(ApplicationHistoryMapper.class);
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
-    private SeriesTabsView.Presenter currentPresenter;
+    private SeriesView.Presenter currentPresenter;
 
     interface MyBinder extends UiBinder<Widget, TabletAndDesktopSeriesView> {
     }
@@ -27,7 +27,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsV
     @UiField StringMessages i18n;
     
     @UiField(provided = true)
-    TabPanel<SeriesTabsView.Presenter> tabPanelUi;
+    TabPanel<SeriesView.Presenter> tabPanelUi;
     
     @UiField(provided = true)
     SeriesHeader seriesHeader;
@@ -36,7 +36,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsV
     }
 
     @Override
-    public void registerPresenter(final SeriesTabsView.Presenter currentPresenter) {
+    public void registerPresenter(final SeriesView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
         tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
         
@@ -55,7 +55,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesTabsV
     @SuppressWarnings("unchecked")
     @UiHandler("tabPanelUi")
     public void onTabSelection(TabPanelPlaceSelectionEvent e) {
-        currentPresenter.handleTabPlaceSelection((TabView<?, SeriesTabView.Presenter>) e.getSelectedActivity());
+        currentPresenter.handleTabPlaceSelection((TabView<?, SeriesView.Presenter>) e.getSelectedActivity());
     }
     
     private void initBreadCrumbs() {

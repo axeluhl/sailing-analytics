@@ -90,4 +90,12 @@ public class EventSeriesViewDTO implements IsSerializable {
     public void setLeaderboardId(String leaderboardGroup) {
         this.leaderboardId = leaderboardGroup;
     }
+
+    public EventSeriesState getState() {
+        return state;
+    }
+
+    public void setState(EventSeriesState state) {
+        this.state = state;
+    }
 }

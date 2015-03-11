@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabsView;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.partials.header.SeriesHeaderResources;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 
@@ -28,7 +28,7 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
-    private SeriesTabsView.Presenter currentPresenter;
+    private SeriesView.Presenter currentPresenter;
 
     public SeriesEventsTabView() {
     }
@@ -82,7 +82,7 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
     }
 
     @Override
-    public void setPresenter(SeriesTabsView.Presenter currentPresenter) {
+    public void setPresenter(SeriesView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
     }
 }

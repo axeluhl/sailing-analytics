@@ -9,9 +9,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 public interface SeriesView<PLACE extends AbstractSeriesPlace, PRES extends SeriesView.Presenter> extends IsWidget {
 
@@ -31,6 +33,8 @@ public interface SeriesView<PLACE extends AbstractSeriesPlace, PRES extends Seri
         
         void ensureMedia(AsyncCallback<MediaDTO> asyncCallback);
         boolean hasMedia();
+        
+        Timer getAutoRefreshTimer();
     }
     
     /**

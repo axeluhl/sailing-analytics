@@ -65,9 +65,8 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
                     placeToStart = place;
                 }
                 
-                super.onSuccess(new SeriesTabActivity((AbstractSeriesTabPlace) placeToStart, clientFactory, homePlacesNavigator));
+                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) placeToStart, clientFactory, homePlacesNavigator));
             }
-
         });
     }
     

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.fakeseries.tabs;
 
+import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesTabPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 
@@ -12,11 +13,11 @@ public class SeriesEventsPlace extends AbstractSeriesTabPlace {
         super(context);
     }
 
-    public static class Tokenizer extends AbstractSeriesTabPlace.Tokenizer<SeriesEventsPlace> {
+    public static class Tokenizer extends AbstractSeriesPlace.Tokenizer<SeriesEventsPlace> {
 
         @Override
-        protected SeriesEventsPlace getRealPlace(String seriesId) {
-            return new SeriesEventsPlace(seriesId);
+        protected SeriesEventsPlace getRealPlace(SeriesContext context) {
+            return new SeriesEventsPlace(context);
         }
     }
 }
