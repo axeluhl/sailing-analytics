@@ -53,7 +53,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
-public class RegattaActivity extends CheckinDataActivity {
+public class RegattaActivity extends CheckinDataActivity implements RegattaFragment.FragmentWatcher {
 
     private final static String TAG = RegattaActivity.class.getName();
     private final static String LEADERBOARD_IMAGE_FILENAME_PREFIX = "leaderboardImage_";
@@ -82,7 +82,6 @@ public class RegattaActivity extends CheckinDataActivity {
 
         checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
         manager = new CheckinManager(checkinUrl.urlString, this);
-        manager.callServerAndGenerateCheckinData();
 
         competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
         event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
@@ -102,7 +101,9 @@ public class RegattaActivity extends CheckinDataActivity {
             getSupportActionBar().setTitle(leaderboard.name);
             getSupportActionBar().setSubtitle(event.name);
         }
-        replaceFragment(R.id.content_frame, new RegattaFragment());
+        RegattaFragment regattaFragment = new RegattaFragment();
+        regattaFragment.setFragmentWatcher(this);
+        replaceFragment(R.id.content_frame, regattaFragment);
     }
 
     @Override
@@ -124,12 +125,9 @@ public class RegattaActivity extends CheckinDataActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem teamPhotoItem = menu.findItem(R.id.options_menu_add_team_image);
-        if(hasPicture)
-        {
+        if (hasPicture) {
             teamPhotoItem.setTitle(getString(R.string.options_replace_team_photo));
-        }
-        else
-        {
+        } else {
             teamPhotoItem.setTitle(getString(R.string.options_add_team_photo));
         }
         return super.onPrepareOptionsMenu(menu);
@@ -138,20 +136,23 @@ public class RegattaActivity extends CheckinDataActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.options_menu_settings:
-            ExLog.i(this, TAG, "Clicked SETTINGS.");
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        case R.id.options_menu_checkout:
-            ExLog.i(this, TAG, "Clicked CHECKOUT.");
-            checkout();
-            return true;
-        case R.id.options_menu_add_team_image:
-            ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
-            getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.options_menu_settings:
+                ExLog.i(this, TAG, "Clicked SETTINGS.");
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.options_menu_checkout:
+                ExLog.i(this, TAG, "Clicked CHECKOUT.");
+                checkout();
+                return true;
+            case R.id.options_menu_add_team_image:
+                ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
+                getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
+                return true;
+            case R.id.options_menu_refresh:
+                manager.callServerAndGenerateCheckinData();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -184,6 +185,15 @@ public class RegattaActivity extends CheckinDataActivity {
 
     @Override
     protected void onResume() {
+        setUpView();
+        RegattaFragment regattaFragment = getRegattaFragment();
+        if (regattaFragment != null) {
+            regattaFragment.setFragmentWatcher(this);
+        }
+        super.onResume();
+    }
+
+    private void setUpView() {
         TextView competitorNameTextView = (TextView) findViewById(R.id.competitor_name);
         competitorNameTextView.setText(competitor.name);
 
@@ -217,7 +227,6 @@ public class RegattaActivity extends CheckinDataActivity {
             imageView.setImageBitmap(storedImage);
             userImageUpdated();
         }
-		
 
 
         ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);
@@ -230,11 +239,9 @@ public class RegattaActivity extends CheckinDataActivity {
         } else {
             flagImageView.setImageBitmap(storedFlagImage);
         }
-        super.onResume();
     }
 
     /**
-     * 
      * @param bitmap
      */
     public void updateLeaderboardPictureChosenByUser(final Bitmap bitmap) {
@@ -251,7 +258,7 @@ public class RegattaActivity extends CheckinDataActivity {
 
     /**
      * Store image for quicker retrieval later and trigger upload to server.
-     * 
+     *
      * @param images
      */
     private void storeImageAndSendToServer(Bitmap image, String fileName, boolean sendToServer) {
@@ -276,7 +283,7 @@ public class RegattaActivity extends CheckinDataActivity {
 
     /**
      * Get stored image if there's one saved.
-     * 
+     *
      * @return
      */
     private Bitmap getStoredImage(String fileName) {
@@ -293,7 +300,7 @@ public class RegattaActivity extends CheckinDataActivity {
 
     /**
      * Silently send the team image to the server.
-     * 
+     *
      * @param imageFile
      */
     private void sendTeamImageToServer(File imageFile) {
@@ -307,7 +314,7 @@ public class RegattaActivity extends CheckinDataActivity {
 
     /**
      * Get Path for cached leaderbaord image.
-     * 
+     *
      * @return
      */
     public File getImageFile(String fileName) {
@@ -351,19 +358,28 @@ public class RegattaActivity extends CheckinDataActivity {
 
     @Override
     public void onCheckinDataAvailable(CheckinData data) {
-        try {
-            DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
-            DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(),
-                    data.getCompetitor(), data.getLeaderboard(), data.getCheckinUrl());
-            competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
-            event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
-            leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
-            checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
-            replaceFragment(R.id.content_frame, new RegattaFragment());
-        } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
-            ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
-            displayDatabaseError();
+        if (data != null) {
+            try {
+                DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
+                DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(),
+                        data.getCompetitor(), data.getLeaderboard(), data.getCheckinUrl());
+                competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
+                event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+                leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
+                checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
+                RegattaFragment regattaFragment = new RegattaFragment();
+                regattaFragment.setFragmentWatcher(this);
+                replaceFragment(R.id.content_frame, regattaFragment);
+            } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+                ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
+                displayDatabaseError();
+            }
         }
+    }
+
+    @Override
+    public void onViewCreated() {
+        setUpView();
     }
 
     private class UploadTeamImageTask extends AsyncTask<String, Void, String> {

@@ -51,6 +51,7 @@ public class CheckinManager {
         final URLData urlData = extractRequestParametersFromUri(uri, scheme);
         if (urlData == null)
         {
+            setCheckinData(null);
             return;
         }
 
@@ -287,11 +288,8 @@ public class CheckinManager {
     }
 
     public void setCheckinData(CheckinData data){
-        if(data != null)
-        {
-            checkinData = data;
-            activity.onCheckinDataAvailable(getCheckinData());
-        }
+        checkinData = data;
+        activity.onCheckinDataAvailable(getCheckinData());
     }
 
     public CheckinData getCheckinData(){
@@ -315,6 +313,7 @@ public class CheckinManager {
         });
         AlertDialog alert = builder.create();
         alert.show();
+        setCheckinData(null);
     }
 
     public interface CheckinDataHandler{

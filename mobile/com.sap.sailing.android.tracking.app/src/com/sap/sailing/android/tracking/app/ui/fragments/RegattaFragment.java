@@ -47,6 +47,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     private TimerRunnable timer;
 
+    private FragmentWatcher watcher;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -132,6 +134,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
+        if(watcher != null)
+        {
+            watcher.onViewCreated();
+        }
         timer = new TimerRunnable();
         timer.start();
         checkAndSwitchToThankYouScreenIfRegattaOver();
@@ -362,6 +368,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         }
     }
 
+    public void setFragmentWatcher(FragmentWatcher fWatcher){
+        watcher = fWatcher;
+    }
+
     private class TimerRunnable implements Runnable {
 
         public Thread t;
@@ -395,6 +405,11 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         public void stop() {
             running = false;
         }
+
+    }
+
+    public interface FragmentWatcher{
+        public void onViewCreated();
     }
 
 }
