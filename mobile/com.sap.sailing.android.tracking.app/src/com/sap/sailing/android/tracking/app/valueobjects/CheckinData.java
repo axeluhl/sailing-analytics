@@ -1,5 +1,7 @@
 package com.sap.sailing.android.tracking.app.valueobjects;
 
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

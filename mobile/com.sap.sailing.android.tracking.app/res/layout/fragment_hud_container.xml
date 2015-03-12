@@ -2,7 +2,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.sap.sailing.android.tracking.app.customviews.OpenSansToolbar
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -15,7 +15,7 @@
             android:orientation="vertical"
             android:padding="0dp" >
 
-            <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
                 android:singleLine="true"
                 android:textSize="16sp" />
 
-            <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
                 android:id="@+id/toolbar_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
                 android:singleLine="true"
                 android:textSize="12sp" />
         </LinearLayout>
-    </com.sap.sailing.android.tracking.app.customviews.OpenSansToolbar>
+    </com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar>
     
     <LinearLayout
         android:layout_width="match_parent"

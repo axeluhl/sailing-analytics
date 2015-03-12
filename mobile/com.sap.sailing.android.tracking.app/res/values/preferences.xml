@@ -27,7 +27,6 @@
     <string name="preference_tracking_timer_started">trackingTimerStarted</string>
     <string name="preference_tracker_is_tracking">trackerIsTracking</string>
     <string name="preference_tracker_is_tracking_checkin_digest">trackerIsTrackingCheckinDigest</string>
-    <string name="preference_last_scanned_qr_code">lastScannedQRCode</string>
 
     <string name="preference_heading_with_declination_subtracted_is_enabled">On</string>
     <string name="preference_heading_with_declination_subtracted_is_disabled">Off</string>

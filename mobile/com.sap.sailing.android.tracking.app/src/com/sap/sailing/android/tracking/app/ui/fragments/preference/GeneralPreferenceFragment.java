@@ -8,7 +8,7 @@ import android.preference.SwitchPreference;
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.utils.UniqueDeviceUuid;
+import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 	

@@ -23,7 +23,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -33,7 +33,7 @@
             android:textColor="@color/white" />
     </RelativeLayout>
 
-    <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
         android:id="@+id/scanQr"
         android:layout_width="fill_parent"
         android:layout_height="80dp"
@@ -47,7 +47,7 @@
         android:textStyle="bold"
         android:text="@string/scan_qr" />
         
-    <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
         android:id="@+id/noQrCode"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:background="@color/black" >
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/mode_label"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
@@ -28,7 +28,7 @@
             android:paddingRight="10dp"
             android:text="@string/tracking_mode" />
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
             android:text="@string/tracking_mode_caching"
             android:textColor="@color/sap_green" />
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/tracking_unsent_fixes_label"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
@@ -51,7 +51,7 @@
             android:paddingLeft="10dp"
             android:text="@string/tracking_unsent_fixes" />
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/tracking_unsent_fixes"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
@@ -63,7 +63,7 @@
             android:paddingLeft="10dp"
             android:text="@string/none" />
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/tracking_status_label"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
@@ -73,7 +73,7 @@
             android:paddingRight="10dp"
             android:text="@string/tracking_status" />
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/tracking_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -95,7 +95,7 @@
             android:gravity="center_vertical"
             android:orientation="horizontal" >
 
-            <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
                 android:id="@+id/gps_accuracy_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -103,7 +103,7 @@
                 android:paddingLeft="9dp"
                 android:text="" />
 
-            <com.sap.sailing.android.tracking.app.customviews.SignalQualityIndicatorView
+            <com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView
                 android:id="@+id/gps_quality_indicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -114,7 +114,7 @@
                 app:signalQuality="none" />
         </LinearLayout>
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/gps_quality"
             android:layout_width="wrap_content"
             android:layout_height="50dp"

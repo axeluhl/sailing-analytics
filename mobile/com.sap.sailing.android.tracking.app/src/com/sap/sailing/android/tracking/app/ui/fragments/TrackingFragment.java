@@ -18,7 +18,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;

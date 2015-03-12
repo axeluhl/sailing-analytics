@@ -7,6 +7,8 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.NetworkHelper;
+import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.CheckinDataActivity;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;

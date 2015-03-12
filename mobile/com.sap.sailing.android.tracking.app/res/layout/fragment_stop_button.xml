@@ -14,7 +14,7 @@
         android:baselineAligned="false"
         android:paddingTop="15dp" >
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/tracking_time"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
             android:layout_alignParentTop="true"
             android:text="@string/tracking_time" />
 
-        <com.sap.sailing.android.tracking.app.customviews.AutoResizeLightTextView
+        <com.sap.sailing.android.shared.ui.customviews.AutoResizeLightTextView
             tools:ignore="InconsistentLayout"
             android:id="@+id/tracking_time_label"
             android:layout_width="match_parent"
@@ -44,7 +44,7 @@
         android:layout_height="100dp"
         android:layout_alignParentBottom="true" >
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
             android:id="@+id/stop_tracking"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
