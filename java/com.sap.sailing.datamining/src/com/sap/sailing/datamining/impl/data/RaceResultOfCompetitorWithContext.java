@@ -19,7 +19,6 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeed;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -63,15 +62,17 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         Leaderboard leaderboard = getLeaderboardContext().getLeaderboard();
         final MillisecondsTimePoint now = MillisecondsTimePoint.now();
         double competitorCount = Util.size(leaderboard.getCompetitors());
-        double rank = leaderboard.getNetPoints(competitor, raceColumn, now);
-        final double result = rank / competitorCount;
+        double points = leaderboard.getNetPoints(competitor, raceColumn, now);
+        double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
+                competitorCount - points : points;
+        final double result = relativeLowPoints / competitorCount;
         return result;
     }
 
     @Override
     public int getAverageWindSpeedInRoundedBeaufort() {
         Speed exactResult = getAverageWindSpeed();
-        return (int) exactResult.getBeaufort();
+        return (int) Math.round(exactResult.getBeaufort());
     }
 
     /**
@@ -154,12 +155,7 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     @Override
     public String getRegattaName() {
         Leaderboard leaderboard = getLeaderboardContext().getLeaderboard();;
-        final String result;
-        if (leaderboard instanceof RegattaLeaderboard) {
-            result = ((RegattaLeaderboard) leaderboard).getRegatta().getName();
-        } else {
-            result = null;
-        }
+        final String result = leaderboard.getName();
         return result;
     }
     
