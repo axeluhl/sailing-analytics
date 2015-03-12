@@ -341,18 +341,14 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                     jsonLegs.add(jsonLeg);
                 }
                 jsonRace.put("legs", jsonLegs);
-                try {
-                    JSONArray jsonRaceRanking = new JSONArray();
-                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                        JSONObject competitorRank = new JSONObject();
-                        competitorRank.put("competitor", competitor.getName());
-                        competitorRank.put("rank", trackedRace.getRank(competitor, timePoint));
-                        jsonRaceRanking.add(competitorRank);
-                    }
-                    jsonRace.put("ranks", jsonRaceRanking);
-                } catch (NoWindException e) {
-                    // well, we don't know the wind direction... then no windward distance will be shown...
+                JSONArray jsonRaceRanking = new JSONArray();
+                for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                    JSONObject competitorRank = new JSONObject();
+                    competitorRank.put("competitor", competitor.getName());
+                    competitorRank.put("rank", trackedRace.getRank(competitor, timePoint));
+                    jsonRaceRanking.add(competitorRank);
                 }
+                jsonRace.put("ranks", jsonRaceRanking);
                 setJsonResponseHeader(resp);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {

@@ -1,6 +1,5 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining;
 
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
 
 public interface DataRetrieverChainDefinitionRegistry extends DataRetrieverChainDefinitionProvider {
 

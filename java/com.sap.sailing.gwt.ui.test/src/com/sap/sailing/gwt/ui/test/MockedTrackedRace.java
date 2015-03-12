@@ -154,7 +154,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getRank(Competitor competitor, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
     }

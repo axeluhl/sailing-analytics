@@ -11,6 +11,7 @@ public interface AdditionalResultData extends Serializable {
     public String getResultSignifier();
 
     public Unit getUnit();
+    public String getUnitSignifier();
 
     public int getValueDecimals();
 

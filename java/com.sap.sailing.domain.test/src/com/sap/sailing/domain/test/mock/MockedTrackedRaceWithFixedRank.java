@@ -88,7 +88,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getRank(Competitor competitor, TimePoint timePoint) {
         return rank;
     }
 

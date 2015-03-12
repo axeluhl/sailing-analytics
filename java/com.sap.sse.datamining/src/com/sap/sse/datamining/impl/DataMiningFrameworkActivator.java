@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -17,30 +18,37 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.impl.functions.FunctionManager;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
-public class DataMiningActivator implements BundleActivator {
+public class DataMiningFrameworkActivator implements BundleActivator {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
     
-    private static DataMiningActivator INSTANCE;
+    private static DataMiningFrameworkActivator INSTANCE;
 
     private ServiceTracker<DataMiningBundleService, DataMiningBundleService> dataMiningBundleServiceTracker;
     private final Collection<ServiceRegistration<?>> serviceRegistrations;
     
     private final ModifiableDataMiningServer dataMiningServer;
     
-    public DataMiningActivator() {
+    public DataMiningFrameworkActivator() {
         ExecutorService executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>());
+                new LinkedBlockingQueue<Runnable>(), new RejectedExecutionHandler() {
+                    @Override
+                    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                        r.run();
+                    }
+                });
 
         FunctionManager functionManager = new FunctionManager();
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new SimpleDataRetrieverChainDefinitionRegistry();
         dataMiningServer = new DataMiningServerImpl(executor, functionManager, functionManager, dataRetrieverChainDefinitionRegistry);
-        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningActivator.class.getClassLoader()));
+        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningFrameworkActivator.class.getClassLoader()));
         
         serviceRegistrations = new HashSet<>();
     }
@@ -73,9 +81,11 @@ public class DataMiningActivator implements BundleActivator {
     private void registerDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
         dataMiningServer.addStringMessages(dataMiningBundleService.getStringMessages());
         
-        dataMiningServer.registerAllWithInternalFunctionPolicy(dataMiningBundleService.getInternalClassesWithMarkedMethods());
-        dataMiningServer.registerAllWithExternalFunctionPolicy(dataMiningBundleService.getExternalLibraryClasses());
+        dataMiningServer.registerAllClasses(dataMiningBundleService.getClassesWithMarkedMethods());
         
+        for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
+            dataMiningServer.setDataSourceProvider(dataSourceProvider);
+        }
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
         }
@@ -84,9 +94,12 @@ public class DataMiningActivator implements BundleActivator {
     private void unregisterDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
         dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
         
-        dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getInternalClassesWithMarkedMethods());
-        dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getExternalLibraryClasses());
+        dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getClassesWithMarkedMethods());
+
         
+        for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
+            dataMiningServer.removeDataSourceProvider(dataSourceProvider);
+        }
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);
         }
@@ -101,9 +114,9 @@ public class DataMiningActivator implements BundleActivator {
         }
     }
     
-    public static DataMiningActivator getDefault() {
+    public static DataMiningFrameworkActivator getDefault() {
         if (INSTANCE == null) {
-            INSTANCE = new DataMiningActivator(); // probably non-OSGi case, as in test execution
+            INSTANCE = new DataMiningFrameworkActivator(); // probably non-OSGi case, as in test execution
         }
         return INSTANCE;
     }
