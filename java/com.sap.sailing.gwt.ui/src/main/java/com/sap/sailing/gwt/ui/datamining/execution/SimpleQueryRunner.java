@@ -57,6 +57,7 @@ public class SimpleQueryRunner implements QueryRunner {
     public void run(QueryDefinitionDTO queryDefinition) {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
+            resultsPresenter.showBusyIndicator();
             dataMiningService.runQuery(queryDefinition, new AsyncCallback<QueryResult<Number>>() {
                 @Override
                 public void onFailure(Throwable caught) {
