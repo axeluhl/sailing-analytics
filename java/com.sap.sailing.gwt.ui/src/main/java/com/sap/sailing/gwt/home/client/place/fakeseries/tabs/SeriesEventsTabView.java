@@ -1,35 +1,33 @@
 package com.sap.sailing.gwt.home.client.place.fakeseries.tabs;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
-import com.sap.sailing.gwt.home.client.place.fakeseries.partials.header.SeriesHeaderResources;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
+import com.sap.sailing.gwt.home.client.shared.event.EventTeaser;
+import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
 public class SeriesEventsTabView extends Composite implements SeriesTabView<SeriesEventsPlace> {
 
-    interface MyBinder extends UiBinder<HTMLPanel, SeriesEventsTabView> {
+    interface MyBinder extends UiBinder<Widget, SeriesEventsTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private SeriesView.Presenter currentPresenter;
 
+    @UiField FlowPanel eventsContainer;
+    
     public SeriesEventsTabView() {
     }
 
@@ -45,30 +43,16 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
 
     @Override
     public void start(SeriesEventsPlace myPlace, AcceptsOneWidget contentArea) {
+        initWidget(ourUiBinder.createAndBindUi(this));
 
-//        initWidget(ourUiBinder.createAndBindUi(this));
-//
-//        contentArea.setWidget(this);
-        
-        // FIXME Temporary hack
-        FlowPanel panel = new FlowPanel();
-        for (EventSeriesEventDTO eventOfSeries : currentPresenter.getCtx().getSeriesDTO().getEvents()) {
-            Anchor eventAnchor = new Anchor(eventOfSeries.getDisplayName());
-            eventAnchor.getElement().getStyle().setDisplay(Display.BLOCK);
-            eventAnchor.getElement().getStyle().setMarginTop(0.5, Unit.EM);
-            eventAnchor.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_itemlink());
+        for (EventMetadataDTO eventOfSeries : currentPresenter.getCtx().getSeriesDTO().getEvents()) {
             final PlaceNavigation<EventDefaultPlace> eventNavigation = currentPresenter.getEventNavigation(eventOfSeries.getId());
-            eventAnchor.setHref(eventNavigation.getTargetUrl());
-            panel.add(eventAnchor);
-            eventAnchor.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    event.preventDefault();
-                    eventNavigation.goToPlace();
-                }
-            });
+            EventTeaser eventTeaser = new EventTeaser(eventNavigation, eventOfSeries);
+            eventsContainer.add(eventTeaser);
         }
-        contentArea.setWidget(panel);
+        
+        contentArea.setWidget(this);
+        
     }
 
     @Override

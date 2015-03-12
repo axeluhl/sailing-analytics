@@ -21,8 +21,8 @@ import com.sap.sailing.gwt.home.client.shared.sharing.SharingButtons;
 import com.sap.sailing.gwt.home.client.shared.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 
 public class SeriesHeader extends Composite {
     private static SeriesHeaderUiBinder uiBinder = GWT.create(SeriesHeaderUiBinder.class);
@@ -77,7 +77,7 @@ public class SeriesHeader extends Composite {
         eventName.setInnerText(series.getDisplayName());
         LabelTypeUtil.renderLabelType(eventState, series.getState().getStateMarker());
         
-        for (EventSeriesEventDTO eventOfSeries : series.getEvents()) {
+        for (EventMetadataDTO eventOfSeries : series.getEvents()) {
             if(eventOfSeries.getState() == EventState.PLANNED) {
                 InlineLabel eventLabel = new InlineLabel(eventOfSeries.getVenue());
                 // TODO light gray color

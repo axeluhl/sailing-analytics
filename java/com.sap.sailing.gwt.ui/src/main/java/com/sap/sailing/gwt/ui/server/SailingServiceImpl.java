@@ -332,15 +332,15 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesEventDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
+import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaEntryDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
@@ -5586,7 +5586,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean oneEventLive = false;
             boolean oneEventNotFinished = false;
             for(Event eventInSeries: fakeSeriesEvents) {
-                EventSeriesEventDTO eventOfSeries = new EventSeriesEventDTO();
+                EventMetadataDTO eventOfSeries = new EventMetadataDTO();
                 eventOfSeries.setId(eventInSeries.getId());
                 eventOfSeries.setDisplayName(eventInSeries.getName());
                 eventOfSeries.setStartDate(eventInSeries.getStartDate().asDate());

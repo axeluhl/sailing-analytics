@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared.eventview;
+package com.sap.sailing.gwt.ui.shared.general;
 
 import java.util.UUID;
 

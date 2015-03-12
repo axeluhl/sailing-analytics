@@ -5,12 +5,13 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class EventSeriesViewDTO implements IsSerializable {
     private UUID id;
     private String displayName;
-    private ArrayList<EventSeriesEventDTO> events = new ArrayList<>();
+    private ArrayList<EventMetadataDTO> events = new ArrayList<>();
     private String baseUrl;
     private boolean onRemoteServer;
     private String logoImageURL;
@@ -54,11 +55,11 @@ public class EventSeriesViewDTO implements IsSerializable {
         this.displayName = displayName;
     }
 
-    public List<EventSeriesEventDTO> getEvents() {
+    public List<EventMetadataDTO> getEvents() {
         return events;
     }
 
-    public void addEvent(EventSeriesEventDTO event) {
+    public void addEvent(EventMetadataDTO event) {
         this.events.add(event);
     }
 

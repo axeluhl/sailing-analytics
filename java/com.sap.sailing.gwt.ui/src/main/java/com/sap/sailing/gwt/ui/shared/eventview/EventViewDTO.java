@@ -7,6 +7,7 @@ import java.util.List;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class EventViewDTO extends EventDTO {
@@ -30,8 +31,8 @@ public class EventViewDTO extends EventDTO {
         }
     }
 
-    private List<RegattaMetadataDTO> regattas = new ArrayList<>();
-    private List<EventReferenceDTO> eventsOfSeries = new ArrayList<>();
+    private ArrayList<RegattaMetadataDTO> regattas = new ArrayList<>();
+    private ArrayList<EventReferenceDTO> eventsOfSeries = new ArrayList<>();
 
     private Date currentServerTime;
 
