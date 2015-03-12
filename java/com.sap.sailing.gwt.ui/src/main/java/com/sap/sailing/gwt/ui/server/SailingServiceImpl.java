@@ -5555,10 +5555,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setBaseUrl(o.getBaseURL());
         dto.setOnRemoteServer(o.isOnRemoteServer());
         dto.setLogoImageURL(o.getLogoImageURL());
-        // TODO implement correctly
+        // TODO implement correctly. We currently do not show media for series.
         dto.setHasMedia(false);
-        // TODO implement correctly
-        dto.setState(EventSeriesState.FINISHED);
         
         if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
             LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
@@ -5583,6 +5581,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     return e1.getStartDate().compareTo(e2.getEndDate());
                 }
             });
+            TimePoint now = MillisecondsTimePoint.now();
+            boolean oneEventStarted = false;
+            boolean oneEventLive = false;
+            boolean oneEventNotFinished = false;
             for(Event eventInSeries: fakeSeriesEvents) {
                 EventSeriesEventDTO eventOfSeries = new EventSeriesEventDTO();
                 eventOfSeries.setId(eventInSeries.getId());
@@ -5592,6 +5594,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 eventOfSeries.setState(calculateEventState(eventInSeries.isPublic(), eventInSeries.getStartDate().asDate(), eventInSeries.getEndDate().asDate()));
                 eventOfSeries.setVenue(eventInSeries.getVenue().getName());
                 dto.addEvent(eventOfSeries);
+                
+                boolean eventStarted = now.after(eventInSeries.getStartDate());
+                boolean eventNotEnded = now.before(eventInSeries.getEndDate());
+                boolean eventLive = eventStarted && eventNotEnded;
+                
+                oneEventStarted |= eventStarted;
+                oneEventLive |= eventLive;
+                oneEventNotFinished |= eventNotEnded;
+            }
+            if(oneEventLive) {
+                dto.setState(EventSeriesState.RUNNING);
+            } else if(!oneEventStarted) {
+                dto.setState(EventSeriesState.UPCOMING);
+            } else if(!oneEventNotFinished) {
+                dto.setState(EventSeriesState.FINISHED);
+            } else {
+                dto.setState(EventSeriesState.IN_PROGRESS);
             }
         }
         return dto;
@@ -5622,7 +5641,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public MediaDTO getMediaForEventSeries(UUID seriesId) {
-        // TODO implement correctly
+        // TODO implement correctly. We currently do not show media for series.
         return getMediaForEvent(seriesId);
     }
 }
