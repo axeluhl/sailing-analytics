@@ -19,7 +19,7 @@ import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtrac
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCollectingAsSetProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataAverageAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataCountAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMaxAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMedianAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMinAggregationProcessor;
@@ -62,7 +62,7 @@ public class ProcessorFactory {
             case Minimum:
                 return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataMinAggregationProcessor(executor, specificResultReceivers);
             case Count:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataCountAggregationProcessor(executor, specificResultReceivers);
+                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDataCountAggregationProcessor(executor, specificResultReceivers);
             default:
                 throw new IllegalArgumentException("No aggregation processor implemented for the aggregation type '"
                         + aggregatorType + "'");
