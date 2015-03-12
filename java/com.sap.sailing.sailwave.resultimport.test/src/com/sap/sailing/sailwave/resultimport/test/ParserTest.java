@@ -50,8 +50,8 @@ public class ParserTest {
                 try {
                     List<ResultDocumentDescriptor> result = new ArrayList<>();
                     TimePoint now = MillisecondsTimePoint.now();
-//                    result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_49er), SAMPLE_INPUT_NAME_49er, now));
-//                    result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_49erFX), SAMPLE_INPUT_NAME_49erFX, now));
+                    result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_49er), SAMPLE_INPUT_NAME_49er, now));
+                    result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_49erFX), SAMPLE_INPUT_NAME_49erFX, now));
                     result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_505), SAMPLE_INPUT_NAME_505, now));
                     return result;
                 } catch (IOException e) {
