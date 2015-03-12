@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.fakeseries;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
 
 public class SeriesDefaultPlace extends AbstractSeriesPlace {
 
@@ -12,15 +11,10 @@ public class SeriesDefaultPlace extends AbstractSeriesPlace {
         super(eventUuidAsString);
     }
 
-    public static class Tokenizer implements PlaceTokenizer<SeriesDefaultPlace> {
+    public static class Tokenizer extends AbstractSeriesPlace.Tokenizer<SeriesDefaultPlace> {
         @Override
-        public String getToken(SeriesDefaultPlace place) {
-            return place.getSeriesUuidAsString();
-        }
-
-        @Override
-        public SeriesDefaultPlace getPlace(String token) {
-            return new SeriesDefaultPlace(token);
+        protected SeriesDefaultPlace getRealPlace(SeriesContext context) {
+            return new SeriesDefaultPlace(context);
         }
     }
 }
