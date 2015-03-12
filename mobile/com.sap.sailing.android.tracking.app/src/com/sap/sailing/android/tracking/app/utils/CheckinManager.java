@@ -55,7 +55,7 @@ public class CheckinManager {
             return;
         }
 
-        activity.showProgressDialog(R.string.please_wait, R.string.getting_leaderboard);
+        activity.showProgressDialog(R.string.please_wait, R.string.getting_event);
 
         try {
             HttpGetRequest getLeaderboardRequest = new HttpGetRequest(new URL(urlData.getLeaderboardUrl), activity);
@@ -110,7 +110,6 @@ public class CheckinManager {
                     public void performAction(JSONObject response) {
                         // TODO Auto-generated method stub
 
-                        activity.dismissProgressDialog();
 
                         final String leaderboardName;
 
@@ -123,8 +122,6 @@ public class CheckinManager {
                             displayAPIErrorRecommendRetry();
                             return;
                         }
-
-                        activity.showProgressDialog(R.string.please_wait, R.string.getting_event);
 
                         HttpGetRequest getEventRequest;
                         try {
@@ -154,7 +151,6 @@ public class CheckinManager {
 
                     @Override
                     public void performAction(JSONObject response) {
-                        activity.dismissProgressDialog();
 
                         try {
                             urlData.eventId = response.getString("id");
@@ -176,9 +172,6 @@ public class CheckinManager {
                             displayAPIErrorRecommendRetry();
                             return;
                         }
-
-                        activity.showProgressDialog(R.string.please_wait,
-                                R.string.getting_competitor);
 
                         HttpGetRequest getCompetitorRequest;
                         try {
@@ -267,6 +260,7 @@ public class CheckinManager {
         data.uriString = urlData.uriStr;
         try {
             data.setCheckinDigestFromString(urlData.uriStr);
+            activity.dismissProgressDialog();
             setCheckinData(data);
         } catch (UnsupportedEncodingException e) {
             ExLog.e(activity,
