@@ -22,4 +22,6 @@ public interface HasRaceResultOfCompetitorContext {
     @Dimension(messageKey="WindSpeedInBeaufort")
     int getAverageWindSpeedInRoundedBeaufort();
 
+    @Dimension(messageKey="Regatta")
+    String getRegattaName();
 }

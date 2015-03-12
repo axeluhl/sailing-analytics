@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.impl.data;
 
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,6 +10,7 @@ import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -17,6 +19,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeed;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -82,8 +85,9 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         if (trackedRace == null) {
             result = null;
         } else {
-            ScalableSpeed windSpeedSum = new ScalableSpeed(Speed.NULL);
-            long count = 0;
+            final ScalableSpeed[] windSpeedSum = new ScalableSpeed[1];
+            windSpeedSum[0] = new ScalableSpeed(Speed.NULL);
+            final long[] count = new long[1];
             final List<Leg> legs = trackedRace.getRace().getCourse().getLegs();
             if (legs.isEmpty()) {
                 result = null;
@@ -106,8 +110,8 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
                             position, timePoint);
                     if (wind != null) {
                         if (wind.useSpeed()) {
-                            windSpeedSum = windSpeedSum.add(new ScalableSpeed(wind.getObject()));
-                            count++;
+                            windSpeedSum[0] = windSpeedSum[0].add(new ScalableSpeed(wind.getObject()));
+                            count[0]++;
                         } else {
                             if (!track.hasDirectionChange(timePoint, /* minimumDegreeDifference */10)) {
                                 // TODO try to estimate wind speed using polar data service, wind direction and COG/SOG
@@ -119,8 +123,15 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
                                         legType = trackedRace.getTrackedLeg(currentLeg.getLeg()).getLegType(timePoint);
                                         final Tack tack = trackedRace.getTack(competitor, timePoint);
                                         if (tack != null) {
-                                            polarDataService.getAverageTrueWindSpeedAndAngleCandidates(trackedRace
-                                                    .getRace().getBoatClass(), cog, legType, tack);
+                                            Set<SpeedWithBearingWithConfidence<Void>> estimatedWindSpeeds = polarDataService
+                                                    .getAverageTrueWindSpeedAndAngleCandidates(trackedRace.getRace()
+                                                            .getBoatClass(), cog, legType, tack);
+                                            if (!estimatedWindSpeeds.isEmpty()) {
+                                                estimatedWindSpeeds.stream().max((a,b)->(int) Math.signum(a.getConfidence()-b.getConfidence())).ifPresent(swbwc-> {
+                                                    windSpeedSum[0] = windSpeedSum[0].add(new ScalableSpeed(swbwc.getObject()));
+                                                    count[0]++;
+                                                });
+                                            }
                                         }
                                     } catch (NoWindException e) {
                                         logger.log(Level.FINEST, "Can't determine wind direction, so no tack nor leg type known", e);
@@ -130,8 +141,8 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
                         }
                     }
                 }
-                if (count > 0) {
-                    result = windSpeedSum.divide(count);
+                if (count[0] > 0) {
+                    result = windSpeedSum[0].divide(count[0]);
                 } else {
                     result = null;
                 }
@@ -139,4 +150,17 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         }
         return result;
     }
+
+    @Override
+    public String getRegattaName() {
+        Leaderboard leaderboard = getLeaderboardContext().getLeaderboard();;
+        final String result;
+        if (leaderboard instanceof RegattaLeaderboard) {
+            result = ((RegattaLeaderboard) leaderboard).getRegatta().getName();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
 }
