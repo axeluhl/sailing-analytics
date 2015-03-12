@@ -19,10 +19,13 @@ import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPla
 import com.sap.sailing.gwt.home.client.place.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultActivityProxy;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
-import com.sap.sailing.gwt.home.client.place.series.SeriesActivityProxy;
 import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
@@ -71,7 +74,9 @@ public class ApplicationActivityMapper implements ActivityMapper {
             // rerouting old place to new place to make bookmarked URLs to work with the new interface.
             return getActivity(getRealRegattaPlace((RegattaPlace) place));
         } else if (place instanceof SeriesPlace) {
-            return new SeriesActivityProxy((SeriesPlace) place, clientFactory);
+//            return new SeriesActivityProxy((SeriesPlace) place, clientFactory);
+            // rerouting old place to new place to make bookmarked URLs to work with the new interface.
+            return getActivity(getRealSeriesPlace((SeriesPlace) place));
         } else if (place instanceof SearchResultPlace) {
             return new SearchResultActivityProxy((SearchResultPlace) place, clientFactory);
         } else {
@@ -130,5 +135,23 @@ public class ApplicationActivityMapper implements ActivityMapper {
         }
         
         return new EventDefaultPlace(eventContext);
+    }
+    
+    private Place getRealSeriesPlace(SeriesPlace place) {
+        String seriesId = place.getEventUuidAsString();
+        SeriesContext context = new SeriesContext().withId(seriesId);
+        
+        // TODO evaluate additional parameters
+        
+        switch (place.getNavigationTab()) {
+            case OverallLeaderboard:
+                return new EventSeriesLeaderboardPlace(context);
+            case RegattaLeaderboards:
+                // TODO regatta Leaderboards aren't ported over yet
+                return new EventSeriesLeaderboardPlace(context);
+            case CompetitorAnalytics:
+                return new EventSeriesCompetitorAnalyticsPlace(context);
+        }
+        return new SeriesDefaultPlace(context);
     }
 }
