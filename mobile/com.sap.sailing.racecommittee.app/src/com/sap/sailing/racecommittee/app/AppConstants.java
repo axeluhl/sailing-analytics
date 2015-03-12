@@ -1,11 +1,8 @@
 package com.sap.sailing.racecommittee.app;
 
-
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
 public class AppConstants {
-    public static final boolean IS_DATA_OFFLINE = false;
-
     // Intent extra fields
     public final static String COURSE_AREA_UUID_KEY = "courseUuid";
     public final static String RACE_ID_KEY = "raceUuid";

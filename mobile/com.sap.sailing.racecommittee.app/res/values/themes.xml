@@ -12,6 +12,7 @@
         <item name="colorAccent">@color/colorAccent</item>
 
         <item name="drawerArrowStyle">@style/AppTheme.Widget.DrawerArrowStyle</item>
+        <item name="android:editTextStyle">@android:style/Widget.EditText</item>
     </style>
 
     <style name="AppTheme.Widget.NumberPicker" parent="@android:style/Theme.Holo.Light">
@@ -25,5 +26,4 @@
     <style name="AppTheme.LargeText" parent="AppTheme.Base">
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
-
 </resources>

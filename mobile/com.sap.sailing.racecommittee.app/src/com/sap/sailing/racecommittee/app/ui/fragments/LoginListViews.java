@@ -12,8 +12,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFragment;
 
-public class LoginListViews extends Fragment implements View.OnClickListener {
+public class LoginListViews extends LoggableDialogFragment implements View.OnClickListener {
 
     private LoginActivity activity;
     private FrameLayout event_listView;

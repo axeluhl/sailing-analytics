@@ -9,17 +9,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.Preference;
+import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
@@ -39,6 +38,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         setupConnection();
         setupPolling();
         setupGeneral();
+        setupDeveloperOptions();
     }
     protected void setupGeneral() {
         setupLanguageButton();
@@ -55,13 +55,20 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         bindPreferenceSummaryToInteger(intervalPreference);
     }
 
+    protected void setupDeveloperOptions() {
+        PreferenceScreen screen = getPreferenceScreen();
+        PreferenceCategory category = (PreferenceCategory)findPreference(getString(R.string.preference_developer_key));
+        if (!BuildConfig.DEBUG && screen != null && category != null) {
+            screen.removePreference(category);
+        }
+    }
 
     protected void setupConnection() {
         setupIdentifierBox();
         setupServerUrlBox();
         setupSyncQRCodeButton();
         setupForceUpdateButton();
-        
+
         bindPreferenceSummaryToValue(findPreference(R.string.preference_server_url_key));
     }
 

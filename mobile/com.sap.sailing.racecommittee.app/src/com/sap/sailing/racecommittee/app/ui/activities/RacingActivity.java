@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -285,12 +286,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
         mEventId = eventId;
 
-        EventBase e = dataManager.getDataStore().getEvent(eventId);
-        if (e == null) {
+        EventBase event = dataManager.getDataStore().getEvent(eventId);
+        if (event == null) {
             ExLog.e(this, TAG, "Noooo the event is null :/");
-            loadEvents();
-            // setupDataStore();
-            // loadNavDrawer( courseAreaId, eventId);
+            preferences.isSetUp(false);
+            PackageManager pm = getPackageManager();
+            Intent intent = pm.getLaunchIntentForPackage(getPackageName());
+            startActivity(intent);
+            finish();
         } else {
             if (mCourseArea != null) {
                 loadRaces(mCourseArea);
@@ -299,7 +302,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 ExLog.i(this, this.getClass().toString(), "courseArea == null :(");
                 Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
             }
-            loadNavDrawer(mCourseArea, e);
+            loadNavDrawer(mCourseArea, event);
             loadWelcomeFragment();
         }
     }

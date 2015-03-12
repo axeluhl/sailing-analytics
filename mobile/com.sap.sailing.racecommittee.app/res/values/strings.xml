@@ -155,6 +155,7 @@
     <string name="settings_polling_active_header">Activate Polling</string>
     <string name="settings_polling_active_description">When active the server will be polled for changes.</string>
     <string name="settings_polling_interval_header">Polling Interval (seconds)</string>
+    <string name="settings_category_developer">Developer Options</string>
     <string name="compass_view_compass">Compass</string>
     <string name="compass_view_needle">Needle</string>
     <string name="racing_course_area_missing">Course area could not be loaded. Please go back to the login page.</string>
@@ -206,6 +207,8 @@
     <string name="update_app_description">Force an update from the server. It\'s a better idea to use the synchronize option.</string>
     <string name="preference_wakelock_header">Stay screen on</string>
     <string name="preference_wakelock_summary">Force the screen to stay awake. Caution: Uses more battery.</string>
+    <string name="preference_offline_header">Offline Mode</string>
+    <string name="preference_offline_summary">Disables the connection to a server and uses static data</string>
     <string name="options_menu_info">Expert Information</string>
     <string name="auto_update_install">Install</string>
     <string name="auto_update_install_anyway">Install anyway</string>

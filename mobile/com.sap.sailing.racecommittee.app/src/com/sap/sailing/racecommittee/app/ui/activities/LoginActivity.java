@@ -264,7 +264,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         if (mSelectedEvent != null && preferences.isSetUp()) {
             showCourseAreaListFragment(mSelectedEvent);
 
-            Intent message = new Intent(LoginActivity.this, RacingActivity.class);
+            Intent message = new Intent(this, RacingActivity.class);
             message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
             message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
             fadeActivity(message);
@@ -329,8 +329,13 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                     }
                 });
 
-        // always reload the configuration...
-        getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
+        if (!AppPreferences.on(this).isOfflineMode()) {
+            // always reload the configuration...
+            getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
+        } else {
+            setSupportProgressBarIndeterminate(false);
+            progressDialog.dismiss();
+        }
     }
 
     private void showAreaPositionListFragment() {

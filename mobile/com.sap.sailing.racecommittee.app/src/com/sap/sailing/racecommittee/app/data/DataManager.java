@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.data;
 import android.content.Context;
 
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 
 /**
@@ -13,7 +12,7 @@ public abstract class DataManager implements ReadonlyDataManager {
 
     public static ReadonlyDataManager create(Context context) {
         DataStore dataStore = InMemoryDataStore.INSTANCE;
-        if (AppConstants.IS_DATA_OFFLINE) {
+        if (AppPreferences.on(context).isOfflineMode()) {
             return new OfflineDataManager(context, dataStore, dataStore.getDomainFactory());
         }
         return new OnlineDataManager(context, dataStore, dataStore.getDomainFactory());
