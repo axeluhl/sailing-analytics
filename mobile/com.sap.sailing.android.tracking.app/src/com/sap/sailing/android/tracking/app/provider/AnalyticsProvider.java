@@ -17,6 +17,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competito
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinUri;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 import java.util.Arrays;
@@ -40,7 +41,10 @@ public class AnalyticsProvider extends ContentProvider {
     
     private static final int MESSAGE = 400;
     private static final int MESSAGE_ID = 401;
-    
+
+    private static final int CHECKIN_URI = 500;
+    private static final int CHECKIN_URI_ID = 501;
+
     private static final int EVENT_LEADERBOARD_COMPETITOR_JOINED = 600;
     
     private static final int EVENT_GPS_FIXES_JOINED = 700;
@@ -56,6 +60,9 @@ public class AnalyticsProvider extends ContentProvider {
         
         matcher.addURI(authority, "leaderboards", LEADERBOARD);
         matcher.addURI(authority, "leaderboards/*", LEADERBOARD_ID);
+
+        matcher.addURI(authority, "checkin_uris", CHECKIN_URI);
+        matcher.addURI(authority, "checkin_uris/*", CHECKIN_URI_ID);
 
         matcher.addURI(authority, "events", EVENT);
         matcher.addURI(authority, "events/*", EVENT_ID);
@@ -147,7 +154,10 @@ public class AnalyticsProvider extends ContentProvider {
         	
         case LEADERBOARD_ID:
         	return Leaderboard.CONTENT_ITEM_TYPE;
-            
+        case CHECKIN_URI:
+            return CheckinUri.CONTENT_TYPE;
+        case CHECKIN_URI_ID:
+            return CheckinUri.CONTENT_ITEM_TYPE;
         default:
             throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -177,7 +187,10 @@ public class AnalyticsProvider extends ContentProvider {
         	long leaderboardId = db.insertOrThrow(Tables.LEADERBOARDS, null, values);
         	notifyChange(uri);
         	return Leaderboard.buildLeaderboardUri(String.valueOf(leaderboardId));
-            
+        case CHECKIN_URI:
+            long checkinUriID = db.insertOrThrow(Tables.CHECKIN_URIS, null, values);
+            notifyChange(uri);
+            return CheckinUri.builCheckInUri(String.valueOf(checkinUriID));
         default:
             throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -209,7 +222,10 @@ public class AnalyticsProvider extends ContentProvider {
         	int numLeaderboardRowsDeleted = db.delete(Tables.LEADERBOARDS, selection, selectionArgs);
             notifyChange(uri);
             return numLeaderboardRowsDeleted;
-
+        case CHECKIN_URI:
+            int numCheckinUriRowsDeleted = db.delete(Tables.CHECKIN_URIS, selection, selectionArgs);
+            notifyChange(uri);
+            return numCheckinUriRowsDeleted;
 		default:
 			throw new UnsupportedOperationException("Unknown uri: " + uri);
 		}		
@@ -263,6 +279,12 @@ public class AnalyticsProvider extends ContentProvider {
             final String event_id = Event.getEventId(uri);
             return builder.table(Tables.EVENTS)
                     .where(Event.EVENT_ID + " = ?", event_id);
+        case CHECKIN_URI:
+            return builder.table(Tables.CHECKIN_URIS);
+        case CHECKIN_URI_ID:
+            final String checkinUriId = AnalyticsContract.CheckinUri.getCheckinUriId(uri);
+            return builder.table(Tables.CHECKIN_URIS)
+                    .where(BaseColumns._ID + " = ?", checkinUriId);
             
         default:
             throw new UnsupportedOperationException("Unknown uri: " + uri); 

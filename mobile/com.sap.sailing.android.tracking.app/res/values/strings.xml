@@ -7,6 +7,7 @@
     <string name="options_menu_checkout">Checkout</string>
     <string name="options_add_team_photo">Add Team Photo</string>
     <string name="options_replace_team_photo">Replace Team Photo</string>
+    <string name="options_refresh">Refresh</string>
     <string name="settings_category_other">Other Settings</string>
     <string name="device_identifier">Device Identifier</string>
     <string name="tracker_started">SAP Sailing Tracker started</string>

@@ -111,6 +111,9 @@ public class StartActivity extends CheckinDataActivity {
 
     @Override
     public void onCheckinDataAvailable(CheckinData data) {
-        getHomeFragment().displayUserConfirmationScreen(data);
+        if(data != null)
+        {
+            getHomeFragment().displayUserConfirmationScreen(data);
+        }
     }
 }

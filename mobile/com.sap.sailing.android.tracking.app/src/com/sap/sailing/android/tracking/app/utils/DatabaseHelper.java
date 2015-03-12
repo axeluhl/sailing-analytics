@@ -16,6 +16,8 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competito
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventLeaderboardCompetitorJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinUri;
+import com.sap.sailing.android.tracking.app.valueobjects.CheckinUrlInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.LeaderboardInfo;
@@ -196,6 +198,22 @@ public class DatabaseHelper {
         return leaderboard;
     }
 
+    public CheckinUrlInfo getCheckinUrl(Context context, String checkinDigest){
+        CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
+        checkinUrlInfo.checkinDigest = checkinDigest;
+
+        Cursor uc = context.getContentResolver().query(CheckinUri.CONTENT_URI, null,
+                CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+        if (uc.moveToFirst()) {
+            checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndex(BaseColumns._ID));
+            checkinUrlInfo.urlString = uc.getString(uc.getColumnIndex(CheckinUri.CHECKIN_URI_VALUE));
+        }
+
+        uc.close();
+
+        return checkinUrlInfo;
+    }
+
     // public void deleteRegattaFromDatabase(Context context, String eventId, String competitorId, String
     // leaderboardName)
     // {
@@ -222,11 +240,14 @@ public class DatabaseHelper {
                 + "\"", null);
         int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest
                 + "\"", null);
+        int d4 = cr.delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = \"" + checkinDigest
+                + "\"", null);
 
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
             ExLog.i(context, TAG, "Checkout, number of competitors deleted: " + d2);
             ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d3);
+            ExLog.i(context, TAG, "Checkout, number of checkinurls deleted: " + d4);
         }
     }
 
@@ -242,7 +263,8 @@ public class DatabaseHelper {
      * @throws OperationApplicationException
      * @throws RemoteException
      */
-    public void storeCheckinRow(Context context, EventInfo event, CompetitorInfo competitor, LeaderboardInfo leaderboard)
+    public void storeCheckinRow(Context context, EventInfo event, CompetitorInfo competitor,
+                                LeaderboardInfo leaderboard, CheckinUrlInfo checkinURL)
             throws GeneralDatabaseHelperException {
 
         // inserting leaderboard first
@@ -281,6 +303,16 @@ public class DatabaseHelper {
         ccv.put(Competitor.COMPETITOR_CHECKIN_DIGEST, competitor.checkinDigest);
 
         opList.add(ContentProviderOperation.newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
+
+        // checkin url
+
+        ContentValues ccuv = new ContentValues();
+
+        ccuv.put(CheckinUri.CHECKIN_URI_VALUE, checkinURL.urlString);
+        ccuv.put(CheckinUri.CHECKIN_URI_CHECKIN_DIGEST, checkinURL.checkinDigest);
+        cr.insert(CheckinUri.CONTENT_URI, ccuv);
+
+        opList.add(ContentProviderOperation.newInsert(CheckinUri.CONTENT_URI).withValues(ccuv).build());
 
         try {
             cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);

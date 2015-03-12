@@ -51,6 +51,7 @@ public class CheckinManager {
         final URLData urlData = extractRequestParametersFromUri(uri, scheme);
         if (urlData == null)
         {
+            setCheckinData(null);
             return;
         }
 
@@ -199,7 +200,6 @@ public class CheckinManager {
                                 "Failed to get leaderboard from API: " + e.getMessage());
                         activity.dismissProgressDialog();
                         displayAPIErrorRecommendRetry();
-                        return;
                     }
                 });
     }
@@ -243,7 +243,6 @@ public class CheckinManager {
                                                 + e.getMessage());
                                 activity.dismissProgressDialog();
                                 displayAPIErrorRecommendRetry();
-                                return;
                             }
                         });
     }
@@ -265,6 +264,7 @@ public class CheckinManager {
         data.leaderboardName = leaderboardName;
         data.deviceUid = urlData.deviceUuid
                 .getStringRepresentation();
+        data.uriString = urlData.uriStr;
         try {
             data.setCheckinDigestFromString(urlData.uriStr);
             setCheckinData(data);
@@ -276,7 +276,6 @@ public class CheckinManager {
                             + e.getMessage());
             activity.dismissProgressDialog();
             displayAPIErrorRecommendRetry();
-            return;
         } catch (NoSuchAlgorithmException e) {
             ExLog.e(activity,
                     TAG,
@@ -285,16 +284,12 @@ public class CheckinManager {
                             + e.getMessage());
             activity.dismissProgressDialog();
             displayAPIErrorRecommendRetry();
-            return;
         }
     }
 
     public void setCheckinData(CheckinData data){
-        if(data != null)
-        {
-            checkinData = data;
-            activity.onCheckinDataAvailable(getCheckinData());
-        }
+        checkinData = data;
+        activity.onCheckinDataAvailable(getCheckinData());
     }
 
     public CheckinData getCheckinData(){
@@ -318,6 +313,7 @@ public class CheckinManager {
         });
         AlertDialog alert = builder.create();
         alert.show();
+        setCheckinData(null);
     }
 
     public interface CheckinDataHandler{

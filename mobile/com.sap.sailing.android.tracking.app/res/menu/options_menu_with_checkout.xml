@@ -18,4 +18,9 @@
         android:id="@+id/options_menu_add_team_image"
         android:title="@string/options_add_team_photo"
         app:showAsAction=""/>
+
+    <item
+        android:id="@+id/options_menu_refresh"
+        android:title="@string/options_refresh"
+        app:showAsAction=""/>
 </menu>

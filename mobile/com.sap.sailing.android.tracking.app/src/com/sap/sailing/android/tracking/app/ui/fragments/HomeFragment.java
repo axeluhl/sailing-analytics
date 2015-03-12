@@ -60,8 +60,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     private int requestCodeQRCode = 442;
     private RegattaAdapter adapter;
 
-    private CheckinData checkinData;
-
     @SuppressLint("InflateParams")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -208,12 +206,12 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
                 checkinData.checkinDigest)) {
             try {
                 DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.getEvent(),
-                        checkinData.getCompetitor(), checkinData.getLeaderboard());
+                        checkinData.getCompetitor(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
 
                 adapter.notifyDataSetChanged();
             } catch (GeneralDatabaseHelperException e) {
                 ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
-                displayDatabaseError();
+                ((StartActivity) getActivity()).displayDatabaseError();
                 return;
             }
 
@@ -260,25 +258,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
     private void displayAPIErrorRecommendRetry() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(getString(R.string.notify_user_api_call_failed));
-        builder.setCancelable(true);
-        builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    /**
-     * Shows a pop-up-dialog that informs the user than an DB-operation has failed.
-     */
-    private void displayDatabaseError() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(getString(R.string.notify_user_db_operation_failed));
         builder.setCancelable(true);
         builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 
