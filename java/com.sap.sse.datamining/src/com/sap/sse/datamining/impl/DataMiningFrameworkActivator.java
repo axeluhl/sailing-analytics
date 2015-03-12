@@ -92,11 +92,9 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     }
 
     private void unregisterDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
+        logger.info("Unregistering data mining bundle "+dataMiningBundleService);
         dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
-        
         dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getClassesWithMarkedMethods());
-
-        
         for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
             dataMiningServer.removeDataSourceProvider(dataSourceProvider);
         }
