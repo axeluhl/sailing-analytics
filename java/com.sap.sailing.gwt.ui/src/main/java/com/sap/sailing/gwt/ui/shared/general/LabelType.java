@@ -84,4 +84,8 @@ public enum LabelType {
     public String getLabelType() {
         return labelType;
     }
+
+    public boolean isRendered() {
+        return labelType != null && getLabel() != null;
+    }
 }

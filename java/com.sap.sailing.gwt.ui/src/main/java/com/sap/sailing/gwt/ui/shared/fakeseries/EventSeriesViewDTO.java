@@ -20,7 +20,7 @@ public class EventSeriesViewDTO implements IsSerializable {
     private String leaderboardId;
 
     public enum EventSeriesState {
-        UPCOMING(LabelType.UPCOMMING), RUNNING(LabelType.LIVE), FINISHED(LabelType.NONE), IN_PROGRESS(LabelType.NONE);
+        UPCOMING(LabelType.UPCOMMING), RUNNING(LabelType.LIVE), FINISHED(LabelType.FINISHED), IN_PROGRESS(LabelType.NONE);
         
         private final LabelType stateMarker;
 

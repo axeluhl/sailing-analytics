@@ -8,7 +8,7 @@ public final class LabelTypeUtil {
     }
 
     public static void renderLabelType(Element labelElement, LabelType labelType) {
-        if(labelType == null || labelType.getLabelType() == null || labelType.getLabel() == null) {
+        if(labelType == null || !labelType.isRendered()) {
             labelElement.removeFromParent();
             return;
         }

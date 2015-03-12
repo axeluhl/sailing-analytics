@@ -69,12 +69,13 @@ public class EventTeaser extends Composite {
     private void updateUI() {
         SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(event.getDisplayName());
         LabelType labelType = event.getState().getStateMarker();
-        if(labelType.getLabelType() == null) {
-            eventTeaserWithState.removeFromParent();
-            eventName.setInnerSafeHtml(safeHtmlEventName);
-        } else {
+        if(labelType.isRendered()) {
             eventNameWithState.setInnerSafeHtml(safeHtmlEventName);
             LabelTypeUtil.renderLabelType(eventState, labelType);
+            eventName.removeFromParent();
+        } else {
+            eventName.setInnerSafeHtml(safeHtmlEventName);
+            eventTeaserWithState.removeFromParent();
         }
         
         String venueString = event.getVenue();
