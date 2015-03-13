@@ -17,14 +17,11 @@
       padding: 0.666666666666667em 0;
   }
   </ui:style>
-     <g:HTMLPanel>
-           <div class="{res.mediaCss.grid}">
-        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <c:BreadcrumbPane ui:field="breadcrumbs"
-            addStyleNames="{style.breadcrumb}" />
-        </div>
-      </div>
-         <p:upcoming.EventsOverviewUpcoming ui:field='upcomingEventsWidget'/>
-         <p:recent.EventsOverviewRecent ui:field='recentEventsWidget'/>
+  <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+      <c:BreadcrumbPane ui:field="breadcrumbs" addStyleNames="{style.breadcrumb}" />
+      <p:upcoming.EventsOverviewUpcoming ui:field='upcomingEventsWidget'/>
+      <p:recent.EventsOverviewRecent ui:field='recentEventsWidget'/>
+    </div>
   </g:HTMLPanel>
 </ui:UiBinder>    
