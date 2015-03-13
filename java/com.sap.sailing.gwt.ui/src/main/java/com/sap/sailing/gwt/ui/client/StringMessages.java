@@ -358,6 +358,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String waypoint();
     String showAllCompetitors();
     String boatTails();
+    String startFirstMarkTriangle();
     String resultImportUrls();
     String errorRefreshingResultImportUrlList(String message);
     String successfullyUpdatedResultImportUrls();
