@@ -84,6 +84,7 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
@@ -588,4 +589,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     MediaDTO getMediaForEvent(UUID eventId);
     
     MediaDTO getMediaForEventSeries(UUID seriesId);
+
+    EventListViewDTO getEventListView() throws Exception;
 }

@@ -18,7 +18,7 @@ public class EventViewDTO extends EventDTO {
     }
 
     public enum EventState {
-        UPCOMING(LabelType.UPCOMMING), RUNNING(LabelType.LIVE), FINISHED(LabelType.FINISHED), PLANNED(LabelType.NONE);
+        PLANNED(LabelType.NONE), UPCOMING(LabelType.UPCOMMING), RUNNING(LabelType.LIVE), FINISHED(LabelType.FINISHED);
         
         private final LabelType stateMarker;
 

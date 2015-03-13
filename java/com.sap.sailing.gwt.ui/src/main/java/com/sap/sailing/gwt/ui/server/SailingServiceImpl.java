@@ -264,6 +264,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -332,6 +333,8 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
@@ -5581,27 +5584,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     return e1.getStartDate().compareTo(e2.getEndDate());
                 }
             });
-            TimePoint now = MillisecondsTimePoint.now();
             boolean oneEventStarted = false;
             boolean oneEventLive = false;
             boolean oneEventNotFinished = false;
             for(Event eventInSeries: fakeSeriesEvents) {
-                EventMetadataDTO eventOfSeries = new EventMetadataDTO();
-                eventOfSeries.setId(eventInSeries.getId());
-                eventOfSeries.setDisplayName(eventInSeries.getName());
-                eventOfSeries.setStartDate(eventInSeries.getStartDate().asDate());
-                eventOfSeries.setEndDate(eventInSeries.getEndDate().asDate());
-                eventOfSeries.setState(calculateEventState(eventInSeries.isPublic(), eventInSeries.getStartDate().asDate(), eventInSeries.getEndDate().asDate()));
-                eventOfSeries.setVenue(eventInSeries.getVenue().getName());
+                EventMetadataDTO eventOfSeries = convertToMetadataDTO(eventInSeries);
                 dto.addEvent(eventOfSeries);
                 
-                boolean eventStarted = now.after(eventInSeries.getStartDate());
-                boolean eventNotEnded = now.before(eventInSeries.getEndDate());
-                boolean eventLive = eventStarted && eventNotEnded;
-                
-                oneEventStarted |= eventStarted;
-                oneEventLive |= eventLive;
-                oneEventNotFinished |= eventNotEnded;
+                oneEventStarted |= eventOfSeries.isStarted();
+                oneEventLive |= (eventOfSeries.isStarted() && eventOfSeries.isFinished());
+                oneEventNotFinished |= !eventOfSeries.isFinished();
             }
             if(oneEventLive) {
                 dto.setState(EventSeriesState.RUNNING);
@@ -5643,5 +5635,56 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public MediaDTO getMediaForEventSeries(UUID seriesId) {
         // TODO implement correctly. We currently do not show media for series.
         return getMediaForEvent(seriesId);
+    }
+    
+    @Override
+    public EventListViewDTO getEventListView() throws MalformedURLException {
+        EventListViewDTO result = new EventListViewDTO();
+        URL requestedBaseURL = getRequestBaseURL();
+        for (Event event : getService().getAllEvents()) {
+            if(event.isPublic()) {
+                EventListEventDTO eventDTO = convertToEventListDTO(event, requestedBaseURL, false);
+                result.addEvent(eventDTO, DateUtil.getYear(eventDTO.getStartDate()));
+            }
+        }
+        for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
+                        getService().getPublicEventsOfAllSailingServers().entrySet()) {
+            final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
+            final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
+            final Iterable<EventBase> remoteEvents = eventsOrException.getA();
+            URL baseURL = getBaseURL(serverRef.getURL());
+            if (remoteEvents != null) {
+                for (EventBase remoteEvent : remoteEvents) {
+                    EventListEventDTO eventDTO = convertToEventListDTO(remoteEvent, baseURL, true);
+                    result.addEvent(eventDTO, DateUtil.getYear(eventDTO.getStartDate()));
+                }
+            }
+        }
+        return result;
+    }
+
+    private EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer) {
+        EventListEventDTO dto = new EventListEventDTO();
+        mapToMetadataDTO(event, dto);
+        dto.setBaseURL(baseURL.toString());
+        dto.setOnRemoteServer(onRemoteServer);
+        return dto;
+    }
+    
+    private EventMetadataDTO convertToMetadataDTO(EventBase event) {
+        EventMetadataDTO dto = new EventMetadataDTO();
+        mapToMetadataDTO(event, dto);
+        return dto;
+    }
+    
+    private void mapToMetadataDTO(EventBase event, EventMetadataDTO dto) {
+        dto.setId((UUID) event.getId());
+        dto.setDisplayName(event.getName());
+        dto.setStartDate(event.getStartDate().asDate());
+        dto.setEndDate(event.getEndDate().asDate());
+        dto.setState(calculateEventState(event.isPublic(), dto.getStartDate(), dto.getEndDate()));
+        dto.setVenue(event.getVenue().getName());
+        // TODO wrong! we need the teaser img here 
+        dto.setLogoImageURL(event.getLogoImageURL().toString());
     }
 }

@@ -17,6 +17,14 @@ public class EventMetadataDTO extends EventReferenceDTO {
     public EventState getState() {
         return state;
     }
+    
+    public boolean isStarted() {
+        return state.compareTo(EventState.RUNNING) >= 0;
+    }
+    
+    public boolean isFinished() {
+        return state == EventState.FINISHED;
+    }
 
     public void setState(EventState state) {
         this.state = state;
