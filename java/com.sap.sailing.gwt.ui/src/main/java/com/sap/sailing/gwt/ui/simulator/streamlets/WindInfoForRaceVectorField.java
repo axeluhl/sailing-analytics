@@ -170,9 +170,12 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         // don't return wind fixes if according to the wind track there is a resolution to which times are rounded
         // and where null is returned when there is no fix at the rounded time point; mimic this behavior here. See
         // also bug 2689 comment #13.
-        if (windTrackInfo.resolutionOutsideOfWhichNoFixWillBeReturned != null &&
-                Math.abs(preResult.requestTimepoint-at.getTime()) > windTrackInfo.resolutionOutsideOfWhichNoFixWillBeReturned.asMillis()) {
-            result = null;
+        if (windTrackInfo.resolutionOutsideOfWhichNoFixWillBeReturned != null) {
+            if (Math.abs(preResult.requestTimepoint-at.getTime()) > windTrackInfo.resolutionOutsideOfWhichNoFixWillBeReturned.asMillis()) {
+                result = null;
+            } else {
+                result = preResult;
+            }
         } else {
             result = preResult;
         }
