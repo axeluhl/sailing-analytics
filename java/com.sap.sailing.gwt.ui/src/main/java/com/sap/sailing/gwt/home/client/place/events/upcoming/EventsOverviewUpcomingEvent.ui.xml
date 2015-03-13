@@ -7,14 +7,12 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.events.upcoming.EventsOverviewUpcomingResources" />
   <g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewupcoming_content_event}">
       <g:Anchor ui:field="eventOverviewLink" addStyleNames="{res.mediaCss.grid}">
-        <div ui:field='eventName' class="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.eventsoverviewupcoming_content_event_name}"></div>
-        <div class="{res.mediaCss.small5} {res.mediaCss.columns} {local_res.css.eventsoverviewupcoming_content_event_location}">
+        <div ui:field='eventName' class="{res.mediaCss.small5} {res.mediaCss.columns} {local_res.css.eventsoverviewupcoming_content_event_name}" />
+        <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.eventsoverviewupcoming_content_event_location}">
           <span ui:field='venueName' />,
           <span ui:field='eventStartDate' />
         </div>
-        <div class="{res.mediaCss.small1} {res.mediaCss.columns} {local_res.css.eventsoverviewupcoming_content_event_icon}">
-          <img src="images/home/breadcrumb-arrow.png"></img>
-        </div>
+        <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.eventsoverviewupcoming_content_event_countdown}">starts in days</div>
       </g:Anchor>
   </g:HTMLPanel>
 </ui:UiBinder>

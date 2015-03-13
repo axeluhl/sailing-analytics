@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
-public class UpcomingEvent extends Composite {
+public class EventsOverviewUpcomingEvent extends Composite {
 
     @UiField DivElement eventName;
     @UiField SpanElement venueName;
@@ -26,12 +26,12 @@ public class UpcomingEvent extends Composite {
     private final HomePlacesNavigator navigator;
     private final PlaceNavigation<EventDefaultPlace> eventNavigation; 
 
-    interface UpcomingEventUiBinder extends UiBinder<Widget, UpcomingEvent> {
+    interface UpcomingEventUiBinder extends UiBinder<Widget, EventsOverviewUpcomingEvent> {
     }
     
     private static UpcomingEventUiBinder uiBinder = GWT.create(UpcomingEventUiBinder.class);
 
-    public UpcomingEvent(final EventListEventDTO event, final HomePlacesNavigator navigator) {
+    public EventsOverviewUpcomingEvent(final EventListEventDTO event, final HomePlacesNavigator navigator) {
         this.navigator = navigator;
 
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();

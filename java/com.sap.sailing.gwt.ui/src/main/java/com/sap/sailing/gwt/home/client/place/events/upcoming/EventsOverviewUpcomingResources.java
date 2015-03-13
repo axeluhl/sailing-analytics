@@ -18,6 +18,10 @@ public interface EventsOverviewUpcomingResources extends ClientBundle {
         String accordioncollapsed();
         String eventsoverviewupcoming_header_info_arrow_image();
         String eventsoverviewupcoming_header();
+        String eventsoverviewupcoming_header_icon();
+        String eventsoverviewupcoming_header_title();
+        String eventsoverviewupcoming_header_ticker();
+        String eventsoverviewupcoming_header_tickerhide();
         String eventsoverviewupcoming_header_info();
         String eventsoverviewupcoming_header_info_arrow();
         String eventsoverviewupcoming_header_info_item();
@@ -26,6 +30,6 @@ public interface EventsOverviewUpcomingResources extends ClientBundle {
         String eventsoverviewupcoming_content_event();
         String eventsoverviewupcoming_content_event_name();
         String eventsoverviewupcoming_content_event_location();
-        String eventsoverviewupcoming_content_event_icon();
+        String eventsoverviewupcoming_content_event_countdown();
     }
 }

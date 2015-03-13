@@ -12,6 +12,9 @@
 }
 .eventsoverviewupcoming {
   font-size: 1rem;
+  margin-top: 1.333333333333333em;
+  border: 1px solid #dedede;
+  border-radius: 0.333333333333333em;
 }
 .eventsoverviewupcoming.accordioncollapsed .eventsoverviewupcoming_header_info_arrow_image {
   -webkit-transform: rotate(0deg);
@@ -19,18 +22,58 @@
       -ms-transform: rotate(0deg);
           transform: rotate(0deg);
 }
+.eventsoverviewupcoming.accordioncollapsed .eventsoverviewupcoming_header {
+  border-bottom: none;
+}
 .eventsoverviewupcoming_header {
-  padding-top: 0.333333333333333em;
-  padding-bottom: 0.666666666666667em;
   cursor: pointer;
+  border-bottom: 1px solid #dedede;
+  padding: 0.666666666666667em 1em;
+  background: #f2f2f2;
+  color: #333;
+}
+.eventsoverviewupcoming_header_icon {
+  width: 2em;
+  margin-top: -0.266666666666667em;
+  vertical-align: middle;
+}
+.eventsoverviewupcoming_header_title {
+  margin: 0;
+  padding-top: 0.266666666666667em;
+  display: inline-block;
+  margin-left: 0.666666666666667em;
+}
+.eventsoverviewupcoming_header a {
+  color: #333;
+  text-decoration: none;
+}
+.eventsoverviewupcoming_header_ticker {
+  margin-left: 0.333333333333333em;
+  white-space: nowrap;
+  overflow: hidden;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+  width: 66%;
+}
+@media (min-width: 61em) {
+  .eventsoverviewupcoming_header_ticker {
+    width: 77%;
+  }
+}
+.eventsoverviewupcoming_header_tickerhide {
+  display: none;
 }
 .eventsoverviewupcoming_header_info {
   float: right;
+  white-space: nowrap;
 }
 .eventsoverviewupcoming_header_info_arrow {
   padding: 0.466666666666667em 1.133333333333333em;
 }
 .eventsoverviewupcoming_header_info_arrow_image {
+  width: 1.333333333333333em;
+  min-width: 1.333333333333333em;
+  vertical-align: middle;
   -webkit-transform: rotate(180deg);
      -moz-transform: rotate(180deg);
       -ms-transform: rotate(180deg);
@@ -55,17 +98,25 @@
 }
 .eventsoverviewupcoming_content_event {
   height: 3.333333333333333em;
+  padding-left: 1em;
+  padding-right: 1em;
   line-height: 3.333333333333333em;
+  border-bottom: 1px solid #dedede;
 }
-.eventsoverviewupcoming_content_event:nth-child(odd) {
-  background: #f2f2f2;
+.eventsoverviewupcoming_content_event:last-child {
+  border-bottom: none;
 }
 .eventsoverviewupcoming_content_event_name {
-  font-size: 1.466666666666667em;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: 60%;
+}
+@media (min-width: 800px) {
+  .eventsoverviewupcoming_content_event_name {
+    width: 41.66666%;
+  }
 }
 .eventsoverviewupcoming_content_event_name:hover {
   text-decoration: underline;
@@ -73,11 +124,27 @@
 .eventsoverviewupcoming_content_event_location {
   white-space: nowrap;
   color: #333;
+  text-align: right;
+  width: 40%;
 }
-.eventsoverviewupcoming_content_event_icon {
-  text-align: center;
+@media (min-width: 800px) {
+  .eventsoverviewupcoming_content_event_location {
+    width: 33.33333%;
+    text-align: left;
+  }
 }
-.eventsoverviewupcoming_content_event_icon img {
+.eventsoverviewupcoming_content_event_countdown {
+  color: #333;
+  white-space: nowrap;
+  text-align: right;
+  display: none;
+}
+@media (min-width: 800px) {
+  .eventsoverviewupcoming_content_event_countdown {
+    display: block;
+  }
+}
+.eventsoverviewupcoming_content_event_countdown img {
   vertical-align: middle;
   width: 0.533333333333333em;
 }

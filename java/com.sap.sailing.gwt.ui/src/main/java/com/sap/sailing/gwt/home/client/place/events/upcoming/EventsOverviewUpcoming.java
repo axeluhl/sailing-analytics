@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
@@ -25,17 +26,17 @@ public class EventsOverviewUpcoming extends Composite {
 
     private final HomePlacesNavigator navigator;
 
-    private final List<UpcomingEvent> upcomingEventComposites;
+    private final List<EventsOverviewUpcomingEvent> upcomingEventComposites;
     
     @UiField HTMLPanel header;
-    @UiField HTMLPanel eventsPlaceholder;
+    @UiField FlowPanel eventsPlaceholder;
     @UiField SpanElement eventsCount;
     
     private boolean isContentVisible = true;
 
     public EventsOverviewUpcoming(HomePlacesNavigator navigator) {
         this.navigator = navigator;
-        upcomingEventComposites = new ArrayList<UpcomingEvent>();
+        upcomingEventComposites = new ArrayList<EventsOverviewUpcomingEvent>();
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
@@ -52,7 +53,7 @@ public class EventsOverviewUpcoming extends Composite {
         eventsPlaceholder.clear();
         upcomingEventComposites.clear();
         for (EventListEventDTO event : arrayList) {
-            UpcomingEvent upcomingEvent = new UpcomingEvent(event, navigator);
+            EventsOverviewUpcomingEvent upcomingEvent = new EventsOverviewUpcomingEvent(event, navigator);
             upcomingEventComposites.add(upcomingEvent);
             eventsPlaceholder.getElement().appendChild(upcomingEvent.getElement());
         }
