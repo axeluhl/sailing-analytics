@@ -21,9 +21,8 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
-import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
+import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOWeigher.AverageLatitudeProvider;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * Implements the {@link VectorField} interface by providing real wind data from a <code>TrackedRace</code> which has
@@ -45,15 +44,15 @@ import com.sap.sse.common.Util.Pair;
 public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeProvider {
     private static final double MAX_WIND_SPEED_IN_KNOTS = 40;
     private final Bounds infiniteBounds = new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180));
-    private final Weigher<Pair<PositionDTO, Date>> weigher;
+    private final Weigher<PositionDTO> weigher;
     private double averageLatitudeDeg;
     private double averageLatitudeCosine;
     private double knotsInDegreePerFrame;
     
-    private final Comparator<WindDTO> windByMeasureTimePointComparator = new Comparator<WindDTO>() {
+    private final Comparator<WindDTO> windByRequestTimePointComparator = new Comparator<WindDTO>() {
         @Override
         public int compare(WindDTO o1, WindDTO o2) {
-            return o1.measureTimepoint > o2.measureTimepoint ? 1 : o1.measureTimepoint == o2.measureTimepoint ? 0 : -1;
+            return o1.requestTimepoint > o2.requestTimepoint ? 1 : o1.requestTimepoint == o2.requestTimepoint ? 0 : -1;
         }
     };
     private final WindInfoForRaceDTO windInfoForRace;
@@ -61,8 +60,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     public WindInfoForRaceVectorField(WindInfoForRaceDTO windInfoForRace, double framesPerSecond) {
         this.windInfoForRace = windInfoForRace;
         this.knotsInDegreePerFrame = 1.0 / (60*3600) / framesPerSecond; // 1kn = 1/60 deg/h = 1/(60*3600) deg/s
-        weigher = new PositionDTOAndDateWeigher(/* half confidence after milliseconds */3000,
-                /* halfConfidenceDistance */new MeterDistance(100), this);
+        weigher = new PositionDTOWeigher(/* halfConfidenceDistance */new MeterDistance(100), this);
     }
     
     /**
@@ -90,12 +88,17 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         return true;
     }
 
+    private final static Position where = new DegreePosition(-33.85741596360764,151.22181591282387);
+    
     @Override
     public Vector getVector(Position p, Date at) {
-        final Pair<PositionDTO, Date> request = new Pair<>(new PositionDTO(p.getLatDeg(), p.getLngDeg()), at);
+        if (where.getDistance(p).getMeters() < 50) {
+            System.out.println("Here we are");
+        }
+        final PositionDTO request = new PositionDTO(p.getLatDeg(), p.getLngDeg());
         double speedConfidenceSum = 0;
         double knotSpeedSumScaledByConfidence = 0;
-        final BearingWithConfidenceCluster<Pair<PositionDTO, Date>> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
+        final BearingWithConfidenceCluster<PositionDTO> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             /*if ((windSourceAndWindTrack.getKey().name().equals("RACECOMMITTEE"))||(windSourceAndWindTrack.getKey().name().equals("COURSE_BASED"))) {
                 continue;
@@ -103,19 +106,18 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
            if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue().windFixes, at);
                 if (timewiseClosestFixForWindSource != null) {
-                    Pair<PositionDTO, Date> fix = new Pair<>(timewiseClosestFixForWindSource.position, new Date(
-                            timewiseClosestFixForWindSource.measureTimepoint));
-                    final double confidence = (timewiseClosestFixForWindSource.confidence == null ? 1 : timewiseClosestFixForWindSource.confidence) * weigher.getConfidence(fix, request);
+                    final double confidence = (timewiseClosestFixForWindSource.confidence == null ? 1 : timewiseClosestFixForWindSource.confidence) *
+                            weigher.getConfidence(timewiseClosestFixForWindSource.position, request);
                     if (windSourceAndWindTrack.getKey().getType().useSpeed()) {
                         speedConfidenceSum += confidence;
                         knotSpeedSumScaledByConfidence += confidence * timewiseClosestFixForWindSource.dampenedTrueWindSpeedInKnots;
                     }
-                    bearingCluster.add(new BearingWithConfidenceImpl<Util.Pair<PositionDTO, Date>>(
-                            new DegreeBearingImpl(timewiseClosestFixForWindSource.dampenedTrueWindBearingDeg), confidence, fix));
+                    bearingCluster.add(new BearingWithConfidenceImpl<PositionDTO>(
+                            new DegreeBearingImpl(timewiseClosestFixForWindSource.dampenedTrueWindBearingDeg), confidence, timewiseClosestFixForWindSource.position));
                 }
             }
         }
-        final BearingWithConfidence<Pair<PositionDTO, Date>> bearing = bearingCluster.getAverage(request);
+        final BearingWithConfidence<PositionDTO> bearing = bearingCluster.getAverage(request);
         final Vector result;
         if (bearing != null && bearing.getObject() != null) {
             final double bearingRad = bearing.getObject().getRadians();
@@ -133,14 +135,14 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
             result = null;
         } else {
             final WindDTO atDummy = new WindDTO();
-            atDummy.measureTimepoint = at.getTime();
-            int pos = Collections.binarySearch(windFixes, atDummy, windByMeasureTimePointComparator);
+            atDummy.requestTimepoint = at.getTime();
+            int pos = Collections.binarySearch(windFixes, atDummy, windByRequestTimePointComparator);
             if (pos < 0) {
                 pos = (-pos) - 1; // now pos points at the insertion point
                 if (pos == 0
                         || (pos < windFixes.size() &&
-                            Math.abs(windFixes.get(pos).measureTimepoint - at.getTime()) < Math.abs(windFixes
-                                .get(pos - 1).measureTimepoint - at.getTime()))) {
+                            Math.abs(windFixes.get(pos).requestTimepoint - at.getTime()) < Math.abs(windFixes
+                                .get(pos - 1).requestTimepoint - at.getTime()))) {
                     result = windFixes.get(pos);
                 } else {
                     // pos doesn't point to the first element, nor is the element at pos time-wise closer than the element at pos-1
