@@ -220,7 +220,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         int canvasHeight = (int)Math.ceil(yOffset + rectHeight*(paths.length + (racePath == null? 0 : 1)));
         setCanvasSize(canvas, canvasWidth, canvasHeight);
         if (racePath != null) {
-            drawRectangleWithText(context2d, xOffset, yOffset, "rgba(255,255,255,0.8);",
+            drawRectangleWithText(context2d, xOffset, yOffset, null,
                 racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth);
         }
         for (PathDTO path : paths) {
@@ -246,10 +246,12 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     protected void drawRectangleWithText(Context2d context2d, double x, double y, String color, String text, String time, double textmaxwidth, double timewidth) {
         double offset = 3.0;
         context2d.setFont(textFont);
-        drawRectangle(context2d, x, y, color);
+        if (color != null) {
+            drawRectangle(context2d, x, y, color);
+        }
         context2d.setGlobalAlpha(0.80);
         context2d.setFillStyle("white");
-        context2d.fillRect(x + rectWidth, y, 15.0 + textmaxwidth + timewidth, rectHeight);
+        context2d.fillRect(x + (color==null?0:rectWidth), y, 15.0 + textmaxwidth + timewidth + (color==null?rectWidth:0), rectHeight);
         context2d.setGlobalAlpha(1.0);
         context2d.setFillStyle(textColor);
         context2d.fillText(text, x + rectWidth + 5.0, y + 12.0 + offset);

@@ -42,14 +42,14 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.SmartFutureCache;
-import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
 public class SimulationServiceImpl implements SimulationService {
 
     final private Executor executor;
     final private SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval> cache;
     final private RacingEventService racingEventService;
-
+    final private long WAIT_MILLIS = 20000; // milliseconds to wait until earliest cache-update for simulation
+    
     public SimulationServiceImpl(Executor executor, RacingEventService racingEventService) {
         this.executor = executor;
         this.racingEventService = racingEventService;
@@ -57,8 +57,9 @@ public class SimulationServiceImpl implements SimulationService {
             this.cache = new SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>(
                     new SmartFutureCache.AbstractCacheUpdater<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>() {
                         @Override
-                        public SimulationResults computeCacheUpdate(LegIdentifier key, EmptyUpdateInterval updateInterval) throws Exception {
-                            return computeSimulationResults(key);
+                        public SimulationResults computeCacheUpdate(LegIdentifier key, SmartFutureCache.EmptyUpdateInterval updateInterval) throws Exception {
+                            SimulationResults results = computeSimulationResults(key); 
+                            return results;
                         }
                     }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
         } else {
@@ -68,7 +69,7 @@ public class SimulationServiceImpl implements SimulationService {
 
     private class Listener extends AbstractRaceChangeListener {
         private final LegIdentifier legIdentifier;
-        private final Duration waitingDuration = new MillisecondsDurationImpl(15000); // update simulation every 15 seconds
+        private final Duration waitingDuration = new MillisecondsDurationImpl(WAIT_MILLIS);
         private TimePoint lastUpdate;
         
 

@@ -501,8 +501,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         /* keepAliveTime */60, TimeUnit.SECONDS,
         /* workQueue */new LinkedBlockingQueue<Runnable>());
         polarDataService = PolarDataServiceFactory.createStandardPolarDataService(polarExecutor);
-        Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
-        /* maximumPoolSize */THREAD_POOL_SIZE,
+        final int SIMULATION_THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/3, 1);
+        Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */SIMULATION_THREAD_POOL_SIZE,
+        /* maximumPoolSize */SIMULATION_THREAD_POOL_SIZE,
         /* keepAliveTime */60, TimeUnit.SECONDS,
         /* workQueue */new LinkedBlockingQueue<Runnable>());
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
