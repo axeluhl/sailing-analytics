@@ -61,6 +61,8 @@
   padding: 0.466666666666667em 1.133333333333333em;
 }
 .eventsoverviewrecent_year_header_info_arrow_image {
+  width: 1.333333333333333em;
+  vertical-align: middle;
   -webkit-transform: rotate(180deg);
      -moz-transform: rotate(180deg);
       -ms-transform: rotate(180deg);

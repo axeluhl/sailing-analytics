@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -264,7 +265,6 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
-import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -5644,7 +5644,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (Event event : getService().getAllEvents()) {
             if(event.isPublic()) {
                 EventListEventDTO eventDTO = convertToEventListDTO(event, requestedBaseURL, false);
-                result.addEvent(eventDTO, DateUtil.getYear(eventDTO.getStartDate()));
+                result.addEvent(eventDTO, getYear(eventDTO.getStartDate()));
             }
         }
         for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
@@ -5655,12 +5655,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             URL baseURL = getBaseURL(serverRef.getURL());
             if (remoteEvents != null) {
                 for (EventBase remoteEvent : remoteEvents) {
-                    EventListEventDTO eventDTO = convertToEventListDTO(remoteEvent, baseURL, true);
-                    result.addEvent(eventDTO, DateUtil.getYear(eventDTO.getStartDate()));
+                    if(remoteEvent.isPublic()) {
+                        EventListEventDTO eventDTO = convertToEventListDTO(remoteEvent, baseURL, true);
+                        result.addEvent(eventDTO, getYear(eventDTO.getStartDate()));
+                    }
                 }
             }
         }
         return result;
+    }
+
+    private int getYear(Date date) {
+        Calendar cal = GregorianCalendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.YEAR);
     }
 
     private EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer) {
@@ -5685,6 +5693,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setState(calculateEventState(event.isPublic(), dto.getStartDate(), dto.getEndDate()));
         dto.setVenue(event.getVenue().getName());
         // TODO wrong! we need the teaser img here 
-        dto.setLogoImageURL(event.getLogoImageURL().toString());
+//        dto.setLogoImageURL(event.getLogoImageURL().toString());
     }
 }

@@ -10,9 +10,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.events.recent.RecentEventTeaser;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
-import com.sap.sailing.gwt.home.client.shared.event.EventTeaser;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 
 /**
@@ -47,7 +47,7 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
 
         for (EventMetadataDTO eventOfSeries : currentPresenter.getCtx().getSeriesDTO().getEvents()) {
             final PlaceNavigation<EventDefaultPlace> eventNavigation = currentPresenter.getEventNavigation(eventOfSeries.getId());
-            EventTeaser eventTeaser = new EventTeaser(eventNavigation, eventOfSeries);
+            RecentEventTeaser eventTeaser = new RecentEventTeaser(eventNavigation, eventOfSeries);
             eventsContainer.add(eventTeaser);
         }
         

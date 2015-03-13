@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.eventlist;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -23,14 +24,16 @@ public class EventListYearDTO implements IsSerializable {
         return year;
     }
 
-    public ArrayList<EventListEventDTO> getEvents() {
+    public List<EventListEventDTO> getEvents() {
         return events;
     }
 
     protected void addEvent(EventListEventDTO event) {
         for(int i = 0; i < events.size(); i++) {
-            if(events.get(i).getStartDate().compareTo(event.getStartDate()) < 0);
-            events.add(i, event);
+            if(events.get(i).getStartDate().compareTo(event.getStartDate()) < 0) {
+                events.add(i, event);
+                return;
+            }
         }
         events.add(event);
     }

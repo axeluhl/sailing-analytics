@@ -5,7 +5,7 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.event.EventTeaserResources" />
-  <g:HTMLPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
+  <g:HTMLPanel>
     <div class="{local_res.css.eventteasercontainer}">
       <a ui:field="eventLink" class="{local_res.css.eventteaser}">
         <div ui:field="eventImage" class="{local_res.css.eventteaser_image}"></div>

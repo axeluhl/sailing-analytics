@@ -16,8 +16,10 @@ public class EventListViewDTO implements IsSerializable {
 
     private void addUpcommingEvent(EventListEventDTO event) {
         for(int i = 0; i < upcommingEvents.size(); i++) {
-            if(upcommingEvents.get(i).getStartDate().compareTo(event.getStartDate()) > 0);
-            upcommingEvents.add(i, event);
+            if(upcommingEvents.get(i).getStartDate().compareTo(event.getStartDate()) > 0) {
+                upcommingEvents.add(i, event);
+                return;
+            }
         }
         upcommingEvents.add(event);
     }

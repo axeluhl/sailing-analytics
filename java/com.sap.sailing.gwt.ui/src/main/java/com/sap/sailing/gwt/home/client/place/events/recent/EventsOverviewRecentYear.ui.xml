@@ -24,33 +24,33 @@
                     </span>
                   </div>
                 </td>
-                <!-- <td>
+                <td ui:field="countriesContainer">
                   <div class="{local_res.css.eventsoverviewrecent_year_header_info_item}">
                     <span class="{local_res.css.eventsoverviewrecent_year_header_info_item_value}">
                       <span ui:field="countriesCount" />
-                      <ui:text from='{i18n.countries}' />
+                      <!-- <ui:text from='{i18n.countries}' /> -->
                     </span>
                   </div>
                 </td>
-                <td>
+                <td ui:field="sailorsContainer">
                   <div class="{local_res.css.eventsoverviewrecent_year_header_info_item}">
                     <span class="{local_res.css.eventsoverviewrecent_year_header_info_item_value}">
                       <span ui:field="sailorsCount" />
-                      <ui:text from='{i18n.sailors}' />
+                      <!-- <ui:text from='{i18n.sailors}' /> -->
                     </span>
                   </div>
                 </td>
-                <td>
+                <td ui:field="trackedRacesContainer">
                   <div class="{local_res.css.eventsoverviewrecent_year_header_info_item}">
                     <span class="{local_res.css.eventsoverviewrecent_year_header_info_item_value}">
                       <span ui:field="trackedRacesCount" />
                       <ui:text from='{i18n.trackedRaces}' />
                     </span>
                   </div>
-                </td> -->
+                </td>
                 <td>
                   <div class="{local_res.css.eventsoverviewrecent_year_header_info_arrow}">
-                    <img src="images/home/arrow-down-yellow.png" class="{local_res.css.eventsoverviewrecent_year_header_info_arrow_image}"></img>
+                    <img src="images/home/arrow-down-grey.png" class="{local_res.css.eventsoverviewrecent_year_header_info_arrow_image}"></img>
                   </div>
                 </td>
               </tr>
@@ -60,9 +60,9 @@
       </g:HTMLPanel>
       <div ui:field="contentDiv" class="{local_res.css.eventsoverviewrecent_year_content} {local_res.css.accordion_content}">
         <g:FlowPanel ui:field="recentEventsTeaserPanel" styleName="{res.mediaCss.grid}">
-        <!-- EACH event in year.events -->
+          <!-- EACH event in year.events -->
         <!-- <s:eventsOverviewRecent.RecentEventTeaser ui:field='event'></s> -->
-        <!-- EACHEND -->
+            <!-- EACHEND -->
         </g:FlowPanel>
       </div>
   </g:HTMLPanel>

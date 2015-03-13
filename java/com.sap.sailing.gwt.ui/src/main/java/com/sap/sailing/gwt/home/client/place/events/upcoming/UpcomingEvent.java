@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
 public class UpcomingEvent extends Composite {
 
@@ -31,18 +31,18 @@ public class UpcomingEvent extends Composite {
     
     private static UpcomingEventUiBinder uiBinder = GWT.create(UpcomingEventUiBinder.class);
 
-    public UpcomingEvent(final EventBaseDTO event, final HomePlacesNavigator navigator) {
+    public UpcomingEvent(final EventListEventDTO event, final HomePlacesNavigator navigator) {
         this.navigator = navigator;
 
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
-        eventNavigation = navigator.getEventNavigation(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
+        eventNavigation = navigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
         eventOverviewLink.setHref(eventNavigation.getTargetUrl());
         
-        eventName.setInnerText(event.getName());
-        venueName.setInnerText(event.venue.getName());
-        eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
+        eventName.setInnerText(event.getDisplayName());
+        venueName.setInnerText(event.getVenue());
+        eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
     }
     
     @UiHandler("eventOverviewLink")

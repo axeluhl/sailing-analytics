@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
 public class EventsOverviewUpcoming extends Composite {
     
@@ -47,16 +47,16 @@ public class EventsOverviewUpcoming extends Composite {
         }, ClickEvent.getType());
     }
     
-    public void updateEvents(List<EventBaseDTO> events) {
-        setVisible(events.size() > 0);
+    public void updateEvents(ArrayList<EventListEventDTO> arrayList) {
+        setVisible(arrayList.size() > 0);
         eventsPlaceholder.clear();
         upcomingEventComposites.clear();
-        for (EventBaseDTO event : events) {
+        for (EventListEventDTO event : arrayList) {
             UpcomingEvent upcomingEvent = new UpcomingEvent(event, navigator);
             upcomingEventComposites.add(upcomingEvent);
             eventsPlaceholder.getElement().appendChild(upcomingEvent.getElement());
         }
-        eventsCount.setInnerText(""+events.size());
+        eventsCount.setInnerText(""+arrayList.size());
     }
     
     private void onHeaderCicked() {

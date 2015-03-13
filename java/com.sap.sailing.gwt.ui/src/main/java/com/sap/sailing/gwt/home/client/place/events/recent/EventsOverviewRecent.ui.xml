@@ -3,14 +3,8 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.events.recent.EventsOverviewRecentResources" />
-  <g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewrecent}" >
-      <div class="{res.mediaCss.grid}">
-        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <h3><ui:text from="{i18n.eventsOverviewRecentEvents}" /></h3>
-        </div>
-      </div>
-      <g:HTMLPanel ui:field="recentEventsPerYearPanel" addStyleNames="{local_res.css.accordion}" />
-  </g:HTMLPanel>
+  <g:FlowPanel ui:field='year' addStyleNames="{local_res.css.eventsoverviewrecent} {local_res.css.accordion}">
+  </g:FlowPanel>
 </ui:UiBinder>

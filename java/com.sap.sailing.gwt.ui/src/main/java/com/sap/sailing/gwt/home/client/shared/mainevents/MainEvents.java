@@ -55,6 +55,7 @@ public class MainEvents extends Composite {
     }
 
     private void createRecentEvent(EventBaseDTO eventBase) {
+        // TODO use RecentEventTeaser for new Design and delete
         RecentEvent event = new RecentEvent(navigator, eventBase);
         recentEventsDiv.appendChild(event.getElement());
     }
