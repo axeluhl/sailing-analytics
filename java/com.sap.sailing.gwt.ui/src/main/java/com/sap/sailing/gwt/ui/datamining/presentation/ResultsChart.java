@@ -31,16 +31,18 @@ import com.sap.sse.datamining.shared.QueryResult;
 
 public class ResultsChart implements ResultsPresenter<Number> {
 
-    private StringMessages stringMessages;
-    private SimplePanel mainPanel;
+    private final StringMessages stringMessages;
+    private final SimplePanel mainPanel;
 
-    private Chart chart;
+    private final Chart chart;
     private Map<GroupKey, Series> series;
 
     private Map<GroupKey, Integer> mainKeyToValueMap;
     private Map<Integer, GroupKey> valueToGroupKeyMap;
 
-    private HTML errorLabel;
+    private final HTML errorLabel;
+
+    private final HTML labeledBusyIndicator;
 
     public ResultsChart(StringMessages stringMessages) {
         super();
@@ -52,14 +54,18 @@ public class ResultsChart implements ResultsPresenter<Number> {
                 chart.redraw();
             }
         };
+        chart = createChart();
         series = new HashMap<GroupKey, Series>();
+        
         errorLabel = new HTML();
         errorLabel.setStyleName("chart-importantMessage");
+        
+        labeledBusyIndicator = new HTML(stringMessages.runningQuery());
+        labeledBusyIndicator.setStyleName("chart-busyMessage");
 
-        createChart();
         showError(this.stringMessages.invalidSelection());
     }
-    
+
     @Override
     public void showError(String error) {
         errorLabel.setHTML(error);
@@ -74,6 +80,11 @@ public class ResultsChart implements ResultsPresenter<Number> {
         }
         errorBuilder.append("</ul>");
         showError(errorBuilder.toString());
+    }
+    
+    @Override
+    public void showBusyIndicator() {
+        mainPanel.setWidget(labeledBusyIndicator);
     }
 
     @Override
@@ -177,8 +188,8 @@ public class ResultsChart implements ResultsPresenter<Number> {
         series = new HashMap<GroupKey, Series>();
     }
 
-    private void createChart() {
-        chart = new Chart()
+    private Chart createChart() {
+        Chart chart = new Chart()
                 .setType(Series.Type.COLUMN)
                 .setMarginLeft(100)
                 .setMarginRight(45)
@@ -211,6 +222,8 @@ public class ResultsChart implements ResultsPresenter<Number> {
                 }
             }
         }));
+        
+        return chart;
     }
     
     @Override
