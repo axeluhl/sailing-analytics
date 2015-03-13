@@ -26,7 +26,6 @@ public class EventsOverviewUpcomingEvent extends Composite {
     @UiField Anchor eventOverviewLink;
     @UiField DivElement days;
 
-    private final HomePlacesNavigator navigator;
     private final PlaceNavigation<EventDefaultPlace> eventNavigation; 
 
     interface UpcomingEventUiBinder extends UiBinder<Widget, EventsOverviewUpcomingEvent> {
@@ -35,8 +34,6 @@ public class EventsOverviewUpcomingEvent extends Composite {
     private static UpcomingEventUiBinder uiBinder = GWT.create(UpcomingEventUiBinder.class);
 
     public EventsOverviewUpcomingEvent(final EventListEventDTO event, final HomePlacesNavigator navigator) {
-        this.navigator = navigator;
-
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -51,7 +48,7 @@ public class EventsOverviewUpcomingEvent extends Composite {
     
     @UiHandler("eventOverviewLink")
     public void goToEventOverview(ClickEvent e) {
-        navigator.goToPlace(eventNavigation);
+        eventNavigation.goToPlace();
         e.preventDefault();
     }
 
