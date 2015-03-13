@@ -25,6 +25,11 @@ public class NullAdditionalResultData implements AdditionalResultData {
     public Unit getUnit() {
         return Unit.None;
     }
+    
+    @Override
+    public String getUnitSignifier() {
+        return "";
+    }
 
     @Override
     public int getValueDecimals() {

@@ -13,20 +13,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.mail.Message.RecipientType;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -54,6 +46,7 @@ import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
 import org.apache.shiro.web.util.SavedRequest;
 import org.apache.shiro.web.util.WebUtils;
+import org.osgi.util.tracker.ServiceTracker;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
@@ -71,11 +64,13 @@ import org.scribe.oauth.OAuthService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.mail.MailException;
+import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
-import com.sap.sse.security.AccessToken;
+import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.GithubApi;
@@ -90,7 +85,6 @@ import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
-import com.sap.sse.security.shared.MailException;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
@@ -112,7 +106,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     private final ReplicatingCacheManager cacheManager;
     
     private UserStore store;
-    private final Properties mailProperties;
+    private final ServiceTracker<MailService, MailService> mailServiceTracker;
     private final ConcurrentHashMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
     /**
@@ -130,12 +124,16 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
     }
+    
+    public SecurityServiceImpl(UserStore store) {
+        this(null, store);
+    }
 
     /**
      * @param mailProperties must not be <code>null</code>
      */
-    public SecurityServiceImpl(UserStore store, Properties mailProperties) {
-        this(store, mailProperties, /* setAsActivatorTestSecurityService */ false);
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore store) {
+        this(mailServiceTracker, store, /* setAsActivatorTestSecurityService */ false);
     }
     
     /**
@@ -147,9 +145,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
      *            replication.
      * 
      */
-    public SecurityServiceImpl(UserStore store, Properties mailProperties, boolean setAsActivatorSecurityService) {
-        assert mailProperties != null;
-        logger.info("Initializing Security Service with user store " + store+" and mail properties "+mailProperties);
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore store, boolean setAsActivatorSecurityService) {
+        logger.info("Initializing Security Service with user store " + store);
         if (setAsActivatorSecurityService) {
             Activator.setSecurityService(this);
         }
@@ -157,7 +154,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         cacheManager = new ReplicatingCacheManager();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = store;
-        this.mailProperties = mailProperties;
+        this.mailServiceTracker = mailServiceTracker;
         // Create default users if no users exist yet.
         initEmptyStore();
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
@@ -205,45 +202,24 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             }
         }
     }
-
-    private class SMTPAuthenticator extends javax.mail.Authenticator {
-        public PasswordAuthentication getPasswordAuthentication() {
-           String username = mailProperties.getProperty("mail.smtp.user");
-           String password = mailProperties.getProperty("mail.smtp.password");
-           return new PasswordAuthentication(username, password);
-        }
+    
+    private MailService getMailService() {
+        return mailServiceTracker == null ? null : mailServiceTracker.getService();
     }
 
     @Override
     public void sendMail(String username, String subject, String body) throws MailException {
-        if (this.mailProperties != null && this.mailProperties.containsKey("mail.transport.protocol")) {
-            final User user = getUserByName(username);
-            if (user != null) {
-                final String toAddress = user.getEmail();
-                if (toAddress != null) {
-                    Session session = Session.getInstance(this.mailProperties, new SMTPAuthenticator());
-                    MimeMessage msg = new MimeMessage(session);
-                    try {
-                        msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
-                        msg.setSubject(subject);
-                        msg.setContent(body, "text/plain");
-                        msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
-                        Transport ts = session.getTransport();
-                        ts.connect();
-                        ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
-                        ts.close();
-                        logger.info("mail sent to user " + username + " with e-mail address " + toAddress
-                                + " with subject " + subject);
-                    } catch (MessagingException e) {
-                        logger.log(Level.SEVERE, "Error trying to send mail to user " + username
-                                + " with e-mail address " + toAddress, e);
-                        throw new MailException(e.getMessage());
-                    }
+        final User user = getUserByName(username);
+        if (user != null) {
+            final String toAddress = user.getEmail();
+            if (toAddress != null) {
+                MailService mailService = getMailService();
+                if (mailService == null) {
+                    logger.warning(String.format("Could not send mail to user %s: no MailService found", username));
+                } else {
+                    getMailService().sendMail(username, subject, body);
                 }
             }
-        } else {
-            logger.warning("No mail properties provided. Cannot send e-mail about "+subject+" to user "+username+
-                    ". This could also mean that this is running on a replica server in which case this is perfectly fine.");
         }
     }
     
@@ -301,7 +277,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         logger.info("Trying to login: " + username);
         Subject subject = SecurityUtils.getSubject();
         subject.login(token);
-        SessionUtils.saveUsername(username);
         HttpServletRequest httpRequest = WebUtils.getHttpRequest(subject);
         SavedRequest savedRequest = WebUtils.getSavedRequest(httpRequest);
         if (savedRequest != null) {
@@ -315,13 +290,12 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     
     @Override
     public User loginByAccessToken(String accessToken) {
-        AccessToken token = new AccessToken(accessToken);
+        BearerAuthenticationToken token = new BearerAuthenticationToken(accessToken);
         logger.info("Trying to login with access token");
         Subject subject = SecurityUtils.getSubject();
         try {
             subject.login(token);
             final String username = (String) token.getPrincipal();
-            SessionUtils.saveUsername(username);
             return store.getUserByName(username);
         } catch (AuthenticationException e) {
             logger.log(Level.INFO, "Authentication failed with access token "+accessToken);
@@ -621,7 +595,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         if (!subject.isAuthenticated()) {
             try {
                 subject.login(otoken);
-                logger.info("User [" + SessionUtils.loadUsername() + "] logged in successfully.");
+                logger.info("User [" + subject.getPrincipal().toString() + "] logged in successfully.");
             } catch (UnknownAccountException uae) {
                 logger.info("There is no user with username of " + subject.getPrincipal());
                 throw new UserManagementException("Invalid credentials!");
@@ -637,7 +611,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
                 throw new UserManagementException("An error occured while authenticating the user!");
             }
         }
-        String username = SessionUtils.loadUsername();
+        String username = subject.getPrincipal().toString();
         if (username == null) {
             logger.info("Something went wrong while authneticating, check doGetAuthenticationInfo() in "
                     + OAuthRealm.class.getName() + ".");
@@ -655,10 +629,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     public User getCurrentUser() {
         final User result;
         Subject subject = SecurityUtils.getSubject();
-        if (subject == null) {
+        if (subject == null || !subject.isAuthenticated()) {
             result = null;
         } else {
-            String username = SessionUtils.loadUsername();
+            String username = subject.getPrincipal().toString();
             if (username == null || username.length() <= 0) {
                 result = null;
             } else {
@@ -890,17 +864,17 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public CacheManager getCacheManager() {
+    public ReplicatingCacheManager getCacheManager() {
         return cacheManager;
     }
 
     @Override
     public void setPreference(final String username, final String key, final String value) {
         final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalSetPreference(username, key, value));
         } else {
-            throw new SecurityException("User " + SessionUtils.loadUsername()
+            throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to set preference for user " + username);
         }
     }
@@ -914,10 +888,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public void unsetPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalUnsetPreference(username, key));
         } else {
-            throw new SecurityException("User " + SessionUtils.loadUsername()
+            throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to unset preference for user " + username);
         }
     }
@@ -943,10 +917,10 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     @Override
     public String getPreference(String username, String key) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(SessionUtils.loadUsername())) {
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             return store.getPreference(username, key);
         } else {
-            throw new SecurityException("User " + SessionUtils.loadUsername()
+            throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to read preferences of user " + username);
         }
     }
@@ -974,7 +948,6 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     // ----------------- Replication -------------
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
-        mailProperties.clear();
         store.clear();
     }
 

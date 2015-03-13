@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity/logout</h2>
+
+<b>Description:</b>
+<p>The service terminates a session, based on the JSESSIONID cookie. The session's subject is no longer
+considered authenticated and the JSESSIONID used to make the request is considered invalid from now on.</p>
+<br/>
+<table>
+	<tr>
+		<td>Request Method:</td>
+		<td>GET/POST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Redirect (302 Found) to / which is not expected to deliver anything
+		</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><code>curl -D /tmp/header -b JSESSIONID=5e94c93e-b515-4bcd-8df8-0c786805a9e0 http://127.0.0.1:8888/security/api/restsecurity/logout</code><br>
+	            Will return something like<pre><code></code>
+	            HTTP/1.1 302 Found
+		    Set-Cookie: rememberMe=deleteMe; Path=/security; Max-Age=0; Expires=Tue, 24-Feb-2015 15:58:16 GMT
+		    Set-Cookie: JSESSIONID=deleteMe; Path=/; Max-Age=0; Expires=Tue, 24-Feb-2015 15:58:16 GMT
+		    Location: http://127.0.0.1:8888/security/
+		    Content-Length: 0</code></pre></td>
+	</tr>
+</table>
+</body>
+</html>

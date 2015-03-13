@@ -188,11 +188,11 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
         String competitorName = "Tina Maximiliane Lutz";
-        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
-                new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
-                /* dateOfBirth */ null, "This is famous "+competitorName)),
-                new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),
-                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
+        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, Color.RED, null, new TeamImpl("STG", Collections.singleton(
+                        new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
+                        /* dateOfBirth */ null, "This is famous "+competitorName)),
+                        new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
                         senderDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
         Competitor receiversCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         Competitor receiversSecondCopyOfCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);

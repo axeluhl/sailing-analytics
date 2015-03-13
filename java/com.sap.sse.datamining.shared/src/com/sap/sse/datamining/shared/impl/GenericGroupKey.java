@@ -39,7 +39,19 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
     
     @Override
     public String asString() {
-        return value.toString();
+        return value == null ? "null" : value.toString();
+    }
+    
+    @Override
+    public int compareTo(GroupKey key) {
+        int result = super.compareTo(key);
+        if (key instanceof GenericGroupKey) {
+            Object keyValue = ((GenericGroupKey<?>) key).value;
+            if (value instanceof Enum && keyValue instanceof Enum) {
+                result = ((Enum<?>) value).ordinal() - ((Enum<?>) keyValue).ordinal(); 
+            }
+        }
+        return result;
     }
 
     @Override

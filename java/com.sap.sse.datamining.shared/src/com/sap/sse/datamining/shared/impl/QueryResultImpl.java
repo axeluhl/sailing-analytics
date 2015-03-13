@@ -53,6 +53,11 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     public Unit getUnit() {
     	return additionalData.getUnit();
     }
+    
+    @Override
+    public String getUnitSignifier() {
+        return additionalData.getUnitSignifier();
+    }
 
     @Override
     public int getValueDecimals() {

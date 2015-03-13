@@ -117,7 +117,7 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
         for (String competitorName : getCompetitorNamesOfStoredTracks(KIELER_WOCHE)) {
             DynamicPerson p = new PersonImpl(competitorName, /* nationality */ null, /* dateOfBirth */ null, /* description */ null);
             DynamicTeam t = new TeamImpl(competitorName, Collections.singleton(p), /* coach */ null);
-            Competitor c = new CompetitorImpl(competitorName, competitorName, Color.RED, t, new BoatImpl(competitorName,
+            Competitor c = new CompetitorImpl(competitorName, competitorName, Color.RED, null, t, new BoatImpl(competitorName,
                     new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack(c, KIELER_WOCHE);
             if (track != null) {

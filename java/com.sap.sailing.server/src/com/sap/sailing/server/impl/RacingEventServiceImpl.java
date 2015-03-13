@@ -463,7 +463,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor
-                        .getColor(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
+                        .getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
                         competitor.getTeam().getImage()));
             }
         });
@@ -2348,7 +2348,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
-                    dynamicCompetitor.getColor(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+                    dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
         }
         logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 

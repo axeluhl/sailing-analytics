@@ -134,7 +134,7 @@ if [ $# -eq 0 ]; then
     echo "local-deploy: performs deployment of one or more bundles into a local directory"
     echo "Example: $0 -n com.sap.sailing.www -s /home/user/myserver local-deploy"
     echo ""
-    echo "remote-deploy: performs hot deployment of the java code to a remote server"
+    echo "remote-deploy: deploys the last build results to a remote server and optionally re-starts it"
     echo "Example: $0 -s dev -w trac@sapsailing.com remote-deploy"
     echo ""
     echo "clean: cleans all code and GWT files"
@@ -261,7 +261,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
-    cp -v $PROJECT_HOME/java/target/configuration/security.properties configuration/
+    cp -v $PROJECT_HOME/java/target/configuration/mail.properties configuration/
     cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
@@ -735,7 +735,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties $ACDIR/configuration/
-        cp -v $PROJECT_HOME/java/target/configuration/security.properties $ACDIR/configuration/
+        cp -v $PROJECT_HOME/java/target/configuration/mail.properties $ACDIR/configuration/
         cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration/
     fi
 
@@ -816,7 +816,7 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/security.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
+        $SCP_CMD $PROJECT_HOME/java/target/configuration/mail.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
  
         $SCP_CMD $PROJECT_HOME/java/target/env.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/

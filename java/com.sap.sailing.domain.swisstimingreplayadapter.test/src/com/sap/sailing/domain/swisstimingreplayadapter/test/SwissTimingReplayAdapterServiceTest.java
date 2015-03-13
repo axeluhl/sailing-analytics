@@ -54,7 +54,7 @@ public class SwissTimingReplayAdapterServiceTest {
         SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayCountListener);
         assertEquals(0, replayCountListener.keyFrameIndexSum);          
-        assertEquals(790, replayCountListener.keyFrameIndexPositionCount);  
+        assertEquals(790, replayCountListener.keyFrameIndexPositionCount);
         assertEquals(2013, replayCountListener.eotCount);                    
         assertEquals(2012, replayCountListener.frameCount);                  
         assertEquals(2012, replayCountListener.referenceTimestampCount);     
@@ -74,7 +74,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testRaceData_SAW005905_20120805_EqualsOnlineVersion() throws Exception {
         byte[] localCopy = read(getClass().getResourceAsStream("/SAW005905.20120805.replay"));
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://live.ota.st-sportservice.com/Data/Log?_rsc=SAW005905&_date=05.08.2012&_start=0").getContent());
+                "http://live.ota.st-sportservice.com/Replay?id=446495&_start=0").getContent());
         assertArrayEquals(localCopy, onlineCopy);
     }
     
@@ -95,41 +95,42 @@ public class SwissTimingReplayAdapterServiceTest {
         assertEquals(0, replayCountListener.keyFrameIndexSum);          
         assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  
         assertEquals(1156, replayCountListener.eotCount);                    
-        assertEquals(1155, replayCountListener.frameCount);                  
+        assertEquals(1063, replayCountListener.frameCount);                  
         assertEquals(1155, replayCountListener.referenceTimestampCount);     
         assertEquals(1155, replayCountListener.referenceLocationCount);      
         assertEquals(1155, replayCountListener.rsc_cidCount);                
-        assertEquals(41580, replayCountListener.competitorsCountSum);       
-        assertEquals(41580, replayCountListener.competitorsCount);            
-        assertEquals(8085, replayCountListener.markCount);                   
+        assertEquals(108, replayCountListener.competitorsCountSum);       
+        assertEquals(108, replayCountListener.competitorsCount);            
+        assertEquals(63, replayCountListener.markCount);                   
         assertEquals(41580, replayCountListener.trackersCountSum);          
         assertEquals(41580, replayCountListener.trackersCount);               
-        assertEquals(23100, replayCountListener.rankingsCountSum);          
-        assertEquals(23100, replayCountListener.rankingsCount);               
-        assertEquals(115500, replayCountListener.rankingMarkCount);                
+        assertEquals(1900, replayCountListener.rankingsCountSum);          
+        assertEquals(1900, replayCountListener.rankingsCount);               
+        assertEquals(9500, replayCountListener.rankingMarkCount);                
     }
 
     @Test
     public void testRaceData_SAW005905_20120805_online() throws Exception {
         SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
+        // race ID is 450053, as extracted from http://live.ota.st-sportservice.com/service?cmd=unity_race_overview&id=91
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://live.ota.st-sportservice.com/Data/Log?_rsc=SAW005905&_date=05.08.2012&_start=0").getContent());
+                "http://live.ota.st-sportservice.com/Replay?id=446495&_start=0").getContent());
         new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(onlineCopy), replayCountListener);
         assertEquals(0, replayCountListener.keyFrameIndexSum);          
         assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  
         assertEquals(1156, replayCountListener.eotCount);                    
-        assertEquals(1155, replayCountListener.frameCount);                  
+        assertEquals(1063, replayCountListener.frameCount);                  
         assertEquals(1155, replayCountListener.referenceTimestampCount);     
         assertEquals(1155, replayCountListener.referenceLocationCount);      
         assertEquals(1155, replayCountListener.rsc_cidCount);                
-        assertEquals(41580, replayCountListener.competitorsCountSum);       
-        assertEquals(41580, replayCountListener.competitorsCount);            
-        assertEquals(8085, replayCountListener.markCount);                   
+        assertEquals(108, replayCountListener.competitorsCountSum);       
+        assertEquals(108, replayCountListener.competitorsCount);            
+        assertEquals(63, replayCountListener.markCount);                   
         assertEquals(41580, replayCountListener.trackersCountSum);          
         assertEquals(41580, replayCountListener.trackersCount);               
-        assertEquals(23100, replayCountListener.rankingsCountSum);          
-        assertEquals(23100, replayCountListener.rankingsCount);               
-        assertEquals(115500, replayCountListener.rankingMarkCount);                
+        assertEquals(1900, replayCountListener.rankingsCountSum);          
+        assertEquals(1900, replayCountListener.rankingsCount);               
+        assertEquals(9500, replayCountListener.rankingMarkCount);                
     }
 
     @Test

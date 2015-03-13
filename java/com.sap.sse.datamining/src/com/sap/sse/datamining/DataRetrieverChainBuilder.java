@@ -3,6 +3,14 @@ package com.sap.sse.datamining;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 
+/**
+ * Used to construct a chain of retriever processors step by step. Allows to set the filter and result
+ * receivers for each element in the chain, before the chain is constructed.
+ * 
+ * @author Lennart Hensler (D054527)
+ *
+ * @param <DataSourceType> The type of the data source and the <code>InputType</code> of the first Processor.
+ */
 public interface DataRetrieverChainBuilder<DataSourceType> {
     
     /**

@@ -477,11 +477,11 @@ img.openColumn {
 }
 
 .TimePanel-ShowExtended-Button-Open {
-    background: white url(images/arrows_top_black.png) center no-repeat;
+    background: white url(images/arrows_bottom_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button-Closed {
-    background: white url(images/arrows_bottom_black.png) center no-repeat;
+    background: white url(images/arrows_top_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button:hover {

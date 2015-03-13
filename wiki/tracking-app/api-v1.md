@@ -53,8 +53,8 @@ This information is represented in a URL with the following structure:
 ```
 http://<host>/tracking/checkin
   ?event_id=<event-id>
-  &leaderboard_name=<leaderboard-name>
-  &competitor_id=<competitor-id>
+  &leaderboardName=<leaderboard-name>
+  &competitorId=<competitor-id>
 ```
 
 **Additional Notes:**
@@ -268,6 +268,13 @@ $ curl -H "Content-Type:image/jpeg" --data-binary @<path-to-jpeg> \
   "teamImageUri" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
 }
 ```
+## Leaderboard Integration
+
+The leaderboard buttons loads the online leaderboard into an web-view. 
+
+```
+http://<host>/gwt/Leaderboard.html?name=<leaderboardName>&showRaceDetails=false&embedded=true&hideToolbar=true
+```
 
 # Buoy Tender (Tonnenleger) App
 <div id="buoy-tender-app"></div>
@@ -300,7 +307,7 @@ _see [bug 2651](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2651)_
 
 Do not use the course to get the list of marks to ping. Instead, use the ``RaceLogDefineMarkEvent``s in the RaceLog, or ``TrackedRace#getMarks()``. As the JavaDoc of the latter states, not all marks for a race are necessarily present in the course - e.g. if they are backup buoys to be used in the case of a wind shift.
 
-**Path:** ``leaderboards/{leaderboard-name}/races/{race-name}/marks``
+**Path:** ``leaderboards/{leaderboard-name}/marks?raceColumn={race-column-name}&fleet={fleet-name}``
 
 **Verb:** ``GET``
 

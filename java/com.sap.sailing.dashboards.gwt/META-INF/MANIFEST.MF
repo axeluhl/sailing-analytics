@@ -21,7 +21,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.declination,
  org.json.simple;bundle-version="1.1.0",
  com.sap.sailing.udpconnector,
- com.googlecode.mgwt;bundle-version="2.0.0"
+ com.googlecode.mgwt;bundle-version="2.0.0",
+ com.sap.sse.gwt.adminconsole
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker

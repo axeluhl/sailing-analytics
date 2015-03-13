@@ -130,10 +130,13 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     }
 
     /**
-     * Subclass implementation has to tell whether the checkbox is selected or deselected for <code>row</code>
+     * The checkbox value is determined by by selection state of <code>row</code>, using the
+     * {@link #getSelectionModel() selection model}.
      */
     @Override
-    public abstract Boolean getValue(T row);
+    public Boolean getValue(T row) {
+        return getSelectionModel().isSelected(row);
+    }
 
     /**
      * The default header display is a check mark. Subclasses may redefine this.

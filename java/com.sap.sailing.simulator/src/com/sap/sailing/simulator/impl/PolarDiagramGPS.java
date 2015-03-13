@@ -51,8 +51,8 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         SpeedWithBearing beatStar;
         for (int i = 0; i < windSpeeds.size(); i++) {
     		try {
-    			beatPort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND, Tack.PORT).getObject();
-    			beatStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND, Tack.STARBOARD).getObject();
+    			beatPort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND, Tack.PORT, true).getObject();
+    			beatStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND, Tack.STARBOARD, true).getObject();
     		} catch (NotEnoughDataHasBeenAddedException e) {
     			beatPort = null;
     			beatStar = null;
@@ -73,8 +73,8 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         SpeedWithBearing jibeStar;
         for (int i = 0; i < windSpeeds.size(); i++) {
     		try {
-    			jibePort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.DOWNWIND, Tack.PORT).getObject();
-    			jibeStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.DOWNWIND, Tack.STARBOARD).getObject();
+    			jibePort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.DOWNWIND, Tack.PORT, false).getObject();
+    			jibeStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.DOWNWIND, Tack.STARBOARD, false).getObject();
     		} catch (NotEnoughDataHasBeenAddedException e) {
     			jibePort = null;
     			jibeStar = null;

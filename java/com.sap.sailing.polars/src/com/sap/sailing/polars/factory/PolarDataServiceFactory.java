@@ -14,5 +14,4 @@ public abstract class PolarDataServiceFactory {
 
     protected abstract PolarDataService createPolarDataService(Executor executor);
 
-
 }
