@@ -12,7 +12,7 @@
           <span ui:field='venueName' />,
           <span ui:field='eventStartDate' />
         </div>
-        <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.eventsoverviewupcoming_content_event_countdown}">starts in days</div>
+        <div ui:field="days" class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.eventsoverviewupcoming_content_event_countdown}">starts in days</div>
       </g:Anchor>
   </g:HTMLPanel>
 </ui:UiBinder>

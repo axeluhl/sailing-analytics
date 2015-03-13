@@ -1046,6 +1046,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
+    String upcommingEventStartsInDays(@PluralCount int days);
     String eventSharingShortText(String eventName, String venue, String dateString);
     String eventSharingLongText(String eventName, String venue, String dateString, String url);
     String seriesSharingShortText(String seriesName);
