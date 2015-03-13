@@ -16,11 +16,7 @@
             <span>
               <h3 class="{local_res.css.eventsoverviewupcoming_header_title}">
                 <ui:text from="{i18n_ubi.seriesHeaderUpcoming}" />:</h3>
-              <span class="{local_res.css.eventsoverviewupcoming_header_ticker}">
-                <!-- upcomingEvents.events[0].name --><!-- , -->
-                <!-- upcomingEvents.events[0].venue.name --><!-- , -->
-                <!-- upcomingEvents.events[0].date -->
-              </span>
+              <span ui:field="ticker" class="{local_res.css.eventsoverviewupcoming_header_ticker}" />
             </span>
             <!-- IFEND upcomingEvents.events.length < 2 -->
           </div>

@@ -10,11 +10,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
 public class EventsOverviewUpcoming extends Composite {
@@ -26,17 +28,27 @@ public class EventsOverviewUpcoming extends Composite {
 
     private final HomePlacesNavigator navigator;
 
-    private final List<EventsOverviewUpcomingEvent> upcomingEventComposites;
+    private final List<String> tickerStrings;
     
     @UiField HTMLPanel header;
     @UiField FlowPanel eventsPlaceholder;
     @UiField SpanElement eventsCount;
+    @UiField SpanElement ticker;
     
     private boolean isContentVisible = true;
+    
+    private int currentTickerOffset;
+
+    private Timer tickerTimer = new Timer() {
+        @Override
+        public void run() {
+            nextTicker(false);
+        }
+    };
 
     public EventsOverviewUpcoming(HomePlacesNavigator navigator) {
         this.navigator = navigator;
-        upcomingEventComposites = new ArrayList<EventsOverviewUpcomingEvent>();
+        tickerStrings = new ArrayList<>();
         EventsOverviewUpcomingResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
@@ -47,14 +59,15 @@ public class EventsOverviewUpcoming extends Composite {
             }
         }, ClickEvent.getType());
     }
-    
+
     public void updateEvents(ArrayList<EventListEventDTO> arrayList) {
         setVisible(arrayList.size() > 0);
         eventsPlaceholder.clear();
-        upcomingEventComposites.clear();
+        tickerStrings.clear();
         for (EventListEventDTO event : arrayList) {
             EventsOverviewUpcomingEvent upcomingEvent = new EventsOverviewUpcomingEvent(event, navigator);
-            upcomingEventComposites.add(upcomingEvent);
+            tickerStrings.add(event.getDisplayName() + ", " + event.getVenue() + ", "
+                    + EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
             eventsPlaceholder.getElement().appendChild(upcomingEvent.getElement());
         }
         eventsCount.setInnerText(""+arrayList.size());
@@ -69,10 +82,25 @@ public class EventsOverviewUpcoming extends Composite {
         if(isContentVisible) {
             eventsPlaceholder.getElement().getStyle().clearDisplay();
             getElement().removeClassName(EventsOverviewUpcomingResources.INSTANCE.css().accordioncollapsed());
+            ticker.setInnerText("");
+            tickerTimer.cancel();
         } else {
             eventsPlaceholder.getElement().getStyle().setDisplay(Display.NONE);
             getElement().addClassName(EventsOverviewUpcomingResources.INSTANCE.css().accordioncollapsed());
+            if(tickerStrings.isEmpty()) {
+                ticker.setInnerText("");
+            } else {
+                nextTicker(true);
+            }
         }
     }
 
+    
+    protected void nextTicker(boolean restart) {
+        currentTickerOffset = restart ? 0 : (currentTickerOffset + 1) % tickerStrings.size();
+        ticker.setInnerText(tickerStrings.get(currentTickerOffset));
+        if(tickerStrings.size() > 1) {
+            tickerTimer.schedule(3000);
+        }
+    }
 }
