@@ -104,7 +104,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
                 continue;
             }*/
            if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
-                WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue().windFixes, at);
+                WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue(), at);
                 if (timewiseClosestFixForWindSource != null) {
                     final double confidence = (timewiseClosestFixForWindSource.confidence == null ? 1 : timewiseClosestFixForWindSource.confidence) *
                             weigher.getConfidence(timewiseClosestFixForWindSource.position, request);
@@ -129,10 +129,23 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         return result;
     }
 
-    private WindDTO getTimewiseClosestFix(List<WindDTO> windFixes, Date at) {
-        final WindDTO result;
+    /**
+     * Regular server-side wind tracks will deliver fixes for queries with a time that is far from any
+     * of the fixes' time point. A respectively reduced confidence will be the result. However, some wind
+     * track types such as that for the wind estimation may not deliver a fix, not even with low confidence,
+     * if at the requested time point (give or take some rounding to a time tick resolution) no fix can be
+     * provided. In this case, the server will not use any value from such a track when computing an average
+     * including fixes from several tracks.<p>
+     * 
+     * To ensure consistent behavior on the client, this method will check if the wind track is marked
+     * accordingly and will return <code>null</code> if the track cannot provide a fix within its resolution
+     * around the requested time point.
+     */
+    private WindDTO getTimewiseClosestFix(WindTrackInfoDTO windTrackInfo, Date at) {
+        List<WindDTO> windFixes = windTrackInfo.windFixes;
+        final WindDTO preResult;
         if (windFixes == null || windFixes.isEmpty()) {
-            result = null;
+            preResult = null;
         } else {
             final WindDTO atDummy = new WindDTO();
             atDummy.requestTimepoint = at.getTime();
@@ -143,15 +156,25 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
                         || (pos < windFixes.size() &&
                             Math.abs(windFixes.get(pos).requestTimepoint - at.getTime()) < Math.abs(windFixes
                                 .get(pos - 1).requestTimepoint - at.getTime()))) {
-                    result = windFixes.get(pos);
+                    preResult = windFixes.get(pos);
                 } else {
                     // pos doesn't point to the first element, nor is the element at pos time-wise closer than the element at pos-1
                     // or pos points beyond the end of the list
-                    result = windFixes.get(pos-1);
+                    preResult = windFixes.get(pos-1);
                 }
             } else {
-                result = windFixes.get(pos);
+                preResult = windFixes.get(pos);
             }
+        }
+        final WindDTO result;
+        // don't return wind fixes if according to the wind track there is a resolution to which times are rounded
+        // and where null is returned when there is no fix at the rounded time point; mimic this behavior here. See
+        // also bug 2689 comment #13.
+        if (windTrackInfo.resolutionOutsideOfWhichNoFixWillBeReturned != null &&
+                Math.abs(preResult.requestTimepoint-at.getTime()) > windTrackInfo.resolutionOutsideOfWhichNoFixWillBeReturned.asMillis()) {
+            result = null;
+        } else {
+            result = preResult;
         }
         return result;
     }
