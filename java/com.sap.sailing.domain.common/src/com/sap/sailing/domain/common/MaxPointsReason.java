@@ -41,6 +41,7 @@ public enum MaxPointsReason {
     DPI(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
     /** Retired */
     RET(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true);
+    UFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true);
     
     private final boolean discardable;
     
