@@ -105,7 +105,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
                 if (timewiseClosestFixForWindSource != null) {
                     Pair<PositionDTO, Date> fix = new Pair<>(timewiseClosestFixForWindSource.position, new Date(
                             timewiseClosestFixForWindSource.measureTimepoint));
-                    final double confidence = weigher.getConfidence(fix, request);
+                    final double confidence = (timewiseClosestFixForWindSource.confidence == null ? 1 : timewiseClosestFixForWindSource.confidence) * weigher.getConfidence(fix, request);
                     if (windSourceAndWindTrack.getKey().getType().useSpeed()) {
                         speedConfidenceSum += confidence;
                         knotSpeedSumScaledByConfidence += confidence * timewiseClosestFixForWindSource.dampenedTrueWindSpeedInKnots;
