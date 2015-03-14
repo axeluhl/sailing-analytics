@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
@@ -17,7 +19,6 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
-import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
 import com.google.gwt.user.client.ui.HTML;
@@ -28,21 +29,23 @@ import com.sap.sailing.gwt.ui.client.shared.panels.ResizingSimplePanel;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
 public class ResultsChart implements ResultsPresenter<Number> {
 
+    private static final GroupKey SIMPLE_RESULT_SERIES_KEY = new GenericGroupKey<String>("Results");
+    
     private final StringMessages stringMessages;
     private final SimplePanel mainPanel;
 
     private final Chart chart;
-    private Map<GroupKey, Series> series;
-
-    private Map<GroupKey, Integer> mainKeyToValueMap;
-    private Map<Integer, GroupKey> valueToGroupKeyMap;
+    private Map<GroupKey, Series> seriesMappedByGroupKey;
 
     private final HTML errorLabel;
-
     private final HTML labeledBusyIndicator;
+
+    private QueryResult<? extends Number> currentResult;
+    private Map<GroupKey, Integer> mainKeyToXValueMap;
 
     public ResultsChart(StringMessages stringMessages) {
         super();
@@ -55,7 +58,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
             }
         };
         chart = createChart();
-        series = new HashMap<GroupKey, Series>();
+        seriesMappedByGroupKey = new HashMap<GroupKey, Series>();
         
         errorLabel = new HTML();
         errorLabel.setStyleName("chart-importantMessage");
@@ -68,6 +71,8 @@ public class ResultsChart implements ResultsPresenter<Number> {
 
     @Override
     public void showError(String error) {
+        currentResult = null;
+        
         errorLabel.setHTML(error);
         mainPanel.setWidget(errorLabel);
     }
@@ -84,23 +89,27 @@ public class ResultsChart implements ResultsPresenter<Number> {
     
     @Override
     public void showBusyIndicator() {
+        currentResult = null;
+        
         mainPanel.setWidget(labeledBusyIndicator);
     }
 
     @Override
     public void showResult(QueryResult<Number> result) {
-        if (!result.isEmpty()) {
+        if (result != null && !result.isEmpty()) {
+            currentResult = result;
             resetChart();
+            updateYAxisLabels();
+            updateChartSubtitleAndSetChartAsWidget();
+            buildMainKeyMapAndSetXAxisCategories();
+            createAndAddSeriesToChart();
             
-            updateYAxisLabels(result);
-            updateChartSubtitleAndSetChartAsWidget(result);
-            
-            List<GroupKey> sortedKeys = getSortedKeysFrom(result);
-            buildGroupKeyValueMaps(sortedKeys);
-            if (resultHasComplexKeys(result)) {
-                displayComplexResult(result, sortedKeys);
-            } else {
-                displaySimpleResult(result, sortedKeys);
+            for (Entry<GroupKey, ? extends Number> resultEntry : currentResult.getResults().entrySet()) {
+                GroupKey mainKey = resultEntry.getKey().getMainKey();
+                Point point = new Point(mainKeyToXValueMap.get(mainKey), resultEntry.getValue());
+                point.setName(mainKey.asString());
+                seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
+                    .addPoint(point, false, false, false);
             }
             
             chart.redraw();
@@ -109,83 +118,63 @@ public class ResultsChart implements ResultsPresenter<Number> {
         }
     }
 
-    private void updateYAxisLabels(QueryResult<? extends Number> result) {
-        chart.getYAxis().setAxisTitleText(result.getResultSignifier());
-        chart.setToolTip(new ToolTip().setValueDecimals(result.getValueDecimals()).setValueSuffix(
-                result.getUnitSignifier()));
+    private void resetChart() {
+        chart.removeAllSeries(false);
+        seriesMappedByGroupKey = new HashMap<GroupKey, Series>();
     }
 
-    private boolean resultHasComplexKeys(QueryResult<? extends Number> result) {
-        for (GroupKey key : result.getResults().keySet()) {
-            if (key.hasSubKey()) {
-                return true;
-            }
-        }
-        return false;
+    private void updateYAxisLabels() {
+        chart.getYAxis().setAxisTitleText(currentResult.getResultSignifier());
+        chart.setToolTip(new ToolTip().setValueDecimals(currentResult.getValueDecimals()).setValueSuffix(
+                currentResult.getUnitSignifier()));
     }
 
-    private void displayComplexResult(QueryResult<? extends Number> result, List<GroupKey> sortedKeys) {
-        Map<Series, Boolean> isInChart = new HashMap<Series, Boolean>();
-        for (GroupKey key : sortedKeys) {
-            Point point = new Point(mainKeyToValueMap.get(key.getMainKey()), result.getResults().get(key));
-            point.setName(key.getMainKey().asString());
-            Series series = getOrCreateSeries(key).addPoint(point, false, false, false);
-            if (isInChart.get(series) == null || !isInChart.get(series)) {
-                chart.addSeries(series, false, false);
-                isInChart.put(series, true);
-            }
-        }
-    }
-
-    private void displaySimpleResult(QueryResult<? extends Number> result, List<GroupKey> sortedKeys) {
-        Series series = chart.createSeries().setName("Results");
-        for (GroupKey key : sortedKeys) {
-            Point point = new Point(mainKeyToValueMap.get(key.getMainKey()), result.getResults().get(key));
-            point.setName(key.getMainKey().asString());
-            series.addPoint(point, false, false, false);
-        }
-        chart.addSeries(series, false, false);
-    }
-
-    private void updateChartSubtitleAndSetChartAsWidget(QueryResult<? extends Number> result) {
+    private void updateChartSubtitleAndSetChartAsWidget() {
         chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(
-                result.getRetrievedDataAmount(), result.getCalculationTimeInSeconds())));
+                currentResult.getRetrievedDataAmount(), currentResult.getCalculationTimeInSeconds())));
         // This is needed, so that the subtitle is updated. Otherwise the text would stay empty
         mainPanel.setWidget(null);
         mainPanel.setWidget(chart);
     }
 
-    public List<GroupKey> getSortedKeysFrom(QueryResult<? extends Number> result) {
-        List<GroupKey> sortedKeys = new ArrayList<GroupKey>(result.getResults().keySet());
+    private void buildMainKeyMapAndSetXAxisCategories() {
+        List<GroupKey> sortedMainKeys = getSortedMainKeys();
+        String[] categories = new String[sortedMainKeys.size()];
+        mainKeyToXValueMap = new HashMap<>();
+        for (int i = 0; i < sortedMainKeys.size(); i++) {
+            GroupKey mainKey = sortedMainKeys.get(i);
+            categories[i] = mainKey.asString();
+            mainKeyToXValueMap.put(mainKey, i);
+        }
+        chart.getXAxis().setCategories(false, categories);
+    }
+
+    public List<GroupKey> getSortedMainKeys() {
+        Collection<GroupKey> mainKeySet = new HashSet<>();
+        for (GroupKey groupKey : currentResult.getResults().keySet()) {
+            mainKeySet.add(groupKey.getMainKey());
+        }
+        List<GroupKey> sortedKeys = new ArrayList<>(mainKeySet);
         Collections.sort(sortedKeys);
         return sortedKeys;
     }
 
-    private void buildGroupKeyValueMaps(Collection<GroupKey> keys) {
-        mainKeyToValueMap = new HashMap<GroupKey, Integer>();
-        valueToGroupKeyMap = new HashMap<Integer, GroupKey>();
-        int index = 0;
-        for (GroupKey groupKey : keys) {
-            if (!mainKeyToValueMap.containsKey(groupKey.getMainKey())) {
-                mainKeyToValueMap.put(groupKey.getMainKey(), index);
-                valueToGroupKeyMap.put(index, groupKey.getMainKey());
-                index++;
+    private void createAndAddSeriesToChart() {
+        for (GroupKey groupKey : currentResult.getResults().keySet()) {
+            GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
+            if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
+                seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()));
             }
         }
-    }
-
-    private Series getOrCreateSeries(GroupKey groupKey) {
-        GroupKey key = groupKey.hasSubKey() ? groupKey.getSubKey() : groupKey;
-
-        if (!series.containsKey(key)) {
-            series.put(key, chart.createSeries().setName(key.asString()));
+        List<GroupKey> sortedSeriesKeys = new ArrayList<>(seriesMappedByGroupKey.keySet());
+        Collections.sort(sortedSeriesKeys);
+        for (GroupKey seriesKey : sortedSeriesKeys) {
+            chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
         }
-        return series.get(key);
     }
-
-    private void resetChart() {
-        chart.removeAllSeries(false);
-        series = new HashMap<GroupKey, Series>();
+    
+    private GroupKey groupKeyToSeriesKey(GroupKey groupKey) {
+        return groupKey.hasSubKey() ? groupKey.getSubKey() : SIMPLE_RESULT_SERIES_KEY;
     }
 
     private Chart createChart() {
@@ -200,17 +189,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningResult()));
 
-        chart.getXAxis().setAllowDecimals(false).setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
-            @Override
-            public String format(AxisLabelsData axisLabelsData) {
-                try {
-                    Integer value = (int) axisLabelsData.getValueAsDouble();
-                    return valueToGroupKeyMap.get(value).asString();
-                } catch (Exception e) {
-                    return "error formatting label";
-                }
-            }
-        }));
+        chart.getXAxis().setAllowDecimals(false);
 
         chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
