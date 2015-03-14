@@ -190,16 +190,18 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                         // confidences
                         for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
                             WindTrackInfoDTO windTrackForSource = windInfoForRace.windTrackInfoByWindSource.get(e.getKey());
+                            final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource.get(e.getKey());
+                            windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
                             if (windTrackForSource.windFixes == null) {
-                                windTrackForSource.windFixes = result.windTrackInfoByWindSource.get(e.getKey()).windFixes;
+                                windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
                             } else {
-                                windTrackForSource.windFixes.addAll(result.windTrackInfoByWindSource.get(e.getKey()).windFixes);
+                                windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
                             }
-                            if (result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence > windTrackForSource.maxWindConfidence) {
-                                windTrackForSource.maxWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence;
+                            if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
+                                windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
                             }
-                            if (result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence < windTrackForSource.minWindConfidence) {
-                                windTrackForSource.minWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence;
+                            if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
+                                windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
                             }
                         }
                     }
