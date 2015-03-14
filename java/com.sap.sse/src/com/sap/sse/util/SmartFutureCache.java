@@ -259,7 +259,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
          */
         public synchronized boolean tryToUpdateUpdateInterval(U newUpdateInterval) {
             final boolean result;
-            if (runningAndReadUpdateInterval) {
+            if ((runningAndReadUpdateInterval)&&(updateInterval!=newUpdateInterval)) {
                 result = false;
             } else {
                 result = true;

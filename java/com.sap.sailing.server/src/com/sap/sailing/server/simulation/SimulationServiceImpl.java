@@ -12,12 +12,14 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
@@ -40,7 +42,6 @@ import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.SmartFutureCache;
 
 public class SimulationServiceImpl implements SimulationService {
@@ -58,7 +59,16 @@ public class SimulationServiceImpl implements SimulationService {
                     new SmartFutureCache.AbstractCacheUpdater<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>() {
                         @Override
                         public SimulationResults computeCacheUpdate(LegIdentifier key, SmartFutureCache.EmptyUpdateInterval updateInterval) throws Exception {
-                            SimulationResults results = computeSimulationResults(key); 
+                            boolean firstTime = cache.get(key, false /* waitForLatest */) == null;
+                            if (firstTime) {
+                                TrackedRace trackedRace = racingEventService.getTrackedRace(key);
+                                if (trackedRace != null) {
+                                    trackedRace.addListener(new Listener(trackedRace, key));
+                                }
+                            } else {
+                                Thread.sleep(WAIT_MILLIS);
+                            }
+                            SimulationResults results = computeSimulationResults(key);
                             return results;
                         }
                     }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
@@ -68,28 +78,53 @@ public class SimulationServiceImpl implements SimulationService {
     }
 
     private class Listener extends AbstractRaceChangeListener {
+        private final TrackedRace trackedRace;
         private final LegIdentifier legIdentifier;
-        private final Duration waitingDuration = new MillisecondsDurationImpl(WAIT_MILLIS);
-        private TimePoint lastUpdate;
+        private boolean finished;
         
 
-        public Listener(LegIdentifier legIdentifier) {
+        public Listener(TrackedRace trackedRace, LegIdentifier legIdentifier) {
+            this.trackedRace = trackedRace;
             this.legIdentifier = legIdentifier;
-            this.lastUpdate = MillisecondsTimePoint.now(); // first cache-update follows creation of listener
+            this.finished = false;
         }
 
         @Override
         protected void defaultAction() {
-            TimePoint now = MillisecondsTimePoint.now();
-            if (now.after(lastUpdate.plus(waitingDuration))) { // avoid cache-updates for waiting duration
-                lastUpdate = now;
+            if (!this.finished) {
                 cache.triggerUpdate(legIdentifier, null);
+            }
+        }
+
+        @Override
+        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
+            if ((trackedRace != null)&&(!this.finished)) {
+                Leg leg = trackedRace.getRace().getCourse().getLegs().get(legIdentifier.getLegNumber());
+                // get next mark as end-position
+                Waypoint toWaypoint = leg.getTo();
+                MarkPassing markPassing;
+                Iterator<MarkPassing> markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
+                if (markPassingIterator.hasNext()) {
+                    markPassing = markPassingIterator.next();
+                } else {
+                    markPassing = null;
+                }
+                if (markPassing != null) { // if leg is finished, only one last simulation update required
+                    cache.triggerUpdate(legIdentifier, null);
+                    this.finished = true;
+                } else {
+                    this.finished = false;
+                }
             }
         }
 
         // simulation is not influenced by live-delay
         @Override
         public void delayToLiveChanged(long delayToLiveInMillis) {
+        }
+
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
         }
 
     }
@@ -108,8 +143,6 @@ public class SimulationServiceImpl implements SimulationService {
     public SimulationResults getSimulationResults(LegIdentifier legIdentifier) {
         SimulationResults result = cache.get(legIdentifier, false);
         if (result == null) {
-            TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
-            trackedRace.addListener(new Listener(legIdentifier));
             cache.triggerUpdate(legIdentifier, null);
             result = cache.get(legIdentifier, true); // take first simulation result that becomes available
         }
@@ -130,11 +163,16 @@ public class SimulationServiceImpl implements SimulationService {
             TimePoint startTimePoint = null;
             TimePoint endTimePoint = null;
             MarkPassing markPassing;
-            markPassing = trackedRace.getMarkPassingsInOrder(fromWaypoint).iterator().next();
+            Iterator<MarkPassing> markPassingIterator = trackedRace.getMarkPassingsInOrder(fromWaypoint).iterator();
+            if (markPassingIterator.hasNext()) {
+                markPassing = markPassingIterator.next();
+            } else {
+                markPassing = null;
+            }
             if (markPassing != null) {
                 startTimePoint = markPassing.getTimePoint();
             }
-            Iterator<MarkPassing> markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
+            markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
             if (markPassingIterator.hasNext()) {
                 markPassing = markPassingIterator.next();
             } else {
