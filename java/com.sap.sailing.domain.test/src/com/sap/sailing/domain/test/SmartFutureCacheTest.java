@@ -251,7 +251,7 @@ public class SmartFutureCacheTest {
     }
     
     @Test
-    public void testIfNoNewFuturesAreRunForTheSameKeyWhileCurrentTaskIsSleeping() {
+    public void testIfNoNewFuturesAreRunForTheSameKeyWhileCurrentTaskIsSleeping() throws InterruptedException {
         final AtomicInteger callCounter = new AtomicInteger(0);
         CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
 
@@ -260,7 +260,13 @@ public class SmartFutureCacheTest {
                 if (key == 1) {
                     callCounter.incrementAndGet();
                 }
-                sleep(500);
+                synchronized (callCounter) {
+                    callCounter.notifyAll();
+                }
+                sleep(50);
+                synchronized (callCounter) {
+                    callCounter.notifyAll();
+                }
                 //For this test case value will be same as key, when updated.
                 return key;
             }
@@ -274,14 +280,19 @@ public class SmartFutureCacheTest {
         SmartFutureCache<Integer, Integer, EmptyUpdateInterval> testCache = new SmartFutureCache<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>(
                 cacheUpdater, "SmartFutureTestCacheLock");
         testCache.triggerUpdate(1, null);
-        sleep(50);
+        synchronized (callCounter) {
+            callCounter.wait(500);
+        }
         assertEquals(1, callCounter.get());
-        sleep(50);
         testCache.triggerUpdate(1, null);
-        sleep(50);
+        synchronized (callCounter) {
+            callCounter.wait(500);
+        }
         // Counter should still be one here, since first future is still sleeping at this point
         assertEquals(1, callCounter.get());
-        sleep(500);
+        synchronized (callCounter) {
+            callCounter.wait(500);
+        }
         // Now the first future should be done, and the second update should have been called, so the counter should be 2
         assertEquals(2, callCounter.get());
     }
