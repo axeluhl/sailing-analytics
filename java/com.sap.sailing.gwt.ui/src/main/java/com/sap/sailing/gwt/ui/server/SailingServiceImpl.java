@@ -5586,20 +5586,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             });
             boolean oneEventStarted = false;
             boolean oneEventLive = false;
-            boolean oneEventNotFinished = false;
+            boolean allFinished = true;
             for(Event eventInSeries: fakeSeriesEvents) {
                 EventMetadataDTO eventOfSeries = convertToMetadataDTO(eventInSeries);
                 dto.addEvent(eventOfSeries);
                 
                 oneEventStarted |= eventOfSeries.isStarted();
-                oneEventLive |= (eventOfSeries.isStarted() && eventOfSeries.isFinished());
-                oneEventNotFinished |= !eventOfSeries.isFinished();
+                oneEventLive |= (eventOfSeries.isStarted() && !eventOfSeries.isFinished());
+                allFinished &= eventOfSeries.isFinished();
             }
             if(oneEventLive) {
                 dto.setState(EventSeriesState.RUNNING);
             } else if(!oneEventStarted) {
                 dto.setState(EventSeriesState.UPCOMING);
-            } else if(!oneEventNotFinished) {
+            } else if(allFinished) {
                 dto.setState(EventSeriesState.FINISHED);
             } else {
                 dto.setState(EventSeriesState.IN_PROGRESS);
