@@ -15,6 +15,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -114,10 +115,8 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      */
     private boolean suspended;
     
-    private final Map<K, U> triggeredWhileSuspended;
+    private final Map<K, Pair<U, Set<SettableFuture<Future<V>>>>> triggeredAndNotYetScheduled;
     
-    private final Map<K, Pair<U, Boolean>> triggeredWhileExecutingForSameKey;
-
     private int smartFutureCacheTaskReuseCounter;
     
     /**
@@ -215,8 +214,6 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * 
      */
     private class FutureTaskWithCancelBlocking extends FutureTask<V> implements Callable<V> {
-        private boolean dontCancel;
-        
         private boolean runningAndReadUpdateInterval;
         
         private final K key;
@@ -331,12 +328,21 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                     } finally {
                         LockUtil.unlockAfterWrite(lock);
                         synchronized (ongoingRecalculations) {
-                            if (triggeredWhileExecutingForSameKey.containsKey(key)) {
-                                Pair<U, Boolean> pair = triggeredWhileExecutingForSameKey.get(key);
-                                createAndExecuteRecalculation(key, pair.getA(), pair.getB());
-                                triggeredWhileExecutingForSameKey.remove(key);
+                            boolean newTaskScheduled = false;
+                            Pair<U, Set<SettableFuture<Future<V>>>> queued = triggeredAndNotYetScheduled.get(key);
+                            if (!suspended || (queued != null && !queued.getB().isEmpty())) {
+                                if (queued != null) {
+                                    triggeredAndNotYetScheduled.remove(key);
+                                    Future<V> future = schedule(key, queued.getA(), /* callerWaitsSynchronouslyForResult */ false);
+                                    newTaskScheduled = true;
+                                    for (SettableFuture<Future<V>> futureToSet : queued.getB()) {
+                                        futureToSet.set(future);
+                                    }
+                                }
                             }
-                            ongoingRecalculations.remove(key);
+                            if (!newTaskScheduled) {
+                                ongoingRecalculations.remove(key);
+                            }
                         }
                     }
                 } finally {
@@ -363,23 +369,6 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             }
         }
 
-        public synchronized void dontCancel() {
-            dontCancel = true;
-        }
-        
-        @Override
-        public synchronized boolean cancel(boolean mayInterruptIfRunning) {
-            if (!dontCancel) {
-                return super.cancel(mayInterruptIfRunning);
-            } else {
-                return false;
-            }
-        }
-
-        public boolean isCallerWaitsSynchronouslyForResult() {
-            return callerWaitsSynchronouslyForResult;
-        }
-
         public U getUpdateInterval() {
             return updateInterval;
         }
@@ -391,8 +380,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         this.cacheUpdateComputer = cacheUpdateComputer;
         this.locksForKeys = new ConcurrentHashMap<K, NamedReentrantReadWriteLock>();
         this.nameForLocks = nameForLocks;
-        this.triggeredWhileSuspended = new HashMap<K, U>();
-        this.triggeredWhileExecutingForSameKey = new HashMap<K, Pair<U, Boolean>>();
+        this.triggeredAndNotYetScheduled = new HashMap<>();
     }
     
     private NamedReentrantReadWriteLock getOrCreateLockForKey(K key) {
@@ -417,15 +405,28 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         synchronized (ongoingRecalculations) {
             suspended = false;
             logger.finest("resuming cache "+nameForLocks);
-            for (Iterator<Map.Entry<K, U>> i=triggeredWhileSuspended.entrySet().iterator(); i.hasNext(); ) {
-                Entry<K, U> e = i.next();
+            for (Iterator<Entry<K, Pair<U, Set<SettableFuture<Future<V>>>>>> i=triggeredAndNotYetScheduled.entrySet().iterator(); i.hasNext(); ) {
+                Entry<K, Pair<U, Set<SettableFuture<Future<V>>>>> e = i.next();
                 if (logger.isLoggable(Level.FINEST)) {
                     logger.finest("while resuming "+nameForLocks+", triggering update for key "+e.getKey()+" with update interval "+e.getValue());
                 }
-                triggerUpdate(e.getKey(), e.getValue());
+                triggerUpdate(e.getKey(), e.getValue().getA());
                 i.remove();
             }
         }
+    }
+    
+    private void queue(final K key, final U updateInterval, SettableFuture<Future<V>> setWhenDone) {
+        Pair<U, Set<SettableFuture<Future<V>>>> oldUpdateInterval = triggeredAndNotYetScheduled.get(key);
+        U joinedUpdateInterval = joinUpdateIntervals(updateInterval, oldUpdateInterval==null?null:oldUpdateInterval.getA());
+        Set<SettableFuture<Future<V>>> newSetWhenDone = new HashSet<>();
+        if (oldUpdateInterval != null) {
+            newSetWhenDone.addAll(oldUpdateInterval.getB());
+        }
+        if (setWhenDone != null) {
+            newSetWhenDone.add(setWhenDone);
+        }
+        triggeredAndNotYetScheduled.put(key, new Pair<>(joinedUpdateInterval, newSetWhenDone));
     }
     
     /**
@@ -443,69 +444,155 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         // establish and maintain the following invariant: after lock on ongoingRecalculations is released,
         // no Future contained in it is in cancelled state
         synchronized (ongoingRecalculations) {
-            final U oldUpdateInterval;
-            final U joinedUpdateInterval;
-            FutureTaskWithCancelBlocking oldFuture = null;
             if (suspended) {
-                oldUpdateInterval = triggeredWhileSuspended.get(key);
+                queue(key, updateInterval, /* future to set when done */ null);
             } else {
-                oldFuture = ongoingRecalculations.get(key);
-                oldUpdateInterval = oldFuture == null ? null : oldFuture.getUpdateInterval();
-            }
-            if (oldUpdateInterval == null) {
-                joinedUpdateInterval = updateInterval;
-            } else {
-                if (updateInterval == null) {
-                    joinedUpdateInterval = oldUpdateInterval;
-                } else {
-                    joinedUpdateInterval = updateInterval.join(oldUpdateInterval);
-                }
-            }
-            if (suspended) {
-                // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
-                // logger.finest("triggerUpdate on cache "+nameForLocks+" while suspended for key "+key);
-                triggeredWhileSuspended.put(key, joinedUpdateInterval);
-            } else {
-                boolean reuseExistingFuture = false;
-                if (oldFuture != null) {
-                    if (!oldFuture.isCallerWaitsSynchronouslyForResult()) {
-                        reuseExistingFuture = oldFuture.tryToUpdateUpdateInterval(joinedUpdateInterval);
-                    }
-                    if (!reuseExistingFuture) {
-                        // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
-                        // logger.finest("cancelling existing future task on cache "+nameForLocks+" for key "+key);
-                        oldFuture.cancel(/* mayInterruptIfRunning */ false);
-                    } else {
-                        // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
-                        // logger.finest("re-using existing future task on cache "+nameForLocks+" for key "+key);
-                        smartFutureCacheTaskReuseCounter++;
-                    }
-                }
-                if (!reuseExistingFuture) {
-                    // the following call adds the resulting new Future to ongoingRecalculations
-                    createAndExecuteRecalculationDirectlyIfNotCurrenlyRunningOtherwiseRemember(key, joinedUpdateInterval, /* callerWaitsSynchronouslyForResult */ false);
-                }
+                scheduleRecalculationIfNotScheduledOrRunningOtherwiseUpdateScheduledTaskOrQueueIfAlreadyRunning(key, updateInterval,
+                        /* callerWaitsSynchronouslyForResult */ false);
             }
         }
     }
 
+    private U joinUpdateIntervals(U updateInterval, final U oldUpdateInterval) {
+        final U joinedUpdateInterval;
+        if (oldUpdateInterval == null) {
+            joinedUpdateInterval = updateInterval;
+        } else {
+            if (updateInterval == null) {
+                joinedUpdateInterval = oldUpdateInterval;
+            } else {
+                joinedUpdateInterval = updateInterval.join(oldUpdateInterval);
+            }
+        }
+        return joinedUpdateInterval;
+    }
+
+    private static class SettableFuture<T> implements Future<T> {
+        private T value;
+        private boolean isSet;
+        
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isDone() {
+            return isSet;
+        }
+
+        @Override
+        public T get() throws InterruptedException, ExecutionException {
+            synchronized (this) {
+                while (!isSet) {
+                    wait();
+                }
+            }
+            return value;
+        }
+
+        @Override
+        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            synchronized (this) {
+                while (!isSet) {
+                    wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
+                    if (!isSet) {
+                        throw new TimeoutException();
+                    }
+                }
+            }
+            return value;
+        }
+        
+        public void set(T value) {
+            synchronized (this) {
+                this.value = value;
+                isSet = true;
+                notifyAll();
+            }
+        }
+    }
+    
+    private static class TransitiveFuture<T> implements Future<T> {
+        private final SettableFuture<Future<T>> future;
+        
+        protected TransitiveFuture(SettableFuture<Future<T>> future) {
+            super();
+            this.future = future;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            try {
+                return future.get().cancel(mayInterruptIfRunning);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public boolean isCancelled() {
+            try {
+                return future.get().isCancelled();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public boolean isDone() {
+            try {
+                return future.get().isDone();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public T get() throws InterruptedException, ExecutionException {
+            return future.get().get();
+        }
+
+        @Override
+        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return future.get(timeout, unit).get(timeout, unit);
+        }
+    }
 
     /**
-     * Either calls {@link #createAndExecuteRecalculation(Object, UpdateInterval, boolean)} to create and execute the
+     * Either calls {@link #schedule(Object, UpdateInterval, boolean)} to create and execute the
      * future or, if there is a currently executing future with this key, "remember" the call in the map
      * {@link #triggeredWhileExecutingForSameKey}. This map is then looked into in the finally block of
      * {@link FutureTaskWithCancelBlocking#call()}.
      */
-    private void createAndExecuteRecalculationDirectlyIfNotCurrenlyRunningOtherwiseRemember(final K key,
-            final U joinedUpdateInterval, final boolean callerWaitsSynchronouslyForResult) {
+    private Future<V> scheduleRecalculationIfNotScheduledOrRunningOtherwiseUpdateScheduledTaskOrQueueIfAlreadyRunning(final K key,
+            final U updateInterval, final boolean callerWaitsSynchronouslyForResult) {
+        final Future<V> result;
         synchronized (ongoingRecalculations) {
             if (ongoingRecalculations.containsKey(key)) {
-                triggeredWhileExecutingForSameKey.put(key, new Pair<U, Boolean>(joinedUpdateInterval,
-                        callerWaitsSynchronouslyForResult));
+                FutureTaskWithCancelBlocking scheduledOrRunning = ongoingRecalculations.get(key);
+                // a future is already scheduled for the key; try to 
+                boolean reuseExistingFuture = scheduledOrRunning.tryToUpdateUpdateInterval(updateInterval);
+                if (reuseExistingFuture) {
+                    result = scheduledOrRunning;
+                    // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+                    // logger.finest("re-using existing future task on cache "+nameForLocks+" for key "+key);
+                    smartFutureCacheTaskReuseCounter++;
+                } else {
+                    SettableFuture<Future<V>> nestedFuture = new SettableFuture<Future<V>>();
+                    queue(key, updateInterval, nestedFuture);
+                    result = new TransitiveFuture<>(nestedFuture);
+                }
             } else {
-                createAndExecuteRecalculation(key, joinedUpdateInterval, callerWaitsSynchronouslyForResult);
+                result = schedule(key, updateInterval, callerWaitsSynchronouslyForResult);
             }
         }
+        return result;
     }
 
     /**
@@ -520,16 +607,16 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      *            {@link LockUtil#propagateLockSetFrom(Thread)}. This can be helpful to avoid read-read deadlocks
      *            in conjunction with fair {@link ReentrantReadWriteLock}s.
      */
-    private void createAndExecuteRecalculation(final K key, final U joinedUpdateInterval,
-            final boolean callerWaitsSynchronouslyForResult) {
-            final Thread callerThread = Thread.currentThread();
-            final FutureTaskWithCancelBlocking future = new FutureTaskWithCancelBlocking(key, joinedUpdateInterval,
-                    callerWaitsSynchronouslyForResult, callerThread);
-            // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection
-            // is too expensive here.
-            // logger.finest("creating future task on cache "+nameForLocks+" for key "+key);
-            ongoingRecalculations.put(key, future);
-            recalculator.execute(future);
+    private Future<V> schedule(final K key, final U joinedUpdateInterval, final boolean callerWaitsSynchronouslyForResult) {
+        final Thread callerThread = Thread.currentThread();
+        final FutureTaskWithCancelBlocking future = new FutureTaskWithCancelBlocking(key, joinedUpdateInterval,
+                callerWaitsSynchronouslyForResult, callerThread);
+        // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection
+        // is too expensive here.
+        // logger.finest("creating future task on cache "+nameForLocks+" for key "+key);
+        ongoingRecalculations.put(key, future);
+        recalculator.execute(future);
+        return future;
     }
     
     /**
@@ -539,42 +626,24 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * ongoing, the result of that ongoing re-calculation is returned.
      */
     public V get(final K key, boolean waitForLatest) {
-        V value = null;
+        final V value;
+        final Future<V> future;
         if (waitForLatest) {
-            FutureTaskWithCancelBlocking future;
             synchronized (ongoingRecalculations) {
-                if (suspended) { // waitForLatest is true, see "if" above
-                    final boolean wasTriggeredWhileSuspended = triggeredWhileSuspended.containsKey(key); // update interval may have deliberately been null
-                    if (wasTriggeredWhileSuspended) {
-                        // If suspended and the caller wants to get the latest results, and while suspended recalculations were
-                        // triggered, execute them now.
-                        // This will enter the new future into ongoingRecalculations, and therefore this method
-                        // will wait for its completion below.
-                        // It is OK to assert that this method will synchronously wait for the results before
-                        // releasing any locks held by the current thread because
-                        // createAndExecuteRecalculation adds key to ongoingRecalculations, and
-                        // further down this method, the future will be fetched from ongoingRecalculations
-                        // with that same key, and a get will be performed on that future.
-                        createAndExecuteRecalculationDirectlyIfNotCurrenlyRunningOtherwiseRemember(key, triggeredWhileSuspended.remove(key),
-                                /* callerWaitsSynchronouslyForResult */ true);
-                    }
-                }
-                // as long as we hold the lock on ongoingManeuverCacheRecalculations, the Futures contained in it are not cancelled
-                future = ongoingRecalculations.get(key);
-                if (future != null) {
-                    future.dontCancel();
+                final Pair<U, Set<SettableFuture<Future<V>>>> triggeredSinceLastCacheUpdate = triggeredAndNotYetScheduled.remove(key);
+                if (triggeredSinceLastCacheUpdate != null) {
+                    future = scheduleRecalculationIfNotScheduledOrRunningOtherwiseUpdateScheduledTaskOrQueueIfAlreadyRunning(key, triggeredSinceLastCacheUpdate.getA(),
+                            /* callerWaitsSynchronouslyForResult: if a new task is scheduled, we'll wait for it by calling future.get() below */ true);
                 } else {
-                    value = cache.get(key);
+                    future = ongoingRecalculations.get(key);
                 }
-            }
-            if (future != null) {
                 try {
                     value = future.get();
                 } catch (InterruptedException | ExecutionException e) {
                     logger.log(Level.SEVERE, "get", e);
                     throw new RuntimeException(e);
                 }
-            } // else no calculation currently going on; value has been fetched from latest cache entry
+            }
         } else {
             final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
             LockUtil.lockForRead(lock);
