@@ -9,7 +9,10 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -49,10 +52,12 @@ public class SimulationServiceImpl implements SimulationService {
     final private Executor executor;
     final private SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval> cache;
     final private RacingEventService racingEventService;
+    final private ScheduledExecutorService scheduler;
     final private long WAIT_MILLIS = 20000; // milliseconds to wait until earliest cache-update for simulation
     
     public SimulationServiceImpl(Executor executor, RacingEventService racingEventService) {
         this.executor = executor;
+        this.scheduler = Executors.newScheduledThreadPool(1);
         this.racingEventService = racingEventService;
         if (racingEventService != null) {
             this.cache = new SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>(
@@ -63,10 +68,8 @@ public class SimulationServiceImpl implements SimulationService {
                             if (firstTime) {
                                 TrackedRace trackedRace = racingEventService.getTrackedRace(key);
                                 if (trackedRace != null) {
-                                    trackedRace.addListener(new Listener(trackedRace, key));
+                                    trackedRace.addListener(new Listener(trackedRace, key, scheduler));
                                 }
-                            } else {
-                                Thread.sleep(WAIT_MILLIS);
                             }
                             SimulationResults results = computeSimulationResults(key);
                             return results;
@@ -80,21 +83,34 @@ public class SimulationServiceImpl implements SimulationService {
     private class Listener extends AbstractRaceChangeListener {
         private final TrackedRace trackedRace;
         private final LegIdentifier legIdentifier;
+        private final ScheduledExecutorService scheduler;
         private boolean finished;
+        private boolean covered;
         
 
-        public Listener(TrackedRace trackedRace, LegIdentifier legIdentifier) {
+        public Listener(TrackedRace trackedRace, LegIdentifier legIdentifier, ScheduledExecutorService scheduler) {
             this.trackedRace = trackedRace;
             this.legIdentifier = legIdentifier;
+            this.scheduler = scheduler;
             this.finished = false;
+            this.covered = false;
         }
 
         @Override
         protected void defaultAction() {
             if (!this.finished) {
-                cache.triggerUpdate(legIdentifier, null);
+                if (!this.covered) {
+                    this.covered = true;
+                    scheduler.schedule(() -> triggerUpdate(legIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
+                }
             }
         }
+
+        private void triggerUpdate(LegIdentifier legIdentifier) {
+            this.covered = false;
+            cache.triggerUpdate(legIdentifier, null);
+        }
+        
 
         @Override
         public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
@@ -110,7 +126,7 @@ public class SimulationServiceImpl implements SimulationService {
                     markPassing = null;
                 }
                 if (markPassing != null) { // if leg is finished, only one last simulation update required
-                    cache.triggerUpdate(legIdentifier, null);
+                    defaultAction();
                     this.finished = true;
                 } else {
                     this.finished = false;
