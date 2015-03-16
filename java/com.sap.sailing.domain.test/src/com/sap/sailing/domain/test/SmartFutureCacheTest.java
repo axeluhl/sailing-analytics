@@ -8,7 +8,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
@@ -251,9 +253,9 @@ public class SmartFutureCacheTest {
     }
     
     @Test
-    public void testIfNoNewFuturesAreRunForTheSameKeyWhileCurrentTaskIsSleeping() throws InterruptedException {
+    public void testIfNoNewFuturesAreRunForTheSameKeyWhileCurrentTaskIsSleeping() throws InterruptedException, BrokenBarrierException {
         final AtomicInteger callCounter = new AtomicInteger(0);
-        final Boolean handShakeObj = new Boolean(true);
+        CyclicBarrier barrier = new CyclicBarrier(2);
         CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
 
             @Override
@@ -262,18 +264,10 @@ public class SmartFutureCacheTest {
                     if (key == 1) {
                         callCounter.incrementAndGet();
                     }
-                    callCounter.notifyAll();
                 }
-                synchronized (handShakeObj) {
-                    handShakeObj.wait();
-                }
-                Thread.sleep(10);
-                synchronized (callCounter) {
-                    callCounter.notifyAll();
-                }
-                synchronized (handShakeObj) {
-                    handShakeObj.wait();
-                }
+                barrier.await();
+                barrier.await();
+                barrier.await();
                 //For this test case value will be same as key, when updated.
                 return key;
             }
@@ -287,32 +281,17 @@ public class SmartFutureCacheTest {
         SmartFutureCache<Integer, Integer, EmptyUpdateInterval> testCache = new SmartFutureCache<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>(
                 cacheUpdater, "SmartFutureTestCacheLock");
         testCache.triggerUpdate(1, null);
-        synchronized (callCounter) {
-            callCounter.wait();
-        }
+        barrier.await();
         assertEquals(1, callCounter.get());
-        synchronized (handShakeObj) {
-            handShakeObj.notifyAll();
-        }
         testCache.triggerUpdate(1, null);
-        synchronized (callCounter) {
-            callCounter.wait();
-        }
+        barrier.await();
         // Counter should still be one here, since first future is still sleeping at this point
         assertEquals(1, callCounter.get());
-        synchronized (handShakeObj) {
-            handShakeObj.notifyAll();
-        }
-        synchronized (callCounter) {
-            callCounter.wait();
-        }
+        barrier.await();
+        
         // Now the first future should be done, and the second update should have been called, so the counter should be 2
+        barrier.await();
         assertEquals(2, callCounter.get());
-        synchronized (handShakeObj) {
-            handShakeObj.notifyAll();
-        }
-        synchronized (handShakeObj) {
-            handShakeObj.notifyAll();
-        }
+        barrier.await();
     }
 }
