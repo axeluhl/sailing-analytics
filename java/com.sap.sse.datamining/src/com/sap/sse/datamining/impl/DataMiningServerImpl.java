@@ -21,7 +21,9 @@ import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
@@ -222,6 +224,12 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     private <DataSourceType> DataSourceProvider<DataSourceType> getDataSourceProviderFor(Class<DataSourceType> dataSourceType) {
         assert dataSourceProviderMappedByDataSourceType.containsKey(dataSourceType) : "No DataSourceProvider found for '" + dataSourceType + "'";
         return (DataSourceProvider<DataSourceType>) dataSourceProviderMappedByDataSourceType.get(dataSourceType);
+    }
+    
+    @Override
+    public <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query) {
+        //TODO
+        return query.run();
     }
     
 }
