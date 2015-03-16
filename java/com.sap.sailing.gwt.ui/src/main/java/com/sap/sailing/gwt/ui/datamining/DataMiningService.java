@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
+import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
@@ -19,9 +20,9 @@ public interface DataMiningService extends RemoteService {
 
     Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
 
-    QueryResult<Set<Object>> getDimensionValuesFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName) throws Exception;
+    QueryResult<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, String localeInfoName) throws Exception;
     
-    <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDTO queryDefinition) throws Exception;
+    <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, QueryDefinitionDTO queryDefinition) throws Exception;
 
     SSEDataMiningSerializationDummy pseudoMethodSoThatSomeSSEDataMiningClassesAreAddedToTheGWTSerializationPolicy();
 

@@ -13,12 +13,14 @@ import com.sap.sailing.gwt.ui.datamining.QueryRunner;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettingsDialogComponent;
+import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class SimpleQueryRunner implements QueryRunner {
 
+    private final DataMiningSession session;
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -29,9 +31,10 @@ public class SimpleQueryRunner implements QueryRunner {
     
     private final Button runButton;
 
-    public SimpleQueryRunner(StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
+    public SimpleQueryRunner(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider,
             ResultsPresenter<Number> resultsPresenter) {
+        this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
@@ -58,7 +61,7 @@ public class SimpleQueryRunner implements QueryRunner {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             resultsPresenter.showBusyIndicator();
-            dataMiningService.runQuery(queryDefinition, new AsyncCallback<QueryResult<Number>>() {
+            dataMiningService.runQuery(session, queryDefinition, new AsyncCallback<QueryResult<Number>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
