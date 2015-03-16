@@ -648,19 +648,29 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 }
             }
             try {
-                value = future.get();
+                if (future != null) {
+                    value = future.get();
+                } else {
+                    value = readCache(key);
+                }
             } catch (InterruptedException | ExecutionException e) {
                 logger.log(Level.SEVERE, "get", e);
                 throw new RuntimeException(e);
             }
         } else {
-            final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
-            LockUtil.lockForRead(lock);
-            try {
-                value = cache.get(key);
-            } finally {
-                LockUtil.unlockAfterRead(lock);
-            }
+            value = readCache(key);
+        }
+        return value;
+    }
+
+    private V readCache(final K key) {
+        final V value;
+        final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
+        LockUtil.lockForRead(lock);
+        try {
+            value = cache.get(key);
+        } finally {
+            LockUtil.unlockAfterRead(lock);
         }
         return value;
     }
