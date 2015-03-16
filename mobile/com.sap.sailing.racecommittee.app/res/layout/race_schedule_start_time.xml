@@ -8,7 +8,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="@color/sap_gray">
+        android:background="?sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -31,7 +31,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/set_time"
-                android:textColor="@color/white"
+                android:textColor="?white"
                 android:textSize="@dimen/textSize_26" />
         </LinearLayout>
     </RelativeLayout>
@@ -46,7 +46,7 @@
         android:layout_marginRight="@dimen/default_margin_twice"
         android:layout_marginTop="@dimen/default_margin"
         tools:text="@string/race_start_time_in"
-        android:textColor="@color/white"
+        android:textColor="?white"
         android:textSize="@dimen/textSize_40"
         android:visibility="visible" />
 
@@ -65,7 +65,7 @@
             android:tag="5"
             android:text="@string/race_start_in_5_minutes"
             android:textAllCaps="true"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22" />
 
         <Button
@@ -76,7 +76,7 @@
             android:tag="1"
             android:text="@string/race_start_in_1_minute"
             android:textAllCaps="true"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22" />
     </LinearLayout>
 
@@ -85,7 +85,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/header"
-        android:background="@color/black" />
+        android:background="?black" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -102,7 +102,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/sap_gray_black_30">
+            android:background="?sap_gray_black_30">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -132,11 +132,11 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerInParent="true"
                 android:layout_margin="@dimen/default_margin_twice"
-                android:background="@color/sap_blue_1"
+                android:background="?sap_blue_1"
                 android:padding="@dimen/default_padding"
                 android:text="@string/race_set_start"
                 android:textAllCaps="true"
-                android:textColor="@color/white"
+                android:textColor="?white"
                 android:textSize="@dimen/textSize_22"
                 android:textStyle="bold" />
         </RelativeLayout>

@@ -480,4 +480,9 @@ public class AppPreferences {
         return preferences.getBoolean(context.getString(R.string.preference_offline_key),
                 context.getResources().getBoolean(R.bool.preference_offline_default));
     }
+
+    public String getTheme() {
+        return preferences.getString(context.getString(R.string.preference_theme_key),
+                context.getResources().getString(R.string.preference_theme_default));
+    }
 }

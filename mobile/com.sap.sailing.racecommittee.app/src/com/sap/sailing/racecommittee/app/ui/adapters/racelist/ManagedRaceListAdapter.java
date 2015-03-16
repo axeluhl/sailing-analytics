@@ -11,8 +11,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -33,8 +31,8 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
-import com.sap.sailing.racecommittee.app.ui.utils.FlagsBitmapCache;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -221,10 +219,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_unscheduled.setVisibility(View.VISIBLE);
                 } else {
                     if (group_name != null) {
-                        group_name.setTextColor(getContext().getResources().getColor(R.color.white));
+                        group_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.white));
                     }
                     if (race_name != null) {
-                        race_name.setTextColor(getContext().getResources().getColor(R.color.white));
+                        race_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.white));
                     }
                 }
             }
@@ -290,10 +288,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 race_unscheduled.setVisibility(View.GONE);
             }
             if (race_name != null) {
-                race_name.setTextColor(getContext().getResources().getColor(R.color.sap_light_gray));
+                race_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_light_gray));
             }
             if (group_name != null) {
-                group_name.setTextColor(getContext().getResources().getColor(R.color.sap_light_gray));
+                group_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_light_gray));
             }
         }
     }

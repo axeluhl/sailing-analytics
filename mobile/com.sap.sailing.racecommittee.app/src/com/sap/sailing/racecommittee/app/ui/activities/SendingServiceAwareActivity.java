@@ -93,7 +93,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         
         int errorCount = this.sendingService.getDelayedIntentsCount();
         if (errorCount > 0) {
-            menuItemLive.setIcon(getTintedDrawable(getResources(), R.drawable.ic_share_white_36dp, R.color.sap_red_1));
+            menuItemLive.setIcon(getTintedDrawable(getResources(), R.drawable.ic_share_white_36dp, R.attr.sap_red_1));
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
             sendingServiceStatus = String.format("Currently %d events waiting to be sent.\nLast successful sent was at %s", 
                     errorCount, lastSuccessfulSend == null ? "never" : lastSuccessfulSend);

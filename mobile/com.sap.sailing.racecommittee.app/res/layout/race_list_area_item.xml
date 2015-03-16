@@ -25,7 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/white"
+                android:textColor="?white"
                 android:textSize="@dimen/textSize_40"
                 tools:text="13:36" />
 
@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_started"
-                android:textColor="@color/white"
+                android:textColor="?white"
                 android:textSize="@dimen/textSize_18" />
 
             <TextView
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_finished"
-                android:textColor="@color/white"
+                android:textColor="?white"
                 android:textSize="@dimen/textSize_18" />
         </LinearLayout>
 
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/race_unscheduled"
-            android:textColor="@color/sap_light_gray"
+            android:textColor="?sap_light_gray"
             android:textSize="@dimen/textSize_18"
             android:visibility="gone" />
     </RelativeLayout>
@@ -102,7 +102,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:textColor="@color/white"
+                    android:textColor="?white"
                     android:textSize="@dimen/textSize_18"
                     tools:text="01:12" />
             </LinearLayout>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme.Light" parent="AppTheme.Light.Base" />
+
+    <style name="AppTheme.Light.Base" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionModeOverlay">true</item>
+
+        <item name="colorPrimary">@color/light_colorPrimary</item>
+        <item name="colorPrimaryDark">@color/light_colorPrimaryDark</item>
+        <item name="colorAccent">@color/light_colorAccent</item>
+
+        <item name="drawerArrowStyle">@style/AppTheme.Light.Widget.DrawerArrowStyle</item>
+        <item name="android:editTextStyle">@android:style/Widget.EditText</item>
+
+        <!-- custom attributes because of custom themes -->
+        <item name="black">@color/light_black</item>
+        <item name="black_light">@color/light_black_light</item>
+        <item name="black_transparent">@color/light_black_transparent</item>
+        <item name="sap_blue_1">@color/light_sap_blue_1</item>
+        <item name="sap_gray">@color/light_sap_gray</item>
+        <item name="sap_gray_black_20">@color/light_sap_gray_black_20</item>
+        <item name="sap_gray_black_30">@color/light_sap_gray_black_30</item>
+        <item name="sap_gray_black_40">@color/light_sap_gray_black_40</item>
+        <item name="sap_gray_white_10">@color/light_sap_gray_white_10</item>
+        <item name="sap_light_gray">@color/light_sap_light_gray</item>
+        <item name="sap_red_1">@color/light_sap_red_1</item>
+        <item name="sap_yellow_1">@color/light_sap_yellow_1</item>
+        <item name="white">@color/light_white</item>
+    </style>
+
+    <style name="AppTheme.Light.Widget.NumberPicker" parent="@android:style/Theme.Holo.Light">
+        <item name="android:divider">@color/light_colorAccent</item>
+    </style>
+
+    <style name="AppTheme.Light.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">false</item>
+    </style>
+
+</resources>

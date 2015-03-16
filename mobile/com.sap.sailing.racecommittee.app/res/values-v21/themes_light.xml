@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme.Light" parent="AppTheme.Light.Base">
+        <item name="android:colorPrimary">@color/light_colorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/light_colorPrimaryDark</item>
+        <item name="android:colorAccent">@color/light_colorAccent</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
+
+        <item name="android:alertDialogTheme">@style/AppTheme.Light.AlertDialog</item>
+    </style>
+
+    <style name="AppTheme.Light.AlertDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:colorPrimary">@color/light_colorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/light_colorPrimaryDark</item>
+        <item name="android:colorAccent">@color/light_colorAccent</item>
+    </style>
+
+</resources>

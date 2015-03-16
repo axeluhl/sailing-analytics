@@ -2,10 +2,10 @@
 <level-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:drawable="@color/black"
+        android:drawable="@color/dark_black"
         android:maxLevel="0" />
     <item
-        android:drawable="@color/sap_yellow_1"
+        android:drawable="@color/dark_sap_yellow_1"
         android:maxLevel="1" />
 
 </level-list>

@@ -84,4 +84,15 @@
     <string name="preference_developer_key" translatable="false">developer_options</string>
     <string name="preference_offline_key" translatable="false">is_data_offline</string>
     <bool name="preference_offline_default">false</bool>
+
+    <string name="preference_theme_key" translatable="false">theme</string>
+    <string name="preference_theme_default">0</string>
+    <string-array name="preference_theme_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="preference_theme_entries">
+        <item>Dark</item>
+        <item>Light</item>
+    </string-array>
 </resources>

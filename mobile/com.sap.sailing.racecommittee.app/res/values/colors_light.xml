@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- color definition by Make Studio -->
+    <color name="light_black">#ffffff</color>
+    <color name="light_sap_blue_1">#ff7033</color>
+    <color name="light_sap_gray">#cccccc</color>
+    <color name="light_sap_gray_white_10">#b8b8b8</color>
+    <color name="light_sap_gray_black_20">#d6d6d6</color>
+    <color name="light_sap_gray_black_30">#dbdbdb</color>
+    <color name="light_sap_gray_black_40">#e0e0e0</color>
+    <color name="light_sap_light_gray">#6d6d6d</color>
+    <color name="light_sap_red_1">#16b5e4</color>
+    <color name="light_sap_yellow_1">#0f54ff</color>
+    <color name="light_white">#000000</color>
+    <!-- color definition end -->
+
+    <!-- default color -->
+    <color name="light_colorPrimary">@color/light_black</color>
+    <color name="light_colorPrimaryDark">@color/light_black</color>
+    <color name="light_colorAccent">@color/light_sap_yellow_1</color>
+    <!-- default color end -->
+
+    <color name="light_black_light">#ff242424</color>
+    <color name="light_black_transparent">#99000000</color>
+
+</resources>

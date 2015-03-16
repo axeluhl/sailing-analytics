@@ -209,6 +209,7 @@
     <string name="preference_wakelock_summary">Force the screen to stay awake. Caution: Uses more battery.</string>
     <string name="preference_offline_header">Offline Mode</string>
     <string name="preference_offline_summary">Disables the connection to a server and uses static data</string>
+    <string name="preference_theme_header">Theme</string>
     <string name="options_menu_info">Expert Information</string>
     <string name="auto_update_install">Install</string>
     <string name="auto_update_install_anyway">Install anyway</string>

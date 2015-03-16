@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="black" format="color" />
+    <attr name="black_light" format="color" />
+    <attr name="black_transparent" format="color" />
+    <attr name="sap_blue_1" format="color" />
+    <attr name="sap_gray" format="color" />
+    <attr name="sap_gray_black_20" format="color" />
+    <attr name="sap_gray_black_30" format="color" />
+    <attr name="sap_gray_black_40" format="color" />
+    <attr name="sap_gray_white_10" format="color" />
+    <attr name="sap_light_gray" format="color" />
+    <attr name="sap_red_1" format="color" />
+    <attr name="sap_yellow_1" format="color" />
+    <attr name="white" format="color" />
+
+</resources>

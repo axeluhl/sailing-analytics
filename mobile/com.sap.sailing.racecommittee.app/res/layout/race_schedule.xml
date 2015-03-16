@@ -19,7 +19,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/set_time"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_26"/>
 
         <ImageView
@@ -45,14 +45,14 @@
             android:layout_toRightOf="@id/start_time_caption"
             android:layout_toStartOf="@id/start_time_icon"
             android:gravity="end"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="@color/black" />
+            android:background="?black" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -71,7 +71,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/start_procedure"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_26"/>
 
         <ImageView
@@ -97,14 +97,14 @@
             android:layout_toRightOf="@id/start_procedure_caption"
             android:layout_toStartOf="@id/start_procedure_icon"
             android:gravity="end"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="@color/black" />
+            android:background="?black" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -123,7 +123,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/start_mode"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_26"/>
 
         <ImageView
@@ -158,14 +158,14 @@
             android:layout_toStartOf="@+id/start_mode_icon"
             android:gravity="end"
             android:singleLine="true"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="@color/black" />
+            android:background="?black" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -184,7 +184,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/course"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_26"/>
 
         <ImageView
@@ -218,14 +218,14 @@
             android:gravity="end"
             android:singleLine="true"
             android:text="Triangle"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="@color/black" />
+            android:background="?black" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -244,7 +244,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/wind"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_26"/>
 
         <ImageView
@@ -278,14 +278,14 @@
             android:layout_toStartOf="@id/wind_icon"
             android:gravity="end"
             android:text="@string/wind_unknown"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="@color/black" />
+            android:background="?black" />
     </RelativeLayout>
 
     <Button
@@ -296,13 +296,13 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/default_margin_twice"
-        android:background="@color/sap_blue_1"
+        android:background="?sap_blue_1"
         android:paddingBottom="@dimen/default_padding"
         android:paddingLeft="@dimen/default_padding_twice"
         android:paddingRight="@dimen/default_padding_twice"
         android:paddingTop="@dimen/default_padding"
         android:text="CONFIRM SETUP"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/white"
+        android:textColor="?white"
         android:textStyle="bold" />
 </RelativeLayout>

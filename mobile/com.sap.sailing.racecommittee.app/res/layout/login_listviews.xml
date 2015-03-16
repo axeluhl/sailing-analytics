@@ -15,7 +15,7 @@
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/default_padding"
             android:text="@string/label_login_events"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_26" />
 
         <ImageView
@@ -34,7 +34,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/icon_event"
             android:paddingRight="@dimen/default_padding"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22" />
     </RelativeLayout>
 
@@ -43,14 +43,14 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/event_header"
-        android:background="@color/black" />
+        android:background="?black" />
 
     <FrameLayout
         android:id="@+id/event_fragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/event_line"
-        android:background="@color/black_light" />
+        android:background="?black_light" />
 
     <RelativeLayout
         android:id="@+id/area_header"
@@ -65,7 +65,7 @@
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/default_padding"
             android:text="@string/label_login_course_area"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_26" />
 
         <ImageView
@@ -84,7 +84,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/icon_area"
             android:paddingRight="@dimen/default_padding"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22" />
     </RelativeLayout>
 
@@ -93,14 +93,14 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/area_header"
-        android:background="@color/black" />
+        android:background="?black" />
 
     <FrameLayout
         android:id="@+id/area_fragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/area_line"
-        android:background="@color/black_light" />
+        android:background="?black_light" />
 
     <RelativeLayout
         android:id="@+id/position_header"
@@ -115,7 +115,7 @@
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/default_padding"
             android:text="@string/label_login_position"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_26" />
 
         <ImageView
@@ -134,7 +134,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/icon_position"
             android:paddingRight="@dimen/default_padding"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_22" />
     </RelativeLayout>
 
@@ -143,14 +143,14 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/position_header"
-        android:background="@color/black" />
+        android:background="?black" />
 
     <FrameLayout
         android:id="@+id/position_fragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/position_line"
-        android:background="@color/black_light" />
+        android:background="?black_light" />
 
     <include layout="@layout/signup_button" />
 </RelativeLayout>

@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -26,11 +25,11 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -472,7 +471,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                             layoutParams.height = getResources().getDimensionPixelSize(R.dimen.thick_line);
                             view.invalidate();
                         }
-                        v.setBackgroundColor(getResources().getColor(R.color.sap_gray_black_20));
+                        v.setBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.sap_gray_black_20));
                         break;
 
                     default:
@@ -480,7 +479,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                             layoutParams.height = getResources().getDimensionPixelSize(R.dimen.thin_line);
                             view.invalidate();
                         }
-                        v.setBackgroundColor(getResources().getColor(R.color.sap_gray));
+                        v.setBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.sap_gray));
                         break;
                 }
                 retValue = drawable.getLevel();

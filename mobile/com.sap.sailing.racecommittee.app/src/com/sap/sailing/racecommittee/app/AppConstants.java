@@ -11,6 +11,9 @@ public class AppConstants {
     public final static String EXTRAS_RACE_STATE_EVENT = "raceStateEvent";
     public final static String FLAG_KEY = "raceFlag";
     public final static String EXTRAS_WIND_FIX = "windfix";
+
+    public final static String DARK_THEME = "0";
+    public final static String LIGHT_THEME = "1";
     
     public final static String INTENT_ACTION_REGISTER_RACE = "com.sap.sailing.racecommittee.app.action.registerRace";
     public final static String INTENT_ACTION_CLEAR_RACES = "com.sap.sailing.racecommittee.app.action.clearRaces";

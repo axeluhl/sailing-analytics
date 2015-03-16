@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginRight="@dimen/default_margin"
-        android:background="@color/sap_blue_1"
+        android:background="?sap_blue_1"
         android:paddingLeft="@dimen/default_padding"
         android:paddingRight="@dimen/default_padding"
         android:layout_toLeftOf="@id/more_data"
@@ -75,5 +75,5 @@
         android:layout_marginLeft="@dimen/default_margin_half"
         android:layout_marginRight="@dimen/default_margin"
         android:layout_toRightOf="@id/flag"
-        android:background="@color/sap_gray" />
+        android:background="?sap_gray" />
 </RelativeLayout>
