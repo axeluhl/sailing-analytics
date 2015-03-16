@@ -251,7 +251,7 @@ public class SmartFutureCacheTest {
     }
     
     @Test
-    public void testIfNoNewTasksAreCreatedForTheSameKeyWhenCurrentTaskIsSleeping() {
+    public void testIfNoNewFuturesAreRunForTheSameKeyWhileCurrentTaskIsSleeping() {
         final AtomicInteger callCounter = new AtomicInteger(0);
         CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
 
