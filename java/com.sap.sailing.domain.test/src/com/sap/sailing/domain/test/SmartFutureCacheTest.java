@@ -253,19 +253,26 @@ public class SmartFutureCacheTest {
     @Test
     public void testIfNoNewFuturesAreRunForTheSameKeyWhileCurrentTaskIsSleeping() throws InterruptedException {
         final AtomicInteger callCounter = new AtomicInteger(0);
+        final Boolean handShakeObj = new Boolean(true);
         CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
 
             @Override
             public Integer computeCacheUpdate(Integer key, EmptyUpdateInterval updateInterval) throws Exception {
-                if (key == 1) {
-                    callCounter.incrementAndGet();
+                synchronized (callCounter) {
+                    if (key == 1) {
+                        callCounter.incrementAndGet();
+                    }
+                    callCounter.notifyAll();
                 }
+                synchronized (handShakeObj) {
+                    handShakeObj.wait();
+                }
+                Thread.sleep(10);
                 synchronized (callCounter) {
                     callCounter.notifyAll();
                 }
-                sleep(50);
-                synchronized (callCounter) {
-                    callCounter.notifyAll();
+                synchronized (handShakeObj) {
+                    handShakeObj.wait();
                 }
                 //For this test case value will be same as key, when updated.
                 return key;
@@ -281,27 +288,31 @@ public class SmartFutureCacheTest {
                 cacheUpdater, "SmartFutureTestCacheLock");
         testCache.triggerUpdate(1, null);
         synchronized (callCounter) {
-            callCounter.wait(500);
+            callCounter.wait();
         }
         assertEquals(1, callCounter.get());
+        synchronized (handShakeObj) {
+            handShakeObj.notifyAll();
+        }
         testCache.triggerUpdate(1, null);
         synchronized (callCounter) {
-            callCounter.wait(500);
+            callCounter.wait();
         }
         // Counter should still be one here, since first future is still sleeping at this point
         assertEquals(1, callCounter.get());
+        synchronized (handShakeObj) {
+            handShakeObj.notifyAll();
+        }
         synchronized (callCounter) {
-            callCounter.wait(500);
+            callCounter.wait();
         }
         // Now the first future should be done, and the second update should have been called, so the counter should be 2
         assertEquals(2, callCounter.get());
-    }
-
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Should not have been interupted...");
+        synchronized (handShakeObj) {
+            handShakeObj.notifyAll();
+        }
+        synchronized (handShakeObj) {
+            handShakeObj.notifyAll();
         }
     }
 }
