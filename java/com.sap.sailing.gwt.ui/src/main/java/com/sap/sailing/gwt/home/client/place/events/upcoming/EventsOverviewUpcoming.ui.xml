@@ -15,8 +15,8 @@
             <!-- IF upcomingEvents.events.length < 2 -->
             <span>
               <h3 class="{local_res.css.eventsoverviewupcoming_header_title}">
-                <ui:text from="{i18n_ubi.seriesHeaderUpcoming}" />:</h3>
-              <span ui:field="ticker" class="{local_res.css.eventsoverviewupcoming_header_ticker}" />
+                <ui:text from="{i18n_ubi.seriesHeaderUpcoming}" /><span ui:field="colon" style="display: none;">:</span></h3>
+              <span ui:field="ticker" class="{local_res.css.eventsoverviewupcoming_header_ticker}" style="display: inline-block;" />
             </span>
             <!-- IFEND upcomingEvents.events.length < 2 -->
           </div>
