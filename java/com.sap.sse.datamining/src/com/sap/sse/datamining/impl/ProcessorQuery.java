@@ -37,7 +37,8 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     private final Object monitorObject = new Object();
     private Thread workingThread;
     private boolean workIsDone = false;
-    private boolean processorTimedOut = false;
+    private boolean queryTimedOut = false;
+    private boolean queryGotAborted = false;
     
     /**
      * Creates a query that returns a result without any additional data (like the calculation time or the retrieved data amount).<br>
@@ -85,7 +86,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     }
 
     private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
-        processorTimedOut = false;
+        queryTimedOut = false;
         final long startTime = System.nanoTime();
         startWorking();
         waitTillWorkIsDone(timeoutInMillis);
@@ -113,8 +114,10 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
                     firstProcessor.processElement(dataSource);
                     firstProcessor.finish();
                 } catch (InterruptedException e) {
-                    if (processorTimedOut) {
+                    if (queryTimedOut) {
                         LOGGER.log(Level.INFO, "The query processing timed out.");
+                    } else if (queryGotAborted) {
+                        LOGGER.log(Level.INFO, "The query got aborted.");
                     } else {
                         LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
                     }
@@ -129,10 +132,12 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         synchronized (monitorObject) {
             while (!workIsDone) {
                 monitorObject.wait();
-                if (processorTimedOut && !workIsDone) {
+                if ((queryTimedOut || queryGotAborted) && !workIsDone) {
                     firstProcessor.abort();
                     workingThread.interrupt();
-                    throw new TimeoutException("The query processing timed out");
+                    if (queryTimedOut) {
+                        throw new TimeoutException("The query processing timed out");
+                    }
                 }
             }
             workIsDone = false;
@@ -146,7 +151,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
                 @Override
                 public void run() {
                     synchronized (monitorObject) {
-                        processorTimedOut = true;
+                        queryTimedOut = true;
                         monitorObject.notify();
                     }
                 }
@@ -157,6 +162,14 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     private void logOccuredFailures() {
         for (Throwable failure : resultReceiver.getOccuredFailures()) {
             LOGGER.log(Level.SEVERE, "An error occured during the processing of an instruction: ", failure);
+        }
+    }
+    
+    @Override
+    public void abort() {
+        synchronized (monitorObject) {
+            queryGotAborted = true;
+            monitorObject.notify();
         }
     }
 

@@ -10,5 +10,7 @@ public interface Query<AggregatedType> {
     public QueryResult<AggregatedType> run();
 
     public QueryResult<AggregatedType> run(long timeout, TimeUnit unit) throws TimeoutException;
+    
+    public void abort();
 
 }

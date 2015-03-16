@@ -169,33 +169,27 @@ public class TestProcessorQuery {
         assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));
     }
 
-    @Test//(timeout=2000)
-    public void testQueryTimeouting() throws TimeoutException {
+    @Test(timeout=2000)
+    public void testQueryTimeouting() {
         receivedElementOrFinished = false;
         receivedAbort = false;
         
+        Collection<Number> dataSource = new ArrayList<>();
+        dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                createDataSource(), stringMessages, Locale.ENGLISH) {
+                dataSource, stringMessages, Locale.ENGLISH) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
-                Processor<Double, Void> resultReceiver = new NullProcessor<Double, Void>(Double.class, Void.class) {
-                    @Override
-                    public void processElement(Double element) {
-                        receivedElementOrFinished = true;
-                    }
-                    @Override
-                    public void finish() throws InterruptedException {
-                        receivedElementOrFinished = true;
-                    }
-                    @Override
-                    public void abort() {
-                        receivedAbort = true;
-                    }
-                };
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(resultReceiver);
-                return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class, ConcurrencyTestsUtil.getExecutor(), resultReceivers, 2000);
+                resultReceivers.add(new AbortResultReceiver(this.getResultReceiver()));
+                return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
+                        ConcurrencyTestsUtil.getExecutor(), resultReceivers, 1000) {
+                            @Override
+                            protected Double createResult(Iterable<Number> element) {
+                                return 0.0;
+                            }
+                };
             }
         };
         
@@ -207,8 +201,74 @@ public class TestProcessorQuery {
         }
         
         ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
-        assertThat("The processing should be aborted", receivedElementOrFinished, is(false));
-        assertThat("The processing should be aborted", receivedAbort, is(true));
+        assertThat("The processing should be aborted, but received elements", receivedElementOrFinished, is(false));
+        assertThat("The processing should be aborted, but didn't receive abort", receivedAbort, is(true));
+    }
+
+    @Test(timeout=2000)
+    public void testQueryAbortion() {
+        receivedElementOrFinished = false;
+        receivedAbort = false;
+
+        Collection<Number> dataSource = new ArrayList<>();
+        dataSource.add(new Number(10));
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
+                dataSource, stringMessages, Locale.ENGLISH) {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+                Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
+                resultReceivers.add(new AbortResultReceiver(this.getResultReceiver()));
+                return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
+                        ConcurrencyTestsUtil.getExecutor(), resultReceivers, 1000) {
+                            @Override
+                            protected Double createResult(Iterable<Number> element) {
+                                return 0.0;
+                            }
+                };
+            }
+        };
+        
+        Thread queryRunner = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                query.run();
+            }
+        });
+        queryRunner.start();
+        ConcurrencyTestsUtil.sleepFor(500);
+        query.abort();
+        
+        ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
+        assertThat("The processing should be aborted, but received elements", receivedElementOrFinished, is(false));
+        assertThat("The processing should be aborted, but didn't receive abort", receivedAbort, is(true));
+    }
+    
+    private class AbortResultReceiver extends NullProcessor<Double, Void> {
+
+        private final Processor<Map<GroupKey, Double>, Void> queryResultReceiver;
+        
+        public AbortResultReceiver(Processor<Map<GroupKey, Double>, Void> queryResultReceiver) {
+            super(Double.class, Void.class);
+            this.queryResultReceiver = queryResultReceiver;
+        }
+        
+        @Override
+        public void processElement(Double element) {
+            receivedElementOrFinished = true;
+            queryResultReceiver.processElement(null);
+        }
+        @Override
+        public void finish() throws InterruptedException {
+            receivedElementOrFinished = true;
+            queryResultReceiver.finish();
+        }
+        @Override
+        public void abort() {
+            receivedAbort = true;
+            queryResultReceiver.abort();
+        }
+        
     }
 
     @Test
@@ -216,46 +276,41 @@ public class TestProcessorQuery {
         final String keyValue = "Sum";
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
                 createDataSource(), stringMessages, Locale.ENGLISH) {
+            @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
-                return createSumBuildingProcessor(/*query*/ this, keyValue);
+                Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
+                resultReceivers.add(this.getResultReceiver());
+                return new AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
+                                                                                                    (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+                                                                                                    ConcurrencyTestsUtil.getExecutor(),
+                                                                                                    resultReceivers) {
+                    @Override
+                    protected Callable<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
+                        return new Callable<Map<GroupKey,Double>>() {
+                            @Override
+                            public Map<GroupKey, Double> call() throws Exception {
+                                Map<GroupKey, Double> result = new HashMap<>();
+                                double sum = 0;
+                                for (Number number : element) {
+                                    sum += number.getValue();
+                                }
+                                result.put(new GenericGroupKey<String>(keyValue), sum);
+                                return result;
+                            }
+                        };
+                    }
+                
+                    @Override
+                    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+                    }
+                };
             }
         };
         
         Map<GroupKey, Double> expectedResult = new HashMap<>();
         expectedResult.put(new GenericGroupKey<String>(keyValue), 10358.0);
         assertThat(query.run(500, TimeUnit.MILLISECONDS).getResults(), is(expectedResult));
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>> createSumBuildingProcessor(
-            ProcessorQuery<Double, Iterable<Number>> query, final String keyValue) {
-        Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
-        resultReceivers.add(query.getResultReceiver());
-        return new AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
-                                                                                            (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-                                                                                            ConcurrencyTestsUtil.getExecutor(),
-                                                                                            resultReceivers) {
-            @Override
-            protected Callable<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
-                return new Callable<Map<GroupKey,Double>>() {
-                    @Override
-                    public Map<GroupKey, Double> call() throws Exception {
-                        Map<GroupKey, Double> result = new HashMap<>();
-                        double sum = 0;
-                        for (Number number : element) {
-                            sum += number.getValue();
-                        }
-                        result.put(new GenericGroupKey<String>(keyValue), sum);
-                        return result;
-                    }
-                };
-            }
-
-            @Override
-            protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
-            }
-        };
     }
 
 }

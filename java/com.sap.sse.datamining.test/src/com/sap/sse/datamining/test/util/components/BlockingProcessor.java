@@ -8,7 +8,7 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 
-public class BlockingProcessor<InputType, ResultType> extends AbstractSimpleParallelProcessor<InputType, ResultType> {
+public abstract class BlockingProcessor<InputType, ResultType> extends AbstractSimpleParallelProcessor<InputType, ResultType> {
     private final long timeToBlockInMillis;
 
     public BlockingProcessor(Class<InputType> inputType, Class<ResultType> resultType,
@@ -24,10 +24,12 @@ public class BlockingProcessor<InputType, ResultType> extends AbstractSimplePara
             @Override
             public ResultType call() throws Exception {
                 Thread.sleep(timeToBlockInMillis);
-                return null;
+                return createResult(element);
             }
         };
     }
+    
+    protected abstract ResultType createResult(InputType element);
 
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
