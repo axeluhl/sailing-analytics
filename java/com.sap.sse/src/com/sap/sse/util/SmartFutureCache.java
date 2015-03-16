@@ -569,6 +569,9 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * future or, if there is a currently executing future with this key, "remember" the call in the map
      * {@link #triggeredWhileExecutingForSameKey}. This map is then looked into in the finally block of
      * {@link FutureTaskWithCancelBlocking#call()}.
+     * 
+     * @param callerWaitsSynchronouslyForResult if <code>true</code>, if a future task needs to be created,
+     * it will already inherit the calling thread's locks, and the method will always return a future task.
      */
     private Future<V> scheduleRecalculationIfNotScheduledOrRunningOtherwiseUpdateScheduledTaskOrQueueIfAlreadyRunning(final K key,
             final U updateInterval, final boolean callerWaitsSynchronouslyForResult) {
@@ -584,9 +587,15 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                     // logger.finest("re-using existing future task on cache "+nameForLocks+" for key "+key);
                     smartFutureCacheTaskReuseCounter++;
                 } else {
-                    SettableFuture<Future<V>> nestedFuture = new SettableFuture<Future<V>>();
+                    final SettableFuture<Future<V>> nestedFuture;
+                    if (callerWaitsSynchronouslyForResult) {
+                        nestedFuture = new SettableFuture<Future<V>>();
+                        result = new TransitiveFuture<>(nestedFuture);
+                    } else {
+                        nestedFuture = null;
+                        result = null;
+                    }
                     queue(key, updateInterval, nestedFuture);
-                    result = new TransitiveFuture<>(nestedFuture);
                 }
             } else {
                 result = schedule(key, updateInterval, callerWaitsSynchronouslyForResult);
