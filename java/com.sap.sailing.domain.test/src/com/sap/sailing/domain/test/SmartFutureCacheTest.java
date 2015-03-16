@@ -293,5 +293,6 @@ public class SmartFutureCacheTest {
         barrier.await();
         assertEquals(2, callCounter.get());
         barrier.await();
+        barrier.await();
     }
 }
