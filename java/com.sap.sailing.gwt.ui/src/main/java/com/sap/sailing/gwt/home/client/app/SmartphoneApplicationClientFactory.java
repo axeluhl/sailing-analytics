@@ -46,7 +46,7 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     }
 
     private SmartphoneApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
-        super(new TabletAndDesktopApplicationView(new HomePlacesNavigator(placeController)), eventBus, placeController);
+        super(new TabletAndDesktopApplicationView(new HomePlacesNavigator(placeController), eventBus), eventBus, placeController);
     }
 
     @Override
