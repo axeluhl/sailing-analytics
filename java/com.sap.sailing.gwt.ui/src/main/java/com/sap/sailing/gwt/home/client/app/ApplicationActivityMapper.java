@@ -95,6 +95,9 @@ public class ApplicationActivityMapper implements ActivityMapper {
         EventContext eventContext = new EventContext().withId(eventId);
         String regattaId = place.getLeaderboardIdAsNameString();
         boolean hasRegattaId = (regattaId != null && !regattaId.isEmpty());
+        
+        // TODO evaluate additional parameters
+        
         if(hasRegattaId) {
             switch (place.getNavigationTab()) {
             case CompetitorAnalytics:
@@ -129,6 +132,7 @@ public class ApplicationActivityMapper implements ActivityMapper {
             }
         } else {
             switch (place.getNavigationTab()) {
+            // TODO some places aren't implemented yet 
             case Media:
                 return new MultiregattaMediaPlace(eventContext);
             case Overview:
