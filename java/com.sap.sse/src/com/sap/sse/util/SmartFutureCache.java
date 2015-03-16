@@ -637,12 +637,12 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 } else {
                     future = ongoingRecalculations.get(key);
                 }
-                try {
-                    value = future.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.log(Level.SEVERE, "get", e);
-                    throw new RuntimeException(e);
-                }
+            }
+            try {
+                value = future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.log(Level.SEVERE, "get", e);
+                throw new RuntimeException(e);
             }
         } else {
             final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
