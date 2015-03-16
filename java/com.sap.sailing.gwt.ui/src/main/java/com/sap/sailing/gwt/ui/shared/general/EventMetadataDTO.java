@@ -12,7 +12,7 @@ public class EventMetadataDTO extends EventReferenceDTO {
     private String venueCountry;
     private Date startDate;
     private Date endDate;
-    private String logoImageURL;
+    private String thumbnailImageURL;
 
     public EventState getState() {
         return state;
@@ -62,12 +62,12 @@ public class EventMetadataDTO extends EventReferenceDTO {
         this.endDate = endDate;
     }
 
-    public String getLogoImageURL() {
-        return logoImageURL;
+    public String getThumbnailImageURL() {
+        return thumbnailImageURL;
     }
 
-    public void setLogoImageURL(String logoImageURL) {
-        this.logoImageURL = logoImageURL;
+    public void setThumbnailImageURL(String thumbnailImageURL) {
+        this.thumbnailImageURL = thumbnailImageURL;
     }
 
 }

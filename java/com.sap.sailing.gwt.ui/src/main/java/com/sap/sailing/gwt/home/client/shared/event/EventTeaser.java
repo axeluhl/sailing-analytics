@@ -87,7 +87,7 @@ public class EventTeaser extends Composite {
 
         final StringBuilder thumbnailUrlBuilder = new StringBuilder("url('");
 
-        final String thumbnailImageUrl = event.getLogoImageURL();
+        final String thumbnailImageUrl = event.getThumbnailImageURL();
         if (thumbnailImageUrl == null || thumbnailImageUrl.isEmpty()) {
             thumbnailUrlBuilder.append(EventTeaserResources.INSTANCE.defaultEventPhotoImage().getSafeUri().asString());
         } else {
