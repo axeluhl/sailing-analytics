@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -49,21 +51,32 @@ import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestin
 
 public class PolarDataMiner {
 
+    private static final int EXECUTOR_QUEUE_SIZE = 100;
     private static final int THREAD_POOL_SIZE = Math.max((int) (Runtime.getRuntime().availableProcessors() * (3.0/4.0)), 3);
-    private static final ThreadPoolExecutor executor = createExecutor();
+    private final ThreadPoolExecutor executor = createExecutor();
     private final PolarSheetGenerationSettings backendPolarSheetGenerationSettings;
+    
+    private final Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
 
-    private static ThreadPoolExecutor createExecutor() {
+    private ThreadPoolExecutor createExecutor() {
         return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(100), new RejectedExecutionHandler() {
+                new LinkedBlockingQueue<Runnable>(EXECUTOR_QUEUE_SIZE), new RejectedExecutionHandler() {
+                    @Override
+                    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                        r.run();
+                    }
+                }) {
             @Override
-            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                r.run();
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                while (this.getQueue().size() < EXECUTOR_QUEUE_SIZE && !fixQueue.isEmpty()) {
+                    GPSFixMovingWithOriginInfo fix = fixQueue.poll();
+                    enrichingProcessor.processElement(fix);
+                }
             }
-        });
+        };
     }
-
-
+    
     private AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext> enrichingProcessor;
     
     /**
@@ -165,8 +178,12 @@ public class PolarDataMiner {
     }
 
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
-        enrichingProcessor.processElement(new GPSFixMovingWithOriginInfo(fix, trackedRace,
-                competitor));
+        GPSFixMovingWithOriginInfo fixWithOriginInfo = new GPSFixMovingWithOriginInfo(fix, trackedRace, competitor);
+        if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE) {
+            fixQueue.add(fixWithOriginInfo);
+        } else {
+            enrichingProcessor.processElement(fixWithOriginInfo);
+        }
     }
 
     public boolean isCurrentlyActiveAndOrHasQueue() {
