@@ -2025,7 +2025,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
-            simulationOverlay.updateLeg(getCurrentLeg(), true, 0);
+            if (newSettings.isShowSimulationOverlay()) {
+                simulationOverlay.updateLeg(getCurrentLeg(), true, -1 /* ensure ui-update */);
+            }
         }
         if (requiredRedraw) {
             redraw();

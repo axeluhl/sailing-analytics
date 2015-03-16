@@ -1432,10 +1432,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) {
         // get simulation-results from smart-future-cached simulation-service
-        SimulationService simulationService = getService().getSimulationService();
-        SimulationResults simulationResults = simulationService.getSimulationResults(legIdentifier);
-        // prepare simulator-results-dto
         SimulatorResultsDTO result = null;
+        SimulationService simulationService = getService().getSimulationService();
+        if (simulationService == null) 
+            return result;
+        SimulationResults simulationResults = simulationService.getSimulationResults(legIdentifier);
+        if (simulationResults == null) 
+            return result;
+        // prepare simulator-results-dto
         Map<PathType, Path> paths = simulationResults.getPaths();
         if (paths != null) {
             int noOfPaths = paths.size();

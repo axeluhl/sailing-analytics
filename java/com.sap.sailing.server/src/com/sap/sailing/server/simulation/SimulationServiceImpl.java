@@ -217,8 +217,7 @@ public class SimulationServiceImpl implements SimulationService {
             try {
                 legType = trackedRace.getTrackedLeg(leg).getLegType(startTimePoint);
             } catch (NoWindException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                return null;
             }
 
             // get windfield
