@@ -35,15 +35,10 @@ public class EventsOverviewRecent extends Composite {
         
         boolean oneYearIsExpanded = false;
         for (EventListYearDTO yearDTO : years) {
-            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(yearDTO, navigator);
+            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(yearDTO, navigator, !oneYearIsExpanded);
             year.add(recentEventsOfOneYear);
             
-            if (oneYearIsExpanded == true) {
-                recentEventsOfOneYear.hideContent();
-            } else {
-                recentEventsOfOneYear.showContent();
-                oneYearIsExpanded = true;
-            }
+            oneYearIsExpanded = true;
         }
     }
 }
