@@ -7,6 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -25,7 +26,7 @@ import com.sap.sse.datamining.impl.functions.FunctionManager;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 public class DataMiningFrameworkActivator implements BundleActivator {
-
+    private static final Logger logger = Logger.getLogger(DataMiningFrameworkActivator.class.getName());
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
     
@@ -79,10 +80,9 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     }
 
     private void registerDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
+        logger.info("Registering data mining bundle "+dataMiningBundleService);
         dataMiningServer.addStringMessages(dataMiningBundleService.getStringMessages());
-        
         dataMiningServer.registerAllClasses(dataMiningBundleService.getClassesWithMarkedMethods());
-        
         for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
             dataMiningServer.setDataSourceProvider(dataSourceProvider);
         }
@@ -92,11 +92,9 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     }
 
     private void unregisterDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
+        logger.info("Unregistering data mining bundle "+dataMiningBundleService);
         dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
-        
         dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getClassesWithMarkedMethods());
-
-        
         for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
             dataMiningServer.removeDataSourceProvider(dataSourceProvider);
         }
