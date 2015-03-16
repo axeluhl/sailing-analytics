@@ -52,6 +52,7 @@ public class SettingsActivity extends PreferenceActivity {
         return isRedirectedToTemp;
     }
 
+    @Override
     protected boolean isValidFragment(String fragmentName) {
         return true;
     }
