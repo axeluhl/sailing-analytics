@@ -12,9 +12,11 @@ import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventActivityProxy;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
@@ -118,17 +120,20 @@ public class ApplicationActivityMapper implements ActivityMapper {
             switch (place.getNavigationTab()) {
             // TODO some places aren't implemented yet 
             case Media:
+                return new RegattaMediaPlace(eventContext);
             case Overview:
+                // Overview not implemented yet -> using regatta list
             case Regatta:
                 return new RegattaRacesPlace(eventContext);
             }
         } else {
             switch (place.getNavigationTab()) {
             case Media:
-                // Media not implemented yet -> using regatta list
+                return new MultiregattaMediaPlace(eventContext);
             case Overview:
-                // Overview not implemented yet -> using regatta list
+                // Overview not implemented yet -> using race list
             case Schedule:
+                // Schedule not implemented yet -> using race list
             case Regattas:
                 return new MultiregattaRegattasPlace(eventContext);
             }
