@@ -40,7 +40,9 @@ public enum MaxPointsReason {
     /** Discretionary Penalty Imposed by the race committee */
     DPI(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
     /** Retired */
-    RET(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true);
+    RET(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    /** Uniform Flag Disqualification */
+    UFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true);
     
     private final boolean discardable;
     
