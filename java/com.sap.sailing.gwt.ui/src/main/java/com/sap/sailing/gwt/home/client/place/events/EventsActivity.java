@@ -36,7 +36,6 @@ public class EventsActivity extends AbstractActivity {
             
             @Override
             public void onFailure(Throwable caught) {
-                GWT.debugger();
                 final ErrorView view = clientFactory.createErrorView("Error while loading the sailing server instances with service getEventListView()", caught);
                 panel.setWidget(view.asWidget());
             }
