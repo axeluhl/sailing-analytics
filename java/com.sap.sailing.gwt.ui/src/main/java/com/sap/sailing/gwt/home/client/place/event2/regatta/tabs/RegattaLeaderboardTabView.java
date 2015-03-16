@@ -54,7 +54,7 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
     
     @Override
     public TabView.State getState() {
-        return TabView.State.VISIBLE;
+        return currentPresenter.getCtx().getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override

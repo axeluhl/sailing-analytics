@@ -5443,6 +5443,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setHasMedia(!o.getPhotoGalleryImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
         dto.getLeaderboardGroups().addAll(o.getLeaderboardGroups());
         dto.setState(calculateEventState(o));
+        
+        // TODO @Frank: is this correct
+        dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
+        
         if (o.isFakeSeries()) {
             dto.setType(EventType.SERIES_EVENT);
 
@@ -5561,6 +5565,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // TODO implement correctly. We currently do not show media for series.
         dto.setHasMedia(false);
         
+        boolean oneEventStarted = false;
+        boolean oneEventLive = false;
+        boolean allFinished = true;
         if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
             LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
             dto.setDisplayName(overallLeaderboardGroupDTO.getDisplayName() != null ? overallLeaderboardGroupDTO.getDisplayName() : overallLeaderboardGroupDTO.getName());
@@ -5584,9 +5591,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     return e1.getStartDate().compareTo(e2.getEndDate());
                 }
             });
-            boolean oneEventStarted = false;
-            boolean oneEventLive = false;
-            boolean allFinished = true;
             for(Event eventInSeries: fakeSeriesEvents) {
                 EventMetadataDTO eventOfSeries = convertToMetadataDTO(eventInSeries);
                 dto.addEvent(eventOfSeries);
@@ -5595,16 +5599,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 oneEventLive |= (eventOfSeries.isStarted() && !eventOfSeries.isFinished());
                 allFinished &= eventOfSeries.isFinished();
             }
-            if(oneEventLive) {
-                dto.setState(EventSeriesState.RUNNING);
-            } else if(!oneEventStarted) {
-                dto.setState(EventSeriesState.UPCOMING);
-            } else if(allFinished) {
-                dto.setState(EventSeriesState.FINISHED);
-            } else {
-                dto.setState(EventSeriesState.IN_PROGRESS);
-            }
         }
+        if(oneEventLive) {
+            dto.setState(EventSeriesState.RUNNING);
+        } else if(!oneEventStarted) {
+            dto.setState(EventSeriesState.UPCOMING);
+        } else if(allFinished) {
+            dto.setState(EventSeriesState.FINISHED);
+        } else {
+            dto.setState(EventSeriesState.IN_PROGRESS);
+        }
+        
+        // TODO @Frank: is this correct
+        dto.setHasAnalytics(oneEventStarted);
         return dto;
     }
 
