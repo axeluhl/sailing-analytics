@@ -9,11 +9,13 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sse.util.SmartFutureCache;
+import com.sap.sse.util.SmartFutureCache.CacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sse.util.SmartFutureCache.UpdateInterval;
 
@@ -246,5 +248,47 @@ public class SmartFutureCacheTest {
         System.out.println(computeCacheUpdateCount[0]);
         System.out.println("Tasks re-used: "+sfc.getSmartFutureCacheTaskReuseCounter());
         assertEquals(updatesTriggeredFor.size(), updateWasCalled.size());
+    }
+    
+    @Test
+    public void testIfNoNewTasksAreCreatedWhenOneTaskIsSleeping() {
+        final AtomicInteger callCounter = new AtomicInteger(0);
+        CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
+
+            @Override
+            public Integer computeCacheUpdate(Integer key, EmptyUpdateInterval updateInterval) throws Exception {
+                if (key == 1) {
+                    callCounter.incrementAndGet();
+                }
+                sleep(500);
+                //For this test case value will be same as key, when updated.
+                return key;
+            }
+
+            @Override
+            public Integer provideNewCacheValue(Integer key, Integer oldCacheValue, Integer computedCacheUpdate,
+                    EmptyUpdateInterval updateInterval) {
+                return computedCacheUpdate;
+            }
+        };
+        SmartFutureCache<Integer, Integer, EmptyUpdateInterval> testCache = new SmartFutureCache<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>(
+                cacheUpdater, "SmartFutureTestCacheLock");
+        testCache.triggerUpdate(1, null);
+        sleep(100);
+        assertEquals(1, callCounter.get());
+        sleep(100);
+        testCache.triggerUpdate(1, null);
+        sleep(100);
+        assertEquals(1, callCounter.get());
+        sleep(500);
+        assertEquals(2, callCounter.get());
+    }
+
+    private void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Should not have been interupted...");
+        }
     }
 }
