@@ -251,7 +251,7 @@ public class SmartFutureCacheTest {
     }
     
     @Test
-    public void testIfNoNewTasksAreCreatedWhenOneTaskIsSleeping() {
+    public void testIfNoNewTasksAreCreatedForTheSameKeyWhenCurrentTaskIsSleeping() {
         final AtomicInteger callCounter = new AtomicInteger(0);
         CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
 
@@ -274,13 +274,15 @@ public class SmartFutureCacheTest {
         SmartFutureCache<Integer, Integer, EmptyUpdateInterval> testCache = new SmartFutureCache<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>(
                 cacheUpdater, "SmartFutureTestCacheLock");
         testCache.triggerUpdate(1, null);
-        sleep(100);
+        sleep(50);
         assertEquals(1, callCounter.get());
-        sleep(100);
+        sleep(50);
         testCache.triggerUpdate(1, null);
-        sleep(100);
+        sleep(50);
+        // Counter should still be one here, since first future is still sleeping at this point
         assertEquals(1, callCounter.get());
         sleep(500);
+        // Now the first future should be done, and the second update should have been called, so the counter should be 2
         assertEquals(2, callCounter.get());
     }
 
