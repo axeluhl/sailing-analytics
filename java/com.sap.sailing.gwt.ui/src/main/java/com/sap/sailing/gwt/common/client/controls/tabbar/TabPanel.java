@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.common.client.controls.tabbar;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,6 +30,8 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
 public class TabPanel<PRESENTER> extends Composite {
     private static TabPanelUiBinder ourUiBinder = GWT.create(TabPanelUiBinder.class);
     private final Map<Class<Place>, TabView<Place, PRESENTER>> knownTabs = new LinkedHashMap<>();
+    private final Map<Class<Place>, String> knownTabTitles = new HashMap<>();
+
     @UiField
     SimplePanel additionalHeader;
     @UiField
@@ -38,6 +41,7 @@ public class TabPanel<PRESENTER> extends Composite {
     @UiField BreadcrumbPane breadcrumbs;
     private TabView<Place, PRESENTER> currentTab;
     
+
     private final PlaceHistoryMapper historyMapper;
     private final PRESENTER presenter;
 
@@ -71,11 +75,13 @@ public class TabPanel<PRESENTER> extends Composite {
         
         // TODO: check if place class already known, reject...
         tab.setPresenter(presenter);
-        knownTabs.put(tab.getPlaceClassForActivation(), tab);
+        final Class<Place> classForActivation = tab.getPlaceClassForActivation();
+        knownTabs.put(classForActivation, tab);
+        knownTabTitles.put(classForActivation, title);
 
         if(tab.getState() == State.VISIBLE) {
             String link = "#" + historyMapper.getToken(tab.placeToFire());
-            tabBar.addTab(title, tab.getPlaceClassForActivation(), link);
+            tabBar.addTab(title, classForActivation, link);
         }
     }
 
@@ -152,6 +158,12 @@ public class TabPanel<PRESENTER> extends Composite {
     }
 
     interface TabPanelUiBinder extends UiBinder<FlowPanel, TabPanel<?>> {
+    }
+
+    public String getCurrentTabTitle() {
+        if (currentTab == null)
+            return null;
+        return knownTabTitles.get(currentTab.getPlaceClassForActivation());
     }
 
 }

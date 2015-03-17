@@ -79,9 +79,9 @@ public class EventSeriesRegattaLeaderboardTabView extends Composite implements S
             MultiLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(leaderboardSettings,
                     null, // TODO: preselectedLeaderboardName
                     preselectedRace,
-                    "leaderboardGroupName", // TODO: keep using magic string? ask frank!
-                    currentPresenter.getCtx().getSeriesDTO().getLeaderboardId(),
-                    true, // this information came from place, now hard coded. check with frank
+ "leaderboardGroupName",
+                    leaderboardName,
+                    true, // TODO @FM this information came from place, now hard coded. check with frank
                     autoExpandLastRaceColumn);
 
             initWidget(ourUiBinder.createAndBindUi(this));
@@ -99,6 +99,7 @@ public class EventSeriesRegattaLeaderboardTabView extends Composite implements S
 
 
             regattaAnalyticsManager.hideCompetitorChart();
+
 
             contentArea.setWidget(this);
         } else {

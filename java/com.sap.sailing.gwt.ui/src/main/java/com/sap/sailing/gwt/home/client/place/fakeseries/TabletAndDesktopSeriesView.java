@@ -4,11 +4,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.fakeseries.partials.header.SeriesHeader;
@@ -50,6 +52,15 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
     @Override
     public void navigateTabsTo(AbstractSeriesTabPlace place) {
         tabPanelUi.activatePlace(place);
+        StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
+
+        titleBuilder.append(currentPresenter.getCtx().getSeriesDTO().getDisplayName());
+
+        String currentTabTitle = tabPanelUi.getCurrentTabTitle();
+        if (currentTabTitle != null && !currentTabTitle.isEmpty()) {
+            titleBuilder.append(" - ").append(currentTabTitle);
+        }
+        Window.setTitle(titleBuilder.toString());
     }
 
     @SuppressWarnings("unchecked")
