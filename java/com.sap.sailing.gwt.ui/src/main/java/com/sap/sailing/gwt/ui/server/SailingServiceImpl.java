@@ -5443,8 +5443,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setHasMedia(!o.getPhotoGalleryImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
         dto.getLeaderboardGroups().addAll(o.getLeaderboardGroups());
         dto.setState(calculateEventState(o));
-        
-        // TODO @Frank: is this correct
         dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
         
         if (o.isFakeSeries()) {
@@ -5610,7 +5608,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             dto.setState(EventSeriesState.IN_PROGRESS);
         }
         
-        // TODO @Frank: is this correct
         dto.setHasAnalytics(oneEventStarted);
         return dto;
     }
