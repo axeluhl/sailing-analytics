@@ -7,21 +7,21 @@ import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 public class EventListViewDTO implements IsSerializable {
     
-    private ArrayList<EventListEventDTO> upcommingEvents = new ArrayList<>();
+    private ArrayList<EventListEventDTO> upcomingEvents = new ArrayList<>();
     private ArrayList<EventListYearDTO> recentEvents = new ArrayList<>();
     
-    public ArrayList<EventListEventDTO> getUpcommingEvents() {
-        return upcommingEvents;
+    public ArrayList<EventListEventDTO> getUpcomingEvents() {
+        return upcomingEvents;
     }
 
-    private void addUpcommingEvent(EventListEventDTO event) {
-        for(int i = 0; i < upcommingEvents.size(); i++) {
-            if(upcommingEvents.get(i).getStartDate().compareTo(event.getStartDate()) > 0) {
-                upcommingEvents.add(i, event);
+    private void addUpcomingEvent(EventListEventDTO event) {
+        for(int i = 0; i < upcomingEvents.size(); i++) {
+            if(upcomingEvents.get(i).getStartDate().compareTo(event.getStartDate()) > 0) {
+                upcomingEvents.add(i, event);
                 return;
             }
         }
-        upcommingEvents.add(event);
+        upcomingEvents.add(event);
     }
     
     public ArrayList<EventListYearDTO> getRecentEvents() {
@@ -51,7 +51,7 @@ public class EventListViewDTO implements IsSerializable {
             getYear(year).addEvent(event);
         } else {
             // upcoming event
-            addUpcommingEvent(event);
+            addUpcomingEvent(event);
         }
     }
 }
