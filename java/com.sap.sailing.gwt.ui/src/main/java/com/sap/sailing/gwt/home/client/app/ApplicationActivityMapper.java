@@ -14,9 +14,11 @@ import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventActivityProxy;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
@@ -25,6 +27,7 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesRegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultActivityProxy;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
@@ -96,6 +99,9 @@ public class ApplicationActivityMapper implements ActivityMapper {
         EventContext eventContext = new EventContext().withId(eventId);
         String regattaId = place.getLeaderboardIdAsNameString();
         boolean hasRegattaId = (regattaId != null && !regattaId.isEmpty());
+        
+        // TODO evaluate additional parameters
+        
         if(hasRegattaId) {
             switch (place.getNavigationTab()) {
             case CompetitorAnalytics:
@@ -122,17 +128,21 @@ public class ApplicationActivityMapper implements ActivityMapper {
             switch (place.getNavigationTab()) {
             // TODO some places aren't implemented yet 
             case Media:
+                return new RegattaMediaPlace(eventContext);
             case Overview:
+                // Overview not implemented yet -> using regatta list
             case Regatta:
                 return new RegattaRacesPlace(eventContext);
             }
         } else {
             switch (place.getNavigationTab()) {
+            // TODO some places aren't implemented yet 
             case Media:
-                // Media not implemented yet -> using regatta list
+                return new MultiregattaMediaPlace(eventContext);
             case Overview:
-                // Overview not implemented yet -> using regatta list
+                // Overview not implemented yet -> using race list
             case Schedule:
+                // Schedule not implemented yet -> using race list
             case Regattas:
                 return new MultiregattaRegattasPlace(eventContext);
             }
@@ -151,8 +161,7 @@ public class ApplicationActivityMapper implements ActivityMapper {
             case OverallLeaderboard:
                 return new EventSeriesLeaderboardPlace(context);
             case RegattaLeaderboards:
-                // TODO regatta Leaderboards aren't ported over yet
-                return new EventSeriesLeaderboardPlace(context);
+                return new EventSeriesRegattaLeaderboardPlace(context);
             case CompetitorAnalytics:
                 return new EventSeriesCompetitorAnalyticsPlace(context);
         }

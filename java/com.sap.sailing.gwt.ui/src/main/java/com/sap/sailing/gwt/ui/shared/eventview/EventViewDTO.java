@@ -42,6 +42,7 @@ public class EventViewDTO extends EventDTO {
     private EventType type;
     private EventState state;
     private boolean hasMedia;
+    private boolean hasAnalytics;
 
     public EventViewDTO() {
         this(new ArrayList<LeaderboardGroupDTO>());
@@ -138,5 +139,22 @@ public class EventViewDTO extends EventDTO {
 
     public void setHasMedia(boolean hasMedia) {
         this.hasMedia = hasMedia;
+    }
+
+    public boolean isHasAnalytics() {
+        return hasAnalytics;
+    }
+
+    public void setHasAnalytics(boolean hasAnalytics) {
+        this.hasAnalytics = hasAnalytics;
+    }
+
+    public boolean isRegattaIDKnown(String regattaId) {
+        for (RegattaMetadataDTO regatta : regattas) {
+            if(regatta.getId().equals(regattaId)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

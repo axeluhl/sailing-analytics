@@ -54,6 +54,7 @@
   vertical-align: middle;
   text-overflow: ellipsis;
   width: 66%;
+  display: inline-block;
 }
 @media (min-width: 61em) {
   .eventsoverviewupcoming_header_ticker {

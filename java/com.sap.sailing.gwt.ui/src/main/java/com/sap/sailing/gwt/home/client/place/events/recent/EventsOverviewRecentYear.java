@@ -6,7 +6,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -18,6 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListYearDTO;
 
@@ -42,11 +42,14 @@ public class EventsOverviewRecentYear extends Composite {
     
     private boolean isContentVisible;
     
-    public EventsOverviewRecentYear(EventListYearDTO yearDTO, HomePlacesNavigator navigator) {
+    private final CollapseAnimation animation;
+    
+    public EventsOverviewRecentYear(EventListYearDTO yearDTO, HomePlacesNavigator navigator, boolean showInitial) {
         List<EventListEventDTO> events = yearDTO.getEvents();
         
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        
         this.year.setInnerText(String.valueOf(yearDTO.getYear()));
         this.eventsCount.setInnerText(String.valueOf(events.size()));
         if(yearDTO.getSailorCount() > 0) {
@@ -72,13 +75,16 @@ public class EventsOverviewRecentYear extends Composite {
             RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO);
             recentEventsTeaserPanel.add(recentEvent);
         }
-        isContentVisible = true;
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 onHeaderCicked();
             }
         }, ClickEvent.getType());
+
+        isContentVisible = showInitial;
+        animation = new CollapseAnimation(contentDiv, showInitial);
+        updateAccordionState();
     }
 
     private void onHeaderCicked() {
@@ -86,22 +92,15 @@ public class EventsOverviewRecentYear extends Composite {
         updateContentVisibility();
     }
     
-    public void hideContent() {
-        isContentVisible = false;
-        updateContentVisibility();
+    private void updateContentVisibility() {
+        animation.animate(isContentVisible);
+        updateAccordionState();
     }
 
-    public void showContent() {
-        isContentVisible = true;
-        updateContentVisibility();
-    }
-    
-    private void updateContentVisibility() {
+    private void updateAccordionState() {
         if(isContentVisible) {
-            contentDiv.getStyle().clearDisplay();
             getElement().removeClassName(EventsOverviewRecentResources.INSTANCE.css().accordioncollapsed());
         } else {
-            contentDiv.getStyle().setDisplay(Display.NONE);
             getElement().addClassName(EventsOverviewRecentResources.INSTANCE.css().accordioncollapsed());
         }
     }

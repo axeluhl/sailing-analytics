@@ -12,38 +12,35 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
+import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.event2.utils.EventParamUtils;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
+import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-/**
- * Created by pgtaboada on 25.11.14.
- */
-public class EventSeriesLeaderboardTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardPlace>,
+public class EventSeriesRegattaLeaderboardTabView extends Composite implements SeriesTabView<EventSeriesRegattaLeaderboardPlace>,
         LeaderboardUpdateListener {
 
     private SeriesView.Presenter currentPresenter;
 
     @UiField
-    protected OldLeaderboard leaderboard;
+    protected OldMultiLeaderboard leaderboard;
 
 
-    public EventSeriesLeaderboardTabView() {
+    public EventSeriesRegattaLeaderboardTabView() {
 
     }
 
     @Override
-    public Class<EventSeriesLeaderboardPlace> getPlaceClassForActivation() {
-        return EventSeriesLeaderboardPlace.class;
+    public Class<EventSeriesRegattaLeaderboardPlace> getPlaceClassForActivation() {
+        return EventSeriesRegattaLeaderboardPlace.class;
     }
 
     @Override
@@ -57,7 +54,7 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
     }
 
     @Override
-    public void start(final EventSeriesLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
+    public void start(final EventSeriesRegattaLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
 
         contentArea.setWidget(new Placeholder());
 
@@ -79,23 +76,23 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
             final RaceIdentifier preselectedRace = EventParamUtils
                     .getPreselectedRace(Window.Location.getParameterMap());
 
-            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createOverallLeaderboardPanel(
-                    leaderboardSettings,
+            MultiLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(leaderboardSettings,
+                    null, // TODO: preselectedLeaderboardName
                     preselectedRace,
                     "leaderboardGroupName", // TODO: keep using magic string? ask frank!
-                    leaderboardName,
+                    currentPresenter.getCtx().getSeriesDTO().getLeaderboardId(),
                     true, // this information came from place, now hard coded. check with frank
                     autoExpandLastRaceColumn);
 
             initWidget(ourUiBinder.createAndBindUi(this));
 
-            leaderboard.setLeaderboard(leaderboardPanel,
+            leaderboard.setMultiLeaderboard(leaderboardPanel,
                     currentPresenter.getAutoRefreshTimer());
 
             leaderboardPanel.addLeaderboardUpdateListener(this);
 
             if (currentPresenter.getCtx().getSeriesDTO().getState() != EventSeriesState.RUNNING) {
-                this.leaderboard.hideRefresh();
+                // TODO: this.leaderboard.hideRefresh();
             } else {
                 // TODO: start autorefresh?
             }
@@ -119,7 +116,7 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
 
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        this.leaderboard.updatedLeaderboard(leaderboard, true);
+        this.leaderboard.updatedMultiLeaderboard(leaderboard, true); // TODO hard coded
     }
 
     @Override
@@ -132,14 +129,14 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
 
     }
 
-    interface MyBinder extends UiBinder<HTMLPanel, EventSeriesLeaderboardTabView> {
+    interface MyBinder extends UiBinder<HTMLPanel, EventSeriesRegattaLeaderboardTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public EventSeriesLeaderboardPlace placeToFire() {
-        return new EventSeriesLeaderboardPlace(currentPresenter.getCtx());
+    public EventSeriesRegattaLeaderboardPlace placeToFire() {
+        return new EventSeriesRegattaLeaderboardPlace(currentPresenter.getCtx());
     }
 
 

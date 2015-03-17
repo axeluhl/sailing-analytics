@@ -16,6 +16,7 @@ public class EventSeriesViewDTO implements IsSerializable {
     private boolean onRemoteServer;
     private String logoImageURL;
     private boolean hasMedia;
+    private boolean hasAnalytics;
 
     private String leaderboardId;
 
@@ -33,7 +34,6 @@ public class EventSeriesViewDTO implements IsSerializable {
         }
     }
 
-    // TODO: frank, please implement
     public EventSeriesState state;
 
     public EventSeriesViewDTO() {
@@ -109,5 +109,13 @@ public class EventSeriesViewDTO implements IsSerializable {
 
     public void setState(EventSeriesState state) {
         this.state = state;
+    }
+
+    public boolean isHasAnalytics() {
+        return hasAnalytics;
+    }
+
+    public void setHasAnalytics(boolean hasAnalytics) {
+        this.hasAnalytics = hasAnalytics;
     }
 }

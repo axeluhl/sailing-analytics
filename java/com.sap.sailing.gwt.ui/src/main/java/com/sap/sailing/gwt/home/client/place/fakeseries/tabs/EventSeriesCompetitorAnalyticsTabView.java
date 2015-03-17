@@ -37,7 +37,7 @@ public class EventSeriesCompetitorAnalyticsTabView extends Composite implements
     
     @Override
     public TabView.State getState() {
-        return TabView.State.VISIBLE;
+        return currentPresenter.getCtx().getSeriesDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override

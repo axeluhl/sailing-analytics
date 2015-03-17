@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.home.client.place.events;
 
 import com.google.gwt.animation.client.Animation;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 
@@ -13,13 +16,30 @@ public class CollapseAnimation extends Animation {
     private int effectiveHeight;
 
     public CollapseAnimation(Element elementToAnimate) {
-        this.elementToAnimate = elementToAnimate;
+        this(elementToAnimate, true);
     }
     
     public CollapseAnimation(Element elementToAnimate, int effectiveHeight) {
-        this(elementToAnimate);
+        this(elementToAnimate, false);
         this.effectiveHeight = effectiveHeight;
-        show = false;
+    }
+    
+    public CollapseAnimation(Element elementToAnimate, boolean showInitial) {
+        this.elementToAnimate = elementToAnimate;
+        this.show = showInitial;
+        elementToAnimate.getStyle().setOverflow(Overflow.HIDDEN);
+        if(!showInitial) {
+            elementToAnimate.getStyle().setDisplay(Display.NONE);
+        }
+    }
+    
+    @Override
+    protected void onComplete() {
+        if(!show) {
+            elementToAnimate.getStyle().setDisplay(Display.NONE);
+        } else {
+            elementToAnimate.getStyle().clearHeight();
+        }
     }
 
     @Override
@@ -30,17 +50,17 @@ public class CollapseAnimation extends Animation {
         elementToAnimate.getStyle().setHeight(effectiveHeight * progress, Unit.PX);
     }
     
-    protected void onStart() {
-        super.onStart();
-        elementToAnimate.getStyle().setOverflow(Overflow.HIDDEN);
-    }
-    
     public void animate(boolean show) {
-        if(this.show && effectiveHeight == 0) {
-            effectiveHeight = elementToAnimate.getOffsetHeight();
+        if(show && effectiveHeight == 0) {
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    effectiveHeight = elementToAnimate.getScrollHeight();
+                }
+            });
         }
+        elementToAnimate.getStyle().clearDisplay();
         this.show = show;
         run(500);
     }
-
 }

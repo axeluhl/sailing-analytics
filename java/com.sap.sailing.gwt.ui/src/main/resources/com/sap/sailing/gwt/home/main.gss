@@ -259,49 +259,49 @@ figcaption {
 .label[data-labeltype='finished']:before {
   border-right-color: #8ab54e;
 }
-.label[datalabeltype='progress'] {
+.label[data-labeltype='progress'] {
   background-color: #f0ab00;
   vertical-align: middle;
   margin-top: -0.416666666666667em;
 }
-.label[datalabeltype='progress']:before {
+.label[data-labeltype='progress']:before {
   border-right-color: #f0ab00;
 }
-.label[datalabeltype='upcoming'] {
+.label[data-labeltype='upcoming'] {
   color: #333;
   background-color: #eee;
   vertical-align: middle;
   margin-top: -0.416666666666667em;
 }
-.label[datalabeltype='upcoming']:before {
+.label[data-labeltype='upcoming']:before {
   border-right-color: #eee;
 }
-.label[datalabeltype='new'],
-.label[datalabeltype='updated'] {
+.label[data-labeltype='new'],
+.label[data-labeltype='updated'] {
   background-color: #f0ab00;
   text-transform: uppercase;
   vertical-align: middle;
 }
-.label[datalabeltype='new']:before,
-.label[datalabeltype='updated']:before {
+.label[data-labeltype='new']:before,
+.label[data-labeltype='updated']:before {
   border-right-color: #f0ab00;
 }
-.label[datalabeltype='ess'] {
+.label[data-labeltype='ess'] {
   background-color: #a71724;
 }
-.label[datalabeltype='ess']:before {
+.label[data-labeltype='ess']:before {
   border-right-color: #a71724;
 }
-.label[datalabeltype='worldcup'] {
+.label[data-labeltype='worldcup'] {
   background-color: #c79242;
 }
-.label[datalabeltype='worldcup']:before {
+.label[data-labeltype='worldcup']:before {
   border-right-color: #c79242;
 }
-.label[datalabeltype='bundesliga'] {
+.label[data-labeltype='bundesliga'] {
   background-color: #005fa7;
 }
-.label[datalabeltype='bundesliga']:before {
+.label[data-labeltype='bundesliga']:before {
   border-right-color: #005fa7;
 }
 .morelink {
