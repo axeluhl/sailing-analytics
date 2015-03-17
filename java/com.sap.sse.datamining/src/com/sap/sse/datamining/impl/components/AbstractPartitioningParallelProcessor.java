@@ -45,7 +45,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
                         public void run() {
                             try {
                                 ResultType result = instruction.call();
-                                if (isResultValid(result)) {
+                                if (isResultValid(result) && !gotAborted) {
                                     forwardResultToReceivers(result);
                                 }
                             } catch (Exception e) {
@@ -134,7 +134,6 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     @Override
     public void abort() {
         gotAborted = true;
-        executor.shutdownNow();
         tellResultReceiversToAbort();
         LOGGER.log(Level.INFO, "The processing got aborted.");
     }
