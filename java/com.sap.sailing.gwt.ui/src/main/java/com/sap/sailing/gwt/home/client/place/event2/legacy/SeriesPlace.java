@@ -1,15 +1,15 @@
-package com.sap.sailing.gwt.home.client.place.regatta;
+package com.sap.sailing.gwt.home.client.place.event2.legacy;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 
-public class RegattaPlace extends AbstractBasePlace {
+public class SeriesPlace extends AbstractBasePlace {
     private final String eventUuidAsString;
     private final String leaderboardIdAsNameString;
     private final Boolean showRaceDetails;
     private final Boolean showSettings;
-    private final RegattaNavigationTabs navigationTab;
+    private final SeriesNavigationTabs navigationTab;
     
     private final static String PARAM_EVENTID = "eventId";
     private final static String PARAM_LEADERBOARD_NAME = "leaderboardName";
@@ -17,9 +17,9 @@ public class RegattaPlace extends AbstractBasePlace {
     private final static String PARAM_SHOW_SETTINGS = "showSettings";
     private final static String PARAM_NAVIGATION_TAB = "navigationTab"; 
 
-    public enum RegattaNavigationTabs { Leaderboard, CompetitorAnalytics };
+    public enum SeriesNavigationTabs { OverallLeaderboard, RegattaLeaderboards, CompetitorAnalytics };
     
-    public RegattaPlace(String url) {
+    public SeriesPlace(String url) {
         super(url);
         eventUuidAsString = getParameter(PARAM_EVENTID);
         leaderboardIdAsNameString = getParameter(PARAM_LEADERBOARD_NAME);
@@ -27,13 +27,13 @@ public class RegattaPlace extends AbstractBasePlace {
         showSettings = Boolean.valueOf(getParameter(PARAM_SHOW_SETTINGS));
         String paramNavTab = getParameter(PARAM_NAVIGATION_TAB);
         if(paramNavTab != null) {
-            navigationTab = RegattaNavigationTabs.valueOf(paramNavTab);
+            navigationTab = SeriesNavigationTabs.valueOf(paramNavTab);
         } else {
-            navigationTab = RegattaNavigationTabs.Leaderboard;
+            navigationTab = SeriesNavigationTabs.OverallLeaderboard;
         }
     }
 
-    public RegattaPlace(String eventUuidAsString, RegattaNavigationTabs navigationTab, String leaderboardIdAsNameString, Boolean showRaceDetails, Boolean showSettings) {
+    public SeriesPlace(String eventUuidAsString, SeriesNavigationTabs navigationTab, String leaderboardIdAsNameString, Boolean showRaceDetails, Boolean showSettings) {
         super(PARAM_EVENTID, eventUuidAsString, PARAM_NAVIGATION_TAB, navigationTab.name(), PARAM_LEADERBOARD_NAME, leaderboardIdAsNameString, 
                 PARAM_SHOW_RACE_DETAILS, String.valueOf(showRaceDetails), PARAM_SHOW_SETTINGS,  String.valueOf(showSettings));
         this.eventUuidAsString = eventUuidAsString;
@@ -51,7 +51,7 @@ public class RegattaPlace extends AbstractBasePlace {
         return eventUuidAsString;
     }
 
-    public RegattaNavigationTabs getNavigationTab() {
+    public SeriesNavigationTabs getNavigationTab() {
         return navigationTab;
     }
 
@@ -67,15 +67,15 @@ public class RegattaPlace extends AbstractBasePlace {
         return showSettings;
     }
 
-    public static class Tokenizer implements PlaceTokenizer<RegattaPlace> {
+    public static class Tokenizer implements PlaceTokenizer<SeriesPlace> {
         @Override
-        public String getToken(RegattaPlace place) {
+        public String getToken(SeriesPlace place) {
             return place.getParametersAsToken();
         }
 
         @Override
-        public RegattaPlace getPlace(String url) {
-            return new RegattaPlace(url);
+        public SeriesPlace getPlace(String url) {
+            return new SeriesPlace(url);
         }
     }
 }

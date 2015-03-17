@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.regattaanalytics;
+package com.sap.sailing.gwt.home.client.place.fakeseries;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -25,13 +26,16 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
- * A class managing analytical data on the regatta level (like leaderboard, regatta rank, etc.)
+ * A viewer for an overall series leaderboard. Additionally the viewer can render a chart for the series leaderboard and
+ * a MultiLeaderboardPanel where the user can select to show one leaderboard of the series.
  * 
  * @author Frank Mittag (c163874)
+ * @author Axel Uhl (d043530)
  */
-public class RegattaAnalyticsDataManager {
-    private LeaderboardPanel leaderboardPanel;
+public class EventSeriesAnalyticsDataManager {
+    private LeaderboardPanel overallLeaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
+    private MultiLeaderboardPanel multiLeaderboardPanel;
 
     private final CompetitorSelectionModel competitorSelectionProvider;
     private final AsyncActionsExecutor asyncActionsExecutor;
@@ -40,28 +44,28 @@ public class RegattaAnalyticsDataManager {
     private final SailingServiceAsync sailingService;
     private final Timer timer;
     private final int MAX_COMPETITORS_IN_CHART = 30; 
-    
-    public RegattaAnalyticsDataManager(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
+
+    public EventSeriesAnalyticsDataManager(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.timer = timer;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
-        this.leaderboardPanel = null;
+        this.overallLeaderboardPanel = null;
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
+    public LeaderboardPanel createOverallLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
-        if(leaderboardPanel == null) {
-            leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
+        if(overallLeaderboardPanel == null) {
+            overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */
                     true, false, false);
         }
-        return leaderboardPanel;
+        return overallLeaderboardPanel;
     }
 
     public MultiCompetitorLeaderboardChart createMultiCompetitorChart(String leaderboardName, DetailType chartDetailType) {
@@ -72,17 +76,28 @@ public class RegattaAnalyticsDataManager {
         }
         return multiCompetitorChart;
     }
-    
+
+    public MultiLeaderboardPanel createMultiLeaderboardPanel(LeaderboardSettings leaderboardSettings,
+            String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
+            String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
+        if(multiLeaderboardPanel == null) {
+            multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer, true /*isEmbedded*/,
+                    preselectedLeaderboardName, preselectedRace, errorReporter, StringMessages.INSTANCE,
+                    userAgent, showRaceDetails, autoExpandLastRaceColumn);
+        }
+        return multiLeaderboardPanel;
+    }
+
+    public MultiLeaderboardPanel getMultiLeaderboardPanel() {
+        return multiLeaderboardPanel;
+    }
+
     public LeaderboardPanel getLeaderboardPanel() {
-        return leaderboardPanel;
+        return overallLeaderboardPanel;
     }
 
     public MultiCompetitorLeaderboardChart getMultiCompetitorChart() {
         return multiCompetitorChart;
-    }
-
-    public CompetitorSelectionModel getCompetitorSelectionProvider() {
-        return competitorSelectionProvider;
     }
 
     public void showCompetitorChart(DetailType chartDetailType) {
@@ -110,6 +125,10 @@ public class RegattaAnalyticsDataManager {
         multiCompetitorChart.timeChanged(timer.getTime(), null);
     }
 
+    public CompetitorSelectionModel getCompetitorSelectionProvider() {
+        return competitorSelectionProvider;
+    }
+
     public void hideCompetitorChart() {
         MultiCompetitorLeaderboardChart multiCompetitorChart = getMultiCompetitorChart();
         if (multiCompetitorChart != null) {
@@ -117,11 +136,15 @@ public class RegattaAnalyticsDataManager {
             timer.removeTimeListener(multiCompetitorChart);
         }
     }
-
-    public void showLeaderboardSettingsDialog() {
-        showComponentSettingsDialog(leaderboardPanel, null);
-    }
     
+    public void showOverallLeaderboardSettingsDialog() {
+        showComponentSettingsDialog(overallLeaderboardPanel, null);
+    }
+
+    public void showRegattaLeaderboardsSettingsDialog() {
+        showComponentSettingsDialog(multiLeaderboardPanel, null);
+    }
+
     public void showChartSettingsDialog() {
         showComponentSettingsDialog(multiCompetitorChart, null);
     }

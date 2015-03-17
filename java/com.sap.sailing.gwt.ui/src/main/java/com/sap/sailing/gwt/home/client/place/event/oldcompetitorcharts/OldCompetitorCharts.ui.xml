@@ -5,7 +5,6 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
-    <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalyticsResources" />
 		<g:HTMLPanel>
 			<div class="{res.mediaCss.grid}" style="margin-left:5rem;margin-right:5rem;">
 			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">

@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
-import com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalyticsDataManager;
+import com.sap.sailing.gwt.home.client.place.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;

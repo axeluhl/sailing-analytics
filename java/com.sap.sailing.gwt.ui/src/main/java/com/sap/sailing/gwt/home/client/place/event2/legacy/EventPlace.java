@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event;
+package com.sap.sailing.gwt.home.client.place.event2.legacy;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.client.place.event2;
 
 import java.util.List;
 
-import com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalyticsDataManager;
+import com.sap.sailing.gwt.home.client.place.event2.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;

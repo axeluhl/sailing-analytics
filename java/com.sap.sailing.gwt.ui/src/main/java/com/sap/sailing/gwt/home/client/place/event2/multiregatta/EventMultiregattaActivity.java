@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.home.client.place.event2.multiregatta;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
-import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.AbstractEventActivity;
+import com.sap.sailing.gwt.home.client.place.event2.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 
