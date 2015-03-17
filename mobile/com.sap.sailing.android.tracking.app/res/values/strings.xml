@@ -46,6 +46,8 @@
 	<string name="hour">Hour</string>
 	<string name="minute">Minute</string>
 	<string name="day">Day</string>
+    <string name="longitude">Longitude</string>
+    <string name="latitude">Latitude</string>
 	<string name="please_listen_to_announcements">Please listen to the announcements</string>
 	<string name="your_regattas">Your Regattas:</string>
 	<string name="close">Close</string>
@@ -67,8 +69,12 @@
 	<string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
 	<string name="warning">Warning</string>
 	<string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
+    <string name="set_position">Set Position</string>
+    <string name="reset_position">Reset Position</string>
 	<string name="knots">knots</string>
 	<string name="preferences">Preferences</string>
+    <string name="course_type">Course Type</string>
+    <string name="marks">Marks</string>
 	
 	<string name="initial_timer_text_zerozero" translatable="false">00:00:00</string>
 	<string name="initial_hyphen" translatable="false">-</string>
