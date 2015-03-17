@@ -164,7 +164,7 @@ public class PolarDataMiner {
         filteringResultReceivers.add(regressionPerAngleClusterGroupingProcessor);
            
         Processor<GPSFixMovingWithPolarContext, GPSFixMovingWithPolarContext> filteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria(backendPolarSheetGenerationSettings.getNumberOfLeadingCompetitorsToInclude()));
+                GPSFixMovingWithPolarContext.class, executor, filteringResultReceivers, new PolarFixFilterCriteria(backendPolarSheetGenerationSettings.getPctOfLeadingCompetitorsToInclude()));
 
         Collection<Processor<GPSFixMovingWithPolarContext, ?>> enrichingResultReceivers = Arrays
                 .asList(filteringProcessor);
@@ -210,7 +210,7 @@ public class PolarDataMiner {
     private void processFix(TrackedRace trackedRace, GPSFixMovingWithOriginInfo fixWithOriginInfo) {
         // Pre Filter for performance. We don't need to run wind estimation for this filter
         if (PolarFixFilterCriteria.isInLeadingCompetitors(trackedRace, fixWithOriginInfo.getCompetitor(),
-                backendPolarSheetGenerationSettings.getNumberOfLeadingCompetitorsToInclude())) {
+                backendPolarSheetGenerationSettings.getPctOfLeadingCompetitorsToInclude())) {
             synchronized (fixQueue) {
                 if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 3) {
                     fixQueue.add(fixWithOriginInfo);

@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.mining;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -24,20 +25,20 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
      * 0 if every competitor should be included.
      * 1 if only the leading competitor should be included and so on.
      */
-    private final int numberOfLeadingCompetitorsToInclude;
+    private final double pctOfLeadingCompetitorsToInclude;
 
     /**
      * 
-     * @param numberOfLeadingCompetitorsToInclude 
-     *                          0 if every competitor should be included.<br \>
-     *                          1 if only the leading competitor should be included and so on.
+     * @param pctOfLeadingCompetitorsToInclude 
+     *                          0 if no competitor should be included.<br \>
+     *                          1 if every competitor should be included
      */
-    public PolarFixFilterCriteria(int numberOfLeadingCompetitorsToInclude) {
-        this.numberOfLeadingCompetitorsToInclude = numberOfLeadingCompetitorsToInclude;
+    public PolarFixFilterCriteria(double pctOfLeadingCompetitorsToInclude) {
+        this.pctOfLeadingCompetitorsToInclude = pctOfLeadingCompetitorsToInclude;
     }
     
     public PolarFixFilterCriteria() {
-        this.numberOfLeadingCompetitorsToInclude = 0;
+        this.pctOfLeadingCompetitorsToInclude = 0;
     }
 
     @Override
@@ -51,9 +52,9 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         boolean beforeFinishTime = isBeforeFinishTime(element);
         boolean noDirectionChange = !hasDirectionChange(element);
         boolean isInLeadingCompetitors = true;
-        if (numberOfLeadingCompetitorsToInclude > 0) {
+        if (pctOfLeadingCompetitorsToInclude > 0) {
             isInLeadingCompetitors = isInLeadingCompetitors(element.getRace(), element.getCompetitor(),
-                    numberOfLeadingCompetitorsToInclude);
+                    pctOfLeadingCompetitorsToInclude);
         }
         return (importantDataIsNotNull && hasLegType && afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors);
     }
@@ -73,7 +74,7 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         return element.getLegType() != null;
     }
     
-    public static boolean isInLeadingCompetitors(TrackedRace trackedRace, Competitor competitor, int numberOfLeadingCompetitorsToInclude) {
+    public static boolean isInLeadingCompetitors(TrackedRace trackedRace, Competitor competitor, double numberOfLeadingCompetitorsToInclude) {
         boolean result;
         if (!trackedRace.isLive(new MillisecondsTimePoint(System.currentTimeMillis()))) {
             result = isInLeadingCompetitorsForReplayRace(trackedRace, competitor, numberOfLeadingCompetitorsToInclude);
@@ -84,13 +85,14 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
     }
 
     private static boolean isInLeadingCompetitorsForLiveRace(TrackedRace trackedRace, Competitor competitor,
-            int numberOfLeadingCompetitorsToInclude) {
+            double pctOfLeadingCompetitorsToInclude) {
         boolean result = false;
         Waypoint wayPoint = trackedRace.getMarkPassings(competitor).last().getWaypoint();
         if (wayPoint != null) {
-            Iterator<MarkPassing> markPassingsAtCompetitorsLastWayPoint = trackedRace
-                    .getMarkPassingsInOrder(trackedRace.getRace().getCourse().getLastWaypoint()).iterator();
-            for (int i = 0; i < numberOfLeadingCompetitorsToInclude; i++) {
+            Iterator<MarkPassing> markPassingsAtCompetitorsLastWayPoint = trackedRace.getMarkPassingsInOrder(
+                    trackedRace.getRace().getCourse().getLastWaypoint()).iterator();
+            for (int i = 0; i < ((int) Math.max(pctOfLeadingCompetitorsToInclude
+                    * getNumberOfCompetitors(trackedRace), 1)); i++) {
                 if (markPassingsAtCompetitorsLastWayPoint.hasNext()) {
                     if (markPassingsAtCompetitorsLastWayPoint.next().getCompetitor().equals(competitor)) {
                         result = true;
@@ -105,11 +107,30 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         return result;
     }
 
-    public static boolean isInLeadingCompetitorsForReplayRace(TrackedRace trackedRace, Competitor competitor, int numberOfLeadingCompetitorsToInclude) {
+    private static int getNumberOfCompetitors(TrackedRace trackedRace) {
+        Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
+        int result;
+        if (competitors instanceof Collection) {
+            Collection<Competitor> competitorCollection = (Collection<Competitor>) competitors;
+            result = competitorCollection.size();
+        } else {
+            int counter = 0;
+            Iterator<Competitor> iterator = competitors.iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
+                counter++;
+            }
+            result = counter;
+        }
+        return result;
+    }
+
+    public static boolean isInLeadingCompetitorsForReplayRace(TrackedRace trackedRace, Competitor competitor, double pctOfLeadingCompetitorsToInclude) {
         boolean result = false;
         Iterator<MarkPassing> finishPassings = trackedRace
                 .getMarkPassingsInOrder(trackedRace.getRace().getCourse().getLastWaypoint()).iterator();
-        for (int i = 0; i < numberOfLeadingCompetitorsToInclude; i++) {
+        for (int i = 0; i < ((int) Math.max(pctOfLeadingCompetitorsToInclude
+                * getNumberOfCompetitors(trackedRace), 1)); i++) {
             if (finishPassings.hasNext()) {
                 if (finishPassings.next().getCompetitor().equals(competitor)) {
                     result = true;
