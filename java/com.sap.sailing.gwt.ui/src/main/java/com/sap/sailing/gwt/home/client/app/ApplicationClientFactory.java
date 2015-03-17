@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.client.app;
 
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsClientFactory;
 import com.sap.sailing.gwt.home.client.place.contact.ContactClientFactory;
+import com.sap.sailing.gwt.home.client.place.error.ErrorClientFactory;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.events.EventsClientFactory;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaClientFactory;
@@ -14,6 +15,6 @@ import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewClientFactory;
 
 public interface ApplicationClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
     EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory, SearchResultClientFactory,
-    WhatsNewClientFactory, RegattaClientFactory, SeriesClientFactory {
+ WhatsNewClientFactory, RegattaClientFactory, SeriesClientFactory, ErrorClientFactory {
     HomePlacesNavigator getHomePlacesNavigator();
 }

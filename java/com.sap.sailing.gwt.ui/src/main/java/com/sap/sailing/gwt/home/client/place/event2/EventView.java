@@ -75,4 +75,6 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
      */
     void navigateTabsTo(PLACE place);
     
+    void showErrorInCurrentTab(IsWidget errorView);
+
 }

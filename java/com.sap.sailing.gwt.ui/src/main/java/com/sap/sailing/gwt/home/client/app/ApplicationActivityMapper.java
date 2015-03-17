@@ -7,6 +7,8 @@ import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsActivityProxy;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactActivityProxy;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
+import com.sap.sailing.gwt.home.client.place.error.ErrorActivityProxy;
+import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.EventActivityProxy;
@@ -48,6 +50,8 @@ public class ApplicationActivityMapper implements ActivityMapper {
     public Activity getActivity(Place place) {
         if (place instanceof AboutUsPlace) {
             return new AboutUsActivityProxy((AboutUsPlace) place, clientFactory);
+        } else if (place instanceof ErrorPlace) {
+            return new ErrorActivityProxy((ErrorPlace) place, clientFactory);
         } else if (place instanceof ContactPlace) {
             return new ContactActivityProxy((ContactPlace) place, clientFactory);
         } else if (place instanceof EventPlace) {

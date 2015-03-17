@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event2;
+package com.sap.sailing.gwt.home.client.place.event2.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;

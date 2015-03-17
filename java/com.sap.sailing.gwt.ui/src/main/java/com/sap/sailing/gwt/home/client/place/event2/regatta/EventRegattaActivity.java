@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event.regattaanalytics.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.event2.AbstractEventActivity;
 import com.sap.sailing.gwt.home.client.place.event2.EventContext;
+import com.sap.sailing.gwt.home.client.place.event2.EventView;
 import com.sap.sailing.gwt.home.client.place.event2.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -93,6 +94,11 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     public Timer getAutoRefreshTimer() {
         return autoRefreshTimer;
+    }
+
+    @Override
+    protected EventView<AbstractEventRegattaPlace, ?> getView() {
+        return currentView;
     }
 
 }

@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event2.multiregatta.EventMultiregattaActivity;
@@ -27,7 +28,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
             HomePlacesNavigator homePlacesNavigator) {
         this.place = place;
         this.homePlacesNavigator = homePlacesNavigator;
-        ctx = this.place.getCtx();
+        this.ctx = this.place.getCtx();
         this.clientFactory = clientFactory;
     }
 
@@ -41,75 +42,28 @@ public class EventActivityProxy extends AbstractActivityProxy {
             clientFactory.getSailingService().getEventViewById(eventUUID, new AsyncCallback<EventViewDTO>() {
                 @Override
                 public void onSuccess(final EventViewDTO event) {
-                    if (event != null) {
-                        ctx.updateContext(event);
-                        afterEventLoad();
-                    } else {
-                        // TODO
-                        // createErrorView("No such event with UUID " + eventUUID, null, panel);
-                    }
+                    ctx.updateContext(event);
+                    afterEventLoad();
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    // TODO
-                    // createErrorView("Error while loading the event with service getEventById()", caught, panel);
+                    // TODO @FM: extract text?
+                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the event with service getEventById()");
+                    // TODO @FM: reload sinnvoll hier?
+                    errorPlace.setComingFrom(place);
+                    clientFactory.getPlaceController().goTo(errorPlace);
                 }
             });
 
         }
-        
-        
-        
     }
 
     private void afterEventLoad() {
         if(place instanceof EventDefaultPlace) {
             place = getRealPlace();
         }
-        
-        loadRegattaStructureIfNeeded();
-    }
-    
-    protected void loadRegattaStructureIfNeeded() {
-//        // TODO do this in a nicer way
-//        if(place instanceof MultiregattaRegattasPlace || place instanceof RegattaRacesPlace) {
-//            final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-//
-//            final EventViewDTO eventDTO = ctx.getEventDTO();
-//            
-//            clientFactory.getSailingService().getRegattaStructureOfEvent(eventDTO.id,
-//                    new AsyncCallback<List<RaceGroupDTO>>() {
-//                        @Override
-//                        public void onSuccess(List<RaceGroupDTO> raceGroups) {
-//                            if (raceGroups.size() > 0) {
-//                                for (LeaderboardGroupDTO leaderboardGroupDTO : eventDTO.getLeaderboardGroups()) {
-//                                    final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
-//                                    if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
-//                                        currentPresenter.getTimerForClientServerOffset().setLivePlayDelayInMillis(
-//                                                leaderboardGroupDTO
-//                                                .getAverageDelayToLiveInMillis());
-//                                    }
-//                                    currentPresenter.getTimerForClientServerOffset().adjustClientServerOffset(
-//                                            clientTimeWhenRequestWasSent,
-//                                            leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
-//                                }
-//                                afterLoad();
-//                            } else {
-//                                // createEventWithoutRegattasView(event, panel);
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onFailure(Throwable caught) {
-//                            // createErrorView(
-//                            // "Error while loading the regatta structure with service getRegattaStructureOfEvent()",
-//                            // caught, panel);
-//                        }
-//                    });
-//        } else {
-            afterLoad();
-//        }
+        afterLoad();
     }
 
     private void afterLoad() {

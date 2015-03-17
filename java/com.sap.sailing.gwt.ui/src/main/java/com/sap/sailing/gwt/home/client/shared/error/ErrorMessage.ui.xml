@@ -13,7 +13,7 @@
 		            <div ui:field="errorMessageDetail" class="{local_res.css.error_message_detail}"></div>
 		        </div>
 		        <div>
-		            <span class="{local_res.css.reload_page_message}"><ui:text from='{i18n.pleaseTryAgain}'/></span>
+		            <div class="{local_res.css.reload_page_message}"><ui:text from='{i18n.pleaseTryAgain}'/></div>
 		            <g:Anchor ui:field="reloadPageAnchor" href="javascript:;" styleName="{res.mainCss.button}"><ui:text from='{i18n.reloadPage}'/></g:Anchor>
 				</div>
 		    </div>

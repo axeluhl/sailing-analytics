@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.seriesanalytics.EventSeriesAnalyticsDataManager;
-import com.sap.sailing.gwt.home.client.place.event2.EventParamUtils;
+import com.sap.sailing.gwt.home.client.place.event2.utils.EventParamUtils;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;

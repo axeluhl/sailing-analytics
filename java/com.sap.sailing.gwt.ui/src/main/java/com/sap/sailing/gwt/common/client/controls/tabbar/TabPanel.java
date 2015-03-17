@@ -15,6 +15,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
@@ -129,6 +130,15 @@ public class TabPanel<PRESENTER> extends Composite {
 
     }
     
+    /**
+     * Directly sets the content of the current widget until it is reloaded/ reset
+     * 
+     * @param widget
+     */
+    public void overrideCurrentContentInTab(IsWidget widget) {
+        tabContentPanelUi.setWidget(widget);
+    }
+
     public void addBreadcrumbItem(String title, String link, final Runnable runnable) {
         breadcrumbs.addBreadcrumbItem(title, link, runnable);
     }
