@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.recent.RecentEventTeaser;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;

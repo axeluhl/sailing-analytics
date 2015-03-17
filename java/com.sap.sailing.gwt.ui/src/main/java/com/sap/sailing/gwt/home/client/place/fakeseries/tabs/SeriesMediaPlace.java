@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.fakeseries.tabs;
 
 import com.google.gwt.place.shared.Prefix;
-import com.sap.sailing.gwt.home.client.place.event2.EventPrefixes;
+import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesTabPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;

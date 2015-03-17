@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard;
-import com.sap.sailing.gwt.home.client.place.event2.utils.EventParamUtils;
+import com.sap.sailing.gwt.home.client.place.event.utils.EventParamUtils;
 import com.sap.sailing.gwt.home.client.place.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
