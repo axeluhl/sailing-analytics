@@ -208,11 +208,15 @@ public class PolarDataMiner {
     }
 
     private void processFix(TrackedRace trackedRace, GPSFixMovingWithOriginInfo fixWithOriginInfo) {
-        synchronized (fixQueue) {
-            if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 3) {
-                fixQueue.add(fixWithOriginInfo);
-            } else {
-                enrichingProcessor.processElement(fixWithOriginInfo);
+        // Pre Filter for performance. We don't need to run wind estimation for this filter
+        if (PolarFixFilterCriteria.isInLeadingCompetitors(trackedRace, fixWithOriginInfo.getCompetitor(),
+                backendPolarSheetGenerationSettings.getNumberOfLeadingCompetitorsToInclude())) {
+            synchronized (fixQueue) {
+                if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 3) {
+                    fixQueue.add(fixWithOriginInfo);
+                } else {
+                    enrichingProcessor.processElement(fixWithOriginInfo);
+                }
             }
         }
     }

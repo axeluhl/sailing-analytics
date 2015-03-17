@@ -5,6 +5,7 @@ import java.util.Iterator;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.components.FilterCriterion;
 
 public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithPolarContext> {
@@ -50,7 +52,8 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         boolean noDirectionChange = !hasDirectionChange(element);
         boolean isInLeadingCompetitors = true;
         if (numberOfLeadingCompetitorsToInclude > 0) {
-            isInLeadingCompetitors = isInLeadingCompetitors(element);
+            isInLeadingCompetitors = isInLeadingCompetitors(element.getRace(), element.getCompetitor(),
+                    numberOfLeadingCompetitorsToInclude);
         }
         return (importantDataIsNotNull && hasLegType && afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors);
     }
@@ -69,14 +72,46 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
     private boolean hasLegType(GPSFixMovingWithPolarContext element) {
         return element.getLegType() != null;
     }
+    
+    public static boolean isInLeadingCompetitors(TrackedRace trackedRace, Competitor competitor, int numberOfLeadingCompetitorsToInclude) {
+        boolean result;
+        if (!trackedRace.isLive(new MillisecondsTimePoint(System.currentTimeMillis()))) {
+            result = isInLeadingCompetitorsForReplayRace(trackedRace, competitor, numberOfLeadingCompetitorsToInclude);
+        } else {
+            result = isInLeadingCompetitorsForLiveRace(trackedRace, competitor, numberOfLeadingCompetitorsToInclude);
+        }
+        return result;
+    }
 
-    private boolean isInLeadingCompetitors(GPSFixMovingWithPolarContext element) {
+    private static boolean isInLeadingCompetitorsForLiveRace(TrackedRace trackedRace, Competitor competitor,
+            int numberOfLeadingCompetitorsToInclude) {
         boolean result = false;
-        Iterator<MarkPassing> finishPassings = element.getRace()
-                .getMarkPassingsInOrder(element.getRace().getRace().getCourse().getLastWaypoint()).iterator();
+        Waypoint wayPoint = trackedRace.getMarkPassings(competitor).last().getWaypoint();
+        if (wayPoint != null) {
+            Iterator<MarkPassing> markPassingsAtCompetitorsLastWayPoint = trackedRace
+                    .getMarkPassingsInOrder(trackedRace.getRace().getCourse().getLastWaypoint()).iterator();
+            for (int i = 0; i < numberOfLeadingCompetitorsToInclude; i++) {
+                if (markPassingsAtCompetitorsLastWayPoint.hasNext()) {
+                    if (markPassingsAtCompetitorsLastWayPoint.next().getCompetitor().equals(competitor)) {
+                        result = true;
+                        break;
+                    }
+                } else {
+                    result = false;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    public static boolean isInLeadingCompetitorsForReplayRace(TrackedRace trackedRace, Competitor competitor, int numberOfLeadingCompetitorsToInclude) {
+        boolean result = false;
+        Iterator<MarkPassing> finishPassings = trackedRace
+                .getMarkPassingsInOrder(trackedRace.getRace().getCourse().getLastWaypoint()).iterator();
         for (int i = 0; i < numberOfLeadingCompetitorsToInclude; i++) {
             if (finishPassings.hasNext()) {
-                if (finishPassings.next().getCompetitor().equals(element.getCompetitor())) {
+                if (finishPassings.next().getCompetitor().equals(competitor)) {
                     result = true;
                     break;
                 }
