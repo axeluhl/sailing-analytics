@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event2;
 
+import com.google.gwt.place.shared.Prefix;
 
 public class EventDefaultPlace extends AbstractEventPlace {
 
@@ -11,6 +12,7 @@ public class EventDefaultPlace extends AbstractEventPlace {
         super(eventUuidAsString);
     }
 
+    @Prefix(EventPrefixes.EventDefault)
     public static class Tokenizer extends AbstractEventPlace.Tokenizer<EventDefaultPlace> {
         @Override
         protected EventDefaultPlace getRealPlace(EventContext context) {

@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-public class EventSeriesRegattaLeaderboardTabView extends Composite implements SeriesTabView<EventSeriesRegattaLeaderboardPlace>,
+public class EventSeriesRegattaLeaderboardTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
         LeaderboardUpdateListener {
 
     private SeriesView.Presenter currentPresenter;
@@ -39,8 +39,8 @@ public class EventSeriesRegattaLeaderboardTabView extends Composite implements S
     }
 
     @Override
-    public Class<EventSeriesRegattaLeaderboardPlace> getPlaceClassForActivation() {
-        return EventSeriesRegattaLeaderboardPlace.class;
+    public Class<EventSeriesLeaderboardsPlace> getPlaceClassForActivation() {
+        return EventSeriesLeaderboardsPlace.class;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class EventSeriesRegattaLeaderboardTabView extends Composite implements S
     }
 
     @Override
-    public void start(final EventSeriesRegattaLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
+    public void start(final EventSeriesLeaderboardsPlace myPlace, final AcceptsOneWidget contentArea) {
 
         contentArea.setWidget(new Placeholder());
 
@@ -136,8 +136,8 @@ public class EventSeriesRegattaLeaderboardTabView extends Composite implements S
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public EventSeriesRegattaLeaderboardPlace placeToFire() {
-        return new EventSeriesRegattaLeaderboardPlace(currentPresenter.getCtx());
+    public EventSeriesLeaderboardsPlace placeToFire() {
+        return new EventSeriesLeaderboardsPlace(currentPresenter.getCtx());
     }
 
 

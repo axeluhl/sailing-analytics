@@ -26,8 +26,8 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesRegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardsPlace;
 import com.sap.sailing.gwt.home.client.place.regatta.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultActivityProxy;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
@@ -159,9 +159,9 @@ public class ApplicationActivityMapper implements ActivityMapper {
         
         switch (place.getNavigationTab()) {
             case OverallLeaderboard:
-                return new EventSeriesLeaderboardPlace(context);
+                return new EventSeriesOverallLeaderboardPlace(context);
             case RegattaLeaderboards:
-                return new EventSeriesRegattaLeaderboardPlace(context);
+                return new EventSeriesLeaderboardsPlace(context);
             case CompetitorAnalytics:
                 return new EventSeriesCompetitorAnalyticsPlace(context);
         }

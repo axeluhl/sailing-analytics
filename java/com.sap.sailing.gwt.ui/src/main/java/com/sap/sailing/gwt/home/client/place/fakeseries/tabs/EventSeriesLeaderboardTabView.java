@@ -28,7 +28,7 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class EventSeriesLeaderboardTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardPlace>,
+public class EventSeriesLeaderboardTabView extends Composite implements SeriesTabView<EventSeriesOverallLeaderboardPlace>,
         LeaderboardUpdateListener {
 
     private SeriesView.Presenter currentPresenter;
@@ -42,8 +42,8 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
     }
 
     @Override
-    public Class<EventSeriesLeaderboardPlace> getPlaceClassForActivation() {
-        return EventSeriesLeaderboardPlace.class;
+    public Class<EventSeriesOverallLeaderboardPlace> getPlaceClassForActivation() {
+        return EventSeriesOverallLeaderboardPlace.class;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
     }
 
     @Override
-    public void start(final EventSeriesLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
+    public void start(final EventSeriesOverallLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
 
         contentArea.setWidget(new Placeholder());
 
@@ -138,8 +138,8 @@ public class EventSeriesLeaderboardTabView extends Composite implements SeriesTa
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
-    public EventSeriesLeaderboardPlace placeToFire() {
-        return new EventSeriesLeaderboardPlace(currentPresenter.getCtx());
+    public EventSeriesOverallLeaderboardPlace placeToFire() {
+        return new EventSeriesOverallLeaderboardPlace(currentPresenter.getCtx());
     }
 
 
