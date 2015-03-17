@@ -90,6 +90,8 @@ public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog
         sailingService.getCompetitorRegistrations(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
         // TODO marks from RegattaLog also?
 
+        sailingService.getMarksInRaceLogsAndTrackedRaces(leaderboardName, itemSelectionPanel.getSetMarksCallback());
+        
         qrWidget = new DeviceMappingQRCodeWidget(stringMessages, new DeviceMappingQRCodeWidget.URLFactory() {
             @Override
             public String createURL(String baseUrlWithoutTrailingSlash, String mappedItemType, String mappedItemId)

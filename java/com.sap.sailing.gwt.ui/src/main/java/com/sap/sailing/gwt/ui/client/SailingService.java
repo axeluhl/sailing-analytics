@@ -577,4 +577,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
+
+    Collection<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName);
 }
