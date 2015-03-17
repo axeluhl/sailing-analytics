@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesClientFactory;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
+import com.sap.sse.gwt.client.mvp.ErrorView;
 
 public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> extends AbstractActivity implements SeriesView.Presenter {
 
@@ -85,7 +86,11 @@ public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> 
         clientFactory.getSailingService().getMediaForEventSeries(ctx.getSeriesDTO().getId(), new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
-                callback.onFailure(caught);
+             // TODO @FM: extract error message
+                ErrorView errorView = clientFactory.createErrorView("Load media failure for series", caught);
+                getView().showErrorInCurrentTab(errorView);
+                // TODO: notify callback of failure?
+                // callback.onFailure(caught);
             }
             
             @Override
@@ -100,4 +105,6 @@ public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> 
     public boolean hasMedia() {
         return ctx.getSeriesDTO().isHasMedia();
     }
+
+    protected abstract SeriesView<PLACE, ?> getView();
 }

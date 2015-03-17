@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
+import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.client.place.series.SeriesClientFactory;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
@@ -35,19 +36,17 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
             clientFactory.getSailingService().getEventSeriesViewById(seriesUUID, new AsyncCallback<EventSeriesViewDTO>() {
                 @Override
                 public void onSuccess(final EventSeriesViewDTO event) {
-                    if (event != null) {
-                        ctx.updateContext(event);
-                        afterLoad();
-                    } else {
-                        // TODO
-                        // createErrorView("No such event with UUID " + eventUUID, null, panel);
-                    }
+                    ctx.updateContext(event);
+                    afterLoad();
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    // TODO
-                    // createErrorView("Error while loading the event with service getEventById()", caught, panel);
+                 // TODO @FM: extract text?
+                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the series with service getEventSeriesViewById()");
+                    // TODO @FM: reload sinnvoll hier?
+                    errorPlace.setComingFrom(place);
+                    clientFactory.getPlaceController().goTo(errorPlace);
                 }
             });
 

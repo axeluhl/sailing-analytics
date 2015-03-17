@@ -6,6 +6,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
@@ -82,5 +83,10 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
                 placeNavigation.goToPlace();
             }
         });
+    }
+    
+    @Override
+    public void showErrorInCurrentTab(IsWidget errorView) {
+        tabPanelUi.overrideCurrentContentInTab(errorView);
     }
 }
