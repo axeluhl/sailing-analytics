@@ -537,7 +537,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .entity("Could not find a race column '" + raceColumnName + "' in leaderboard '" + leaderboardName + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        Fleet fleet = leaderboard.getFleet(fleetName);
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
         if (fleet == null) {
             return Response.status(Status.NOT_FOUND)
                     .entity("Could not find fleet '" + fleetName + "' in leaderboard '" + leaderboardName + "'.")
