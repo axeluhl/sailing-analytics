@@ -5696,6 +5696,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setEndDate(event.getEndDate().asDate());
         dto.setState(calculateEventState(event.isPublic(), dto.getStartDate(), dto.getEndDate()));
         dto.setVenue(event.getVenue().getName());
+        // TODO set correct value: dto.setLocation(location);
         dto.setThumbnailImageURL(SailingServiceUtil.findEventThumbnailImageUrlAsString(event));
     }
 }

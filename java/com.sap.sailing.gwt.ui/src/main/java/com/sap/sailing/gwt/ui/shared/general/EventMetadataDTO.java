@@ -6,7 +6,7 @@ public class EventMetadataDTO extends EventReferenceDTO {
 
     private EventState state;
     private String venue;
-    private String venueCountry;
+    private String location;
     private Date startDate;
     private Date endDate;
     private String thumbnailImageURL;
@@ -34,13 +34,13 @@ public class EventMetadataDTO extends EventReferenceDTO {
     public void setVenue(String venue) {
         this.venue = venue;
     }
-
-    public String getVenueCountry() {
-        return venueCountry;
+    
+    public void setLocation(String location) {
+        this.location = location;
     }
-
-    public void setVenueCountry(String venueCountry) {
-        this.venueCountry = venueCountry;
+    
+    public String getLocation() {
+        return location;
     }
 
     public Date getStartDate() {
@@ -67,4 +67,17 @@ public class EventMetadataDTO extends EventReferenceDTO {
         this.thumbnailImageURL = thumbnailImageURL;
     }
 
+    public String getLocationOrVenue() {
+        if(location != null && !location.isEmpty()) {
+            return location;
+        }
+        return venue;
+    }
+    
+    public String getLocationAndVenue() {
+        if(location != null && !location.isEmpty()) {
+            return location + ", " + venue;
+        }
+        return venue;
+    }
 }

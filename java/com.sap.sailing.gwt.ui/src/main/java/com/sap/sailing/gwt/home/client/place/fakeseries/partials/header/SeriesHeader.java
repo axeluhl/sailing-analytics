@@ -79,12 +79,12 @@ public class SeriesHeader extends Composite {
         
         for (EventMetadataDTO eventOfSeries : series.getEvents()) {
             if(eventOfSeries.getState() == EventState.PLANNED) {
-                InlineLabel eventLabel = new InlineLabel(eventOfSeries.getVenue());
+                InlineLabel eventLabel = new InlineLabel(eventOfSeries.getLocationOrVenue());
                 // TODO light gray color
                 eventLabel.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
                 venues.add(eventLabel);
             } else {
-                Anchor eventAnchor = new Anchor(eventOfSeries.getVenue());
+                Anchor eventAnchor = new Anchor(eventOfSeries.getLocationOrVenue());
                 eventAnchor.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
                 final PlaceNavigation<EventDefaultPlace> eventNavigation = presenter.getEventNavigation(eventOfSeries.getId());
                 eventAnchor.setHref(eventNavigation.getTargetUrl());

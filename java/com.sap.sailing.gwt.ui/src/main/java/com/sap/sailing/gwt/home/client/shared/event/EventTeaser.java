@@ -79,11 +79,7 @@ public class EventTeaser extends Composite {
             eventTeaserWithState.removeFromParent();
         }
         
-        String venueString = event.getVenue();
-        if(event.getVenueCountry()!= null && ! event.getVenueCountry().isEmpty()) {
-            venueString += ", " + event.getVenueCountry();
-        }
-        venue.setInnerText(venueString);
+        venue.setInnerText(event.getLocationOrVenue());
         eventDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
 
         final StringBuilder thumbnailUrlBuilder = new StringBuilder("url('");
