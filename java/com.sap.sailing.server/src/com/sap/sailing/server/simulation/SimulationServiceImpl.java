@@ -53,6 +53,7 @@ public class SimulationServiceImpl implements SimulationService {
     final private SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval> cache;
     final private RacingEventService racingEventService;
     final private ScheduledExecutorService scheduler;
+    final private HashMap<LegIdentifier, Listener> listeners;
     final private long WAIT_MILLIS = 20000; // milliseconds to wait until earliest cache-update for simulation
     
     public SimulationServiceImpl(Executor executor, RacingEventService racingEventService) {
@@ -60,15 +61,19 @@ public class SimulationServiceImpl implements SimulationService {
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.racingEventService = racingEventService;
         if (racingEventService != null) {
+            this.listeners = new HashMap<LegIdentifier, Listener>();
+            // TODO: cleanup listeners when tracked-race is removed from server => admin-console?
             this.cache = new SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>(
                     new SmartFutureCache.AbstractCacheUpdater<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>() {
                         @Override
                         public SimulationResults computeCacheUpdate(LegIdentifier key, SmartFutureCache.EmptyUpdateInterval updateInterval) throws Exception {
-                            boolean firstTime = cache.get(key, false /* waitForLatest */) == null;
-                            if (firstTime) {
+                            boolean noListener = !listeners.containsKey(key);
+                            if (noListener) {
                                 TrackedRace trackedRace = racingEventService.getTrackedRace(key);
                                 if (trackedRace != null) {
-                                    trackedRace.addListener(new Listener(trackedRace, key, scheduler));
+                                    Listener listener = new Listener(trackedRace, key, scheduler);
+                                    listeners.put(key, listener);
+                                    trackedRace.addListener(listener);
                                 }
                             }
                             SimulationResults results = computeSimulationResults(key);
@@ -76,6 +81,7 @@ public class SimulationServiceImpl implements SimulationService {
                         }
                     }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
         } else {
+            this.listeners = null;
             this.cache = null;
         }
     }
