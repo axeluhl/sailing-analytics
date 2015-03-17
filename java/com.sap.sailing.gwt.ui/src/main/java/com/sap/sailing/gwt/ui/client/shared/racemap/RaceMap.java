@@ -1060,6 +1060,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 boolean isVisibleLeaderInfoComplete = false;
                 boolean isLegTypeKnown = false;
                 WindTrackInfoDTO windDataForLegMiddle = null;
+                LegInfoDTO legInfoDTO = null;
                 if (visibleLeaderInfo != null
                         && visibleLeaderInfo.getA() > 0
                         && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()
@@ -1068,14 +1069,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                 .getCombinedWindOnLegMiddle(visibleLeaderInfo.getA() - 1)) != null
                         && !windDataForLegMiddle.windFixes.isEmpty()) {
                     isVisibleLeaderInfoComplete = true;
-                    LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
+                    legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
                     if (legInfoDTO.legType != null) {
                         isLegTypeKnown = true;
                     }
                     lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                 }
                 if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null && lastBoatFix.speedWithBearing != null) {
-                    LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
                     double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible
                                                           // area of the map; bug 616
                     double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().getBoatClass()

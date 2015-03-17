@@ -6,7 +6,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.dto.PositionDTO;
-import com.sap.sse.common.Util;
 
 /**
  * A weigher that uses a {@link PositionDTO} and a {@link Date} to compute a confidence based on space and time
@@ -24,9 +23,8 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  * 
  */
-public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO, Date>> {
+public class PositionDTOWeigher implements Weigher<PositionDTO> {
     private static final long serialVersionUID = -262428237738496818L;
-    private final long halfConfidenceAfterMilliseconds;
     private final double halfConfidenceDistanceNauticalMiles;
     private final AverageLatitudeProvider averageLatitudeDegProvider;
     
@@ -35,9 +33,7 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
         double getCosineOfAverageLatitude();
     }
     
-    public PositionDTOAndDateWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance,
-            AverageLatitudeProvider averageLatitudeDegProvider) {
-        this.halfConfidenceAfterMilliseconds = halfConfidenceAfterMilliseconds;
+    public PositionDTOWeigher(Distance halfConfidenceDistance, AverageLatitudeProvider averageLatitudeDegProvider) {
         this.halfConfidenceDistanceNauticalMiles = halfConfidenceDistance.getNauticalMiles();
         this.averageLatitudeDegProvider = averageLatitudeDegProvider;
     }
@@ -47,17 +43,10 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
     }
     
     @Override
-    public double getConfidence(Util.Pair<PositionDTO, Date> fix, Util.Pair<PositionDTO, Date> request) {
-        final double timeConfidence;
-        {
-            double x = Math.abs(fix.getB().getTime() - request.getB().getTime());
-            double c = halfConfidenceAfterMilliseconds;
-            double y = halfConfidenceAfterMilliseconds;
-            timeConfidence = c / (x + y);
-        }
+    public double getConfidence(PositionDTO fix, PositionDTO request) {
         final double distanceConfidence;
-        if (fix.getA() != null && request.getA() != null) {
-            double x = getApproximateNauticalMileDistance(fix.getA(), request.getA());
+        if (fix != null && request != null) {
+            double x = getApproximateNauticalMileDistance(fix, request);
             double c = halfConfidenceDistanceNauticalMiles;
             double y = c;
             distanceConfidence = c / (x + y);
@@ -65,7 +54,7 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
             distanceConfidence = 0.0001; // if we have no information about the position, let's not distort an
                                          // otherwise spatially-resolved field
         }
-        return distanceConfidence * timeConfidence;
+        return distanceConfidence;
     }
 
     private double getApproximateNauticalMileDistance(PositionDTO p1, PositionDTO p2) {
