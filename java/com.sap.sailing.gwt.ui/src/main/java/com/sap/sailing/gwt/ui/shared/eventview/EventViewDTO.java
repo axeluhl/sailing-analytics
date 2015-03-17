@@ -8,27 +8,13 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.general.LabelType;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 public class EventViewDTO extends EventDTO {
     private static final long serialVersionUID = -7100030301376959817L;
 
     public enum EventType {
         SINGLE_REGATTA, MULTI_REGATTA, SERIES_EVENT
-    }
-
-    public enum EventState {
-        PLANNED(LabelType.NONE), UPCOMING(LabelType.UPCOMMING), RUNNING(LabelType.LIVE), FINISHED(LabelType.FINISHED);
-        
-        private final LabelType stateMarker;
-
-        private EventState(LabelType stateMarker) {
-            this.stateMarker = stateMarker;
-        }
-        
-        public LabelType getStateMarker() {
-            return stateMarker;
-        }
     }
 
     private ArrayList<RegattaMetadataDTO> regattas = new ArrayList<>();

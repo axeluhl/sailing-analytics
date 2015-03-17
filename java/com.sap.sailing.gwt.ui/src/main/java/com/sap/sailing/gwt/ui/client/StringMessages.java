@@ -471,6 +471,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String overallLeaderboardSelection();
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
+    String upcoming();
+    String inProgress();
     String passedTo(String name);
     String gapChangeSinceLegStartInSeconds();
     String sideToWhichMarkAtLegStartWasRounded();

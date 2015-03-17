@@ -47,7 +47,7 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
 
         for (EventMetadataDTO eventOfSeries : currentPresenter.getCtx().getSeriesDTO().getEvents()) {
             final PlaceNavigation<EventDefaultPlace> eventNavigation = currentPresenter.getEventNavigation(eventOfSeries.getId());
-            RecentEventTeaser eventTeaser = new RecentEventTeaser(eventNavigation, eventOfSeries);
+            RecentEventTeaser eventTeaser = new RecentEventTeaser(eventNavigation, eventOfSeries, eventOfSeries.getState().getStateMarker());
             eventsContainer.add(eventTeaser);
         }
         

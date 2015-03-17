@@ -133,6 +133,7 @@ public class Header extends Composite {
         } else if(place instanceof SolutionsPlace) {
             setActiveLink(solutionsPageLink);
         }
+        // TODO add more rules
     }
     
     private void setActiveLink(Anchor link) {

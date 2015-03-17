@@ -25,15 +25,13 @@ public enum LabelType {
     PROGRESS("progress") {
         @Override
         public String getLabel() {
-//            return StringMessages.INSTANCE.;
-            return null;
+            return StringMessages.INSTANCE.inProgress();
         }
     },
-    UPCOMMING("upcomming") {
+    UPCOMING("upcoming") {
         @Override
         public String getLabel() {
-//            return StringMessages.INSTANCE.;
-            return null;
+            return StringMessages.INSTANCE.upcoming();
         }
     },
     NEW_("new") {

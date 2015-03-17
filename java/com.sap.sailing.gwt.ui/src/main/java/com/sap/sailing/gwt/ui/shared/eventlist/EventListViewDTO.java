@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared.eventlist;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 public class EventListViewDTO implements IsSerializable {
     

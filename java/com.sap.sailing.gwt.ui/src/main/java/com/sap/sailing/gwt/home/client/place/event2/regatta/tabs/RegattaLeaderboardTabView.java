@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
