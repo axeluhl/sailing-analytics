@@ -3,18 +3,16 @@ package com.sap.sailing.gwt.home.client.app;
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
-import com.sap.sailing.gwt.home.client.place.event2.AbstractEventPlace;
-import com.sap.sailing.gwt.home.client.place.event2.EventDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.event2.multiregatta.tabs.MultiregattaRegattasPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.AbstractEventRegattaPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.event2.regatta.tabs.RegattaRacesPlace;
+import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaRegattasPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaCompetitorAnalyticsPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
-import com.sap.sailing.gwt.home.client.place.series.SeriesPlace;
-import com.sap.sailing.gwt.home.client.place.series.SeriesPlace.SeriesNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
@@ -91,13 +89,6 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     public PlaceNavigation<RegattaLeaderboardPlace> getLeaderboardNavigation(String eventUuidAsString, String regattaId, String baseUrl, boolean isOnRemoteServer) {
         RegattaLeaderboardPlace regattaPlace = new RegattaLeaderboardPlace(eventUuidAsString, regattaId);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, regattaPlace);
-    }
-
-    // TODO replace with the new places / remove when the code that calls this is gone
-    /** this place will be merged into the common series event view as tab later on */
-    public PlaceNavigation<SeriesPlace> getSeriesAnalyticsNavigation(String eventUuidAsString, SeriesNavigationTabs navigationTab, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
-        SeriesPlace seriesPlace = new SeriesPlace(eventUuidAsString, navigationTab, leaderboardIdAsNameString, true, true);
-        return createPlaceNavigation(baseUrl, isOnRemoteServer, seriesPlace);
     }
 
     public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {

@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.fakeseries;
 
 import com.google.gwt.place.shared.Prefix;
-import com.sap.sailing.gwt.home.client.place.event2.EventPrefixes;
+import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 
 
 public class SeriesDefaultPlace extends AbstractSeriesPlace {
