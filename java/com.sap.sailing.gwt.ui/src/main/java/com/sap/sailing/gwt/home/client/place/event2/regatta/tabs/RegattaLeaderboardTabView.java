@@ -88,13 +88,14 @@ public class RegattaLeaderboardTabView extends Composite implements RegattaTabVi
                     preselectedRace, //
                     "leaderboardGroupName", // TODO: keep using magic string? ask frank!
                     leaderboardName, //
-                    true, // this information came from place, now hard coded. check with frank
+                    true,
                     autoExpandLastRaceColumn);
 
             initWidget(ourUiBinder.createAndBindUi(this));
 
             leaderboard.setLeaderboard(leaderboardPanel,
                     currentPresenter.getAutoRefreshTimer());
+
 
             leaderboardPanel.addLeaderboardUpdateListener(this);
 
