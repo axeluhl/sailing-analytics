@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-public class EventSeriesRegattaLeaderboardTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
+public class EventSeriesLeaderboardsTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
         LeaderboardUpdateListener {
 
     private SeriesView.Presenter currentPresenter;
@@ -33,8 +33,7 @@ public class EventSeriesRegattaLeaderboardTabView extends Composite implements S
     @UiField
     protected OldMultiLeaderboard leaderboard;
 
-
-    public EventSeriesRegattaLeaderboardTabView() {
+    public EventSeriesLeaderboardsTabView() {
 
     }
 
@@ -130,7 +129,7 @@ public class EventSeriesRegattaLeaderboardTabView extends Composite implements S
 
     }
 
-    interface MyBinder extends UiBinder<HTMLPanel, EventSeriesRegattaLeaderboardTabView> {
+    interface MyBinder extends UiBinder<HTMLPanel, EventSeriesLeaderboardsTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
