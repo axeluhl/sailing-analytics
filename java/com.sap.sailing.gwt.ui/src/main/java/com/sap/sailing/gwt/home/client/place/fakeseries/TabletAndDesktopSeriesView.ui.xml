@@ -56,7 +56,7 @@
         <tabs:EventSeriesLeaderboardTabView />
       </c:tabcontent>
       <c:tabcontent title="{tm.regattaLeaderboards}">
-        <tabs:EventSeriesRegattaLeaderboardTabView />
+        <tabs:EventSeriesLeaderboardsTabView />
       </c:tabcontent>
       <c:tabcontent title="{i18n.competitorsAnalytics}">
         <tabs:EventSeriesCompetitorAnalyticsTabView />
