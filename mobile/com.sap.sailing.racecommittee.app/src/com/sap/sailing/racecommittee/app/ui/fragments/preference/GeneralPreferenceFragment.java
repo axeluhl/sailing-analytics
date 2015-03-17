@@ -46,6 +46,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         
         bindPreferenceSummaryToSet(findPreference(R.string.preference_course_areas_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_mail_key));
+        bindPreferenceToListEntry(findPreference(R.string.preference_theme_key), getString(R.string.preference_theme_default));
     }
 
     private void setupPolling() {

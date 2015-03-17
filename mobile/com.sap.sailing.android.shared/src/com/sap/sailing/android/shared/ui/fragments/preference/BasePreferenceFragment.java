@@ -14,6 +14,7 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.utils.MultiplePreferenceChangeListener;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 
@@ -90,7 +91,27 @@ public class BasePreferenceFragment extends PreferenceFragment {
             }
         });
     }
-    
+
+    protected static void bindPreferenceToListEntry(Preference preference, final String defaultValue) {
+        final ListPreference listPreference = (ListPreference) preference;
+        if (listPreference.getValue() == null) {
+            listPreference.setValue(defaultValue);
+        }
+        listPreference.setSummary(listPreference.getEntry());
+        addOnPreferenceChangeListener(preference, new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference pref, Object newValue) {
+                int index = listPreference.findIndexOfValue(String.valueOf(newValue));
+                if (index < 0) {
+                    index = listPreference.findIndexOfValue(defaultValue);
+                }
+                String summary = listPreference.getEntries()[index].toString();
+                pref.setSummary(summary);
+                return true;
+            }
+        });
+    }
+
     protected static void addOnPreferenceChangeListener(Preference preference, OnPreferenceChangeListener newListener) {
         OnPreferenceChangeListener oldListener = preference.getOnPreferenceChangeListener();
         if (oldListener == null) {

@@ -86,10 +86,10 @@
     <bool name="preference_offline_default">false</bool>
 
     <string name="preference_theme_key" translatable="false">theme</string>
-    <string name="preference_theme_default">0</string>
+    <string name="preference_theme_default">dark</string>
     <string-array name="preference_theme_values">
-        <item>0</item>
-        <item>1</item>
+        <item>dark</item>
+        <item>light</item>
     </string-array>
     <string-array name="preference_theme_entries">
         <item>Dark</item>

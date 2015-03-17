@@ -18,7 +18,6 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemeHelper.setTheme(this);
 
         Bundle arguments = getIntent().getExtras();
 

@@ -20,6 +20,7 @@ import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRe
 import com.sap.sailing.racecommittee.app.ui.fragments.MainPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
 import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class PreferenceActivity extends ActionBarActivity {
 
@@ -35,6 +36,8 @@ public class PreferenceActivity extends ActionBarActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ThemeHelper.setTheme(this);
 
         setContentView(R.layout.preference_view);
 
