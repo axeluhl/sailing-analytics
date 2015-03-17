@@ -58,7 +58,7 @@
 }
 @media (min-width: 61em) {
   .eventsoverviewupcoming_header_ticker {
-    /* TODO breaks the layout: width: 77%;*/
+    width: 77%;
   }
 }
 .eventsoverviewupcoming_header_tickerhide {
