@@ -8,12 +8,18 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sse.util.SmartFutureCache;
+import com.sap.sse.util.SmartFutureCache.CacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sse.util.SmartFutureCache.UpdateInterval;
 
@@ -246,5 +252,125 @@ public class SmartFutureCacheTest {
         System.out.println(computeCacheUpdateCount[0]);
         System.out.println("Tasks re-used: "+sfc.getSmartFutureCacheTaskReuseCounter());
         assertEquals(updatesTriggeredFor.size(), updateWasCalled.size());
+    }
+    
+    @Test
+    public void testIfNoNewFuturesAreRunForTheSameKeyWhileCurrentTaskIsSleeping() throws InterruptedException, BrokenBarrierException {
+        final AtomicInteger callCounter = new AtomicInteger(0);
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
+
+            @Override
+            public Integer computeCacheUpdate(Integer key, EmptyUpdateInterval updateInterval) throws Exception {
+                synchronized (callCounter) {
+                    if (key == 1) {
+                        callCounter.incrementAndGet();
+                    }
+                }
+                barrier.await();
+                barrier.await();
+                barrier.await();
+                //For this test case value will be same as key, when updated.
+                return key;
+            }
+
+            @Override
+            public Integer provideNewCacheValue(Integer key, Integer oldCacheValue, Integer computedCacheUpdate,
+                    EmptyUpdateInterval updateInterval) {
+                return computedCacheUpdate;
+            }
+        };
+        SmartFutureCache<Integer, Integer, EmptyUpdateInterval> testCache = new SmartFutureCache<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>(
+                cacheUpdater, "SmartFutureTestCacheLock");
+        testCache.triggerUpdate(1, null);
+        barrier.await();
+        assertEquals(1, callCounter.get());
+        testCache.triggerUpdate(1, null);
+        barrier.await();
+        // Counter should still be one here, since first future is still sleeping at this point
+        assertEquals(1, callCounter.get());
+        barrier.await();
+        
+        // Now the first future should be done, and the second update should have been called, so the counter should be 2
+        barrier.await();
+        assertEquals(2, callCounter.get());
+        barrier.await();
+        barrier.await();
+    }
+    
+    @Test
+    public void testTriggerAndGetWithWaitForLatestWithRunningFutureOnSuspendedCache() throws InterruptedException, BrokenBarrierException {
+        final AtomicInteger callCounter = new AtomicInteger(0);
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
+
+            @Override
+            public Integer computeCacheUpdate(Integer key, EmptyUpdateInterval updateInterval) throws Exception {
+                synchronized (callCounter) {
+                    if (key == 1) {
+                        callCounter.incrementAndGet();
+                    }
+                }
+                barrier.await();
+                barrier.await();
+                barrier.await();
+                return callCounter.get();
+            }
+
+            @Override
+            public Integer provideNewCacheValue(Integer key, Integer oldCacheValue, Integer computedCacheUpdate,
+                    EmptyUpdateInterval updateInterval) {
+                return computedCacheUpdate;
+            }
+        };
+        SmartFutureCache<Integer, Integer, EmptyUpdateInterval> testCache = new SmartFutureCache<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>(
+                cacheUpdater, "SmartFutureTestCacheLock");
+        testCache.triggerUpdate(1, null);
+        barrier.await();
+        assertEquals(1, callCounter.get());
+        testCache.triggerUpdate(1, null);
+        testCache.suspend();
+
+        CyclicBarrier getResultBarrier = new CyclicBarrier(2);
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                //FIXME find a way to guarantee that get is called, while the first computeUpdate Future is still running
+                int result = testCache.get(1, true);
+                assertEquals(2, result);
+                try {
+                    getResultBarrier.await();
+                } catch (InterruptedException | BrokenBarrierException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        thread.start();
+        barrier.await();
+        
+        barrier.await();
+
+        barrier.await();
+        assertEquals(2, callCounter.get());
+        //Trigger again. This update should not retrigger add another future, since cache is disabled and no
+        // get with waitForLatest is called afterwards
+        testCache.triggerUpdate(1, null);
+        barrier.await();
+        barrier.await();
+        //Wait for get Thread to finish with getting and asserting
+        getResultBarrier.await();
+        assertEquals(2, callCounter.get());
+        //Check if no compute Thread is waiting at barrier.
+        boolean timeOut = false;
+        try {
+            barrier.await(10, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            timeOut = true;
+        }
+        assertTrue(timeOut);
+        
+        
     }
 }
