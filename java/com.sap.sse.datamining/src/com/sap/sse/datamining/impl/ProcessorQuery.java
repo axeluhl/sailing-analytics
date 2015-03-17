@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
@@ -39,6 +40,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     private boolean workIsDone = false;
     private boolean queryTimedOut = false;
     private boolean queryGotAborted = false;
+    private boolean severeFailureOccured = false;
     
     /**
      * Creates a query that returns a result without any additional data (like the calculation time or the retrieved data amount).<br>
@@ -92,7 +94,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         waitTillWorkIsDone(timeoutInMillis);
         final long endTime = System.nanoTime();
         
-        logOccuredFailures();
+        logOccuredFailuresAndThrowSevereFailure();
 
         long calculationTimeInNanos = endTime - startTime;
         Map<GroupKey, AggregatedType> results = resultReceiver.getResult();
@@ -117,7 +119,9 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
                     if (queryTimedOut) {
                         LOGGER.log(Level.INFO, "The query processing timed out.");
                     } else if (queryGotAborted) {
-                        LOGGER.log(Level.INFO, "The query got aborted.");
+                        LOGGER.log(Level.INFO, "The query processing got aborted.");
+                    } else if (severeFailureOccured) {
+                        LOGGER.log(Level.INFO, "A severe failure occured during the query processing.");
                     } else {
                         LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
                     }
@@ -132,12 +136,13 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         synchronized (monitorObject) {
             while (!workIsDone) {
                 monitorObject.wait();
-                if ((queryTimedOut || queryGotAborted) && !workIsDone) {
+                if ((queryTimedOut || queryGotAborted || severeFailureOccured) && !workIsDone) {
                     firstProcessor.abort();
                     workingThread.interrupt();
                     if (queryTimedOut) {
                         throw new TimeoutException("The query processing timed out");
                     }
+                    break;
                 }
             }
             workIsDone = false;
@@ -159,9 +164,12 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         }
     }
 
-    private void logOccuredFailures() {
+    private void logOccuredFailuresAndThrowSevereFailure() {
         for (Throwable failure : resultReceiver.getOccuredFailures()) {
             LOGGER.log(Level.SEVERE, "An error occured during the processing of an instruction: ", failure);
+        }
+        if (severeFailureOccured) {
+            throw new RuntimeException("A severe failure occured during the processing of an instruction", resultReceiver.getSevereFailure());
         }
     }
     
@@ -182,6 +190,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         private final ReentrantLock resultsLock;
         private Map<GroupKey, AggregatedType> results;
         private List<Throwable> occuredFailures;
+        private Throwable severeFailure;
         
         public ProcessResultReceiver() {
             resultsLock = new ReentrantLock();
@@ -201,7 +210,19 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         
         @Override
         public void onFailure(Throwable failure) {
-            occuredFailures.add(failure);
+            if (isSevereFailure(failure)) {
+                severeFailure = failure;
+                synchronized (monitorObject) {
+                    severeFailureOccured = true;
+                    monitorObject.notify();
+                }
+            } else {
+                occuredFailures.add(failure);
+            }
+        }
+
+        private boolean isSevereFailure(Throwable failure) {
+            return !(failure instanceof Exception) || failure instanceof RejectedExecutionException;
         }
 
         @Override
@@ -224,6 +245,10 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         
         public List<Throwable> getOccuredFailures() {
             return occuredFailures;
+        }
+        
+        public Throwable getSevereFailure() {
+            return severeFailure;
         }
 
         @Override

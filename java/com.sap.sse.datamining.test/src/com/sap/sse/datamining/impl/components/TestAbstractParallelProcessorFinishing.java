@@ -38,8 +38,18 @@ public class TestAbstractParallelProcessorFinishing {
 
     @Test
     public void testProcessFinishing() {
-        processor.processElement(1);
-        ConcurrencyTestsUtil.tryToFinishTheProcessorInAnotherThread(processor);
+        Thread worker = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                processor.processElement(1);
+                try {
+                    processor.finish();
+                } catch (InterruptedException e) {
+                    fail("The test was interrupted: " + e.getMessage());
+                }
+            }
+        });
+        worker.start();
         ConcurrencyTestsUtil.sleepFor(100); //Wait till the processor tries to finish
         assertThat(receiverWasToldToFinish, is(false));
         instructionIsWorking = false; //The processer should be able to finish after the instruction is done
@@ -53,10 +63,6 @@ public class TestAbstractParallelProcessorFinishing {
             @Override
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
             }
         };
     }

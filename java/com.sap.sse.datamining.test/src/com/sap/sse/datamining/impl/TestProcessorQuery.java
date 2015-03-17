@@ -17,7 +17,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.common.Util.Pair;
@@ -52,16 +51,11 @@ public class TestProcessorQuery {
     
     private final static ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     
-    private ProcessorFactory processorFactory;
+    private final static ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
 
     private boolean receivedElementOrFinished;
     private boolean receivedAbort;
     
-    @Before
-    public void initializeProcessorFactory() {
-        processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
-    }
-
     @Test
     public void testStandardWorkflow() throws InterruptedException, ExecutionException {
         Collection<Number> dataSource = createDataSource();
