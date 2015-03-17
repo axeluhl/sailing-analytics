@@ -647,7 +647,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // next, do the full thing; being the later call, if request throttling kicks in, the later call
                     // supersedes the earlier call which may get dropped then
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
-                            useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true, (simulationOverlay==null ? null : simulationOverlay.getLegIdentifier()));
+                            useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true, (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null));
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY,
                             getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
                     
@@ -725,7 +725,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         final GetRaceMapDataAction result;
         if (!fromTimes.isEmpty()) {
             result = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(),
-                race, useNullAsTimePoint() ? null : newTime, fromTimes, toTimes, /* extrapolate */true, (simulationOverlay==null ? null: simulationOverlay.getLegIdentifier()));
+                race, useNullAsTimePoint() ? null : newTime, fromTimes, toTimes, /* extrapolate */true, (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null));
         } else {
             result = null;
         }
