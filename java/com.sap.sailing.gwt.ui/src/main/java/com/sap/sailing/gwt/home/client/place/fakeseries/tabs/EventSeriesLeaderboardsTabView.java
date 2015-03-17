@@ -98,7 +98,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
 
 
             regattaAnalyticsManager.hideCompetitorChart();
-
+            leaderboardPanel.setVisible(true);
 
             contentArea.setWidget(this);
         } else {
