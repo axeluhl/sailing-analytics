@@ -155,14 +155,14 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaId) {
         return homePlacesNavigator
-                .getEventNavigation(getPlaceForRegattaRaces(regattaId), new RegattaRacesPlace.Tokenizer(), ctx
+.getEventNavigation(getPlaceForRegattaRaces(regattaId), ctx
                         .getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
     }
 
     @Override
     public PlaceNavigation<RegattaRacesPlace> getRegattaNavigation(String regattaId) {
         return homePlacesNavigator
-                .getEventNavigation(getPlaceForRegattaRaces(regattaId), new RegattaRacesPlace.Tokenizer(), ctx
+.getEventNavigation(getPlaceForRegattaRaces(regattaId), ctx
                         .getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
     }
 
