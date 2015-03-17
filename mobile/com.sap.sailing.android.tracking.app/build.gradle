@@ -5,12 +5,12 @@ def verCode = 1
 
 android {
     buildToolsVersion "22.0.0"
-    compileSdkVersion 21
+    compileSdkVersion 22
 
     defaultConfig {
         applicationId packageName
         minSdkVersion 14
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionCode verCode
         versionName "$verCode - Altitude"
         useJack false // not working on Windows yet
@@ -70,7 +70,7 @@ dependencies {
     compile "net.hockeyapp.android:HockeySDK:3.5.0"
 
     /* support libraries */
-    compile "com.android.support:appcompat-v7:21.0.3"
+    compile "com.android.support:appcompat-v7:22.0.0"
 
     /* Google Play Services */
     compile "com.google.android.gms:play-services-location:6.5.87"
