@@ -37,6 +37,8 @@ public class CollapseAnimation extends Animation {
     protected void onComplete() {
         if(!show) {
             elementToAnimate.getStyle().setDisplay(Display.NONE);
+        } else {
+            elementToAnimate.getStyle().clearHeight();
         }
     }
 
