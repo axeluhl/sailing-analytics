@@ -26,6 +26,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.ws.http.HTTPException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -36,6 +37,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
@@ -62,17 +64,25 @@ import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v1/leaderboards")
@@ -514,8 +524,6 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         return response;
     }
     
-    private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
-    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{leaderboardName}/marks")
@@ -523,7 +531,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
         //TODO also look for defined marks in RegattaLog?
-        
+
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             return Response.status(Status.NOT_FOUND)
@@ -559,6 +567,82 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             array.add(markSerializer.serialize(mark));
         }
         
-        return Response.ok(array.toJSONString(), MediaType.APPLICATION_JSON).build();
+        return Response.ok(array.toJSONString(), MediaType.APPLICATION_JSON).build();   
+    }
+
+    private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
+    
+    private final JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> fixesDeserializer =
+            new FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer();
+    
+    protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+        return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
+    }
+    
+    @POST
+    @Path("{leaderboardName}/marks/{markId}/gps_fixes")
+    @Consumes(MediaType.APPLICATION_JSON)
+    /**
+     * Add the fixes to the GPSFixStore and create mappings for each fix in the RegattaLog.
+     * @param json
+     * @param leaderboardName
+     * @param markId
+     * @return
+     * @throws HTTPException
+     */
+    public Response pingMark(String json, @PathParam("leaderboardName") String leaderboardName,
+            @PathParam("markId") String markId) throws HTTPException {
+        logger.fine("Post issued to " + this.getClass().getName());
+        
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + leaderboardName + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        RegattaLog regattaLog = null;
+        if (leaderboard instanceof HasRegattaLike) {
+            regattaLog = ((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog();
+        } else {
+            return Response.status(Status.BAD_REQUEST)
+                    .entity("Leaderboard '" + leaderboardName + "' does not have an attached RegattaLog.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        Mark mark = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markId);
+        if (mark == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a mark with ID '" + markId + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        Pair<UUID, List<GPSFixMoving>> data = null;
+        try {
+            Object requestBody = JSONValue.parseWithException(json);
+            JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
+            logger.fine("JSON requestObject is: " + requestObject.toString());
+            data = fixesDeserializer.deserialize(requestObject);
+        } catch (ParseException | JsonDeserializationException e) {
+            logger.warning(String.format("Exception while parsing post request:\n%s", e.toString()));
+            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request").type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(data.getA());
+        List<GPSFixMoving> fixes = data.getB();
+        
+        RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
+        RacingEventService service = getService();
+        
+        try {
+            for (GPSFixMoving fix : fixes) {
+                adapter.pingMark(regattaLog, mark, fix, service, device);
+            }
+            logger.log(Level.INFO, "Pinged mark " + mark.getName() + " with " + fixes.size() + " fixes");
+        } catch (NoCorrespondingServiceRegisteredException e) {
+            logger.log(Level.WARNING, "Could not ping mark " + mark.getName());
+        }
+
+        return Response.ok().build();
     }
 }

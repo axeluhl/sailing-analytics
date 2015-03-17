@@ -52,7 +52,7 @@ public interface Speed extends Comparable<Speed>, Serializable {
         }
     };
     
-    @Statistic(messageKey="InKnots", resultDecimals=2, resultUnit=Unit.Knots)
+    @Statistic(messageKey="", resultDecimals=2, resultUnit=Unit.Knots)
     double getKnots();
 
     double getMetersPerSecond();

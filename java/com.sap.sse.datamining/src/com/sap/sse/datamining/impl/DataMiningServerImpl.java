@@ -2,6 +2,7 @@ package com.sap.sse.datamining.impl;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,6 +11,9 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.DataRetrieverChainDefinitionProvider;
+import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryDefinition;
@@ -32,7 +36,8 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     private final FunctionRegistry functionRegistry;
     private final FunctionProvider functionProvider;
     
-    private DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
+    private final Map<Class<?>, DataSourceProvider<?>> dataSourceProviderMappedByDataSourceType;
+    private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
 
     public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry, FunctionProvider functionProvider, DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry) {
         this.stringMessages = new CompoundResourceBundleStringMessages();
@@ -40,9 +45,10 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.queryFactory = new QueryFactory();
         this.functionRegistry = functionRegistry;
         this.functionProvider = functionProvider;
+        dataSourceProviderMappedByDataSourceType = new HashMap<>();
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
     }
-    
+
     @Override
     public ExecutorService getExecutorService() {
         return executorService;
@@ -69,8 +75,8 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public void registerAllWithInternalFunctionPolicy(Iterable<Class<?>> classesToScan) {
-        functionRegistry.registerAllWithInternalFunctionPolicy(classesToScan);
+    public void registerAllClasses(Iterable<Class<?>> classesToScan) {
+        functionRegistry.registerAllClasses(classesToScan);
     }
     
     @Override
@@ -119,6 +125,16 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
+    public void setDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
+        dataSourceProviderMappedByDataSourceType.put(dataSourceProvider.getDataSourceType(), dataSourceProvider);
+    }
+    
+    @Override
+    public void removeDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
+        dataSourceProviderMappedByDataSourceType.remove(dataSourceProvider.getDataSourceType());
+    }
+    
+    @Override
     public DataRetrieverChainDefinitionProvider getDataRetrieverChainDefinitionProvider() {
         return dataRetrieverChainDefinitionRegistry;
     }
@@ -134,9 +150,15 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitions(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(
             Class<DataSourceType> dataSourceType) {
-        return dataRetrieverChainDefinitionRegistry.get(dataSourceType);
+        return dataRetrieverChainDefinitionRegistry.getBySourceType(dataSourceType);
+    }
+    
+    @Override
+    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(
+            Class<DataType> dataType) {
+        return dataRetrieverChainDefinitionRegistry.getByDataType(dataType);
     }
 
     @Override
@@ -184,15 +206,22 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <DataSource, DataType, ResultType> Query<ResultType> createQuery(DataSource dataSource, QueryDefinition<DataSource, DataType, ResultType> queryDefinition) {
-        return queryFactory.createQuery(dataSource, queryDefinition, getStringMessages(), getExecutorService());
+    public <DataSourceType, ResultType> Query<ResultType> createQuery(QueryDefinition<DataSourceType, ?, ResultType> queryDefinition) {
+        DataSourceProvider<DataSourceType> dataSourceProvider = getDataSourceProviderFor(queryDefinition.getDataRetrieverChainDefinition().getDataSourceType());
+        return queryFactory.createQuery(dataSourceProvider.getDataSource(), queryDefinition, getStringMessages(), getExecutorService());
     }
 
     @Override
-    public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
-            DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, int retrieverLevel,
+    public <DataSourceType> Query<Set<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, int retrieverLevel,
             Iterable<Function<?>> dimensions, Locale locale) {
-        return queryFactory.createDimensionValuesQuery(dataSource, dataRetrieverChainDefinition, retrieverLevel, dimensions, locale, getStringMessages(), getExecutorService());
+        DataSourceProvider<DataSourceType> dataSourceProvider = getDataSourceProviderFor(dataRetrieverChainDefinition.getDataSourceType());
+        return queryFactory.createDimensionValuesQuery(dataSourceProvider.getDataSource(), dataRetrieverChainDefinition, retrieverLevel, dimensions, locale, getStringMessages(), getExecutorService());
+    }
+
+    @SuppressWarnings("unchecked")
+    private <DataSourceType> DataSourceProvider<DataSourceType> getDataSourceProviderFor(Class<DataSourceType> dataSourceType) {
+        assert dataSourceProviderMappedByDataSourceType.containsKey(dataSourceType) : "No DataSourceProvider found for '" + dataSourceType + "'";
+        return (DataSourceProvider<DataSourceType>) dataSourceProviderMappedByDataSourceType.get(dataSourceType);
     }
     
 }

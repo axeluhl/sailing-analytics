@@ -8,30 +8,22 @@ Each race has a course that is set that way that spectators can see as much as p
 
 Usually not more than 8 competitors race against each other. One of the competitors is always an invitational team from the local spot that is allowed to race.
 
+## The pitch - SAP sponsoring the Extreme Sailing Series
+
+Like businesses, sailors need the latest information to make strategic decisions - but they need it even faster. One wrong tack, a false estimation of the current, or the slightest wind shift can cost the skipper the entire race. As technology sponsor of the Extreme Sailing Series, SAP is showing how innovative IT solutions providing real time data analysis can give teams the competitive edge and make series run simpler.
+
+SAP is at the center of today’s technology revolution, developing innovations that not only help businesses run like never before, but also improve the lives of people everywhere. As market leader in enterprise application software, SAP SE (NYSE: SAP) helps companies of all sizes and industries run better. From back office to boardroom, warehouse to storefront, desktop to mobile device – SAP empowers people and organizations to work together more efficiently and use business insight more effectively to stay ahead of the competition. SAP applications and services enable more than 258,000 customers to operate profitably, adapt continuously, and grow sustainably.
+
 ## External Links
 
 * [Extreme Sailing Series Offical Website](http://www.extremesailingseries.com/)
 * [Official Results](http://www.extremesailingseries.com/results)
-* [Analytics Homepage](http://ess40-2013.sapsailing.com/)
+* [Analytics Homepage](http://ess40-2015.sapsailing.com/)
 * [Youtube Channel](http://www.youtube.com/user/ExtremeSailingSeries)
-
-## Equipment Needed
-
-* **From WDF**
-  * 4x SIM Cards (2x WindBot, Spares)
-  * 1x World Adapter
-* **In Container**
- * 2x Samsung Tablet
- * 2x WindBots
- * 1x Satellite Modem
- * 1x Plug Strip
-* **Provided by OC**
- * 1x Rack with servers and switches
- * 2x radio
 
 ## Official information
 
-The current notice of race and other information can be accessed on the following page: https://octpftp.egnyte.com/. The username is `ess_main` and the password is `x402014ess`.
+The current notice of race and other information can be accessed on the following page: https://octpftp.egnyte.com/. The username is `ess_main` and the password can be retrieved from Simon or Clem.
 
 ## Boats
 To achieve the goal of providing invitees an exciting event a new type of boats have been designed. Capable of reaching speeds usually reserved to motorboats even in medium wind conditions, the Extreme 40 has been designed by Olympic champions Yves Loday and Mitch Booth, with the aim to provide the international sailing arena with a visually stunning and 100% performance-focused multihull. 
@@ -85,11 +77,15 @@ The setup for such an event usually consists of the following departments:
 * GMR (SAP Lounge)
   * Mark Angell (Senior SAP Account Manager)
   * Nick Houchin (SAP Account Manager, Host Manager)
+  * Milan Cerny (Business Consultant, Media Contact)
 * TracTrac
   * Jakob Oedum (Senior Event Manager)
   * Jorge Llodra (IT Specialist)
 * Sunset & Vine APP (TV)
-  * Sarah Greene (Manager)
+  * Sarah Greene (Event Manager)
+* SAP
+  * Simon Pamies (Senior Development Architect, SAP ESS Project Lead)
+  * Tom Peel (Technology Support)
 
 ## Team Contact Information
 
@@ -103,15 +99,44 @@ GAC Pindar	Tyson Lamond	tysonlamond@me.com
 Team Turx	Edhem Dirvana	edhemdirvana@gmail.com
 </pre>
 
+## Competitor colors for 2015
+
+<pre>
+The Wave #16A6ED
+Oman Air #B07A00
+Gazprom Team Russia #FFFFFF
+Lino Sonego Team Italia #000099
+SAP Extreme Sailing Team #FFC61E
+Invite #FFFF00
+Beko Team Turx #FF0000
+GAC Pindar #2AFFFF
+Red Bull Sailing Team #990099
+</pre>
+
+## Equipment
+
+* **From WDF**
+  * 4x SIM Cards (2x WindBot, Spares)
+  * 1x World Adapter
+* **In Container**
+ * 2x Samsung Tablet
+ * 2x WindBots
+ * 1x Satellite Modem
+ * 1x Plug Strip
+* **Provided by OC**
+ * 1x Rack with servers and switches
+ * 2x radio
+
 ## Technical Architecture
 The technical infrastructure can be divided into two major parts.
 
 ### ON-PREMISE
 This part physically consists of a rack that holds all servers needed to run the event in terms of tracking and network setup. All data (gps, wind, ...) is gathered here and then replicated to the cloud.
 
- * The **DNS-Server** serves not only as a Gateway to the internet but also has a Nameserver installed that redirects some urls to the local setup. In addition to that a caching proxy makes sure that redundant bits of information are cached.
+ * The **DNS-Server** serves not only as a Gateway to the internet but also has a nameserver installed that redirects some urls to the local setup. In addition to that a caching proxy makes sure that redundant bits of information are cached.
  * The **Sailing Analytics** server holds an Apache webserver that answers to *.sapsailing.com requests and of course the Java application running the analytics itself.
  * A **TracTrac** server that receives tracking data and provides the API to the analytics server to get GPS fixes in realtime.
+ * A machine running windows and delivering 2D for TV overlays
  * Last but not least a **Hot-Spare** server that can be used in case of failure of another server.
 
 In addition to the servers some switches make sure to have enough space for connecting additional networks and machines. To power the whole thing in the not so unlikely event of a power failure two mid-size UPS give enough power to at least shut down the servers cleanly.
@@ -390,10 +415,10 @@ $TTL 86400
 		NS 	ns.ocsportmobile.
 		TXT	"ESS DNS"
 
-ess40-2014.sapsailing.com.	A	192.168.1.201
-live.ess40-2014.sapsailing.com.	A	192.168.1.201
-ess40-2014.ru.sapsailing.com.	A	192.168.1.201
-live.ru.ess40-2014.sapsailing.com.	A	192.168.1.201
+ess40-2015.sapsailing.com.	A	192.168.1.201
+live.ess40-2015.sapsailing.com.	A	192.168.1.201
+ess40-2015.ru.sapsailing.com.	A	192.168.1.201
+live.ru.ess40-2015.sapsailing.com.	A	192.168.1.201
 ess40-mobile.sapsailing.com.	A	192.168.1.201
 ess40-local.sapsailing.com.	A	192.168.1.201
 ess40.local.sapsailing.com.	A	192.168.1.201
@@ -492,6 +517,10 @@ coredump_dir /var/spool/squid
 
 There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` that enables you to access some stats from http://192.168.1.202/Squid/cgi-bin/cachemgr.cgi. 
 
+## Backup
+
+There exists a backup of all data and configurations (DNS, TracTrac, SAP Analytics) on a USB harddisk that can be found in the suitcase that holds the tablets and other stuff.
+
 ## Additional information bits
 
 ### Useful tools to get information about system
@@ -503,20 +532,6 @@ There is a web interface that is configued in `/etc/httpd/conf.d/squid.conf` tha
 * (Caching) squidclient -h 192.168.1.202 cache_object://localhost/ mgr:utilization
 * (Caching) squidclient -h 192.168.1.202 cache_object://localhost/ mgr:info
 * (Caching) http://192.168.1.202/Squid/cgi-bin/cachemgr.cgi?host=localhost&port=3128&user_name=&operation=counters&auth=
-
-### Competitor colors for 2015
-
-<pre>
-The Wave #16A6ED
-Oman Air #B07A00
-Gazprom Team Russia #FFFFFF
-Lino Sonego Team Italia #000099
-SAP Extreme Sailing Team #FFC61E
-Invite #FFFF00
-Beko Team Turx #FF0000
-GAC Pindar #2AFFFF
-Red Bull Sailing Team #990099
-</pre>
 
 ### Opening replication channel for Sailing Analytics server
 

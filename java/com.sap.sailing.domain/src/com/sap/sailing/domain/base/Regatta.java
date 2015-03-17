@@ -103,7 +103,7 @@ public interface Regatta extends Named, WithID, IsRegattaLike {
 
     BoatClass getBoatClass();
 
-    Iterable<Competitor> getCompetitors();
+    Iterable<Competitor> getAllCompetitors();
 
     /**
      * Will remove the series from this regatta. Will also call {@link RaceColumn#removeRaceIdentifier(Fleet)} to make

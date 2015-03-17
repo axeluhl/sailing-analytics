@@ -15,6 +15,7 @@ import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.test.util.OpenFunctionManager;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Moving;
 import com.sap.sailing.domain.base.Nationality;
@@ -23,19 +24,17 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.common.Named;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 
 public class TestSailingFunctionsRegistration {
 
     private static FunctionFactory functionFactory = new FunctionFactory();
     
-    private FunctionRegistry functionRegistry;
+    private OpenFunctionManager functionRegistry;
     
     @Before
     public void setUpFunctionRegistryAndProvider() {
-        functionRegistry = new SimpleFunctionRegistry();
-        functionRegistry.registerAllWithInternalFunctionPolicy(Activator.getDefault().getInternalClassesWithMarkedMethods());
+        functionRegistry = new OpenFunctionManager();
+        functionRegistry.registerAllClasses(Activator.getDefault().getClassesWithMarkedMethods());
     }
     
     @Test
@@ -76,7 +75,7 @@ public class TestSailingFunctionsRegistration {
     @Test
     public void testImportantRegisteredStatistics() throws NoSuchMethodException, SecurityException {
         Collection<Function<?>> expectedStatistics = createExpectedImportantRegisteredStatistics();
-        Collection<Function<?>> providedStatistics = functionRegistry.getStatistics();
+        Collection<Function<?>> providedStatistics = functionRegistry.getAllStatistics();
         for (Function<?> statistic : expectedStatistics) {
             assertThat("The expected statistic '" + statistic + "' wasn't provided.",
                        providedStatistics.contains(statistic), is(true));

@@ -34,7 +34,7 @@ public interface FileStorageService extends IsManagedByCache<FileStorageServiceR
     /**
      * From the given {@code uri} it should be possible to determine the file to remove.
      */
-    void removeFile(URI uri) throws OperationFailedException, InvalidPropertiesException;
+    void removeFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException;
 
     FileStorageServiceProperty[] getProperties();
 
@@ -56,5 +56,5 @@ public interface FileStorageService extends IsManagedByCache<FileStorageServiceR
     /**
      * Test whether properties are valid, e.g. by trying to log in using access credentials provided as properties.
      */
-    void testProperties() throws InvalidPropertiesException;
+    void testProperties() throws InvalidPropertiesException, IOException;
 }

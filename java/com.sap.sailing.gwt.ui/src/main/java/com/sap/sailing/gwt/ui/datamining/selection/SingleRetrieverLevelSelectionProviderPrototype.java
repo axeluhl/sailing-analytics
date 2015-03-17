@@ -31,6 +31,8 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
 public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPanel {
     
@@ -52,6 +54,7 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
     private Map<FunctionDTO, Collection<? extends Serializable>> filterSelectionToBeApplied;
     
     private final Label filterByLabel;
+    private final HorizontalPanel labeledBusyIndicator;
     private final HorizontalPanel filterSelectionPanel;
     
     private final List<ValueListBox<FunctionDTO>> dimensionToFilterByBoxes;
@@ -83,6 +86,14 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
         filterByLabel.setVisible(false);
         add(filterByLabel);
         
+        labeledBusyIndicator = new HorizontalPanel();
+        labeledBusyIndicator.setVisible(false);
+        labeledBusyIndicator.setSpacing(5);
+        BusyIndicator busyIndicator = new SimpleBusyIndicator(true, 0.7f);
+        labeledBusyIndicator.add(busyIndicator);
+        labeledBusyIndicator.add(new Label(stringMessages.loadingDimensionValues()));
+        add(labeledBusyIndicator);
+        
         filterSelectionPanel = new HorizontalPanel();
         filterSelectionPanel.setVisible(false);
         add(filterSelectionPanel);
@@ -111,6 +122,7 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
         filterSelectionPanel.setVisible(isFiltrationPossible);
         if (isFiltrationPossible) {
             Collections.sort(availableDimensions);
+            labeledBusyIndicator.setVisible(true);
             dataMiningService.getDimensionValuesFor(retrieverChain, retrieverLevel, dimensions, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
                 @Override
                 public void onSuccess(QueryResult<Set<Object>> result) {
@@ -125,10 +137,13 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
                         applySelection(filterSelectionToBeApplied);
                         filterSelectionToBeApplied = null;
                     }
+
+                    labeledBusyIndicator.setVisible(false);
                 }
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error fetching the dimension values: " + caught.getMessage());
+                    labeledBusyIndicator.setVisible(false);
                 }
             });
         }

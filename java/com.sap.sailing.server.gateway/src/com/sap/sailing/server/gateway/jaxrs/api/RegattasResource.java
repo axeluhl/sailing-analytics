@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -65,6 +67,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
+    private static final Logger logger = Logger.getLogger(RegattasResource.class.getName());
 
     private Response getBadRegattaErrorResponse(String regattaName) {
         return  Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
@@ -651,6 +654,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                 jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
                             } catch (NoWindException e) {
+                                logger.log(Level.FINE,
+                                        "No wind information while trying to determing maneuvers for competitor "
+                                                + competitor.getName(), e);
                             }
 
                             TimePoint startTime = trackedLegOfCompetitor.getStartTime();

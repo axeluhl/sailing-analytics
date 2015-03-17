@@ -169,7 +169,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getRank(Competitor competitor, TimePoint timePoint) {
         return 0;
     }
 
@@ -450,7 +450,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }

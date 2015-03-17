@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -57,7 +58,13 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
                         }
                     };
                     unfinishedInstructionsCounter.increment();
-                    executor.execute(instructionWrapper);
+                    try {
+                        executor.execute(instructionWrapper);
+                    } catch (RejectedExecutionException exc){
+                        LOGGER.log(Level.WARNING, "A " + RejectedExecutionException.class.getSimpleName() +
+                                                  " appeared during the processing.");
+                        instructionWrapper.run();
+                    }
                 }
             }
         }

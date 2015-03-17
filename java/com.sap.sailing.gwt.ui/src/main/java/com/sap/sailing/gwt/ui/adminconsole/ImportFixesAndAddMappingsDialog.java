@@ -60,8 +60,10 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
             }
         });
         
-        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                new SingleSelectionModel<CompetitorDTO>(), true);
+        final Class<?> selectionModelType = SingleSelectionModel.class;
+        @SuppressWarnings("unchecked")
+        final Class<SingleSelectionModel<CompetitorDTO>> singleSelectionType = (Class<SingleSelectionModel<CompetitorDTO>>) selectionModelType;
+        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, singleSelectionType, true);
         markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(
                 new SingleSelectionModel<MarkDTO>(), sailingService, stringMessages, errorReporter);
         
