@@ -91,7 +91,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
         path.add(new TimedPositionWithSpeedImpl(startTime, start, wndStart));
 
         long timeStep = wf.getTimeStep().asMillis() / 2;
-        logger.info("Time step :" + timeStep);
+        logger.fine("Time step :" + timeStep);
         // while there is more than 5% of the total distance to the finish
 
         String legType = "none";
@@ -126,7 +126,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
                 this.maxRight = (int) Math.floor((double) maxTurnTimes.right / (double) timeStep);
             }
         }
-        logger.info("Leg Direction: " + legType);
+        logger.fine("Leg Direction: " + legType);
 
         //
         // StrategicPhase: start & intermediate course until close to target

@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -49,6 +50,8 @@ import com.sap.sse.util.SmartFutureCache;
 
 public class SimulationServiceImpl implements SimulationService {
 
+    private static final Logger logger = Logger.getLogger(SimulationService.class.getName());
+
     final private Executor executor;
     final private SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval> cache;
     final private RacingEventService racingEventService;
@@ -62,21 +65,13 @@ public class SimulationServiceImpl implements SimulationService {
         this.racingEventService = racingEventService;
         if (racingEventService != null) {
             this.listeners = new HashMap<LegIdentifier, Listener>();
-            // TODO: cleanup listeners when tracked-race is removed from server => admin-console?
             this.cache = new SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>(
                     new SmartFutureCache.AbstractCacheUpdater<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>() {
                         @Override
                         public SimulationResults computeCacheUpdate(LegIdentifier key, SmartFutureCache.EmptyUpdateInterval updateInterval) throws Exception {
-                            boolean noListener = !listeners.containsKey(key);
-                            if (noListener) {
-                                TrackedRace trackedRace = racingEventService.getTrackedRace(key);
-                                if (trackedRace != null) {
-                                    Listener listener = new Listener(trackedRace, key, scheduler);
-                                    listeners.put(key, listener);
-                                    trackedRace.addListener(listener);
-                                }
-                            }
+                            logger.info("Simulation Started: \"" + key.toString() + "\"");
                             SimulationResults results = computeSimulationResults(key);
+                            logger.info("Simulation Finished: \"" + key.toString() + "\", Results-Version: "+ (results==null?0:results.hashCode()));
                             return results;
                         }
                     }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
@@ -86,6 +81,8 @@ public class SimulationServiceImpl implements SimulationService {
         }
     }
 
+    // TODO: subscribe to race-admin-events; cleanup listeners when tracked-race is removed from server => admin-console?
+    
     private class Listener extends AbstractRaceChangeListener {
         private final TrackedRace trackedRace;
         private final LegIdentifier legIdentifier;
@@ -114,6 +111,7 @@ public class SimulationServiceImpl implements SimulationService {
 
         private void triggerUpdate(LegIdentifier legIdentifier) {
             this.covered = false;
+            logger.info("Simulation Scheduled Update Triggered: \"" + legIdentifier.toString() + "\"");
             cache.triggerUpdate(legIdentifier, null);
         }
         
@@ -154,19 +152,30 @@ public class SimulationServiceImpl implements SimulationService {
     @Override
     public int getSimulationResultsVersion(LegIdentifier legIdentifier) {
         SimulationResults result = cache.get(legIdentifier, false);
-        if (result == null) {
-            return 0;
-        } else {
-            return result.hashCode();
-        }
+        int version = (result == null ? 0 : result.hashCode());
+        logger.fine("Simulation Results-Version: " + + version);
+        return version;
     }
 
     @Override
     public SimulationResults getSimulationResults(LegIdentifier legIdentifier) {
         SimulationResults result = cache.get(legIdentifier, false);
         if (result == null) {
+            logger.fine("Simulation Get: Cache Empty: \"" + legIdentifier.toString() + "\"");
+            if (!listeners.containsKey(legIdentifier)) {
+                TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
+                if (trackedRace != null) {
+                    Listener listener = new Listener(trackedRace, legIdentifier, scheduler);
+                    listeners.put(legIdentifier, listener);
+                    trackedRace.addListener(listener);
+                }
+            }
+            logger.info("Simulation Get: Update Triggered: \"" + legIdentifier.toString() + "\"");
             cache.triggerUpdate(legIdentifier, null);
             result = cache.get(legIdentifier, true); // take first simulation result that becomes available
+        }
+        if (result == null) {
+            logger.fine("Simulation Get: Null-Result: \"" + legIdentifier.toString() + "\"");
         }
         return result;
     }

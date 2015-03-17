@@ -511,13 +511,13 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
             System.out.println("middle: " + middlePos.getLatDeg() + ", " + middlePos.getLngDeg());
             System.out.println("end   : " + endPos.getLatDeg() + ", " + endPos.getLngDeg());
         }
-        logger.info("Leg Direction: " + legType);
+        logger.fine("Leg Direction: " + legType);
 
         long turnLoss = pd.getTurnLoss(); // time lost when doing a turn
         if (!this.upwindLeg) {
             turnLoss = turnLoss / 2;
         }
-        logger.info("Turnloss :" + turnLoss);
+        logger.fine("Turnloss :" + turnLoss);
 
         if ((this.parameters.getSimuStep() != null) && (this.parameters.getSimuStep().asMillis() > turnLoss + 1000)) {
             this.usedTimeStep = this.parameters.getSimuStep().asMillis();
@@ -525,7 +525,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
             this.usedTimeStep = turnLoss + 1000; // time-step larger than turn-loss is required (this may be removed by
                                                  // extended handling of turn-loss)
         }
-        logger.info("Time step :" + usedTimeStep);
+        logger.fine("Time step :" + usedTimeStep);
 
         // calculate initial position according to initPathStr
         PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), false, 0.0,
@@ -600,7 +600,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
                     // terminate path-search if paths are found that are close enough to target
                     // if ((curPath.vrt > distStartEndMeters)) {
                     if (curPath.reached) {
-                        // logger.info("\ntPath: " + curPath.path + "\n      Time: " +
+                        // logger.fine("\ntPath: " + curPath.path + "\n      Time: " +
                         // (Math.round((curPath.pos.getTimePoint().asMillis()-startTime.asMillis())/1000.0/60.0*10.0)/10.0)+", Height: "+curPath.vrt+" of "+(Math.round(startPos.getDistance(endPos).getMeters()*100.0)/100.0)+", Dist: "+curPath.hrz+"m ~ "+(Math.round(curPath.pos.getPosition().getDistance(endPos).getMeters()*100.0)/100.0)+"m");
                         int curBin = (int) Math.round(Math.floor((curPath.hrz + hrzBinSize / 2.0) / hrzBinSize));
                         if ((Math.abs(curBin) <= 4)) {
@@ -705,7 +705,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
 
         // debug output
         for (PathCandidate curPath : trgPaths) {
-            logger.info("\nPath: " + curPath.path + "\n      Time: "
+            logger.fine("\nPath: " + curPath.path + "\n      Time: "
                     + (curPath.pos.getTimePoint().asMillis() - startTime.asMillis()) + ", Height: " + curPath.vrt
                     + " of " + (Math.round(startPos.getDistance(endPos).getMeters() * 100.0) / 100.0) + ", Dist: "
                     + curPath.hrz + "m ~ "
