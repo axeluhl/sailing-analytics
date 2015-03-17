@@ -624,31 +624,43 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
-        ANDROID_SDK_VERSION=r24.0.2
-        BUILD_TOOLS=21.1.2
-        TARGET_API=21
+        BUILD_TOOLS=22.0.0
+        TARGET_API=22
         TEST_API=18
         ANDROID_ABI=armeabi-v7a
         AVD_NAME=androidTest
-        echo "Updating Android SDK...."
+        echo "Updating Android SDK (tools)..."
+        echo yes | android update sdk --filter tools --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (platform-tools)..."
         echo yes | android update sdk --filter platform-tools --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..."
         echo yes | android update sdk --filter build-tools-${BUILD_TOOLS} --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (android-${TARGET_API})..."
         echo yes | android update sdk --filter android-${TARGET_API} --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (extra-android-m2repository)..."
         echo yes | android update sdk --filter extra-android-m2repository --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (extra-google-m2repository)..."
         echo yes | android update sdk --filter extra-google-m2repository --no-ui --force --all > /dev/null
         ./gradlew clean build
         if [[ $? != 0 ]]; then
             exit 100
         fi
         if [ $testing -eq 1 ]; then
-            echo "Downloading and installing emulator image..."
+            adb emu kill
+            echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..."
             echo yes | android update sdk --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
             echo no | android create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force
+            echo "Starting emulator..."
             emulator -avd ${AVD_NAME} -no-skin -no-audio -no-window &
-            echo "Waiting for device to start..."
+            echo "Waiting for startup..."
             adb wait-for-device
-            echo "Waiting 10 seconds to complete startup..."
             sleep 10
+            $PROJECT_HOME/configuration/androidWaitForEmulator.sh
+            if [[ $? != 0 ]]; then
+                adb emu kill
+                android delete avd --name ${AVD_NAME}
+                exit 102
+            fi
             adb shell input keyevent 82 &
             ./gradlew deviceCheck connectedCheck
             if [[ $? != 0 ]]; then
