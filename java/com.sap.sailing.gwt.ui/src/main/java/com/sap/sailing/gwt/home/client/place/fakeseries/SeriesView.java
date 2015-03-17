@@ -50,4 +50,6 @@ public interface SeriesView<PLACE extends AbstractSeriesPlace, PRES extends Seri
      */
     void navigateTabsTo(PLACE place);
     
+    void showErrorInCurrentTab(IsWidget errorView);
+    
 }

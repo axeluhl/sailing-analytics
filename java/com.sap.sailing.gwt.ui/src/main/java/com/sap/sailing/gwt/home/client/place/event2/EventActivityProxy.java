@@ -51,7 +51,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
                 @Override
                 public void onFailure(Throwable caught) {
                     // TODO @FM: extract text?
-                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the event with service getEventById()");
+                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the event with service getEventViewById()");
                     // TODO @FM: reload sinnvoll hier?
                     errorPlace.setComingFrom(place);
                     clientFactory.getPlaceController().goTo(errorPlace);
