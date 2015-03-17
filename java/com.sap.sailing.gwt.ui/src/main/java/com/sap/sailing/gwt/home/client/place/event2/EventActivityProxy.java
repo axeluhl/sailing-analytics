@@ -148,6 +148,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
      * If not, the place is automatically being adjusted.
      */
     private AbstractEventPlace verifyAndAdjustPlace() {
+        // TODO check if regatta ID is valid
         if(place instanceof AbstractMultiregattaEventPlace && ctx.getEventDTO().getType() != EventType.MULTI_REGATTA) {
             EventContext ctxToUse = new EventContext(ctx).withRegattaId(null);
             if(place instanceof MultiregattaRegattasPlace) {

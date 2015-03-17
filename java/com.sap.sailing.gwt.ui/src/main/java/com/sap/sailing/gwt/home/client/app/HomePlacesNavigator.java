@@ -93,6 +93,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, regattaPlace, new RegattaLeaderboardPlace.Tokenizer());
     }
 
+    // TODO replace with the new places / remove when the code that calls this is gone
     /** this place will be merged into the common series event view as tab later on */
     public PlaceNavigation<SeriesPlace> getSeriesAnalyticsNavigation(String eventUuidAsString, SeriesNavigationTabs navigationTab, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
         SeriesPlace seriesPlace = new SeriesPlace(eventUuidAsString, navigationTab, leaderboardIdAsNameString, true, true);
