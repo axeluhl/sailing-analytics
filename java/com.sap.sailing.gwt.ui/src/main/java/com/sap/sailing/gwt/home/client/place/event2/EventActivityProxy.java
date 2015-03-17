@@ -148,20 +148,33 @@ public class EventActivityProxy extends AbstractActivityProxy {
      * If not, the place is automatically being adjusted.
      */
     private AbstractEventPlace verifyAndAdjustPlace() {
+        EventContext contextWithoutRegatta = new EventContext(ctx).withRegattaId(null);
         // TODO check if regatta ID is valid
         if(place instanceof AbstractMultiregattaEventPlace && ctx.getEventDTO().getType() != EventType.MULTI_REGATTA) {
-            EventContext ctxToUse = new EventContext(ctx).withRegattaId(null);
+            // Events with a type other than multi regatta only have regatta level pages
             if(place instanceof MultiregattaRegattasPlace) {
-                return new RegattaRacesPlace(ctxToUse);
+                return new RegattaRacesPlace(contextWithoutRegatta);
             }
             if(place instanceof MultiregattaMediaPlace) {
-                return new RegattaMediaPlace(ctxToUse);
+                return new RegattaMediaPlace(contextWithoutRegatta);
             }
             // TODO Overview isn't implemented yet
 //            return new RegattaOverviewPlace(ctxToUse);
-            return new RegattaRacesPlace(ctxToUse);
+            return new RegattaRacesPlace(contextWithoutRegatta);
         }
+        
+        if(place instanceof AbstractEventRegattaPlace) {
+            boolean regattaKnown = ctx.getEventDTO().isRegattaIDKnown(ctx.getRegattaId());
+            if(ctx.getEventDTO().getType() != EventType.MULTI_REGATTA && ctx.getRegattaId() != null && !regattaKnown) {
+                // Regatta ID unknown but unnecessary ...
+                ctx.withRegattaId(null);
+            } else if(ctx.getEventDTO().getType() == EventType.MULTI_REGATTA && !regattaKnown) {
+                return new MultiregattaRegattasPlace(contextWithoutRegatta);
+            }
+        }
+        
         if(place instanceof RegattaMediaPlace && ctx.getEventDTO().getType() == EventType.MULTI_REGATTA) {
+            // The media page for multi regatta events is on event level only but not on regatta level
             return new MultiregattaMediaPlace(new EventContext(ctx).withRegattaId(null));
         }
         // no adjustment necessary

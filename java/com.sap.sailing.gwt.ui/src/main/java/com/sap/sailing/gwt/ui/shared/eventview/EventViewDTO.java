@@ -148,4 +148,13 @@ public class EventViewDTO extends EventDTO {
     public void setHasAnalytics(boolean hasAnalytics) {
         this.hasAnalytics = hasAnalytics;
     }
+
+    public boolean isRegattaIDKnown(String regattaId) {
+        for (RegattaMetadataDTO regatta : regattas) {
+            if(regatta.getId().equals(regattaId)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
