@@ -38,7 +38,7 @@ public class Footer extends Composite {
 
     public Footer(final HomePlacesNavigator navigator) {
         localeAndLanguages = new HashMap<String, String>();
-        localeAndLanguages.put("default", "English");
+        localeAndLanguages.put("en", "English");
         localeAndLanguages.put("de", "Deutsch");
         
         FooterResources.INSTANCE.css().ensureInjected();
