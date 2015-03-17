@@ -410,39 +410,72 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(serverUrlWithoutTrailingSlash,
                         event.getId().toString(), leaderboardName, DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                         competitor.getId().toString(), NonGwtUrlHelper.INSTANCE);
-                String subject = String.format("%s %s",
-                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "trackingInvitationFor"), competitorName);
-
-                // taken from http://www.tutorialspoint.com/javamail_api/javamail_api_send_inlineimage_in_email.htm
-                BodyPart messageTextPart = new MimeBodyPart();
-                String htmlText = String.format("<h1>%s %s</h1>" + "<p>%s <b>%s</b></p>"
-                        + "<img src=\"cid:image\" title=\"%s\"><br/>"
-                        + "<a href=\"%s\">%s</a>",
-                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "welcomeTo"), leaderboardName,
-                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs"), competitorName,
-                        url, url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "alternativelyVisitThisLink"));
-                
                 try {
-                    messageTextPart.setContent(htmlText, "text/html");
-
-                    BodyPart messageImagePart = new MimeBodyPart();
-                    InputStream imageIs = QRCodeGenerationUtil.create(url, 250);
-                    DataSource imageDs = new ByteArrayDataSource(imageIs, "image/png");
-                    messageImagePart.setDataHandler(new DataHandler(imageDs));
-                    messageImagePart.setHeader("Content-ID", "<image>");
-
-                    MimeMultipart multipart = new MimeMultipart();
-                    multipart.addBodyPart(messageTextPart);
-                    multipart.addBodyPart(messageImagePart);
-
-                    getMailService().sendMail(toAddress, subject, multipart);
-                } catch (MessagingException | MailException | WriterException | IOException e) {
-                    logger.log(Level.SEVERE, "Error trying to send mail to " + competitor.getName()
-                            + " with e-mail address " + toAddress, e);
+                    sendInvitationEmail(locale, toAddress, leaderboardName, competitorName,
+                            url);
+                } catch (MailException e){
                     occuredExceptions.append(e.getMessage()+"\r\n");
                 }
             }
         }
+        if (!(occuredExceptions.length() == 0)){
+            throw new MailException(occuredExceptions.toString());
+        }
+    }
+
+    private void sendInvitationEmail(Locale locale, final String toAddress, String leaderboardName, String invitee, String url) throws MailException {
+        String subject = String.format("%s %s",
+                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "trackingInvitationFor"), invitee);
+
+        // taken from http://www.tutorialspoint.com/javamail_api/javamail_api_send_inlineimage_in_email.htm
+        BodyPart messageTextPart = new MimeBodyPart();
+        String htmlText = String.format("<h1>%s %s</h1>" + "<p>%s <b>%s</b></p>"
+                + "<img src=\"cid:image\" title=\"%s\"><br/>"
+                + "<a href=\"%s\">%s</a>",
+                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "welcomeTo"), leaderboardName,
+                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs"), invitee,
+                url, url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "alternativelyVisitThisLink"));
+        
+        try {
+            messageTextPart.setContent(htmlText, "text/html");
+
+            BodyPart messageImagePart = new MimeBodyPart();
+            InputStream imageIs = QRCodeGenerationUtil.create(url, 250);
+            DataSource imageDs = new ByteArrayDataSource(imageIs, "image/png");
+            messageImagePart.setDataHandler(new DataHandler(imageDs));
+            messageImagePart.setHeader("Content-ID", "<image>");
+
+            MimeMultipart multipart = new MimeMultipart();
+            multipart.addBodyPart(messageTextPart);
+            multipart.addBodyPart(messageImagePart);
+
+            getMailService().sendMail(toAddress, subject, multipart);
+        } catch (MessagingException | MailException | WriterException | IOException e) {
+            logger.log(Level.SEVERE, "Error trying to send mail to " + invitee
+                    + " with e-mail address " + toAddress, e);
+            throw new MailException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
+            String emails, Locale locale) throws MailException {
+        
+        StringBuilder occuredExceptions = new StringBuilder();
+        
+        String[] emailArray = emails.split(",");
+        String leaderboardName = leaderboard.getName();
+        
+        //http://<host>/buoy-tender/checkin&leaderboard_name=<leaderboard-name>
+        String url = DeviceMappingConstants.getBuyoTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboardName,NonGwtUrlHelper.INSTANCE);
+        for (String toAddress : emailArray){
+            try {
+                sendInvitationEmail(locale, toAddress, leaderboardName, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "buoyTender"), url);
+            } catch (MailException e) {
+                occuredExceptions.append(e.getMessage()+"\r\n");
+            }
+        }
+        
         if (!(occuredExceptions.length() == 0)){
             throw new MailException(occuredExceptions.toString());
         }

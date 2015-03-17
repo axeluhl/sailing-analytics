@@ -56,7 +56,7 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
     public void testCheckinAndCheckout() throws Exception {
         LeaderboardsResource resource = spyResource(new LeaderboardsResource() {
             @Override
-            protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+            public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
                 return RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(racingEventService.getBaseDomainFactory());
             }
         });

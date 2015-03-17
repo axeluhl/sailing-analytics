@@ -9,6 +9,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -32,9 +33,11 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -133,6 +136,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
                     new AddDeviceMappingToRegattaLogDialog(sailingService, errorReporter, stringMessages,
                             leaderboardName).show();
+                } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_INVITE_BUOY_TENDERS.equals(value)) {
+                    openChooseEventDialogAndSendMails(leaderboardName);
                 }
             }
         });
@@ -459,5 +464,34 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             @Override
             public void cancel() { }
         }).show();
+    }
+    
+    private String getLocaleInfo() {
+        return LocaleInfo.getCurrentLocale().getLocaleName();
+    }
+    
+    private void openChooseEventDialogAndSendMails(final String leaderBoardName) {
+        new InviteBuoyTenderDialog(stringMessages, sailingService, leaderBoardName, errorReporter, new DialogCallback<Triple<EventDTO, String, String>>() {
+            @Override
+            public void ok(Triple<EventDTO, String, String> result) {
+                sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderBoardName, result.getC(), getLocaleInfo(), new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Window.alert(stringMessages.sendingMailsSuccessfull());
+                            }
+                        });
+            }
+
+            @Override
+            public void cancel() {
+                
+            }
+        }).show();
+        
     }
 }

@@ -5454,4 +5454,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
                 competitors, getLocale(localeInfoName));
     }
+    
+    @Override
+    public void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
+            String leaderboardName, String emails, String localeInfoName) throws MailException {
+        Event event = getService().getEvent(eventDto.id);
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
+                emails, getLocale(localeInfoName));
+    }
 }

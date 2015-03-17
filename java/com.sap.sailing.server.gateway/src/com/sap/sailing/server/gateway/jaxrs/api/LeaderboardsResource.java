@@ -575,7 +575,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     private final JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> fixesDeserializer =
             new FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer();
     
-    protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
     }
     

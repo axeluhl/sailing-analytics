@@ -117,7 +117,15 @@ public interface RaceLogTrackingAdapter {
 
     /**
      * Invite competitors for tracking via the Tracking App by sending out emails.
+     * @throws MailException 
      */
     void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
             String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException;
+
+    /**
+     * Invite buoy tenders for buoy pinging via the Buoy Tender App by sending out emails.
+     * @throws MailException 
+     */
+    void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
+            String emails, Locale locale) throws MailException;
 }

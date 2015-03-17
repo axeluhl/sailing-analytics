@@ -1160,4 +1160,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String showCompetitorFullNameColumn();
     String loadingDimensionValues();
     String runningQuery();
+    String inviteBuoyTenders();
+    String orMultipleEmails();
 }
