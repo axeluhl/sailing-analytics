@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.ui.shared.general.LabelType;
 public interface HasRegattaMetadata {
     
     public enum RegattaState {
-        UPCOMING(LabelType.UPCOMMING), RUNNING(LabelType.LIVE), FINISHED(LabelType.NONE), UNKNOWN(LabelType.NONE);
+        UPCOMING(LabelType.UPCOMING), RUNNING(LabelType.LIVE), FINISHED(LabelType.FINISHED), UNKNOWN(LabelType.NONE);
         
         private final LabelType stateMarker;
 

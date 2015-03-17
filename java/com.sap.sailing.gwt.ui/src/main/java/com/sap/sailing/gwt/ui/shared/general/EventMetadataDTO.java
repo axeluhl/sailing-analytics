@@ -2,11 +2,8 @@ package com.sap.sailing.gwt.ui.shared.general;
 
 import java.util.Date;
 
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventState;
-
 public class EventMetadataDTO extends EventReferenceDTO {
 
-    // private EventType type;
     private EventState state;
     private String venue;
     private String venueCountry;

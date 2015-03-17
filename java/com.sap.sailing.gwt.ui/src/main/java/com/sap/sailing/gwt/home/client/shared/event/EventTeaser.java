@@ -44,9 +44,11 @@ public class EventTeaser extends Composite {
     }
 
     private static RecentEventUiBinder uiBinder = GWT.create(RecentEventUiBinder.class);
+    private final LabelType labelType;
 
-    public EventTeaser(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event) {
+    public EventTeaser(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event, LabelType labelType) {
         this.event = event;
+        this.labelType = labelType;
 
         EventTeaserResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -68,7 +70,6 @@ public class EventTeaser extends Composite {
 
     private void updateUI() {
         SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(event.getDisplayName());
-        LabelType labelType = event.getState().getStateMarker();
         if(labelType.isRendered()) {
             eventNameWithState.setInnerSafeHtml(safeHtmlEventName);
             LabelTypeUtil.renderLabelType(eventState, labelType);

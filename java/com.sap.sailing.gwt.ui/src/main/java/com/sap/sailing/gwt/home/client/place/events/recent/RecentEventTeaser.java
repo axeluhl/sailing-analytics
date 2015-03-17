@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.shared.event.EventTeaser;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class RecentEventTeaser extends Composite {
 
@@ -18,8 +19,8 @@ public class RecentEventTeaser extends Composite {
     
     @UiField(provided = true) EventTeaser eventTeaser;
 
-    public RecentEventTeaser(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event) {
-        eventTeaser = new EventTeaser(placeNavigation, event);
+    public RecentEventTeaser(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event, LabelType labelType) {
+        eventTeaser = new EventTeaser(placeNavigation, event, labelType);
         initWidget(uiBinder.createAndBindUi(this));
     }
 

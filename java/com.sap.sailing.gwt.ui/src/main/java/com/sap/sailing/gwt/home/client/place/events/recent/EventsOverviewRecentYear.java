@@ -72,7 +72,7 @@ public class EventsOverviewRecentYear extends Composite {
 //        this.trackedRacesCount.setInnerText("tbd.");
         for (EventListEventDTO eventDTO : events) {
             PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
-            RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO);
+            RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState().getListStateMarker());
             recentEventsTeaserPanel.add(recentEvent);
         }
         headerDiv.addDomHandler(new ClickHandler() {
