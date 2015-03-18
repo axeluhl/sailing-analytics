@@ -30,15 +30,12 @@ import com.sap.sailing.domain.abstractlog.impl.LastEventOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
@@ -228,6 +225,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         }
     }
 
+    @FunctionalInterface
     private static interface DeviceMarkMappingEventFactory<VisitorT, EventT extends AbstractLogEvent<VisitorT>>{
         EventT createDeviceMarkMapping(DeviceIdentifier device, TimePoint timePoint);
     }
@@ -236,7 +234,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             LogT log, Mark mark, GPSFix gpsFix, RacingEventService service,
             DeviceMarkMappingEventFactory<VisitorT, EventT> factory, DeviceIdentifier device) {
         TimePoint time = gpsFix.getTimePoint();
-        
         EventT mapping = factory.createDeviceMarkMapping(device, time);
         log.add(mapping);
         try {
@@ -248,14 +245,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void pingMark(RaceLog raceLog, Mark mark, GPSFix gpsFix, RacingEventService service, DeviceIdentifier device) {
-        pingMark(raceLog, mark, gpsFix, service, new DeviceMarkMappingEventFactory<RaceLogEventVisitor, RaceLogEvent>() {
-            @Override
-            public RaceLogEvent createDeviceMarkMapping(DeviceIdentifier device, TimePoint timePoint) {
-                return RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(timePoint,
-                        service.getServerAuthor(), device, mark, raceLog.getCurrentPassId(), timePoint, timePoint);
-            }
-            
-        }, device);
+        pingMark(raceLog, mark, gpsFix, service, (DeviceIdentifier dev, TimePoint timePoint) ->
+            RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(timePoint,
+                        service.getServerAuthor(), dev, mark, raceLog.getCurrentPassId(), timePoint, timePoint), device);
     }
 
     @Override
@@ -265,13 +257,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void pingMark(RegattaLog regattaLog, Mark mark, GPSFix gpsFix, RacingEventService service, DeviceIdentifier device) {
-        pingMark(regattaLog, mark, gpsFix, service, new DeviceMarkMappingEventFactory<RegattaLogEventVisitor, RegattaLogEvent>() {
-            @Override
-            public RegattaLogEvent createDeviceMarkMapping(DeviceIdentifier device, TimePoint timePoint) {
-                return new RegattaLogDeviceMarkMappingEventImpl(service.getServerAuthor(), timePoint, mark, device, timePoint, timePoint);
-            }
-            
-        }, device);
+        pingMark(regattaLog, mark, gpsFix, service, (DeviceIdentifier dev, TimePoint timePoint) ->
+                new RegattaLogDeviceMarkMappingEventImpl(service.getServerAuthor(), timePoint, mark, dev, timePoint, timePoint), device);
     }
 
     @Override
