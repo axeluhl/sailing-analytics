@@ -5456,15 +5456,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         boolean isFakeSeries = SailingServiceUtil.isFakeSeries(event);
         
-        boolean first = true;
-        boolean onlyOneLG = false;
         for (Iterator<LeaderboardGroup> iter = event.getLeaderboardGroups().iterator(); iter.hasNext();) {
             LeaderboardGroup lg = iter.next();
-            
-            if(first) {
-                first = false;
-                onlyOneLG = !iter.hasNext();
-            }
             
             for (Leaderboard sl : lg.getLeaderboards()) {
                 Regatta regattaEntity = getService().getRegattaByName(sl.getName());
@@ -5473,9 +5466,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 
                 RegattaMetadataDTO regatta = new RegattaMetadataDTO(sl.getName(), sl.getName());
-                if(!onlyOneLG) {
-                    regatta.setBoatCategory(lg.getName());
-                }
+                regatta.setBoatCategory(lg.getDisplayName() != null ? lg.getDisplayName() : lg.getName());
                 regatta.setCompetitorsCount(SailingServiceUtil.calculateCompetitorsCount(sl));
                 regatta.setRaceCount(SailingServiceUtil.calculateRaceCount(sl));
                 regatta.setTrackedRacesCount(SailingServiceUtil.calculateTrackedRaceCount(sl));
