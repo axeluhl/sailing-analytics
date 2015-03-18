@@ -71,9 +71,12 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -81,6 +84,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAnd
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -653,6 +657,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
         
+        GPSFix lastKnownFix = getLastKnownFix(leaderboard, mark, regattaLog);
+        
         Pair<UUID, List<GPSFixMoving>> data = null;
         try {
             Object requestBody = JSONValue.parseWithException(json);
@@ -679,6 +685,25 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             logger.log(Level.WARNING, "Could not ping mark " + mark.getName());
         }
 
-        return Response.ok().build();
+        if (lastKnownFix != null){
+            GPSFixJsonSerializer serializer = new GPSFixJsonSerializer();
+            JSONObject lastKnownFixJson = serializer.serialize(lastKnownFix);
+            String fixJson = lastKnownFixJson.toJSONString();
+            return Response.ok(fixJson, MediaType.APPLICATION_JSON).build();
+        } else {
+            return Response.ok().build();
+        }
+    }
+
+    private GPSFix getLastKnownFix(Leaderboard leaderboard, Mark mark, RegattaLog regattaLog) {
+        DynamicGPSFixTrack<Mark, GPSFix> track = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
+        try {
+            getService().getGPSFixStore().loadMarkTrack(track, regattaLog, mark);
+        } catch (Exception e) {
+            return null;
+        }
+        
+        GPSFix lastKnownFix = track.getLastFixAtOrBefore(new MillisecondsTimePoint(new Date()));
+        return lastKnownFix;
     }
 }

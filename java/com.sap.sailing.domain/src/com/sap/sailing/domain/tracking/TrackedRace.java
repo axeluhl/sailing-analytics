@@ -222,6 +222,11 @@ public interface TrackedRace extends Serializable {
      * will be created in case no track was present for <code>mark</code> so far.
      */
     GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
+    
+    /**
+     * Yields the track describing <code>mark</code>'s movement over time; <code>null</code> if no track exists for <code>mark</code> so far.
+     */
+    GPSFixTrack<Mark, GPSFix> getTrack(Mark mark);
 
     /**
      * Retrieves all marks assigned to the race. They are not necessarily part of the race course.
