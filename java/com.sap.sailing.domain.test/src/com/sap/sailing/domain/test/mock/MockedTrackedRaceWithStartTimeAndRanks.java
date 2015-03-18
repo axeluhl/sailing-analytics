@@ -677,4 +677,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         
     }
 
+    @Override
+    public GPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
+        return null;
+    }
+
 }
