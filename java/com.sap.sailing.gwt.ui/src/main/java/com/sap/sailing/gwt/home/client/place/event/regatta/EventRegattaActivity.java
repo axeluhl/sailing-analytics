@@ -86,8 +86,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     public PlaceNavigation<RegattaRacesPlace> getCurrentRegattaOverviewNavigation() {
         // TODO Overview isn't implemented yet
-        return homePlacesNavigator.getEventNavigation(new RegattaRacesPlace(ctx), ctx.getEventDTO().getBaseURL(), ctx
-                .getEventDTO().isOnRemoteServer());
+        return homePlacesNavigator.getEventNavigation(new RegattaRacesPlace(ctx), null, false);
     }
 
 

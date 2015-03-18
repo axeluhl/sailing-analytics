@@ -142,26 +142,22 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public PlaceNavigation<EventDefaultPlace> getCurrentEventNavigation() {
-        return homePlacesNavigator.getEventNavigation(ctx.getEventId(), ctx.getEventDTO().getBaseURL(), ctx
-                .getEventDTO().isOnRemoteServer());
+        return homePlacesNavigator.getEventNavigation(ctx.getEventId(), null, false);
     }
 
     @Override
     public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
-        return homePlacesNavigator.getEventSeriesNavigation(ctx.getEventId(), ctx.getEventDTO().getBaseURL(), ctx
-                .getEventDTO().isOnRemoteServer());
+        return homePlacesNavigator.getEventSeriesNavigation(ctx.getEventId(), null, false);
     }
 
     @Override
     public PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaId) {
-        return homePlacesNavigator.getEventNavigation(getPlaceForRegattaRaces(regattaId), ctx
-                        .getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
+        return homePlacesNavigator.getEventNavigation(getPlaceForRegattaRaces(regattaId), null, false);
     }
 
     @Override
     public PlaceNavigation<RegattaRacesPlace> getRegattaNavigation(String regattaId) {
-        return homePlacesNavigator.getEventNavigation(getPlaceForRegattaRaces(regattaId), ctx
-                        .getEventDTO().getBaseURL(), ctx.getEventDTO().isOnRemoteServer());
+        return homePlacesNavigator.getEventNavigation(getPlaceForRegattaRaces(regattaId), null, false);
     }
 
     @Override

@@ -12,8 +12,6 @@ public class EventSeriesViewDTO implements IsSerializable {
     private UUID id;
     private String displayName;
     private ArrayList<EventMetadataDTO> events = new ArrayList<>();
-    private String baseUrl;
-    private boolean onRemoteServer;
     private String logoImageURL;
     private boolean hasMedia;
     private boolean hasAnalytics;
@@ -61,22 +59,6 @@ public class EventSeriesViewDTO implements IsSerializable {
 
     public void addEvent(EventMetadataDTO event) {
         this.events.add(event);
-    }
-
-    public String getBaseURL() {
-        return baseUrl;
-    }
-    
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-
-    public boolean isOnRemoteServer() {
-        return onRemoteServer;
-    }
-    
-    public void setOnRemoteServer(boolean onRemoteServer) {
-        this.onRemoteServer = onRemoteServer;
     }
 
     public String getLogoImageURL() {

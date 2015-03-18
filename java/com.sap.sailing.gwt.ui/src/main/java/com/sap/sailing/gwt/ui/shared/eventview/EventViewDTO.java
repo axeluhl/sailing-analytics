@@ -21,8 +21,6 @@ public class EventViewDTO extends EventMetadataDTO {
     private String seriesName;
     private String logoImageURL;
     private String officialWebsiteURL;
-    private String baseURL;
-    private boolean isOnRemoteServer;
 
     public EventViewDTO() {
     }
@@ -102,21 +100,5 @@ public class EventViewDTO extends EventMetadataDTO {
     
     public String getOfficialWebsiteURL() {
         return officialWebsiteURL;
-    }
-
-    public String getBaseURL() {
-        return baseURL;
-    }
-
-    public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
-    }
-
-    public boolean isOnRemoteServer() {
-        return isOnRemoteServer;
-    }
-
-    public void setOnRemoteServer(boolean isOnRemoteServer) {
-        this.isOnRemoteServer = isOnRemoteServer;
     }
 }

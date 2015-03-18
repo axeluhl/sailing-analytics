@@ -69,12 +69,12 @@ public abstract class AbstractSeriesActivity<PLACE extends AbstractSeriesPlace> 
     
     @Override
     public PlaceNavigation<EventDefaultPlace> getEventNavigation(UUID eventId) {
-        return homePlacesNavigator.getEventNavigation(eventId.toString(), ctx.getSeriesDTO().getBaseURL(), ctx.getSeriesDTO().isOnRemoteServer());
+        return homePlacesNavigator.getEventNavigation(eventId.toString(), null, false);
     }
     
     @Override
     public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
-        return homePlacesNavigator.getEventSeriesNavigation(ctx.getSeriesId(), ctx.getSeriesDTO().getBaseURL(), ctx.getSeriesDTO().isOnRemoteServer());
+        return homePlacesNavigator.getEventSeriesNavigation(ctx.getSeriesId(), null, false);
     }
     
     @Override

@@ -5439,13 +5439,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public EventViewDTO getEventViewById(UUID id) {
-        
-        String requestBaseURL;
-        try {
-            requestBaseURL = getRequestBaseURL().toString();
-        } catch (MalformedURLException e) {
-            requestBaseURL = null;
-        }
         Event event = getService().getEvent(id);
         if (event == null) {
             throw new RuntimeException("Event not found");
@@ -5453,9 +5446,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         EventViewDTO dto = new EventViewDTO();
         mapToMetadataDTO(event, dto);
-        
-        dto.setBaseURL(requestBaseURL);
-        dto.setOnRemoteServer(false);
         
         dto.setLogoImageURL(event.getLogoImageURL() == null ? null : event.getLogoImageURL().toString());
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
@@ -5578,31 +5568,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public EventSeriesViewDTO getEventSeriesViewById(UUID id) {
-        EventDTO o;
-        try {
-            o = getEventById(id, false);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("We can do better than MalformedURLException");
+        Event o = getService().getEvent(id);
+        if (o == null) {
+            throw new RuntimeException("Series not found");
         }
-        if(!o.isFakeSeries()) {
-            throw new IllegalArgumentException("Event is not part of a series!");
-        }
+        
         EventSeriesViewDTO dto = new EventSeriesViewDTO();
         dto.setId(id);
-        dto.setBaseUrl(o.getBaseURL());
-        dto.setOnRemoteServer(o.isOnRemoteServer());
-        dto.setLogoImageURL(o.getLogoImageURL());
+        dto.setLogoImageURL(o.getLogoImageURL() == null ? null : o.getLogoImageURL().toString());
         // TODO implement correctly. We currently do not show media for series.
         dto.setHasMedia(false);
         
         boolean oneEventStarted = false;
         boolean oneEventLive = false;
         boolean allFinished = true;
-        if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
-            LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
-            dto.setDisplayName(overallLeaderboardGroupDTO.getDisplayName() != null ? overallLeaderboardGroupDTO.getDisplayName() : overallLeaderboardGroupDTO.getName());
-
-            LeaderboardGroup overallLeaderboardGroup = getService().getLeaderboardGroupByName(overallLeaderboardGroupDTO.getName());
+        if (SailingServiceUtil.isFakeSeries(o)) {
+            LeaderboardGroup overallLeaderboardGroup = o.getLeaderboardGroups().iterator().next();
+            dto.setDisplayName(overallLeaderboardGroup.getDisplayName() != null ? overallLeaderboardGroup.getDisplayName() : overallLeaderboardGroup.getName());
 
             if (overallLeaderboardGroup.getOverallLeaderboard() != null) {
                 dto.setLeaderboardId(overallLeaderboardGroup.getOverallLeaderboard().getName());
