@@ -421,7 +421,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         String leaderboardName = leaderboard.getName();
         
         //http://<host>/buoy-tender/checkin&leaderboard_name=<leaderboard-name>
-        String url = DeviceMappingConstants.getBuyoTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboardName,NonGwtUrlHelper.INSTANCE);
+        String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboardName,NonGwtUrlHelper.INSTANCE);
         for (String toAddress : emailArray){
             try {
                 sendInvitationEmail(locale, toAddress, leaderboardName, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "buoyTender"), url);

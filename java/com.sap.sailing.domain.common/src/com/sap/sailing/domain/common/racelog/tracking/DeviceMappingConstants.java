@@ -49,7 +49,7 @@ public class DeviceMappingConstants {
                 + mappedItemId);
     }
     
-    public static String getBuyoTenderInvitationUrl(String serverUrlWithoutTrailingSlash,
+    public static String getBuoyTenderInvitationUrl(String serverUrlWithoutTrailingSlash,
             String leaderboardName, UrlHelper helper) {
         return helper.encodeUrl(serverUrlWithoutTrailingSlash + BUOY_TENDER_URL_BASE + "?" + URL_LEADERBOARD_NAME + "=" + leaderboardName);
     }
