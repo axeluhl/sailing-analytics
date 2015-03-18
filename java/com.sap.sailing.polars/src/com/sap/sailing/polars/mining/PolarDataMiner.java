@@ -77,7 +77,7 @@ public class PolarDataMiner {
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);
                 synchronized (fixQueue) {
-                    while (this.getQueue().size() < (EXECUTOR_QUEUE_SIZE / 3) && !fixQueue.isEmpty()) {
+                    while (this.getQueue().size() < (EXECUTOR_QUEUE_SIZE / 10) && !fixQueue.isEmpty()) {
                         GPSFixMovingWithOriginInfo fix = fixQueue.poll();
                         enrichingProcessor.processElement(fix);
                     }
@@ -212,7 +212,7 @@ public class PolarDataMiner {
         if (PolarFixFilterCriteria.isInLeadingCompetitors(trackedRace, fixWithOriginInfo.getCompetitor(),
                 backendPolarSheetGenerationSettings.getPctOfLeadingCompetitorsToInclude())) {
             synchronized (fixQueue) {
-                if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 3) {
+                if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 10) {
                     fixQueue.add(fixWithOriginInfo);
                 } else {
                     enrichingProcessor.processElement(fixWithOriginInfo);
