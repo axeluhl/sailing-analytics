@@ -1,11 +1,11 @@
-package com.sap.sailing.android.tracking.app.customviews;
+package com.sap.sailing.android.shared.ui.customviews;
 
 import android.content.Context;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.shared.R;
 
 public class OpenSansToolbar extends Toolbar {
 

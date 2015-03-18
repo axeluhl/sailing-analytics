@@ -1,9 +1,9 @@
-package com.sap.sailing.android.tracking.app.utils;
+package com.sap.sailing.android.shared.util;
+
+import java.util.UUID;
 
 import android.content.Context;
 import android.telephony.TelephonyManager;
-
-import java.util.UUID;
 
 /**
  * I'm picking a device id based on this reply on Stack Overflow: http://stackoverflow.com/a/2853253/3589281
@@ -14,7 +14,6 @@ public class UniqueDeviceUuid {
 
 	public static String getUniqueId(Context context)
 	{
-		 AppPreferences prefs = new AppPreferences(context);
         /*
 		 String existingDeviceIdentifier = prefs.getDeviceIdentifier();
 		 
@@ -34,8 +33,6 @@ public class UniqueDeviceUuid {
 		 UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
 		 String deviceId = deviceUuid.toString();
 		 
-		 prefs.setDeviceIdentifier(deviceId);
-		
 		 return deviceId;
 	}
 }

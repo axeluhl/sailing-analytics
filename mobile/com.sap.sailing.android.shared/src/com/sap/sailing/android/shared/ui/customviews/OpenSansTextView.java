@@ -1,4 +1,4 @@
-package com.sap.sailing.android.tracking.app.customviews;
+package com.sap.sailing.android.shared.ui.customviews;
 
 import android.content.Context;
 import android.graphics.Typeface;

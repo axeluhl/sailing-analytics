@@ -1,18 +1,18 @@
-package com.sap.sailing.android.tracking.app.utils;
+package com.sap.sailing.android.shared.util;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
 
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 
 public class NetworkHelper {
 	

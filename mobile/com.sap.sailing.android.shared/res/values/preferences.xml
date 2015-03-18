@@ -17,7 +17,6 @@
     
     <string name="preference_competitor_key">competitor</string>
     <string name="preference_competitor_default">-1</string>
-    ‚
     <string name="preference_last_scanned_qr_code">lastScannedQRCode</string>
 
     <!-- the following strings should be overridden by apps using this library (e.g. in their own preferences.xml) -->

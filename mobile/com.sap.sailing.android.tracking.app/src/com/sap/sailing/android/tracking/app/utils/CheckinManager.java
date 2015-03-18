@@ -6,11 +6,12 @@ import android.net.Uri;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
+import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.CheckinDataActivity;
+import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -30,7 +31,7 @@ import java.util.UUID;
 public class CheckinManager {
 
     private final static String TAG = CheckinManager.class.getName();
-    private CheckinData checkinData;
+    private AbstractCheckinData checkinData;
     private CheckinDataActivity activity;
     private AppPreferences prefs;
     private String url;
@@ -283,12 +284,12 @@ public class CheckinManager {
         }
     }
 
-    public void setCheckinData(CheckinData data){
+    public void setCheckinData(AbstractCheckinData data){
         checkinData = data;
         activity.onCheckinDataAvailable(getCheckinData());
     }
 
-    public CheckinData getCheckinData(){
+    public AbstractCheckinData getCheckinData(){
         return checkinData;
     }
 
@@ -313,7 +314,6 @@ public class CheckinManager {
     }
 
     public interface CheckinDataHandler{
-        public void onCheckinDataAvailable(CheckinData data);
     }
 
     private class URLData{

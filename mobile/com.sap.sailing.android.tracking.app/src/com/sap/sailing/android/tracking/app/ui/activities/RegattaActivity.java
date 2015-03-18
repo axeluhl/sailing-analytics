@@ -1,5 +1,22 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Locale;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,42 +35,28 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.tracking.app.BuildConfig;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
-import com.sap.sailing.android.tracking.app.utils.CheckinManager;
-import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
+import com.sap.sailing.android.tracking.app.BuildConfig;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.CheckinManager;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinUrlInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
-import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Locale;
-
-public class RegattaActivity extends CheckinDataActivity implements RegattaFragment.FragmentWatcher {
+public class RegattaActivity extends AbstractRegattaActivity implements RegattaFragment.FragmentWatcher {
 
     private final static String TAG = RegattaActivity.class.getName();
     private final static String LEADERBOARD_IMAGE_FILENAME_PREFIX = "leaderboardImage_";
@@ -67,11 +70,12 @@ public class RegattaActivity extends CheckinDataActivity implements RegattaFragm
     private boolean hasPicture;
     private String checkinDigest;
     private CheckinManager manager;
+    private AppPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        prefs = new AppPreferences(this);
         Intent intent = getIntent();
 
         event = new EventInfo();
@@ -357,8 +361,9 @@ public class RegattaActivity extends CheckinDataActivity implements RegattaFragm
     }
 
     @Override
-    public void onCheckinDataAvailable(CheckinData data) {
-        if (data != null) {
+    public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
+        if (checkinData != null) {
+        	CheckinData data = (CheckinData) checkinData;
             try {
                 DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
                 DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(),
@@ -556,5 +561,10 @@ public class RegattaActivity extends CheckinDataActivity implements RegattaFragm
         Intent intent = new Intent(this, TrackingActivity.class);
         intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
         startActivity(intent);
+    }
+    
+    @Override
+    protected int getOptionsMenuResId() {
+        return R.menu.options_menu_with_checkout;
     }
 }
