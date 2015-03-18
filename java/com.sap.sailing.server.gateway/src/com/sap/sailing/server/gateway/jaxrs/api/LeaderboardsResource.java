@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -539,19 +541,58 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
         
-        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        if (raceColumn == null) {
-            return Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a race column '" + raceColumnName + "' in leaderboard '" + leaderboardName + "'.")
+        
+        Collection<Mark> marks = new HashSet<Mark>(); 
+        if (raceColumnName == null && fleetName != null){
+            return Response.status(Status.BAD_REQUEST)
+                    .entity("Either specify neither raceColumnName nor fleetName, only raceColumnName, or raceColumnName and fleetName but not only fleetName")
                     .type(MediaType.TEXT_PLAIN).build();
-        }
-        Fleet fleet = raceColumn.getFleetByName(fleetName);
-        if (fleet == null) {
-            return Response.status(Status.NOT_FOUND)
-                    .entity("Could not find fleet '" + fleetName + "' in leaderboard '" + leaderboardName + "'.")
-                    .type(MediaType.TEXT_PLAIN).build();
+        } else if (raceColumnName == null && fleetName == null){
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()){
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
+                    marks.addAll(new DefinedMarkFinder(raceLog).analyze());
+                    if (trackedRace != null) {
+                        Util.addAll(trackedRace.getMarks(), marks);
+                    }
+                }
+            }
+        } else if (raceColumnName != null){
+            
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn == null) {
+                return Response.status(Status.NOT_FOUND)
+                        .entity("Could not find a race column '" + raceColumnName + "' in leaderboard '" + leaderboardName + "'.")
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            if (fleetName != null){
+                Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet == null) {
+                    return Response.status(Status.NOT_FOUND)
+                            .entity("Could not find fleet '" + fleetName + "' in leaderboard '" + leaderboardName + "'.")
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                
+                marks = getMarksForFleet(raceColumn, fleet);
+            } else {
+                //Return all marks for a certain race column
+                for (Fleet fleet: raceColumn.getFleets()){
+                    Util.addAll(getMarksForFleet(raceColumn, fleet), marks);
+                }
+            }
         }
         
+        JSONArray array = new JSONArray();
+        for (Mark mark : marks) {
+            array.add(markSerializer.serialize(mark));
+        }
+        
+        return Response.ok(array.toJSONString(), MediaType.APPLICATION_JSON).build();   
+    }
+
+    private Collection<Mark> getMarksForFleet(RaceColumn raceColumn, Fleet fleet) {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
         
@@ -562,12 +603,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             Util.addAll(trackedRace.getMarks(), marks);
         }
         
-        JSONArray array = new JSONArray();
-        for (Mark mark : marks) {
-            array.add(markSerializer.serialize(mark));
-        }
-        
-        return Response.ok(array.toJSONString(), MediaType.APPLICATION_JSON).build();   
+        return marks;
     }
 
     private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
