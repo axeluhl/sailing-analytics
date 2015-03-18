@@ -2,11 +2,9 @@ package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -47,7 +45,6 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitors
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -58,7 +55,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
@@ -79,7 +75,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
@@ -188,44 +183,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     public RaceLogTrackingState getRaceLogTrackingState(RacingEventService service, RaceColumn raceColumn, Fleet fleet) {
         return new RaceLogTrackingStateAnalyzer(raceColumn.getRaceLog(fleet)).analyze();
     }
-
-    private Waypoint duplicateWaypoint(Waypoint waypoint, Map<ControlPoint, ControlPoint> controlPointDuplicationCache,
-            Map<Mark, Mark> markDuplicationCache, SharedDomainFactory baseDomainFactory) {
-        ControlPoint oldCP = waypoint.getControlPoint();
-        ControlPoint newCP = null;
-        PassingInstruction pi = waypoint.getPassingInstructions();
-        if (controlPointDuplicationCache.get(oldCP) != null) {
-            newCP = controlPointDuplicationCache.get(oldCP);
-        } else {
-            Mark[] newMarks = new Mark[Util.size(oldCP.getMarks())];
-            int i = 0;
-            for (Mark oldMark : oldCP.getMarks()) {
-                newMarks[i] = null;
-                if (markDuplicationCache.get(oldMark) != null) {
-                    newMarks[i] = markDuplicationCache.get(oldMark);
-                } else {
-                    newMarks[i] = baseDomainFactory.getOrCreateMark(UUID.randomUUID(), oldMark.getName(), oldMark.getType(),
-                            oldMark.getColor(), oldMark.getShape(), oldMark.getPattern());
-                    markDuplicationCache.put(oldMark, newMarks[i]);
-                }
-                i++;
-            }
-            switch (newMarks.length) {
-            case 1:
-                newCP = newMarks[0];
-                break;
-            case 2:
-                newCP = baseDomainFactory.createControlPointWithTwoMarks(newMarks[0], newMarks[1], oldCP.getName());
-                break;
-            default:
-                logger.log(Level.WARNING, "Don't know how to duplicate CP with more than 2 marks");
-                throw new RuntimeException("Don't know how to duplicate CP with more than 2 marks");
-            }
-            controlPointDuplicationCache.put(oldCP, newCP);
-        }
-
-        return baseDomainFactory.createWaypoint(newCP, pi);
-    }
     
     private void revokeAlreadyDefinedMarks(RaceLog raceLog, AbstractLogEventAuthor author) {
         List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogDefineMarkEvent.class).analyze();
@@ -251,21 +208,18 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             CourseBase to = new CourseDataImpl("Copy of \"" + course.getName());
             TimePoint now = MillisecondsTimePoint.now();
             int i = 0;
-            Map<ControlPoint, ControlPoint> controlPointDuplicationCache = new HashMap<ControlPoint, ControlPoint>();
             revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
-            Map<Mark, Mark> markDuplicationCache = new HashMap<Mark, Mark>();
-            for (Waypoint oldWaypoint : course.getWaypoints()) {
-                to.addWaypoint(i++, duplicateWaypoint(oldWaypoint, controlPointDuplicationCache, markDuplicationCache, baseDomainFactory));
-            }
 
-            for (Mark mark : markDuplicationCache.values()) {
-                RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now, service.getServerAuthor(),
-                        toRaceLog.getCurrentPassId(), mark);
-                toRaceLog.add(event);
+            for (Waypoint oldWaypoint : course.getWaypoints()) {
+                to.addWaypoint(i++, oldWaypoint);
+                for (Mark mark : oldWaypoint.getMarks()) {
+                    RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now, service.getServerAuthor(),
+                            toRaceLog.getCurrentPassId(), mark);
+                    toRaceLog.add(event);
+                }
             }
 
             int passId = toRaceLog.getCurrentPassId();
-
             RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(
                     now, service.getServerAuthor(), passId, to);
             toRaceLog.add(newCourseEvent);
