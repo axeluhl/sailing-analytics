@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.doReturn;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,12 +55,8 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testCheckinAndCheckout() throws Exception {
-        LeaderboardsResource resource = spyResource(new LeaderboardsResource() {
-            @Override
-            public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
-                return RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(racingEventService.getBaseDomainFactory());
-            }
-        });
+        LeaderboardsResource resource = spyResource(new LeaderboardsResource());
+        doReturn(RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(racingEventService.getBaseDomainFactory())).when(resource).getRaceLogTrackingAdapter();
 
         Response response = resource.pingMark(GPSFixesResourceTest.FIXES_JSON, leaderboard.getName(), mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
