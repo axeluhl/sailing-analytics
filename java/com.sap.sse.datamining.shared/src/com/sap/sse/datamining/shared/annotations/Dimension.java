@@ -30,9 +30,11 @@ import java.util.Locale;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Dimension {
-    
+
     /**
-     * The message key used for internationalization
+     * The message key used for internationalization.<br />
+     * If there are more than one ordinal in a function (e.g. if the function is an instance of ConcatenatingCompoundFunction),
+     * then the messages will be concatenated (separated by a space).
      */
     public String messageKey();
     

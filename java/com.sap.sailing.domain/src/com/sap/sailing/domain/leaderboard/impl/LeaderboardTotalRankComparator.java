@@ -74,7 +74,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * is before a race in a column that is considered has started, <code>null</code> values may result in that column.
      */
     public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint,
-            ScoringScheme scoringScheme, boolean nullScoresAreBetter, Iterable<RaceColumn> raceColumnsToConsider) throws NoWindException {
+            ScoringScheme scoringScheme, boolean nullScoresAreBetter, Iterable<RaceColumn> raceColumnsToConsider) {
         super();
         this.leaderboard = leaderboard;
         this.timePoint = timePoint;

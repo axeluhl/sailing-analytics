@@ -140,9 +140,6 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 e.printStackTrace();
             }
         }
-        if (simulator != null) {
-            simulator.stop();
-        }
         unsubscribe();
     }
 

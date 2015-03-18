@@ -15,15 +15,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaVideo;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaEntryDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
-import com.sap.sse.gwt.theme.client.component.imagegallery.ImageDescriptor;
-import com.sap.sse.gwt.theme.client.component.imagegallery.ImageGalleryData;
-import com.sap.sse.gwt.theme.client.component.videogallery.VideoDescriptor;
-import com.sap.sse.gwt.theme.client.component.videogallery.VideoGalleryData;
 
 public class MediaPage extends Composite {
 
@@ -132,40 +127,40 @@ public class MediaPage extends Composite {
         }
     }
 
-    private ImageGalleryData mapPhotoData(ArrayList<MediaEntryDTO> photos) {
-        List<ImageDescriptor> images = new ArrayList<>();
-        for(MediaEntryDTO entry : photos) {
-            ImageDescriptor descriptor = new ImageDescriptor(entry.getMediaURL());
-            descriptor.setTitle(entry.getTitle());
-            descriptor.setSubtitle(entry.getSubtitle());
-            descriptor.setAuthor(entry.getAuthor());
-            descriptor.setCreatedAtDate(entry.getCreatedAtDate());
-            descriptor.setWidthInPx(entry.getWidthInPx());
-            descriptor.setHeightInPx(entry.getHeightInPx());
-            descriptor.setThumbnailURL(entry.getThumbnailURL());
-            descriptor.setThumbnailWidthInPx(entry.getThumbnailWidthInPx());
-            descriptor.setThumbnailHeightInPx(entry.getThumbnailHeightInPx());
-            images.add(descriptor);
-        }
-        return new ImageGalleryData(StringMessages.INSTANCE.photos(), images);
-    }
-    
-    private VideoGalleryData mapVideoData(ArrayList<MediaEntryDTO> photos) {
-        List<VideoDescriptor> images = new ArrayList<>();
-        for(MediaEntryDTO entry : photos) {
-            VideoDescriptor descriptor = new VideoDescriptor(entry.getMediaURL());
-            descriptor.setTitle(entry.getTitle());
-            descriptor.setSubtitle(entry.getSubtitle());
-            descriptor.setAuthor(entry.getAuthor());
-            descriptor.setCreatedAtDate(entry.getCreatedAtDate());
-            descriptor.setWidthInPx(entry.getWidthInPx());
-            descriptor.setHeightInPx(entry.getHeightInPx());
-            descriptor.setThumbnailURL(entry.getThumbnailURL());
-            descriptor.setThumbnailWidthInPx(entry.getThumbnailWidthInPx());
-            descriptor.setThumbnailHeightInPx(entry.getThumbnailHeightInPx());
-            images.add(descriptor);
-        }
-        return new VideoGalleryData(StringMessages.INSTANCE.videos(), images);
-    }
+    // private ImageGalleryData mapPhotoData(ArrayList<MediaEntryDTO> photos) {
+    // List<ImageDescriptor> images = new ArrayList<>();
+    // for(MediaEntryDTO entry : photos) {
+    // ImageDescriptor descriptor = new ImageDescriptor(entry.getMediaURL());
+    // descriptor.setTitle(entry.getTitle());
+    // descriptor.setSubtitle(entry.getSubtitle());
+    // descriptor.setAuthor(entry.getAuthor());
+    // descriptor.setCreatedAtDate(entry.getCreatedAtDate());
+    // descriptor.setWidthInPx(entry.getWidthInPx());
+    // descriptor.setHeightInPx(entry.getHeightInPx());
+    // descriptor.setThumbnailURL(entry.getThumbnailURL());
+    // descriptor.setThumbnailWidthInPx(entry.getThumbnailWidthInPx());
+    // descriptor.setThumbnailHeightInPx(entry.getThumbnailHeightInPx());
+    // images.add(descriptor);
+    // }
+    // return new ImageGalleryData(StringMessages.INSTANCE.photos(), images);
+    // }
+    //
+    // private VideoGalleryData mapVideoData(ArrayList<MediaEntryDTO> photos) {
+    // List<VideoDescriptor> images = new ArrayList<>();
+    // for(MediaEntryDTO entry : photos) {
+    // VideoDescriptor descriptor = new VideoDescriptor(entry.getMediaURL());
+    // descriptor.setTitle(entry.getTitle());
+    // descriptor.setSubtitle(entry.getSubtitle());
+    // descriptor.setAuthor(entry.getAuthor());
+    // descriptor.setCreatedAtDate(entry.getCreatedAtDate());
+    // descriptor.setWidthInPx(entry.getWidthInPx());
+    // descriptor.setHeightInPx(entry.getHeightInPx());
+    // descriptor.setThumbnailURL(entry.getThumbnailURL());
+    // descriptor.setThumbnailWidthInPx(entry.getThumbnailWidthInPx());
+    // descriptor.setThumbnailHeightInPx(entry.getThumbnailHeightInPx());
+    // images.add(descriptor);
+    // }
+    // return new VideoGalleryData(StringMessages.INSTANCE.videos(), images);
+    // }
 
 }

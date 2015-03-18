@@ -94,11 +94,11 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         logOccuredFailures();
 
         long calculationTimeInNanos = endTime - startTime;
-        AdditionalResultDataBuilder additionalDataBuilder = new OverwritingResultDataBuilder();
-        additionalDataBuilder = firstProcessor.getAdditionalResultData(additionalDataBuilder);
         Map<GroupKey, AggregatedType> results = resultReceiver.getResult();
         
         if (stringMessages != null && locale != null) {
+            AdditionalResultDataBuilder additionalDataBuilder = new OverwritingResultDataBuilder();
+            additionalDataBuilder = firstProcessor.getAdditionalResultData(additionalDataBuilder);
             return new QueryResultImpl<>(results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
         } else {
             return new QueryResultImpl<>(results);
