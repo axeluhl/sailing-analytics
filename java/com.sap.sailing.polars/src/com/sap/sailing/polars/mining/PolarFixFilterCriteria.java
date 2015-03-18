@@ -30,7 +30,8 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
     /**
      * 
      * @param pctOfLeadingCompetitorsToInclude 
-     *                          0 if no competitor should be included.<br \>
+     *                          0 if only first competitor should be included.<br \>
+     *                          0.1 if the best 10% should be included
      *                          1 if every competitor should be included
      */
     public PolarFixFilterCriteria(double pctOfLeadingCompetitorsToInclude) {
@@ -90,9 +91,9 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         Waypoint wayPoint = trackedRace.getMarkPassings(competitor).last().getWaypoint();
         if (wayPoint != null) {
             Iterator<MarkPassing> markPassingsAtCompetitorsLastWayPoint = trackedRace.getMarkPassingsInOrder(
-                    trackedRace.getRace().getCourse().getLastWaypoint()).iterator();
-            for (int i = 0; i < ((int) Math.max(pctOfLeadingCompetitorsToInclude
-                    * getNumberOfCompetitors(trackedRace), 1)); i++) {
+                    wayPoint).iterator();
+            for (int i = 0; i < ((int) Math.max(Math.round(pctOfLeadingCompetitorsToInclude
+                    * getNumberOfCompetitors(trackedRace)), 1)); i++) {
                 if (markPassingsAtCompetitorsLastWayPoint.hasNext()) {
                     if (markPassingsAtCompetitorsLastWayPoint.next().getCompetitor().equals(competitor)) {
                         result = true;
@@ -125,12 +126,12 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         return result;
     }
 
-    public static boolean isInLeadingCompetitorsForReplayRace(TrackedRace trackedRace, Competitor competitor, double pctOfLeadingCompetitorsToInclude) {
+    private static boolean isInLeadingCompetitorsForReplayRace(TrackedRace trackedRace, Competitor competitor, double pctOfLeadingCompetitorsToInclude) {
         boolean result = false;
         Iterator<MarkPassing> finishPassings = trackedRace
                 .getMarkPassingsInOrder(trackedRace.getRace().getCourse().getLastWaypoint()).iterator();
-        for (int i = 0; i < ((int) Math.max(pctOfLeadingCompetitorsToInclude
-                * getNumberOfCompetitors(trackedRace), 1)); i++) {
+        for (int i = 0; i < ((int) Math.max(Math.round(pctOfLeadingCompetitorsToInclude
+                * getNumberOfCompetitors(trackedRace)), 1)); i++) {
             if (finishPassings.hasNext()) {
                 if (finishPassings.next().getCompetitor().equals(competitor)) {
                     result = true;
