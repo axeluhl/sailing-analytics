@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.general;
 
-import com.google.gwt.thirdparty.guava.common.annotations.GwtCompatible;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public enum LabelType {
@@ -76,7 +75,6 @@ public enum LabelType {
         this.labelType = labelType;
     }
     
-    @GwtCompatible
     public abstract String getLabel();
 
     public String getLabelType() {
