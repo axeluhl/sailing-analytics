@@ -40,6 +40,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
 import com.sap.sailing.racecommittee.app.ui.fragments.maps.WindMap;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
@@ -145,19 +146,6 @@ public class WindFragment extends ScheduleFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.wind_view, container, false);
 
-        if (getArguments() != null) {
-            switch (getArguments().getInt(STARTMODE, 0)) {
-                case 1:
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    header.setVisibility(View.GONE);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
         mHeader = layout.findViewById(R.id.header_text);
         mDarkLayer = layout.findViewById(R.id.dark_layer);
         mLayoutDirection = layout.findViewById(R.id.layout_direction);
@@ -183,6 +171,22 @@ public class WindFragment extends ScheduleFragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (getArguments() != null) {
+            switch (getArguments().getInt(STARTMODE, 0)) {
+                case 1:
+                    if (getView() != null) {
+                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_header);
+                        View header = getView().findViewById(R.id.header);
+                        header.setVisibility(View.GONE);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         if (mWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             String sensorData = getString(R.string.wind_sensor);
@@ -421,7 +425,6 @@ public class WindFragment extends ScheduleFragment
         switch (getArguments().getInt(STARTMODE, 0)) {
             case 1:
                 replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
-                sendIntent(R.string.intent_uncheck_all);
                 break;
 
             default:

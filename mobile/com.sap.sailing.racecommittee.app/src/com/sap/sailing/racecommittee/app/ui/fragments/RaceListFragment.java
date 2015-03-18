@@ -22,6 +22,8 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
@@ -118,7 +120,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mAdapter.notifyDataSetChanged();
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void filterChanged() {
         mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.getFilter().filterByMode(getFilterMode());
@@ -137,7 +139,18 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 mAll.setBackgroundDrawable(null);
             }
 
-            Drawable drawable = getResources().getDrawable(R.drawable.nav_drawer_tab_button);
+            int id;
+            if (AppPreferences.on(getActivity()).getTheme().equals(AppConstants.LIGHT_THEME)) {
+                id = R.drawable.nav_drawer_tab_button_light;
+            } else {
+                id = R.drawable.nav_drawer_tab_button_dark;
+            }
+            Drawable drawable;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                drawable = getActivity().getDrawable(id);
+            } else {
+                drawable = getResources().getDrawable(id);
+            }
             switch (getFilterMode()) {
                 case ALL:
                     mAll.setTextColor(colorOrange);

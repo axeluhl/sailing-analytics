@@ -38,7 +38,7 @@
         android:layout_alignStart="@+id/imageView"
         android:layout_marginBottom="@dimen/default_margin"
         android:text="@string/login_text"
-        android:textColor="?white"
+        android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_40" />
 
     <TextView
@@ -53,7 +53,7 @@
         android:drawablePadding="@dimen/default_padding_half"
         android:drawableStart="@drawable/ic_assignment_white_48dp"
         android:text="@string/login_sub_text"
-        android:textColor="?white"
+        android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_40" />
 
     <ImageView

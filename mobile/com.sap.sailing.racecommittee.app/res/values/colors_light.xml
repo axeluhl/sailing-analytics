@@ -21,7 +21,4 @@
     <color name="light_colorAccent">@color/light_sap_yellow_1</color>
     <!-- default color end -->
 
-    <color name="light_black_light">#ff242424</color>
-    <color name="light_black_transparent">#99000000</color>
-
 </resources>

@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
@@ -54,16 +55,6 @@ public class GateStartFragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             final View layout = inflater.inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
-
-            if (getArguments() != null) {
-                if (getArguments().getInt(STARTMODE, 0) != 0) {
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    if (header != null) {
-                        header.setVisibility(View.GONE);
-                    }
-                }
-            }
 
             mNat = (EditText) layout.findViewById(R.id.pathfinder_nat);
             mNum = (EditText) layout.findViewById(R.id.pathfinder_num);
@@ -131,6 +122,19 @@ public class GateStartFragment {
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
+            if (getArguments() != null) {
+                if (getArguments().getInt(STARTMODE, 0) != 0) {
+                    if (getView() != null) {
+                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_header);
+                        View header = getView().findViewById(R.id.header);
+                        if (header != null) {
+                            header.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            }
+
             if (mButton != null) {
                 mButton.setOnClickListener(new OnClickListener() {
 
@@ -185,16 +189,6 @@ public class GateStartFragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View layout = inflater.inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
 
-            if (getArguments() != null) {
-                if (getArguments().getInt(STARTMODE, 0) != 0) {
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    if (header != null) {
-                        header.setVisibility(View.GONE);
-                    }
-                }
-            }
-
             View caption = layout.findViewById(R.id.header_text);
             if (caption != null) {
                 caption.setOnClickListener(new OnClickListener() {
@@ -212,6 +206,18 @@ public class GateStartFragment {
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
+
+            if (getArguments() != null) {
+                if (getArguments().getInt(STARTMODE, 0) != 0) {
+                    if (getView() != null) {
+                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                        View header = getView().findViewById(R.id.header);
+                        if (header != null) {
+                            header.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            }
 
             ArrayList<String> timeValues = getTimeValues();
             final NumberPicker time_launch = (NumberPicker) getActivity().findViewById(R.id.time_launch);
@@ -254,7 +260,6 @@ public class GateStartFragment {
                             openMainScheduleFragment();
                         } else {
                             replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
-                            sendIntent(R.string.intent_uncheck_all);
                         }
                     }
                 });

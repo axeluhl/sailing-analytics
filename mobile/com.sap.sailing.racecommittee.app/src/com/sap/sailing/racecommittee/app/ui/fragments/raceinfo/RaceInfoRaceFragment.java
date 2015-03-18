@@ -18,9 +18,6 @@ public class RaceInfoRaceFragment extends BaseRaceInfoRaceFragment<BasicRacingPr
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_main, container, false);
-        ViewStub actionsStub = (ViewStub) view.findViewById(R.id.race_content);
-        actionsStub.setLayoutResource(R.layout.race_running_content);
-        actionsStub.inflate();
         return view;
     }
 

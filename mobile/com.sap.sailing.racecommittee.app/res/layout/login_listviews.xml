@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?sap_gray">
 
     <RelativeLayout
         android:id="@+id/event_header"
@@ -50,7 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/event_line"
-        android:background="?black_light" />
+        android:background="@color/constant_black_light" />
 
     <RelativeLayout
         android:id="@+id/area_header"
@@ -100,7 +101,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/area_line"
-        android:background="?black_light" />
+        android:background="@color/constant_black_light" />
 
     <RelativeLayout
         android:id="@+id/position_header"
@@ -150,7 +151,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/position_line"
-        android:background="?black_light" />
+        android:background="@color/constant_black_light" />
 
     <include layout="@layout/signup_button" />
 </RelativeLayout>

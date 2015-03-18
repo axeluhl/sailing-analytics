@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
@@ -25,6 +26,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
 
+    private final static String TAG = BaseRunningRaceFragment.class.getName();
+
     private ImageButton abortButton;
     private ImageButton finishingButton;
     private ImageButton generalRecallButton;
@@ -36,9 +39,11 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     protected TextView individualRecallLabel;
     
     private FlagPoleStateRenderer flagRenderer;
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ExLog.i(getActivity(), TAG, this.getClass().getName());
+
         View view = inflater.inflate(R.layout.race_running_base_view, container, false);
         ViewStub actionsStub = (ViewStub) view.findViewById(R.id.race_running_base_actions);
         int actionsLayout = getActionsLayoutId();

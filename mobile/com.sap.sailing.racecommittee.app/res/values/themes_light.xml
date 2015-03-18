@@ -16,8 +16,6 @@
 
         <!-- custom attributes because of custom themes -->
         <item name="black">@color/light_black</item>
-        <item name="black_light">@color/light_black_light</item>
-        <item name="black_transparent">@color/light_black_transparent</item>
         <item name="sap_blue_1">@color/light_sap_blue_1</item>
         <item name="sap_gray">@color/light_sap_gray</item>
         <item name="sap_gray_black_20">@color/light_sap_gray_black_20</item>

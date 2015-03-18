@@ -1,0 +1,164 @@
+package com.sap.sailing.racecommittee.app.ui.fragments.panels;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
+import com.sap.sailing.racecommittee.app.utils.TickSingleton;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.text.SimpleDateFormat;
+
+public class TimePanelFragment extends BasePanelFragment implements TickListener {
+
+    public final static String TOGGLED = "toggled";
+
+    private IntentReceiver mReceiver;
+    private SimpleDateFormat dateFormat;
+
+    private View mRaceHeader;
+    private TextView mCurrentTime;
+    private TextView mHeaderTime;
+    private TextView mTimeStart;
+    private TextView mTimeFinish;
+
+    public TimePanelFragment() {
+        mReceiver = new IntentReceiver();
+    }
+
+    public static TimePanelFragment newInstance(Bundle args) {
+        TimePanelFragment fragment = new TimePanelFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View layout = inflater.inflate(R.layout.race_panel_time, container, false);
+
+        dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
+
+        mRaceHeader = layout.findViewById(R.id.race_content_header);
+        if (mRaceHeader != null) {
+            mRaceHeader.setOnClickListener(new RaceHeaderClick());
+        }
+
+        mCurrentTime = (TextView) layout.findViewById(R.id.current_time);
+        mTimeFinish = (TextView) layout.findViewById(R.id.time_finish);
+        mHeaderTime = (TextView) layout.findViewById(R.id.timer_text);
+        mTimeStart = (TextView) layout.findViewById(R.id.time_start);
+        if (getArguments().getBoolean(TOGGLED, false)) {
+            toggleMarker(layout, R.id.time_marker);
+        }
+
+        return layout;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        TickSingleton.INSTANCE.registerListener(this);
+        notifyTick();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
+        filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        TickSingleton.INSTANCE.unregisterListener(this);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    public void notifyTick() {
+        super.notifyTick();
+
+        TimePoint now = MillisecondsTimePoint.now();
+
+        if (mCurrentTime != null) {
+            mCurrentTime.setText(dateFormat.format(now.asMillis()));
+            mCurrentTime.setVisibility(View.VISIBLE);
+        }
+
+        if (getRace() != null && getRace().getState() != null) {
+            TimePoint startTime = getRace().getState().getStartTime();
+
+            if (mTimeStart != null && startTime != null) {
+                mTimeStart.setText(getString(R.string.time_start).replace("#TIME#", dateFormat.format(startTime.asDate())));
+            }
+
+            if (mTimeFinish != null) {
+                mTimeFinish.setVisibility(View.VISIBLE);
+            }
+
+            if (mHeaderTime != null && startTime != null) {
+                String time;
+                if (startTime.asMillis() > now.asMillis()) {
+                    time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
+                } else {
+                    time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
+                }
+                mHeaderTime.setText(getString(R.string.time).replace("#TIME#", time));
+            }
+        }
+    }
+
+    private void uncheckMarker(View view) {
+        if (view != null) {
+            setMarkerLevel(mRaceHeader, R.id.time_marker, 0);
+        }
+    }
+
+    private class RaceHeaderClick implements View.OnClickListener {
+
+        private final String TAG = RaceHeaderClick.class.getName();
+
+        public void onClick(View v) {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_TIME);
+            switch (toggleMarker(v, R.id.time_marker)) {
+                case 0:
+                    replaceFragment(RaceFlagViewerFragment.newInstance());
+                    break;
+
+                case 1:
+                    replaceFragment(StartTimeFragment.newInstance(2));
+                    break;
+
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
+            }
+        }
+    }
+
+    private class IntentReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
+//                uncheckMarker(new View(context));
+            }
+        }
+    }
+}

@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedureAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
@@ -37,21 +38,6 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_procedure, container, false);
 
-        if (getArguments() != null) {
-            switch (getArguments().getInt(STARTMODE, 0)) {
-                case 1:
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    if (header != null) {
-                        header.setVisibility(View.GONE);
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
         LinearLayout headerText = (LinearLayout) layout.findViewById(R.id.header_text);
         if (headerText != null) {
             headerText.setOnClickListener(new View.OnClickListener() {
@@ -69,6 +55,22 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (getArguments() != null) {
+            switch (getArguments().getInt(STARTMODE, 0)) {
+                case 1:
+                    if (getView() != null) {
+                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_header);
+                        View header = getView().findViewById(R.id.header);
+                        header.setVisibility(View.GONE);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         String className;
         for (RacingProcedureType procedureType : RacingProcedureType.validValues()) {
@@ -96,7 +98,6 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
             } else {
                 getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime());
                 replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
-                sendIntent(R.string.intent_uncheck_all);
             }
         } else {
             if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {

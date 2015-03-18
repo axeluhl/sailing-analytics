@@ -4,7 +4,9 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,13 +18,15 @@ import android.widget.TimePicker;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class StartTimeFragment extends RaceFragment implements View.OnClickListener {
+public class StartTimeFragment extends ScheduleFragment implements View.OnClickListener {
     private static final String STARTMODE = "startMode";
     private static final int MAX_DAYS = 30;
 
@@ -47,29 +51,7 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_start_time, container, false);
-        if (getArguments() != null) {
-            switch (getArguments().getInt(STARTMODE, 0)) {
-                case 1:
-                    View header = layout.findViewById(R.id.header_text);
-                    if (header != null) {
-                        header.setOnClickListener(this);
-                    }
-                    View back = layout.findViewById(R.id.header_back);
-                    if (back != null) {
-                        back.setVisibility(View.VISIBLE);
-                    }
-                    break;
-                case 2:
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View frame = layout.findViewById(R.id.header);
-                    if (frame != null) {
-                        frame.setVisibility(View.GONE);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
+
         mCountdown = (TextView) layout.findViewById(R.id.start_countdown);
         Button min5 = (Button) layout.findViewById(R.id.start_min_five);
         if (min5 != null) {
@@ -110,6 +92,33 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
             }
         }
         if (getView() != null) {
+            if (getArguments() != null) {
+                switch (getArguments().getInt(STARTMODE, 0)) {
+                    case 1:
+                        View header = getView().findViewById(R.id.header_text);
+                        if (header != null) {
+                            header.setOnClickListener(this);
+                        }
+                        View back = getView().findViewById(R.id.header_back);
+                        if (back != null) {
+                            back.setVisibility(View.VISIBLE);
+                        }
+                        break;
+                    case 2:
+                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                        Bundle args = getArguments();
+                        args.putBoolean(TimePanelFragment.TOGGLED, true);
+                        replaceFragment(TimePanelFragment.newInstance(args), R.id.race_header);
+                        View frame = getView().findViewById(R.id.header);
+                        if (frame != null) {
+                            frame.setVisibility(View.GONE);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             mDatePicker = (NumberPicker) getView().findViewById(R.id.start_date_picker);
             if (mDatePicker != null) {
                 initDatePicker();
@@ -232,6 +241,6 @@ public class StartTimeFragment extends RaceFragment implements View.OnClickListe
                 .beginTransaction()
                 .replace(viewId, fragment)
                 .commit();
-        sendIntent(R.string.intent_uncheck_all);
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
     }
 }

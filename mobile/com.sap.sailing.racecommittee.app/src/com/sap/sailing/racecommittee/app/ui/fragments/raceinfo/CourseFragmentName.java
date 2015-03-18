@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.CourseNameAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseFragmentName extends CourseFragment implements CourseNameAdapter.CourseItemClick {
@@ -21,10 +22,6 @@ public class CourseFragmentName extends CourseFragment implements CourseNameAdap
     private static final String STARTMODE = "startMode";
 
     private ListView mListView;
-    
-    public CourseFragmentName() {
-        
-    }
 
     public static CourseFragmentName newInstance(int startMode) {
         CourseFragmentName fragment = new CourseFragmentName();
@@ -33,23 +30,31 @@ public class CourseFragmentName extends CourseFragment implements CourseNameAdap
         fragment.setArguments(args);
         return fragment;
     }
-    
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (getView() != null) {
+            if (getArguments() != null) {
+                switch (getArguments().getInt(STARTMODE, 0)) {
+                    case 1:
+                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
+                        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_header);
+                        View header = getView().findViewById(R.id.header);
+                        header.setVisibility(View.GONE);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_course_name, container, false);
-
-        if (getArguments() != null) {
-            switch (getArguments().getInt(STARTMODE, 0)) {
-                case 1:
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    header.setVisibility(View.GONE);
-                    break;
-
-                default:
-                    break;
-            }
-        }
 
         mListView = (ListView) layout.findViewById(R.id.listView);
 
@@ -85,7 +90,6 @@ public class CourseFragmentName extends CourseFragment implements CourseNameAdap
             openMainScheduleFragment();
         } else {
             replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
-            sendIntent(R.string.intent_uncheck_all);
         }
     }
 }

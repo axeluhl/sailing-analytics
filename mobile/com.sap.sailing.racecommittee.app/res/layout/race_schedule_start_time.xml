@@ -93,18 +93,20 @@
         android:layout_below="@id/header"
         android:orientation="vertical">
 
-        <ViewStub android:id="@+id/race_header"
-            android:layout="@layout/race_content_header"
+        <FrameLayout android:id="@+id/race_header"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_width="match_parent" />
+            android:layout_width="match_parent"
+            android:visibility="gone"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
             android:background="?sap_gray_black_30">
 
             <LinearLayout
+                android:id="@+id/start_picker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true">

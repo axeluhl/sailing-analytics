@@ -2,8 +2,6 @@
 <resources>
 
     <attr name="black" format="color" />
-    <attr name="black_light" format="color" />
-    <attr name="black_transparent" format="color" />
     <attr name="sap_blue_1" format="color" />
     <attr name="sap_gray" format="color" />
     <attr name="sap_gray_black_20" format="color" />
