@@ -92,15 +92,15 @@ public class EventHeader extends Composite {
             @Override
             public String getShortText() {
                 // TODO regatta details?
-                String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate);
-                return StringMessages.INSTANCE.eventSharingShortText(event.getName(), event.getVenue().getName(), dateString);
+                String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate());
+                return StringMessages.INSTANCE.eventSharingShortText(event.getDisplayName(), event.getLocationOrVenue(), dateString);
             }
 
             @Override
             public String getLongText(String url) {
                 // TODO regatta details?
-                String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate);
-                return StringMessages.INSTANCE.eventSharingLongText(event.getName(), event.getVenue().getName(), dateString, url);
+                String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate());
+                return StringMessages.INSTANCE.eventSharingLongText(event.getDisplayName(), event.getLocationOrVenue(), dateString, url);
             }
         });
     }
@@ -108,7 +108,7 @@ public class EventHeader extends Composite {
     private void initFields() {
         String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : EventHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
         eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
-        eventLogo.setTitle(event.getName());
+        eventLogo.setTitle(event.getDisplayName());
         
         String nameToShow;
         if(presenter.showRegattaMetadata()) {
@@ -135,15 +135,15 @@ public class EventHeader extends Composite {
             } else {
                 hide(eventCategory);
             }
-            Date startDate = regattaMetadata.getStartDate() != null ? regattaMetadata.getStartDate() : event.startDate;
-            Date endDate = regattaMetadata.getEndDate() != null ? regattaMetadata.getEndDate() : event.endDate;
+            Date startDate = regattaMetadata.getStartDate() != null ? regattaMetadata.getStartDate() : event.getStartDate();
+            Date endDate = regattaMetadata.getEndDate() != null ? regattaMetadata.getEndDate() : event.getEndDate();
             eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(startDate, endDate));
             
             hide(eventVenueContainer, eventLink);
         } else {
-            nameToShow = event.getName();
-            eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
-            String venue = event.getVenue().getName();
+            nameToShow = event.getDisplayName();
+            eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
+            String venue = event.getLocationAndVenue();
             if(event.getVenueCountry() != null && !event.getVenueCountry().isEmpty()) {
                 venue += ", " + event.getVenueCountry();
             }

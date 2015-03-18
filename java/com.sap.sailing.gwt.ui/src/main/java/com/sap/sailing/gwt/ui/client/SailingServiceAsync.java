@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -702,4 +703,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getMediaForEventSeries(UUID seriesId, AsyncCallback<MediaDTO> callback);
 
     void getEventListView(AsyncCallback<EventListViewDTO> callback);
+
+    void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
 }

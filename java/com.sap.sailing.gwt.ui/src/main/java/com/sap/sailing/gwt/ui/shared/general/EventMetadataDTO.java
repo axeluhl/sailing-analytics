@@ -10,9 +10,15 @@ public class EventMetadataDTO extends EventReferenceDTO {
     private Date startDate;
     private Date endDate;
     private String thumbnailImageURL;
+    
+    private Date currentServerTime;
+    
+    public EventMetadataDTO() {
+        initCurrentServerTime();
+    }
 
-    public EventState getState() {
-        return state;
+    public boolean isRunning() {
+        return state == EventState.RUNNING;
     }
     
     public boolean isStarted() {
@@ -22,6 +28,20 @@ public class EventMetadataDTO extends EventReferenceDTO {
     public boolean isFinished() {
         return state == EventState.FINISHED;
     }
+
+    private void initCurrentServerTime() {
+        currentServerTime = new Date();
+    }
+
+    public Date getCurrentServerTime() {
+        return currentServerTime;
+    }
+
+    public EventState getState() {
+        return state;
+    }
+    
+    
 
     public void setState(EventState state) {
         this.state = state;
@@ -72,6 +92,13 @@ public class EventMetadataDTO extends EventReferenceDTO {
             return location;
         }
         return venue;
+    }
+    
+    public String getLocationOrDisplayName() {
+        if(location != null && !location.isEmpty()) {
+            return location;
+        }
+        return getDisplayName();
     }
     
     public String getLocationAndVenue() {

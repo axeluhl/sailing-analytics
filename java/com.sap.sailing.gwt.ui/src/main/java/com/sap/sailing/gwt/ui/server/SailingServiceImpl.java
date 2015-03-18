@@ -5422,78 +5422,110 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return null;
         }
     }
+    
+    @Override
+    public ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id) {
+        Event event = getService().getEvent(id);
+        if (event == null) {
+            throw new RuntimeException("Event not found");
+        }
+        
+        ArrayList<LeaderboardGroupDTO> result = new ArrayList<>();
+        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            result.add(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, false));
+        }
+        return result;
+    }
 
     @Override
     public EventViewDTO getEventViewById(UUID id) {
-        EventDTO o;
+        
+        String requestBaseURL;
         try {
-            o = getEventById(id, false);
+            requestBaseURL = getRequestBaseURL().toString();
         } catch (MalformedURLException e) {
-            throw new RuntimeException("We can do better than MalformedURLException");
+            requestBaseURL = null;
+        }
+        Event event = getService().getEvent(id);
+        if (event == null) {
+            throw new RuntimeException("Event not found");
         }
 
         EventViewDTO dto = new EventViewDTO();
-        dto.id = id;
-        dto.startDate = o.startDate;
-        dto.endDate = o.endDate;
-        dto.setLogoImageURL(o.getLogoImageURL());
-        dto.setName(o.getName());
-        dto.setOfficialWebsiteURL(o.getOfficialWebsiteURL());
-        dto.venue = o.venue;
-        dto.setHasMedia(!o.getPhotoGalleryImageURLs().isEmpty() || !o.getVideoURLs().isEmpty());
-        dto.getLeaderboardGroups().addAll(o.getLeaderboardGroups());
-        dto.setState(calculateEventState(o));
-        dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
+        mapToMetadataDTO(event, dto);
         
-        if (o.isFakeSeries()) {
+        dto.setBaseURL(requestBaseURL);
+        dto.setOnRemoteServer(false);
+        
+        dto.setLogoImageURL(event.getLogoImageURL() == null ? null : event.getLogoImageURL().toString());
+        dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
+        
+        dto.setHasMedia(SailingServiceUtil.hasMedia(event));
+        dto.setState(calculateEventState(event));
+        dto.setHasAnalytics(EventState.RUNNING.compareTo(dto.getState()) <= 0);
+
+        boolean isFakeSeries = SailingServiceUtil.isFakeSeries(event);
+        
+        boolean first = true;
+        boolean onlyOneLG = false;
+        for (Iterator<LeaderboardGroup> iter = event.getLeaderboardGroups().iterator(); iter.hasNext();) {
+            LeaderboardGroup lg = iter.next();
+            
+            if(first) {
+                first = false;
+                onlyOneLG = !iter.hasNext();
+            }
+            
+            for (Leaderboard sl : lg.getLeaderboards()) {
+                Regatta regattaEntity = getService().getRegattaByName(sl.getName());
+                if(isFakeSeries && !SailingServiceUtil.isPartOfEvent(event, regattaEntity)) {
+                    continue;
+                }
+                
+                RegattaMetadataDTO regatta = new RegattaMetadataDTO(sl.getName(), sl.getName());
+                if(!onlyOneLG) {
+                    regatta.setBoatCategory(lg.getName());
+                }
+                regatta.setCompetitorsCount(SailingServiceUtil.calculateCompetitorsCount(sl));
+                regatta.setRaceCount(SailingServiceUtil.calculateRaceCount(sl));
+                regatta.setTrackedRacesCount(SailingServiceUtil.calculateTrackedRaceCount(sl));
+                regatta.setBoatClass(SailingServiceUtil.calculateBoatClass(sl));
+                
+                regatta.setStartDate(regattaEntity.getStartDate() != null ? regattaEntity.getStartDate().asDate() : null);
+                regatta.setEndDate(regattaEntity.getEndDate() != null ? regattaEntity.getEndDate().asDate() : null);
+                regatta.setState(calculateRegattaState(regatta));
+                dto.getRegattas().add(regatta);
+            }
+        }
+        
+        if (isFakeSeries) {
             dto.setType(EventType.SERIES_EVENT);
-
-            if (o.getLeaderboardGroups().size() == 1 && o.getLeaderboardGroups().get(0).hasOverallLeaderboard()) {
-                LeaderboardGroupDTO overallLeaderboardGroupDTO = o.getLeaderboardGroups().get(0);
-                List<Event> fakeSeriesEvents = new ArrayList<Event>();
-
-                LeaderboardGroup overallLeaderboardGroup = getService().getLeaderboardGroupByName(overallLeaderboardGroupDTO.getName());
-                for (Event event : getService().getAllEvents()) {
-                    for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                        if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                            fakeSeriesEvents.add(event);
-                        }
+            
+            LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
+            dto.setSeriesName(overallLeaderboardGroup.getDisplayName() != null ? overallLeaderboardGroup.getDisplayName() :overallLeaderboardGroup.getName());
+            List<Event> fakeSeriesEvents = new ArrayList<Event>();
+            
+            for (Event eventOfSeries : getService().getAllEvents()) {
+                for (LeaderboardGroup leaderboardGroup : eventOfSeries.getLeaderboardGroups()) {
+                    if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                        fakeSeriesEvents.add(eventOfSeries);
                     }
                 }
-                Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
-                    public int compare(Event e1, Event e2) {
-                        return e1.getStartDate().compareTo(e2.getEndDate());
-                    }
-                });
-                for(Event eventInSeries: fakeSeriesEvents) {
-                    dto.getEventsOfSeries().add(new EventReferenceDTO(eventInSeries.getId(), eventInSeries.getName()));
+            }
+            Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
+                public int compare(Event e1, Event e2) {
+                    return e1.getStartDate().compareTo(e2.getEndDate());
                 }
+            });
+            for(Event eventInSeries: fakeSeriesEvents) {
+                String displayName = getLocation(eventInSeries);
+                if(displayName == null) {
+                    displayName = eventInSeries.getName();
+                }
+                dto.getEventsOfSeries().add(new EventReferenceDTO(eventInSeries.getId(), displayName));
             }
         } else {
-            for (LeaderboardGroupDTO lg : o.getLeaderboardGroups()) {
-                for (StrippedLeaderboardDTO sl : lg.leaderboards) {
-                    RegattaMetadataDTO regatta = new RegattaMetadataDTO(sl.regattaName, sl.regattaName);
-                    if(o.getLeaderboardGroups().size() > 1) {
-                        regatta.setBoatCategory(lg.getName());
-                    }
-                    regatta.setCompetitorsCount(sl.competitorsCount);
-                    regatta.setRaceCount(sl.getRacesCount());
-                    regatta.setTrackedRacesCount(sl.getTrackedRacesCount());
-                    if(sl.getBoatClasses().size() == 1) {
-                        BoatClassDTO boatClass = sl.getBoatClasses().iterator().next();
-                        regatta.setBoatClass(boatClass.getDisplayName() != null ? boatClass.getDisplayName() : boatClass.getName());
-                    }
-                    if(o.getLeaderboardGroups().size() > 1) {
-                        regatta.setBoatCategory(lg.getName());
-                    }
-                    Regatta regattaEntity = getService().getRegattaByName(sl.regattaName);
-                    regatta.setStartDate(regattaEntity.getStartDate() != null ? regattaEntity.getStartDate().asDate() : null);
-                    regatta.setEndDate(regattaEntity.getEndDate() != null ? regattaEntity.getEndDate().asDate() : null);
-                    regatta.setState(calculateRegattaState(regatta));
-                    dto.getRegattas().add(regatta);
-                }
-                dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
-            }
+            dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
         }
 
         return dto;
@@ -5512,9 +5544,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return RegattaState.UNKNOWN;
     }
-
-    private EventState calculateEventState(EventDTO o) {
-        return calculateEventState(o.isPublic, o.startDate, o.endDate);
+    
+    private EventState calculateEventState(EventBase event) {
+        return calculateEventState(event.isPublic(), event.getStartDate().asDate(), event.getEndDate().asDate());
     }
     
     private EventState calculateEventState(boolean isPublic, Date startDate, Date endDate) {
@@ -5643,6 +5675,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public EventListViewDTO getEventListView() throws MalformedURLException {
+        // TODO fill stats of years
         EventListViewDTO result = new EventListViewDTO();
         URL requestedBaseURL = getRequestBaseURL();
         for (Event event : getService().getAllEvents()) {
@@ -5694,9 +5727,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.setDisplayName(event.getName());
         dto.setStartDate(event.getStartDate().asDate());
         dto.setEndDate(event.getEndDate().asDate());
-        dto.setState(calculateEventState(event.isPublic(), dto.getStartDate(), dto.getEndDate()));
+        dto.setState(calculateEventState(event));
         dto.setVenue(event.getVenue().getName());
-        // TODO set correct value: dto.setLocation(location);
+        if(SailingServiceUtil.isFakeSeries(event)) {
+            dto.setLocation(getLocation(event));
+        }
         dto.setThumbnailImageURL(SailingServiceUtil.findEventThumbnailImageUrlAsString(event));
+    }
+    
+    public String getLocation(EventBase eventBase) {
+        if(!(eventBase instanceof Event)) {
+            return null;
+        }
+        Event event = (Event) eventBase;
+        for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
+            Regatta regattaEntity = getService().getRegattaByName(leaderboard.getName());
+            if(!SailingServiceUtil.isPartOfEvent(event, regattaEntity)) {
+                continue;
+            }
+            return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
+        }
+        return null;
     }
 }

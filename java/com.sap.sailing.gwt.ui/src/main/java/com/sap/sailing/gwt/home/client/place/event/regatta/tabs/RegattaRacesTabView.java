@@ -13,13 +13,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.partials.regattaraces.EventRegattaRaces;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -56,15 +54,13 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
 
         // TODO: understand, and than move this into appropiate place (probably context)
-        final EventViewDTO eventDTO = myPlace.getCtx().getEventDTO();
         final String selectedRegattaId = myPlace.getCtx().getRegattaId();
         
         currentPresenter.ensureRegattaStructure(new AsyncCallback<List<RaceGroupDTO>>() {
                     @Override
                     public void onSuccess(List<RaceGroupDTO> raceGroups) {
                         if (raceGroups.size() > 0) {
-                            Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(
-                                    eventDTO, raceGroups);
+                            Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure();
 
                             Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> selectedRegatta = regattaStructure
                                     .get(selectedRegattaId);
@@ -114,15 +110,14 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         return RegattaRacesPlace.class;
     }
 
-    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure(
-            EventDTO event, List<RaceGroupDTO> raceGroups) {
+    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure() {
         Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> result = new HashMap<>();
         Map<String, RaceGroupDTO> raceGroupsMap = new HashMap<>();
-        for (RaceGroupDTO raceGroup : raceGroups) {
+        for (RaceGroupDTO raceGroup : currentPresenter.getCtx().getRaceGroups()) {
             raceGroupsMap.put(raceGroup.getName(), raceGroup);
         }
 
-        for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
+        for (LeaderboardGroupDTO leaderboardGroup : currentPresenter.getCtx().getLeaderboardGroups()) {
             for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
                 String leaderboardName = leaderboard.name;
                 result.put(leaderboardName, new Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>(

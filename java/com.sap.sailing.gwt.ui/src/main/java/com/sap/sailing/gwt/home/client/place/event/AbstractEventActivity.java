@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,38 +171,76 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             return;
         }
 
-        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
+        final EventViewDTO eventDTO = ctx.getEventDTO();
+
+        ensureLeaderboardGroups(new AsyncCallback<List<LeaderboardGroupDTO>>() {
+            @Override
+            public void onSuccess(final List<LeaderboardGroupDTO> leaderboardGroups) {
+                final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
+                
+                getSailingService().getRegattaStructureOfEvent(eventDTO.getId(),
+                        new AsyncCallback<List<RaceGroupDTO>>() {
+                    @Override
+                    public void onSuccess(List<RaceGroupDTO> raceGroups) {
+                        if (raceGroups.size() > 0) {
+                            for (LeaderboardGroupDTO leaderboardGroupDTO : leaderboardGroups) {
+                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                                if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
+                                    timerForClientServerOffset.setLivePlayDelayInMillis(leaderboardGroupDTO
+                                            .getAverageDelayToLiveInMillis());
+                                }
+                                timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent,
+                                        leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                            }
+                            ctx.withRaceGroups(raceGroups);
+                            callback.onSuccess(raceGroups);
+                        } else {
+                            // TODO @FM: extract error message
+                            ErrorView errorView = clientFactory.createErrorView("No race data available", null);
+                            getView().showErrorInCurrentTab(errorView);
+                        }
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // TODO @FM: extract error message
+                        ErrorView errorView = clientFactory.createErrorView(
+                                "Error while loading the regatta structure with service getRegattaStructureOfEvent()", caught);
+                        getView().showErrorInCurrentTab(errorView);
+                        // TODO: notify callback of failure?
+                        // callback.onFailure(caught);
+                        
+                    }
+                });
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
+    }
+    
+    @Override
+    public void ensureLeaderboardGroups(final AsyncCallback<List<LeaderboardGroupDTO>> callback) {
+        if (ctx.getLeaderboardGroups() != null) {
+            callback.onSuccess(ctx.getLeaderboardGroups());
+            return;
+        }
 
         final EventViewDTO eventDTO = ctx.getEventDTO();
 
-        getSailingService().getRegattaStructureOfEvent(eventDTO.id,
-                new AsyncCallback<List<RaceGroupDTO>>() {
+        getSailingService().getLeaderboardGroupsByEventId(eventDTO.getId(),
+                new AsyncCallback<ArrayList<LeaderboardGroupDTO>>() {
             @Override
-            public void onSuccess(List<RaceGroupDTO> raceGroups) {
-                if (raceGroups.size() > 0) {
-                    for (LeaderboardGroupDTO leaderboardGroupDTO : eventDTO.getLeaderboardGroups()) {
-                        final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
-                        if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
-                            timerForClientServerOffset.setLivePlayDelayInMillis(leaderboardGroupDTO
-                                    .getAverageDelayToLiveInMillis());
-                        }
-                        timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent,
-                                leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
-                    }
-                    ctx.withRaceGroups(raceGroups);
-                    callback.onSuccess(raceGroups);
-                } else {
-                    // TODO @FM: extract error message
-                    ErrorView errorView = clientFactory.createErrorView("No race data available", null);
-                    getView().showErrorInCurrentTab(errorView);
-                }
+            public void onSuccess(ArrayList<LeaderboardGroupDTO> leaderboardGroups) {
+                ctx.withLeaderboardGroups(leaderboardGroups);
+                callback.onSuccess(leaderboardGroups);
             }
 
             @Override
             public void onFailure(Throwable caught) {
                 // TODO @FM: extract error message
                 ErrorView errorView = clientFactory.createErrorView(
-                        "Error while loading the regatta structure with service getRegattaStructureOfEvent()", caught);
+                        "Error while loading the leaderboard structure with service getLeaderboardGroupsByEventId()", caught);
                 getView().showErrorInCurrentTab(errorView);
                 // TODO: notify callback of failure?
                 // callback.onFailure(caught);
@@ -217,7 +256,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             return;
         }
 
-        getSailingService().getMediaForEvent(ctx.getEventDTO().id, new AsyncCallback<MediaDTO>() {
+        getSailingService().getMediaForEvent(ctx.getEventDTO().getId(), new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO @FM: extract error message

@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sse.common.Util.Triple;
 
 public class EventRegattaList extends Composite {
@@ -60,21 +61,20 @@ public class EventRegattaList extends Composite {
 
         regattaElementsByLeaderboardGroup = new HashMap<>();
         leaderboardGroupFilterAnchors = new ArrayList<AnchorElement>();
-        boolean isSeries = event.isFakeSeries(); 
-        boolean hasMultipleLeaderboardGroups = event.getLeaderboardGroups().size() > 1;
+        boolean hasMultipleLeaderboardGroups = presenter.getCtx().getLeaderboardGroups().size() > 1;
         
-        if(isSeries) {
+        if(event.getType() == EventType.SERIES_EVENT) {
             regattaListNavigationDiv.getStyle().setDisplay(Display.NONE);
         } else {
             if(hasMultipleLeaderboardGroups) {
                 // fill the navigation panel
                 registerFilterLeaderboardGroupEvent(filterNoLeaderboardGroupsAnchor, null);
-                for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
+                for(LeaderboardGroupDTO leaderboardGroup: presenter.getCtx().getLeaderboardGroups()) {
                     AnchorElement filterLeaderboardGroupAnchor = Document.get().createAnchorElement();
                     filterLeaderboardGroupAnchor.setClassName(SharedResources.INSTANCE.mainCss().navbar_button());
                     filterLeaderboardGroupAnchor.setHref("javascript:;");
                     
-                    String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName());
+                    String leaderboardGroupName = LongNamesUtil.shortenLeaderboardGroupName(event.getDisplayName(), leaderboardGroup.getName());
                     filterLeaderboardGroupAnchor.setInnerText(leaderboardGroupName);
                     regattaGroupsNavigationPanel.appendChild(filterLeaderboardGroupAnchor);
                     leaderboardGroupFilterAnchors.add(filterLeaderboardGroupAnchor);
@@ -86,7 +86,7 @@ public class EventRegattaList extends Composite {
             }
         }
 
-        for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
+        for (LeaderboardGroupDTO leaderboardGroup : presenter.getCtx().getLeaderboardGroups()) {
             for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
                 Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> r = regattaStructure.get(leaderboard.name);
                 if (r != null) {
@@ -128,7 +128,7 @@ public class EventRegattaList extends Composite {
             allBoatClassesSelected.getStyle().setDisplay(Display.NONE);
             filterNoLeaderboardGroupsAnchor.removeClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
             // hide all regattas of the not selected leaderboardgroup
-            for (LeaderboardGroupDTO lg : presenter.getCtx().getEventDTO().getLeaderboardGroups()) {
+            for (LeaderboardGroupDTO lg : presenter.getCtx().getLeaderboardGroups()) {
                 boolean isVisible = leaderboardGroup.getName().equals(lg.getName());
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {
@@ -139,7 +139,7 @@ public class EventRegattaList extends Composite {
             // make all regattas visible
             allBoatClassesSelected.getStyle().setDisplay(Display.INLINE_BLOCK);
             filterNoLeaderboardGroupsAnchor.addClassName(SharedResources.INSTANCE.mainCss().navbar_buttonactive());
-            for (LeaderboardGroupDTO lg : presenter.getCtx().getEventDTO().getLeaderboardGroups()) {
+            for (LeaderboardGroupDTO lg : presenter.getCtx().getLeaderboardGroups()) {
                 List<Regatta> regattaElements = regattaElementsByLeaderboardGroup.get(lg.getName());
                 for (Regatta regatta : regattaElements) {
                     regatta.setVisible(true);

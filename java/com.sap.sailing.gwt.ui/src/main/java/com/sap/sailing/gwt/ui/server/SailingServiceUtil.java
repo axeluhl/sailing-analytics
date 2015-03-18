@@ -8,8 +8,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.ImageSize;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;
 
 public final class SailingServiceUtil {
@@ -22,6 +31,18 @@ public final class SailingServiceUtil {
     public static String findEventThumbnailImageUrlAsString(EventBase event) {
         URL url = findEventThumbnailImageUrl(event);
         return url == null ? null : url.toString();
+    }
+    
+    public static boolean isFakeSeries(EventBase event) {
+        Iterator<? extends LeaderboardGroupBase> lgIter = event.getLeaderboardGroups().iterator();
+        if(!lgIter.hasNext()) {
+            return false;
+        }
+        LeaderboardGroupBase lg = lgIter.next();
+        if(lgIter.hasNext()) {
+            return false;
+        }
+        return lg.hasOverallLeaderboard();
     }
     
     private static URL findEventThumbnailImageUrl(EventBase event) {
@@ -245,5 +266,77 @@ public final class SailingServiceUtil {
             first = false;
         }
         return result;
+    }
+
+    public static int calculateCompetitorsCount(Leaderboard sl) {
+        int count=0;
+        for (Iterator<Competitor> iterator = sl.getCompetitors().iterator(); iterator.hasNext();) {
+            iterator.next();
+            count++;
+        }
+        return count;
+    }
+    
+    public static int calculateRaceCount(Leaderboard sl) {
+        int count=0;
+        for (RaceColumn column : sl.getRaceColumns()) {
+            for (Iterator<? extends Fleet> iterator = column.getFleets().iterator(); iterator.hasNext();) {
+                iterator.next();
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    public static int calculateTrackedRaceCount(Leaderboard sl) {
+        int count=0;
+        for (RaceColumn column : sl.getRaceColumns()) {
+            for (Fleet fleet : column.getFleets()) {
+                TrackedRace trackedRace = column.getTrackedRace(fleet);
+                if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
+    public static String calculateBoatClass(Leaderboard sl) {
+        String boatClass = null;
+        String boatClassDisplayName = null;
+        for (Competitor competitor : sl.getCompetitors()) {
+            if(competitor.getBoat() != null && competitor.getBoat().getBoatClass() != null) {
+                if(boatClass == null) {
+                    boatClass = competitor.getBoat().getBoatClass().getName();
+                    boatClassDisplayName = competitor.getBoat().getBoatClass().getDisplayName();
+                } else if(competitor.getBoat().getBoatClass().getName() != null && !boatClass.equals(competitor.getBoat().getBoatClass().getName())) {
+                    // more than one boatClass
+                    return null;
+                }
+                
+            }
+        }
+        return boatClassDisplayName != null ? boatClassDisplayName : boatClass;
+    }
+
+    public static boolean hasMedia(Event event) {
+       if(event.getVideoURLs().iterator().hasNext()) {
+           return true;
+       }
+        Iterator<URL> iterator = event.getImageURLs().iterator();
+        if(!iterator.hasNext()) {
+            return false;
+        }
+        iterator.next();
+        return iterator.hasNext();
+    }
+
+    public static boolean isPartOfEvent(Event event, Regatta regattaEntity) {
+        for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+            if(courseArea.equals(regattaEntity.getDefaultCourseArea())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

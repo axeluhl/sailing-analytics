@@ -14,10 +14,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
+import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.partials.eventregatta.EventRegattaList;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -58,7 +57,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
                     @Override
                     public void onSuccess(List<RaceGroupDTO> raceGroups) {
                         if (raceGroups.size() > 0) {
-                            initView(raceGroups, contentArea);
+                            initView(contentArea);
                         } else {
                             // createEventWithoutRegattasView(event, panel);
                         }
@@ -73,22 +72,22 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
                 });
     }
 
-    protected void initView(List<RaceGroupDTO> raceGroups, AcceptsOneWidget contentArea) {
-        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure(currentPresenter.getCtx().getEventDTO(), raceGroups);
+    protected void initView(AcceptsOneWidget contentArea) {
+        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure();
         EventRegattaList eventRegattaList = new EventRegattaList(regattaStructure, currentPresenter);
 //        initWidget(ourUiBinder.createAndBindUi(this));
 //        contentArea.setWidget(this);
         contentArea.setWidget(eventRegattaList);
     }
     
-    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure(EventDTO event, List<RaceGroupDTO> raceGroups) {
+    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure() {
         Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> result = new HashMap<>();
         Map<String, RaceGroupDTO> raceGroupsMap = new HashMap<>();
-        for (RaceGroupDTO raceGroup: raceGroups) {
+        for (RaceGroupDTO raceGroup: currentPresenter.getCtx().getRaceGroups()) {
             raceGroupsMap.put(raceGroup.getName(), raceGroup);
         }            
         
-        for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
+        for (LeaderboardGroupDTO leaderboardGroup : currentPresenter.getCtx().getLeaderboardGroups()) {
             for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
                 String leaderboardName = leaderboard.name;
                 result.put(leaderboardName, new Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>(raceGroupsMap.get(leaderboardName),

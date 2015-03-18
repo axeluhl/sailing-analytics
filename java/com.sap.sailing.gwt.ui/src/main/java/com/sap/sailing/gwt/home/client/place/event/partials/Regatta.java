@@ -25,11 +25,11 @@ import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 
 public class Regatta extends Composite {
     private static RegattaUiBinder uiBinder = GWT.create(RegattaUiBinder.class);
@@ -37,7 +37,7 @@ public class Regatta extends Composite {
     interface RegattaUiBinder extends UiBinder<Widget, Regatta> {
     }
 
-    private final EventDTO event;
+    private final EventViewDTO event;
     private RaceGroupDTO raceGroup;
     private final List<RegattaPhase> phasesElements;
     private LeaderboardGroupDTO leaderboardGroup;
@@ -113,7 +113,7 @@ public class Regatta extends Composite {
         String regattaDisplayName = leaderboard.displayName != null ? leaderboard.displayName : leaderboard.name;
         regattaNameHeading.setInnerText(regattaDisplayName);
         if(hasMultipleLeaderboardGroups && leaderboardGroup.getName() != null) {
-            leaderboardGroupName.setInnerText(LongNamesUtil.shortenLeaderboardGroupName(event.getName(), leaderboardGroup.getName()));
+            leaderboardGroupName.setInnerText(LongNamesUtil.shortenLeaderboardGroupName(event.getDisplayName(), leaderboardGroup.getName()));
             leaderboardGroupName.setAttribute("data-labeltype", "group1");
         } else {
             leaderboardGroupNameDiv.getStyle().setDisplay(Display.NONE);

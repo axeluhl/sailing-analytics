@@ -59,7 +59,7 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
         StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
 
         titleBuilder.append(currentPresenter.showRegattaMetadata() ? currentPresenter.getRegattaMetadata()
-                .getDisplayName() : currentPresenter.getCtx().getEventDTO().getName());
+                .getDisplayName() : currentPresenter.getCtx().getEventDTO().getDisplayName());
         String currentTabTitle = tabPanelUi.getCurrentTabTitle();
         if (currentTabTitle != null && !currentTabTitle.isEmpty()) {
             titleBuilder.append(" - ").append(currentTabTitle);
@@ -79,7 +79,7 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
         if(currentPresenter.getCtx().getEventDTO().getType() == EventType.SERIES_EVENT) {
             addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getSeriesName(),  currentPresenter.getCurrentEventSeriesNavigation());
         }
-        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getName(), currentPresenter.getCurrentEventNavigation());
+        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getLocationOrDisplayName(), currentPresenter.getCurrentEventNavigation());
         
         if(currentPresenter.showRegattaMetadata()) {
             addBreadCrumbItem(currentPresenter.getRegattaMetadata().getDisplayName(), currentPresenter.getCurrentRegattaOverviewNavigation());

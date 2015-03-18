@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.place.event;
 import java.util.List;
 
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
@@ -20,6 +21,7 @@ public class EventContext {
     private String eventId;
     private String regattaId;
     private List<RaceGroupDTO> raceGroups;
+    private List<LeaderboardGroupDTO> leaderboardGroups;
 
     private RegattaAnalyticsDataManager regattaAnalyticsManager;
 
@@ -36,6 +38,7 @@ public class EventContext {
     public EventContext(EventContext ctx) {
         updateContext(ctx.getEventDTO());
         withRaceGroups(ctx.raceGroups);
+        withLeaderboardGroups(ctx.leaderboardGroups);
         withMedia(ctx.media);
         withRegattaId(ctx.regattaId);
         withRegattaAnalyticsManager(ctx.regattaAnalyticsManager);
@@ -63,7 +66,7 @@ public class EventContext {
         if (eventDTO == null) {
             withId(null);
         } else {
-            withId(dto.id.toString());
+            withId(dto.getId().toString());
         }
         return this;
     }
@@ -81,7 +84,7 @@ public class EventContext {
             return regattaId;
         }
         if(eventDTO != null && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
-            return eventDTO.getLeaderboardGroups().get(0).getLeaderboards().get(0).regattaName;
+            return eventDTO.getRegattas().get(0).getDisplayName();
         }
         return null;
     }
@@ -104,6 +107,15 @@ public class EventContext {
 
     public EventContext withRaceGroups(List<RaceGroupDTO> raceGroups) {
         this.raceGroups = raceGroups;
+        return this;
+    }
+    
+    public List<LeaderboardGroupDTO> getLeaderboardGroups() {
+        return leaderboardGroups;
+    }
+    
+    public EventContext withLeaderboardGroups(List<LeaderboardGroupDTO> leaderboardGroups) {
+        this.leaderboardGroups = leaderboardGroups;
         return this;
     }
 

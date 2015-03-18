@@ -68,7 +68,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         if (event.getType() == EventType.SERIES_EVENT) {
             for(EventReferenceDTO seriesEvent : event.getEventsOfSeries()) {
                 AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));
-                callback.forPlace(place, seriesEvent.getDisplayName(), (event.id.equals(seriesEvent.getId())));
+                callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())));
             }
         } else {
             for(RegattaReferenceDTO regatta : event.getRegattas()) {
