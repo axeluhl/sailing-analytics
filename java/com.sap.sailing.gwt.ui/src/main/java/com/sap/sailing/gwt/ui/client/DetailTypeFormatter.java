@@ -128,6 +128,8 @@ public class DetailTypeFormatter {
             return stringMessages.distanceToLine();
         case BEAT_ANGLE:
             return stringMessages.beatAngle();
+        case COURSE_OVER_GROUND_TRUE_DEGREES:
+            return stringMessages.courseOverGroundTrueDegrees();
         }
         return null;
     }
@@ -172,6 +174,9 @@ public class DetailTypeFormatter {
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
         case DISTANCE_TO_START_LINE:
             return stringMessages.metersUnit();
+            
+        case COURSE_OVER_GROUND_TRUE_DEGREES:
+            return stringMessages.degreesShort();
 
         case GAP_TO_LEADER_IN_SECONDS:
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
@@ -342,6 +347,8 @@ public class DetailTypeFormatter {
             return stringMessages.beatAngleTooltip();
         case DISTANCE_TO_START_LINE:
             return "";
+        case COURSE_OVER_GROUND_TRUE_DEGREES:
+            return stringMessages.courseOverGroundTrueDegreesTooltip();
         }
         
         return "";

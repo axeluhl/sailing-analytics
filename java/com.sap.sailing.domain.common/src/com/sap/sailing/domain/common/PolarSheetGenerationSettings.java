@@ -32,6 +32,6 @@ public interface PolarSheetGenerationSettings extends Serializable {
 
     boolean areDefault();
 
-    int getNumberOfLeadingCompetitorsToInclude();
+    double getPctOfLeadingCompetitorsToInclude();
 
 }

@@ -90,6 +90,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -1449,6 +1450,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
             polarDataService.competitorPositionChanged(fix, item, race);
+        }
+        
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus) {
+            if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+                polarDataService.raceFinishedTracking(race);
+            }
         }
 
     }

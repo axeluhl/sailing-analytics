@@ -308,6 +308,15 @@ Do not use the course to get the list of marks to ping. Instead, use the ``RaceL
 
 **Path:** ``leaderboards/{leaderboard-name}/marks?raceColumn={race-column-name}&fleet={fleet-name}``
 
+The parameters ``raceColumn`` and ``fleet`` are optional. 
+
+* neither ``raceColumn`` nor ``fleet``: all marks of the leaderboard get returned
+* only ``raceColumn``:  all marks of the leaderboard's raceColumn get returned
+* both ``raceColumn`` and ``fleet``: all marks of a certain fleet of a leaderboard's raceColumn
+* only ``fleet``: HTTP/400 Bad Request 
+
+Specifying an invalid leaderboard/raceColumn/fleet leads to an HTTP/404 Not found
+
 **Verb:** ``GET``
 
 **Response:**
@@ -359,6 +368,18 @@ The interface (apart from the path) is identical to [Send Measurements](#fixes).
       "course" : 258.11,
     }
   ]
+}
+```
+
+**Response:**
+If there is no existent GPS Fix for the Mark HTTP/200 will be returned.
+If there is an existent GPS Fix the latest known Position of the Mark will be returned:
+```
+{
+"type": "GPSFix",
+"lat_deg": 54.325246,
+"lon_deg": 10.148556,
+"unixtime": 0
 }
 ```
 
