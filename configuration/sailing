@@ -20,7 +20,7 @@ start_tmux() {
 
 start_servers() {
 	NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
-	MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
+	MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 * 0.75 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
 	echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
 	for conf in $JAVA_START_INSTANCES; do
 		echo "Checking for amazon update..."
