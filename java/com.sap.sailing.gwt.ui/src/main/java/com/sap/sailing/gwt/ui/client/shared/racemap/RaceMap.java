@@ -636,14 +636,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public void timeChanged(final Date newTime, final Date oldTime) {
-        System.out.println("Race Map Time changed");
         if (newTime != null && isMapInitialized) {
             if (selectedRaces != null && !selectedRaces.isEmpty()) {
                 RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
                 final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
                 
                 if (race != null) {
-                    System.out.println("Data for "+race.getRaceName());
                     final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
                     int requestID = ++boatPositionRequestIDCounter;
@@ -753,12 +751,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), true /*silentMode */);
-                System.out.println("Error obtaining racemap data: " + caught.getMessage());
             }
             
             @Override
             public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
-                System.out.println("Got RaceMapDataDTO");
                 if (map != null && raceMapDataDTO != null) {
                     quickRanks = raceMapDataDTO.quickRanks;
                     if (showViewSimulation && settings.isShowSimulationOverlay()) {
@@ -1194,7 +1190,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             LatLng firstMarkPoint = LatLng.newInstance(courseDTO.waypointPositions.get(1).latDeg, courseDTO.waypointPositions.get(1).lngDeg);
             
             if (windwardStartLineMarkToFirstMarkLine == null && leewardStartLineMarkToFirstMarkLine == null) {
-                System.out.println("Draw Star First Mark Triangle");
                 PolylineOptions options = PolylineOptions.newInstance();
                 options.setGeodesic(true);
                 options.setStrokeColor("grey");
