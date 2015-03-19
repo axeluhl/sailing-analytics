@@ -7,7 +7,7 @@
     android:paddingLeft="10dp"
     android:paddingRight="10dp">
 
-    <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+    <com.sap.sailing.android.shared.customviews.OpenSansTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
@@ -15,7 +15,7 @@
         android:textSize="18sp" />
 
 
-    <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
+    <com.sap.sailing.android.shared.customviews.OpenSansTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
