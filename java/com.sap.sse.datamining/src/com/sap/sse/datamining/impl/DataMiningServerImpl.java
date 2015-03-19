@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.DataMiningQueryManager;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.DataRetrieverChainDefinitionRegistry;
@@ -34,6 +35,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     private final ExecutorService executorService;
     
     private final QueryFactory queryFactory;
+    private final DataMiningQueryManager dataMiningQueryManager;
     
     private final FunctionRegistry functionRegistry;
     private final FunctionProvider functionProvider;
@@ -45,6 +47,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.stringMessages = new CompoundResourceBundleStringMessages();
         this.executorService = executorService;
         this.queryFactory = new QueryFactory();
+        dataMiningQueryManager = new ConcurrentDataMiningQueryManager();
         this.functionRegistry = functionRegistry;
         this.functionProvider = functionProvider;
         dataSourceProviderMappedByDataSourceType = new HashMap<>();
@@ -228,8 +231,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
     @Override
     public <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query) {
-        //TODO
-        return query.run();
+        return dataMiningQueryManager.runNewAndAbortPrevious(session, query);
     }
     
 }

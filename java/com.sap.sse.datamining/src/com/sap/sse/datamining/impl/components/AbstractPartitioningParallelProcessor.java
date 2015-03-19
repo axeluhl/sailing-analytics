@@ -112,8 +112,14 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
 
     protected void sleepUntilAllInstructionsFinished() throws InterruptedException {
-        while (areUnfinishedInstructionsLeft()) {
-            Thread.sleep(SLEEP_TIME_DURING_FINISHING);
+        while (areUnfinishedInstructionsLeft() && !gotAborted) {
+            try {
+                Thread.sleep(SLEEP_TIME_DURING_FINISHING);
+            } catch (InterruptedException e) {
+                if (!gotAborted) {
+                    onFailure(e);
+                }
+            }
         }
     }
 
