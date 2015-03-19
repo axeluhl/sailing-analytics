@@ -50,8 +50,6 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
     private final static String TAG = HomeFragment.class.getName();
 
-    private AppPreferences prefs;
-
     @SuppressLint("InflateParams")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
