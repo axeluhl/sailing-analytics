@@ -1,5 +1,6 @@
 package com.sap.sailing.dashboards.gwt.client.startanalysis;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -119,7 +120,9 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
         competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(),
                 raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier));
-        raceMap.getSettings().setZoomSettings(new RaceMapZoomSettings(ZoomTypes.TAILS));
+        ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
+        zoomTypes.add(ZoomTypes.TAILS);
+        raceMap.getSettings().setZoomSettings(new RaceMapZoomSettings(zoomTypes, false));
         raceMap.getSettings().setHelpLinesSettings(getHelpLineSettings());
         raceMap.getSettings().setTailLengthInMilliseconds(TAIL_LENGHT_IN_MILLISECONDS);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);

@@ -45,12 +45,6 @@ public class RaceMapZoomSettings {
         zoomToSelectedCompetitors = false;
     }
     
-    public RaceMapZoomSettings(ZoomTypes zoomType) {
-        typesToConsiderOnZoom = new ArrayList<ZoomTypes>();
-        typesToConsiderOnZoom.add(zoomType);
-        zoomToSelectedCompetitors = false;
-    }
-    
     public RaceMapZoomSettings(ArrayList<ZoomTypes> typesToConsiderOnZoom, boolean zoomToSelected) {
         this.typesToConsiderOnZoom = typesToConsiderOnZoom;
         this.zoomToSelectedCompetitors = zoomToSelected;
