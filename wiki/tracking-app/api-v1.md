@@ -371,6 +371,18 @@ The interface (apart from the path) is identical to [Send Measurements](#fixes).
 }
 ```
 
+**Response:**
+If there is no existent GPS Fix for the Mark HTTP/200 will be returned.
+If there is an existent GPS Fix the latest known Position of the Mark will be returned:
+```
+{
+"type": "GPSFix",
+"lat_deg": 54.325246,
+"lon_deg": 10.148556,
+"unixtime": 0
+}
+```
+
 **Additional Notes:**
 * the path for this endpoint intentionally has the leaderboard as a parent item
   * each mark should have a unique ID (``SharedDomainFactory#getOrCreateMark(String toStringRepresentationOfID, String name)``)
