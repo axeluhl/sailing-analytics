@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.client;
 
 import com.google.gwt.i18n.client.impl.plurals.DefaultRule;
 
