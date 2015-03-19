@@ -1,6 +1,5 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.ui.client;
 
-import com.google.gwt.i18n.client.PluralRule.PluralForm;
 import com.google.gwt.i18n.client.impl.plurals.DefaultRule;
 
 public class DefaultRule_0_1_2_n extends DefaultRule {
