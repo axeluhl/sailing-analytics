@@ -34,6 +34,7 @@ import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.QueryResultState;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
@@ -55,6 +56,8 @@ public class TestProcessorQuery {
 
     private boolean receivedElementOrFinished;
     private boolean receivedAbort;
+    
+    private QueryResult<?> resultAfterAbortion;
     
     @Test
     public void testStandardWorkflow() throws InterruptedException, ExecutionException {
@@ -151,11 +154,12 @@ public class TestProcessorQuery {
         results.put(new GenericGroupKey<Integer>(3), 3.0);
         results.put(new GenericGroupKey<Integer>(4), 10.0);
         
-        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", Unit.None, "", 0, 0));
+        QueryResultImpl<Double> result = new QueryResultImpl<>(QueryResultState.NORMAL, results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", Unit.None, "", 0, 0));
         return result;
     }
 
     private void verifyResult(QueryResult<Double> result, QueryResult<Double> expectedResult) {
+        assertThat("The result State isn't correct.", result.getState(), is(expectedResult.getState()));
         assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
         assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));
         assertThat("Result signifier isn't correct.", result.getResultSignifier(), is(expectedResult.getResultSignifier()));
@@ -200,7 +204,7 @@ public class TestProcessorQuery {
     }
 
     @Test(timeout=2000)
-    public void testQueryAbortion() {
+    public void testQueryAbortion() throws InterruptedException {
         receivedElementOrFinished = false;
         receivedAbort = false;
 
@@ -226,7 +230,7 @@ public class TestProcessorQuery {
         Thread queryRunner = new Thread(new Runnable() {
             @Override
             public void run() {
-                query.run();
+                resultAfterAbortion = query.run();
             }
         });
         queryRunner.start();
@@ -234,6 +238,8 @@ public class TestProcessorQuery {
         query.abort();
         
         ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
+        queryRunner.join();
+        assertThat(resultAfterAbortion.getState(), is(QueryResultState.ABORTED));
         assertThat("The processing should be aborted, but received elements", receivedElementOrFinished, is(false));
         assertThat("The processing should be aborted, but didn't receive abort", receivedAbort, is(true));
     }

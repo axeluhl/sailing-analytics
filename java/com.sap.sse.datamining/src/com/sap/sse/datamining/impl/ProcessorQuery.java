@@ -16,10 +16,12 @@ import java.util.logging.Logger;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.OverwritingResultDataBuilder;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.QueryResultState;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
@@ -37,10 +39,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
 
     private final Object monitorObject = new Object();
     private Thread workingThread;
-    private boolean workIsDone = false;
-    private boolean queryTimedOut = false;
-    private boolean queryGotAborted = false;
-    private boolean severeFailureOccured = false;
+    private QueryState state;
     
     /**
      * Creates a query that returns a result without any additional data (like the calculation time or the retrieved data amount).<br>
@@ -57,12 +56,18 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         this.dataSource = dataSource;
         this.stringMessages = stringMessages;
         this.locale = locale;
+        state = QueryState.NOT_STARTED;
 
         resultReceiver = new ProcessResultReceiver();
         firstProcessor = createFirstProcessor();
     }
 
     protected abstract Processor<DataSourceType, ?> createFirstProcessor();
+    
+    @Override
+    public QueryState getState() {
+        return state;
+    }
 
     @Override
     public QueryResult<AggregatedType> run() {
@@ -88,7 +93,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     }
 
     private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
-        queryTimedOut = false;
+        state = QueryState.RUNNING;
         final long startTime = System.nanoTime();
         startWorking();
         waitTillWorkIsDone(timeoutInMillis);
@@ -98,13 +103,14 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
 
         long calculationTimeInNanos = endTime - startTime;
         Map<GroupKey, AggregatedType> results = resultReceiver.getResult();
+        QueryResultState resultState = state.asResultState();
         
         if (stringMessages != null && locale != null) {
             AdditionalResultDataBuilder additionalDataBuilder = new OverwritingResultDataBuilder();
             additionalDataBuilder = firstProcessor.getAdditionalResultData(additionalDataBuilder);
-            return new QueryResultImpl<>(results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
+            return new QueryResultImpl<>(resultState, results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
         } else {
-            return new QueryResultImpl<>(results);
+            return new QueryResultImpl<>(resultState, results);
         }
     }
 
@@ -116,11 +122,11 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
                     firstProcessor.processElement(dataSource);
                     firstProcessor.finish();
                 } catch (InterruptedException e) {
-                    if (queryTimedOut) {
+                    if (state == QueryState.TIMED_OUT) {
                         LOGGER.log(Level.INFO, "The query processing timed out.");
-                    } else if (queryGotAborted) {
+                    } else if (state == QueryState.ABORTED) {
                         LOGGER.log(Level.INFO, "The query processing got aborted.");
-                    } else if (severeFailureOccured) {
+                    } else if (state == QueryState.ERROR) {
                         LOGGER.log(Level.INFO, "A severe failure occured during the query processing.");
                     } else {
                         LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
@@ -134,21 +140,24 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     private void waitTillWorkIsDone(long timeoutInMillis) throws InterruptedException, TimeoutException {
         setUpTimeoutTimer(timeoutInMillis);
         synchronized (monitorObject) {
-            while (!workIsDone) {
+            while (getState() == QueryState.RUNNING) {
                 monitorObject.wait();
-                if ((queryTimedOut || queryGotAborted || severeFailureOccured) && !workIsDone) {
+                if (processingHasToBeAborted()) {
                     firstProcessor.abort();
                     workingThread.interrupt();
-                    if (queryTimedOut) {
+                    if (state == QueryState.TIMED_OUT) {
                         throw new TimeoutException("The query processing timed out");
                     }
                     break;
                 }
             }
-            workIsDone = false;
         }
     }
     
+    private boolean processingHasToBeAborted() {
+        return state == QueryState.TIMED_OUT || state == QueryState.ABORTED || state == QueryState.ERROR;
+    }
+
     private void setUpTimeoutTimer(long timeoutInMillis) {
         if (timeoutInMillis > 0) {
             Timer timeoutTimer = new Timer();
@@ -156,7 +165,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
                 @Override
                 public void run() {
                     synchronized (monitorObject) {
-                        queryTimedOut = true;
+                        state = QueryState.TIMED_OUT;
                         monitorObject.notify();
                     }
                 }
@@ -168,7 +177,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         for (Throwable failure : resultReceiver.getOccuredFailures()) {
             LOGGER.log(Level.SEVERE, "An error occured during the processing of an instruction: ", failure);
         }
-        if (severeFailureOccured) {
+        if (state == QueryState.ERROR) {
             throw new RuntimeException("A severe failure occured during the processing of an instruction", resultReceiver.getSevereFailure());
         }
     }
@@ -176,7 +185,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     @Override
     public void abort() {
         synchronized (monitorObject) {
-            queryGotAborted = true;
+            state = QueryState.ABORTED;
             monitorObject.notify();
         }
     }
@@ -213,10 +222,11 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
             if (isSevereFailure(failure)) {
                 severeFailure = failure;
                 synchronized (monitorObject) {
-                    severeFailureOccured = true;
+                    state = QueryState.ERROR;
                     monitorObject.notify();
                 }
             } else {
+                state = QueryState.FAILURE;
                 occuredFailures.add(failure);
             }
         }
@@ -228,7 +238,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         @Override
         public void finish() throws InterruptedException {
             synchronized (monitorObject) {
-                workIsDone = true;
+                state = QueryState.NORMAL;
                 monitorObject.notify();
             }
         }

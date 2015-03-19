@@ -7,6 +7,8 @@ import com.sap.sse.datamining.shared.QueryResult;
 
 public interface Query<AggregatedType> {
     
+    public QueryState getState();
+    
     public QueryResult<AggregatedType> run();
 
     public QueryResult<AggregatedType> run(long timeout, TimeUnit unit) throws TimeoutException;
