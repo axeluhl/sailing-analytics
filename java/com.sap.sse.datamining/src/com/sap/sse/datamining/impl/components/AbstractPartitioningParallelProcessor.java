@@ -3,7 +3,6 @@ package com.sap.sse.datamining.impl.components;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,7 +23,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     private final AtomicInteger unfinishedInstructionsCounter;
     
     private boolean isFinished = false;
-    private boolean gotAborted = false;
+    private boolean isAborted = false;
 
     public AbstractPartitioningParallelProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
         super(inputType, resultType);
@@ -35,46 +34,33 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
 
     @Override
     public void processElement(InputType element) {
-        if (!isFinished && !gotAborted) {
+        if (!isFinished && !isAborted) {
             for (WorkingType partialElement : partitionElement(element)) {
-                final Callable<ResultType> instruction = createInstruction(partialElement);
+                final ProcessorInstruction<ResultType> instruction = createInstruction(partialElement);
                 if (isInstructionValid(instruction)) {
-                    Runnable instructionWrapper = new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                ResultType result = instruction.call();
-                                if (isResultValid(result) && !gotAborted) {
-                                    forwardResultToReceivers(result);
-                                }
-                            } catch (Exception e) {
-                                if (!gotAborted || !(e instanceof InterruptedException)) {
-                                    onFailure(e);
-                                }
-                            } finally {
-                                AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.getAndDecrement();
-                            }
-                        }
-                    };
                     unfinishedInstructionsCounter.getAndIncrement();
                     try {
-                        executor.execute(instructionWrapper);
+                        executor.execute(instruction);
                     } catch (RejectedExecutionException exc){
                         LOGGER.log(Level.WARNING, "A " + RejectedExecutionException.class.getSimpleName() +
                                                   " appeared during the processing.");
-                        instructionWrapper.run();
+                        instruction.run();
                     }
                 }
             }
         }
     }
 
-    protected boolean isInstructionValid(Callable<ResultType> instruction) {
+    private boolean isInstructionValid(ProcessorInstruction<ResultType> instruction) {
         return instruction != null;
     }
 
-    protected boolean isResultValid(ResultType result) {
+    boolean isResultValid(ResultType result) {
         return result != null;
+    }
+    
+    AtomicInteger getUnfinishedInstructionsCounter() {
+        return unfinishedInstructionsCounter;
     }
     
     /**
@@ -90,7 +76,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         }
     }
 
-    protected abstract Callable<ResultType> createInstruction(final WorkingType partialElement);
+    protected abstract ProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement);
 
     protected abstract Iterable<WorkingType> partitionElement(InputType element);
 
@@ -104,18 +90,18 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     @Override
     public void finish() throws InterruptedException {
         sleepUntilAllInstructionsFinished();
-        if (!gotAborted) {
+        if (!isAborted) {
             isFinished = true;
             tellResultReceiversToFinish();
         }
     }
 
     protected void sleepUntilAllInstructionsFinished() throws InterruptedException {
-        while (areUnfinishedInstructionsLeft() && !gotAborted) {
+        while (areUnfinishedInstructionsLeft() && !isAborted) {
             try {
                 Thread.sleep(SLEEP_TIME_DURING_FINISHING);
             } catch (InterruptedException e) {
-                if (!gotAborted) {
+                if (!isAborted) {
                     onFailure(e);
                 }
             }
@@ -135,10 +121,14 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
             }
         }
     }
+
+    boolean isAborted() {
+        return isAborted;
+    }
     
     @Override
     public void abort() {
-        gotAborted = true;
+        isAborted = true;
         tellResultReceiversToAbort();
         LOGGER.log(Level.INFO, "The processing got aborted.");
     }

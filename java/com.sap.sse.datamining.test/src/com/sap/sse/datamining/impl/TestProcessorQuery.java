@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +30,7 @@ import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
+import com.sap.sse.datamining.impl.components.ProcessorInstruction;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
@@ -286,10 +286,10 @@ public class TestProcessorQuery {
                                                                                                     ConcurrencyTestsUtil.getExecutor(),
                                                                                                     resultReceivers) {
                     @Override
-                    protected Callable<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
-                        return new Callable<Map<GroupKey,Double>>() {
+                    protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
+                        return new ProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
-                            public Map<GroupKey, Double> call() throws Exception {
+                            public Map<GroupKey, Double> computeResult() {
                                 Map<GroupKey, Double> result = new HashMap<>();
                                 double sum = 0;
                                 for (Number number : element) {

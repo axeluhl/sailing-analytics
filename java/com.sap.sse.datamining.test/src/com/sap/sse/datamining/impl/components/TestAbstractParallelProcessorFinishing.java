@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,10 +69,10 @@ public class TestAbstractParallelProcessorFinishing {
     private AbstractSimpleParallelProcessor<Integer, Integer> createProcessor(Collection<Processor<Integer, ?>> receivers) {
         return new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
-            protected Callable<Integer> createInstruction(Integer partialElement) {
-                return new Callable<Integer>() {
+            protected ProcessorInstruction<Integer> createInstruction(Integer partialElement) {
+                return new ProcessorInstruction<Integer>(this) {
                     @Override
-                    public Integer call() {
+                    public Integer computeResult() {
                         while (instructionIsWorking) {
                             try {
                                 Thread.sleep(100);
