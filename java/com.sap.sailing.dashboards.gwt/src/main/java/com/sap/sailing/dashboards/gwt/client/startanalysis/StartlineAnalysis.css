@@ -56,17 +56,10 @@
 	display: inline;
 	width: 80%;
 	height: 100%;
-	background-color: #4293DB;
-	margin-top: 1px; /*Zeigt sonst Linie am oberen Rand*/
+	/*#4293DB old water color*/
+	background-color: #004384;
+	margin-top: 1px; /*Shows otherwise small line at top edge*/
 	overflow: hidden;
-}
-
-.startanalysis_google_map {
-	position: absolute;
-	bottom: -20pt;
-	right: -20pt;
-	left: -20pt;
-	top: -20pt;
 }
 
 .startanalysis_card_table {
@@ -87,30 +80,6 @@
 	z-index: 1;
 }
 
-.startanalysis_card_wind_direction_image {
-	position: absolute;
-	top: 0pt;
-	right: 0pt;
-	width: 45pt;
-	height: 45pt;
-	border-radius: 22.5pt;
-	background-color: white;
-}
-
-.startanalysis_card_wind_arrow {
-	width: 25pt;
-	height: 25pt;
-	margin-top: 10pt;
-	margin-left: 10pt;
-}
-
-.startanalysis_card_wind_canvas {
-	width: 25pt;
-	height: 25pt;
-	margin-top: 10pt;
-	margin-left: 10pt;
-}
-
 .startanalysis_card_data {
 	position: absolute;
 	right: 0pt;
@@ -122,14 +91,6 @@
 	font-size: 11pt;
 	font-family: "Arial";
 	text-align: center;
-}
-
-.startanalysis_card_wind_data_direction {
-	top: 55pt;
-}
-
-.startanalysis_card_wind_data_speed {
-	top: 85pt;
 }
 
 .startanalysis_card_line_advantage {

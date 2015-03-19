@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -28,8 +26,6 @@ public class CombinedWindPanel extends FlowPanel {
     
     private CombinedWindPanelStyle combinedWindPanelStyle;
     
-    private static final Logger logger = Logger.getLogger(CombinedWindPanel.class.getName());
-   
     /**
      */
     public CombinedWindPanel(RaceMapImageManager theRaceMapResources, CombinedWindPanelStyle combinedWindPanelStyle, StringMessages stringMessages) {

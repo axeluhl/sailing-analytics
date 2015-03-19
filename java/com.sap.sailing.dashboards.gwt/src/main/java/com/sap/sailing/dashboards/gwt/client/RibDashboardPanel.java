@@ -20,6 +20,7 @@ import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComp
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 
 /**
  * This class contains all components of the Dashboard and the basic UI Elements of the Dashboard, like top and bottom
@@ -72,10 +73,10 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     private List<WindBotComponent> windBotComponents;
 
-    public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, RibDashboardDataRetriever ribDashboardDataRetriever) {
+    public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingServiceAsync, RibDashboardDataRetriever ribDashboardDataRetriever) {
         windBotComponents = new ArrayList<WindBotComponent>();
         ribDashboardDataRetriever.addDataObserver(this);
-        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService);
+        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, sailingServiceAsync);
         startLineCAComponent = new StartLineAdvantageComponent(ribDashboardDataRetriever);
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();

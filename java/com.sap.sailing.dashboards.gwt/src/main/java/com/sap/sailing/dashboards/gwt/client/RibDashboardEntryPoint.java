@@ -36,7 +36,7 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
         RibDashboardDataRetriever dataRetriever = new RibDashboardDataRetriever(ribdashboardService);
 
         applyMGWTSettings();
-        RibDashboardPanel ribDashboardPanel = new RibDashboardPanel(ribdashboardService, dataRetriever);
+        RibDashboardPanel ribDashboardPanel = new RibDashboardPanel(ribdashboardService, sailingService, dataRetriever);
         RootLayoutPanel.get().add(ribDashboardPanel);
         WindBotDataRetriever windBotDataRetriever = new WindBotDataRetriever(sailingService);
         windBotDataRetriever.addNumberOfWindBotsChangeListeners(ribDashboardPanel);

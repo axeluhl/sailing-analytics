@@ -32,6 +32,7 @@ import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.Competit
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.SettingsButtonWithSelectionIndicationLabel;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -98,10 +99,11 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
 
     private boolean displaysCards;
     private List<StartAnalysisDTO> starts;
-    private List<StartAnalysisPageChangeListener> pageChangeListener;
+    private List<StartlineAnalysisCard> pageChangeListener;
     private BottomNotification bottomNotification;
     private Timer timer;
     private RibDashboardServiceAsync ribDashboardServiceAsync;
+    private SailingServiceAsync sailingServiceAsync;
 
     private static final int RERFRESH_INTERVAL = 10000;
 
@@ -118,9 +120,10 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     /**
      * Component that contains handles, displays and loads startanalysis cards.
      * */
-    public StartlineAnalysisComponent(RibDashboardServiceAsync ribDashboardServiceAsync) {
+    public StartlineAnalysisComponent(RibDashboardServiceAsync ribDashboardServiceAsync, SailingServiceAsync sailingServiceAsync) {
         this.ribDashboardServiceAsync = ribDashboardServiceAsync;
-        pageChangeListener = new ArrayList<StartAnalysisPageChangeListener>();
+        this.sailingServiceAsync = sailingServiceAsync;
+        pageChangeListener = new ArrayList<StartlineAnalysisCard>();
         starts = new ArrayList<StartAnalysisDTO>();
         this.leaderboardName = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
 
@@ -174,9 +177,11 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
                     @Override
                     public void onSuccess(List<StartAnalysisDTO> result) {
                         if (!result.isEmpty()) {
+                            
                             if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
                                 removeAllStartAnalysisCards();
                             }
+                            
                             if (result.size() != starts.size()) {
                                 showNotificationForNewStartAnalysis();
                             }
@@ -317,7 +322,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         }
     }
 
-    private void addStartAnalysisCard(StartAnalysisDTO startAnalysisDTO) {
+    private void addStartAnalysisCard(final StartAnalysisDTO startAnalysisDTO) {
 
         if (displaysCards == false) {
             displaysCards = true;
@@ -326,12 +331,13 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         if (numberOfStartAnalysisCards > 0) {
             rightButton.setResource(RibDashboardImageResources.INSTANCE.right());
         }
-        StartlineAnalysisCard sac = new StartlineAnalysisCard(numberOfStartAnalysisCards
-                * SCROLL_OFFSET_STARTANALYSIS_CARDS + 10, numberOfStartAnalysisCards, startAnalysisDTO);
-        startanalysis_card_container.add(sac);
-        registerPageChangeListener(sac);
+        final StartlineAnalysisCard startlineAnalysisCard = new StartlineAnalysisCard(numberOfStartAnalysisCards
+                * SCROLL_OFFSET_STARTANALYSIS_CARDS + 10, numberOfStartAnalysisCards, startAnalysisDTO,
+                sailingServiceAsync);
+        startanalysis_card_container.add(startlineAnalysisCard);
+        startlineAnalysisCard.startAnalysisComponentPageChangedToIndexAndStartAnalysis(page, startAnalysisDTO);
+        registerPageChangeListener(startlineAnalysisCard);
         numberOfStartAnalysisCards++;
-
     }
 
     private void removeAllStartAnalysisCards() {
@@ -344,7 +350,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         this.bottomNotification.show(BottomNotificationType.NEW_STARTANALYSIS_AVAILABLE);
     }
 
-    public void registerPageChangeListener(StartAnalysisPageChangeListener s) {
+    public void registerPageChangeListener(StartlineAnalysisCard s) {
         pageChangeListener.add(s);
     }
 
@@ -354,7 +360,8 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
 
     public void notifyStartAnalysisPageChangeListener(int newPageIndex) {
         for (StartAnalysisPageChangeListener sO : pageChangeListener) {
-            sO.loadMapAndContent(newPageIndex);
+            if(starts.get(newPageIndex) != null)
+            sO.startAnalysisComponentPageChangedToIndexAndStartAnalysis(newPageIndex, starts.get(newPageIndex));
         }
     }
 
