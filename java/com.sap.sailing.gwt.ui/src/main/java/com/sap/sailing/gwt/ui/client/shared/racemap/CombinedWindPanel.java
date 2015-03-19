@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
 public class CombinedWindPanel extends FlowPanel {
-    //private static final int LABEL_HEIGHT = 12;
     
     private final ImageTransformer transformer;
     private final StringMessages stringMessages;
