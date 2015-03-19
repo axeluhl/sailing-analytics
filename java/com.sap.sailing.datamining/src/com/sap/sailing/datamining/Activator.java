@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
@@ -26,10 +27,13 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     private static final SailingClusterGroups clusterGroups = new SailingClusterGroups();
     
     private static Activator INSTANCE;
+    
+    private BundleContext context = null;
 
     private final ResourceBundleStringMessages sailingServerStringMessages;
     private final SailingDataRetrievalChainDefinitions dataRetrieverChainDefinitions;
-    private DataSourceProvider<?> racingEventServiceProvider;
+    private Collection<DataSourceProvider<?>> dataSourceProviders;
+    private boolean dataSourceProvidersHaveBeenInitialized;
     
     public Activator() {
         dataRetrieverChainDefinitions = new SailingDataRetrievalChainDefinitions();
@@ -39,15 +43,16 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     @Override
     public void start(BundleContext context) throws Exception {
         INSTANCE = this;
-        racingEventServiceProvider = new RacingEventServiceProvider(context);
+        this.context = context;
+        dataSourceProvidersHaveBeenInitialized = false;
         super.start(context);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        super.stop(context);
+        this.context = null;
         INSTANCE = null;
-        racingEventServiceProvider = null;
+        super.stop(context);
     }
     
     @Override
@@ -64,6 +69,7 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     public Iterable<Class<?>> getClassesWithMarkedMethods() {
         Set<Class<?>> internalClasses = new HashSet<>();
         internalClasses.add(HasTrackedRaceContext.class);
+        internalClasses.add(HasRaceResultOfCompetitorContext.class);
         internalClasses.add(HasTrackedLegContext.class);
         internalClasses.add(HasTrackedLegOfCompetitorContext.class);
         internalClasses.add(HasGPSFixContext.class);
@@ -78,11 +84,18 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     
     @Override
     public Iterable<DataSourceProvider<?>> getDataSourceProviders() {
-        Collection<DataSourceProvider<?>> dataSourceProviders = new HashSet<>();
-        dataSourceProviders.add(racingEventServiceProvider);
+        if (!dataSourceProvidersHaveBeenInitialized) {
+            initializeDataSourceProviders();
+            dataSourceProvidersHaveBeenInitialized = true;
+        }
         return dataSourceProviders;
     }
     
+    private void initializeDataSourceProviders() {
+        dataSourceProviders = new HashSet<>();
+        dataSourceProviders.add(new RacingEventServiceProvider(context));
+    }
+
     public static ClusterGroup<Speed> getWindStrengthInBeaufortClusterGroup() {
         return clusterGroups.getWindStrengthInBeaufortCluster();
     }

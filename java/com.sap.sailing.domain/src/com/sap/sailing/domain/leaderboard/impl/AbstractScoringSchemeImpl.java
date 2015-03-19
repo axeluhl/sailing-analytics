@@ -100,12 +100,8 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         for (Competitor competitor : leaderboard.getCompetitors()) {
             Fleet fleet = raceColumn.getFleetOfCompetitor(competitor);
             if (fleetsForWhichNoScoreWasFound.contains(fleet)) {
-                try {
-                    if (leaderboard.getNetPoints(competitor, raceColumn, at) != null) {
-                        fleetsForWhichNoScoreWasFound.remove(fleet);
-                    }
-                } catch (NoWindException nwe) {
-                    // can't occur here because no started tracked race exists yet for the competitor
+                if (leaderboard.getNetPoints(competitor, raceColumn, at) != null) {
+                    fleetsForWhichNoScoreWasFound.remove(fleet);
                 }
             }
         }

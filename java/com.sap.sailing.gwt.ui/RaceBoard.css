@@ -467,11 +467,11 @@ img.openColumn {
 }
 
 .TimePanel-ShowExtended-Button-Open {
-    background: white url(images/arrows_top_black.png) center no-repeat;
+    background: white url(images/arrows_bottom_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button-Closed {
-    background: white url(images/arrows_bottom_black.png) center no-repeat;
+    background: white url(images/arrows_top_black.png) center no-repeat;
 }
 
 .TimePanel-ShowExtended-Button:hover {
@@ -557,13 +557,17 @@ img.openColumn {
     background-color: white;
     background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_INACTIVE.png);
     background-repeat: no-repeat, no-repeat;
-    background-position: 4% 50%, 96% 50%
+    background-position: 10% 50%, 90% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-mediaplaying {
+    background-image: url(images/viewicons/@1x/img/SAP_RV_AudioVideo_GHOSTED.png);
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Small-media {
-    background-position: 50% 50%, 100% 50% !important;
+    background-position: 5% 50%, 100% 50% !important;
     margin-left: 0px !important;
-    padding: 2px 20px !important;
+    padding: 2px 35px !important;
 }
 
 @external gwt-ToggleButton-up, gwt-ToggleButton-down, gwt-ToggleButton-up-hovering, gwt-ToggleButton-down-hovering;

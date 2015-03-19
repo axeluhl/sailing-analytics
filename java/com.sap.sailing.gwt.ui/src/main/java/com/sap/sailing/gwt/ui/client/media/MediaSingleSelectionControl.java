@@ -78,16 +78,16 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
                 
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (event.isControlKeyDown() && mediaTrack.mimeType.mediaType == MediaTrack.MediaType.video) {
+                    if (/*event.isControlKeyDown() && */mediaTrack.mimeType.mediaType == MediaTrack.MediaType.video) {
                         mediaPlayerManager.playFloatingVideo(mediaTrack);
-                    } else if (mediaPlayerManager.getPlayingAudioTrack() != mediaTrack) {
+                    } /*else if (mediaPlayerManager.getPlayingAudioTrack() != mediaTrack) {
                         mediaPlayerManager.stopAll();
                         if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.video) {
                             mediaPlayerManager.playFloatingVideo(mediaTrack);
                             mediaPlayerManager.playAudio(mediaTrack);
-                        } else if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.audio) {
+                        } */else if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.audio) {
                             mediaPlayerManager.playAudio(mediaTrack);
-                        }
+//                        }
                     }
                     hide();
                 };

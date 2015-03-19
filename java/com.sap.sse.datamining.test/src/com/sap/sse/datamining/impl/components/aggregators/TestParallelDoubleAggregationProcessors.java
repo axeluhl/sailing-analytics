@@ -104,7 +104,7 @@ public class TestParallelDoubleAggregationProcessors {
 
     @Test
     public void testMaxAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> maxAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Max, Double.class);
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> maxAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Maximum, Double.class);
         Collection<GroupedDataEntry<Double>> elements = createElements();
         ConcurrencyTestsUtil.processElements(maxAggregationProcessor, elements);
         
@@ -123,7 +123,7 @@ public class TestParallelDoubleAggregationProcessors {
 
     @Test
     public void testMinAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> minAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Min, Double.class);
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> minAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Minimum, Double.class);
         Collection<GroupedDataEntry<Double>> elements = createElements();
         ConcurrencyTestsUtil.processElements(minAggregationProcessor, elements);
         
@@ -137,6 +137,25 @@ public class TestParallelDoubleAggregationProcessors {
         result.put(new GenericGroupKey<Integer>(1), 5.0);
         result.put(new GenericGroupKey<Integer>(2), 3.0);
         result.put(new GenericGroupKey<Integer>(3), 5.0);
+        return result;
+    }
+
+    @Test
+    public void testCountAggregationProcessor() throws InterruptedException {
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> countAggregationProcessor = ComponentTestsUtil.getProcessorFactory().createAggregationProcessor(receivers, AggregatorType.Count, Double.class);
+        Collection<GroupedDataEntry<Double>> elements = createElements();
+        ConcurrencyTestsUtil.processElements(countAggregationProcessor, elements);
+        
+        countAggregationProcessor.finish();
+        Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedCountAggregations();
+        ConcurrencyTestsUtil.verifyResultData(receivedAggregations, expectedReceivedAggregations);
+    }
+
+    private Map<GroupKey, Double> computeExpectedCountAggregations() {
+        Map<GroupKey, Double> result = new HashMap<>();
+        result.put(new GenericGroupKey<Integer>(1), 3.0);
+        result.put(new GenericGroupKey<Integer>(2), 4.0);
+        result.put(new GenericGroupKey<Integer>(3), 3.0);
         return result;
     }
 

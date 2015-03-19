@@ -1,6 +1,7 @@
 package com.sap.sailing.dashboards.gwt.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -120,6 +121,13 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     private void fillLiveRaceInfoDTOWithRaceData(RibDashboardRaceInfoDTO lRInfo, TimePoint now) {
         if (runningRace != null) {
             lRInfo.idOfLastTrackedRace = runningRace.getRaceIdentifier();
+            List<Competitor> competitors = runningRace.getCompetitorsFromBestToWorst(now);
+            List<String> competitorNames = new ArrayList<String>();
+            for (Competitor competitor : competitors) {
+                competitorNames.add(competitor.getName());
+            }
+            Collections.sort(competitorNames);
+            lRInfo.competitorNamesFromLastTrackedRace = competitorNames;
         }
     }
 
@@ -243,12 +251,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     public List<CompetitorDTO> getCompetitorsInLeaderboard(String leaderboardName) {
         logger.log(Level.INFO, "getCompetitorsInLeaderboard(...) Request.");
         Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardName);
-        try {
-            return baseDomainFactory.getCompetitorDTOList(lb.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(
-                    new Date())));
-        } catch (NoWindException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return baseDomainFactory.getCompetitorDTOList(lb.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(
+                new Date())));
     }
 }
