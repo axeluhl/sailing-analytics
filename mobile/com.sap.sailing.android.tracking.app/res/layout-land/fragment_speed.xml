@@ -25,7 +25,7 @@
         android:layout_centerInParent="true"
         android:orientation="vertical" >
 
-        <com.sap.sailing.android.tracking.app.customviews.AutoResizeLightTextView
+        <com.sap.sailing.android.shared.ui.customviews.AutoResizeLightTextView
             android:id="@+id/speed_text_view"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
             android:textSize="124sp"
             android:textStyle="bold" />
 
-        <com.sap.sailing.android.tracking.app.customviews.AutoResizeLightTextView
+        <com.sap.sailing.android.shared.ui.customviews.AutoResizeLightTextView
             android:id="@+id/speed_unit_text_view"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

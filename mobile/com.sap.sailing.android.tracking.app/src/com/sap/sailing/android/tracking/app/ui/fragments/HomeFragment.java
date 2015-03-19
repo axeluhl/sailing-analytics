@@ -1,12 +1,16 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Date;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,16 +19,19 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.NetworkHelper;
+import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
+import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
+import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
@@ -36,48 +43,19 @@ import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
-import com.sap.sailing.android.tracking.app.utils.NetworkHelper;
-import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperError;
-import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperFailureListener;
-import com.sap.sailing.android.tracking.app.utils.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
+import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
-import java.util.List;
-
-public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor> {
+public class HomeFragment extends AbstractHomeFragment implements LoaderCallbacks<Cursor> {
 
     private final static String TAG = HomeFragment.class.getName();
-    private final static int REGATTA_LOADER = 1;
-
-    private AppPreferences prefs;
-
-    private int requestCodeQRCode = 442;
-    private RegattaAdapter adapter;
 
     @SuppressLint("InflateParams")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+        View view = super.onCreateView(inflater, container, savedInstanceState);
 
         prefs = new AppPreferences(getActivity());
-
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
-
-        Button scanButton = (Button) view.findViewById(R.id.scanQr);
-        if (scanButton != null) {
-            scanButton.setOnClickListener(new ClickListener());
-        }
-
-        Button noQrCodeButton = (Button) view.findViewById(R.id.noQrCode);
-        if (noQrCodeButton != null) {
-            noQrCodeButton.setOnClickListener(new ClickListener());
-        }
 
         ListView listView = (ListView) view.findViewById(R.id.listRegatta);
         if (listView != null) {
@@ -102,96 +80,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         if (lastQRCode != null) {
             handleQRCode(lastQRCode);
         }
-    }
-
-    private void showNoQRCodeMessage() {
-        ((StartActivity) getActivity()).showErrorPopup(R.string.no_qr_code_popup_title,
-                R.string.no_qr_code_popup_message);
-    }
-
-    private boolean requestQRCodeScan() {
-        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-
-        PackageManager manager = getActivity().getPackageManager();
-        List<ResolveInfo> infos = manager.queryIntentActivities(intent, 0);
-        if (infos.size() != 0) {
-            startActivityForResult(intent, requestCodeQRCode);
-            return true;
-        } else {
-            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            infos = manager.queryIntentActivities(marketIntent, 0);
-            if (infos.size() != 0) {
-                startActivity(marketIntent);
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.error_play_store_and_scanning_not_available),
-                        Toast.LENGTH_LONG).show();
-            }
-            return false;
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            String scanResult = data.getStringExtra("SCAN_RESULT");
-            prefs.setLastScannedQRCode(scanResult);
-            // handleQRCode is called in onResume()
-        } else if (resultCode == Activity.RESULT_CANCELED) {
-            Toast.makeText(getActivity(), getString(R.string.scanning_cancelled), Toast.LENGTH_LONG).show();
-        } else {
-            String templateString = getString(R.string.error_scanning_qrcode);
-            Toast.makeText(getActivity(), templateString.replace("{result-code}", String.valueOf(resultCode)),
-                    Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void handleQRCode(String qrCode) {
-        ExLog.i(getActivity(), TAG, "Parsing URI: " + qrCode);
-        Uri uri = Uri.parse(qrCode);
-        handleScannedOrUrlMatchedUri(uri);
-    }
-
-    public void handleScannedOrUrlMatchedUri(Uri uri) {
-        String uriString = uri.toString();
-        CheckinManager manager = new CheckinManager(uriString, (StartActivity)getActivity());
-        manager.callServerAndGenerateCheckinData();
-    }
-
-    /**
-     * Display a confirmation-dialog in which the user confirms his full name and sail-id.
-     * 
-     * @param checkinData
-     */
-    public void displayUserConfirmationScreen(final CheckinData checkinData) {
-        String message1 = getString(R.string.confirm_data_hello_name)
-                .replace("{full_name}", checkinData.competitorName);
-        String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}",
-                checkinData.competitorSailId);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(message1 + "\n\n" + message2);
-        builder.setCancelable(true);
-        builder.setPositiveButton(getString(R.string.confirm_data_is_correct), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                clearScannedQRCodeInPrefs();
-                checkInWithAPIAndDisplayTrackingActivity(checkinData);
-            }
-        }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                clearScannedQRCodeInPrefs();
-                dialog.cancel();
-            }
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    private void clearScannedQRCodeInPrefs() {
-        prefs.setLastScannedQRCode(null);
     }
 
     /**
@@ -252,20 +140,41 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
         }
     }
 
+    @Override
+    public void handleScannedOrUrlMatchedUri(Uri uri) {
+        String uriString = uri.toString();
+        CheckinManager manager = new CheckinManager(uriString, (StartActivity)getActivity());
+        manager.callServerAndGenerateCheckinData();
+    }
+    
     /**
-     * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
+     * Display a confirmation-dialog in which the user confirms his full name and sail-id.
+     * 
+     * @param checkinData
      */
-    private void displayAPIErrorRecommendRetry() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(getString(R.string.notify_user_api_call_failed));
-        builder.setCancelable(true);
-        builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+    @Override
+    public void displayUserConfirmationScreen(final AbstractCheckinData data) {
+    	final CheckinData checkinData = (CheckinData) data;
+        String message1 = getString(R.string.confirm_data_hello_name)
+                .replace("{full_name}", checkinData.competitorName);
+        String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}",
+                checkinData.competitorSailId);
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(message1 + "\n\n" + message2);
+        builder.setCancelable(true);
+        builder.setPositiveButton(getString(R.string.confirm_data_is_correct), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                clearScannedQRCodeInPrefs();
+                checkInWithAPIAndDisplayTrackingActivity(checkinData);
+            }
+        }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                clearScannedQRCodeInPrefs();
                 dialog.cancel();
             }
-
         });
         AlertDialog alert = builder.create();
         alert.show();
@@ -319,21 +228,6 @@ public class HomeFragment extends BaseFragment implements LoaderCallbacks<Cursor
 
         default:
             break;
-        }
-    }
-
-    private class ClickListener implements OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-            case R.id.scanQr:
-                requestQRCodeScan();
-                break;
-            case R.id.noQrCode:
-                showNoQRCodeMessage();
-                break;
-            }
         }
     }
 

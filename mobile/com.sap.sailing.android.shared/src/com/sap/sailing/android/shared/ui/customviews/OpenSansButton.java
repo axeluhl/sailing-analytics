@@ -1,4 +1,4 @@
-package com.sap.sailing.android.tracking.app.customviews;
+package com.sap.sailing.android.shared.ui.customviews;
 
 import android.annotation.TargetApi;
 import android.content.Context;

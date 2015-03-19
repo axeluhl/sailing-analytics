@@ -1,4 +1,4 @@
-package com.sap.sailing.android.tracking.app.valueobjects;
+package com.sap.sailing.android.shared.data;
 
 public class LeaderboardInfo {
 

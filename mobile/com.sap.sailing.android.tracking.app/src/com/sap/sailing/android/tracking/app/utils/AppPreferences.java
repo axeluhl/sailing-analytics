@@ -1,33 +1,22 @@
 package com.sap.sailing.android.tracking.app.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.shared.util.BaseAppPreferences;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 
-public class AppPreferences {
-    protected final Context context;
-    protected final SharedPreferences preferences;
-    public static final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl("Tracking App", 0);
-    
-    public AppPreferences(Context context) {
-        this.context = context;
-        //multi process mode so that services read consistent values
-        this.preferences = context.getSharedPreferences(AppPreferences.class.getName(), Context.MODE_MULTI_PROCESS);
-    }
-    
-    public void setDeviceIdentifier(String deviceId)
-    {
-    	preferences.edit().putString(context.getString(R.string.preference_device_identifier_key), deviceId).commit();
+public class AppPreferences extends BaseAppPreferences {
+
+    public AppPreferences(Context context){
+        super(context);
     }
 
-    public String getDeviceIdentifier() {
-        return UniqueDeviceUuid.getUniqueId(context);
-    }
+    public static final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl("Tracking App", 0);
     
+
     public String getServerUploadTeamImagePath() {
     	 return PrefUtils.getString(context, R.string.preference_server_team_image_upload_path, R.string.preference_server_team_image_upload_path);
     }
@@ -143,16 +132,6 @@ public class AppPreferences {
     public static boolean getPrintDatabaseOperationDebugMessages()
     {
     	return false;
-    }
-    
-    public String getLastScannedQRCode()
-    {
-    	return preferences.getString(context.getString(R.string.preference_last_scanned_qr_code), null);
-    }
-    
-    public void setLastScannedQRCode(String lastQRCode)
-    {
-    	preferences.edit().putString(context.getString(R.string.preference_last_scanned_qr_code), lastQRCode).commit();
     }
     
     public void setMessageResendInterval(int interval)

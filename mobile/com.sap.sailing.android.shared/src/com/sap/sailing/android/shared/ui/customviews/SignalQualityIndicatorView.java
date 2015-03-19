@@ -1,4 +1,4 @@
-package com.sap.sailing.android.tracking.app.customviews;
+package com.sap.sailing.android.shared.ui.customviews;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -11,7 +11,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.shared.R;
 
 /**
  * Draws one vertical indicator that can is filled green up to a point, 

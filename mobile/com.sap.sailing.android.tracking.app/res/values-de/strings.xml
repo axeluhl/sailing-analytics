@@ -23,12 +23,6 @@
     <string name="title_activity_tracking">Tracking</string>
     <string name="please_confirm">Bitte bestätigen</string>
     <string name="do_you_really_want_to_stop_tracking">Soll das Tracking wirklich beendet werden?</string>
-    <string name="ok">OK</string>
-    <string name="signal_accuracy_indicator_view_description">GPS Genauigkeit</string>
-    <string name="poor">schwach</string>
-    <string name="good">gut</string>
-    <string name="great">sehr gut</string>
-    <string name="no_signal">kein Signal</string>
     <string name="tracking_status_tracking">Tracking läuft</string>
     <string name="tracking_status_no_gps_signal">Kein GPS Signal!</string>
     <string name="tracking_mode_offline">Offline</string>
@@ -67,8 +61,6 @@
     <string name="your_regattas">Ihre Regattas:</string>
     <string name="close">Schließen</string>
     <string name="thank_you_you_successfully_participated">Vielen Dank, Sie haben erfolgreich an der Regatta teilgenommen.\n\nIhr SAP Sailing Team</string>
-    <string name="no_qr_code_popup_title">Kein QR-Code?</string>
-	<string name="no_qr_code_popup_message">Bitte kontaktieren Sie die Rennleitung, falls Sie keinen QR-Code erhalten haben.</string>
 	<string name="tracking_colon">Tracke:</string>
 	<string name="tracking_gps_accuracy">GPS Genauigkeit</string>
 	<string name="regatta_in_progress">Die Regatta findet gerade statt.</string>
@@ -79,9 +71,6 @@
 	<string name="show_leaderboard">Leaderboard</string>
 	<string name="desc_regatta_user_image">Benutzerdefiniertes Bild für Regatta</string>
 	<string name="desc_add_photo_button">Foto hinzufügen Button</string>
-	<string name="error_play_store_and_scanning_not_available">"PlayStore und BarcodeScanner-App nicht verfügbar."</string>
-	<string name="scanning_cancelled">Scan abgebrochen</string>
-	<string name="error_scanning_qrcode">Fehler beim Scannen des QR-Codes {result-code}</string>
 	<string name="error_invalid_qr_code">Ungültiger QR-Code</string>
 	<string name="error_while_receiving_server_data">Fehler beim Empfang vom Server</string>
 	<string name="info_already_checked_in_this_qr_code">Bereits für diese Regatta eingecheckt</string>

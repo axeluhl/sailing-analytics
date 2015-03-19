@@ -23,7 +23,7 @@
             android:layout_alignParentTop="true"
             android:background="@color/white_transparent" />
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
             android:id="@+id/stop_tracking"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
