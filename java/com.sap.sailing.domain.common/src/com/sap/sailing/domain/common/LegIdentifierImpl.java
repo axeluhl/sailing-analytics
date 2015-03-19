@@ -2,14 +2,22 @@ package com.sap.sailing.domain.common;
 
 public class LegIdentifierImpl extends RegattaNameAndRaceName implements LegIdentifier {
     private static final long serialVersionUID = 3599904513673776450L;
+    private RaceIdentifier raceIdentifier = null;
     private String legName;
 
     LegIdentifierImpl() {}
-
+    
     public LegIdentifierImpl(RegattaAndRaceIdentifier raceIdentifier, String legName) {
         super(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
+        this.raceIdentifier = raceIdentifier;
         this.legName = legName;
     }
+
+    @Override
+    public RaceIdentifier getRaceIdentifier() {
+        return this.raceIdentifier;
+    }
+
 
     @Override
     public String getLegName() {

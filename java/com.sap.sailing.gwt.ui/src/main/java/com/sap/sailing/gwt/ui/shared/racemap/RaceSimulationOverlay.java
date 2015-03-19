@@ -66,7 +66,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     }
     
     public void updateLeg(int newLeg, boolean clearCanvas, int newVersion) {
-        if (((newLeg != raceLeg)||((newLeg == raceLeg)&&(newVersion != 0)&&(newVersion != (simulationResult==null ? 0 : simulationResult.getVersion())))) && (this.isVisible())) {
+        if (((newLeg != raceLeg)||((newLeg == raceLeg)&&(newVersion != (simulationResult==null ? 0 : simulationResult.getVersion())))) && (this.isVisible())) {
             raceLeg = newLeg;
             if (clearCanvas) {
                 this.clearCanvas();

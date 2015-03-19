@@ -18,14 +18,26 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegIdentifier;
+import com.sap.sailing.domain.common.LegIdentifierImpl;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.server.RacingEventService;
@@ -46,6 +58,7 @@ import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.SmartFutureCache;
 
 public class SimulationServiceImpl implements SimulationService {
@@ -56,7 +69,8 @@ public class SimulationServiceImpl implements SimulationService {
     final private SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval> cache;
     final private RacingEventService racingEventService;
     final private ScheduledExecutorService scheduler;
-    final private HashMap<LegIdentifier, Listener> listeners;
+    final private HashMap<String, SimulationRaceListener> raceListeners;
+    final private HashMap<RaceIdentifier, LegChangeListener> legListeners;
     final private long WAIT_MILLIS = 20000; // milliseconds to wait until earliest cache-update for simulation
     
     public SimulationServiceImpl(Executor executor, RacingEventService racingEventService) {
@@ -64,7 +78,8 @@ public class SimulationServiceImpl implements SimulationService {
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.racingEventService = racingEventService;
         if (racingEventService != null) {
-            this.listeners = new HashMap<LegIdentifier, Listener>();
+            this.raceListeners = new HashMap<String, SimulationRaceListener>();
+            this.legListeners = new HashMap<RaceIdentifier, LegChangeListener>();
             this.cache = new SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>(
                     new SmartFutureCache.AbstractCacheUpdater<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>() {
                         @Override
@@ -76,75 +91,177 @@ public class SimulationServiceImpl implements SimulationService {
                         }
                     }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
         } else {
-            this.listeners = null;
+            this.raceListeners = null;
+            this.legListeners = null;
             this.cache = null;
         }
     }
 
-    // TODO: subscribe to race-admin-events; cleanup listeners when tracked-race is removed from server => admin-console?
-    
-    private class Listener extends AbstractRaceChangeListener {
-        private final TrackedRace trackedRace;
-        private final LegIdentifier legIdentifier;
-        private final ScheduledExecutorService scheduler;
-        private boolean finished;
-        private boolean covered;
-        
-
-        public Listener(TrackedRace trackedRace, LegIdentifier legIdentifier, ScheduledExecutorService scheduler) {
-            this.trackedRace = trackedRace;
-            this.legIdentifier = legIdentifier;
-            this.scheduler = scheduler;
-            this.finished = false;
-            this.covered = false;
+    private class SimulationRaceListener implements RaceListener {
+        @Override
+        public void raceAdded(TrackedRace trackedRace) {
         }
 
         @Override
-        protected void defaultAction() {
-            if (!this.finished) {
-                if (!this.covered) {
-                    this.covered = true;
-                    scheduler.schedule(() -> triggerUpdate(legIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
+        public void raceRemoved(TrackedRace trackedRace) {
+            RaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+            LegChangeListener listener = legListeners.get(raceIdentifier); 
+            if (listener != null) {
+                trackedRace.removeListener(listener);
+            }
+            int legNumber = 1;
+            Iterator<TrackedLeg> iterator = trackedRace.getTrackedLegs().iterator(); 
+            while (iterator.hasNext()) {
+                LegIdentifier key = new LegIdentifierImpl((RegattaAndRaceIdentifier)raceIdentifier, ""+legNumber);
+                SimulationResults entry = cache.get(key, false);
+                if (entry != null) {
+                    cache.remove(key);
                 }
+                legNumber++;
+                iterator.next();
+            }
+            legListeners.remove(raceIdentifier);
+        }
+    }
+    
+    private class LegChangeListener extends AbstractRaceChangeListener {
+        private final TrackedRace trackedRace;
+        private LegIdentifier legIdentifier;
+        private final ScheduledExecutorService scheduler;
+        private boolean covered;
+        
+
+        public LegChangeListener(TrackedRace trackedRace, ScheduledExecutorService scheduler) {
+            this.trackedRace = trackedRace;
+            this.legIdentifier = null;
+            this.scheduler = scheduler;
+            this.covered = false;
+        }
+
+        public boolean isLive() {
+            return trackedRace.isLive(MillisecondsTimePoint.now());
+        }
+        
+        public void setLegIdentifier(LegIdentifier legIdentifier) {
+            if (this.legIdentifier != null) {
+                if (!this.legIdentifier.equals(legIdentifier)) {
+                    this.legIdentifier = legIdentifier;
+                    this.covered = false;
+                }
+            } else {
+                this.legIdentifier = legIdentifier;
+            }
+        }
+        
+        @Override
+        protected void defaultAction() {
+            if ((!this.covered)&&(legIdentifier!=null)) {
+                this.covered = true;
+                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier, legIdentifier.getLegName());
+                scheduler.schedule(() -> triggerUpdate(tmpLegIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
             }
         }
 
         private void triggerUpdate(LegIdentifier legIdentifier) {
-            this.covered = false;
+            if (this.legIdentifier.equals(legIdentifier)) {
+                this.covered = false;
+            }
             logger.info("Simulation Scheduled Update Triggered: \"" + legIdentifier.toString() + "\"");
             cache.triggerUpdate(legIdentifier, null);
         }
         
 
         @Override
-        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
-            if ((trackedRace != null)&&(!this.finished)) {
-                Leg leg = trackedRace.getRace().getCourse().getLegs().get(legIdentifier.getLegNumber());
-                // get next mark as end-position
-                Waypoint toWaypoint = leg.getTo();
-                MarkPassing markPassing;
-                Iterator<MarkPassing> markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
-                if (markPassingIterator.hasNext()) {
-                    markPassing = markPassingIterator.next();
-                } else {
-                    markPassing = null;
-                }
-                if (markPassing != null) { // if leg is finished, only one last simulation update required
-                    defaultAction();
-                    this.finished = true;
-                } else {
-                    this.finished = false;
-                }
-            }
+        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+            // relevant for simulation: start of leg 1 changes; requires update of leg 1
+            // TODO: update leg 1
         }
 
-        // simulation is not influenced by live-delay
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus) {
+            // relevant for simulation: update all legs when switched to "replay"
+            // TODO: update all legs
+        }
+
+        @Override
+        public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+            // relevant for simulation: update all legs when wind changes overall
+            // TODO: update all legs
+        }
+
+        @Override
+        public void startOfTrackingChanged(TimePoint startOfTracking) {
+            // irrelevant for simulation
+        }
+
+        @Override
+        public void endOfTrackingChanged(TimePoint endOfTracking) {
+            // irrelevant for simulation
+        }
+
+        @Override
+        public void startTimeReceivedChanged(TimePoint startTimeReceived) {
+            // irrelevant for simulation: should be covered by startOfRaceChanged()
+        }
+
+        @Override
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+            // relevant for simulation
+            // TODO: identify influenced legs and update these legs
+        }
+
+        @Override
+        public void windDataReceived(Wind wind, WindSource windSource) {
+            // relevant for simulation: update legs influenced by wind
+            // TODO: update influenced legs; "live" update current leg
+            defaultAction();
+        }
+
+        @Override
+        public void windDataRemoved(Wind wind, WindSource windSource) {
+            // relevant for simulation: update legs influenced by wind
+            // TODO: update influenced legs; "live" update current leg
+            defaultAction();
+        }
+
+        @Override
+        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            // relevant for simulation: update legs influenced by wind
+            // TODO: update influenced legs; "live" update current leg
+            defaultAction();
+        }
+
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+            // irrelevant for simulation: covered by wind estimation
+        }
+
+        @Override
+        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
+            // relevant for simulation: update start- and end-times of legs
+            // TODO: update influenced legs; "live" update current leg
+        }
+
+        @Override
+        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            // irrelevant for simulation
+        }
+
         @Override
         public void delayToLiveChanged(long delayToLiveInMillis) {
+            // irrelevant for simulation
         }
 
         @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+        public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+            // relevant for simulation: update legs influenced waypoint
+            // TODO: update influenced legs; "live" update current leg
+        }
+
+        @Override
+        public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+            // relevant for simulation: update legs influenced waypoint
+            // TODO: update influenced legs; "live" update current leg
         }
 
     }
@@ -162,12 +279,27 @@ public class SimulationServiceImpl implements SimulationService {
         SimulationResults result = cache.get(legIdentifier, false);
         if (result == null) {
             logger.fine("Simulation Get: Cache Empty: \"" + legIdentifier.toString() + "\"");
-            if (!listeners.containsKey(legIdentifier)) {
+            if (!raceListeners.containsKey(legIdentifier.getRegattaName())) {
+                Regatta regatta = racingEventService.getRegattaByName(legIdentifier.getRegattaName());
+                DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
+                SimulationRaceListener raceListener = new SimulationRaceListener(); 
+                raceListeners.put(legIdentifier.getRegattaName(), raceListener);
+                trackedRegatta.addRaceListener(raceListener);
+            }
+            if (!legListeners.containsKey(legIdentifier.getRaceIdentifier())) {
                 TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
                 if (trackedRace != null) {
-                    Listener listener = new Listener(trackedRace, legIdentifier, scheduler);
-                    listeners.put(legIdentifier, listener);
+                    LegChangeListener listener = new LegChangeListener(trackedRace, scheduler);
+                    if (listener.isLive()) {
+                        listener.setLegIdentifier(legIdentifier);
+                    }
+                    legListeners.put(legIdentifier.getRaceIdentifier(), listener);
                     trackedRace.addListener(listener);
+                }
+            } else {
+                LegChangeListener listener = legListeners.get(legIdentifier.getRaceIdentifier());
+                if (listener.isLive()) {
+                    listener.setLegIdentifier(legIdentifier);
                 }
             }
             logger.info("Simulation Get: Update Triggered: \"" + legIdentifier.toString() + "\"");
