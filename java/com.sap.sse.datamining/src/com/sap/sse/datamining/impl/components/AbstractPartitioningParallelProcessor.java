@@ -6,8 +6,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +21,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
 
     private final Set<Processor<ResultType, ?>> resultReceivers;
     private final ExecutorService executor;
-    private final UnfinishedInstructionsCounter unfinishedInstructionsCounter;
+    private final AtomicInteger unfinishedInstructionsCounter;
     
     private boolean isFinished = false;
     private boolean gotAborted = false;
@@ -31,7 +30,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         super(inputType, resultType);
         this.executor = executor;
         this.resultReceivers = new HashSet<Processor<ResultType, ?>>(resultReceivers);
-        unfinishedInstructionsCounter = new UnfinishedInstructionsCounter();
+        unfinishedInstructionsCounter = new AtomicInteger();
     }
 
     @Override
@@ -53,11 +52,11 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
                                     onFailure(e);
                                 }
                             } finally {
-                                AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.decrement();
+                                AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.getAndDecrement();
                             }
                         }
                     };
-                    unfinishedInstructionsCounter.increment();
+                    unfinishedInstructionsCounter.getAndIncrement();
                     try {
                         executor.execute(instructionWrapper);
                     } catch (RejectedExecutionException exc){
@@ -124,7 +123,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
 
     private boolean areUnfinishedInstructionsLeft() {
-        return unfinishedInstructionsCounter.getUnfinishedInstructionsAmount() > 0;
+        return unfinishedInstructionsCounter.get() > 0;
     }
 
     protected void tellResultReceiversToFinish() {
@@ -160,42 +159,5 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
     
     protected abstract void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder);
-
-    /**
-     * Thread safe class to manage, if there are unfinished instructions. 
-     */
-    private class UnfinishedInstructionsCounter {
-        
-        private final Lock instructionsAmountLock;
-        private int unfinishedInstructionsAmount;
-        
-        public UnfinishedInstructionsCounter() {
-            instructionsAmountLock = new ReentrantLock();
-        }
-        
-        public void increment() {
-            instructionsAmountLock.lock();
-            try {
-                unfinishedInstructionsAmount++;
-            } finally {
-                instructionsAmountLock.unlock();
-            }
-        }
-        
-        public void decrement() {
-            instructionsAmountLock.lock();
-            try {
-                unfinishedInstructionsAmount--;
-                unfinishedInstructionsAmount = Math.max(0, unfinishedInstructionsAmount);
-            } finally {
-                instructionsAmountLock.unlock();
-            }
-        }
-        
-        public int getUnfinishedInstructionsAmount() {
-            return unfinishedInstructionsAmount;
-        }
-        
-    }
 
 }
