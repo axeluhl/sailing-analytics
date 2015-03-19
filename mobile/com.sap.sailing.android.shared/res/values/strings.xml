@@ -19,12 +19,17 @@
     <!-- Generic -->
     <string name="empty" translatable="false"></string>
     <string name="generic_error">Error</string>
+    
+    <!-- Signal quality -->
     <string name="signal_accuracy_indicator_view_description">GPS Accuracy</string>
     <string name="poor">poor</string>
     <string name="good">good</string>
     <string name="great">great</string>
     <string name="no_signal">no signal</string>
     <string name="ok">OK</string>
+    
+    <!-- Regatta -->
+    <string name="your_regattas">Your Regattas:</string>
     
     <!-- QR Code -->
     <string name="notify_user_db_operation_failed">Error: Database operation has failed.</string>
@@ -34,4 +39,7 @@
 	<string name="scanning_cancelled">Scanning cancelled</string>
 	<string name="error_scanning_qrcode">Error scanning QR-Code {result-code}</string>
 	<string name="notify_user_api_call_failed">An error occurred while contacting the server. Please try again.</string>
+	<string name="please_wait">Please wait</string>
+	<string name="error_invalid_qr_code">Invalid QR-Code</string>
+	<string name="checkin_digest" translatable="false">CheckinDigest</string>
 </resources>

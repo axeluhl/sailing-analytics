@@ -7,11 +7,62 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="22" />
 
+    <permission
+        android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <!-- <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" /> -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
+        android:name="com.sap.sailing.android.shared.application.LoggableApplication"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name=".ui.activities.StartActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="unspecified" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="*"
+                    android:pathPattern=".*tracking/checkin.*"
+                    android:scheme="http" />
+                <data
+                    android:host="*"
+                    android:pathPattern=".*tracking/checkin.*"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsProvider"
+            android:authorities="com.sap.sailing.android.buoy.positioning.app.provider.db"
+            android:exported="false" />
     </application>
 
 </manifest>

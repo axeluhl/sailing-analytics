@@ -1,4 +1,7 @@
-package com.sap.sailing.android.tracking.app.adapter;
+package com.sap.sailing.android.buoy.positioning.app.adapter;
+
+
+import com.sap.sailing.android.buoy.positioning.app.R;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -6,7 +9,6 @@ import android.support.v4.widget.ResourceCursorAdapter;
 import android.view.View;
 import android.widget.TextView;
 
-import com.sap.sailing.android.tracking.app.R;
 
 public class MarkAdapter extends ResourceCursorAdapter {
 

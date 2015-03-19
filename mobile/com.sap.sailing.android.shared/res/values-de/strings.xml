@@ -24,5 +24,10 @@
 	<string name="scanning_cancelled">Scan abgebrochen</string>
 	<string name="error_scanning_qrcode">Fehler beim Scannen des QR-Codes {result-code}</string>
 	<string name="notify_user_api_call_failed">Bei der Kommunikation mit dem Server ist ein Fehler aufgetreten. Bitte versuchen Sie es noch einmal.</string>
-
+	<string name="please_wait">Bitte warten</string>
+	<string name="error_invalid_qr_code">Ungültiger QR-Code</string>
+	
+	<!-- Regatta -->
+    <string name="your_regattas">Ihre Regattas:</string>
+    
 </resources>
