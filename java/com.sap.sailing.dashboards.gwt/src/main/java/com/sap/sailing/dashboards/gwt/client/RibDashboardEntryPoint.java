@@ -8,11 +8,11 @@ import com.googlecode.mgwt.ui.client.MGWTSettings;
 import com.googlecode.mgwt.ui.client.MGWTSettings.StatusBarStyle;
 import com.googlecode.mgwt.ui.client.MGWTSettings.ViewPort;
 import com.googlecode.mgwt.ui.client.MGWTStyle;
+import com.sap.sailing.dashboards.gwt.client.i18n.StringMessages;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.EntryPointHelper;
-import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -61,6 +61,6 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
 
     @Override
     protected StringMessages createStringMessages() {
-        return GWT.create(StringMessages.class);
+        return StringMessages.INSTANCE;
     }
 }
