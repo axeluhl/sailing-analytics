@@ -76,13 +76,15 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
+import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.tracking.impl.GPSFixTrackImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -612,8 +614,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     }
 
     private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
-
-    private final GPSFixJsonDeserializer fixDeserializer = new GPSFixJsonDeserializer();
+    private final FlatGPSFixJsonDeserializer fixDeserializer = new FlatGPSFixJsonDeserializer();
+    private final FlatGPSFixJsonSerializer fixSerializer = new FlatGPSFixJsonSerializer();
 
     public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
@@ -664,7 +666,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
             logger.fine("JSON requestObject is: " + requestObject.toString());
             fix = fixDeserializer.deserialize(requestObject);
-        } catch (ParseException | JsonDeserializationException e) {
+        } catch (ParseException | JsonDeserializationException | NumberFormatException e) {
             logger.warning(String.format("Exception while parsing post request:\n%s", e.toString()));
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
@@ -674,6 +676,18 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         RacingEventService service = getService();
 
         try {
+            if (lastKnownFix != null){
+                //ping again to avoid interpolation, avoid filtering by paying attention to maxSpeedForSmoothing
+                GPSFix tmp; 
+                long timeDifference = 1;
+                do {
+                    tmp = new GPSFixImpl(lastKnownFix.getPosition(), fix.getTimePoint().minus(timeDifference));
+                    timeDifference++;
+                } while (tmp.getSpeedAndBearingRequiredToReach(fix).getKnots() > GPSFixTrackImpl.getDefaultMaxSpeedForSmoothing().getKnots());
+                
+                adapter.pingMark(regattaLog, mark, tmp, service);
+            }
+            
             adapter.pingMark(regattaLog, mark, fix, service);
             logger.log(Level.INFO, "Pinged mark " + mark.getName());
         } catch (NoCorrespondingServiceRegisteredException e) {
@@ -681,8 +695,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
 
         if (lastKnownFix != null) {
-            GPSFixJsonSerializer serializer = new GPSFixJsonSerializer();
-            JSONObject lastKnownFixJson = serializer.serialize(lastKnownFix);
+            JSONObject lastKnownFixJson = fixSerializer.serialize(lastKnownFix);
             String fixJson = lastKnownFixJson.toJSONString();
             return Response.ok(fixJson, MediaType.APPLICATION_JSON).build();
         } else {
