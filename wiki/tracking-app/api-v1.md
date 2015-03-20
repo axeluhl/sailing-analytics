@@ -359,8 +359,6 @@ Instead of the checkin/checkout process of the tracking app, marks can be pinged
       "timestamp" : 14144160080000,
       "latitude" : 54.325246,
       "longitude" : 10.148556,
-      "speed" : 3.61,
-      "course" : 258.11,
 }
 ```
 
