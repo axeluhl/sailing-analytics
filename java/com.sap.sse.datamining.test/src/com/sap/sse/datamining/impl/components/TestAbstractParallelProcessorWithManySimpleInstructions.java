@@ -5,7 +5,6 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,10 +38,10 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
         receivers.add(receiver);
         processor = new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
-            protected Callable<Integer> createInstruction(final Integer element) {
-                return new Callable<Integer>() {
+            protected ProcessorInstruction<Integer> createInstruction(final Integer element) {
+                return new ProcessorInstruction<Integer>(this) {
                     @Override
-                    public Integer call() throws Exception {
+                    public Integer computeResult() {
                         return element;
                     }
                 };

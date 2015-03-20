@@ -11,11 +11,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
+import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class BenchmarkResultsPanel extends FlowPanel {
-    
+
+    private final DataMiningSession session;
     private DataMiningServiceAsync dataMiningService;
     private ErrorReporter errorReporter;
     private StringMessages stringMessages;
@@ -25,9 +27,10 @@ public class BenchmarkResultsPanel extends FlowPanel {
     private Label benchmarkStatusLabel;
     private BenchmarkResultsChart resultsChart;
 
-    public BenchmarkResultsPanel(StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
+    public BenchmarkResultsPanel(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider) {
         super();
+        this.session = session;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -48,7 +51,7 @@ public class BenchmarkResultsPanel extends FlowPanel {
 
     private void runQuery(final ClientBenchmarkData benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        dataMiningService.runQuery(queryDefinitionProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
+        dataMiningService.runQuery(session, queryDefinitionProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());
