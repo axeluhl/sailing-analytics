@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
+import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -39,7 +40,8 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
     /* This implementation is a prototype and mustn't be used to develop a productive UI component.
      * Instead start from scratch and use this prototype as orientation to get a cleaner result.
      * */
-    
+
+    private final DataMiningSession session;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<SelectionChangedListener> listeners;
@@ -61,8 +63,9 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
     private final Map<ValueListBox<?>, VerticalPanel> singleDimensionFilterSelectionPanelsMappedBySelectionBox;
     private final Map<ValueListBox<?>, SelectionTable<?>> selectionTablesMappedBySelectionBox;
 
-    public SingleRetrieverLevelSelectionProviderPrototype(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+    public SingleRetrieverLevelSelectionProviderPrototype(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                                  DataRetrieverChainDefinitionDTO retrieverChain, LocalizedTypeDTO retrievedDataType, int retrieverLevel) {
+        this.session = session;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
@@ -123,7 +126,7 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
         if (isFiltrationPossible) {
             Collections.sort(availableDimensions);
             labeledBusyIndicator.setVisible(true);
-            dataMiningService.getDimensionValuesFor(retrieverChain, retrieverLevel, dimensions, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
+            dataMiningService.getDimensionValuesFor(session, retrieverChain, retrieverLevel, dimensions, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
                 @Override
                 public void onSuccess(QueryResult<Set<Object>> result) {
                     dimensionValuesMappedByDimension.clear();

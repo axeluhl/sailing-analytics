@@ -34,6 +34,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
         availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
         availableDetailsTypes.add(DetailType.BEAT_ANGLE);
+        availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
         
         if (hasOverallLeaderboard) {
             availableDetailsTypes.add(DetailType.OVERALL_RANK);
