@@ -7,7 +7,11 @@ import com.sap.sse.datamining.shared.QueryResult;
 
 public interface Query<AggregatedType> {
     
+    public enum QueryType { STATISTIC, DIMENSION_VALUES, OTHER }
+    
     public QueryState getState();
+    
+    public AdditionalQueryData getAdditionalData();
     
     public QueryResult<AggregatedType> run();
 

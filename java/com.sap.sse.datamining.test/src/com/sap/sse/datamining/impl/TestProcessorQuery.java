@@ -19,6 +19,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Test;
 
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.FilterCriterion;
@@ -107,7 +108,7 @@ public class TestProcessorQuery {
      */
     private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
         final ThreadPoolExecutor executor = ConcurrencyTestsUtil.getExecutor();
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(dataSource, stringMessages, Locale.ENGLISH) {
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregator = processorFactory.createAggregationProcessor(this, AggregatorType.Sum, Double.class);
@@ -175,7 +176,7 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH) {
+                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
@@ -211,7 +212,7 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH) {
+                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
@@ -275,7 +276,7 @@ public class TestProcessorQuery {
     public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
         final String keyValue = "Sum";
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                createDataSource(), stringMessages, Locale.ENGLISH) {
+                createDataSource(), stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {

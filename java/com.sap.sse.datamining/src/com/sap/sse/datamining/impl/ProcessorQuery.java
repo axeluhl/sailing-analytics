@@ -14,14 +14,17 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.OverwritingResultDataBuilder;
+import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.QueryResultState;
+import com.sap.sse.datamining.shared.impl.NullAdditionalResultData;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
@@ -36,26 +39,33 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     
     private final ResourceBundleStringMessages stringMessages;
     private final Locale locale;
+    private final AdditionalQueryData additionalData;
 
     private final Object monitorObject = new Object();
     private Thread workingThread;
     private QueryState state;
     
     /**
-     * Creates a query that returns a result without any additional data (like the calculation time or the retrieved data amount).<br>
+     * Creates a query
+     * <ul>
+     *   <li> with no {@link AdditionalQueryData} (more exactly with {@link NullAdditionalQueryData} as additional data).</li>
+     *   <li> that returns a result without {@link AdditionalResultData} (more exactly with {@link NullAdditionalResultData} as additional data).</li>
+     * </ul>
+     * 
      * This is useful for non user specific queries, like retrieving the dimension values.
      */
     public ProcessorQuery(DataSourceType dataSource) {
-        this(dataSource, null, null);
+        this(dataSource, null, null, AdditionalQueryData.NULL_INSTANCE);
     }
 
     /**
      * Creates a query that returns a result with additional data.
      */
-    public ProcessorQuery(DataSourceType dataSource, ResourceBundleStringMessages stringMessages, Locale locale) {
+    public ProcessorQuery(DataSourceType dataSource, ResourceBundleStringMessages stringMessages, Locale locale, AdditionalQueryData additionalData) {
         this.dataSource = dataSource;
         this.stringMessages = stringMessages;
         this.locale = locale;
+        this.additionalData = additionalData;
         state = QueryState.NOT_STARTED;
 
         resultReceiver = new ProcessResultReceiver();
@@ -67,6 +77,11 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     @Override
     public QueryState getState() {
         return state;
+    }
+    
+    @Override
+    public AdditionalQueryData getAdditionalData() {
+        return additionalData;
     }
 
     @Override
