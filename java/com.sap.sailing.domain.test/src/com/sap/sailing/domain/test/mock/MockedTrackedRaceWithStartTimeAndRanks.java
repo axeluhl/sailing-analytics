@@ -577,4 +577,14 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return null;
     }
 
+    @Override
+    public Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
 }

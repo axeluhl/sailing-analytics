@@ -117,16 +117,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         final Distance result;
         final Distance preResult = getDistanceTraveled(timePoint);
         final Waypoint from = getLeg().getFrom();
-        final TimePoint competitorLegStartTime = getStartTime();
-        if (from == getTrackedRace().getRace().getCourse().getFirstWaypoint() && getTrackedRace().isGateStart() == true
-                && competitorLegStartTime != null) {
-            final Mark portMarkOfStartLine = getTrackedRace().getStartLine(competitorLegStartTime)
-                    .getPortMarkWhileApproachingLine();
-            final Position portSideOfStartLinePosition = getTrackedRace().getOrCreateTrack(portMarkOfStartLine)
-                    .getEstimatedPosition(competitorLegStartTime, /* extrapolate */true);
-            final Distance additionalDistance = portSideOfStartLinePosition.getDistance(getTrackedRace().getTrack(
-                    getCompetitor()).getEstimatedPosition(competitorLegStartTime, /* extrapolate */false));
-            result = preResult.add(additionalDistance);
+        if (from == getTrackedRace().getRace().getCourse().getFirstWaypoint()) {
+            result = preResult.add(getTrackedRace().getAdditionalGateStartDistance(getCompetitor(), timePoint));
         } else {
             result = preResult;
         }

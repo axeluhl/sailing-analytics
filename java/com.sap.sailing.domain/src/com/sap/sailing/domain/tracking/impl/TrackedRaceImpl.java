@@ -893,7 +893,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
+    public Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint) {
+        return getDistanceTraveled(competitor, timePoint, /* consider gate start */ true);
+    }
+
+    @Override
     public Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        return getDistanceTraveled(competitor, timePoint, /* consider gate start */ false);
+    }
+    
+    private Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint, boolean considerGateStart) {
         final Distance result;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         try {
@@ -3296,4 +3305,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         return result;
     }
+
+    @Override
+    public Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
+        final Leg startLeg = getRace().getCourse().getFirstLeg();
+        final TrackedLegOfCompetitor competitorLeg;
+        if (startLeg != null && isGateStart() == true && (competitorLeg=getTrackedLeg(competitor, startLeg)).hasStartedLeg(timePoint)) {
+            TimePoint competitorLegStartTime = competitorLeg.getStartTime();
+            final Mark portMarkOfStartLine = getStartLine(competitorLegStartTime).getPortMarkWhileApproachingLine();
+            final Position portSideOfStartLinePosition = getOrCreateTrack(portMarkOfStartLine)
+                    .getEstimatedPosition(competitorLegStartTime, /* extrapolate */true);
+            result = portSideOfStartLinePosition.getDistance(getTrack(competitor).getEstimatedPosition(competitorLegStartTime, /* extrapolate */false));
+        } else {
+            result = Distance.NULL;
+        }
+        return result;
+    }
+
 }

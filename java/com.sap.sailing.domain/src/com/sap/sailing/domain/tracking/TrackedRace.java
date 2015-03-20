@@ -474,6 +474,11 @@ public interface TrackedRace extends Serializable {
      */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
+    /**
+     * See {@link TrackedLegOfCompetitor#getDistanceTraveledConsideringGateStart(TimePoint)}
+     */
+    Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
+
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
@@ -728,5 +733,12 @@ public interface TrackedRace extends Serializable {
      * <code>null</code> is returned, meaning that the type is not known.
      */
     Boolean isGateStart();
+    
+    /**
+     * If the race was started with a gate start (see {@link #isGateStart()}, this method returns the distance between
+     * the competitor's starting position and the port side of the start line (pin end); otherwise, returns a zero
+     * distance.
+     */
+    Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint);
 
 }

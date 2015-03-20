@@ -2746,6 +2746,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = distanceTraveled == null ? null : distanceTraveled.getMeters();
                 }
                 break;
+            case DISTANCE_TRAVELED_INCLUDING_GATE_START:
+                if (trackedLeg != null) {
+                    Distance distanceTraveledConsideringGateStart = trackedRace.getDistanceTraveledIncludingGateStart(competitor, timePoint);
+                    result = distanceTraveledConsideringGateStart == null ? null : distanceTraveledConsideringGateStart.getMeters();
+                }
+                break;
             case GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
                     result = trackedLeg.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE, cache);
