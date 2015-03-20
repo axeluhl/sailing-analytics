@@ -18,19 +18,12 @@ import com.sap.sse.datamining.shared.GroupKey;
 public class ConcurrencyTestsUtil extends TestsUtil {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-    private static ThreadPoolExecutor executor = createExecutor();
+    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     public static ThreadPoolExecutor getExecutor() {
-        if (executor.isShutdown()) {
-            executor = createExecutor();
-        }
         return executor;
     }
 
-    private static ThreadPoolExecutor createExecutor() {
-        return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-    }
-    
     public static void sleepFor(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
@@ -57,7 +50,7 @@ public class ConcurrencyTestsUtil extends TestsUtil {
     }
 
     public static void tryToFinishTheProcessorInAnotherThread(final Processor<?, ?> processor) {
-        Runnable finishingRunnable = new Runnable() {
+        Thread finishingThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -66,8 +59,8 @@ public class ConcurrencyTestsUtil extends TestsUtil {
                     fail("The test was interrupted: " + e.getMessage());
                 }
             }
-        };
-        getExecutor().execute(finishingRunnable);
+        });
+        finishingThread.start();
     }
 
     protected ConcurrencyTestsUtil() {
