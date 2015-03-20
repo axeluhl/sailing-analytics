@@ -911,22 +911,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 result = null;
             } else {
                 TimePoint end = timePoint;
+                final TrackedLegOfCompetitor trackedLegOfCompetitor;
                 if (markPassings.last().getWaypoint() == getRace().getCourse().getLastWaypoint()
                         && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
-                    // competitor has finished race; use time point of crossing the finish line
+                    // competitor has finished race at or before the requested time point; use time point of crossing the finish line
                     end = markPassings.last().getTimePoint();
-                } else if (markPassings.last().getWaypoint() != getRace().getCourse().getLastWaypoint()
+                } else if ((trackedLegOfCompetitor=getTrackedLeg(competitor, timePoint)) == null ||
+                        (!trackedLegOfCompetitor.hasFinishedLeg(timePoint)
                         && ((getEndOfTracking() != null && timePoint.after(getEndOfTracking()))
-                                || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED)) {
+                                || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED))) {
                     // If the race is no longer tracking and hence no more data can be expected, and the competitor
-                    // hasn't finished the race, no valid distance traveled can be determined
-                    // for the competitor in this race.
+                    // hasn't finished a leg after the requested time point, no valid distance traveled can be determined
+                    // for the competitor in this race the the time point requested
                     end = null;
                 }
                 if (end == null) {
                     result = null;
                 } else {
-                    result = getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
+                    final Distance preResult = getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
+                    if (considerGateStart && preResult != null) {
+                        result = preResult.add(getAdditionalGateStartDistance(competitor, timePoint));
+                    } else {
+                        result = preResult;
+                    }
                 }
             }
             return result;
