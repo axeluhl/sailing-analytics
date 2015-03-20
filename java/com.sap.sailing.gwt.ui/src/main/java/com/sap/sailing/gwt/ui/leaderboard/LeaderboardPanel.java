@@ -2816,35 +2816,29 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 return t.competitor;
             }
         });
-        if (getLeaderboardTable().getColumnCount() >= 3) { // table already filled with columns
+        if (getLeaderboardTable().getColumnCount() >= columnIndexWhereToInsertTheNextColumn) {
             if (isShowCompetitorSailId()) {
                 if (!(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>)) {
                     insertColumn(columnIndexWhereToInsertTheNextColumn, sailIdColumn);
                 }
+                columnIndexWhereToInsertTheNextColumn++;
             } else {
                 if (getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>) {
                     removeColumn(columnIndexWhereToInsertTheNextColumn);
                 }
             }
-            final int competitorFullNameColumnIndex = isShowCompetitorSailId() ? columnIndexWhereToInsertTheNextColumn+1 : columnIndexWhereToInsertTheNextColumn;
             if (isShowCompetitorFullName()) {
-                if (!(getLeaderboardTable().getColumn(competitorFullNameColumnIndex) instanceof CompetitorColumn)) {
-                    insertColumn(competitorFullNameColumnIndex, createCompetitorColumn());
+                if (!(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn)) {
+                    insertColumn(columnIndexWhereToInsertTheNextColumn, createCompetitorColumn());
                 }
+                columnIndexWhereToInsertTheNextColumn++;
             } else {
-                if (getLeaderboardTable().getColumn(competitorFullNameColumnIndex) instanceof CompetitorColumn) {
-                    removeColumn(competitorFullNameColumnIndex);
+                if (getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn) {
+                    removeColumn(columnIndexWhereToInsertTheNextColumn);
                 }
-            }
-        } else { // table just being initialized
-            if (isShowCompetitorSailId()) {
-                addColumn(sailIdColumn);
-            }
-            if (isShowCompetitorFullName()) {
-                addColumn(createCompetitorColumn());
             }
         }
-        return columnIndexWhereToInsertTheNextColumn + (isShowCompetitorSailId() ? 1 : 0) + (isShowCompetitorFullName() ? 1 : 0);
+        return columnIndexWhereToInsertTheNextColumn;
     }
 
     protected CompetitorColumn createCompetitorColumn() {
