@@ -3,6 +3,9 @@
 
     <color name="constant_white">#ffffff</color>
     <color name="constant_black">#000000</color>
+    <color name="constant_sap_yellow_1">#f0ab00</color>
+    <color name="constant_sap_red_1">#e94a1b</color>
+    <color name="constant_sap_blue_1">#008fcc</color>
 
     <color name="constant_black_light">#ff242424</color>
     <color name="constant_black_transparent">#99000000</color>
