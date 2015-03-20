@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.UUID;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,6 +26,8 @@ import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
 import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
 import com.sap.sailing.gwt.ui.datamining.selection.BufferingQueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
+import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
@@ -31,11 +35,14 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     private static DataMiningResources resources = GWT.create(DataMiningResources.class);
     
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
+    
+    private DataMiningSession session;
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-
+        session = new UUIDDataMiningSession(UUID.randomUUID());
+        
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
@@ -44,13 +51,13 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addNorth(createLogoAndTitlePanel(), 68);
-        BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new BufferingQueryDefinitionProviderWithControls(getStringMessages(), sailingService, dataMiningService, this);
+        BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new BufferingQueryDefinitionProviderWithControls(session, getStringMessages(), sailingService, dataMiningService, this);
         queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
         dockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
         
         ResultsPresenter<Number> resultsPresenter = new ResultsChart(getStringMessages());
         if (GwtHttpRequestUtils.getBooleanParameter("benchmark", false)) {
-            BenchmarkResultsPanel benchmarkResultsPanel = new BenchmarkResultsPanel(getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls);
+            BenchmarkResultsPanel benchmarkResultsPanel = new BenchmarkResultsPanel(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls);
             splitPanel.addSouth(benchmarkResultsPanel, 500);
         } else {
             splitPanel.addSouth(resultsPresenter.getWidget(), 400);
@@ -58,7 +65,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         
         splitPanel.add(dockPanel);
         
-        QueryRunner queryRunner = new SimpleQueryRunner(getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
+        QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProviderWithControls));
     }

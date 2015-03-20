@@ -349,8 +349,6 @@ _see [bug 2652](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2652)_
 
 Instead of the checkin/checkout process of the tracking app, marks can be pinged using an API that hides the inner workings on the server completely. The server creates a device-mapping in the regatta-log for the exact timepoint of every fix, and adds the fixes to the GPSFixStore.
 
-The interface (apart from the path) is identical to [Send Measurements](#fixes). Several fixes can be sent at once, but in the interest of pinging a mark, this should usually just be a single fix.
-
 **Path:** ``leaderboards/{leaderboard-name}/marks/{mark-id}/gps_fixes``
 
 **Verb:** ``POST``
@@ -358,16 +356,20 @@ The interface (apart from the path) is identical to [Send Measurements](#fixes).
 **Request:**
 ```
 {
-  "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
-  "fixes" : [
-    {
       "timestamp" : 14144160080000,
       "latitude" : 54.325246,
       "longitude" : 10.148556,
-      "speed" : 3.61,
-      "course" : 258.11,
-    }
-  ]
+}
+```
+
+**Response:**
+If there is no existent GPS Fix for the Mark HTTP/200 will be returned.
+If there is an existent GPS Fix the latest known Position of the Mark will be returned:
+```
+{
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
 }
 ```
 
