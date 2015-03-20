@@ -4,6 +4,14 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 
+/**
+ * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
+ * {@link LeaderboardSettingsDialogComponent} to make the setting editable, and edit {@link LeaderboardUrlSettings}
+ * for URL generation and parsing.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class LeaderboardSettings {
     public static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
     public static final String PARAM_EMBEDDED = "embedded";
