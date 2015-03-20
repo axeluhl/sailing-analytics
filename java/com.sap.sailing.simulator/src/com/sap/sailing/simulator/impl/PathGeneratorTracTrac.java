@@ -30,6 +30,7 @@ import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @SuppressWarnings("restriction")
 public class PathGeneratorTracTrac extends PathGeneratorBase {
@@ -112,7 +113,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     }
 
     public Path getRaceCourse() {
-        return this.raceCourse == null ? null : new PathImpl(this.raceCourse, null);
+        return this.raceCourse == null ? null : new PathImpl(this.raceCourse, null, this.algorithmTimedOut);
     }
 
     public List<String> getLegsNames() {
@@ -128,6 +129,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     @Override
     @SuppressWarnings("all")
     public Path getPath() {
+        this.algorithmStartTime = MillisecondsTimePoint.now();
+
         this.intializeRaceHandle();
 
         // getting the first race
@@ -176,7 +179,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
         track.unlockAfterRead();
 
-        return new PathImpl(path, null);
+        return new PathImpl(path, null, this.algorithmTimedOut);
     }
 
     @SuppressWarnings("null")
@@ -241,7 +244,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
             }
         }
 
-        return new PathImpl(path, null);
+        return new PathImpl(path, null, this.algorithmTimedOut);
     }
 
     public static SpeedWithBearing scale(SpeedWithBearing speed, double scale) {

@@ -29,9 +29,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PathGeneratorTreeGrow extends PathGeneratorBase {
 
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private static final Logger logger = Logger.getLogger(com.sap.sailing.simulator.impl.PathGeneratorTreeGrow.class.getName());
     private boolean debugMsgOn = false;
-
+    
     double oobFact = 2.0; // out-of-bounds factor
     int maxTurns = 0;
     boolean upwindLeg = false;
@@ -461,6 +461,8 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
 
     @Override
     public Path getPath() {
+        this.algorithmStartTime = MillisecondsTimePoint.now();
+        
         WindFieldGenerator wf = this.parameters.getWindField();
         PolarDiagram pd = this.parameters.getBoatPolarDiagram();
 
@@ -592,7 +594,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
                 this.isocPositions.add(isocPaths);
 
             }
-
+            
             // check if there are still paths in the regatta-area
             if (allPaths.size() > 0) {
 
@@ -615,7 +617,12 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
                 reachedEnd = true;
             }
 
-        }
+            // check for time-out
+            if (this.isTimedOut()) {
+                reachedEnd = true;
+            }
+            
+        } // main while-loop
 
         if (this.gridStore) {
 
@@ -697,7 +704,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
             // trgPaths = allPaths; // TODO: only for testing; remove lateron
             TimedPositionWithSpeed curPosition = new TimedPositionWithSpeedImpl(startTime, startPos, null);
             path.add(curPosition);
-            return new PathImpl(path, wf); // return empty path
+            return new PathImpl(path, wf, true /* out-of-bounds spatially||timely */); // return empty path
         }
 
         // sort target-paths ascending by distance-to-target
@@ -765,7 +772,7 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
                 maxTurnTime = turnMiddle * this.usedTimeStep;
             }
         }
-        return new PathImpl(path, wf, maxTurnTime);
+        return new PathImpl(path, wf, maxTurnTime, this.algorithmTimedOut);
     }
 
 }

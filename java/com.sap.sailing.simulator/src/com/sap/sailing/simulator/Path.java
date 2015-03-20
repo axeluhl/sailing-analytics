@@ -21,4 +21,6 @@ public interface Path {
     Path getEvenTimedPath(long timeStep);
     
     int getTurnCount();
+    
+    boolean getAlgorithmTimedOut();
 }

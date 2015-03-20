@@ -52,6 +52,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
 
     @Override
     public Path getPath() {
+        this.algorithmStartTime = MillisecondsTimePoint.now();
 
         WindFieldGenerator wf = simulationParameters.getWindField();
         PolarDiagram pd = simulationParameters.getBoatPolarDiagram();
@@ -136,7 +137,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
         SpeedWithBearing srght = null;
         while ((currentHeight > 0)
                 && (currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(fracFinishPhase)) > 0)
-                && (path.size() < 500)) {
+                && (path.size() < 500) && (!this.isTimedOut())) {
 
             // TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
 
@@ -306,42 +307,44 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             // System.out.println("Height to Target: "+height);
         }
 
-        //
-        // FinishPhase: get 1-turners to finalize course
-        //
-        PathGenerator1Turner gen1Turner = new PathGenerator1Turner(simulationParameters);
-        TimePoint leftGoingTime;
-        TimePoint rightGoingTime;
-        if (prevDirection == 1) {
-            leftGoingTime = currentTime;
-            rightGoingTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
-        } else {
-            leftGoingTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
-            rightGoingTime = currentTime;
-        }
-
-        gen1Turner.setEvaluationParameters(true, currentPosition, end, leftGoingTime, timeStep / (5 * 3), 100, 0.1,
-                this.upwindLeg);
-        Path leftPath = gen1Turner.getPath();
-
-        gen1Turner.setEvaluationParameters(false, currentPosition, end, rightGoingTime, timeStep / (5 * 3), 100, 0.1,
-                this.upwindLeg);
-        Path rightPath = gen1Turner.getPath();
-
-        if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {
-            if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= rightPath
-                    .getPathPoints().get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
-                path.addAll(leftPath.getPathPoints());
+        if (!this.isTimedOut()) {
+            //
+            // FinishPhase: get 1-turners to finalize course
+            //
+            PathGenerator1Turner gen1Turner = new PathGenerator1Turner(simulationParameters);
+            TimePoint leftGoingTime;
+            TimePoint rightGoingTime;
+            if (prevDirection == 1) {
+                leftGoingTime = currentTime;
+                rightGoingTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
             } else {
+                leftGoingTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
+                rightGoingTime = currentTime;
+            }
+
+            gen1Turner.setEvaluationParameters(true, currentPosition, end, leftGoingTime, timeStep / (5 * 3), 100, 0.1,
+                    this.upwindLeg);
+            Path leftPath = gen1Turner.getPath();
+
+            gen1Turner.setEvaluationParameters(false, currentPosition, end, rightGoingTime, timeStep / (5 * 3), 100,
+                    0.1, this.upwindLeg);
+            Path rightPath = gen1Turner.getPath();
+
+            if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {
+                if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= rightPath
+                        .getPathPoints().get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
+                    path.addAll(leftPath.getPathPoints());
+                } else {
+                    path.addAll(rightPath.getPathPoints());
+                }
+            } else if (leftPath.getPathPoints() != null) {
+                path.addAll(leftPath.getPathPoints());
+            } else if (rightPath.getPathPoints() != null) {
                 path.addAll(rightPath.getPathPoints());
             }
-        } else if (leftPath.getPathPoints() != null) {
-            path.addAll(leftPath.getPathPoints());
-        } else if (rightPath.getPathPoints() != null) {
-            path.addAll(rightPath.getPathPoints());
-        }
+       }
 
-        return new PathImpl(path, wf, getTurns());
+        return new PathImpl(path, wf, getTurns(), this.algorithmTimedOut);
 
     }
 

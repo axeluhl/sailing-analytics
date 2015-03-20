@@ -9,4 +9,7 @@ public interface PathGenerator {
     Path getPath();
 
     Path getPathEvenTimed(long stepMilliseconds);
+    
+    public boolean isTimedOut();
+
 }

@@ -16,8 +16,8 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     private static Logger logger = Logger.getLogger(ReplayPathCanvasOverlay.class.getName());
     private List<SimulatorWindDTO> windDTOToDraw;
 
-    public ReplayPathCanvasOverlay(MapWidget map, int zIndex, final String name, final Timer timer, WindFieldGenParamsDTO windParams) {
-        super(map, zIndex, name, timer, windParams);
+    public ReplayPathCanvasOverlay(MapWidget map, int zIndex, final String name, final Timer timer, WindFieldGenParamsDTO windParams, boolean algorithmTimedOut) {
+        super(map, zIndex, name, timer, windParams, algorithmTimedOut);
         this.displayWindAlongPath = false;
         windDTOToDraw = null;
         canvas.setStyleName("replayPanel");

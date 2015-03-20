@@ -42,6 +42,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     public static final String GET_SIMULATION_CATEGORY = "getSimulation";
     private final String textColor = "Black";
     private final String textFont = "10pt OpenSansRegular";
+    private String algorithmTimedOutText = "out-of-bounds";
     private int xOffset = 0;
     private int yOffset = 0; //150;
     private double rectWidth = 20;
@@ -210,22 +211,34 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             txtmet = context2d.measureText(racePath.getName().split("#")[1]);
             txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
+        boolean containsTimeOut = false;
         PathDTO[] paths = this.simulationResult.getPaths();
         for (PathDTO path : paths) {
-            txtmet = context2d.measureText(path.getName());
+            if (path.getAlgorithmTimedOut()) {
+                containsTimeOut = true;
+            }
+            txtmet = context2d.measureText(path.getName().split("#")[1]);
             txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
+        double xOOBDelta = 0;
+        if (containsTimeOut) {
+            txtmet = context2d.measureText(algorithmTimedOutText);
+            xOOBDelta = timewidth;
+            timewidth = Math.max(timewidth, txtmet.getWidth());
+            xOOBDelta = timewidth - xOOBDelta;
+        }
         //canvas.setSize(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0+"px", rectHeight*(paths.length+1)+"px");
-        int canvasWidth = (int)Math.ceil(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0 + 5.0);
+        int canvasWidth = (int)Math.ceil(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0 + 10.0);
         int canvasHeight = (int)Math.ceil(yOffset + rectHeight*(paths.length + (racePath == null? 0 : 1)));
         setCanvasSize(canvas, canvasWidth, canvasHeight);
         if (racePath != null) {
             drawRectangleWithText(context2d, xOffset, yOffset, null,
-                racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth);
+                racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth, xOOBDelta);
         }
         for (PathDTO path : paths) {
+            String timeText = (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime()));
             drawRectangleWithText(context2d, xOffset, yOffset + (paths.length-index-(racePath==null?1:0)) * rectHeight, this.colors.getColor(paths.length-1-index),
-                path.getName().split("#")[1], getFormattedTime(path.getPathTime()), txtmaxwidth, timewidth);
+                path.getName().split("#")[1], timeText, txtmaxwidth, timewidth, (path.getAlgorithmTimedOut()?0:xOOBDelta));
             index++;
         }
     }
@@ -243,7 +256,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         context2d.fillRect(x, y, rectWidth, rectHeight);
     }
 
-    protected void drawRectangleWithText(Context2d context2d, double x, double y, String color, String text, String time, double textmaxwidth, double timewidth) {
+    protected void drawRectangleWithText(Context2d context2d, double x, double y, String color, String text, String time, double textmaxwidth, double timewidth, double xdelta) {
         double offset = 3.0;
         context2d.setFont(textFont);
         if (color != null) {
@@ -251,11 +264,11 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         }
         context2d.setGlobalAlpha(0.80);
         context2d.setFillStyle("white");
-        context2d.fillRect(x + (color==null?0:rectWidth), y, 15.0 + textmaxwidth + timewidth + (color==null?rectWidth:0), rectHeight);
+        context2d.fillRect(x + (color==null?0:rectWidth), y, 20.0 + textmaxwidth + timewidth + (color==null?rectWidth:0), rectHeight);
         context2d.setGlobalAlpha(1.0);
         context2d.setFillStyle(textColor);
         context2d.fillText(text, x + rectWidth + 5.0, y + 12.0 + offset);
-        context2d.fillText(time, x + rectWidth + textmaxwidth + 10.0, y + 12.0 + offset);
+        context2d.fillText(time, x + rectWidth + textmaxwidth + xdelta + 15.0, y + 12.0 + offset);
     }
     
     protected String getFormattedTime(long pathTime) {

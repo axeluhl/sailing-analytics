@@ -443,6 +443,8 @@ public class PathGeneratorTreeGrowBitSet extends PathGeneratorBase {
 
     @Override
     public Path getPath() {
+        this.algorithmStartTime = MillisecondsTimePoint.now();
+
         WindFieldGenerator wf = this.parameters.getWindField();
         PolarDiagram pd = this.parameters.getBoatPolarDiagram();
         
@@ -585,7 +587,12 @@ public class PathGeneratorTreeGrowBitSet extends PathGeneratorBase {
                 reachedEnd = true;
             }
 
-        }
+            // check for time-out
+            if (this.isTimedOut()) {
+                reachedEnd = true;
+            }
+
+        } // main while-loop
 
         if (this.gridStore) {
 
@@ -660,7 +667,7 @@ public class PathGeneratorTreeGrowBitSet extends PathGeneratorBase {
             //trgPaths = allPaths; // TODO: only for testing; remove lateron
             TimedPositionWithSpeed curPosition = new TimedPositionWithSpeedImpl(startTime, startPos, null);
             path.add(curPosition);
-            return new PathImpl(path, wf); // return empty path
+            return new PathImpl(path, wf, this.algorithmTimedOut); // return empty path
         }
 
         // sort target-paths ascending by distance-to-target
@@ -706,7 +713,7 @@ public class PathGeneratorTreeGrowBitSet extends PathGeneratorBase {
         // add final position (rescaled before to end on height of target)
         path.add(new TimedPositionWithSpeedImpl(bestCand.pos.getTimePoint(), bestCand.pos.getPosition(), null));            
 
-        return new PathImpl(path, wf);
+        return new PathImpl(path, wf, this.algorithmTimedOut);
 
     }
 

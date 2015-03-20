@@ -29,31 +29,40 @@ public class PathImpl implements Path, Serializable {
     private WindField windField;
     private int turnCount;
     private long maxTurnTime;
+    private boolean algorithmTimedOut;
 
     private static final double TRESHOLD_DEGREES = 25.0;
     private static final double THRESHOLD_DISTANCE_METERS = 15.0;
 
-    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf) {
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, boolean algorithmTimedOut) {
         this.pathPoints = pointsList;
         this.windField = wf;
         this.turnCount = 0;
         this.maxTurnTime = 0;
+        this.algorithmTimedOut = algorithmTimedOut;
     }
 
-    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, long maxTurnTime) {
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, long maxTurnTime, boolean algorithmTimedOut) {
         this.pathPoints = pointsList;
         this.windField = wf;
         this.turnCount = 0;
         this.maxTurnTime = maxTurnTime;
+        this.algorithmTimedOut = algorithmTimedOut;
     }
 
-    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, int turnCount) {
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf, int turnCount, boolean algorithmTimedOut) {
         this.pathPoints = pointsList;
         this.windField = wf;
         this.turnCount = turnCount;
         this.maxTurnTime = 0;
+        this.algorithmTimedOut = algorithmTimedOut;
     }
 
+    @Override
+    public boolean getAlgorithmTimedOut() {
+        return this.algorithmTimedOut;
+    }
+    
     @Override
     public List<TimedPositionWithSpeed> getPathPoints() {
         return this.pathPoints;
@@ -81,7 +90,7 @@ public class PathImpl implements Path, Serializable {
     
     @Override
     public Path getEvenTimedPath(long timestep) {
-        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField);
+        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField, this.algorithmTimedOut);
     }
 
     private List<TimedPositionWithSpeed> getEvenTimedPathAsList(long timeStep) {

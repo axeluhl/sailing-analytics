@@ -156,12 +156,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             PathDTO currentPath = null;
             //String color = null;
             String pathName = null;
+            boolean algorithmTimedOut = false;
             int noOfPaths = paths.length;
 
             for (int index = 0; index < noOfPaths; ++index) {
 
                 currentPath = paths[index];
                 pathName = currentPath.getName();
+                algorithmTimedOut = currentPath.getAlgorithmTimedOut();
                 //color = colorPalette.getColor(noOfPaths - 1 - index);
 
                 if (pathName.equals("Polyline")) {
@@ -176,7 +178,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     pathWindDTO.setMatrix(currentPath.getPoints());
 
                     ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATH_ZINDEX, 
-                            pathName.split("#")[1], timer, windParams);
+                            pathName.split("#")[1], timer, windParams, algorithmTimedOut);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setPathColor(colorPalette.getColor(Integer.parseInt(pathName.split("#")[0])-1));
 

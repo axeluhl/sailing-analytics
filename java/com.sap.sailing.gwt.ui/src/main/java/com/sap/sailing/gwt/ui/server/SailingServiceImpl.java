@@ -1456,6 +1456,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     wList.add(createSimulatorWindDTO(p));
                 }
                 pathDTOs[index].setPoints(wList);
+                pathDTOs[index].setAlgorithmTimedOut(entry.getValue().getAlgorithmTimedOut());
                 index--;
             }
             RaceMapDataDTO rcDTO;

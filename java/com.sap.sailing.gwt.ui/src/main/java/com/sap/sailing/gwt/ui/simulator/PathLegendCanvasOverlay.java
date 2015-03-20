@@ -39,6 +39,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
 
     private String textColor = "Black";
     private String textFont = "10pt OpenSansRegular";
+    private String algorithmTimedOutText = "out-of-bounds";
 
     public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode) {
         super(map, zIndex);
@@ -90,13 +91,25 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
             txtmet = context2d.measureText("00:00:00");
             double timewidth = txtmet.getWidth();
             double txtmaxwidth = 0.0;
+            boolean containsTimeOut = false;
             for (PathCanvasOverlay path : pathOverlays) {
+                if (path.getAlgorithmTimedOut()) {
+                    containsTimeOut = true;
+                }
                 txtmet = context2d.measureText(path.getName());
                 txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
             }
+            double xOOBDelta = 0;
+            if (containsTimeOut) {
+                txtmet = context2d.measureText(algorithmTimedOutText);
+                xOOBDelta = timewidth;
+                timewidth = Math.max(timewidth, txtmet.getWidth());
+                xOOBDelta = timewidth - xOOBDelta;
+            }
             for (PathCanvasOverlay path : pathOverlays) {
+                String timeText = (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime()));
                 drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.getPathColor(),
-                        path.getName(), getFormattedTime(path.getPathTime()),txtmaxwidth,timewidth);
+                        path.getName(), timeText, txtmaxwidth, timewidth, (path.getAlgorithmTimedOut()?0:xOOBDelta));
                 index++;
             }
             
@@ -184,7 +197,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
         context2d.fillRect(x, y, rectWidth, rectHeight);
     }
 
-    protected void drawRectangleWithText(double x, double y, String color, String text, String time, double textmaxwidth, double timewidth) {
+    protected void drawRectangleWithText(double x, double y, String color, String text, String time, double textmaxwidth, double timewidth, double xdelta) {
 
         double offset = 3.0;
 
@@ -193,11 +206,11 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
         drawRectangle(x, y, color);
         context2d.setGlobalAlpha(0.80);
         context2d.setFillStyle("white");
-        context2d.fillRect(x + rectWidth, y, 15.0 + textmaxwidth + timewidth, rectHeight);
+        context2d.fillRect(x + rectWidth, y, 20.0 + textmaxwidth + timewidth, rectHeight);
         context2d.setGlobalAlpha(1.0);
         context2d.setFillStyle(textColor);
         context2d.fillText(text, x + rectWidth + 5.0, y + 12.0 + offset);
-        context2d.fillText(time, x + rectWidth + textmaxwidth + 10.0, y + 12.0 + offset);
+        context2d.fillText(time, x + rectWidth + textmaxwidth + xdelta + 15.0, y + 12.0 + offset);
     }
 
     protected String getFormattedTime(long pathTime) {
