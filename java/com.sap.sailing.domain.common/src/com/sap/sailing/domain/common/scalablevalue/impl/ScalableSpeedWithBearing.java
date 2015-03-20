@@ -1,12 +1,12 @@
 package com.sap.sailing.domain.common.scalablevalue.impl;
 
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.DoubleTriple;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
@@ -14,42 +14,47 @@ import com.sap.sse.common.scalablevalue.ScalableValue;
  * bearing is scaled separately, and the speed is scaled as a scalar value independently of the bearing. This is
  * particularly useful for {@link Wind} scaling where it makes more sense to average the wind speed independently of the
  * wind direction / bearing than adding up the "wind vectors" and averaging, which would reduce the resulting wind speed
- * for constant wind speeds across all fixes with different directions.
+ * for constant wind speeds across all fixes with different directions.<p>
+ * 
+ * The triple used for scaling uses the speed in knots as the first component, the sine as the second and the
+ * cosine as the third value.
  * 
  * @author Axel Uhl (d043530)
  * 
  */
-public class ScalableSpeedWithBearing implements ScalableValue<Util.Triple<Speed, Double, Double>, SpeedWithBearing> {
-    private final Speed speed;
+public class ScalableSpeedWithBearing implements ScalableValue<DoubleTriple, SpeedWithBearing> {
+    private final double speedInKnots;
     private final double sin;
     private final double cos;
     
     public ScalableSpeedWithBearing(SpeedWithBearing speedWithBearing) {
-        this(new KnotSpeedImpl(speedWithBearing.getKnots()), Math.sin(speedWithBearing.getBearing()
+        this(speedWithBearing.getKnots(), Math.sin(speedWithBearing.getBearing()
                 .getRadians()), Math.cos(speedWithBearing.getBearing().getRadians()));
     }
     
     public ScalableSpeedWithBearing(Speed speed, double sin, double cos) {
-        this.speed = speed;
+        this(speed.getKnots(), sin, cos);
+    }
+    
+    private ScalableSpeedWithBearing(double speedInKnots, double sin, double cos) {
+        this.speedInKnots = speedInKnots;
         this.sin = sin;
         this.cos = cos;
     }
 
     @Override
     public ScalableSpeedWithBearing multiply(double factor) {
-        Speed newSpeed = new KnotSpeedImpl(factor*speed.getKnots());
-        return new ScalableSpeedWithBearing(newSpeed, factor*sin, factor*cos);
+        return new ScalableSpeedWithBearing(factor*speedInKnots, factor*sin, factor*cos);
     }
 
     @Override
-    public ScalableSpeedWithBearing add(ScalableValue<Util.Triple<Speed, Double, Double>, SpeedWithBearing> t) {
-        Speed newSpeed = new KnotSpeedImpl(speed.getKnots() + t.getValue().getA().getKnots());
-        return new ScalableSpeedWithBearing(newSpeed, sin+t.getValue().getB(), cos+t.getValue().getC());
+    public ScalableSpeedWithBearing add(ScalableValue<DoubleTriple, SpeedWithBearing> t) {
+        return new ScalableSpeedWithBearing(speedInKnots + t.getValue().getA(), sin+t.getValue().getB(), cos+t.getValue().getC());
     }
 
     @Override
     public SpeedWithBearing divide(double divisor) {
-        Speed newSpeed = new KnotSpeedImpl(speed.getKnots() / divisor);
+        Speed newSpeed = new KnotSpeedImpl(speedInKnots / divisor);
         double angle;
         if (cos == 0) {
             angle = sin >= 0 ? Math.PI / 2 : -Math.PI / 2;
@@ -61,8 +66,8 @@ public class ScalableSpeedWithBearing implements ScalableValue<Util.Triple<Speed
     }
 
     @Override
-    public Util.Triple<Speed, Double, Double> getValue() {
-        return new Util.Triple<Speed, Double, Double>(speed, sin, cos);
+    public DoubleTriple getValue() {
+        return new DoubleTriple(speedInKnots, sin, cos);
     }
     
 }

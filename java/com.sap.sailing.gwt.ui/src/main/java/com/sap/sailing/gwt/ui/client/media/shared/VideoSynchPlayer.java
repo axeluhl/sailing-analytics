@@ -6,4 +6,8 @@ public interface VideoSynchPlayer extends VideoPlayerWithWidget, MediaSynchAdapt
     
     void setEditFlag(EditFlag editFlag);
 
+    int getDefaultWidth();
+
+    int getDefaultHeight();
+
 }

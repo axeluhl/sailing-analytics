@@ -58,11 +58,11 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
     private Button createMediaEntry(final MediaTrack mediaTrack) {
         Button mediaSelectButton = new Button(mediaTrack.title);
         mediaSelectButton.setStyleName("Media-Select-Button");
-        if (mediaTrack.equals(mediaPlayerManager.getPlayingAudioTrack()) || mediaPlayerManager.getPlayingVideoTracks().contains(mediaTrack)) {
+        if (mediaPlayerManager.getPlayingVideoTracks().contains(mediaTrack)) {
             mediaSelectButton.setTitle(stringMessages.mediaHideVideoTooltip());
             mediaSelectButton.addStyleName("Media-Select-Button-playing");
             mediaSelectButton.addClickHandler(new ClickHandler() {
-
+                
                 @Override
                 public void onClick(ClickEvent event) {
                     if (mediaPlayerManager.getPlayingAudioTrack() == mediaTrack) {
@@ -75,14 +75,19 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
         } else {
             mediaSelectButton.setTitle(stringMessages.mediaShowVideoTooltip(mediaTrack.title));
             mediaSelectButton.addClickHandler(new ClickHandler() {
-
+                
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.video) {
+                    if (/*event.isControlKeyDown() && */mediaTrack.mimeType.mediaType == MediaTrack.MediaType.video) {
                         mediaPlayerManager.playFloatingVideo(mediaTrack);
-                    }
-                    if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.audio || mediaPlayerManager.getPlayingAudioTrack() == null) {
-                        mediaPlayerManager.playAudio(mediaTrack);
+                    } /*else if (mediaPlayerManager.getPlayingAudioTrack() != mediaTrack) {
+                        mediaPlayerManager.stopAll();
+                        if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.video) {
+                            mediaPlayerManager.playFloatingVideo(mediaTrack);
+                            mediaPlayerManager.playAudio(mediaTrack);
+                        } */else if (mediaTrack.mimeType.mediaType == MediaTrack.MediaType.audio) {
+                            mediaPlayerManager.playAudio(mediaTrack);
+//                        }
                     }
                     hide();
                 };
