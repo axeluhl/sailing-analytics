@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
@@ -31,6 +32,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -719,5 +721,13 @@ public interface TrackedRace extends Serializable {
      * Computes the center point of the course's marks at the given time point.
      */
     Position getCenterOfCourse(TimePoint at);
+
+    /**
+     * If the {@link RacingProcedure} defined by any of the {@link #attachedRaceLogs attached} {@link RaceLog}s
+     * has type {@link RacingProcedureType#GateStart}, this method returns <code>true</code>, <code>false</code> for
+     * any other type found. If no type is found, e.g., because no race log is currently attached to this tracked race,
+     * <code>null</code> is returned, meaning that the type is not known.
+     */
+    Boolean isGateStart();
 
 }

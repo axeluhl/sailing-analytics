@@ -40,6 +40,20 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Distance getDistanceTraveled(TimePoint timePoint);
 
     /**
+     * When a race uses a gate start, competitors are free to choose their start time point within the gate opening
+     * time. During this time a pathfinder boat, also called "rabbit," progresses on port tack until the gate launch
+     * time is over. After the gate launch time, competitors may still start until the gate closes, but that's usually
+     * not a useful option because starting after the gate launch time usually means losing time towards the next mark.
+     * <p>
+     * 
+     * Depending on when a competitor starts, they will have different distances to sail: early starters a bit more,
+     * late starters a bit less. To normalize and make comparable, for the first leg of a gate start race, this method
+     * adds the distance between the competitor and the port side of the start line at the time point when the competitor
+     * starts.
+     */
+    Distance getDistanceTraveledConsideringGateStart(TimePoint timePoint);
+    
+    /**
      * Estimates how much the competitor still has to go to the end waypoint of this leg, projected onto the wind
      * direction. If the competitor already finished this leg, a zero, non-<code>null</code> distance will result.
      * If the competitor hasn't started the leg yet, the full leg distance is returned. For reaching legs or when

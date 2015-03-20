@@ -10,6 +10,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -109,6 +110,27 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
             return getTrackedRace().getTrack(getCompetitor()).getDistanceTraveled(legStart.getTimePoint(), end);
         }
+    }
+    
+    @Override
+    public Distance getDistanceTraveledConsideringGateStart(TimePoint timePoint) {
+        final Distance result;
+        final Distance preResult = getDistanceTraveled(timePoint);
+        final Waypoint from = getLeg().getFrom();
+        final TimePoint competitorLegStartTime = getStartTime();
+        if (from == getTrackedRace().getRace().getCourse().getFirstWaypoint() && getTrackedRace().isGateStart() == true
+                && competitorLegStartTime != null) {
+            final Mark portMarkOfStartLine = getTrackedRace().getStartLine(competitorLegStartTime)
+                    .getPortMarkWhileApproachingLine();
+            final Position portSideOfStartLinePosition = getTrackedRace().getOrCreateTrack(portMarkOfStartLine)
+                    .getEstimatedPosition(competitorLegStartTime, /* extrapolate */true);
+            final Distance additionalDistance = portSideOfStartLinePosition.getDistance(getTrackedRace().getTrack(
+                    getCompetitor()).getEstimatedPosition(competitorLegStartTime, /* extrapolate */false));
+            result = preResult.add(additionalDistance);
+        } else {
+            result = preResult;
+        }
+        return result;
     }
 
     private MarkPassing getMarkPassingForLegStart() {

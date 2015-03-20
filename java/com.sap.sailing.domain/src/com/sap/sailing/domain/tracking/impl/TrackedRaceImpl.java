@@ -35,6 +35,10 @@ import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -84,6 +88,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
@@ -3278,5 +3283,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     Iterable<Waypoint> getWaypoints() {
         return markPassingsForWaypoint.keySet();
     }
-    
+
+    @Override
+    public Boolean isGateStart() {
+        Boolean result = null;
+        for (RaceLog raceLog : attachedRaceLogs.values()) {
+            ReadonlyRaceState raceState = RaceStateImpl.create(raceLog);
+            ReadonlyRacingProcedure procedure = raceState.getRacingProcedure();
+            if (procedure != null && procedure.getType() != null) {
+                result = procedure.getType() == RacingProcedureType.GateStart;
+                break;
+            }
+        }
+        return result;
+    }
 }
