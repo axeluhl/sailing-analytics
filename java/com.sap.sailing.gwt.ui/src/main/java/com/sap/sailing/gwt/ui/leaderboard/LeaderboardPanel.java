@@ -2815,27 +2815,27 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
                 return t.competitor;
             }
-        });
-        if (getLeaderboardTable().getColumnCount() >= columnIndexWhereToInsertTheNextColumn) {
-            if (isShowCompetitorSailId()) {
-                if (!(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>)) {
-                    insertColumn(columnIndexWhereToInsertTheNextColumn, sailIdColumn);
-                }
-                columnIndexWhereToInsertTheNextColumn++;
-            } else {
-                if (getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>) {
-                    removeColumn(columnIndexWhereToInsertTheNextColumn);
-                }
+                });
+        if (isShowCompetitorSailId()) {
+            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
+                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>)) {
+                insertColumn(columnIndexWhereToInsertTheNextColumn, sailIdColumn);
             }
-            if (isShowCompetitorFullName()) {
-                if (!(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn)) {
-                    insertColumn(columnIndexWhereToInsertTheNextColumn, createCompetitorColumn());
-                }
-                columnIndexWhereToInsertTheNextColumn++;
-            } else {
-                if (getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn) {
-                    removeColumn(columnIndexWhereToInsertTheNextColumn);
-                }
+            columnIndexWhereToInsertTheNextColumn++;
+        } else {
+            if (getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>) {
+                removeColumn(columnIndexWhereToInsertTheNextColumn);
+            }
+        }
+        if (isShowCompetitorFullName()) {
+            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
+                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn)) {
+                insertColumn(columnIndexWhereToInsertTheNextColumn, createCompetitorColumn());
+            }
+            columnIndexWhereToInsertTheNextColumn++;
+        } else {
+            if (getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn) {
+                removeColumn(columnIndexWhereToInsertTheNextColumn);
             }
         }
         return columnIndexWhereToInsertTheNextColumn;
