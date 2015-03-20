@@ -21,7 +21,6 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTracki
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -76,11 +75,6 @@ public interface RaceLogTrackingAdapter {
             throws NotDenotableForRaceLogTrackingException;
 
     /**
-     * Add a fix to the {@link GPSFixStore}, and create a mapping with a virtual device for exactly that timepoint.
-     */
-    void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service, DeviceIdentifier device);
-    
-    /**
      * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService) using a random {@link PingDeviceIdentifier}
      */
     void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
@@ -89,11 +83,6 @@ public interface RaceLogTrackingAdapter {
      * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService)
      */
     void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
-    
-    /**
-     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService, DeviceIdentifier)
-     */
-    void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service, DeviceIdentifier device);
 
     /**
      * Duplicate the course and competitor registrations in the newest {@link RaceLogCourseDesignChangedEvent} in
