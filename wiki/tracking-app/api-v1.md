@@ -367,10 +367,9 @@ If there is no existent GPS Fix for the Mark HTTP/200 will be returned.
 If there is an existent GPS Fix the latest known Position of the Mark will be returned:
 ```
 {
-"type": "GPSFix",
-"lat_deg": 54.325246,
-"lon_deg": 10.148556,
-"unixtime": 0
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
 }
 ```
 
