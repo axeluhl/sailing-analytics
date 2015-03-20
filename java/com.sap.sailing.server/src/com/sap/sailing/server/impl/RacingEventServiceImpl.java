@@ -374,6 +374,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
             .withInitial(() -> false);
+    
+    private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
@@ -451,6 +453,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             CompetitorStore competitorStore, WindStore windStore, GPSFixStore gpsFixStore,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
+        this.masterDataClassLoaders.add(this.getClass().getClassLoader());
         this.operationsSentToMasterForReplication = new HashSet<>();
         if (windStore == null) {
             try {
@@ -3018,5 +3021,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             return null;
         }
         return bundleContext.getService(ref);
+    }
+
+    public void addMasterDataClassLoader(ClassLoader classLoader) {
+        masterDataClassLoaders.add(classLoader);
+    }
+
+    public void removeMasterDataClassLoader(ClassLoader classLoader) {
+        masterDataClassLoaders.remove(classLoader);
+    }
+    
+    @Override
+    public ClassLoader getCombinedMasterDataClassLoader() {
+        JoinedClassLoader joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
+        return joinedClassLoader;
     }
 }

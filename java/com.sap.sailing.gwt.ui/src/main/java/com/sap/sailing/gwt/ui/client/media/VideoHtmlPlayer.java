@@ -86,5 +86,15 @@ public class VideoHtmlPlayer extends AbstractHtmlMediaPlayer implements VideoSyn
     public void setEditFlag(EditFlag editFlag) {
         this.editFlag = editFlag;
     }
+
+    @Override
+    public int getDefaultWidth() {
+        return 400;
+    }
+
+    @Override
+    public int getDefaultHeight() {
+        return -1;
+    }
     
 }
