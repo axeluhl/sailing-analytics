@@ -2496,7 +2496,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         int columnIndex = 0;
         columnIndex = ensureSelectionCheckboxColumn(columnIndex);
         columnIndex = ensureRankColumn(columnIndex);
-        columnIndex = ensureSailIDAndCompetitorColumn();
+        columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
         columnIndex = updateCarryColumn(leaderboard, columnIndex);
         adjustOverallDetailColumns(leaderboard, columnIndex);
         // first remove race columns no longer needed:
@@ -2809,7 +2809,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     /**
      * @return the 0-based index for the next column
      */
-    private int ensureSailIDAndCompetitorColumn() {
+    private int ensureSailIDAndCompetitorColumn(int columnIndexWhereToInsertTheNextColumn) {
         SailIDColumn<LeaderboardRowDTO> sailIdColumn = new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
             @Override
             public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
@@ -2818,15 +2818,15 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         });
         if (getLeaderboardTable().getColumnCount() >= 3) { // table already filled with columns
             if (isShowCompetitorSailId()) {
-                if (!(getLeaderboardTable().getColumn(2) instanceof SailIDColumn<?>)) {
-                    insertColumn(2, sailIdColumn);
+                if (!(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>)) {
+                    insertColumn(columnIndexWhereToInsertTheNextColumn, sailIdColumn);
                 }
             } else {
-                if (getLeaderboardTable().getColumn(2) instanceof SailIDColumn<?>) {
-                    removeColumn(2);
+                if (getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>) {
+                    removeColumn(columnIndexWhereToInsertTheNextColumn);
                 }
             }
-            final int competitorFullNameColumnIndex = 2 + (isShowCompetitorSailId() ? 1 : 0);
+            final int competitorFullNameColumnIndex = isShowCompetitorSailId() ? columnIndexWhereToInsertTheNextColumn+1 : columnIndexWhereToInsertTheNextColumn;
             if (isShowCompetitorFullName()) {
                 if (!(getLeaderboardTable().getColumn(competitorFullNameColumnIndex) instanceof CompetitorColumn)) {
                     insertColumn(competitorFullNameColumnIndex, createCompetitorColumn());
@@ -2844,7 +2844,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 addColumn(createCompetitorColumn());
             }
         }
-        return (isShowRegattaRankColumn() ? 2 : 1) + (isShowCompetitorSailId() ? 1 : 0) + (isShowCompetitorFullName() ? 1 : 0);
+        return columnIndexWhereToInsertTheNextColumn + (isShowCompetitorSailId() ? 1 : 0) + (isShowCompetitorFullName() ? 1 : 0);
     }
 
     protected CompetitorColumn createCompetitorColumn() {
