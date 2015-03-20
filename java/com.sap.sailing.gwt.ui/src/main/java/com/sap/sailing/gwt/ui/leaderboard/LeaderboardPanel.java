@@ -810,6 +810,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     if (isShowAddedScores()) {
                         double o1AddedScore = computeAddedScores(o1);
                         double o2AddedScore = computeAddedScores(o2);
+                        // FIXME bug 2717: need to respect the scoring scheme's isHigherBetter() flag here
                         double result = o1AddedScore == 0. ? o2AddedScore == 0. ? 0. : isAscending() ? 1. : -1. : o2AddedScore == 0. ? isAscending() ? 1. : -1. : o2AddedScore - o1AddedScore;
                         return result > 0 ? 1 : result < 0 ? -1 : 0;
                     } else {
@@ -840,7 +841,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
         return new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.RACE_DISTANCE_TRAVELED, 
+                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
                 DetailType.RACE_TIME_TRAVELED,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
@@ -902,6 +903,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                             new RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED, new RaceDistanceTraveledInMeters(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START, new RaceDistanceTraveledIncludingGateStartInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, 
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new RaceAverageSpeedInKnots(),
@@ -1246,6 +1250,35 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                                     result = 0.0;
                                 }
                                 result += legDetail.distanceTraveledInMeters;
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Accumulates the distance traveled over all legs of a race and considers the specifics of a gate start. The
+         * first leg of a gate start gets as additional distance traveled the distance from the port side of the line to
+         * the point where the competitor started which helps normalize the distance traveled and make them comparable
+         * across early and late starters.
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDistanceTraveledIncludingGateStartInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
+                        if (legDetail != null) {
+                            if (legDetail.distanceTraveledIncludingGateStartInMeters != null) {
+                                if (result == null) {
+                                    result = 0.0;
+                                }
+                                result += legDetail.distanceTraveledIncludingGateStartInMeters;
                             }
                         }
                     }

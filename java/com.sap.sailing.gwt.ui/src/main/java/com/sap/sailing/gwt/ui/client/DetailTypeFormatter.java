@@ -14,6 +14,8 @@ public class DetailTypeFormatter {
         switch (detailType) {
         case DISTANCE_TRAVELED:
             return stringMessages.distanceInMeters();
+        case DISTANCE_TRAVELED_INCLUDING_GATE_START:
+            return stringMessages.distanceIncludingGateStartInMeters();
         case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.averageSpeedInKnots();
         case RANK_GAIN:
@@ -50,6 +52,8 @@ public class DetailTypeFormatter {
             return stringMessages.windwardDistanceToGoInMeters();
         case RACE_DISTANCE_TRAVELED:
             return stringMessages.distanceInMeters();
+        case RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START:
+            return stringMessages.distanceIncludingGateStartInMeters();
         case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.averageSpeedInKnots();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
@@ -159,8 +163,10 @@ public class DetailTypeFormatter {
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
         case DISTANCE_TRAVELED:
+        case DISTANCE_TRAVELED_INCLUDING_GATE_START:
         case RACE_DISTANCE_TO_LEADER_IN_METERS:
         case RACE_DISTANCE_TRAVELED:
+        case RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START:
         case AVERAGE_TACK_LOSS_IN_METERS:
         case AVERAGE_JIBE_LOSS_IN_METERS:
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
@@ -257,6 +263,8 @@ public class DetailTypeFormatter {
             return "";
         case DISTANCE_TRAVELED:
             return stringMessages.distanceTraveledTooltip();
+        case DISTANCE_TRAVELED_INCLUDING_GATE_START:
+            return stringMessages.distanceTraveledIncludingGateStartTooltip();
         case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.averageSpeedInKnotsTooltip();
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
@@ -295,6 +303,8 @@ public class DetailTypeFormatter {
             return stringMessages.startTackTooltip();
         case RACE_DISTANCE_TRAVELED:
             return stringMessages.raceDistanceTraveledTooltip();
+        case RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START:
+            return stringMessages.raceDistanceTraveledIncludingGateStartTooltip();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSecondsTooltip();
         case RACE_RANK:

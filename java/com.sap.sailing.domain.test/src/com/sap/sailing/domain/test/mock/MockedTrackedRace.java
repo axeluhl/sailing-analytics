@@ -873,13 +873,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
-        // TODO Auto-generated method stub
-        
+    }
+
+    @Override
+    public Boolean isGateStart() {
+        return null;
     }
 }

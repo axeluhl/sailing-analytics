@@ -37,7 +37,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;

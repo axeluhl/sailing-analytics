@@ -85,7 +85,6 @@ public interface TrackedRace extends Serializable {
      * <li>Returns time of the last mark passing recorded for the finish line</li>
      * <li>TODO: Returns the time of the first passing of the finish line + the target window (defined in the
      * competition rules) if a target window has been defined for the race</li>
-     * </ol>
      */
     TimePoint getEndOfRace();
 

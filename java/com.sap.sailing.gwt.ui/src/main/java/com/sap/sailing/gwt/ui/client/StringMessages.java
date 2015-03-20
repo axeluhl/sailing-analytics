@@ -1163,4 +1163,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String runningQuery();
     String courseOverGroundTrueDegreesTooltip();
     String courseOverGroundTrueDegrees();
+    String distanceIncludingGateStartInMeters();
+    String distanceTraveledIncludingGateStartTooltip();
+    String raceDistanceTraveledIncludingGateStartTooltip();
 }
