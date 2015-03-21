@@ -8,7 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
-import com.sap.sse.datamining.impl.components.ProcessorInstruction;
+import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
 
 public abstract class AbstractParallelStoringAggregationProcessor<InputType, AggregatedType> 
@@ -28,8 +28,8 @@ public abstract class AbstractParallelStoringAggregationProcessor<InputType, Agg
     }
 
     @Override
-    protected ProcessorInstruction<AggregatedType> createInstruction(final InputType element) {
-        return new ProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
+    protected AbstractProcessorInstruction<AggregatedType> createInstruction(final InputType element) {
+        return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
             @Override
             public AggregatedType computeResult() {
                 storeLock.lock();

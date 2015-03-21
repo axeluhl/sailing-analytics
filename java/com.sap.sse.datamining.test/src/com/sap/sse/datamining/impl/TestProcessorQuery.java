@@ -31,7 +31,7 @@ import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
-import com.sap.sse.datamining.impl.components.ProcessorInstruction;
+import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
@@ -287,8 +287,8 @@ public class TestProcessorQuery {
                                                                                                     ConcurrencyTestsUtil.getExecutor(),
                                                                                                     resultReceivers) {
                     @Override
-                    protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
-                        return new ProcessorInstruction<Map<GroupKey,Double>>(this) {
+                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
+                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             public Map<GroupKey, Double> computeResult() {
                                 Map<GroupKey, Double> result = new HashMap<>();

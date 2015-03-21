@@ -1,6 +1,6 @@
 package com.sap.sse.datamining.impl.components;
 
-public abstract class ProcessorInstruction<ResultType> implements Runnable, Comparable<ProcessorInstruction<?>> {
+public abstract class AbstractProcessorInstruction<ResultType> implements Runnable, Comparable<AbstractProcessorInstruction<?>> {
     
     private final AbstractPartitioningParallelProcessor<?, ?, ResultType> processor;
     private final int priority;
@@ -15,7 +15,7 @@ public abstract class ProcessorInstruction<ResultType> implements Runnable, Comp
      * 
      * @param processor The processor, that processes this instruction
      */
-    public ProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor) {
+    public AbstractProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor) {
         this(processor, 0);
     }
     
@@ -25,7 +25,7 @@ public abstract class ProcessorInstruction<ResultType> implements Runnable, Comp
      * @param processor The processor, that processes this instruction
      * @param priority The priority of this instruction
      */
-    public ProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor,
+    public AbstractProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor,
                                 ProcessorInstructionPriority priority) {
         this(processor, priority.asIntValue());
     }
@@ -40,7 +40,7 @@ public abstract class ProcessorInstruction<ResultType> implements Runnable, Comp
      * @param processor The processor, that processes this instruction
      * @param priority The priority of this instruction. <code>0</code> is the highest priority.
      */
-    public ProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor,
+    public AbstractProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor,
                                 int priority) {
         this.processor = processor;
         this.priority = priority;
@@ -65,7 +65,7 @@ public abstract class ProcessorInstruction<ResultType> implements Runnable, Comp
     protected abstract ResultType computeResult() throws Exception;
     
     @Override
-    public int compareTo(ProcessorInstruction<?> instruction) {
+    public int compareTo(AbstractProcessorInstruction<?> instruction) {
         return Integer.compare(priority, instruction.priority);
     }
 

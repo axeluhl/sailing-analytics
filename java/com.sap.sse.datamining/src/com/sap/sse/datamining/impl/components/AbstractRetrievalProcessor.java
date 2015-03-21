@@ -32,8 +32,8 @@ public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultT
     }
 
     @Override
-    protected ProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement) {
-        return new ProcessorInstruction<ResultType>(this, ProcessorInstructionPriority.createRetrievalPriority(retrievalLevel)) {
+    protected AbstractProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement) {
+        return new AbstractProcessorInstruction<ResultType>(this, ProcessorInstructionPriority.createRetrievalPriority(retrievalLevel)) {
             @Override
             public ResultType computeResult() {
                 incrementRetrievedDataAmount();
