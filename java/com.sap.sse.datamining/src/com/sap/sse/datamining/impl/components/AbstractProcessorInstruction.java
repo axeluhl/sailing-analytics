@@ -64,6 +64,10 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Runnab
 
     protected abstract ResultType computeResult() throws Exception;
     
+    protected int getPriority() {
+        return priority;
+    }
+    
     @Override
     public int compareTo(AbstractProcessorInstruction<?> instruction) {
         return Integer.compare(priority, instruction.priority);
