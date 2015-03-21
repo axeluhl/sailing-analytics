@@ -136,7 +136,7 @@ public class TestProcessorQuery {
                 
                 @SuppressWarnings("unchecked")
                 Processor<Iterable<Number>, Number> retrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
-                                                                                                                                                          ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers) {
+                                                                                                                                         ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 0) {
                     @Override
                     protected Iterable<Number> retrieveData(Iterable<Number> element) {
                         return element;

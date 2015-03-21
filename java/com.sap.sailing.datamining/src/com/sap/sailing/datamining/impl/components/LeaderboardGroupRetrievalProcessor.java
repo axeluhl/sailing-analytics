@@ -14,19 +14,18 @@ public class LeaderboardGroupRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<RacingEventService, LeaderboardGroupWithContext> {
 
     public LeaderboardGroupRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<LeaderboardGroupWithContext, ?>> resultReceivers) {
-        super(RacingEventService.class, LeaderboardGroupWithContext.class, executor, resultReceivers);
+            Collection<Processor<LeaderboardGroupWithContext, ?>> resultReceivers, int retrievalLevel) {
+        super(RacingEventService.class, LeaderboardGroupWithContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override
     protected Iterable<LeaderboardGroupWithContext> retrieveData(RacingEventService element) {
-		final PolarDataService polarDataService = element.getPolarDataService();
-		return element
-				.getLeaderboardGroups()
-				.values()
-				.stream()
-				.map(lg -> new LeaderboardGroupWithContext(lg, polarDataService))
-				.collect(Collectors.toSet());
-	}
+        final PolarDataService polarDataService = element.getPolarDataService();
+        return element.getLeaderboardGroups()
+                .values()
+                .stream()
+                .map(lg -> new LeaderboardGroupWithContext(lg, polarDataService))
+                .collect(Collectors.toSet());
+    }
 
 }

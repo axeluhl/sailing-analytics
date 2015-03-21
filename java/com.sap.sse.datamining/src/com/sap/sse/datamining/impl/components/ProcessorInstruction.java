@@ -1,11 +1,49 @@
 package com.sap.sse.datamining.impl.components;
 
-public abstract class ProcessorInstruction<ResultType> implements Runnable {
+public abstract class ProcessorInstruction<ResultType> implements Runnable, Comparable<ProcessorInstruction<?>> {
     
     private final AbstractPartitioningParallelProcessor<?, ?, ResultType> processor;
+    private final int priority;
 
+    /**
+     * Creates an instruction with a priority of 0, which is the highest priority.<br />
+     * Use only, if <b>no processor</b> in the chain creates instruction <b>with</b> priorities other than 0 or
+     * if the chain doesn't use priorities at all.
+     * If this isn't the case use
+     * {@link #ProcessorInstruction(AbstractPartitioningParallelProcessor, ProcessorInstructionPriority)}
+     * instead.
+     * 
+     * @param processor The processor, that processes this instruction
+     */
     public ProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor) {
+        this(processor, 0);
+    }
+    
+    /**
+     * Creates an instruction with the given {@linkplain ProcessorInstructionPriority priority}.
+     * 
+     * @param processor The processor, that processes this instruction
+     * @param priority The priority of this instruction
+     */
+    public ProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor,
+                                ProcessorInstructionPriority priority) {
+        this(processor, priority.asIntValue());
+    }
+
+    /**
+     * Creates an instruction with the given priority as <code>int</code>.<br />
+     * <b>Use only, if you need instructions with custom priorities and if you know what you're doing!</b>
+     * If this isn't the case use
+     * {@link #ProcessorInstruction(AbstractPartitioningParallelProcessor, ProcessorInstructionPriority)}
+     * instead.
+     * 
+     * @param processor The processor, that processes this instruction
+     * @param priority The priority of this instruction. <code>0</code> is the highest priority.
+     */
+    public ProcessorInstruction(AbstractPartitioningParallelProcessor<?, ?, ResultType> processor,
+                                int priority) {
         this.processor = processor;
+        this.priority = priority;
     }
 
     @Override
@@ -25,5 +63,10 @@ public abstract class ProcessorInstruction<ResultType> implements Runnable {
     }
 
     protected abstract ResultType computeResult() throws Exception;
+    
+    @Override
+    public int compareTo(ProcessorInstruction<?> instruction) {
+        return Integer.compare(priority, instruction.priority);
+    }
 
 }

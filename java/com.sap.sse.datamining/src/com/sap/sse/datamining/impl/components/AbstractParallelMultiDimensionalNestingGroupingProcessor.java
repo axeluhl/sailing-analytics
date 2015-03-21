@@ -47,7 +47,7 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
 
     @Override
     protected ProcessorInstruction<GroupedDataEntry<DataType>> createInstruction(final DataType element) {
-        return new ProcessorInstruction<GroupedDataEntry<DataType>>(this) {
+        return new ProcessorInstruction<GroupedDataEntry<DataType>>(this, ProcessorInstructionPriority.Grouping) {
             @Override
             public GroupedDataEntry<DataType> computeResult() {
                 return new GroupedDataEntry<DataType>(createCompoundKeyFor(element,

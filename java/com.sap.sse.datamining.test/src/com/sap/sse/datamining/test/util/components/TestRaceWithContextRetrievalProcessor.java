@@ -15,8 +15,8 @@ public class TestRaceWithContextRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<Test_Regatta, Test_HasRaceContext> {
 
     public TestRaceWithContextRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<Test_HasRaceContext, ?>> resultReceivers) {
-        super(Test_Regatta.class, Test_HasRaceContext.class, executor, resultReceivers);
+            Collection<Processor<Test_HasRaceContext, ?>> resultReceivers, int retrievalLevel) {
+        super(Test_Regatta.class, Test_HasRaceContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override
