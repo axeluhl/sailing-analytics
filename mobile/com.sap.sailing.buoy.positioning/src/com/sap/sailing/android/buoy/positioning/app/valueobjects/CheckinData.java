@@ -3,6 +3,7 @@ package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
@@ -12,6 +13,7 @@ public class CheckinData extends AbstractCheckinData{
 	public String deviceUid;
 	public String uriString;
 	public String checkinDigest;
+	public List<MarkInfo> marks;
 
 	public void setCheckinDigestFromString(String checkinString)
 			throws UnsupportedEncodingException, NoSuchAlgorithmException {

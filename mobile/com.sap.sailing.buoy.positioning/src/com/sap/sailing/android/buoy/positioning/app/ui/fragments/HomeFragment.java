@@ -1,7 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.database.Cursor;
@@ -16,22 +14,20 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.adapter.RegattaAdapter;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.RegattaActivity;
-import com.sap.sailing.android.buoy.positioning.app.ui.activities.StartActivity;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
+import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
-import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
-import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
+import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 public class HomeFragment extends AbstractHomeFragment implements LoaderCallbacks<Cursor> {
 
+	@SuppressWarnings("unused")
 	private final static String TAG = HomeFragment.class.getName();
 
 	@SuppressLint("InflateParams")
@@ -77,7 +73,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
 	@Override
 	public void handleScannedOrUrlMatchedUri(Uri uri) {
-		// TODO Auto-generated method stub
+		CheckinManager manager = new CheckinManager(uri.toString(), (CheckinDataActivity) getActivity());
+		manager.callServerAndGenerateCheckinData();
 
 	}
 	
@@ -96,11 +93,12 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
         case REGATTA_LOADER:
+        	// TODO: FIX projection String
             String[] projection = new String[] { "events.event_checkin_digest", "events.event_id", "events._id",
                     "events.event_name", "events.event_server", "competitors.competitor_display_name",
                     "competitors.competitor_id", "leaderboards.leaderboard_name",
                     "competitors.competitor_country_code", "competitors.competitor_sail_id" };
-            return new CursorLoader(getActivity(), AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI,
+            return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsMarksJoined.CONTENT_URI,
                     projection, null, null, null);
 
         default:
