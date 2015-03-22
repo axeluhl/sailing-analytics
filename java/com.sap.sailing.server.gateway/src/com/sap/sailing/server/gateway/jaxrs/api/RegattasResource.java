@@ -594,7 +594,34 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return response;
     }
- 
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races")
+    public Response getRaces(@PathParam("regattaname") String regattaName) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN)
+                    .build();
+        } else {
+            JSONObject jsonRaceResults = new JSONObject();
+            jsonRaceResults.put("regatta", regatta.getName());
+            JSONArray jsonRaces = new JSONArray();
+            jsonRaceResults.put("races", jsonRaces);
+            for (RaceDefinition race : regatta.getAllRaces()) {
+                JSONObject jsonRace = new JSONObject();
+                jsonRaces.add(jsonRace);
+                jsonRace.put("name", race.getName());
+                jsonRace.put("id", race.getId().toString());
+            }
+            String json = jsonRaceResults.toJSONString();
+            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        }
+        return response;
+    }
+    
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/competitors/legs")
@@ -684,6 +711,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                             Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
                                 jsonCompetitorInLeg.put("distanceTraveled-m", UnitSerializationUtil.distanceDecimalFormatter.format(distanceTraveled.getMeters()));
+                            }
+                            Distance distanceTraveledIncludingGateStart = trackedLegOfCompetitor.getDistanceTraveledConsideringGateStart(timePoint);
+                            if (distanceTraveledIncludingGateStart != null) {
+                                jsonCompetitorInLeg.put("distanceTraveledIncludingGateStart-m",
+                                        UnitSerializationUtil.distanceDecimalFormatter
+                                                .format(distanceTraveledIncludingGateStart.getMeters()));
                             }
                             try {
                                 Integer rank = ranks.get(competitor);
@@ -785,6 +818,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                             Distance distanceTraveled = currentLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
                                 jsonCompetitorInLeg.put("distanceTraveled-m", roundDouble(distanceTraveled.getMeters(), 2));
+                            }
+                            Distance distanceTraveledConsideringGateStart = currentLegOfCompetitor.getDistanceTraveledConsideringGateStart(timePoint);
+                            if (distanceTraveledConsideringGateStart != null) {
+                                jsonCompetitorInLeg.put("distanceTraveledConsideringGateStart-m", roundDouble(distanceTraveledConsideringGateStart.getMeters(), 2));
                             }
                             
                             Double gapToLeaderInSeconds = currentLegOfCompetitor.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE);

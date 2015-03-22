@@ -6,6 +6,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO.RaceColumnLiveState;
 import com.sap.sse.gwt.client.player.Timer;
 
 public class RegattaPhaseRace extends UIObject {
@@ -14,7 +15,7 @@ public class RegattaPhaseRace extends UIObject {
     interface RegattaPhaseRaceUiBinder extends UiBinder<DivElement, RegattaPhaseRace> {
     }
 
-    @UiField DivElement raceStatus;
+    @UiField DivElement raceColumnStatus;
 
     private enum DataStatusEnum { 
         FINISHED ("finished"), LIVE("live"), SCHEDULED("scheduled");
@@ -31,14 +32,20 @@ public class RegattaPhaseRace extends UIObject {
         RegattaResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
     
-        DataStatusEnum dataStatus;
-        if(raceColumn.hasLiveRaces(timerForClientServerOffset.getLiveTimePointInMillis())) {
-            dataStatus = DataStatusEnum.LIVE;
-        } else if (raceColumn.hasTrackedRaces()) {
-            dataStatus = DataStatusEnum.FINISHED;
-        } else {
-            dataStatus = DataStatusEnum.SCHEDULED;
+        DataStatusEnum dataStatus = DataStatusEnum.SCHEDULED;
+        RaceColumnLiveState liveState = raceColumn.getLiveState(timerForClientServerOffset.getLiveTimePointInMillis());
+        
+        switch(liveState) {
+            case NOT_TRACKED:
+                dataStatus = DataStatusEnum.SCHEDULED;
+                break;
+            case TRACKED:
+                dataStatus = DataStatusEnum.FINISHED;
+                break;
+            case TRACKED_AND_LIVE:
+                dataStatus = DataStatusEnum.LIVE;
+                break;
         }
-        raceStatus.setAttribute(DataStatusEnum.ATTRIBUTE_NAME, dataStatus.attributeValue);
+        raceColumnStatus.setAttribute(DataStatusEnum.ATTRIBUTE_NAME, dataStatus.attributeValue);
     }
 }

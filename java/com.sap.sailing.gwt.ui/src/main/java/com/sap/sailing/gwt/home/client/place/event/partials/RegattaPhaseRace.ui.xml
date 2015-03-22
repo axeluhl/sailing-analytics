@@ -5,5 +5,5 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.RegattaResources" />
-	<div ui:field="raceStatus" class="{local_res.css.regatta_intro_phases_phase_races_race}"></div>
+	<div ui:field="raceColumnStatus" class="{local_res.css.regatta_intro_phases_phase_races_race}"></div>
 </ui:UiBinder>

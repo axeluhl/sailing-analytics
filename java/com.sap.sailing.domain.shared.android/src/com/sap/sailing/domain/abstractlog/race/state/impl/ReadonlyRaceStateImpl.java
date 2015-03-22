@@ -133,7 +133,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.cachedRacingProcedureType = determineInitialProcedureType();
         this.cachedRaceStatus = RaceLogRaceStatus.UNKNOWN;
         this.cachedPassId = raceLog.getCurrentPassId();
-        // TODO bug 2083: make sure the listener registration is "weak" in the sense that it is removed when this race state is no longer strongly referenced
+        // see resolved bug 2083: make sure the listener registration is "weak" in the sense that it is removed when
+        // this race state is no longer strongly referenced
         this.raceLog.addListener(new WeakRaceLogChangedVisitor(this.raceLog, this));
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
