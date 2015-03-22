@@ -5474,25 +5474,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         boolean isFakeSeries = SailingServiceUtil.isFakeSeries(event);
         
         for (Iterator<LeaderboardGroup> iter = event.getLeaderboardGroups().iterator(); iter.hasNext();) {
-            LeaderboardGroup lg = iter.next();
+            LeaderboardGroup leaderboardGroup = iter.next();
             
-            for (Leaderboard sl : lg.getLeaderboards()) {
-                Regatta regattaEntity = getService().getRegattaByName(sl.getName());
-                if(isFakeSeries && !SailingServiceUtil.isPartOfEvent(event, regattaEntity)) {
-                    continue;
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if(leaderboard instanceof RegattaLeaderboard) {
+                    Regatta regattaEntity = getService().getRegattaByName(leaderboard.getName());
+                    if(isFakeSeries && !SailingServiceUtil.isPartOfEvent(event, regattaEntity)) {
+                        continue;
+                    }
+                    
+                    RegattaMetadataDTO regatta = new RegattaMetadataDTO(leaderboard.getName(), leaderboard.getName());
+                    regatta.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
+                    regatta.setCompetitorsCount(SailingServiceUtil.calculateCompetitorsCount(leaderboard));
+                    regatta.setRaceCount(SailingServiceUtil.calculateRaceCount(leaderboard));
+                    regatta.setTrackedRacesCount(SailingServiceUtil.calculateTrackedRaceCount(leaderboard));
+                    regatta.setBoatClass(SailingServiceUtil.calculateBoatClass(leaderboard));
+                    
+                    regatta.setStartDate(regattaEntity.getStartDate() != null ? regattaEntity.getStartDate().asDate() : null);
+                    regatta.setEndDate(regattaEntity.getEndDate() != null ? regattaEntity.getEndDate().asDate() : null);
+                    regatta.setState(calculateRegattaState(regatta));
+                    dto.getRegattas().add(regatta);
+                } else {
+                    // TODO: Implement for FlexibleLeaderboard
                 }
-                
-                RegattaMetadataDTO regatta = new RegattaMetadataDTO(sl.getName(), sl.getName());
-                regatta.setBoatCategory(lg.getDisplayName() != null ? lg.getDisplayName() : lg.getName());
-                regatta.setCompetitorsCount(SailingServiceUtil.calculateCompetitorsCount(sl));
-                regatta.setRaceCount(SailingServiceUtil.calculateRaceCount(sl));
-                regatta.setTrackedRacesCount(SailingServiceUtil.calculateTrackedRaceCount(sl));
-                regatta.setBoatClass(SailingServiceUtil.calculateBoatClass(sl));
-                
-                regatta.setStartDate(regattaEntity.getStartDate() != null ? regattaEntity.getStartDate().asDate() : null);
-                regatta.setEndDate(regattaEntity.getEndDate() != null ? regattaEntity.getEndDate().asDate() : null);
-                regatta.setState(calculateRegattaState(regatta));
-                dto.getRegattas().add(regatta);
             }
         }
         
@@ -5736,6 +5740,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if(!SailingServiceUtil.isPartOfEvent(event, regattaEntity)) {
                     continue;
                 }
+            } else {
+                // TODO: Implement for FlexibleLeaderboard
             }
             return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
         }
