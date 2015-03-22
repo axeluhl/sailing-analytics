@@ -5449,7 +5449,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         ArrayList<LeaderboardGroupDTO> result = new ArrayList<>();
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            result.add(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, false));
+            result.add(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
         }
         return result;
     }
