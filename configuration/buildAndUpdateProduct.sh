@@ -624,7 +624,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
-        BUILD_TOOLS=22.0.0
+        BUILD_TOOLS=22.0.1
         TARGET_API=22
         TEST_API=18
         ANDROID_ABI=armeabi-v7a

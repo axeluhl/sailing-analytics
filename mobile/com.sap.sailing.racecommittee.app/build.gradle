@@ -4,7 +4,7 @@ def packageName = "com.sap.sailing.racecommittee.app"
 def verCode = 6
 
 android {
-    buildToolsVersion "22.0.0"
+    buildToolsVersion "22.0.1"
     compileSdkVersion 22
 
     defaultConfig {
