@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
+import com.sap.sailing.domain.common.dto.RaceDTO.RaceLiveState;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class EventRegattaRacesRace extends Composite {
@@ -98,7 +99,8 @@ public class EventRegattaRacesRace extends Composite {
             hideElement(el);
         }
         
-        switch(race.getLiveState(presenter.getTimerForClientServerOffset().getLiveTimePointInMillis())) {
+        RaceLiveState liveState = race != null ? race.getLiveState(presenter.getTimerForClientServerOffset().getLiveTimePointInMillis()) : RaceLiveState.NOT_TRACKED;       
+        switch(liveState) {
             case NOT_TRACKED:
                 showElement(raceNotTrackedDiv);
                 break;
