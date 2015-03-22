@@ -810,6 +810,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     if (isShowAddedScores()) {
                         double o1AddedScore = computeAddedScores(o1);
                         double o2AddedScore = computeAddedScores(o2);
+                        // FIXME bug 2717: need to respect the scoring scheme's isHigherBetter() flag here
                         double result = o1AddedScore == 0. ? o2AddedScore == 0. ? 0. : isAscending() ? 1. : -1. : o2AddedScore == 0. ? isAscending() ? 1. : -1. : o2AddedScore - o1AddedScore;
                         return result > 0 ? 1 : result < 0 ? -1 : 0;
                     } else {
@@ -840,7 +841,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
         return new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.RACE_DISTANCE_TRAVELED, 
+                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
                 DetailType.RACE_TIME_TRAVELED,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
@@ -902,6 +903,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                             new RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED, new RaceDistanceTraveledInMeters(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START, new RaceDistanceTraveledIncludingGateStartInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, 
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new RaceAverageSpeedInKnots(),
@@ -1246,6 +1250,35 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                                     result = 0.0;
                                 }
                                 result += legDetail.distanceTraveledInMeters;
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Accumulates the distance traveled over all legs of a race and considers the specifics of a gate start. The
+         * first leg of a gate start gets as additional distance traveled the distance from the port side of the line to
+         * the point where the competitor started which helps normalize the distance traveled and make them comparable
+         * across early and late starters.
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDistanceTraveledIncludingGateStartInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
+                        if (legDetail != null) {
+                            if (legDetail.distanceTraveledIncludingGateStartInMeters != null) {
+                                if (result == null) {
+                                    result = 0.0;
+                                }
+                                result += legDetail.distanceTraveledIncludingGateStartInMeters;
                             }
                         }
                     }
@@ -2065,7 +2098,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * adds the <code>column</code> to the right end of the {@link #getLeaderboardTable() leaderboard table} and sets
      * the column style according to the {@link LeaderboardSortableColumnWithMinMax#getColumnStyle() column's style definition}.
      */
-    protected void addColumn(LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, ?> column) {
+    protected void addColumn(AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column) {
         leaderboardTable.addColumn(column, column.getHeader(), column.getComparator(), column
                 .getPreferredSortingOrder().isAscending());
         String columnStyle = column.getColumnStyle();
@@ -2496,7 +2529,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         int columnIndex = 0;
         columnIndex = ensureSelectionCheckboxColumn(columnIndex);
         columnIndex = ensureRankColumn(columnIndex);
-        columnIndex = ensureSailIDAndCompetitorColumn();
+        columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
         columnIndex = updateCarryColumn(leaderboard, columnIndex);
         adjustOverallDetailColumns(leaderboard, columnIndex);
         // first remove race columns no longer needed:
@@ -2809,42 +2842,37 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     /**
      * @return the 0-based index for the next column
      */
-    private int ensureSailIDAndCompetitorColumn() {
-        SailIDColumn<LeaderboardRowDTO> sailIdColumn = new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-            @Override
-            public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                return t.competitor;
+    private int ensureSailIDAndCompetitorColumn(int columnIndexWhereToInsertTheNextColumn) {
+        if (isShowCompetitorSailId()) {
+            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
+                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>)) {
+                insertColumn(columnIndexWhereToInsertTheNextColumn, new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+                    @Override
+                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                        return t.competitor;
+                    }
+                }));
             }
-        });
-        if (getLeaderboardTable().getColumnCount() >= 3) { // table already filled with columns
-            if (isShowCompetitorSailId()) {
-                if (!(getLeaderboardTable().getColumn(2) instanceof SailIDColumn<?>)) {
-                    insertColumn(2, sailIdColumn);
-                }
-            } else {
-                if (getLeaderboardTable().getColumn(2) instanceof SailIDColumn<?>) {
-                    removeColumn(2);
-                }
-            }
-            final int competitorFullNameColumnIndex = 2 + (isShowCompetitorSailId() ? 1 : 0);
-            if (isShowCompetitorFullName()) {
-                if (!(getLeaderboardTable().getColumn(competitorFullNameColumnIndex) instanceof CompetitorColumn)) {
-                    insertColumn(competitorFullNameColumnIndex, createCompetitorColumn());
-                }
-            } else {
-                if (getLeaderboardTable().getColumn(competitorFullNameColumnIndex) instanceof CompetitorColumn) {
-                    removeColumn(competitorFullNameColumnIndex);
-                }
-            }
-        } else { // table just being initialized
-            if (isShowCompetitorSailId()) {
-                addColumn(sailIdColumn);
-            }
-            if (isShowCompetitorFullName()) {
-                addColumn(createCompetitorColumn());
+            columnIndexWhereToInsertTheNextColumn++;
+        } else {
+            if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn
+                    && getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>) {
+                removeColumn(columnIndexWhereToInsertTheNextColumn);
             }
         }
-        return (isShowRegattaRankColumn() ? 2 : 1) + (isShowCompetitorSailId() ? 1 : 0) + (isShowCompetitorFullName() ? 1 : 0);
+        if (isShowCompetitorFullName()) {
+            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
+                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn)) {
+                insertColumn(columnIndexWhereToInsertTheNextColumn, createCompetitorColumn());
+            }
+            columnIndexWhereToInsertTheNextColumn++;
+        } else {
+            if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn
+                    && getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn) {
+                removeColumn(columnIndexWhereToInsertTheNextColumn);
+            }
+        }
+        return columnIndexWhereToInsertTheNextColumn;
     }
 
     protected CompetitorColumn createCompetitorColumn() {
