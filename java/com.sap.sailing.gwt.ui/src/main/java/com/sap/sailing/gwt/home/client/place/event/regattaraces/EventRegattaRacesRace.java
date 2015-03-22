@@ -23,8 +23,6 @@ import com.sap.sse.gwt.client.player.Timer;
 public class EventRegattaRacesRace extends Composite {
     private static EventRegattaRacesRaceUiBinder uiBinder = GWT.create(EventRegattaRacesRaceUiBinder.class);
 
-    private enum SimpleRaceStates { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE, TRACKED_BUT_NOT_SCHEDULED };
-    
     interface EventRegattaRacesRaceUiBinder extends UiBinder<Widget, EventRegattaRacesRace> {
     }
 
@@ -62,16 +60,12 @@ public class EventRegattaRacesRace extends Composite {
     
     private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
     
-    private final FleetDTO fleet;
-    private final RaceColumnDTO raceColumn;
     private final RaceDTO race;
     private final Timer timerForClientServerOffset;
 
     private Element[] allConditionalElements;
     
     public EventRegattaRacesRace(StrippedLeaderboardDTO leaderboard, FleetDTO fleet, RaceColumnDTO raceColumn, Timer timerForClientServerOffset, EventPlaceNavigator pageNavigator) {
-        this.fleet = fleet;
-        this.raceColumn = raceColumn;
         this.timerForClientServerOffset = timerForClientServerOffset;
         race = raceColumn.getRace(fleet);
         
@@ -97,25 +91,6 @@ public class EventRegattaRacesRace extends Composite {
         updateUI();    
     }
     
-    private SimpleRaceStates getSimpleRaceState() {
-        SimpleRaceStates simpleRaceState = SimpleRaceStates.NOT_TRACKED;
-        
-        if(race != null && race.trackedRace != null && race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
-            simpleRaceState = SimpleRaceStates.TRACKED;
-            if(isLive()) {
-                simpleRaceState = SimpleRaceStates.TRACKED_AND_LIVE;
-                if(race.startOfRace == null) {
-                    simpleRaceState = SimpleRaceStates.TRACKED_BUT_NOT_SCHEDULED;
-                }                    
-            }
-        }
-        return simpleRaceState;
-    }
-
-    private boolean isLive() {
-        return raceColumn.isLive(fleet, timerForClientServerOffset.getLiveTimePointInMillis());
-    }
-    
     private void updateUI() {
         averageRaceWind.setInnerText("tbd.");
         
@@ -123,7 +98,7 @@ public class EventRegattaRacesRace extends Composite {
             hideElement(el);
         }
         
-        switch(getSimpleRaceState()) {
+        switch(race.getLiveState(timerForClientServerOffset.getLiveTimePointInMillis())) {
             case NOT_TRACKED:
                 showElement(raceNotTrackedDiv);
                 break;

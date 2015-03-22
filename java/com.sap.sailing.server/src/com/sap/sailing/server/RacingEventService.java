@@ -579,4 +579,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return {@code null} if no service can be found in the OSGi registry
      */
     FileStorageManagementService getFileStorageManagementService();
+
+    ClassLoader getCombinedMasterDataClassLoader();
 }
