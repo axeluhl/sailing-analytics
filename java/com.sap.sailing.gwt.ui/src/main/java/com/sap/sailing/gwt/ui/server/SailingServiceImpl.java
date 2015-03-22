@@ -5731,9 +5731,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         Event event = (Event) eventBase;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            Regatta regattaEntity = getService().getRegattaByName(leaderboard.getName());
-            if(!SailingServiceUtil.isPartOfEvent(event, regattaEntity)) {
-                continue;
+            if(leaderboard instanceof RegattaLeaderboard) {
+                Regatta regattaEntity = getService().getRegattaByName(leaderboard.getName());
+                if(!SailingServiceUtil.isPartOfEvent(event, regattaEntity)) {
+                    continue;
+                }
             }
             return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
         }
