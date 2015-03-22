@@ -253,7 +253,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         @Override
         public void finish() throws InterruptedException {
             synchronized (monitorObject) {
-                state = QueryState.NORMAL;
+                state = state == QueryState.RUNNING ? QueryState.NORMAL : state;
                 monitorObject.notify();
             }
         }

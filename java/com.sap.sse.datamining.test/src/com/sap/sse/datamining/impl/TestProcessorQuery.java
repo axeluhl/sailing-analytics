@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -22,6 +23,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.ProcessorFactory;
@@ -64,6 +66,7 @@ public class TestProcessorQuery {
     public void testStandardWorkflow() throws InterruptedException, ExecutionException {
         Collection<Number> dataSource = createDataSource();
         Query<Double> queryWithStandardWorkflow = createQueryWithStandardWorkflow(dataSource);
+        assertThat(queryWithStandardWorkflow.getState(), is(QueryState.NOT_STARTED));
         QueryResult<Double> expectedResult = buildExpectedResult(dataSource);
         verifyResult(queryWithStandardWorkflow.run(), expectedResult);
     }
@@ -198,6 +201,7 @@ public class TestProcessorQuery {
         } catch (TimeoutException e) {
             // A timeout exception is expected
         }
+        assertThat(query.getState(), is(QueryState.TIMED_OUT));
         
         ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
         assertThat("The processing should be aborted, but received elements", receivedElementOrFinished, is(false));
@@ -235,7 +239,9 @@ public class TestProcessorQuery {
             }
         });
         queryRunner.start();
-        ConcurrencyTestsUtil.sleepFor(500);
+        ConcurrencyTestsUtil.sleepFor(250);
+        assertThat(query.getState(), is(QueryState.RUNNING));
+        ConcurrencyTestsUtil.sleepFor(250);
         query.abort();
         
         ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
@@ -312,6 +318,76 @@ public class TestProcessorQuery {
         Map<GroupKey, Double> expectedResult = new HashMap<>();
         expectedResult.put(new GenericGroupKey<String>(keyValue), 10358.0);
         assertThat(query.run(500, TimeUnit.MILLISECONDS).getResults(), is(expectedResult));
+    }
+    
+    @Test
+    public void testQueryWithSevereFailure() {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected Processor<Double, ?> createFirstProcessor() {
+                Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
+                resultReceivers.add(this.getResultReceiver());
+                return new AbstractSimpleParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
+                                                                                          (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+                                                                                          ConcurrencyTestsUtil.getExecutor(),
+                                                                                          resultReceivers) {
+                    @Override
+                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
+                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
+                            @Override
+                            protected Map<GroupKey, Double> computeResult() throws Exception {
+                                throw new RejectedExecutionException("This should cause an error during the query processing");
+                            }
+                        };
+                    }
+                    @Override
+                    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+                    }
+                };
+            }
+        };
+        try {
+            query.run();
+            fail("The previous line should throw a runtime exception");
+        } catch (RuntimeException e) {
+            // A RuntimeException wiht a RejectedExecitonException is expected
+            if (!(e.getCause() instanceof RejectedExecutionException)) {
+                throw e;
+            }
+        }
+        assertThat(query.getState(), is(QueryState.ERROR));
+    }
+    
+    @Test
+    public void testQueryWithFailure() {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected Processor<Double, ?> createFirstProcessor() {
+                Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
+                resultReceivers.add(this.getResultReceiver());
+                return new AbstractSimpleParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
+                                                                                          (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+                                                                                          ConcurrencyTestsUtil.getExecutor(),
+                                                                                          resultReceivers) {
+                    @Override
+                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
+                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
+                            @Override
+                            protected Map<GroupKey, Double> computeResult() throws Exception {
+                                throw new NullPointerException("This should cause a failure during the query processing");
+                            }
+                        };
+                    }
+                    @Override
+                    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+                    }
+                };
+            }
+        };
+        query.run();
+        assertThat(query.getState(), is(QueryState.FAILURE));
     }
 
 }
