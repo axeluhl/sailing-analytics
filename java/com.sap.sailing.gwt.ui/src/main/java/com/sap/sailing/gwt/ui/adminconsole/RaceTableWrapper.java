@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplates;
@@ -45,14 +47,26 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                 }
             }
         };
-        
+        raceNameColumn.setSortable(true);
+        getColumnSortHandler().setComparator(raceNameColumn, new Comparator<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
+            @Override
+            public int compare(RaceColumnDTOAndFleetDTOWithNameBasedEquality o1, RaceColumnDTOAndFleetDTOWithNameBasedEquality o2) {
+                return new NaturalComparator().compare(o1.getA().getName(), o2.getA().getName());
+            }
+        });
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> fleetNameColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
                 return object.getB().getName();
             }
         };
-
+        fleetNameColumn.setSortable(true);
+        getColumnSortHandler().setComparator(fleetNameColumn, new Comparator<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
+            @Override
+            public int compare(RaceColumnDTOAndFleetDTOWithNameBasedEquality o1, RaceColumnDTOAndFleetDTOWithNameBasedEquality o2) {
+                return new NaturalComparator().compare(o1.getB().getName(), o2.getB().getName());
+            }
+        });
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(fleetNameColumn, stringMessages.fleet());
     }
