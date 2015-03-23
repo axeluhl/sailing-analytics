@@ -2,6 +2,7 @@ package com.sap.sailing.polars.mining;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -88,20 +89,23 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
     private static boolean isInLeadingCompetitorsForLiveRace(TrackedRace trackedRace, Competitor competitor,
             double pctOfLeadingCompetitorsToInclude) {
         boolean result = false;
-        Waypoint wayPoint = trackedRace.getMarkPassings(competitor).last().getWaypoint();
-        if (wayPoint != null) {
-            Iterator<MarkPassing> markPassingsAtCompetitorsLastWayPoint = trackedRace.getMarkPassingsInOrder(
-                    wayPoint).iterator();
-            for (int i = 0; i < ((int) Math.max(Math.round(pctOfLeadingCompetitorsToInclude
-                    * getNumberOfCompetitors(trackedRace)), 1)); i++) {
-                if (markPassingsAtCompetitorsLastWayPoint.hasNext()) {
-                    if (markPassingsAtCompetitorsLastWayPoint.next().getCompetitor().equals(competitor)) {
-                        result = true;
+        NavigableSet<MarkPassing> markPassingsOfCompetitor = trackedRace.getMarkPassings(competitor);
+        if (!markPassingsOfCompetitor.isEmpty()) {
+            Waypoint wayPoint = markPassingsOfCompetitor.last().getWaypoint();
+            if (wayPoint != null) {
+                Iterator<MarkPassing> markPassingsAtCompetitorsLastWayPoint = trackedRace.getMarkPassingsInOrder(
+                        wayPoint).iterator();
+                for (int i = 0; i < ((int) Math.max(
+                        Math.round(pctOfLeadingCompetitorsToInclude * getNumberOfCompetitors(trackedRace)), 1)); i++) {
+                    if (markPassingsAtCompetitorsLastWayPoint.hasNext()) {
+                        if (markPassingsAtCompetitorsLastWayPoint.next().getCompetitor().equals(competitor)) {
+                            result = true;
+                            break;
+                        }
+                    } else {
+                        result = false;
                         break;
                     }
-                } else {
-                    result = false;
-                    break;
                 }
             }
         }
