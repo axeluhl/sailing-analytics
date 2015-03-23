@@ -763,14 +763,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return markDTO;
     }
     
-    private Iterable<? extends MarkDTO> convertToMarkDTOs(Iterable<Mark> marks) {
-        List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
-        for (Mark mark : marks){
-            markDTOs.add(convertToMarkDTO(mark, null));
-        }
-        return markDTOs;
-    }
-
     private RegattaDTO convertToRegattaDTO(Regatta regatta) {
         RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), regatta.getScoringScheme().getType());
         regattaDTO.races = convertToRaceDTOs(regatta);
@@ -4923,31 +4915,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Collection<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+    public Iterable<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Collection<Mark> marks = new DefinedMarkFinder(raceLog).analyze();
+        Iterable<Mark> marks = new DefinedMarkFinder(raceLog).analyze();
         return convertToMarkDTOs(raceLog, marks);
     }
     
     @Override
-    public Collection<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName) {
+    public Iterable<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null){
+        if (leaderboard == null) {
             //TODO: implement proper Exception Handling
             return null;
         }
-        
-        Collection<MarkDTO> markDTOs = new HashSet<>();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()){
+        Set<MarkDTO> markDTOs = new HashSet<>();
+        Map<Serializable, Mark> marksById = new HashMap<>();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
-                List<Mark> marks = new ArrayList<>();
-                marks.addAll(new DefinedMarkFinder(raceLog).analyze());
-                Util.addAll(convertToMarkDTOs(raceLog, marks), markDTOs);
-                if (trackedRace != null) {
-                    Util.addAll(convertToMarkDTOs(trackedRace.getMarks()), markDTOs);
+                for (Mark markDefinitionFromRaceLog : new DefinedMarkFinder(raceLog).analyze()) {
+                    marksById.put(markDefinitionFromRaceLog.getId(), markDefinitionFromRaceLog);
                 }
+                if (trackedRace != null) {
+                    for (Mark markFromTrackedRace : trackedRace.getMarks()) {
+                        marksById.put(markFromTrackedRace.getId(), markFromTrackedRace);
+                    }
+                }
+                Util.addAll(convertToMarkDTOs(raceLog, marksById.values()), markDTOs);
             }
         }
         return markDTOs;

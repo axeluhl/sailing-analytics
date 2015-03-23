@@ -595,7 +595,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
             AsyncCallback<Void> callback);
 
     void getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Collection<MarkDTO>> callback);
+            AsyncCallback<Iterable<MarkDTO>> callback);
 
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
@@ -689,7 +689,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
 
-    void getMarksInRaceLogsAndTrackedRaces(String leaderboardName, AsyncCallback<Collection<MarkDTO>> callback);
+    void getMarksInRaceLogsAndTrackedRaces(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName, AsyncCallback<Void> callback); 

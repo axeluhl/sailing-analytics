@@ -477,7 +477,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO);
     
-    Collection<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
+    Iterable<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
     
     /**
      * Adds the course definition to the racelog, while trying to reuse existing marks, controlpoints and waypoints
@@ -582,7 +582,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
 
-    Collection<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName);
+    Iterable<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName);
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName) throws MailException;

@@ -9,10 +9,13 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0 Beta</h1>
-<h2>URL: /api/v1/leaderboards/{name}/marks?raceColumn={name}&amp;fleet={name}</h2>
+<h2>URL: /api/v1/leaderboards/{name}/marks?race_column={name}&amp;fleet={name}</h2>
 
 <b>Description:</b>
-<p>Gets the marks of a race (from the RaceLog and if possible the TrackedRace)</p>
+<p>Gets the marks of a race (from the RaceLog and if possible the TrackedRace). If the "fleet"
+parameter is specified then so must the race_column parameter. If no fleet is specified,
+the marks for all fleets of the specified race column are returned. If no race column and
+no fleet are specified, all marks of all races in the leaderboard are returned.</p>
 <br/>
 <table>
 	<tr>
