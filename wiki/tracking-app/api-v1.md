@@ -294,8 +294,7 @@ In contrast to the _Tracking App_, we won't perform a check-in. However, we can 
 
 This information is represented in a URL with the following structure:
 ```
-http://<host>/buoy-tender/checkin
-  &leaderboard_name=<leaderboard-name>
+http://<host>/buoy-tender/checkin?leaderboard_name=<leaderboard-name>
 ```
 
 _also see [Tracking App Check-In Information](#tracking-checkin-info) for additional notes that might apply_
@@ -367,10 +366,9 @@ If there is no existent GPS Fix for the Mark HTTP/200 will be returned.
 If there is an existent GPS Fix the latest known Position of the Mark will be returned:
 ```
 {
-"type": "GPSFix",
-"lat_deg": 54.325246,
-"lon_deg": 10.148556,
-"unixtime": 0
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
 }
 ```
 

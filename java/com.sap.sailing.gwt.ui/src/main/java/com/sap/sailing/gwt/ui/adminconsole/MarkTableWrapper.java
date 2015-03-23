@@ -19,10 +19,9 @@ import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
-    public MarkTableWrapper(S selectionModel, SailingServiceAsync sailingService, StringMessages stringMessages,
+    public MarkTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, selectionModel, true);
-        
+        super(sailingService, stringMessages, errorReporter, multiSelection, true);
         TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {

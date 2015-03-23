@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -48,6 +49,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     
     @Override
     protected void doOnModuleLoad() {
+        GWT.debugger();
         super.doOnModuleLoad();
         final boolean showRaceDetails = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, false /* default*/);
         final boolean embedded = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_EMBEDDED, false /* default*/); 

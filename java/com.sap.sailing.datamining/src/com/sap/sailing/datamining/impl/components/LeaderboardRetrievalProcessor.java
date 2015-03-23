@@ -15,8 +15,8 @@ public class LeaderboardRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<LeaderboardGroupWithContext, HasLeaderboardContext> {
 
     public LeaderboardRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasLeaderboardContext, ?>> resultReceivers) {
-        super(LeaderboardGroupWithContext.class, HasLeaderboardContext.class, executor, resultReceivers);
+            Collection<Processor<HasLeaderboardContext, ?>> resultReceivers, int retrievalLevel) {
+        super(LeaderboardGroupWithContext.class, HasLeaderboardContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override
