@@ -7,7 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedureAdapter;
@@ -38,7 +40,7 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_procedure, container, false);
 
-        LinearLayout headerText = (LinearLayout) layout.findViewById(R.id.header_text);
+        LinearLayout headerText = ViewHolder.get(layout, R.id.header_text);
         if (headerText != null) {
             headerText.setOnClickListener(new View.OnClickListener() {
 
@@ -60,8 +62,6 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
             switch (getArguments().getInt(STARTMODE, 0)) {
                 case 1:
                     if (getView() != null) {
-                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_header);
                         View header = getView().findViewById(R.id.header);
                         header.setVisibility(View.GONE);
                     }
@@ -87,6 +87,20 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
             StartProcedureAdapter adapter = new StartProcedureAdapter(getActivity(), startProcedure, this);
             listView.setAdapter(adapter);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     @Override

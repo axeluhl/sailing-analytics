@@ -47,16 +47,9 @@
         android:layout_below="@id/line_top"
         android:orientation="vertical">
 
-        <FrameLayout android:id="@+id/race_header"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:visibility="gone"/>
-
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
+            android:layout_height="match_parent"
             android:background="?sap_gray_black_30">
 
             <RelativeLayout

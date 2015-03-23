@@ -14,6 +14,7 @@ import android.widget.*;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
@@ -51,10 +52,8 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
             switch (getArguments().getInt(STARTMODE, 0)) {
                 case 1:
                     if (getView() != null)  {
-                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
                         View header = getView().findViewById(R.id.header);
                         header.setVisibility(View.GONE);
-                        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_header);
                     }
                     break;
 
@@ -104,6 +103,15 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
         Collections.sort(startMode, new StartModeComparator());
         StartModeAdapter adapter = new StartModeAdapter(getActivity(), startMode, this);
         mListView.setAdapter(adapter);
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     @Override

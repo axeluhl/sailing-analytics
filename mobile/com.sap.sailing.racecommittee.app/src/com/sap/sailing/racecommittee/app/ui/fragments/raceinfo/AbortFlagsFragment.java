@@ -87,4 +87,18 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                 break;
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+    }
 }

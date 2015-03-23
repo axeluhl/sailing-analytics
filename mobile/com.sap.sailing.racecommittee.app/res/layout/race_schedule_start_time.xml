@@ -87,60 +87,47 @@
         android:layout_below="@id/header"
         android:background="?black" />
 
-    <LinearLayout
+    <RelativeLayout
+        android:layout_below="@id/header"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/header"
-        android:orientation="vertical">
+        android:background="?sap_gray_black_30">
 
-        <FrameLayout android:id="@+id/race_header"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:visibility="gone"/>
+        <LinearLayout
+            android:id="@+id/start_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
-            android:background="?sap_gray_black_30">
-
-            <LinearLayout
-                android:id="@+id/start_picker"
+            <NumberPicker
+                android:id="@+id/start_date_picker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true">
+                android:layout_gravity="center_vertical"
+                android:descendantFocusability="blocksDescendants" />
 
-                <NumberPicker
-                    android:id="@+id/start_date_picker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:descendantFocusability="blocksDescendants" />
-
-                <include
-                    android:id="@+id/start_time_picker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    layout="@layout/time_picker"
-                    android:layout_gravity="center_vertical" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/set_start_time"
+            <include
+                android:id="@+id/start_time_picker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerInParent="true"
-                android:layout_margin="@dimen/default_margin_twice"
-                android:background="?sap_blue_1"
-                android:padding="@dimen/default_padding"
-                android:text="@string/race_set_start"
-                android:textAllCaps="true"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_22"
-                android:textStyle="bold" />
-        </RelativeLayout>
-    </LinearLayout>
+                layout="@layout/time_picker"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/set_start_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:layout_margin="@dimen/default_margin_twice"
+            android:background="?sap_blue_1"
+            android:padding="@dimen/default_padding"
+            android:text="@string/race_set_start"
+            android:textAllCaps="true"
+            android:textColor="?white"
+            android:textSize="@dimen/textSize_22"
+            android:textStyle="bold" />
+    </RelativeLayout>
 </RelativeLayout>

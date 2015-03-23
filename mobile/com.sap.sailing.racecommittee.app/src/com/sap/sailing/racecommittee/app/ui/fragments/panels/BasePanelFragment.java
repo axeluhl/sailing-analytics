@@ -78,16 +78,6 @@ public abstract class BasePanelFragment extends RaceFragment {
         }
     }
 
-    protected void sendIntent(String action, String extra_key, String extra_value) {
-        if (action != null) {
-            Intent intent = new Intent(action);
-            if (extra_key != null) {
-                intent.putExtra(extra_key, extra_value);
-            }
-            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-        }
-    }
-
     protected void resetFragment(View lockIcon, Class cls) {
         if (lockIcon != null && lockIcon.getVisibility() == View.VISIBLE) {
             Fragment fragment = getFragmentManager().findFragmentById(R.id.race_frame);
@@ -108,6 +98,5 @@ public abstract class BasePanelFragment extends RaceFragment {
                 .beginTransaction()
                 .replace(R.id.race_frame, fragment)
                 .commit();
-        sendIntent(R.string.intent_update_ui);
     }
 }

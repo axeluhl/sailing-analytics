@@ -33,8 +33,8 @@ public class AppConstants {
 
     // Inner process events
     public final static String INTENT_ACTION_TOGGLE = PACKAGE_NAME + ".action.toggle";
-    public final static String INTENT_ACTION_EXTRA = "extra";
 
+    public final static String INTENT_ACTION_EXTRA = "extra";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE = "procedure";
     public final static String INTENT_ACTION_TOGGLE_MODE = "mode";
     public final static String INTENT_ACTION_TOGGLE_COURSE = "course";
@@ -44,6 +44,10 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_ABANDON = "abandon";
     public final static String INTENT_ACTION_TOGGLE_RECALL = "recall";
     public final static String INTENT_ACTION_TOGGLE_MORE = "more";
+
+    private final static String INTENT_ACTION_TIME = PACKAGE_NAME + "action.time";
+    public final static String INTENT_ACTION_TIME_HIDE = INTENT_ACTION_TIME + ".hide";
+    public final static String INTENT_ACTION_TIME_SHOW = INTENT_ACTION_TIME + ".show";
 
     // clears all toggle buttons
     public final static String INTENT_ACTION_CLEAR_TOGGLE = PACKAGE_NAME + ".action.toggle.clear";

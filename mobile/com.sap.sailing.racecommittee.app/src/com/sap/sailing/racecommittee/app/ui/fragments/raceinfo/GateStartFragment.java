@@ -125,8 +125,6 @@ public class GateStartFragment {
             if (getArguments() != null) {
                 if (getArguments().getInt(STARTMODE, 0) != 0) {
                     if (getView() != null) {
-                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_header);
                         View header = getView().findViewById(R.id.header);
                         if (header != null) {
                             header.setVisibility(View.GONE);
@@ -210,7 +208,6 @@ public class GateStartFragment {
             if (getArguments() != null) {
                 if (getArguments().getInt(STARTMODE, 0) != 0) {
                     if (getView() != null) {
-                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
                         View header = getView().findViewById(R.id.header);
                         if (header != null) {
                             header.setVisibility(View.GONE);

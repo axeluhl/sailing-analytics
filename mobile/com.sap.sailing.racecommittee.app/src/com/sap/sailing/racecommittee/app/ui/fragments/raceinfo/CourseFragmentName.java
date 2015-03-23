@@ -39,8 +39,6 @@ public class CourseFragmentName extends CourseFragment implements CourseNameAdap
             if (getArguments() != null) {
                 switch (getArguments().getInt(STARTMODE, 0)) {
                     case 1:
-                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_header);
                         View header = getView().findViewById(R.id.header);
                         header.setVisibility(View.GONE);
                         break;

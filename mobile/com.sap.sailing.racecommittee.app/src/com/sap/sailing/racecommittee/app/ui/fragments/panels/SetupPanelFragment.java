@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -68,39 +69,39 @@ public class SetupPanelFragment extends BasePanelFragment  {
         mStateListener = new RaceStateChangedListener();
         mProcedureListener = new RaceProcedureChangedListener();
 
-        mStartProcedure = layout.findViewById(R.id.start_procedure);
+        mStartProcedure = ViewHolder.get(layout, R.id.start_procedure);
         if (mStartProcedure != null) {
             mStartProcedure.setOnClickListener(new StartProcedureClick());
         }
-        mStartProcedureLock = layout.findViewById(R.id.start_procedure_lock);
-        mStartProcedureValue = (TextView) layout.findViewById(R.id.start_procedure_value);
+        mStartProcedureLock = ViewHolder.get(layout, R.id.start_procedure_lock);
+        mStartProcedureValue = ViewHolder.get(layout, R.id.start_procedure_value);
 
-        mStartMode = layout.findViewById(R.id.start_mode);
+        mStartMode = ViewHolder.get(layout, R.id.start_mode);
         if (mStartMode != null) {
             mStartMode.setOnClickListener(new StartModeClick());
         }
-        mStartModeLock = layout.findViewById(R.id.start_mode_lock);
-        mStartModeFlag = (ImageView) layout.findViewById(R.id.start_mode_flag);
+        mStartModeLock = ViewHolder.get(layout, R.id.start_mode_lock);
+        mStartModeFlag = ViewHolder.get(layout, R.id.start_mode_flag);
 
-        mCourse = layout.findViewById(R.id.course);
+        mCourse = ViewHolder.get(layout, R.id.course);
         if (mCourse != null) {
             mCourse.setOnClickListener(new CourseClick());
         }
-        mCourseLock = layout.findViewById(R.id.course_lock);
-        mCourseValue = (TextView) layout.findViewById(R.id.course_value);
+        mCourseLock = ViewHolder.get(layout, R.id.course_lock);
+        mCourseValue = ViewHolder.get(layout, R.id.course_value);
 
-        mWind = layout.findViewById(R.id.wind);
+        mWind = ViewHolder.get(layout, R.id.wind);
         if (mWind != null) {
             mWind.setOnClickListener(new WindClick());
         }
-        mWindLock = layout.findViewById(R.id.wind_lock);
-        mWindValue = (TextView) layout.findViewById(R.id.wind_value);
+        mWindLock = ViewHolder.get(layout, R.id.wind_lock);
+        mWindValue = ViewHolder.get(layout, R.id.wind_value);
 
         return layout;
     }
 
     @Override
-    public void onStart() {
+    public void onResume() {
         super.onStart();
 
         refreshPanel();
@@ -116,7 +117,7 @@ public class SetupPanelFragment extends BasePanelFragment  {
     }
 
     @Override
-    public void onStop() {
+    public void onPause() {
         super.onStop();
 
         getRaceState().removeChangedListener(mStateListener);

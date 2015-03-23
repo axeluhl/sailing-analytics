@@ -1,11 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
-import android.view.View;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -14,12 +12,12 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.FlagPanelFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
@@ -33,8 +31,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     protected RaceInfoListener infoListener;
     private FlagPoleCache flagPoleCache;
 
-    private RaceLogRaceStatus lastStatus = null;
-
     public BaseRaceInfoRaceFragment() {
         procedureListener = new ProcedureChangedListener();
         flagPoleCache = null;
@@ -46,6 +42,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
         replaceFragment(SetupPanelFragment.newInstance(getArguments()), R.id.race_panel_left);
         replaceFragment(FlagPanelFragment.newInstance(getArguments()), R.id.race_panel_right);
+        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_panel_top);
     }
 
     @Override
@@ -133,7 +130,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
     protected void replaceFragment(RaceFragment fragment) {
         replaceFragment(fragment, R.id.race_frame);
-        sendIntent(R.string.intent_update_ui);
     }
 
     protected void replaceFragment(RaceFragment fragment, @IdRes int id) {

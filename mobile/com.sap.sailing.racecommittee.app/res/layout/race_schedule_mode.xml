@@ -41,25 +41,12 @@
             android:background="?black" />
     </RelativeLayout>
 
-    <LinearLayout
+    <ListView
+        android:id="@+id/listView"
+        android:layout_below="@id/header"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/header"
-        android:orientation="vertical">
-
-        <FrameLayout android:id="@+id/race_header"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:visibility="gone"/>
-
-        <ListView
-            android:id="@+id/listView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
-            android:background="?sap_gray_black_30"
-            android:divider="@null"
-            android:dividerHeight="0dp" />
-    </LinearLayout>
+        android:background="?sap_gray_black_30"
+        android:divider="@null"
+        android:dividerHeight="0dp" />
 </RelativeLayout>

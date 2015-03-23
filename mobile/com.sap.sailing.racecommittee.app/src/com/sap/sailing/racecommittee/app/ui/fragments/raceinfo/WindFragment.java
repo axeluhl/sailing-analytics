@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
@@ -176,8 +177,6 @@ public class WindFragment extends ScheduleFragment
             switch (getArguments().getInt(STARTMODE, 0)) {
                 case 1:
                     if (getView() != null) {
-                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_header);
                         View header = getView().findViewById(R.id.header);
                         header.setVisibility(View.GONE);
                     }
@@ -337,6 +336,8 @@ public class WindFragment extends ScheduleFragment
 
     @Override
     public void onPause() {
+        super.onPause();
+
         if (apiClient.isConnected()) {
             apiClient.unregisterConnectionFailedListener(this);
             apiClient.unregisterConnectionCallbacks(this);
@@ -351,7 +352,7 @@ public class WindFragment extends ScheduleFragment
             transaction.commit();
         }
 
-        super.onPause();
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     @Override
@@ -359,6 +360,7 @@ public class WindFragment extends ScheduleFragment
         super.onResume();
 
         setupLocationClient();
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
 
     @Override

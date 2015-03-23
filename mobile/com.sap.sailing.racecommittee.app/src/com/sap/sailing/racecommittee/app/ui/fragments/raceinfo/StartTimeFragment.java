@@ -15,6 +15,7 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -52,16 +53,16 @@ public class StartTimeFragment extends ScheduleFragment implements View.OnClickL
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_start_time, container, false);
 
-        mCountdown = (TextView) layout.findViewById(R.id.start_countdown);
-        Button min5 = (Button) layout.findViewById(R.id.start_min_five);
+        mCountdown = ViewHolder.get(layout, R.id.start_countdown);
+        Button min5 = ViewHolder.get(layout, R.id.start_min_five);
         if (min5 != null) {
             min5.setOnClickListener(this);
         }
-        Button min1 = (Button) layout.findViewById(R.id.start_min_one);
+        Button min1 = ViewHolder.get(layout, R.id.start_min_one);
         if (min1 != null) {
             min1.setOnClickListener(this);
         }
-        Button setStart = (Button) layout.findViewById(R.id.set_start_time);
+        Button setStart = ViewHolder.get(layout, R.id.set_start_time);
         if (setStart != null) {
             setStart.setOnClickListener(this);
         }
@@ -105,10 +106,6 @@ public class StartTimeFragment extends ScheduleFragment implements View.OnClickL
                         }
                         break;
                     case 2:
-                        getView().findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                        Bundle args = getArguments();
-                        args.putBoolean(TimePanelFragment.TOGGLED, true);
-                        replaceFragment(TimePanelFragment.newInstance(args), R.id.race_header);
                         View frame = getView().findViewById(R.id.header);
                         if (frame != null) {
                             frame.setVisibility(View.GONE);

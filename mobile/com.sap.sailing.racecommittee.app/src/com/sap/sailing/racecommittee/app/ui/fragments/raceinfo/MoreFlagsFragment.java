@@ -9,8 +9,9 @@ import android.widget.ListView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import com.sap.sailing.android.shared.util.ViewHolder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
@@ -62,6 +63,20 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     public static class FinishingTimeFragment extends ScheduleFragment implements View.OnClickListener {
@@ -124,24 +139,23 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
         }
 
         private void setFinishTime(boolean current) {
-            TimePoint finishedTime;
+            TimePoint finishingTime;
             if (current) {
-                finishedTime = MillisecondsTimePoint.now();
+                finishingTime = MillisecondsTimePoint.now();
             } else {
-                finishedTime = getFinishedTime();
+                finishingTime = getFinishingTime();
             }
-            FinishingTimeFinder finishingTimeFinder = new FinishingTimeFinder(getRace().getRaceLog());
-            if (finishingTimeFinder.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
-                if (finishingTimeFinder.analyze().before(finishedTime)) {
-                    getRaceState().setFinishedTime(finishedTime);
-                    replaceFragment(FinishingWaitingFragment.newInstance(), R.id.race_frame);
-                }else{
-                    Toast.makeText(getActivity(), "The given finish time is earlier than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG).show();
+            StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
+            if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
+                if (stf.analyze().before(finishingTime)) {
+                    getRace().getState().setFinishingTime(finishingTime);
+                } else {
+                    Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
                 }
             }
         }
 
-        private TimePoint getFinishedTime() {
+        private TimePoint getFinishingTime() {
             Calendar time = Calendar.getInstance();
             time.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
             time.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());

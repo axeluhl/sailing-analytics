@@ -3,8 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -63,6 +62,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     private static ProgressBar mProgressSpinner;
 
+    private IntentReceiver mReceiver;
     private TextView windValue;
     private ReadonlyDataManager dataManager;
     private RaceInfoFragment infoFragment;
@@ -243,6 +243,24 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             loadNavDrawer(mCourseArea, event);
             loadWelcomeFragment();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mReceiver = new IntentReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
+        filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
     private void loadNavDrawer(CourseArea courseArea, EventBase event) {
@@ -561,6 +579,23 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 if (course.getId().toString().equals(mCourseAreaId.toString())) {
                     mCourseArea = course;
                     setupFragments();
+                }
+            }
+        }
+    }
+
+    private class IntentReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            View view = findViewById(R.id.race_panel_top);
+            if (view != null) {
+                if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
+                    view.setVisibility(View.GONE);
+                }
+                if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
+                    view.setVisibility(View.VISIBLE);
                 }
             }
         }

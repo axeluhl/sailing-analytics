@@ -9,8 +9,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
@@ -52,15 +55,15 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
         dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
-        mRaceHeader = layout.findViewById(R.id.race_content_header);
+        mRaceHeader = ViewHolder.get(layout, R.id.race_content_header);
         if (mRaceHeader != null) {
             mRaceHeader.setOnClickListener(new RaceHeaderClick());
         }
 
-        mCurrentTime = (TextView) layout.findViewById(R.id.current_time);
-        mTimeFinish = (TextView) layout.findViewById(R.id.time_finish);
-        mHeaderTime = (TextView) layout.findViewById(R.id.timer_text);
-        mTimeStart = (TextView) layout.findViewById(R.id.time_start);
+        mCurrentTime = ViewHolder.get(layout, R.id.current_time);
+        mTimeFinish = ViewHolder.get(layout, R.id.time_finish);
+        mHeaderTime = ViewHolder.get(layout, R.id.timer_text);
+        mTimeStart = ViewHolder.get(layout, R.id.time_start);
         if (getArguments().getBoolean(TOGGLED, false)) {
             toggleMarker(layout, R.id.time_marker);
         }
@@ -69,7 +72,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
     }
 
     @Override
-    public void onStart() {
+    public void onResume() {
         super.onStart();
 
         TickSingleton.INSTANCE.registerListener(this);
@@ -82,7 +85,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
     }
 
     @Override
-    public void onStop() {
+    public void onPause() {
         super.onStop();
 
         TickSingleton.INSTANCE.unregisterListener(this);
@@ -125,7 +128,9 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
     private void uncheckMarker(View view) {
         if (view != null) {
-            setMarkerLevel(mRaceHeader, R.id.time_marker, 0);
+            if (!view.equals(mRaceHeader)) {
+                setMarkerLevel(mRaceHeader, R.id.time_marker, 0);
+            }
         }
     }
 
@@ -155,9 +160,20 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            View view = new View(context);
             String action = intent.getAction();
             if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
-//                uncheckMarker(new View(context));
+                uncheckMarker(view);
+            }
+            if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
+                if (intent.getExtras() != null) {
+                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                    if (AppConstants.INTENT_ACTION_TOGGLE_TIME.equals(data)) {
+                        uncheckMarker(mRaceHeader);
+                    } else {
+                        uncheckMarker(view);
+                    }
+                }
             }
         }
     }
