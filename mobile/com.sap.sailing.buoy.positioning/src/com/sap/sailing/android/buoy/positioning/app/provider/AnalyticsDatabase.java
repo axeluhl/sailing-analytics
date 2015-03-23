@@ -54,14 +54,14 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + Tables.MARKS + " ("
     			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
     			+ MarkColums.MARK_CHECKIN_DIGEST + " TEXT,"
-    			+ MarkColums.MARK_ID + " INTEGER,"
+    			+ MarkColums.MARK_ID + " TEXT,"
     			+ MarkColums.MARK_NAME + " TEXT,"
     			+ MarkColums.MARK_TYPE + " TEXT,"
     			+ MarkColums.MARK_CLASS_NAME + " TEXT );");
         
         db.execSQL("CREATE TABLE " + Tables.MARK_PINGS + " ("
     			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-    			+ MarkPingColumns.MARK_ID + " INTEGER,"
+    			+ MarkPingColumns.MARK_ID + " TEXT,"
     			+ MarkPingColumns.MARK_PING_TIMESTAMP + " TEXT,"
     			+ MarkPingColumns.MARK_PING_LATITUDE + " TEXT,"
     			+ MarkPingColumns.MARK_PING_LONGITUDE + " TEXT,"

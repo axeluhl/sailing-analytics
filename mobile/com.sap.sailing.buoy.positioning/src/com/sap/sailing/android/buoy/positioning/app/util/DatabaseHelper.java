@@ -1,5 +1,8 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -9,7 +12,6 @@ import android.database.Cursor;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.CheckinUri;
@@ -20,9 +22,7 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public class DatabaseHelper {
 
@@ -78,7 +78,7 @@ public class DatabaseHelper {
         while (!mc.isAfterLast()) {
         	MarkInfo markInfo = new MarkInfo();
         	markInfo.setCheckinDigest(mc.getString((mc.getColumnIndex(Mark.MARK_CHECKIN_DIGEST))));
-        	markInfo.setId(mc.getInt((mc.getColumnIndex(Mark.MARK_ID))));
+        	markInfo.setId(mc.getString((mc.getColumnIndex(Mark.MARK_ID))));
         	markInfo.setName(mc.getString((mc.getColumnIndex(Mark.MARK_NAME))));
         	markInfo.setType(mc.getString((mc.getColumnIndex(Mark.MARK_TYPE))));
         	markInfo.setClassName(mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))));
