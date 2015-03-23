@@ -979,12 +979,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog) {
         GPSFixTrack<Mark, GPSFix> track = null;
         for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            if (Util.contains(trackedRace.getMarks(), mark)) {
-                GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getOrCreateTrack(mark);
-                if (spansTimePoint(trackCandidate, timePoint)) {
-                    track = trackCandidate;
-                    break;
-                }
+            GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
+            if (trackCandidate != null && spansTimePoint(trackCandidate, timePoint)) {
+                track = trackCandidate;
+                break;
             }
         }
         if (track == null) { // no spanning track found in any tracked race, or no tracked races found
