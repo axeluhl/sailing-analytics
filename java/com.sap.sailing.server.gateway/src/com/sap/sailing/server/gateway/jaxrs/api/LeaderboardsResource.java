@@ -613,7 +613,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     private final FlatGPSFixJsonDeserializer fixDeserializer = new FlatGPSFixJsonDeserializer();
     private final FlatGPSFixJsonSerializer fixSerializer = new FlatGPSFixJsonSerializer();
 
-    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+    RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
     }
 

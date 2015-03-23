@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.test.jaxrs;
+package com.sap.sailing.server.gateway.jaxrs.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -29,6 +29,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
+import com.sap.sailing.server.gateway.test.jaxrs.AbstractJaxRsApiTest;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
