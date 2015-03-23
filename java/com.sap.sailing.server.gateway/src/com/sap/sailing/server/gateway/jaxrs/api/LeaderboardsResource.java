@@ -50,6 +50,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -63,14 +64,15 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
-import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
@@ -83,6 +85,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -665,23 +668,16 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
         RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
         RacingEventService service = getService();
-
         try {
-            if (lastKnownFix != null){
-                //ping again to avoid interpolation, avoid filtering by paying attention to maxSpeedForSmoothing
-                GPSFix tmp; 
-                long timeDifference = 1;
-                do {
-                    tmp = new GPSFixImpl(lastKnownFix.getPosition(), fix.getTimePoint().minus(timeDifference));
-                    timeDifference++;
-                } while (tmp.getSpeedAndBearingRequiredToReach(fix).getKnots() > GPSFixTrackImpl.getDefaultMaxSpeedForSmoothing().getKnots());
-                
-                adapter.pingMark(regattaLog, mark, tmp, service);
+            if (lastKnownFix != null) {
+                // ping again to avoid interpolation, avoid filtering by paying attention to maxSpeedForSmoothing
+                final Distance distance = lastKnownFix.getPosition().getDistance(fix.getPosition());
+                final Duration minDuration = GPSFixTrackImpl.getDefaultMaxSpeedForSmoothing().getDuration(distance);
+                final GPSFix repeatedFixAvoidingCreepingMark = new GPSFixImpl(lastKnownFix.getPosition(), fix.getTimePoint().minus(minDuration));
+                adapter.pingMark(regattaLog, mark, repeatedFixAvoidingCreepingMark, service);
             }
-            
             adapter.pingMark(regattaLog, mark, fix, service);
             logger.log(Level.INFO, "Pinged mark " + mark.getName());
         } catch (NoCorrespondingServiceRegisteredException e) {
@@ -697,14 +693,33 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
     }
 
+    /**
+     * Looks at the mark tracks in the tracked races attached to the <code>leaderboard</code>
+     * and if it doesn't find the <code>mark</code> requested there, looks in the <code>regattaLog</code>
+     * for device mappings for the mark and tried to load fixes from the {@link GPSFixStore}.
+     * The latter is only necessary if the mark isn't found in any tracked race because should there
+     * be a tracked race in the leaderboard that has the mark, it will also have received the fixes
+     * from the {@link GPSFixStore} through the regatta log mapping.
+     */
     private GPSFix getLastKnownFix(Leaderboard leaderboard, Mark mark, RegattaLog regattaLog) {
-        DynamicGPSFixTrack<Mark, GPSFix> track = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
-        try {
-            getService().getGPSFixStore().loadMarkTrack(track, regattaLog, mark);
-        } catch (Exception e) {
-            return null;
+        GPSFixTrack<Mark, GPSFix> track = null;
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            if (Util.contains(trackedRace.getMarks(), mark)) {
+                track = trackedRace.getOrCreateTrack(mark);
+                break;
+            }
         }
-
+        if (track == null) { // not found in any tracked race, or no tracked races found
+            // try to load from store
+            DynamicGPSFixTrackImpl<Mark> loadedTrack = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
+            track = loadedTrack;
+            try {
+                getService().getGPSFixStore().loadMarkTrack(loadedTrack, regattaLog, mark);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Couldn't load mark track for mark "+mark, e);
+                return null;
+            }
+        }
         GPSFix lastKnownFix = track.getLastFixAtOrBefore(MillisecondsTimePoint.now());
         return lastKnownFix;
     }
