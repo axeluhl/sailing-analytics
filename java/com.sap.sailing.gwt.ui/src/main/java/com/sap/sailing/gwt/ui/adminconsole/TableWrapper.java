@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -17,7 +18,9 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
- * Implementing classes still have to add the table to the main panel.
+ * Implementing classes still have to add the table to the main panel. The table created and wrapped by this object
+ * offers already a {@link ListHandler} for sorting. Subclasses can obtain the table's default column sort handler
+ * created by this class's constructor by calling {@link #getColumnSortHandler}.
  */
 public abstract class TableWrapper<T, S extends SelectionModel<T>> implements IsWidget {
     protected final CellTable<T> table;
@@ -28,6 +31,7 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
     protected final ErrorReporter errorReporter;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    private final ListHandler<T> columnSortHandler;
     
     @Override
     public Widget asWidget() {
@@ -39,6 +43,9 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         table = new CellTable<T>(10000, tableRes);
+        this.dataProvider = new ListDataProvider<T>();
+        this.columnSortHandler = new ListHandler<T>(dataProvider.getList());
+        table.addColumnSortHandler(this.columnSortHandler);
         if (multiSelection) {
             SelectionCheckboxColumn<T> selectionCheckboxColumn = new SelectionCheckboxColumn<T>(
                     tableRes.cellTableStyle().cellTableCheckboxSelected(),
@@ -49,6 +56,7 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
                             return dataProvider;
                         }
             };
+            columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
             @SuppressWarnings("unchecked")
             S typedSelectionModel = (S) selectionCheckboxColumn.getSelectionModel();
             selectionModel = typedSelectionModel;
@@ -60,7 +68,6 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
             selectionModel = typedSelectionModel;
             table.setSelectionModel(selectionModel);
         }
-        this.dataProvider = new ListDataProvider<T>();
         mainPanel = new VerticalPanel();
         dataProvider.addDataDisplay(table);
         mainPanel.add(table);
@@ -72,6 +79,10 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
         }
     }
     
+    public ListHandler<T> getColumnSortHandler() {
+        return columnSortHandler;
+    }
+
     public CellTable<T> getTable() {
         return table;
     }
