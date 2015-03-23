@@ -155,7 +155,7 @@ public class CheckinManager {
 			@Override
 			public void performAction(JSONObject response) {
 				try {
-                    JSONArray markArray = response.getJSONArray("");
+                    JSONArray markArray = response.getJSONArray("marks");
                     List<MarkInfo> marks = new ArrayList<MarkInfo>();
                     for(int i = 0; i< markArray.length(); i++){
                     	JSONObject jsonMark = (JSONObject) markArray.get(i);
@@ -192,6 +192,7 @@ public class CheckinManager {
     private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
         CheckinData data = new CheckinData();
         data.leaderboardName = leaderboardName;
+        data.marks = urlData.marks;
         data.deviceUid = urlData.deviceUuid
                 .getStringRepresentation();
         data.uriString = urlData.uriStr;
@@ -255,8 +256,6 @@ public class CheckinManager {
         public String server;
         public int port;
         public String hostWithPort;
-        public String checkinURLStr;
-        public String eventId;
         public List<MarkInfo> marks;
         public String leaderboardName;
         public DeviceIdentifier deviceUuid;

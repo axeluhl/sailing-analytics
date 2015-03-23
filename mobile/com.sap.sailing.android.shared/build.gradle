@@ -25,6 +25,10 @@ android {
             storePassword 'stg_debug'
         }
     }
+    
+    lintOptions {
+          abortOnError false
+      }
 
     buildTypes {
         debug {

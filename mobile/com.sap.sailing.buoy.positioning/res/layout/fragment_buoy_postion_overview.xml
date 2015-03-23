@@ -22,9 +22,8 @@
         android:text="@string/marks"
         android:textSize="18sp" />
 
-    <View
-        style="@style/Divider"
-    />
+    <View style="@style/Divider" />
+    
     <ListView
         android:id="@+id/listMarks"
         android:layout_width="match_parent"

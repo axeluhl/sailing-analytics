@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
 public class CheckinData extends AbstractCheckinData{
@@ -32,5 +33,12 @@ public class CheckinData extends AbstractCheckinData{
         leaderboard.name = leaderboardName;
         leaderboard.checkinDigest = checkinDigest;
         return leaderboard;
+    }
+	
+	public CheckinUrlInfo getCheckinUrl(){
+        CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
+        checkinUrlInfo.urlString = uriString;
+        checkinUrlInfo.checkinDigest = checkinDigest;
+        return checkinUrlInfo;
     }
 }

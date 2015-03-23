@@ -89,14 +89,14 @@ public class DatabaseHelper {
     	return marks;
     }
     
-    public List<MarkPingInfo> getMarkPings(Context context, MarkInfo markInfo){
+    public List<MarkPingInfo> getMarkPings(Context context, String markID){
     	List<MarkPingInfo> marks = new ArrayList<MarkPingInfo>();
     	Cursor mpc = context.getContentResolver().query(Mark.CONTENT_URI, null,
-                MarkPing.MARK_ID + " = \"" + markInfo.getId() + "\"", null, null);
+                MarkPing.MARK_ID + " = \"" + markID + "\"", null, MarkPing.MARK_PING_TIMESTAMP + " DSC");
     	mpc.moveToFirst();
         while (!mpc.isAfterLast()) {
         	MarkPingInfo markPingInfo = new MarkPingInfo();
-        	markPingInfo.setMarkId(markInfo.getId());
+        	markPingInfo.setMarkId(markID);
         	markPingInfo.setTimestamp(mpc.getInt((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
         	markPingInfo.setLongitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
         	markPingInfo.setLattitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));

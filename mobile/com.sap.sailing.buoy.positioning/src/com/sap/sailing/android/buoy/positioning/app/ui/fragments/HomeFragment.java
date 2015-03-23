@@ -15,19 +15,24 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.adapter.RegattaAdapter;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.RegattaActivity;
+import com.sap.sailing.android.buoy.positioning.app.ui.activities.StartActivity;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
+import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
-public class HomeFragment extends AbstractHomeFragment implements LoaderCallbacks<Cursor> {
+public class HomeFragment extends AbstractHomeFragment implements
+		LoaderCallbacks<Cursor> {
 
-	@SuppressWarnings("unused")
 	private final static String TAG = HomeFragment.class.getName();
 
 	@SuppressLint("InflateParams")
@@ -53,99 +58,124 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
 		return view;
 	}
-	
-	@Override
-    public void onResume() {
-        super.onResume();
-        getLoaderManager().restartLoader(REGATTA_LOADER, null, this);
 
-        String lastQRCode = prefs.getLastScannedQRCode();
-        if (lastQRCode != null) {
-            handleQRCode(lastQRCode);
-        }
-    }
+	@Override
+	public void onResume() {
+		super.onResume();
+		getLoaderManager().restartLoader(REGATTA_LOADER, null, this);
+
+		String lastQRCode = prefs.getLastScannedQRCode();
+		if (lastQRCode != null) {
+			handleQRCode(lastQRCode);
+		}
+	}
 
 	@Override
 	public void displayUserConfirmationScreen(AbstractCheckinData data) {
-		// TODO Auto-generated method stub
+		CheckinData chData = (CheckinData) data;
+		checkinWithApiAndStartRegattaActivity(chData);
 
+	}
+
+	private void checkinWithApiAndStartRegattaActivity(CheckinData checkinData) {
+		try {
+			DatabaseHelper.getInstance().storeCheckinRow(getActivity(),
+					checkinData.marks, checkinData.getLeaderboard(),
+					checkinData.getCheckinUrl());
+			adapter.notifyDataSetChanged();
+
+		} catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+			ExLog.e(getActivity(), TAG,
+					"Batch insert failed: " + e.getMessage());
+			((StartActivity) getActivity()).displayDatabaseError();
+			return;
+		}
+
+		if (BuildConfig.DEBUG) {
+			ExLog.i(getActivity(), TAG,
+					"Batch-insert of checkinData completed.");
+		}
+		((StartActivity) getActivity())
+				.startRegatta(checkinData.leaderboardName);
 	}
 
 	@Override
 	public void handleScannedOrUrlMatchedUri(Uri uri) {
-		CheckinManager manager = new CheckinManager(uri.toString(), (CheckinDataActivity) getActivity());
+		CheckinManager manager = new CheckinManager(uri.toString(),
+				(CheckinDataActivity) getActivity());
 		manager.callServerAndGenerateCheckinData();
 
 	}
-	
+
 	/**
-     * Start regatta activity.
-     * 
-     * @param checkinDigest
-     */
-    private void startRegatta(String checkinDigest) {
-        Intent intent = new Intent(getActivity(), RegattaActivity.class);
-        intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
-        getActivity().startActivity(intent);
-    }
+	 * Start regatta activity.
+	 * 
+	 * @param leaderboardName
+	 * @param checkinDigest2 
+	 */
+	private void startRegatta(String leaderboardName, String checkinDigest) {
+		Intent intent = new Intent(getActivity(), RegattaActivity.class);
+		intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
+		intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
+		getActivity().startActivity(intent);
+	}
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
-        switch (loaderId) {
-        case REGATTA_LOADER:
-        	// TODO: FIX projection String
-            String[] projection = new String[] { "events.event_checkin_digest", "events.event_id", "events._id",
-                    "events.event_name", "events.event_server", "competitors.competitor_display_name",
-                    "competitors.competitor_id", "leaderboards.leaderboard_name",
-                    "competitors.competitor_country_code", "competitors.competitor_sail_id" };
-            return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsMarksJoined.CONTENT_URI,
-                    projection, null, null, null);
+	@Override
+	public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+		switch (loaderId) {
+		case REGATTA_LOADER:
+			return new CursorLoader(getActivity(),
+					AnalyticsContract.LeaderboardsMarksJoined.CONTENT_URI,
+					null, null, null, null);
 
-        default:
-            return null;
-        }
-    }
+		default:
+			return null;
+		}
+	}
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        switch (loader.getId()) {
-        case REGATTA_LOADER:
-            adapter.changeCursor(cursor);
-            break;
+	@Override
+	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+		switch (loader.getId()) {
+		case REGATTA_LOADER:
+			adapter.changeCursor(cursor);
+			break;
 
-        default:
-            break;
-        }
-    }
+		default:
+			break;
+		}
+	}
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        switch (loader.getId()) {
-        case REGATTA_LOADER:
-            adapter.changeCursor(null);
-            break;
+	@Override
+	public void onLoaderReset(Loader<Cursor> loader) {
+		switch (loader.getId()) {
+		case REGATTA_LOADER:
+			adapter.changeCursor(null);
+			break;
 
-        default:
-            break;
-        }
-    }
+		default:
+			break;
+		}
+	}
 
-    private class ItemClickListener implements OnItemClickListener {
+	private class ItemClickListener implements OnItemClickListener {
 
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
 
-            if (position < 1) // tapped header
-            {
-                return;
-            }
+			if (position < 1) // tapped header
+			{
+				return;
+			}
 
-            // -1, because there's a header row
-            Cursor cursor = (Cursor) adapter.getItem(position - 1);
+			// -1, because there's a header row
+			Cursor cursor = (Cursor) adapter.getItem(position - 1);
+			String checkinDigest = cursor.getString(cursor.getColumnIndex("leaderboard_checkin_digest"));
 
-            String checkinDigest = cursor.getString(cursor.getColumnIndex("event_checkin_digest"));
-            startRegatta(checkinDigest);
-        }
-    }
+			String leaderboardName = cursor.getString(cursor
+					.getColumnIndex("leaderboard_name"));
+			startRegatta(leaderboardName, checkinDigest);
+		}
+	}
 
 }

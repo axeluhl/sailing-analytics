@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
 
 public class RegattaAdapter extends AbstractRegattaAdapter {
@@ -18,9 +19,8 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
        TextView name = (TextView) view.findViewById(R.id.regattaName);
        if (name != null) {
-           //String text = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_NAME));
-           //text += " (" + cursor.getString(cursor.getColumnIndex(AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME)) + ")";
-           //name.setText(text);
+           String text = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_NAME));
+           name.setText(text);
        }
     }
 }

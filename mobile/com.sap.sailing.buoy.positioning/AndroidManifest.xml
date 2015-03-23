@@ -58,6 +58,27 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name=".ui.RegattaActity"
+            android:screenOrientation="unspecified">
+            
+        </activity>
+        
+        <activity
+            android:name=".ui.PositioningActivity"
+            android:screenOrientation="unspecified">
+            
+        </activity>
+        
+        <service
+            android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.sap.sailing.android.tracking.app.action.sendSavedIntents" />
+                <action android:name="com.sap.sailing.android.tracking.app.action.sendMessage" />
+            </intent-filter>
+        </service>
 
         <provider
             android:name="com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsProvider"
