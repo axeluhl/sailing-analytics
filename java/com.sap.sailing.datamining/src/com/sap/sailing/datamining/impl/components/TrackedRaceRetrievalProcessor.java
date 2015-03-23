@@ -18,8 +18,8 @@ public class TrackedRaceRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<HasLeaderboardContext, HasTrackedRaceContext> {
 
     public TrackedRaceRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasTrackedRaceContext, ?>> resultReceivers) {
-        super(HasLeaderboardContext.class, HasTrackedRaceContext.class, executor, resultReceivers);
+            Collection<Processor<HasTrackedRaceContext, ?>> resultReceivers, int retrievalLevel) {
+        super(HasLeaderboardContext.class, HasTrackedRaceContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override

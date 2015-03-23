@@ -32,7 +32,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager);
-        ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(dataProvider.getList());
+        ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();
         
         // competitors table
         TextColumn<CompetitorDTO> competitorNameColumn = new TextColumn<CompetitorDTO>() {

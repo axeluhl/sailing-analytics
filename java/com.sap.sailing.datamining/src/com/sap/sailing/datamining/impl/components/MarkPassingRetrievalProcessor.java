@@ -19,8 +19,8 @@ public class MarkPassingRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<HasTrackedRaceContext, HasMarkPassingContext> {
 
     public MarkPassingRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasMarkPassingContext, ?>> resultReceivers) {
-        super(HasTrackedRaceContext.class, HasMarkPassingContext.class, executor, resultReceivers);
+            Collection<Processor<HasMarkPassingContext, ?>> resultReceivers, int retrievalLevel) {
+        super(HasTrackedRaceContext.class, HasMarkPassingContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override

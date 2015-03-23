@@ -10,6 +10,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -109,6 +110,19 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
             return getTrackedRace().getTrack(getCompetitor()).getDistanceTraveled(legStart.getTimePoint(), end);
         }
+    }
+    
+    @Override
+    public Distance getDistanceTraveledConsideringGateStart(TimePoint timePoint) {
+        final Distance result;
+        final Distance preResult = getDistanceTraveled(timePoint);
+        final Waypoint from = getLeg().getFrom();
+        if (from == getTrackedRace().getRace().getCourse().getFirstWaypoint()) {
+            result = preResult.add(getTrackedRace().getAdditionalGateStartDistance(getCompetitor(), timePoint));
+        } else {
+            result = preResult;
+        }
+        return result;
     }
 
     private MarkPassing getMarkPassingForLegStart() {

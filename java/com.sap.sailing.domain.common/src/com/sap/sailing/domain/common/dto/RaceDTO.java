@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.TimingConstants;
 
 /**
  * Master data about a single race that is to be transferred to the client.<p>
@@ -13,6 +14,8 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
  */
 public class RaceDTO extends NamedDTO {
     private static final long serialVersionUID = 2613189982608149975L;
+
+    public enum RaceLiveState { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE, TRACKED_BUT_NOT_SCHEDULED };
 
     /**
      * Tells if this race is currently being tracked, meaning that a {@link RaceTracker} is
@@ -46,6 +49,20 @@ public class RaceDTO extends NamedDTO {
         this.isTracked = isCurrentlyTracked;
     }
 
+    public RaceLiveState getLiveState(long serverTimePointAsMillis) {
+        RaceLiveState result = RaceLiveState.NOT_TRACKED;         
+        if(trackedRace != null && trackedRace.hasGPSData && trackedRace.hasWindData) {
+            result = RaceLiveState.TRACKED;
+            if(isLive(serverTimePointAsMillis)) {
+                result = RaceLiveState.TRACKED_AND_LIVE;
+                if(startOfRace == null) {
+                    result = RaceLiveState.TRACKED_BUT_NOT_SCHEDULED;
+                }                    
+            }
+        }
+        return result;
+    }
+
     public RegattaAndRaceIdentifier getRaceIdentifier() {
         return new RegattaNameAndRaceName(regattaName, getName());
     }
@@ -54,6 +71,52 @@ public class RaceDTO extends NamedDTO {
         return regattaName;
     }
 
+    /**
+     * @see {@link TrackedRace#isLive} for further explanation.
+     * @param serverTimePointAsMillis
+     *            the time point (in server clock time) at which to determine whether the race is/was live
+     * @return <code>true</code> if <code>serverTimePointAsMillis</code> is between (inclusively) the start and end time
+     *         point of the "live" interval as defined above.
+     */
+    public boolean isLive(long serverTimePointAsMillis) {
+        final Date startOfLivePeriod;
+        final Date endOfLivePeriod;
+        if (trackedRace == null || !trackedRace.hasGPSData || !trackedRace.hasWindData) {
+            startOfLivePeriod = null;
+            endOfLivePeriod = null;
+        } else {
+            if (startOfRace == null) {
+                startOfLivePeriod = trackedRace.startOfTracking;
+            } else {
+                startOfLivePeriod = new Date(startOfRace.getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
+            }
+            if (endOfRace == null) {
+                if (trackedRace.timePointOfNewestEvent != null) {
+                    endOfLivePeriod = new Date(trackedRace.timePointOfNewestEvent.getTime()
+                            + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                } else {
+                    endOfLivePeriod = null;
+                }
+            } else {
+                endOfLivePeriod = new Date(endOfRace.getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+            }
+        }
+        
+        // if an empty timepoint is given then take the start of the race
+        if (serverTimePointAsMillis == 0) {
+            serverTimePointAsMillis = startOfLivePeriod.getTime()+1;
+        }
+        
+        // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
+        // when this DTO was assembled, or there were no GPS or wind data
+        final boolean result =
+                startOfLivePeriod != null &&
+                endOfLivePeriod != null &&
+                startOfLivePeriod.getTime() <= serverTimePointAsMillis &&
+                serverTimePointAsMillis <= endOfLivePeriod.getTime();
+        return result;
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

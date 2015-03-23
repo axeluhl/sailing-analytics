@@ -294,8 +294,7 @@ In contrast to the _Tracking App_, we won't perform a check-in. However, we can 
 
 This information is represented in a URL with the following structure:
 ```
-http://<host>/buoy-tender/checkin
-  &leaderboard_name=<leaderboard-name>
+http://<host>/buoy-tender/checkin?leaderboard_name=<leaderboard-name>
 ```
 
 _also see [Tracking App Check-In Information](#tracking-checkin-info) for additional notes that might apply_
