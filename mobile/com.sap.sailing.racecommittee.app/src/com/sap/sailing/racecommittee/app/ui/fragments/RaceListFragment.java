@@ -283,6 +283,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         ExLog.i(getActivity(), TAG, "Touched " + mAdapter.getItem(position).toString());
 
         mDrawerLayout.closeDrawers();
+        mAdapter.setSelectedRace(mAdapter.getItem(position));
         mCallbacks.onRaceListItemSelected(mAdapter.getItem(position));
     }
 

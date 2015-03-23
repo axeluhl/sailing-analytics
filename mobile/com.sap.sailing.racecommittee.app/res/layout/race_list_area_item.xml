@@ -63,9 +63,14 @@
         android:id="@+id/panel_left"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="2dp"
         android:layout_toLeftOf="@id/panel_right"
         android:layout_toStartOf="@id/panel_right">
+
+        <ImageView
+            android:id="@+id/race_marker"
+            android:layout_width="@dimen/thick_line"
+            android:layout_height="match_parent"
+            android:src="@drawable/marker_race"/>
 
         <LinearLayout
             android:id="@+id/race_flag"
@@ -114,8 +119,8 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
-            android:layout_marginStart="5dp"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
             android:layout_toLeftOf="@id/race_flag"
             android:layout_toStartOf="@id/race_flag"
             android:orientation="vertical">
