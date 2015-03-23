@@ -13,7 +13,7 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
 public class RestServletContainer extends ServletContainer {
     private static final long serialVersionUID = -3132655822281021061L;
 
-    private static final String OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME = "osgi-bundlecontext"; 
+    public static final String OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME = "osgi-bundlecontext"; 
 
     public static final String RACING_EVENT_SERVICE_TRACKER_NAME = "racingEventServiceTracker"; 
 

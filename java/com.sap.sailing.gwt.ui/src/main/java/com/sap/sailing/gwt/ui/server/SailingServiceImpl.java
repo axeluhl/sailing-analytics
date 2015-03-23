@@ -762,6 +762,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         markDTO.type = mark.getType();
         return markDTO;
     }
+    
+    private Iterable<? extends MarkDTO> convertToMarkDTOs(Iterable<Mark> marks) {
+        List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
+        for (Mark mark : marks){
+            markDTOs.add(convertToMarkDTO(mark, null));
+        }
+        return markDTOs;
+    }
 
     private RegattaDTO convertToRegattaDTO(Regatta regatta) {
         RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), regatta.getScoringScheme().getType());
@@ -4922,6 +4930,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
+    public Collection<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null){
+            //TODO: implement proper Exception Handling
+            return null;
+        }
+        
+        Collection<MarkDTO> markDTOs = new HashSet<>();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()){
+            for (Fleet fleet : raceColumn.getFleets()) {
+                RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
+                List<Mark> marks = new ArrayList<>();
+                marks.addAll(new DefinedMarkFinder(raceLog).analyze());
+                Util.addAll(convertToMarkDTOs(raceLog, marks), markDTOs);
+                if (trackedRace != null) {
+                    Util.addAll(convertToMarkDTOs(trackedRace.getMarks()), markDTOs);
+                }
+            }
+        }
+        return markDTOs;
+    }
+
+    @Override
     public void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
@@ -5427,5 +5459,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
                 competitors, getLocale(localeInfoName));
+    }
+    
+    @Override
+    public void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
+            String leaderboardName, String emails, String localeInfoName) throws MailException {
+        Event event = getService().getEvent(eventDto.id);
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
+                emails, getLocale(localeInfoName));
     }
 }

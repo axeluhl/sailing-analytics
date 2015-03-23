@@ -9,10 +9,11 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0 Beta</h1>
-<h2>URL: /api/v1/leaderboards/{name}/device_mappings/start</h2>
+<h2>URL: /api/v1/leaderboards/{name}/marks/{id}/gps_fixes</h2>
 
 <b>Description:</b>
-<p>Tracking App Device Checkin on leaderboard</p>
+<p>Adds an arbitrary number GPS-fixes that originated from a device with a unique identifier as fixes for the mark.
+This is done by adding the fixes to the GPSFixStore, and creating device-mappings in the RegattaLog attached to the Leaderboard.</p>
 <br/>
 <table>
 	<tr>
@@ -20,8 +21,8 @@
 		<td>REST</td>
 	</tr>
 	<tr>
-		<td>Input format:</td>
-		<td>JSON (application/json)</td>
+		<td>Post data input format:</td>
+		<td>JSON</td>
 	</tr>
 	<tr>
 		<td>Output format:</td>
@@ -41,14 +42,26 @@
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td>POST <a href=http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/start>http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/start</a>
+		<td>POST <a href="http://www.sapsailing.com/sailingserver/api/v1/leaderboards/{name}/marks/{id}/gps_fixes">http://www.sapsailing.com/sailingserver/api/v1/leaderboards/{name}/marks/{id}/gps_fixes</a>
 			<pre><code>
 {
-    "competitorId" : "af855a56-9726-4a9c-a77e-da955bd289bg",
-    "deviceType" : "ios",
-    "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
-    "pushDeviceId" : "0f744707bebcf74f9b7c25d48e3358945f6aa01da5ddb387462c7eaf61bbad78",
-    "fromMillis" : 1415624564718
+  "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
+  "fixes" : [
+    {
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
+      "speed" : 3.61,
+      "course" : 258.11,
+    },
+    {
+      "timestamp" : 14144168490000,
+      "latitude" : 55.12456,
+      "longitude" : 8.03456,
+      "speed" : 5.1,
+      "course" : 14.2,
+    }
+  ]
 }
 			</code></pre>
 		</td>

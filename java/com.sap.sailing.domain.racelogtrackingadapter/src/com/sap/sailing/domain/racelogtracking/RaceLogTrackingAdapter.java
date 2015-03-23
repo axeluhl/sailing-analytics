@@ -78,7 +78,22 @@ public interface RaceLogTrackingAdapter {
     /**
      * Add a fix to the {@link GPSFixStore}, and create a mapping with a virtual device for exactly that timepoint.
      */
+    void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service, DeviceIdentifier device);
+    
+    /**
+     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService) using a random {@link PingDeviceIdentifier}
+     */
     void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
+    
+    /**
+     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService)
+     */
+    void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
+    
+    /**
+     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService, DeviceIdentifier)
+     */
+    void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service, DeviceIdentifier device);
 
     /**
      * Duplicate the course and competitor registrations in the newest {@link RaceLogCourseDesignChangedEvent} in
@@ -102,7 +117,15 @@ public interface RaceLogTrackingAdapter {
 
     /**
      * Invite competitors for tracking via the Tracking App by sending out emails.
+     * @throws MailException 
      */
     void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
             String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException;
+
+    /**
+     * Invite buoy tenders for buoy pinging via the Buoy Tender App by sending out emails.
+     * @throws MailException 
+     */
+    void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
+            String emails, Locale locale) throws MailException;
 }
