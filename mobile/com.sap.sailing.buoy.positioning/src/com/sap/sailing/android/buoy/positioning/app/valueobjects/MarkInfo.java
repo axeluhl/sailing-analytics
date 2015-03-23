@@ -2,17 +2,17 @@ package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
 public class MarkInfo {
 	
-	private int markId;
+	private String markId;
 	private String name;
 	private String type;
 	private String className;
 	private String checkinDigest;
 
-	public int getId() {
+	public String getId() {
 		return markId;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.markId = id;
 	}
 

@@ -5,8 +5,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,11 +20,13 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
 import com.sap.sailing.android.shared.util.NetworkHelper;
+import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -111,6 +116,7 @@ public class CheckinManager {
 
                         try {
                             leaderboardName = response.getString("name");
+                            urlData.getMarkUrl = urlData.hostWithPort + prefs.getServerMarkPath(leaderboardName);
                         } catch (JSONException e) {
                             ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.getLeaderboardUrl
                                     + ", Error: " + e.getMessage());
@@ -142,10 +148,45 @@ public class CheckinManager {
                 });
     }
     
-	private void getMarksFromServer(String leaderboardName,
-			HttpGetRequest getMarksRequest, URLData urlData) {
-		// TODO Auto-generated method stub
-		
+	private void getMarksFromServer(final String leaderboardName,
+			HttpGetRequest getMarksRequest, final URLData urlData) {
+		NetworkHelper.getInstance(activity).executeHttpJsonRequestAsnchronously(getMarksRequest, new NetworkHelperSuccessListener() {
+			
+			@Override
+			public void performAction(JSONObject response) {
+				try {
+                    JSONArray markArray = response.getJSONArray("");
+                    List<MarkInfo> marks = new ArrayList<MarkInfo>();
+                    for(int i = 0; i< markArray.length(); i++){
+                    	JSONObject jsonMark = (JSONObject) markArray.get(i);
+                    	MarkInfo mark = new MarkInfo();
+                    	mark.setClassName(jsonMark.getString("@class"));
+                    	mark.setName(jsonMark.getString("name"));
+                    	mark.setId(jsonMark.getString("id"));
+                    	mark.setType(jsonMark.getString("type"));
+                    	marks.add(mark);
+                    }
+                    urlData.marks = marks;
+                    saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
+
+                } catch (JSONException e) {
+                    ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.getMarkUrl
+                            + ", Error: " + e.getMessage());
+                    activity.dismissProgressDialog();
+                    displayAPIErrorRecommendRetry();
+                    return;
+                }
+				
+			}
+		}, new NetworkHelper.NetworkHelperFailureListener() {
+			
+			@Override
+            public void performAction(NetworkHelper.NetworkHelperError e) {
+                ExLog.e(activity, TAG, "Failed to get marks from API: " + e.getMessage());
+                activity.dismissProgressDialog();
+                displayAPIErrorRecommendRetry();
+            }
+		});
 	}
 
     private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
@@ -216,6 +257,7 @@ public class CheckinManager {
         public String hostWithPort;
         public String checkinURLStr;
         public String eventId;
+        public List<MarkInfo> marks;
         public String leaderboardName;
         public DeviceIdentifier deviceUuid;
         public String getMarkUrl;
