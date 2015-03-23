@@ -69,11 +69,11 @@ public abstract class CourseManagementWidget implements IsWidget {
         mainPanel.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         
         waypoints = new WaypointTableWrapper<SingleSelectionModel<WaypointDTO>>(
-                new SingleSelectionModel<WaypointDTO>(), sailingService, stringMessages, errorReporter);
+                /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         multiMarkControlPoints = new ControlPointTableWrapper<MultiSelectionModel<ControlPointDTO>>(
-                new MultiSelectionModel<ControlPointDTO>(), sailingService, stringMessages, errorReporter);
+                /* multiSelection */ true, sailingService, stringMessages, errorReporter);
         marks = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
-                new MultiSelectionModel<MarkDTO>(), sailingService, stringMessages, errorReporter);
+                /* multiSelection */ true, sailingService, stringMessages, errorReporter);
         
         CaptionPanel waypointsPanel = new CaptionPanel(stringMessages.waypoints());
         CaptionPanel controlPointsPanel = new CaptionPanel(stringMessages.twoMarkControlPoint());

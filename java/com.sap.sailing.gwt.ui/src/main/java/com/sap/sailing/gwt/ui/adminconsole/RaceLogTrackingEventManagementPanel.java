@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -50,7 +49,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter,
-                stringMessages, new MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
+                stringMessages, /* multiSelection */ true);
         
         // add upload panel
         CaptionPanel importPanel = new CaptionPanel(stringMessages.importFixes());

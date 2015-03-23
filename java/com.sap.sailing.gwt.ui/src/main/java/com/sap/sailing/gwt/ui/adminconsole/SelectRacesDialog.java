@@ -31,7 +31,7 @@ public class SelectRacesDialog extends DataEntryDialog<Set<RaceColumnDTOAndFleet
                     }
         }, true, dialogCallback);
         racesTable = new RaceTableWrapper<MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
-                sailingService, stringMessages, errorReporter, new MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
+                sailingService, stringMessages, errorReporter, /* multiSelection */ true);
         racesTable.setSelectedLeaderboardName(leaderboardName);
         racesTable.getDataProvider().getList().addAll(races);
         racesTable.getSelectionModel().addSelectionChangeHandler(new Handler() {

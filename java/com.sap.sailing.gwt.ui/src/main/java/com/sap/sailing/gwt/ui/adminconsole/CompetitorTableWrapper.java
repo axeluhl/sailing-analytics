@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -16,33 +15,23 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources.AdminConsoleTableStyle;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sse.common.Color;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
-    private static final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-    private static final AdminConsoleTableStyle tableSTyle = tableResources.cellTableStyle();
-    
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     
-    private final S selectionModel;
-
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
-            Class<S> selectionModelType, boolean enablePager) {
-        super(sailingService, stringMessages, errorReporter, /* selectionModel will be set later below */ null, enablePager);
-        
+            boolean multiSelection, boolean enablePager) {
+        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager);
         ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(dataProvider.getList());
         
         // competitors table
@@ -170,28 +159,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
                 return string;
             }
         };
-
         mainPanel.insert(filterField, 0);
-        if (selectionModelType.getName().contains("Multi")) {
-            // add a selection checkbox column
-            SelectionCheckboxColumn<CompetitorDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<CompetitorDTO>(
-                    tableSTyle.cellTableCheckboxSelected(), tableSTyle.cellTableCheckboxDeselected(), tableSTyle.cellTableCheckboxColumnCell()) {
-                        @Override
-                        protected ListDataProvider<CompetitorDTO> getListDataProvider() {
-                            return dataProvider;
-                        }
-            };
-            @SuppressWarnings("unchecked")
-            S mySelectionModel = (S) selectionCheckboxColumn.getSelectionModel();
-            selectionModel = mySelectionModel;
-            table.setSelectionModel(selectionModel, selectionCheckboxColumn.getSelectionManager());
-            table.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
-        } else {
-            @SuppressWarnings("unchecked")
-            S mySelectionModel = (S) new SingleSelectionModel<CompetitorDTO>();
-            selectionModel = mySelectionModel;
-            table.setSelectionModel(selectionModel);
-        }
         table.addColumnSortHandler(competitorColumnListHandler);
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(competitorNameColumn, stringMessages.name());
@@ -200,11 +168,6 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
         table.addColumn(imageColumn, stringMessages.imageURL());
         table.addColumn(competitorEMailColumn, stringMessages.email());
         table.addColumn(competitorIdColumn, stringMessages.id());
-    }
-    
-    @Override 
-    public S getSelectionModel() {
-        return selectionModel;
     }
     
     public Iterable<CompetitorDTO> getAllCompetitors() {

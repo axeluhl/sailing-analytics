@@ -30,7 +30,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -91,7 +90,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails,
             LeaderboardsRefresher leaderboardsRefresher) {
         super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter, theStringConstants,
-                new SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
+                /* multi-selection */ false);
         this.showRaceDetails = showRaceDetails;
         leaderboardTable.ensureDebugId("LeaderboardsCellTable");
     }

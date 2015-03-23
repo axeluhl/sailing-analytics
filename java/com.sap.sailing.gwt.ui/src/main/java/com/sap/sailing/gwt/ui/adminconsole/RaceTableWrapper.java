@@ -24,9 +24,8 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     private String selectedLeaderboardName;
 
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
-            ErrorReporter errorReporter, S selectionModel) {
-        super(sailingService, stringMessages, errorReporter, selectionModel, false);
-        
+            ErrorReporter errorReporter, boolean multiSelection) {
+        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ false);
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceNameColumn =
                 new Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml>(new AnchorCell()) {
             @Override
