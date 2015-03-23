@@ -34,7 +34,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class CourseManagementWidget implements IsWidget {
     protected final MarkTableWrapper<MultiSelectionModel<MarkDTO>> marks;
-    protected final ControlPointTableWrapper<MultiSelectionModel<ControlPointDTO>> multiMarkControlPoints;
+    protected final ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>> multiMarkControlPoints;
     protected final WaypointTableWrapper<SingleSelectionModel<WaypointDTO>> waypoints;
     
     protected final Grid mainPanel;
@@ -70,7 +70,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         
         waypoints = new WaypointTableWrapper<SingleSelectionModel<WaypointDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
-        multiMarkControlPoints = new ControlPointTableWrapper<MultiSelectionModel<ControlPointDTO>>(
+        multiMarkControlPoints = new ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         marks = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
                 /* multiSelection */ true, sailingService, stringMessages, errorReporter);
