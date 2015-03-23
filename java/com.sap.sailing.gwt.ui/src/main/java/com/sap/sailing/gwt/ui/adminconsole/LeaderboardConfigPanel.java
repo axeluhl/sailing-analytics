@@ -30,7 +30,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -76,7 +75,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private Button columnMoveDownButton;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
-
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
             sb.append(safeHtml);
@@ -87,13 +85,12 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
         SafeHtml cell(String url, String displayName);
     }
-    
 
     public LeaderboardConfigPanel(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
             final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails,
             LeaderboardsRefresher leaderboardsRefresher) {
         super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter, theStringConstants,
-                new SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
+                /* multi-selection */ false);
         this.showRaceDetails = showRaceDetails;
         leaderboardTable.ensureDebugId("LeaderboardsCellTable");
     }
