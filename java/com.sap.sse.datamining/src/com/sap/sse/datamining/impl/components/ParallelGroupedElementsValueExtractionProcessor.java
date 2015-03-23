@@ -30,8 +30,8 @@ public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionR
     }
 
     @Override
-    protected ProcessorInstruction<GroupedDataEntry<FunctionReturnType>> createInstruction(final GroupedDataEntry<DataType> element) {
-        return new ProcessorInstruction<GroupedDataEntry<FunctionReturnType>>(this) {
+    protected AbstractProcessorInstruction<GroupedDataEntry<FunctionReturnType>> createInstruction(final GroupedDataEntry<DataType> element) {
+        return new AbstractProcessorInstruction<GroupedDataEntry<FunctionReturnType>>(this, ProcessorInstructionPriority.Extraction) {
             @Override
             public GroupedDataEntry<FunctionReturnType> computeResult() {
                 FunctionReturnType value = extractionFunction.tryToInvoke(element.getDataEntry(), parameterProvider);

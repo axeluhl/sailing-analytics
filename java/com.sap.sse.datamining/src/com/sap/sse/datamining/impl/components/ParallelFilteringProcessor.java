@@ -23,8 +23,8 @@ public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParalle
     }
 
     @Override
-    protected ProcessorInstruction<InputType> createInstruction(final InputType element) {
-        return new ProcessorInstruction<InputType>(this) {
+    protected AbstractProcessorInstruction<InputType> createInstruction(final InputType element) {
+        return new AbstractProcessorInstruction<InputType>(this, ProcessorInstructionPriority.Filtration) {
             @Override
             public InputType computeResult() {
                 if (filterCriterion.matches(element)) {

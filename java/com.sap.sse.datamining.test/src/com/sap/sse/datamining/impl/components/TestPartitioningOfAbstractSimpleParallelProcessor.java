@@ -27,8 +27,8 @@ public class TestPartitioningOfAbstractSimpleParallelProcessor {
             }
 
             @Override
-            protected ProcessorInstruction<Integer> createInstruction(Integer partialElement) {
-                return new ProcessorInstruction<Integer>(this) {
+            protected AbstractProcessorInstruction<Integer> createInstruction(Integer partialElement) {
+                return new AbstractProcessorInstruction<Integer>(this) {
                     @Override
                     public Integer computeResult() {
                         return 0;

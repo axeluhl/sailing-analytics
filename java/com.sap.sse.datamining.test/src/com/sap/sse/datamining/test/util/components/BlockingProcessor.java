@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
-import com.sap.sse.datamining.impl.components.ProcessorInstruction;
+import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 
 public abstract class BlockingProcessor<InputType, ResultType> extends AbstractSimpleParallelProcessor<InputType, ResultType> {
     private final long timeToBlockInMillis;
@@ -19,8 +19,8 @@ public abstract class BlockingProcessor<InputType, ResultType> extends AbstractS
     }
 
     @Override
-    protected ProcessorInstruction<ResultType> createInstruction(InputType element) {
-        return new ProcessorInstruction<ResultType>(this) {
+    protected AbstractProcessorInstruction<ResultType> createInstruction(InputType element) {
+        return new AbstractProcessorInstruction<ResultType>(this) {
             @Override
             public ResultType computeResult() throws Exception {
                 Thread.sleep(timeToBlockInMillis);

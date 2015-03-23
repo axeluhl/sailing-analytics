@@ -21,6 +21,6 @@ public abstract class AbstractSimpleParallelProcessor<InputType, ResultType>
     //Redefinition of the method to set the parameter name to element instead of partial element.
     //This makes the implementation of sub classes more fluent.
     @Override
-    protected abstract ProcessorInstruction<ResultType> createInstruction(InputType element);
+    protected abstract AbstractProcessorInstruction<ResultType> createInstruction(InputType element);
 
 }
