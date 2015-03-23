@@ -43,6 +43,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -85,6 +86,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -125,11 +127,13 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -144,6 +148,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.polars.PolarDataService;
@@ -968,6 +973,48 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Leaderboard getLeaderboardByName(String name) {
         return leaderboardsByName.get(name);
+    }
+
+    @Override
+    public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog) {
+        GPSFixTrack<Mark, GPSFix> track = null;
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            if (Util.contains(trackedRace.getMarks(), mark)) {
+                GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getOrCreateTrack(mark);
+                if (spansTimePoint(trackCandidate, timePoint)) {
+                    track = trackCandidate;
+                    break;
+                }
+            }
+        }
+        if (track == null) { // no spanning track found in any tracked race, or no tracked races found
+            // try to load from store
+            DynamicGPSFixTrackImpl<Mark> loadedTrack = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
+            track = loadedTrack;
+            Set<AbstractLog<?, ?>> logs = new HashSet<>();
+            logs.add(leaderboard.getRegattaLike().getRegattaLog());
+            if (raceLog == null) { // no race log explicitly provided --> use all race logs
+                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        logs.add(raceColumn.getRaceLog(fleet));
+                    }
+                }
+            } else {
+                logs.add(raceLog);
+            }
+            for (AbstractLog<?, ?> log : logs) {
+                try {
+                    getGPSFixStore().loadMarkTrack(loadedTrack, log, mark);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Couldn't load mark track for mark " + mark + " from log " + log, e);
+                }
+            }
+        }
+        return track.getEstimatedPosition(timePoint, /* extrapolate */ false);
+    }
+
+    private boolean spansTimePoint(GPSFixTrack<Mark, GPSFix> track, TimePoint timePoint) {
+        return track.getLastFixAtOrBefore(timePoint) != null && track.getFirstFixAtOrAfter(timePoint) != null;
     }
 
     @Override

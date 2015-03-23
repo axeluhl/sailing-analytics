@@ -54,6 +54,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -64,18 +65,16 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixTrackImpl;
 import com.sap.sailing.server.RacingEventService;
@@ -654,9 +653,10 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + markId + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
-        GPSFix lastKnownFix = getLastKnownFix(leaderboard, mark, regattaLog);
-
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        Position lastKnownPosition = getService().getMarkPosition(mark,
+                (LeaderboardThatHasRegattaLike) leaderboard, now,
+                /* raceLog==null means use all race logs */ null);
         GPSFix fix = null;
         try {
             Object requestBody = JSONValue.parseWithException(json);
@@ -671,11 +671,11 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
         RacingEventService service = getService();
         try {
-            if (lastKnownFix != null) {
+            if (lastKnownPosition != null) {
                 // ping again to avoid interpolation, avoid filtering by paying attention to maxSpeedForSmoothing
-                final Distance distance = lastKnownFix.getPosition().getDistance(fix.getPosition());
+                final Distance distance = lastKnownPosition.getDistance(fix.getPosition());
                 final Duration minDuration = GPSFixTrackImpl.getDefaultMaxSpeedForSmoothing().getDuration(distance);
-                final GPSFix repeatedFixAvoidingCreepingMark = new GPSFixImpl(lastKnownFix.getPosition(), fix.getTimePoint().minus(minDuration));
+                final GPSFix repeatedFixAvoidingCreepingMark = new GPSFixImpl(lastKnownPosition, fix.getTimePoint().minus(minDuration));
                 adapter.pingMark(regattaLog, mark, repeatedFixAvoidingCreepingMark, service);
             }
             adapter.pingMark(regattaLog, mark, fix, service);
@@ -684,43 +684,12 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             logger.log(Level.WARNING, "Could not ping mark " + mark.getName());
         }
 
-        if (lastKnownFix != null) {
-            JSONObject lastKnownFixJson = fixSerializer.serialize(lastKnownFix);
+        if (lastKnownPosition != null) {
+            JSONObject lastKnownFixJson = fixSerializer.serialize(new GPSFixImpl(lastKnownPosition, now));
             String fixJson = lastKnownFixJson.toJSONString();
             return Response.ok(fixJson, MediaType.APPLICATION_JSON).build();
         } else {
             return Response.ok().build();
         }
-    }
-
-    /**
-     * Looks at the mark tracks in the tracked races attached to the <code>leaderboard</code>
-     * and if it doesn't find the <code>mark</code> requested there, looks in the <code>regattaLog</code>
-     * for device mappings for the mark and tried to load fixes from the {@link GPSFixStore}.
-     * The latter is only necessary if the mark isn't found in any tracked race because should there
-     * be a tracked race in the leaderboard that has the mark, it will also have received the fixes
-     * from the {@link GPSFixStore} through the regatta log mapping.
-     */
-    private GPSFix getLastKnownFix(Leaderboard leaderboard, Mark mark, RegattaLog regattaLog) {
-        GPSFixTrack<Mark, GPSFix> track = null;
-        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            if (Util.contains(trackedRace.getMarks(), mark)) {
-                track = trackedRace.getOrCreateTrack(mark);
-                break;
-            }
-        }
-        if (track == null) { // not found in any tracked race, or no tracked races found
-            // try to load from store
-            DynamicGPSFixTrackImpl<Mark> loadedTrack = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
-            track = loadedTrack;
-            try {
-                getService().getGPSFixStore().loadMarkTrack(loadedTrack, regattaLog, mark);
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Couldn't load mark track for mark "+mark, e);
-                return null;
-            }
-        }
-        GPSFix lastKnownFix = track.getLastFixAtOrBefore(MillisecondsTimePoint.now());
-        return lastKnownFix;
     }
 }

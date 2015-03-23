@@ -71,14 +71,12 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.Readon
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogLastPingMappingEventFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -220,6 +218,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
@@ -253,7 +252,6 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
@@ -4884,28 +4882,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 return existing;
             }
         }
-        
         Serializable id = UUID.randomUUID();
-        
         return baseDomainFactory.getOrCreateMark(id, dto.getName(), dto.type, dto.color, dto.shape, dto.pattern);
     }
     
     /**
      * Also finds the last position of the marks, if set by pinging them
      */
-    private Collection<MarkDTO> convertToMarkDTOs(RaceLog raceLog, Iterable<Mark> marks) {
+    private Collection<MarkDTO> convertToMarkDTOs(LeaderboardThatHasRegattaLike leaderboard, RaceLog raceLog, Iterable<Mark> marks) {
         List<MarkDTO> dtos = new ArrayList<MarkDTO>();
+        final TimePoint now = MillisecondsTimePoint.now();
         for (Mark mark : marks) {
-            DynamicGPSFixTrackImpl<Mark> track = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
-            DeviceMappingEvent<?, Mark> lastPingMappingEvent = new RaceLogLastPingMappingEventFinder<Mark>(raceLog, mark).analyze();
-            if (lastPingMappingEvent != null) {
-                try {
-                    getService().getGPSFixStore().loadMarkTrack(track, DeviceMappingImpl.convertToDeviceMapping(lastPingMappingEvent));
-                } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                    logger.log(Level.WARNING, "Could not convert to Mark DTO: " + mark);
-                }
-            }
-            Position lastPos = track.getLastRawFix() == null ? null : track.getLastRawFix().getPosition();
+            final Position lastPos = getService().getMarkPosition(mark, leaderboard, now, raceLog);
             dtos.add(convertToMarkDTO(mark, lastPos));
         }
         return dtos;
@@ -4924,14 +4912,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public Iterable<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Iterable<Mark> marks = new DefinedMarkFinder(raceLog).analyze();
-        return convertToMarkDTOs(raceLog, marks);
+        return convertToMarkDTOs((LeaderboardThatHasRegattaLike) getService().getLeaderboardByName(leaderboardName), raceLog, marks);
     }
     
     @Override
     public Iterable<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
-            //TODO: implement proper Exception Handling
+            // TODO: implement proper Exception Handling
             return null;
         }
         Set<MarkDTO> markDTOs = new HashSet<>();
@@ -4948,7 +4936,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         marksById.put(markFromTrackedRace.getId(), markFromTrackedRace);
                     }
                 }
-                Util.addAll(convertToMarkDTOs(raceLog, marksById.values()), markDTOs);
+                Util.addAll(convertToMarkDTOs(
+                                (LeaderboardThatHasRegattaLike) getService().getLeaderboardByName(leaderboardName),
+                                raceLog, marksById.values()), markDTOs);
             }
         }
         return markDTOs;
