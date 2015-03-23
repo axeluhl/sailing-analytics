@@ -71,7 +71,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         waypoints = new WaypointTableWrapper<SingleSelectionModel<WaypointDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         multiMarkControlPoints = new ControlPointTableWrapper<MultiSelectionModel<ControlPointDTO>>(
-                /* multiSelection */ true, sailingService, stringMessages, errorReporter);
+                /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         marks = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
                 /* multiSelection */ true, sailingService, stringMessages, errorReporter);
         
