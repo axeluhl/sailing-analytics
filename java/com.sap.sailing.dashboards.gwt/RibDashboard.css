@@ -69,3 +69,12 @@
 	height: 0pt;
 	line-height: 0pt;
 }
+
+.eventLogo {
+	position: absolute;
+	right: 12.5px;
+	bottom: 10px;
+	height: 22.5pt;
+	z-index: 1;
+}
+}

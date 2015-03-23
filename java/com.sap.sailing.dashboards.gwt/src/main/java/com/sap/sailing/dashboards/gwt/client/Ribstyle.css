@@ -34,17 +34,6 @@
 	z-index: 1;
 }
 
-.extremelogo {
-	position: absolute;
-	left: 100%;
-	top: 100%;
-	width: 90pt;
-	height: 22.5pt;
-	margin-top: -31pt;
-	margin-left: -100pt;
-	z-index: 1;
-}
-
 .collumn {
 	position: absolute;
 	top: 5pt;

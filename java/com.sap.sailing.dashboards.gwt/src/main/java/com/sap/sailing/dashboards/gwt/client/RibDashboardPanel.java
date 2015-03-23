@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -20,7 +21,6 @@ import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComp
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
-import com.sap.sailing.domain.tracking.impl.WindComparator;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -78,6 +78,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     private List<WindBotComponent> windBotComponents;
     private StringMessages stringConstants;
+    private final String EVENT_ID_PARAMETER = "eventId";
 
     public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingServiceAsync, RibDashboardDataRetriever ribDashboardDataRetriever) {
         windBotComponents = new ArrayList<WindBotComponent>();
@@ -90,6 +91,13 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
         windloadinghintleft.setInnerText(stringConstants.dashboardWindBotLoading());
         windloadinghintright.setInnerText(stringConstants.dashboardWindBotLoading());
+    
+        String eventId = Window.Location.getParameter(EVENT_ID_PARAMETER);
+        EventLogo eventLogo = EventLogo.getEventLogoFromEventId(sailingServiceAsync, eventId);
+        if(eventLogo != null){
+            Document.get().getBody().appendChild(eventLogo.getElement());
+        }
+        
     }
 
     private void initLogos() {
@@ -97,11 +105,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         logo.setResource(RibDashboardImageResources.INSTANCE.logo_sap());
         logo.getElement().addClassName(style.logo());
         Document.get().getBody().appendChild(logo.getElement());
-
-        Image esslogo = new Image();
-        esslogo.setResource(RibDashboardImageResources.INSTANCE.logoess());
-        esslogo.getElement().addClassName(style.extremelogo());
-        Document.get().getBody().appendChild(esslogo.getElement());
     }
 
     private void initWindBotComponents(List<String> windBotIDs,
