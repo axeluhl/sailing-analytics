@@ -19,7 +19,7 @@ public class SelectRacesDialog extends DataEntryDialog<Set<RaceColumnDTOAndFleet
     
     public SelectRacesDialog(SailingServiceAsync sailingService, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
-            DialogCallback<Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> dialogCallback) {
+            String leaderboardName, DialogCallback<Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> dialogCallback) {
         super(stringMessages.selectRaces(), stringMessages.selectRaces(), stringMessages.ok(), stringMessages.cancel(),
                 new Validator<Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>() {
                     @Override
@@ -29,14 +29,11 @@ public class SelectRacesDialog extends DataEntryDialog<Set<RaceColumnDTOAndFleet
                         }
                         return null;
                     }
-            
         }, true, dialogCallback);
-        
         racesTable = new RaceTableWrapper<MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, new MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
-        
+        racesTable.setSelectedLeaderboardName(leaderboardName);
         racesTable.getDataProvider().getList().addAll(races);
-        
         racesTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

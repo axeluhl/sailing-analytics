@@ -141,7 +141,6 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
-        leaderboardTable.setSelectionModel(new MultiSelectionModel<StrippedLeaderboardDTO>());
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
     }
     
@@ -239,7 +238,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());
                     races.remove(object);
                     new SelectRacesDialog(sailingService, errorReporter, stringMessages, races,
-                            new DialogCallback<Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>() {
+                            leaderboardName, new DialogCallback<Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>() {
                                 @Override
                                 public void ok(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> editedObject) {
                                     Set<Util.Triple<String, String, String>> toRaceLogs = new java.util.HashSet<>();

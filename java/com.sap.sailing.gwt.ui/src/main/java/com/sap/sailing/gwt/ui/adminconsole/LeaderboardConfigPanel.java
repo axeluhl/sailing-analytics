@@ -76,7 +76,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private Button columnMoveDownButton;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
-
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
             sb.append(safeHtml);
@@ -87,7 +86,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
         SafeHtml cell(String url, String displayName);
     }
-    
 
     public LeaderboardConfigPanel(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
             final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails,

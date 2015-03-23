@@ -11,7 +11,6 @@ public abstract class AbstractSailingEntryPoint extends AbstractSecureEntryPoint
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
     }
     
