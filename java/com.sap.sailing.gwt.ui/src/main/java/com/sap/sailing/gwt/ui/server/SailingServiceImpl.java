@@ -5005,7 +5005,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
-
         getRaceLogTrackingAdapter().copyCourseAndCompetitors(fromRaceLog, toRaceLogs, baseDomainFactory, getService());
     }
     

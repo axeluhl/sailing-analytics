@@ -224,7 +224,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
     
     private void revokeAlreadyDefinedMarks(RaceLog raceLog, AbstractLogEventAuthor author) {
-        List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogDefineMarkEvent.class).analyze();
+        List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(raceLog, /* only unrevoked */ true, RaceLogDefineMarkEvent.class).analyze();
         for (RaceLogEvent event : markEvents) {
             try {
                 raceLog.revokeEvent(author, event, "removing mark that was already defined");
@@ -239,7 +239,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             RacingEventService service) {
         CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
         Set<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(fromRaceLog).analyze();
-
         for (RaceLog toRaceLog : toRaceLogs) {
             if (course == null || ! new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 continue;
@@ -253,19 +252,15 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             for (Waypoint oldWaypoint : course.getWaypoints()) {
                 to.addWaypoint(i++, duplicateWaypoint(oldWaypoint, controlPointDuplicationCache, markDuplicationCache, baseDomainFactory));
             }
-
             for (Mark mark : markDuplicationCache.values()) {
                 RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now, service.getServerAuthor(),
                         toRaceLog.getCurrentPassId(), mark);
                 toRaceLog.add(event);
             }
-
             int passId = toRaceLog.getCurrentPassId();
-
             RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(
                     now, service.getServerAuthor(), passId, to);
             toRaceLog.add(newCourseEvent);
-
             registerCompetitors(service, toRaceLog, competitors);
         }
     }

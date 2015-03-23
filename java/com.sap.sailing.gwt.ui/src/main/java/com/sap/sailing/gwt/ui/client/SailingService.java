@@ -492,6 +492,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, PositionDTO position);
     
+    /**
+     * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
+     * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
+     */
     void copyCourseAndCompetitorsToOtherRaceLogs(Util.Triple<String, String, String> raceLogFrom,
             Set<Util.Triple<String, String, String>> raceLogsTo);
     
