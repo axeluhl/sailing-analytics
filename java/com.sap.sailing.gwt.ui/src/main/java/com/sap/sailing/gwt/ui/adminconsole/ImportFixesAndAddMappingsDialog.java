@@ -48,9 +48,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
                 return null;
             }
         }, true, callback);
-        
         this.stringMessages = stringMessages;
-
         deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
         importWidget = new TrackFileImportWidget(deviceIdTable, stringMessages, sailingService, errorReporter);
         deviceIdTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -59,13 +57,9 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
                 deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject());
             }
         });
-        
-        final Class<?> selectionModelType = SingleSelectionModel.class;
-        @SuppressWarnings("unchecked")
-        final Class<SingleSelectionModel<CompetitorDTO>> singleSelectionType = (Class<SingleSelectionModel<CompetitorDTO>>) selectionModelType;
-        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, singleSelectionType, true);
+        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, true);
         markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(
-                new SingleSelectionModel<MarkDTO>(), sailingService, stringMessages, errorReporter);
+                /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -73,14 +67,12 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
                 mappedToSelectionChanged(competitorTable.getSelectionModel().getSelectedObject());
             }
         });
-        
         markTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 mappedToSelectionChanged(markTable.getSelectionModel().getSelectedObject());
             }
         });
-        
         sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
             @Override
             public void onSuccess(Collection<CompetitorDTO> result) {
@@ -92,7 +84,6 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
                 errorReporter.reportError("Could not load competitors: " + caught.getMessage());
             }
         });
-        
         sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<MarkDTO>>() {
             @Override
             public void onSuccess(Collection<MarkDTO> result) {
