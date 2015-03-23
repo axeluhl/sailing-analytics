@@ -259,4 +259,14 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
         return editFlag != null && editFlag.isEditing();
     }
 
+    @Override
+    public int getDefaultWidth() {
+        return -1;
+    }
+
+    @Override
+    public int getDefaultHeight() {
+        return -1;
+    }
+
 }

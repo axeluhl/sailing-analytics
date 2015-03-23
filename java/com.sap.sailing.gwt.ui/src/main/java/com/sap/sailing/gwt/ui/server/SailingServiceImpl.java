@@ -763,14 +763,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return markDTO;
     }
     
-    private Iterable<? extends MarkDTO> convertToMarkDTOs(Iterable<Mark> marks) {
-        List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
-        for (Mark mark : marks){
-            markDTOs.add(convertToMarkDTO(mark, null));
-        }
-        return markDTOs;
-    }
-
     private RegattaDTO convertToRegattaDTO(Regatta regatta) {
         RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), regatta.getScoringScheme().getType());
         regattaDTO.races = convertToRaceDTOs(regatta);
@@ -2729,10 +2721,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
             switch (dataType) {
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-                final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                if (track != null) {
-                    SpeedWithBearing speedOverGround = track.getEstimatedSpeed(timePoint);
+                final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = trackedRace.getTrack(competitor);
+                if (sogTrack != null) {
+                    SpeedWithBearing speedOverGround = sogTrack.getEstimatedSpeed(timePoint);
                     result = (speedOverGround == null) ? null : speedOverGround.getKnots();
+                }
+                break;
+            case COURSE_OVER_GROUND_TRUE_DEGREES:
+                final GPSFixTrack<Competitor, GPSFixMoving> cogTrack = trackedRace.getTrack(competitor);
+                if (cogTrack != null) {
+                    SpeedWithBearing speedOverGround = cogTrack.getEstimatedSpeed(timePoint);
+                    result = (speedOverGround == null) ? null : speedOverGround.getBearing().getDegrees();
                 }
                 break;
             case VELOCITY_MADE_GOOD_IN_KNOTS:
@@ -4916,31 +4915,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Collection<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+    public Iterable<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Collection<Mark> marks = new DefinedMarkFinder(raceLog).analyze();
+        Iterable<Mark> marks = new DefinedMarkFinder(raceLog).analyze();
         return convertToMarkDTOs(raceLog, marks);
     }
     
     @Override
-    public Collection<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName) {
+    public Iterable<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null){
+        if (leaderboard == null) {
             //TODO: implement proper Exception Handling
             return null;
         }
-        
-        Collection<MarkDTO> markDTOs = new HashSet<>();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()){
+        Set<MarkDTO> markDTOs = new HashSet<>();
+        Map<Serializable, Mark> marksById = new HashMap<>();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
-                List<Mark> marks = new ArrayList<>();
-                marks.addAll(new DefinedMarkFinder(raceLog).analyze());
-                Util.addAll(convertToMarkDTOs(raceLog, marks), markDTOs);
-                if (trackedRace != null) {
-                    Util.addAll(convertToMarkDTOs(trackedRace.getMarks()), markDTOs);
+                for (Mark markDefinitionFromRaceLog : new DefinedMarkFinder(raceLog).analyze()) {
+                    marksById.put(markDefinitionFromRaceLog.getId(), markDefinitionFromRaceLog);
                 }
+                if (trackedRace != null) {
+                    for (Mark markFromTrackedRace : trackedRace.getMarks()) {
+                        marksById.put(markFromTrackedRace.getId(), markFromTrackedRace);
+                    }
+                }
+                Util.addAll(convertToMarkDTOs(raceLog, marksById.values()), markDTOs);
             }
         }
         return markDTOs;
@@ -5030,7 +5032,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
-
         getRaceLogTrackingAdapter().copyCourseAndCompetitors(fromRaceLog, toRaceLogs, baseDomainFactory, getService());
     }
     

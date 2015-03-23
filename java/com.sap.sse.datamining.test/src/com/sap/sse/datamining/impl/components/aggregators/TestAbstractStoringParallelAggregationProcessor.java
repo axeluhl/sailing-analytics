@@ -73,6 +73,25 @@ public class TestAbstractStoringParallelAggregationProcessor {
     
     @Test(timeout=5000)
     public void testThatTheLockIsReleasedAfterStoringFailed() throws InterruptedException {
+        Collection<Processor<Integer, ?>> receivers = new HashSet<>();
+        receivers.add(new NullProcessor<Integer, Void>(Integer.class, Void.class) {
+            @Override
+            public void processElement(Integer element) {
+                receivedElement = element;
+            }
+            @Override
+            public void finish() throws InterruptedException {
+                receiverWasToldToFinish = true;
+            }
+            @Override
+            public void onFailure(Throwable failure) {
+                if (failure instanceof IllegalArgumentException) {
+                    // Do nothing, since a IllegalArgumentException is expected
+                } else {
+                    super.onFailure(failure);
+                }
+            }
+        });
         Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
             @Override
             protected void storeElement(Integer element) {

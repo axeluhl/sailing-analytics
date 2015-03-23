@@ -1,7 +1,6 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,10 +23,10 @@ public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParalle
     }
 
     @Override
-    protected Callable<InputType> createInstruction(final InputType element) {
-        return new Callable<InputType>() {
+    protected ProcessorInstruction<InputType> createInstruction(final InputType element) {
+        return new ProcessorInstruction<InputType>(this) {
             @Override
-            public InputType call() throws Exception {
+            public InputType computeResult() {
                 if (filterCriterion.matches(element)) {
                     return element;
                 } else {

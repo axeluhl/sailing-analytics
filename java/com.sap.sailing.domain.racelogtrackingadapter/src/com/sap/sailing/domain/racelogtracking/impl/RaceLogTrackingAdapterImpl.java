@@ -72,6 +72,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
@@ -185,7 +186,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     private void revokeAlreadyDefinedMarks(RaceLog raceLog, AbstractLogEventAuthor author) {
-        List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogDefineMarkEvent.class)
+        List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(raceLog, /* only unrevoked */ true, RaceLogDefineMarkEvent.class)
                 .analyze();
         for (RaceLogEvent event : markEvents) {
             try {
@@ -200,8 +201,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     public void copyCourseAndCompetitors(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs,
             SharedDomainFactory baseDomainFactory, RacingEventService service) {
         CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
+        final Set<Mark> marks = new HashSet<>();
+        course.getWaypoints().forEach(wp->Util.addAll(wp.getMarks(), marks));
         Set<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(fromRaceLog).analyze();
-
         for (RaceLog toRaceLog : toRaceLogs) {
             if (course == null || !new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 continue;
@@ -210,21 +212,18 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             TimePoint now = MillisecondsTimePoint.now();
             int i = 0;
             revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
-
             for (Waypoint oldWaypoint : course.getWaypoints()) {
                 to.addWaypoint(i++, oldWaypoint);
-                for (Mark mark : oldWaypoint.getMarks()) {
-                    RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now,
-                            service.getServerAuthor(), toRaceLog.getCurrentPassId(), mark);
-                    toRaceLog.add(event);
-                }
             }
-
+            for (Mark mark : marks) {
+                RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now,
+                        service.getServerAuthor(), toRaceLog.getCurrentPassId(), mark);
+                toRaceLog.add(event);
+            }
             int passId = toRaceLog.getCurrentPassId();
             RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now,
                     service.getServerAuthor(), passId, to);
             toRaceLog.add(newCourseEvent);
-
             registerCompetitors(service, toRaceLog, competitors);
         }
     }

@@ -3,8 +3,6 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -538,78 +536,74 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
         // TODO also look for defined marks in RegattaLog?
-
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             return Response.status(Status.NOT_FOUND)
                     .entity("Could not find a leaderboard with name '" + leaderboardName + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
-        Collection<Mark> marks = new HashSet<Mark>();
-        if (raceColumnName == null && fleetName != null) {
-            return Response
+        final Set<Mark> marks;
+        if (raceColumnName == null) {
+            if (fleetName != null) {
+                return Response
                     .status(Status.BAD_REQUEST)
                     .entity("Either specify neither raceColumnName nor fleetName, only raceColumnName, or raceColumnName and fleetName but not only fleetName")
                     .type(MediaType.TEXT_PLAIN).build();
-        } else if (raceColumnName == null && fleetName == null) {
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); // might not yet be attached
-                    marks.addAll(new DefinedMarkFinder(raceLog).analyze());
-                    if (trackedRace != null) {
-                        Util.addAll(trackedRace.getMarks(), marks);
+            } else {
+                marks = new HashSet<Mark>();
+                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); // might not yet be attached
+                        Util.addAll(new DefinedMarkFinder(raceLog).analyze(), marks);
+                        if (trackedRace != null) {
+                            Util.addAll(trackedRace.getMarks(), marks);
+                        }
                     }
                 }
             }
-        } else if (raceColumnName != null) {
-
+        } else {
             RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn == null) {
                 return Response
                         .status(Status.NOT_FOUND)
                         .entity("Could not find a race column '" + raceColumnName + "' in leaderboard '"
                                 + leaderboardName + "'.").type(MediaType.TEXT_PLAIN).build();
-            }
-
-            if (fleetName != null) {
+            } else if (fleetName != null) {
                 Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet == null) {
                     return Response
                             .status(Status.NOT_FOUND)
                             .entity("Could not find fleet '" + fleetName + "' in leaderboard '" + leaderboardName
                                     + "'.").type(MediaType.TEXT_PLAIN).build();
+                } else {
+                    marks = getMarksForFleet(raceColumn, fleet);
                 }
-
-                marks = getMarksForFleet(raceColumn, fleet);
             } else {
                 // Return all marks for a certain race column
+                marks = new HashSet<Mark>();
                 for (Fleet fleet : raceColumn.getFleets()) {
                     Util.addAll(getMarksForFleet(raceColumn, fleet), marks);
                 }
             }
         }
-
         JSONArray array = new JSONArray();
         for (Mark mark : marks) {
             array.add(markSerializer.serialize(mark));
         }
-
-        return Response.ok(array.toJSONString(), MediaType.APPLICATION_JSON).build();
+        JSONObject result = new JSONObject();
+        result.put("marks", array);
+        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON).build();
     }
 
-    private Collection<Mark> getMarksForFleet(RaceColumn raceColumn, Fleet fleet) {
+    private Set<Mark> getMarksForFleet(RaceColumn raceColumn, Fleet fleet) {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); // might not yet be attached
-
-        List<Mark> marks = new ArrayList<>();
-
-        marks.addAll(new DefinedMarkFinder(raceLog).analyze());
+        Set<Mark> marks = new HashSet<>();
+        Util.addAll(new DefinedMarkFinder(raceLog).analyze(), marks);
         if (trackedRace != null) {
             Util.addAll(trackedRace.getMarks(), marks);
         }
-
         return marks;
     }
 

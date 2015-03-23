@@ -1,7 +1,6 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -21,10 +20,10 @@ public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultT
     }
 
     @Override
-    protected Callable<ResultType> createInstruction(final WorkingType partialElement) {
-        return new Callable<ResultType>() {
+    protected ProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement) {
+        return new ProcessorInstruction<ResultType>(this) {
             @Override
-            public ResultType call() throws Exception {
+            public ResultType computeResult() {
                 incrementRetrievedDataAmount();
                 return convertWorkingToResultType(partialElement);
             }

@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.SimplePager;
@@ -10,8 +8,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
@@ -33,17 +34,35 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
     }
 
     public TableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            S selectionModel, boolean enablePager) {
+            boolean multiSelection, boolean enablePager) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.selectionModel = selectionModel;
+        table = new CellTable<T>(10000, tableRes);
+        if (multiSelection) {
+            SelectionCheckboxColumn<T> selectionCheckboxColumn = new SelectionCheckboxColumn<T>(
+                    tableRes.cellTableStyle().cellTableCheckboxSelected(),
+                    tableRes.cellTableStyle().cellTableCheckboxDeselected(),
+                    tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
+                        @Override
+                        protected ListDataProvider<T> getListDataProvider() {
+                            return dataProvider;
+                        }
+            };
+            @SuppressWarnings("unchecked")
+            S typedSelectionModel = (S) selectionCheckboxColumn.getSelectionModel();
+            selectionModel = typedSelectionModel;
+            table.setSelectionModel(selectionModel, selectionCheckboxColumn.getSelectionManager());
+            table.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
+        } else {
+            @SuppressWarnings("unchecked")
+            S typedSelectionModel = (S) new SingleSelectionModel<T>();
+            selectionModel = typedSelectionModel;
+            table.setSelectionModel(selectionModel);
+        }
         this.dataProvider = new ListDataProvider<T>();
         mainPanel = new VerticalPanel();
-        table = new CellTable<T>(10000, tableRes);
         dataProvider.addDataDisplay(table);
-        table.setSelectionModel(selectionModel);
         mainPanel.add(table);
-        
         if (enablePager) {
             table.setPageSize(8);
             SimplePager pager = new SimplePager();
@@ -64,9 +83,9 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
         return dataProvider;
     }
     
-    public void refresh(Collection<T> newItems) {
+    public void refresh(Iterable<T> newItems) {
         dataProvider.getList().clear();
-        dataProvider.getList().addAll(newItems);
+        Util.addAll(newItems, dataProvider.getList());
         dataProvider.flush();
     }
 }

@@ -1091,6 +1091,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
+    String mediaNoVideosCaption();
     String mediaShowVideoCaption();
     String mediaShowVideoTooltip(String title);
     String mediaHideVideoCaption();
@@ -1162,4 +1163,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String runningQuery();
     String inviteBuoyTenders();
     String orMultipleEmails();
+    String courseOverGroundTrueDegreesTooltip();
+    String courseOverGroundTrueDegrees();
+    String results();
+    String group();
+    String valueAscending();
+    String valueDescending();
+    String sortBy();
 }
