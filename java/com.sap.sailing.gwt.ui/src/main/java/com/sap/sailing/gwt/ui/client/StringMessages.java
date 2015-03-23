@@ -1169,4 +1169,25 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String valueAscending();
     String valueDescending();
     String sortBy();
+    
+    String dashboardWindBotLoading();
+    String dashboardWindBotNotAvailable();
+    String dashboardWindBot();
+    String dashboardTrueWindSpeed();
+    String dashboardTrueWindDirection();
+    String dashboardTrueWindSpeedUnit();
+    String dashboardTrueWindDirectionUnit();
+    String dashboardLiveWind();
+    String dashboardAverageWind();
+    String dashboardAverageWindMinutes(int minutes);
+    String dashboardWindChartHint();
+    
+    String dashboardNewStartAnalysisAvailable();
+    
+    String dashboardStartlineAdvantageByWind();
+    String dashboardStartlineAdvantageByGeometry();
+    String dashboardRankAtFirstMark();
+    String dashboardTeam();
+    String dashboardDistanceToLineInM();
+    String dashboardSpeedInKts();
 }

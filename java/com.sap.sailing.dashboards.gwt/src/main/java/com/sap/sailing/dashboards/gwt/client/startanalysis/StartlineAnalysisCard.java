@@ -59,6 +59,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     private RaceMap raceMap;
 
     private SailingServiceAsync sailingServiceAsync;
+    private StringMessages stringMessages;
     private final CompetitorSelectionModel competitorSelectionModel;
 
     private final double WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 185;
@@ -67,9 +68,9 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     
 
     private static StartAnalysisResources resources = GWT.create(StartAnalysisResources.class);
-
     public StartlineAnalysisCard(double leftCSSProperty, int cardId, StartAnalysisDTO startAnalysisDTO,
             SailingServiceAsync sailingServiceAsync) {
+        stringMessages = StringMessages.INSTANCE;
         resources.combinedWindPanelStyle().ensureInjected();
         this.sailingServiceAsync = sailingServiceAsync;
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */true);
@@ -85,9 +86,15 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     private void fillWindAndStartLineData(StartAnalysisDTO startAnalysisDTO) {
         if (startAnalysisDTO.startAnalysisWindLineInfoDTO != null) {
             setLineAdvantageDivWidth(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType);
+            String startLineAdvantageType;
+            if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType
+                    .equals(StartlineAdvantageType.GEOMETRIC)) {
+                startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByGeometry();
+            }else{
+                startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByWind();
+            }
             startanalysis_card_line_advantage
-                    .setInnerHTML(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType
-                            .getDisplayName()
+                    .setInnerHTML(startLineAdvantageType
                             + ": "
                             + NumberFormat
                                     .getFormat("#0.0")

@@ -8,17 +8,17 @@
 	<ui:style type='com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent.WindBotComponentStyle'
 		src='WindBotComponentStyle.css'></ui:style>
 
-	<g:HTMLPanel styleName="windBotComponent">
-		<g:HTMLPanel ui:field="windBotNamePanel" styleName="{style.windBotNamePanel}">Wind Bot</g:HTMLPanel>
+	<g:HTMLPanel ui:field="windBotComponent" styleName="windBotComponent">
+		<g:HTMLPanel ui:field="windBotNamePanel" styleName="{style.windBotNamePanel}"></g:HTMLPanel>
 		<g:HTMLPanel
 			styleName="{style.wind_bot_component_live_average_container} {style.wind_bot_component_left}">
 			<startlineadvantage:LiveAverageComponent
-				ui:field="trueWindSpeedLiveAverageComponent" header="TWS" unit="kts"></startlineadvantage:LiveAverageComponent>
+				ui:field="trueWindSpeedLiveAverageComponent"></startlineadvantage:LiveAverageComponent>
 		</g:HTMLPanel>
 		<g:HTMLPanel
 			styleName="{style.wind_bot_component_live_average_container} {style.wind_bot_component_right}">
 			<startlineadvantage:LiveAverageComponent
-				ui:field="trueWindDirectionLiveAverageComponent" header="TWD" unit="°"></startlineadvantage:LiveAverageComponent>
+				ui:field="trueWindDirectionLiveAverageComponent"></startlineadvantage:LiveAverageComponent>
 		</g:HTMLPanel>
 		<g:HTMLPanel
 			styleName="{style.wind_bot_component_windchart_container} {style.wind_bot_component_left}">

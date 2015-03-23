@@ -18,13 +18,13 @@
 			<mgwtcarousel:Carousel ui:field="carousel">
 				<mgwtpanel:Panel styleName="{style.page}">
 					<g:HTMLPanel ui:field="leftwindbotcontainer" styleName="{style.collumn} {style.left}">
-						<div class="{style.windloadinghint}"><div ui:field="windloadinghintleft" class="{style.windloadinghinttext}">Loading Wind Bot Data...</div></div>
+						<div class="{style.windloadinghint}"><div ui:field="windloadinghintleft" class="{style.windloadinghinttext}"></div></div>
 					</g:HTMLPanel>
 					<g:HTMLPanel ui:field="rightwindbotcontainer"
 						styleName="{style.collumn} {style.right}">
-						<div class="{style.windloadinghint}"><div ui:field="windloadinghintright" class="{style.windloadinghinttext}">Loading Wind Bot Data...</div></div>
+						<div class="{style.windloadinghint}"><div ui:field="windloadinghintright" class="{style.windloadinghinttext}"></div></div>
 					</g:HTMLPanel>
-					<g:HTMLPanel styleName="{style.windcharthint}">Tap on chart to change interval.</g:HTMLPanel>
+					<g:HTMLPanel ui:field="windcharthint" styleName="{style.windcharthint}"></g:HTMLPanel>
 				</mgwtpanel:Panel>
 				<mgwtpanel:Panel styleName="{style.page}">
 					<g:HTMLPanel styleName="{style.collumn} {style.startanalysiscollumn}">

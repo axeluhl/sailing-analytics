@@ -20,7 +20,9 @@ import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComp
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
+import com.sap.sailing.domain.tracking.impl.WindComparator;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * This class contains all components of the Dashboard and the basic UI Elements of the Dashboard, like top and bottom
@@ -67,19 +69,27 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     @UiField
     public HTMLPanel bottombar;
+    
+    @UiField
+    public HTMLPanel windcharthint;
 
     @UiField(provided = true)
     public StartlineAnalysisComponent startanalysisComponent;
 
     private List<WindBotComponent> windBotComponents;
+    private StringMessages stringConstants;
 
     public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingServiceAsync, RibDashboardDataRetriever ribDashboardDataRetriever) {
         windBotComponents = new ArrayList<WindBotComponent>();
         ribDashboardDataRetriever.addDataObserver(this);
         startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, sailingServiceAsync);
         startLineCAComponent = new StartLineAdvantageComponent(ribDashboardDataRetriever);
+        stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
+        windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
+        windloadinghintleft.setInnerText(stringConstants.dashboardWindBotLoading());
+        windloadinghintright.setInnerText(stringConstants.dashboardWindBotLoading());
     }
 
     private void initLogos() {
@@ -115,8 +125,8 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
             windBotAddedCounterTOConsiderForPanels++;
             if (windloadinghintleft.getStyle().getOpacity() != "0.0"
                     || windloadinghintright.getStyle().getOpacity() != "0.0") {
-                windloadinghintleft.setInnerHTML("Wind bot not available.");
-                windloadinghintright.setInnerHTML("Wind bot not available.");
+                windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotNotAvailable());
+                windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotNotAvailable());
             }
         }
         addWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
@@ -134,7 +144,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
             windBotDataRetrieverProvider.removeWindBotDataRetrieverListener(windBotComponent);
         }
     }
-
+    
     @Override
     public void updateUIWithNewLiveRaceInfo(RibDashboardRaceInfoDTO liveRaceInfoDTO) {
         if (liveRaceInfoDTO != null && liveRaceInfoDTO.idOfLastTrackedRace != null) {
