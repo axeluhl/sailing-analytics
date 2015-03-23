@@ -8,14 +8,17 @@ import android.support.v7.widget.Toolbar;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.BuoyFragment;
+import com.sap.sailing.android.buoy.positioning.app.ui.fragments.BuoyFragment.pingListener;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
-public class PositioningActivity extends BaseActivity {
+public class PositioningActivity extends BaseActivity implements pingListener{
 	
 	private MarkInfo markInfo;
 	private MarkPingInfo markPing;
+	private LeaderboardInfo leaderBoard;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +27,7 @@ public class PositioningActivity extends BaseActivity {
 		String markerID = intent.getExtras().getString(getString(R.string.mark_id));
 		String checkinDigest = intent.getExtras().getString(getString(R.string.checkin_digest));
 		List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
+		leaderBoard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
 		for(MarkInfo mark : marks)
 		{
 			if(mark.getId().equals(markerID))
@@ -34,11 +38,7 @@ public class PositioningActivity extends BaseActivity {
 		}
 		if(markInfo != null)
 		{
-			List<MarkPingInfo> markPings = DatabaseHelper.getInstance().getMarkPings(this, markerID);
-			if(!markPings.isEmpty())
-			{
-				setMarkPing(markPings.get(0));
-			}
+			setPingFromDatabase(markerID);
 		}
 		setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -55,10 +55,20 @@ public class PositioningActivity extends BaseActivity {
             getSupportActionBar().setTitle(getString(R.string.title_activity_positioning));
         }
 	}
+
+	public void setPingFromDatabase(String markerID) {
+		List<MarkPingInfo> markPings = DatabaseHelper.getInstance().getMarkPings(this, markerID);
+		if(!markPings.isEmpty())
+		{
+			setMarkPing(markPings.get(0));
+		}
+	}
 	
 	@Override
     public void onResume() {
         super.onResume();
+        BuoyFragment fragment = (BuoyFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        fragment.setPingListener(this);
 	}
 
 	public MarkInfo getMarkInfo() {
@@ -75,5 +85,18 @@ public class PositioningActivity extends BaseActivity {
 
 	public void setMarkPing(MarkPingInfo markPing) {
 		this.markPing = markPing;
+	}
+
+	public LeaderboardInfo getLeaderBoard() {
+		return leaderBoard;
+	}
+
+	public void setLeaderBoard(LeaderboardInfo leaderBoard) {
+		this.leaderBoard = leaderBoard;
+	}
+
+	@Override
+	public void updatePing() {
+		setPingFromDatabase(markInfo.getId());
 	}
 }
