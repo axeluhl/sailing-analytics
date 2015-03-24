@@ -7,7 +7,7 @@
     android:paddingLeft="0dp"
     android:paddingRight="0dp" >
 
-    <com.sap.sailing.android.shared.customviews.OpenSansTextView
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
         android:id="@+id/mark_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
         android:paddingRight="7dp"
         android:paddingTop="15dp" >
 
-        <com.sap.sailing.android.shared.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/signal_accuracy_indicator_view_description"
@@ -54,7 +54,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <com.sap.sailing.android.shared.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/marker_gps_accuracy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -75,7 +75,7 @@
         android:paddingRight="7dp"
         android:paddingTop="15dp" >
 
-        <com.sap.sailing.android.shared.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/longitude"
@@ -89,7 +89,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <com.sap.sailing.android.shared.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/marker_gps_longitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -109,7 +109,7 @@
         android:paddingRight="7dp"
         android:paddingTop="15dp" >
 
-        <com.sap.sailing.android.shared.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/latitude"
@@ -123,7 +123,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <com.sap.sailing.android.shared.customviews.OpenSansTextView
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/marker_gps_latitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -134,7 +134,7 @@
 
     <View style="@style/Divider" />
 
-    <com.sap.sailing.android.shared.customviews.OpenSansButton
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
         android:id="@+id/marker_set_position_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -146,7 +146,7 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <com.sap.sailing.android.shared.customviews.OpenSansButton
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
         android:id="@+id/marker_reset_position_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

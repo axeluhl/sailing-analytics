@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
@@ -21,12 +22,13 @@ public class RegattaActivity extends AbstractRegattaActivity{
 	private List<MarkInfo> marks;
 	// private CheckinUrlInfo checkinUrl;
 	
-	// private AppPreferences prefs;
+	private AppPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //prefs = new AppPreferences(this);
+        prefs = new AppPreferences(this);
+        prefs.setLastScannedQRCode(null);
         Intent intent = getIntent();
 
         setMarks(new ArrayList<MarkInfo>());

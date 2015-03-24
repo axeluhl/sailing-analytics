@@ -63,8 +63,8 @@ public class AnalyticsProvider extends ContentProvider {
         matcher.addURI(authority, "marks", MARK);
         matcher.addURI(authority, "marks/*", MARK_ID);
 
-        matcher.addURI(authority, "mark_positions", MARK_PING);
-        matcher.addURI(authority, "mark_positions/*", MARK_PING_ID);
+        matcher.addURI(authority, "mark_pings", MARK_PING);
+        matcher.addURI(authority, "mark_pings/*", MARK_PING_ID);
 
         matcher.addURI(authority, "messages", MESSAGE);
         matcher.addURI(authority, "messages/#", MESSAGE_ID);

@@ -91,8 +91,8 @@ public class DatabaseHelper {
     
     public List<MarkPingInfo> getMarkPings(Context context, String markID){
     	List<MarkPingInfo> marks = new ArrayList<MarkPingInfo>();
-    	Cursor mpc = context.getContentResolver().query(Mark.CONTENT_URI, null,
-                MarkPing.MARK_ID + " = \"" + markID + "\"", null, MarkPing.MARK_PING_TIMESTAMP + " DSC");
+    	Cursor mpc = context.getContentResolver().query(MarkPing.CONTENT_URI, null,
+                MarkPing.MARK_ID + " = \"" + markID + "\"", null, MarkPing.MARK_PING_TIMESTAMP + " DESC");
     	mpc.moveToFirst();
         while (!mpc.isAfterLast()) {
         	MarkPingInfo markPingInfo = new MarkPingInfo();

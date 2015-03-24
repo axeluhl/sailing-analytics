@@ -16,7 +16,7 @@
         android:src="@drawable/yellow_arrow_right"
         android:textColor="@color/white" />
 
-    <com.sap.sailing.android.shared.customviews.OpenSansTextView
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
         android:id="@+id/mark_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
         android:singleLine="true"
         android:textColor="@color/white" />
 
-    <com.sap.sailing.android.shared.customviews.OpenSansTextView
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
         android:id="@+id/mark_set"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
