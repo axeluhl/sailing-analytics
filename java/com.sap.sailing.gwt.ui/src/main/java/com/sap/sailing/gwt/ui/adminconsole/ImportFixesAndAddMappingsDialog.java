@@ -84,9 +84,9 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
                 errorReporter.reportError("Could not load competitors: " + caught.getMessage());
             }
         });
-        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<MarkDTO>>() {
+        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Iterable<MarkDTO>>() {
             @Override
-            public void onSuccess(Collection<MarkDTO> result) {
+            public void onSuccess(Iterable<MarkDTO> result) {
                 markTable.refresh(result);
             }
             

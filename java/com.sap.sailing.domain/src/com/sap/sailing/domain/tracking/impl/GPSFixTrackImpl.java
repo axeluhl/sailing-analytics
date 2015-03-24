@@ -1092,4 +1092,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
         }
     }
+    
+    public static Speed getDefaultMaxSpeedForSmoothing() {
+        return DEFAULT_MAX_SPEED_FOR_SMOOTHING;
+    }
 }

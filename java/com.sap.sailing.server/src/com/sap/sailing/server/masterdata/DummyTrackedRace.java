@@ -562,4 +562,9 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         return null;
     }
 
+    @Override
+    public GPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
+        return null;
+    }
+
 }

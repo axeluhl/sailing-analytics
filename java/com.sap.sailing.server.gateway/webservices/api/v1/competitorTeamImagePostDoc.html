@@ -20,6 +20,10 @@
 		<td>REST</td>
 	</tr>
 	<tr>
+		<td>Input format:</td>
+		<td>binary (not multipart)</td>
+	</tr>
+	<tr>
 		<td>Output format:</td>
 		<td>JSON</td>
 	</tr>
@@ -41,18 +45,26 @@
 	</tr>
 	<tr>
 		<td>Request method:</td>
-		<td>POST (Binary data, not multipart)</td>
+		<td>POST</td>
 	</tr>
 	<tr>
 		<td>Request example:</td>
-		<td><pre>curl -H "Content-Type:image/jpeg" --data-binary @{image-path} \
-   http://sapsailing.com/sailingserver/api/v1/competitors/{competitor-id}/team/image</pre></td>
+		<td>
+			<pre><code>
+curl -H "Content-Type:image/jpeg" --data-binary @{image-path} \
+   http://sapsailing.com/sailingserver/api/v1/competitors/{competitor-id}/team/image
+ 			</code></pre>
+ 		</td>
 	</tr>
 	<tr>
 		<td>Response example:</td>
-		<td><pre>{
+		<td>
+			<pre><code>
+{
   "teamImageUri" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
-}</pre></td>
+}
+			</code></pre>
+		</td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>
