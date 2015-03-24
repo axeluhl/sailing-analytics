@@ -36,4 +36,9 @@
         <item name="spinBars">false</item>
     </style>
 
+    <style name="AppTheme.Dark.Button">
+        <item name="android:textColor">@color/constant_black</item>
+        <item name="android:background">@drawable/button_dark</item>
+    </style>
+
 </resources>

@@ -36,49 +36,54 @@
         </LinearLayout>
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/start_countdown"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="@dimen/default_margin_twice"
-        android:layout_marginRight="@dimen/default_margin_twice"
-        android:layout_marginTop="@dimen/default_margin"
-        tools:text="@string/race_start_time_in"
-        android:textColor="?white"
-        android:textSize="@dimen/textSize_40"
-        android:visibility="visible" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/default_margin_half"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/start_min_five"
+        <TextView
+            android:id="@+id/start_countdown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="@dimen/default_padding"
-            android:tag="5"
-            android:text="@string/race_start_in_5_minutes"
-            android:textAllCaps="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="@dimen/default_margin_twice"
+            android:layout_marginRight="@dimen/default_margin_twice"
+            tools:text="@string/race_start_time_in"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_22" />
+            android:textSize="@dimen/textSize_40"
+            android:visibility="visible"
+            android:layout_centerVertical="true" />
 
-        <Button
-            android:id="@+id/start_min_one"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="@dimen/default_padding"
-            android:tag="1"
-            android:text="@string/race_start_in_1_minute"
-            android:textAllCaps="true"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_22" />
-    </LinearLayout>
+            android:layout_marginTop="@dimen/default_margin_half"
+            android:orientation="horizontal"
+            android:layout_centerInParent="true">
+
+            <Button
+                android:id="@+id/start_min_five"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_padding"
+                android:tag="5"
+                android:text="@string/race_start_in_5_minutes"
+                android:textAllCaps="true"
+                android:textColor="?white"
+                android:textSize="@dimen/textSize_22" />
+
+            <Button
+                android:id="@+id/start_min_one"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_padding"
+                android:tag="1"
+                android:text="@string/race_start_in_1_minute"
+                android:textAllCaps="true"
+                android:textColor="?white"
+                android:textSize="@dimen/textSize_22" />
+        </LinearLayout>
+    </RelativeLayout>
 
     <View
         android:id="@+id/line_top"
@@ -122,12 +127,11 @@
             android:layout_alignParentRight="true"
             android:layout_centerInParent="true"
             android:layout_margin="@dimen/default_margin_twice"
-            android:background="?sap_blue_1"
             android:padding="@dimen/default_padding"
             android:text="@string/race_set_start"
             android:textAllCaps="true"
-            android:textColor="?white"
             android:textSize="@dimen/textSize_22"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            style="@style/AppTheme.Dark.Button"/>
     </RelativeLayout>
 </RelativeLayout>

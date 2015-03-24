@@ -11,7 +11,7 @@
         <item name="android:alertDialogTheme">@style/AppTheme.Dark.AlertDialog</item>
     </style>
 
-    <style name="AppTheme.Dark.AlertDialog" parent="Theme.AppCompat.Light.Dialog">
+    <style name="AppTheme.Dark.AlertDialog" parent="Theme.AppCompat.Dialog">
         <item name="android:colorPrimary">@color/dark_colorPrimary</item>
         <item name="android:colorPrimaryDark">@color/dark_colorPrimaryDark</item>
         <item name="android:colorAccent">@color/dark_colorAccent</item>

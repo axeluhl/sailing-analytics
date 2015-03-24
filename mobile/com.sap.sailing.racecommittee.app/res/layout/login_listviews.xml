@@ -153,5 +153,23 @@
         android:layout_below="@id/position_line"
         android:background="@color/constant_black_light" />
 
-    <include layout="@layout/signup_button" />
+    <Button
+        android:id="@+id/login_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="@dimen/default_margin_twice"
+        android:layout_marginEnd="@dimen/default_margin_twice"
+        android:layout_marginRight="@dimen/default_margin_twice"
+        android:enabled="false"
+        android:paddingLeft="@dimen/default_padding"
+        android:paddingRight="@dimen/default_padding"
+        android:text="@string/sign_up"
+        android:textAllCaps="true"
+        android:textSize="@dimen/textSize_26"
+        android:textStyle="bold"
+        android:visibility="visible"
+        style="@style/AppTheme.Dark.Button"/>
 </RelativeLayout>

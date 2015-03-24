@@ -36,4 +36,9 @@
         <item name="spinBars">false</item>
     </style>
 
+    <style name="AppTheme.Light.Button">
+        <item name="android:textColor">@color/constant_white</item>
+        <item name="android:background">@drawable/button_light</item>
+    </style>
+
 </resources>
