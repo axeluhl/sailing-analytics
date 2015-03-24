@@ -27,6 +27,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sailing.server.gateway.test.jaxrs.AbstractJaxRsApiTest;
@@ -73,8 +74,12 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testCheckinAndCheckout() throws Exception {
-        LeaderboardsResource resource = spyResource(new LeaderboardsResource());
-        doReturn(RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(racingEventService.getBaseDomainFactory())).when(resource).getRaceLogTrackingAdapter();
+        LeaderboardsResource resource = spyResource(new LeaderboardsResource() {
+            @Override
+            RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+                return RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(racingEventService.getBaseDomainFactory());
+            }
+        });
         {
         Response response = resource.pingMark(PING_MARK_JSON, leaderboard.getName(), mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));

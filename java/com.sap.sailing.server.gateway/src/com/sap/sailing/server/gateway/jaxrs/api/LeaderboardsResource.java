@@ -613,10 +613,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     private final FlatGPSFixJsonDeserializer fixDeserializer = new FlatGPSFixJsonDeserializer();
     private final FlatGPSFixJsonSerializer fixSerializer = new FlatGPSFixJsonSerializer();
 
-    /**
-     * Method unfortunately needs to be public because otherwise it cannot easily be mocked with Mockito.
-     */
-    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+    RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
     }
 
