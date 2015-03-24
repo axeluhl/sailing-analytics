@@ -21,9 +21,9 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTracki
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.mail.MailException;
@@ -40,7 +40,7 @@ public interface RaceLogTrackingAdapter {
      * <li>Is a {@link RaceLogStartTrackingEvent} present in the racelog? If not, add one</li>
      * </ul>
      */
-    void startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
+    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
             throws NotDenotedForRaceLogTrackingException, Exception;
 
     RaceLogTrackingState getRaceLogTrackingState(RacingEventService service, RaceColumn raceColumn, Fleet fleet);
@@ -76,9 +76,14 @@ public interface RaceLogTrackingAdapter {
             throws NotDenotableForRaceLogTrackingException;
 
     /**
-     * Add a fix to the {@link GPSFixStore}, and create a mapping with a virtual device for exactly that timepoint.
+     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService) using a random {@link PingDeviceIdentifier}
      */
     void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
+    
+    /**
+     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService)
+     */
+    void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
 
     /**
      * Duplicate the course and competitor registrations in the newest {@link RaceLogCourseDesignChangedEvent} in
@@ -102,7 +107,15 @@ public interface RaceLogTrackingAdapter {
 
     /**
      * Invite competitors for tracking via the Tracking App by sending out emails.
+     * @throws MailException 
      */
     void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
             String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException;
+
+    /**
+     * Invite buoy tenders for buoy pinging via the Buoy Tender App by sending out emails.
+     * @throws MailException 
+     */
+    void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
+            String emails, Locale locale) throws MailException;
 }

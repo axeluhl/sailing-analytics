@@ -19,6 +19,7 @@ public class LegEntryDTO implements Serializable {
     private static final long serialVersionUID = -1236734337344886025L;
     public LegType legType;
     public Double distanceTraveledInMeters;
+    public Double distanceTraveledIncludingGateStartInMeters;
     public Double averageSpeedOverGroundInKnots;
     public int rank;
     public Double gapToLeaderInSeconds;
@@ -62,6 +63,7 @@ public class LegEntryDTO implements Serializable {
         result = prime * result
                 + ((currentSpeedOverGroundInKnots == null) ? 0 : currentSpeedOverGroundInKnots.hashCode());
         result = prime * result + ((distanceTraveledInMeters == null) ? 0 : distanceTraveledInMeters.hashCode());
+        result = prime * result + ((distanceTraveledIncludingGateStartInMeters == null) ? 0 : distanceTraveledIncludingGateStartInMeters.hashCode());
         result = prime
                 * result
                 + ((estimatedTimeToNextWaypointInSeconds == null) ? 0 : estimatedTimeToNextWaypointInSeconds.hashCode());
@@ -119,6 +121,11 @@ public class LegEntryDTO implements Serializable {
             if (other.distanceTraveledInMeters != null)
                 return false;
         } else if (!distanceTraveledInMeters.equals(other.distanceTraveledInMeters))
+            return false;
+        if (distanceTraveledIncludingGateStartInMeters == null) {
+            if (other.distanceTraveledIncludingGateStartInMeters != null)
+                return false;
+        } else if (!distanceTraveledIncludingGateStartInMeters.equals(other.distanceTraveledIncludingGateStartInMeters))
             return false;
         if (estimatedTimeToNextWaypointInSeconds == null) {
             if (other.estimatedTimeToNextWaypointInSeconds != null)

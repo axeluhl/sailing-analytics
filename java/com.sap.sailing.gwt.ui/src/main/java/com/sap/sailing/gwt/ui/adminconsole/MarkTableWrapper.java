@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -19,10 +18,9 @@ import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
-    public MarkTableWrapper(S selectionModel, SailingServiceAsync sailingService, StringMessages stringMessages,
+    public MarkTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, selectionModel, true);
-        
+        super(sailingService, stringMessages, errorReporter, multiSelection, true);
         TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {
@@ -94,10 +92,8 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
         table.addColumn(markUUIDColumn, "UUID");
     }
     
-    public void refresh(Collection<MarkDTO> marks) {
-        dataProvider.getList().clear();
-        dataProvider.getList().addAll(marks);
-        dataProvider.flush();
+    public void refresh(Iterable<MarkDTO> marks) {
+        super.refresh(marks);
         Collections.sort(dataProvider.getList(), new Comparator<MarkDTO>() {
             @Override
             public int compare(MarkDTO o1, MarkDTO o2) {
@@ -107,9 +103,9 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
     }
     
     public void refresh(String leaderboardName, String raceColumnName, String fleetName) {
-        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<MarkDTO>>() {
+        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Iterable<MarkDTO>>() {
             @Override
-            public void onSuccess(Collection<MarkDTO> result) {
+            public void onSuccess(Iterable<MarkDTO> result) {
                 refresh(result);
             }
             

@@ -122,7 +122,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     public AbstractLeaderboardConfigPanel(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
             LeaderboardsRefresher leaderboardsRefresher, final ErrorReporter errorReporter,
-            StringMessages theStringConstants, SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel) {
+            StringMessages theStringConstants, boolean multiSelection) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
         leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
@@ -227,16 +227,13 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             }
         });
         vPanel.add(reloadAllRaceLogs);
-
-        
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
-        
         raceColumnTable = new RaceTableWrapper<SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
-                sailingService, stringMessages, errorReporter, raceColumnTableSelectionModel);
+                sailingService, stringMessages, errorReporter, multiSelection);
         raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
-        this.raceColumnTableSelectionModel = raceColumnTableSelectionModel;
+        this.raceColumnTableSelectionModel = raceColumnTable.getSelectionModel();
         raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardRaceColumnSelectionChanged();
@@ -265,11 +262,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             @Override
             protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
                 return leaderboardList;
-            }
-
-            @Override
-            public Boolean getValue(StrippedLeaderboardDTO row) {
-                return leaderboardTable.getSelectionModel().isSelected(row);
             }
         };
         selectionCheckboxColumn.setSortable(true);

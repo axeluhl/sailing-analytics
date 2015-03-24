@@ -3,10 +3,10 @@ package com.sap.sailing.datamining;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
+import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
@@ -18,7 +18,7 @@ import com.sap.sailing.datamining.impl.components.MarkPassingRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
@@ -32,7 +32,7 @@ public class SailingDataRetrievalChainDefinitions {
 
         final DataRetrieverChainDefinition<RacingEventService, HasLeaderboardContext> leaderboardRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 RacingEventService.class, HasLeaderboardContext.class, "LeaderboardSailingDomainRetrieverChain");
-        leaderboardRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardGroup.class, "LeaderboardGroup");
+        leaderboardRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardGroupWithContext.class, "LeaderboardGroup");
         leaderboardRetrieverChainDefinition.endWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardRetrievalProcessor.class,
                 HasLeaderboardContext.class, "Leaderboard");
         

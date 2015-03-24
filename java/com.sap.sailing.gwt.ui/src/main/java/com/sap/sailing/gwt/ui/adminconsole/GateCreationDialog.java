@@ -46,7 +46,7 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
         name = createTextBox("");
         
         marksWrapper = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
-                new MultiSelectionModel<MarkDTO>(), sailingService, stringMessages, errorReporter);
+                /* multiSelection */ true, sailingService, stringMessages, errorReporter);
         marksWrapper.getDataProvider().getList().addAll(marks);
         
         marksWrapper.getSelectionModel().addSelectionChangeHandler(new Handler() {

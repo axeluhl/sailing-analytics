@@ -27,6 +27,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         availableDetailsTypes = new ArrayList<DetailType>();
         availableDetailsTypes.add(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER);
         availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED);
+        availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START);
         availableDetailsTypes.add(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS);
         availableDetailsTypes.add(DetailType.GAP_TO_LEADER_IN_SECONDS);
         availableDetailsTypes.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
@@ -34,6 +35,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
         availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
         availableDetailsTypes.add(DetailType.BEAT_ANGLE);
+        availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
         
         if (hasOverallLeaderboard) {
             availableDetailsTypes.add(DetailType.OVERALL_RANK);

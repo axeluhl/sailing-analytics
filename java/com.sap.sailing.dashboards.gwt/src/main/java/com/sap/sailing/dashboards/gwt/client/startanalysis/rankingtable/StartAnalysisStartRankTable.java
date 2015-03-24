@@ -10,14 +10,16 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSe
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisCompetitorDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
 
 public class StartAnalysisStartRankTable extends AbsolutePanel {
 
-    CellTable<StartAnalysisCompetitorDTO> table;
+    private CellTable<StartAnalysisCompetitorDTO> table;
+    private StringMessages stringConstants;
 
     public StartAnalysisStartRankTable(List<StartAnalysisCompetitorDTO> saCompetitors) {
-
+        stringConstants = StringMessages.INSTANCE;
         initTable(saCompetitors);
     }
 
@@ -59,13 +61,13 @@ public class StartAnalysisStartRankTable extends AbsolutePanel {
             }
         };
 
-        table.addColumn(rankColumn, "Rank at first mark");
+        table.addColumn(rankColumn, stringConstants.dashboardRankAtFirstMark());
         table.setColumnWidth(rankColumn, 18.0, Unit.PCT);
-        table.addColumn(teamColumn, "Team");
+        table.addColumn(teamColumn, stringConstants.dashboardTeam());
         table.setColumnWidth(teamColumn, 42.0, Unit.PCT);
-        table.addColumn(speedColumn, "Speed in kts");
+        table.addColumn(speedColumn, stringConstants.dashboardSpeedInKts());
         table.setColumnWidth(speedColumn, 15.0, Unit.PCT);
-        table.addColumn(distanceColumn, "Distance to line in m");
+        table.addColumn(distanceColumn, stringConstants.dashboardDistanceToLineInM());
         table.setColumnWidth(distanceColumn, 25.0, Unit.PCT);
 
         table.setRowCount(4, true);

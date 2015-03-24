@@ -1,9 +1,12 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.polars.PolarDataService;
 
 public interface HasLeaderboardContext {
     
-    public Leaderboard getLeaderboard();
+    Leaderboard getLeaderboard();
+
+	PolarDataService getPolarDataService();
 
 }

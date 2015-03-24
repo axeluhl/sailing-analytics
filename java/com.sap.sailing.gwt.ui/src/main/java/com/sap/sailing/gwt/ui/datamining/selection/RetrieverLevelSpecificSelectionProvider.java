@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedList
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
+import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -30,6 +31,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class RetrieverLevelSpecificSelectionProvider implements SelectionProvider<Object>, DataRetrieverChainDefinitionChangedListener {
     
+    private final DataMiningSession session;
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -42,8 +44,9 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
     private final VerticalPanel contentPanel;
     private final Collection<SingleRetrieverLevelSelectionProviderPrototype> singleRetrieverLevelSelectionProviders;
     
-    public RetrieverLevelSpecificSelectionProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+    public RetrieverLevelSpecificSelectionProvider(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                                    DataRetrieverChainDefinitionProvider dataRetrieverChainDefinitionProvider) {
+        this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
@@ -90,7 +93,7 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
             }
             first = false;
             
-            SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider = new SingleRetrieverLevelSelectionProviderPrototype(stringMessages, dataMiningService, errorReporter,
+            SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider = new SingleRetrieverLevelSelectionProviderPrototype(session, stringMessages, dataMiningService, errorReporter,
                                                                                                                                     retrieverChain, retrievedDataType, retrieverLevel );
             singleRetrieverLevelSelectionProvider.addSelectionChangedListener(singleRetrieverLevelSelectionProvidersListener);
             

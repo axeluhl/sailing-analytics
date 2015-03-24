@@ -9,6 +9,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
 public class PlainResultsPresenter implements ResultsPresenter<Number> {
     
@@ -16,6 +18,7 @@ public class PlainResultsPresenter implements ResultsPresenter<Number> {
 
     private final SimplePanel mainPanel;
     private final HTML resultsLabel;
+    private final BusyIndicator busyIndicator;
 
     public PlainResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -23,6 +26,8 @@ public class PlainResultsPresenter implements ResultsPresenter<Number> {
         mainPanel = new SimplePanel();
         resultsLabel = new HTML();
         mainPanel.setWidget(resultsLabel);
+        
+        busyIndicator = new SimpleBusyIndicator(true, 0.7f);
     }
 
     @Override
@@ -40,11 +45,13 @@ public class PlainResultsPresenter implements ResultsPresenter<Number> {
         resultsBuilder.append("</ul>");
         
         resultsLabel.setHTML(resultsBuilder.toString());
+        mainPanel.setWidget(resultsLabel);
     }
 
     @Override
     public void showError(String error) {
         resultsLabel.setHTML(error);
+        mainPanel.setWidget(resultsLabel);
     }
 
     @Override
@@ -55,6 +62,11 @@ public class PlainResultsPresenter implements ResultsPresenter<Number> {
         }
         errorBuilder.append("</ul>");
         showError(errorBuilder.toString());
+    }
+    
+    @Override
+    public void showBusyIndicator() {
+        mainPanel.setWidget(busyIndicator);
     }
 
     @Override

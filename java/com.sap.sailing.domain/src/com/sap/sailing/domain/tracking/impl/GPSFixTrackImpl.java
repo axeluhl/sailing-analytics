@@ -1033,8 +1033,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 while (!result && next.compareTo(end) <= 0) {
                     SpeedWithBearing estimatedSpeedAtNext = getEstimatedSpeed(next);
                     if (estimatedSpeedAtNext != null) {
-                        Bearing bearingAtEnd = estimatedSpeedAtNext.getBearing();
-                        result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
+                        Bearing bearingAtNext = estimatedSpeedAtNext.getBearing();
+                        result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtNext).getDegrees()) > minimumDegreeDifference;
                     }
                     next = new MillisecondsTimePoint(next.asMillis()
                             + Math.max(1000l, getMillisecondsOverWhichToAverageSpeed() / 2));
@@ -1091,5 +1091,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
             listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
         }
+    }
+    
+    public static Speed getDefaultMaxSpeedForSmoothing() {
+        return DEFAULT_MAX_SPEED_FOR_SMOOTHING;
     }
 }
