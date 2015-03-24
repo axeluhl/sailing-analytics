@@ -5,7 +5,13 @@ import android.text.format.DateFormat;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.util.Calendar;
+
 public class TimeUtils {
+
+    private TimeUtils() {
+        // only static methods
+    }
 
     public static long timeUntil(TimePoint targetTime) {
         return targetTime.asMillis() - MillisecondsTimePoint.now().asMillis();
@@ -38,7 +44,32 @@ public class TimeUtils {
         int secondsTillStart = (int) Math.ceil(milliseconds / 1000f);
         return formatDuration(secondsTillStart);
     }
-    
+
+    public static int daysBetween(Calendar day1, Calendar day2){
+        Calendar dayOne = (Calendar) day1.clone();
+        Calendar dayTwo = (Calendar) day2.clone();
+
+        if (dayOne.get(Calendar.YEAR) == dayTwo.get(Calendar.YEAR)) {
+            return Math.abs(dayOne.get(Calendar.DAY_OF_YEAR) - dayTwo.get(Calendar.DAY_OF_YEAR));
+        } else {
+            if (dayTwo.get(Calendar.YEAR) > dayOne.get(Calendar.YEAR)) {
+                //swap them
+                Calendar temp = dayOne;
+                dayOne = dayTwo;
+                dayTwo = temp;
+            }
+            int extraDays = 0;
+
+            while (dayOne.get(Calendar.YEAR) > dayTwo.get(Calendar.YEAR)) {
+                dayOne.add(Calendar.YEAR, -1);
+                // getActualMaximum() important for leap years
+                extraDays += dayOne.getActualMaximum(Calendar.DAY_OF_YEAR);
+            }
+
+            return extraDays - dayTwo.get(Calendar.DAY_OF_YEAR) + dayOne.get(Calendar.DAY_OF_YEAR);
+        }
+    }
+
     private static String formatDuration(int secondsTillStart) {
         int hours = secondsTillStart / 3600;
         int minutes = (secondsTillStart % 3600) / 60;

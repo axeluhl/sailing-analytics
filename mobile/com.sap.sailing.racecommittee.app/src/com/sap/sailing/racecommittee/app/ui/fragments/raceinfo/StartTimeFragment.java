@@ -10,10 +10,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.NumberPicker;
-import android.widget.TextView;
-import android.widget.TimePicker;
+import android.widget.*;
 
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
@@ -22,19 +19,21 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class StartTimeFragment extends ScheduleFragment implements View.OnClickListener {
+public class StartTimeFragment
+        extends ScheduleFragment
+        implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
     private static final String STARTMODE = "startMode";
     private static final int MAX_DAYS = 30;
 
     private NumberPicker mDatePicker;
     private TimePicker mTimePicker;
     private TextView mCountdown;
-    private TimePoint startTime;
+    private TimePoint mStartTime;
+    private boolean mListenerIgnore = true;
     
     /**
      * Listens for start time changes
@@ -54,34 +53,39 @@ public class StartTimeFragment extends ScheduleFragment implements View.OnClickL
         View layout = inflater.inflate(R.layout.race_schedule_start_time, container, false);
 
         mCountdown = ViewHolder.get(layout, R.id.start_countdown);
-        Button min5 = ViewHolder.get(layout, R.id.start_min_five);
-        if (min5 != null) {
-            min5.setOnClickListener(this);
+        ImageButton min_inc = ViewHolder.get(layout, R.id.minute_inc);
+        if (min_inc != null) {
+            min_inc.setOnClickListener(this);
         }
-        Button min1 = ViewHolder.get(layout, R.id.start_min_one);
-        if (min1 != null) {
-            min1.setOnClickListener(this);
+
+        ImageButton min_dec = ViewHolder.get(layout, R.id.minute_dec);
+        if (min_dec != null) {
+            min_dec.setOnClickListener(this);
         }
+
         Button setStart = ViewHolder.get(layout, R.id.set_start_time);
         if (setStart != null) {
             setStart.setOnClickListener(this);
         }
+
         return layout;
     }
 
     @Override
     public void onDestroy() {
-        getRaceState().removeChangedListener(raceStateChangedListener);
         super.onDestroy();
+
+        getRaceState().removeChangedListener(raceStateChangedListener);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         raceStateChangedListener = new BaseRaceStateChangedListener() {
             @Override
             public void onStartTimeChanged(ReadonlyRaceState state) {
-                startTime = state.getStartTime();
+                mStartTime = state.getStartTime();
                 notifyTick();
             }
         };
@@ -96,32 +100,36 @@ public class StartTimeFragment extends ScheduleFragment implements View.OnClickL
             if (getArguments() != null) {
                 switch (getArguments().getInt(STARTMODE, 0)) {
                     case 1:
-                        View header = getView().findViewById(R.id.header_text);
+                        View header = ViewHolder.get(getView(), R.id.header_text);
                         if (header != null) {
                             header.setOnClickListener(this);
                         }
-                        View back = getView().findViewById(R.id.header_back);
+                        View back = ViewHolder.get(getView(), R.id.header_back);
                         if (back != null) {
                             back.setVisibility(View.VISIBLE);
                         }
                         break;
+
                     case 2:
-                        View frame = getView().findViewById(R.id.header);
+                        View frame = ViewHolder.get(getView(), R.id.header);
                         if (frame != null) {
                             frame.setVisibility(View.GONE);
                         }
                         break;
+
                     default:
                         break;
                 }
             }
 
-            mDatePicker = (NumberPicker) getView().findViewById(R.id.start_date_picker);
+            mDatePicker = ViewHolder.get(getView(), R.id.start_date_picker);
             if (mDatePicker != null) {
+                mDatePicker.setOnValueChangedListener(this);
                 initDatePicker();
             }
-            mTimePicker = (TimePicker) getView().findViewById(R.id.start_time_picker);
+            mTimePicker = ViewHolder.get(getView(), R.id.start_time_picker);
             if (mTimePicker != null) {
+                mTimePicker.setOnTimeChangedListener(this);
                 mTimePicker.setIs24HourView(true);
                 int hours = time.get(Calendar.HOUR_OF_DAY);
                 int minutes = time.get(Calendar.MINUTE);
@@ -145,31 +153,97 @@ public class StartTimeFragment extends ScheduleFragment implements View.OnClickL
     @Override
     public void notifyTick() {
         super.notifyTick();
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+
         int resId;
         String time;
-        if (startTime == null) {
-            startTime = getPickerTime();
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        if (mStartTime == null) {
+            mStartTime = getPickerTime(true);
         }
-        if (startTime.after(now)) {
+        if (mStartTime.after(now)) {
             resId = R.string.race_start_time_in;
-            time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
+            time = TimeUtils.formatDurationUntil(mStartTime.minus(now.asMillis()).asMillis());
         } else {
             resId = R.string.race_start_time_ago;
-            time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
+            time = TimeUtils.formatDurationSince(now.minus(mStartTime.asMillis()).asMillis());
         }
         if (mCountdown != null) {
-            mCountdown.setText(getString(resId).replace("#TIME#", time));
+            String countdown = getString(resId).replace("#TIME#", time);
+            mCountdown.setText(countdown);
         }
     }
 
-    private TimePoint getPickerTime() {
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.minute_inc:
+            case R.id.minute_dec:
+                Integer minutes;
+                try {
+                    minutes = Integer.valueOf("" + view.getTag());
+                } catch (Exception ex) {
+                    minutes = 0;
+                }
+                Calendar time = Calendar.getInstance();
+                int seconds = time.get(Calendar.SECOND);
+                time.setTime(mStartTime.asDate());
+                time.set(Calendar.SECOND, seconds);
+                time.add(Calendar.MINUTE, minutes);
+                mStartTime = new MillisecondsTimePoint(time.getTimeInMillis());
+                mListenerIgnore = true;
+                setPickerTime();
+                break;
+
+            case R.id.set_start_time:
+                changeFragment(mStartTime);
+                break;
+
+            case R.id.header_text:
+                changeFragment();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+        if (!mListenerIgnore) {
+            mStartTime = new MillisecondsTimePoint(getPickerTime(true).asMillis());
+        }
+        mListenerIgnore = false;
+    }
+
+    @Override
+    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+        if (!mListenerIgnore) {
+            mStartTime = new MillisecondsTimePoint(getPickerTime(true).asMillis());
+        }
+        mListenerIgnore = false;
+    }
+
+    private void setPickerTime() {
+        Calendar today = Calendar.getInstance();
+        Calendar newTime = Calendar.getInstance();
+        newTime.setTime(mStartTime.asDate());
+
+        int days = TimeUtils.daysBetween(today, newTime);
+
+        mDatePicker.setValue(days);
+        mTimePicker.setCurrentHour(newTime.get(Calendar.HOUR_OF_DAY));
+        mTimePicker.setCurrentMinute(newTime.get(Calendar.MINUTE));
+    }
+
+    private TimePoint getPickerTime(boolean zeroSeconds) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue());
         calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
         calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
+        if (zeroSeconds) {
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+        }
         return new MillisecondsTimePoint(calendar.getTime());
     }
 
@@ -188,32 +262,6 @@ public class StartTimeFragment extends ScheduleFragment implements View.OnClickL
         mDatePicker.setMinValue(0);
         mDatePicker.setMaxValue(dates.size() - 1);
         mDatePicker.setWrapSelectorWheel(false);
-    }
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.start_min_five:
-            case R.id.start_min_one:
-                Integer minutes;
-                try {
-                    minutes = Integer.valueOf("" + view.getTag());
-                } catch (Exception ex) {
-                    minutes = 0;
-                }
-                Calendar newStartTime = Calendar.getInstance();
-                newStartTime.add(Calendar.MINUTE, minutes);
-                getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), new MillisecondsTimePoint(newStartTime.getTime()));
-                break;
-            case R.id.set_start_time:
-                changeFragment(getPickerTime());
-                break;
-            case R.id.header_text:
-                changeFragment();
-                break;
-            default:
-                break;
-        }
     }
 
     private void changeFragment() {

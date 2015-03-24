@@ -318,8 +318,8 @@
     <string name="race_reset_cancel">No Thanks</string>
     <string name="race_reset_message">Do you really want to reset this race including all settings and actions that have be made? This can not be undone.</string>
     <string name="race_set_start">Set Start</string>
-    <string name="race_start_time_in">Start in #TIME#</string>
-    <string name="race_start_time_ago">Start #TIME# ago</string>
+    <string name="race_start_time_in">-#TIME#</string>
+    <string name="race_start_time_ago">#TIME#</string>
     <string name="tomorrow">Morgen</string>
     <string name="race_begin_finish_header">Begin Finish</string>
     <string name="race_begin_finish_current">Use Current Time</string>
