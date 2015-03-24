@@ -47,6 +47,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     	db.execSQL("CREATE TABLE " + Tables.LEADERBOARDS + " ("
     			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
     			+ LeaderboardColumns.LEADERBOARD_CHECKIN_DIGEST + " TEXT, "
+    			+ LeaderboardColumns.LEADERBOARD_SERVER_URL + " TEXT, "
     			+ LeaderboardColumns.LEADERBOARD_NAME + " TEXT );");
 
         db.execSQL("CREATE TABLE " + Tables.CHECKIN_URIS + " ("

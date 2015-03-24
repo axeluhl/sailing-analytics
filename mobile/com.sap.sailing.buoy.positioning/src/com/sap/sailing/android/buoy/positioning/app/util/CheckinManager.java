@@ -194,6 +194,7 @@ public class CheckinManager {
 
     private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
         CheckinData data = new CheckinData();
+        data.serverWithPort = urlData.hostWithPort;
         data.leaderboardName = leaderboardName;
         data.marks = urlData.marks;
         data.deviceUid = urlData.deviceUuid

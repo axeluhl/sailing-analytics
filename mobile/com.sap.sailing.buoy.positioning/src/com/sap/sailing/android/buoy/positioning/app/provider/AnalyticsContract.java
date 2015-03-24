@@ -8,6 +8,7 @@ public class AnalyticsContract {
 
 	interface LeaderboardColumns {
 		String LEADERBOARD_NAME = "leaderboard_name";
+		String LEADERBOARD_SERVER_URL = "leaderboard_server_url";
 		String LEADERBOARD_CHECKIN_DIGEST = "leaderboard_checkin_digest";
 	}
 

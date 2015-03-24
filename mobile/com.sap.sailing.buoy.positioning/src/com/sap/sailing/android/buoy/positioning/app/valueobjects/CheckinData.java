@@ -14,6 +14,7 @@ public class CheckinData extends AbstractCheckinData{
 	public String deviceUid;
 	public String uriString;
 	public String checkinDigest;
+	public String serverWithPort;
 	public List<MarkInfo> marks;
 
 	public void setCheckinDigestFromString(String checkinString)
@@ -32,6 +33,7 @@ public class CheckinData extends AbstractCheckinData{
         LeaderboardInfo leaderboard = new LeaderboardInfo();
         leaderboard.name = leaderboardName;
         leaderboard.checkinDigest = checkinDigest;
+        leaderboard.serverUrl = serverWithPort;
         return leaderboard;
     }
 	
