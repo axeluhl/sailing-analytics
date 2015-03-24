@@ -223,14 +223,12 @@ public class DatabaseHelper {
     
     public boolean markLeaderboardCombnationAvailable(Context context, String checkinDigest) {
 
-        ContentResolver cr = context.getContentResolver();
-        String sel = "leaderboards.leaderboard_checkin_digest = \"" + checkinDigest;
+        Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null,
+                Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
 
-        Cursor cursor = cr.query(AnalyticsContract.Leaderboard.CONTENT_URI, null, sel, null, null);
+        int count = lc.getCount();
 
-        int count = cursor.getCount();
-
-        cursor.close();
+        lc.close();
         return count == 0;
     }
 

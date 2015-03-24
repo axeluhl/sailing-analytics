@@ -79,10 +79,12 @@ public class HomeFragment extends AbstractHomeFragment implements
 
 	private void checkinWithApiAndStartRegattaActivity(CheckinData checkinData) {
 		try {
-			DatabaseHelper.getInstance().storeCheckinRow(getActivity(),
-					checkinData.marks, checkinData.getLeaderboard(),
-					checkinData.getCheckinUrl());
-			adapter.notifyDataSetChanged();
+            if(DatabaseHelper.getInstance().markLeaderboardCombnationAvailable(getActivity(), checkinData.checkinDigest)) {
+                DatabaseHelper.getInstance().storeCheckinRow(getActivity(),
+                        checkinData.marks, checkinData.getLeaderboard(),
+                        checkinData.getCheckinUrl());
+                adapter.notifyDataSetChanged();
+            }
 
 		} catch (DatabaseHelper.GeneralDatabaseHelperException e) {
 			ExLog.e(getActivity(), TAG,
