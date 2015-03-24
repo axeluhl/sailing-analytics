@@ -117,6 +117,14 @@ name to make sure you get to the event you're interested in.
 		<td>Gets the details of a competitor in the context of a leaderboard</td>
 	</tr>
 	<tr>
+		<td><a href="leaderboardRaceMarksGetDoc.html">/api/v1/leaderboards/{name}/marks?race_column={name}&amp;fleet={name}</a></td>
+		<td>Gets the marks of a race (from the RaceLog and if possible the TrackedRace)</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardMarkGpsFixesPostDoc.html">/api/v1/leaderboards/{name}/marks/{id}/gps_fixes</a></td>
+		<td>Pings the location of a mark via the RegattaLog</td>
+	</tr>
+	<tr>
 		<td><a href="gpsFixesPostDoc.html">/api/v1/gps_fixes</a></td>
 		<td>Adds GPS-fixes that originated from a device with a unique identifier</td>
 	</tr>

@@ -120,7 +120,6 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
         List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder<>(log).analyze().get(mark);
-
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {
                 loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);

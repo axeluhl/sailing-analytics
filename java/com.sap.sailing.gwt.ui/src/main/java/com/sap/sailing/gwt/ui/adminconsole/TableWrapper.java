@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -15,6 +13,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
@@ -95,9 +94,9 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
         return dataProvider;
     }
     
-    public void refresh(Collection<T> newItems) {
+    public void refresh(Iterable<T> newItems) {
         dataProvider.getList().clear();
-        dataProvider.getList().addAll(newItems);
+        Util.addAll(newItems, dataProvider.getList());
         dataProvider.flush();
     }
 }

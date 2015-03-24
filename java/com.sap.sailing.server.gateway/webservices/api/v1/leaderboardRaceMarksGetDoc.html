@@ -9,10 +9,13 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0 Beta</h1>
-<h2>URL: /api/v1/regattas/{regattaname}/races/{racename}/marks/positions</h2>
+<h2>URL: /api/v1/leaderboards/{name}/marks?race_column={name}&amp;fleet={name}</h2>
 
 <b>Description:</b>
-<p>Gets all GPS positions of the course marks of a race</p>
+<p>Gets the marks of a race (from the RaceLog and if possible the TrackedRace). If the "fleet"
+parameter is specified then so must the race_column parameter. If no fleet is specified,
+the marks for all fleets of the specified race column are returned. If no race column and
+no fleet are specified, all marks of all races in the leaderboard are returned.</p>
 <br/>
 <table>
 	<tr>
@@ -29,14 +32,8 @@
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>
-			<div>fromtime (ISO format, such as 2014-02-14T10:12:03Z)</div>
-			<div>fromtimeasmillis</div>
-			<div>totime (ISO format, such as 2014-02-14T10:12:03Z)</div>
-			<div>totimeasmillis</div>
-			<div>lastknown (boolean, false or true; defaults to false; true will return the last known fix even
-			     if there is no fix for the mark within the interval requested)</div>
-		</td>
+		<td>race_column
+			<br/>fleet</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>
@@ -44,7 +41,7 @@
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/marks/positions">http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/marks/positions</a></td>
+		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/leaderboards/{name}/marks?race_column={name}&fleet={name}">http://www.sapsailing.com/sailingserver/api/v1/leaderboards/{name}/marks?race_column={name}&amp;fleet={name}</a></td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>
