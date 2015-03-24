@@ -1280,6 +1280,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     @Override
     public GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark) {
+        return getOrCreateTrack(mark, true);
+    }
+    
+    @Override
+    public GPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
+        return getOrCreateTrack(mark, false);
+    }
+    
+    private GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark, boolean createIfNotExistent){
         GPSFixTrack<Mark, GPSFix> result = markTracks.get(mark);
         if (result == null) {
             // try again, this time with more expensive synchronization
@@ -1287,7 +1296,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 LockUtil.lockForRead(getSerializationLock());
                 try {
                     result = markTracks.get(mark);
-                    if (result == null) {
+                    if (result == null && createIfNotExistent) {
                         result = createMarkTrack(mark);
                         markTracks.put(mark, result);
                     }

@@ -107,10 +107,10 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         };
     }
     
-    public AsyncCallback<Collection<MarkDTO>> getSetMarksCallback() {
-        return new AsyncCallback<Collection<MarkDTO>>() {
+    public AsyncCallback<Iterable<MarkDTO>> getSetMarksCallback() {
+        return new AsyncCallback<Iterable<MarkDTO>>() {
             @Override
-            public void onSuccess(Collection<MarkDTO> result) {
+            public void onSuccess(Iterable<MarkDTO> result) {
                 markTable.refresh(result);
                 select(result, markTable.getSelectionModel());
             }

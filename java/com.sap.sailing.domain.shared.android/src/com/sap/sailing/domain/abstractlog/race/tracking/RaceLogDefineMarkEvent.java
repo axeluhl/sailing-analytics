@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.Mark;
 
 /**
  * Defines a mark, that can then be used to build a course.
+ * 
  * @author Fredrik Teschke
  *
  */
