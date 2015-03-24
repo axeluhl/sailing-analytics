@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -50,7 +49,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter,
-                stringMessages, new MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
+                stringMessages, /* multiSelection */ true);
         
         // add upload panel
         CaptionPanel importPanel = new CaptionPanel(stringMessages.importFixes());
@@ -141,7 +140,6 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
-        leaderboardTable.setSelectionModel(new MultiSelectionModel<StrippedLeaderboardDTO>());
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
     }
     
@@ -239,7 +237,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());
                     races.remove(object);
                     new SelectRacesDialog(sailingService, errorReporter, stringMessages, races,
-                            new DialogCallback<Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>() {
+                            leaderboardName, new DialogCallback<Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>() {
                                 @Override
                                 public void ok(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> editedObject) {
                                     Set<Util.Triple<String, String, String>> toRaceLogs = new java.util.HashSet<>();
