@@ -5,11 +5,11 @@ import android.os.Bundle;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
-import com.sap.sailing.android.shared.ui.activities.AbstractBaseActivity;
+import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 
-public class StartActivity extends AbstractBaseActivity {
+public class StartActivity extends AbstractStartActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +32,9 @@ public class StartActivity extends AbstractBaseActivity {
 		return homeFragment;
 	}
 	
-	public void startRegatta(String checkinDigest) {
+	public void startRegatta(String leaderboardName) {
 		Intent intent = new Intent(this, RegattaActivity.class);
-		intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
+		intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
 		startActivity(intent);
 	}
 }

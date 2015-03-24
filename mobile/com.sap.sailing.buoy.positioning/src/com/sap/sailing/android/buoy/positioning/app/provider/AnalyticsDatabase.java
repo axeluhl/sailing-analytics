@@ -30,8 +30,11 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String MARK_PINGS = "mark_pings";
         String CHECKIN_URIS= "checkin_uris";
         
-        String LEADERBOARDS_MARKS_JOINED = "marks LEFT JOIN leaderboards ON " + Tables.MARKS + "." + Mark.MARK_CHECKIN_DIGEST 
-        		+ " = " + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST;
+        String MARKS_LEADERBOARDS_JOINED = "marks LEFT JOIN leaderboards ON (" + Tables.MARKS + "." + Mark.MARK_CHECKIN_DIGEST 
+        		+ " = " + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " )";
+        
+        String LEADERBOARDS_MARKS_JOINED = "leaderboards LEFT JOIN marks ON (" + Tables.MARKS + "." + Mark.MARK_CHECKIN_DIGEST 
+        		+ " = " + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " )";
     }
     
     public AnalyticsDatabase(Context context) {
@@ -44,6 +47,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     	db.execSQL("CREATE TABLE " + Tables.LEADERBOARDS + " ("
     			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
     			+ LeaderboardColumns.LEADERBOARD_CHECKIN_DIGEST + " TEXT, "
+    			+ LeaderboardColumns.LEADERBOARD_SERVER_URL + " TEXT, "
     			+ LeaderboardColumns.LEADERBOARD_NAME + " TEXT );");
 
         db.execSQL("CREATE TABLE " + Tables.CHECKIN_URIS + " ("
@@ -54,14 +58,14 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + Tables.MARKS + " ("
     			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
     			+ MarkColums.MARK_CHECKIN_DIGEST + " TEXT,"
-    			+ MarkColums.MARK_ID + " TEXT,"
+    			+ MarkColums.MARK_ID + " INTEGER,"
     			+ MarkColums.MARK_NAME + " TEXT,"
     			+ MarkColums.MARK_TYPE + " TEXT,"
     			+ MarkColums.MARK_CLASS_NAME + " TEXT );");
         
         db.execSQL("CREATE TABLE " + Tables.MARK_PINGS + " ("
     			+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-    			+ MarkPingColumns.MARK_ID + " TEXT,"
+    			+ MarkPingColumns.MARK_ID + " INTEGER,"
     			+ MarkPingColumns.MARK_PING_TIMESTAMP + " TEXT,"
     			+ MarkPingColumns.MARK_PING_LATITUDE + " TEXT,"
     			+ MarkPingColumns.MARK_PING_LONGITUDE + " TEXT,"

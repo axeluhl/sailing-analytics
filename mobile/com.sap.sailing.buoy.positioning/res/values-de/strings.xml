@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="title_activity_positioning">Markierungs Position setzen</string>
     <string name="course_type">Kurstyp</string>
     <string name="marks">Kursmarkierungen</string>
     <string name="longitude">Breitengrad</string>
@@ -8,5 +9,7 @@
     <string name="set_position">Position setzen</string>
     <string name="reset_position">Position zurücksetzen</string>
     <string name="getting_marks">Empfangen der Markierungen..</string>
+    <string name="set">gesetzt</string>
+    <string name="not_set">nicht gesetzt</string>
 
 </resources>

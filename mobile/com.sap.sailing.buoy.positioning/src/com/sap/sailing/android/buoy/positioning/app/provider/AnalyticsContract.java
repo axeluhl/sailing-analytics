@@ -8,6 +8,7 @@ public class AnalyticsContract {
 
 	interface LeaderboardColumns {
 		String LEADERBOARD_NAME = "leaderboard_name";
+		String LEADERBOARD_SERVER_URL = "leaderboard_server_url";
 		String LEADERBOARD_CHECKIN_DIGEST = "leaderboard_checkin_digest";
 	}
 
@@ -105,9 +106,9 @@ public class AnalyticsContract {
                 .appendPath(PATH_MARK_PING).build();
     	
     	public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
-                + "/vnd.sap_sailing_analytics_buoy.mark";
+                + "/vnd.sap_sailing_analytics_buoy.mark.ping";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
-                + "/vnd.sap_sailing_analytics_buoy.mark";
+                + "/vnd.sap_sailing_analytics_buoy.mark.ping";
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
 
         public static Uri builMarkPingUri(String markId) {
@@ -123,6 +124,11 @@ public class AnalyticsContract {
 		public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
 				.appendPath("leaderboards_marks_joined").build();
 	}
+    
+    public static class MarksLeaderBoardsJoined{
+    	public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+				.appendPath("marks_leaderboards_joined").build();
+    }
 
 	private AnalyticsContract() {
 

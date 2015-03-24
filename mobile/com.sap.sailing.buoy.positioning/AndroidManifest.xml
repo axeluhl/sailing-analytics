@@ -13,6 +13,7 @@
 
     <!-- <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" /> -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -31,6 +32,10 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="@string/GoogleMapsKey"/>
+        
 
         <activity
             android:name=".ui.activities.StartActivity"
@@ -58,6 +63,27 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name=".ui.activities.RegattaActivity"
+            android:screenOrientation="unspecified">
+            
+        </activity>
+        
+        <activity
+            android:name=".ui.activities.PositioningActivity"
+            android:screenOrientation="unspecified">
+            
+        </activity>
+        
+        <service
+            android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.sap.sailing.android.tracking.app.action.sendSavedIntents" />
+                <action android:name="com.sap.sailing.android.tracking.app.action.sendMessage" />
+            </intent-filter>
+        </service>
 
         <provider
             android:name="com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsProvider"

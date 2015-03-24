@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -155,11 +156,13 @@ public class CheckinManager {
 			@Override
 			public void performAction(JSONObject response) {
 				try {
-                    JSONArray markArray = response.getJSONArray("");
+                    JSONArray markArray = response.getJSONArray("marks");
+                    String checkinDigest = generateCheckindigest(urlData.uriStr);
                     List<MarkInfo> marks = new ArrayList<MarkInfo>();
                     for(int i = 0; i< markArray.length(); i++){
                     	JSONObject jsonMark = (JSONObject) markArray.get(i);
                     	MarkInfo mark = new MarkInfo();
+                    	mark.setCheckinDigest(checkinDigest);
                     	mark.setClassName(jsonMark.getString("@class"));
                     	mark.setName(jsonMark.getString("name"));
                     	mark.setId(jsonMark.getString("id"));
@@ -191,7 +194,9 @@ public class CheckinManager {
 
     private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
         CheckinData data = new CheckinData();
+        data.serverWithPort = urlData.hostWithPort;
         data.leaderboardName = leaderboardName;
+        data.marks = urlData.marks;
         data.deviceUid = urlData.deviceUuid
                 .getStringRepresentation();
         data.uriString = urlData.uriStr;
@@ -246,6 +251,28 @@ public class CheckinManager {
         alert.show();
         setCheckinData(null);
     }
+    
+    private String generateCheckindigest(String url)
+    {
+    	String checkinDigest = "";
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update(url.getBytes("UTF-8"));
+			byte[] digest = md.digest();
+			StringBuffer buf = new StringBuffer();
+			for (byte byt : digest) {
+				buf.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
+				checkinDigest = buf.toString();
+			}
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return checkinDigest;
+    }
 
     public interface CheckinDataHandler{
     }
@@ -255,8 +282,6 @@ public class CheckinManager {
         public String server;
         public int port;
         public String hostWithPort;
-        public String checkinURLStr;
-        public String eventId;
         public List<MarkInfo> marks;
         public String leaderboardName;
         public DeviceIdentifier deviceUuid;

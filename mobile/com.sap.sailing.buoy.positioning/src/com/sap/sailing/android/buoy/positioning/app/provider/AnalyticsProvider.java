@@ -47,6 +47,8 @@ public class AnalyticsProvider extends ContentProvider {
     
     private static final int LEADERBOARDS_MARKS_JOINED = 600;
     
+    private static final int MARKS_LEADERBOARDS_JOINED = 700;
+    
     
 
     
@@ -63,13 +65,15 @@ public class AnalyticsProvider extends ContentProvider {
         matcher.addURI(authority, "marks", MARK);
         matcher.addURI(authority, "marks/*", MARK_ID);
 
-        matcher.addURI(authority, "mark_positions", MARK_PING);
-        matcher.addURI(authority, "mark_positions/*", MARK_PING_ID);
+        matcher.addURI(authority, "mark_pings", MARK_PING);
+        matcher.addURI(authority, "mark_pings/*", MARK_PING_ID);
 
         matcher.addURI(authority, "messages", MESSAGE);
         matcher.addURI(authority, "messages/#", MESSAGE_ID);
         
         matcher.addURI(authority, "leaderboards_marks_joined", LEADERBOARDS_MARKS_JOINED);
+        
+        matcher.addURI(authority, "marks_leaderboards_joined", MARKS_LEADERBOARDS_JOINED);
         
         return matcher;
     }
@@ -105,6 +109,12 @@ public class AnalyticsProvider extends ContentProvider {
         	SQLiteQueryBuilder el = new SQLiteQueryBuilder();
         	el.setTables(Tables.LEADERBOARDS_MARKS_JOINED);
         	cursor = el.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+        	return cursor;
+        	
+        case MARKS_LEADERBOARDS_JOINED:
+        	SQLiteQueryBuilder el2 = new SQLiteQueryBuilder();
+        	el2.setTables(Tables.MARKS_LEADERBOARDS_JOINED);
+        	cursor = el2.query(db, projection, selection, selectionArgs, null, null, sortOrder);
         	return cursor;
             	
             default:

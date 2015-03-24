@@ -7,7 +7,7 @@
     android:paddingLeft="10dp"
     android:paddingRight="10dp">
 
-    <com.sap.sailing.android.shared.customviews.OpenSansTextView
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
@@ -15,16 +15,15 @@
         android:textSize="18sp" />
 
 
-    <com.sap.sailing.android.shared.customviews.OpenSansTextView
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:text="@string/marks"
         android:textSize="18sp" />
 
-    <View
-        style="@style/Divider"
-    />
+    <View style="@style/Divider" />
+    
     <ListView
         android:id="@+id/listMarks"
         android:layout_width="match_parent"

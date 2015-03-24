@@ -47,6 +47,7 @@ public class DatabaseHelper {
         if (lc.moveToFirst()) {
             leaderboard.rowId = lc.getInt(lc.getColumnIndex(BaseColumns._ID));
             leaderboard.name = lc.getString(lc.getColumnIndex(Leaderboard.LEADERBOARD_NAME));
+            leaderboard.serverUrl = lc.getString(lc.getColumnIndex(Leaderboard.LEADERBOARD_SERVER_URL));
         }
 
         lc.close();
@@ -89,14 +90,14 @@ public class DatabaseHelper {
     	return marks;
     }
     
-    public List<MarkPingInfo> getMarkPings(Context context, MarkInfo markInfo){
+    public List<MarkPingInfo> getMarkPings(Context context, String markID){
     	List<MarkPingInfo> marks = new ArrayList<MarkPingInfo>();
-    	Cursor mpc = context.getContentResolver().query(Mark.CONTENT_URI, null,
-                MarkPing.MARK_ID + " = \"" + markInfo.getId() + "\"", null, null);
+    	Cursor mpc = context.getContentResolver().query(MarkPing.CONTENT_URI, null,
+                MarkPing.MARK_ID + " = \"" + markID + "\"", null, MarkPing.MARK_PING_TIMESTAMP + " DESC");
     	mpc.moveToFirst();
         while (!mpc.isAfterLast()) {
         	MarkPingInfo markPingInfo = new MarkPingInfo();
-        	markPingInfo.setMarkId(markInfo.getId());
+        	markPingInfo.setMarkId(markID);
         	markPingInfo.setTimestamp(mpc.getInt((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
         	markPingInfo.setLongitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
         	markPingInfo.setLattitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
@@ -158,6 +159,7 @@ public class DatabaseHelper {
 
         ContentValues clv = new ContentValues();
         clv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
+        clv.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
         clv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
         cr.insert(Leaderboard.CONTENT_URI, clv);
 
@@ -217,6 +219,19 @@ public class DatabaseHelper {
             throw new GeneralDatabaseHelperException(e.getMessage());
         }
 
+    }
+    
+    public boolean markLeaderboardCombnationAvailable(Context context, String checkinDigest) {
+
+        ContentResolver cr = context.getContentResolver();
+        String sel = "leaderboards.leaderboard_checkin_digest = \"" + checkinDigest;
+
+        Cursor cursor = cr.query(AnalyticsContract.Leaderboard.CONTENT_URI, null, sel, null, null);
+
+        int count = cursor.getCount();
+
+        cursor.close();
+        return count == 0;
     }
 
     public class GeneralDatabaseHelperException extends Exception {
