@@ -91,7 +91,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     @Override
-    public void startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
+    public RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
             throws NotDenotedForRaceLogTrackingException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
@@ -99,16 +99,18 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             throw new NotDenotedForRaceLogTrackingException();
         }
         RegattaIdentifier regatta = ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier();
-
         if (raceLogTrackingState != RaceLogTrackingState.TRACKING) {
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTrackingEvent(MillisecondsTimePoint.now(),
                     service.getServerAuthor(), raceLog.getCurrentPassId());
             raceLog.add(event);
         }
-
+        final RaceHandle result;
         if (!isRaceLogRaceTrackerAttached(service, raceLog)) {
-            addTracker(service, regatta, leaderboard, raceColumn, fleet, -1);
+            result = addTracker(service, regatta, leaderboard, raceColumn, fleet, -1);
+        } else {
+            result = null;
         }
+        return result;
     }
 
     /**

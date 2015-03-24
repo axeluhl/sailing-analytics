@@ -23,6 +23,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.mail.MailException;
@@ -39,7 +40,7 @@ public interface RaceLogTrackingAdapter {
      * <li>Is a {@link RaceLogStartTrackingEvent} present in the racelog? If not, add one</li>
      * </ul>
      */
-    void startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
+    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
             throws NotDenotedForRaceLogTrackingException, Exception;
 
     RaceLogTrackingState getRaceLogTrackingState(RacingEventService service, RaceColumn raceColumn, Fleet fleet);
