@@ -263,11 +263,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
                 return leaderboardList;
             }
-
-            @Override
-            public Boolean getValue(StrippedLeaderboardDTO row) {
-                return leaderboardTable.getSelectionModel().isSelected(row);
-            }
         };
         selectionCheckboxColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(selectionCheckboxColumn, new Comparator<StrippedLeaderboardDTO>() {

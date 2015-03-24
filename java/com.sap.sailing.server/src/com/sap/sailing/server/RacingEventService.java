@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -35,6 +36,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
@@ -54,6 +56,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -123,6 +126,22 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         parameter, or <code>null</code> if no such leaderboard is known to this service
      */
     Leaderboard getLeaderboardByName(String name);
+
+    /**
+     * Looks at the mark tracks in the tracked races attached to the <code>leaderboard</code>. If it doesn't find a
+     * track for the <code>mark</code> requested there which has fixes before and after <code>timePoint</code> (to
+     * ensure that no track cropping has taken place, removing the fixes for the interesting time period), looks in the
+     * leaderboard's regatta log and the specific <code>raceLog</code> (if provided) or all race logs attached to the
+     * leaderboard (if not provided) for device mappings for the mark and tries to load fixes from the
+     * {@link GPSFixStore}. The latter is only necessary if the mark isn't found in any tracked race with fixes
+     * surrounding <code>timePoint</code> because should there be a tracked race in the leaderboard that has the mark
+     * then it will also have received the fixes from the {@link GPSFixStore} through the regatta log mapping.
+     * <p>
+     * 
+     * @return the position obtained by interpolation but never extrapolation from the track identified as described
+     *         above
+     */
+    Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog);
 
     /**
      * Stops tracking all races of the regatta specified. This will also stop tracking wind for all races of this regatta.
@@ -581,4 +600,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     FileStorageManagementService getFileStorageManagementService();
 
     ClassLoader getCombinedMasterDataClassLoader();
+
 }
