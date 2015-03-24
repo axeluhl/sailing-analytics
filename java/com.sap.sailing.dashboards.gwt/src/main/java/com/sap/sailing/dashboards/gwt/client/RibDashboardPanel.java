@@ -10,18 +10,19 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.LayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.ui.client.widget.carousel.Carousel;
-import com.sap.sailing.dashboards.gwt.client.bottomnotification.BottomNotification;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComponent;
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * This class contains all components of the Dashboard and the basic UI Elements of the Dashboard, like top and bottom
@@ -57,7 +58,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     @UiField
     HTMLPanel rightwindbotcontainer;
 
-    @UiField
+    @UiField(provided = true)
     public StartLineAdvantageComponent startLineCAComponent;
 
     @UiField
@@ -68,20 +69,35 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     @UiField
     public HTMLPanel bottombar;
+    
+    @UiField
+    public HTMLPanel windcharthint;
 
     @UiField(provided = true)
     public StartlineAnalysisComponent startanalysisComponent;
 
-    private BottomNotification bottomNotification;
     private List<WindBotComponent> windBotComponents;
+    private StringMessages stringConstants;
+    private final String EVENT_ID_PARAMETER = "eventId";
 
-    public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService) {
+    public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingServiceAsync, RibDashboardDataRetriever ribDashboardDataRetriever) {
         windBotComponents = new ArrayList<WindBotComponent>();
-        RibDashboardDataRetriever.getInstance(ribDashboardService).addDataObserver(this);
-        initBottomNotification();
-        startanalysisComponent = new StartlineAnalysisComponent(bottomNotification, ribDashboardService);
+        ribDashboardDataRetriever.addDataObserver(this);
+        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, sailingServiceAsync);
+        startLineCAComponent = new StartLineAdvantageComponent(ribDashboardDataRetriever);
+        stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
+        windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
+        windloadinghintleft.setInnerText(stringConstants.dashboardWindBotLoading());
+        windloadinghintright.setInnerText(stringConstants.dashboardWindBotLoading());
+    
+        String eventId = Window.Location.getParameter(EVENT_ID_PARAMETER);
+        EventLogo eventLogo = EventLogo.getEventLogoFromEventId(sailingServiceAsync, eventId);
+        if(eventLogo != null){
+            Document.get().getBody().appendChild(eventLogo.getElement());
+        }
+        
     }
 
     private void initLogos() {
@@ -89,16 +105,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         logo.setResource(RibDashboardImageResources.INSTANCE.logo_sap());
         logo.getElement().addClassName(style.logo());
         Document.get().getBody().appendChild(logo.getElement());
-
-        Image esslogo = new Image();
-        esslogo.setResource(RibDashboardImageResources.INSTANCE.logoess());
-        esslogo.getElement().addClassName(style.extremelogo());
-        Document.get().getBody().appendChild(esslogo.getElement());
-    }
-
-    private void initBottomNotification() {
-        bottomNotification = new BottomNotification();
-        RootPanel.get().add(bottomNotification);
     }
 
     private void initWindBotComponents(List<String> windBotIDs,
@@ -122,8 +128,8 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
             windBotAddedCounterTOConsiderForPanels++;
             if (windloadinghintleft.getStyle().getOpacity() != "0.0"
                     || windloadinghintright.getStyle().getOpacity() != "0.0") {
-                windloadinghintleft.setInnerHTML("Wind bot not available.");
-                windloadinghintright.setInnerHTML("Wind bot not available.");
+                windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotNotAvailable());
+                windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotNotAvailable());
             }
         }
         addWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
@@ -141,7 +147,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
             windBotDataRetrieverProvider.removeWindBotDataRetrieverListener(windBotComponent);
         }
     }
-
+    
     @Override
     public void updateUIWithNewLiveRaceInfo(RibDashboardRaceInfoDTO liveRaceInfoDTO) {
         if (liveRaceInfoDTO != null && liveRaceInfoDTO.idOfLastTrackedRace != null) {

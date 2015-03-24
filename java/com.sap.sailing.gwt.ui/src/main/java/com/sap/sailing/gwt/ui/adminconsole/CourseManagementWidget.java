@@ -34,7 +34,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class CourseManagementWidget implements IsWidget {
     protected final MarkTableWrapper<MultiSelectionModel<MarkDTO>> marks;
-    protected final ControlPointTableWrapper<MultiSelectionModel<ControlPointDTO>> multiMarkControlPoints;
+    protected final ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>> multiMarkControlPoints;
     protected final WaypointTableWrapper<SingleSelectionModel<WaypointDTO>> waypoints;
     
     protected final Grid mainPanel;
@@ -69,11 +69,11 @@ public abstract class CourseManagementWidget implements IsWidget {
         mainPanel.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         
         waypoints = new WaypointTableWrapper<SingleSelectionModel<WaypointDTO>>(
-                new SingleSelectionModel<WaypointDTO>(), sailingService, stringMessages, errorReporter);
-        multiMarkControlPoints = new ControlPointTableWrapper<MultiSelectionModel<ControlPointDTO>>(
-                new MultiSelectionModel<ControlPointDTO>(), sailingService, stringMessages, errorReporter);
+                /* multiSelection */ false, sailingService, stringMessages, errorReporter);
+        multiMarkControlPoints = new ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>>(
+                /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         marks = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
-                new MultiSelectionModel<MarkDTO>(), sailingService, stringMessages, errorReporter);
+                /* multiSelection */ true, sailingService, stringMessages, errorReporter);
         
         CaptionPanel waypointsPanel = new CaptionPanel(stringMessages.waypoints());
         CaptionPanel controlPointsPanel = new CaptionPanel(stringMessages.twoMarkControlPoint());

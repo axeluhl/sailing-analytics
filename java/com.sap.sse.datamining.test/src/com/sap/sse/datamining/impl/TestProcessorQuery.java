@@ -12,25 +12,28 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
-import com.sap.sse.datamining.impl.components.ProcessorInstruction;
 import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
@@ -63,6 +66,7 @@ public class TestProcessorQuery {
     public void testStandardWorkflow() throws InterruptedException, ExecutionException {
         Collection<Number> dataSource = createDataSource();
         Query<Double> queryWithStandardWorkflow = createQueryWithStandardWorkflow(dataSource);
+        assertThat(queryWithStandardWorkflow.getState(), is(QueryState.NOT_STARTED));
         QueryResult<Double> expectedResult = buildExpectedResult(dataSource);
         verifyResult(queryWithStandardWorkflow.run(), expectedResult);
     }
@@ -106,8 +110,8 @@ public class TestProcessorQuery {
      * their length, extracts the cross sum and aggregates these as sum.
      */
     private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
-        final ThreadPoolExecutor executor = ConcurrencyTestsUtil.getExecutor();
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(dataSource, stringMessages, Locale.ENGLISH) {
+        final ExecutorService executor = ConcurrencyTestsUtil.getExecutor();
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
                 Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregator = processorFactory.createAggregationProcessor(this, AggregatorType.Sum, Double.class);
@@ -135,7 +139,7 @@ public class TestProcessorQuery {
                 
                 @SuppressWarnings("unchecked")
                 Processor<Iterable<Number>, Number> retrievalProcessor = new AbstractSimpleRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
-                                                                                                                                                          ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers) {
+                                                                                                                                         ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 0) {
                     @Override
                     protected Iterable<Number> retrieveData(Iterable<Number> element) {
                         return element;
@@ -175,7 +179,7 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH) {
+                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
@@ -197,6 +201,7 @@ public class TestProcessorQuery {
         } catch (TimeoutException e) {
             // A timeout exception is expected
         }
+        assertThat(query.getState(), is(QueryState.TIMED_OUT));
         
         ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
         assertThat("The processing should be aborted, but received elements", receivedElementOrFinished, is(false));
@@ -211,7 +216,7 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH) {
+                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
@@ -234,7 +239,9 @@ public class TestProcessorQuery {
             }
         });
         queryRunner.start();
-        ConcurrencyTestsUtil.sleepFor(500);
+        ConcurrencyTestsUtil.sleepFor(250);
+        assertThat(query.getState(), is(QueryState.RUNNING));
+        ConcurrencyTestsUtil.sleepFor(250);
         query.abort();
         
         ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
@@ -275,7 +282,7 @@ public class TestProcessorQuery {
     public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
         final String keyValue = "Sum";
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                createDataSource(), stringMessages, Locale.ENGLISH) {
+                createDataSource(), stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
@@ -286,8 +293,8 @@ public class TestProcessorQuery {
                                                                                                     ConcurrencyTestsUtil.getExecutor(),
                                                                                                     resultReceivers) {
                     @Override
-                    protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
-                        return new ProcessorInstruction<Map<GroupKey,Double>>(this) {
+                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
+                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             public Map<GroupKey, Double> computeResult() {
                                 Map<GroupKey, Double> result = new HashMap<>();
@@ -311,6 +318,76 @@ public class TestProcessorQuery {
         Map<GroupKey, Double> expectedResult = new HashMap<>();
         expectedResult.put(new GenericGroupKey<String>(keyValue), 10358.0);
         assertThat(query.run(500, TimeUnit.MILLISECONDS).getResults(), is(expectedResult));
+    }
+    
+    @Test
+    public void testQueryWithSevereFailure() {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected Processor<Double, ?> createFirstProcessor() {
+                Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
+                resultReceivers.add(this.getResultReceiver());
+                return new AbstractSimpleParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
+                                                                                          (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+                                                                                          ConcurrencyTestsUtil.getExecutor(),
+                                                                                          resultReceivers) {
+                    @Override
+                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
+                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
+                            @Override
+                            protected Map<GroupKey, Double> computeResult() throws Exception {
+                                throw new RejectedExecutionException("This should cause an error during the query processing");
+                            }
+                        };
+                    }
+                    @Override
+                    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+                    }
+                };
+            }
+        };
+        try {
+            query.run();
+            fail("The previous line should throw a runtime exception");
+        } catch (RuntimeException e) {
+            // A RuntimeException wiht a RejectedExecitonException is expected
+            if (!(e.getCause() instanceof RejectedExecutionException)) {
+                throw e;
+            }
+        }
+        assertThat(query.getState(), is(QueryState.ERROR));
+    }
+    
+    @Test
+    public void testQueryWithFailure() {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected Processor<Double, ?> createFirstProcessor() {
+                Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
+                resultReceivers.add(this.getResultReceiver());
+                return new AbstractSimpleParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
+                                                                                          (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+                                                                                          ConcurrencyTestsUtil.getExecutor(),
+                                                                                          resultReceivers) {
+                    @Override
+                    protected AbstractProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
+                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
+                            @Override
+                            protected Map<GroupKey, Double> computeResult() throws Exception {
+                                throw new NullPointerException("This should cause a failure during the query processing");
+                            }
+                        };
+                    }
+                    @Override
+                    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+                    }
+                };
+            }
+        };
+        query.run();
+        assertThat(query.getState(), is(QueryState.FAILURE));
     }
 
 }

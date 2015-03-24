@@ -69,8 +69,8 @@ public class TestAbstractParallelProcessorFinishing {
     private AbstractSimpleParallelProcessor<Integer, Integer> createProcessor(Collection<Processor<Integer, ?>> receivers) {
         return new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
-            protected ProcessorInstruction<Integer> createInstruction(Integer partialElement) {
-                return new ProcessorInstruction<Integer>(this) {
+            protected AbstractProcessorInstruction<Integer> createInstruction(Integer partialElement) {
+                return new AbstractProcessorInstruction<Integer>(this) {
                     @Override
                     public Integer computeResult() {
                         while (instructionIsWorking) {

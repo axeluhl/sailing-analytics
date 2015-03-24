@@ -36,7 +36,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     public void processElement(InputType element) {
         if (!isFinished && !isAborted) {
             for (WorkingType partialElement : partitionElement(element)) {
-                final ProcessorInstruction<ResultType> instruction = createInstruction(partialElement);
+                final AbstractProcessorInstruction<ResultType> instruction = createInstruction(partialElement);
                 if (isInstructionValid(instruction)) {
                     unfinishedInstructionsCounter.getAndIncrement();
                     try {
@@ -51,7 +51,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         }
     }
 
-    private boolean isInstructionValid(ProcessorInstruction<ResultType> instruction) {
+    private boolean isInstructionValid(AbstractProcessorInstruction<ResultType> instruction) {
         return instruction != null;
     }
 
@@ -76,7 +76,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         }
     }
 
-    protected abstract ProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement);
+    protected abstract AbstractProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement);
 
     protected abstract Iterable<WorkingType> partitionElement(InputType element);
 

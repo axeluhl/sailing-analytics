@@ -15,8 +15,8 @@ public class TrackedLegOfCompetitorRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext> {
 
     public TrackedLegOfCompetitorRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasTrackedLegOfCompetitorContext, ?>> resultReceivers) {
-        super(HasTrackedLegContext.class, HasTrackedLegOfCompetitorContext.class, executor, resultReceivers);
+            Collection<Processor<HasTrackedLegOfCompetitorContext, ?>> resultReceivers, int retrievalLevel) {
+        super(HasTrackedLegContext.class, HasTrackedLegOfCompetitorContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override

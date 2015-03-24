@@ -8,11 +8,11 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 
-public class ConcurrentDataMiningQueryManager implements DataMiningQueryManager {
+public class SingleQueryPerSessionManager implements DataMiningQueryManager {
 
     private final ConcurrentMap<DataMiningSession, Query<?>> queryMappedBySession;
 
-    public ConcurrentDataMiningQueryManager() {
+    public SingleQueryPerSessionManager() {
         queryMappedBySession = new ConcurrentHashMap<>();
     }
 
@@ -23,15 +23,14 @@ public class ConcurrentDataMiningQueryManager implements DataMiningQueryManager 
             throw new NullPointerException();
         }
         
-        abortPreviousQueries(session, query);
+        abortPreviousQueries(session);
         registerNewQuery(session, query);
         QueryResult<ResultType> result = query.run();
         unregisterQuery(session, query);
         return result;
     }
     
-    private void abortPreviousQueries(DataMiningSession session, Query<?> query) {
-        // TODO handle different types of queries (a statistics query doesn't have to be aborted, if a new dimension values query wants to run)
+    private void abortPreviousQueries(DataMiningSession session) {
         if (queryMappedBySession.containsKey(session)) {
             Query<?> previousQuery = queryMappedBySession.get(session);
             previousQuery.abort();
@@ -46,8 +45,8 @@ public class ConcurrentDataMiningQueryManager implements DataMiningQueryManager 
         }
     }
 
-    private void unregisterQuery(DataMiningSession session, Query<?> query) {
-        queryMappedBySession.remove(session, query);
+    private void unregisterQuery(DataMiningSession session, Query<?> finishedQuery) {
+        queryMappedBySession.remove(session, finishedQuery);
     }
     
 }
