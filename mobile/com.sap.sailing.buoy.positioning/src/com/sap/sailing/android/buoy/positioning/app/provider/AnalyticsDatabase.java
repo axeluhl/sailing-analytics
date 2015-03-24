@@ -30,7 +30,10 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String MARK_PINGS = "mark_pings";
         String CHECKIN_URIS= "checkin_uris";
         
-        String LEADERBOARDS_MARKS_JOINED = "marks LEFT JOIN leaderboards ON (" + Tables.MARKS + "." + Mark.MARK_CHECKIN_DIGEST 
+        String MARKS_LEADERBOARDS_JOINED = "marks LEFT JOIN leaderboards ON (" + Tables.MARKS + "." + Mark.MARK_CHECKIN_DIGEST 
+        		+ " = " + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " )";
+        
+        String LEADERBOARDS_MARKS_JOINED = "leaderboards LEFT JOIN marks ON (" + Tables.MARKS + "." + Mark.MARK_CHECKIN_DIGEST 
         		+ " = " + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " )";
     }
     

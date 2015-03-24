@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -156,10 +157,12 @@ public class CheckinManager {
 			public void performAction(JSONObject response) {
 				try {
                     JSONArray markArray = response.getJSONArray("marks");
+                    String checkinDigest = generateCheckindigest(urlData.uriStr);
                     List<MarkInfo> marks = new ArrayList<MarkInfo>();
                     for(int i = 0; i< markArray.length(); i++){
                     	JSONObject jsonMark = (JSONObject) markArray.get(i);
                     	MarkInfo mark = new MarkInfo();
+                    	mark.setCheckinDigest(checkinDigest);
                     	mark.setClassName(jsonMark.getString("@class"));
                     	mark.setName(jsonMark.getString("name"));
                     	mark.setId(jsonMark.getString("id"));
@@ -246,6 +249,28 @@ public class CheckinManager {
         AlertDialog alert = builder.create();
         alert.show();
         setCheckinData(null);
+    }
+    
+    private String generateCheckindigest(String url)
+    {
+    	String checkinDigest = "";
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update(url.getBytes("UTF-8"));
+			byte[] digest = md.digest();
+			StringBuffer buf = new StringBuffer();
+			for (byte byt : digest) {
+				buf.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
+				checkinDigest = buf.toString();
+			}
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return checkinDigest;
     }
 
     public interface CheckinDataHandler{

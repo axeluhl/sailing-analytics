@@ -43,6 +43,7 @@ public class HomeFragment extends AbstractHomeFragment implements
 
 		prefs = new AppPreferences(getActivity());
 
+		getLoaderManager().initLoader(REGATTA_LOADER, null, this);
 		ListView listView = (ListView) view.findViewById(R.id.listRegatta);
 		if (listView != null) {
 			listView.addHeaderView(inflater.inflate(
@@ -54,7 +55,6 @@ public class HomeFragment extends AbstractHomeFragment implements
 			listView.setOnItemClickListener(new ItemClickListener());
 		}
 
-		getLoaderManager().initLoader(REGATTA_LOADER, null, this);
 
 		return view;
 	}
@@ -125,7 +125,7 @@ public class HomeFragment extends AbstractHomeFragment implements
 		switch (loaderId) {
 		case REGATTA_LOADER:
 			return new CursorLoader(getActivity(),
-					AnalyticsContract.LeaderboardsMarksJoined.CONTENT_URI,
+					AnalyticsContract.Leaderboard.CONTENT_URI,
 					null, null, null, null);
 
 		default:

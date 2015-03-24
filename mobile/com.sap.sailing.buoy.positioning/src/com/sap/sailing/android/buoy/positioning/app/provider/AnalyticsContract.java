@@ -123,6 +123,11 @@ public class AnalyticsContract {
 		public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
 				.appendPath("leaderboards_marks_joined").build();
 	}
+    
+    public static class MarksLeaderBoardsJoined{
+    	public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+				.appendPath("marks_leaderboards_joined").build();
+    }
 
 	private AnalyticsContract() {
 
