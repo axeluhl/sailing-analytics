@@ -2,18 +2,17 @@ package com.sap.sailing.datamining.test.util;
 
 import static org.junit.Assert.fail;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.DataMiningExecutorService;
 
 public class ConcurrencyTestsUtil {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    private static final ExecutorService executor = new DataMiningExecutorService(THREAD_POOL_SIZE);
 
-    public static ThreadPoolExecutor getExecutor() {
+    public static ExecutorService getExecutor() {
         return executor;
     }
 

@@ -47,7 +47,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.stringMessages = new CompoundResourceBundleStringMessages();
         this.executorService = executorService;
         this.queryFactory = new QueryFactory();
-        dataMiningQueryManager = new ConcurrentDataMiningQueryManager();
+        dataMiningQueryManager = new StrategyPerQueryTypeManager();
         this.functionRegistry = functionRegistry;
         this.functionProvider = functionProvider;
         dataSourceProviderMappedByDataSourceType = new HashMap<>();

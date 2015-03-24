@@ -11,8 +11,8 @@ public class TestRegattaRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<Collection<Test_Regatta>, Test_Regatta> {
 
     @SuppressWarnings("unchecked")
-    public TestRegattaRetrievalProcessor(ExecutorService executor, Collection<Processor<Test_Regatta, ?>> resultReceivers) {
-        super((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_Regatta.class, executor, resultReceivers);
+    public TestRegattaRetrievalProcessor(ExecutorService executor, Collection<Processor<Test_Regatta, ?>> resultReceivers, int retrievalLevel) {
+        super((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_Regatta.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override

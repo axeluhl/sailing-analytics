@@ -1,7 +1,9 @@
 package com.sap.sailing.dashboards.gwt.client.startanalysis;
 
+import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
+
 public interface StartAnalysisPageChangeListener {
 
-    public void loadMapAndContent(int newPageIndex, String someDataDTO);
+    public void startAnalysisComponentPageChangedToIndexAndStartAnalysis(int newPageIndex, StartAnalysisDTO startAnalysisDTO);
     
 }

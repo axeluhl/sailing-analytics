@@ -38,8 +38,8 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
         receivers.add(receiver);
         processor = new AbstractSimpleParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
-            protected ProcessorInstruction<Integer> createInstruction(final Integer element) {
-                return new ProcessorInstruction<Integer>(this) {
+            protected AbstractProcessorInstruction<Integer> createInstruction(final Integer element) {
+                return new AbstractProcessorInstruction<Integer>(this) {
                     @Override
                     public Integer computeResult() {
                         return element;
