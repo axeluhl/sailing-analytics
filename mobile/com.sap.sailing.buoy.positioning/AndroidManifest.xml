@@ -7,9 +7,6 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="22" />
 
-    <permission
-        android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
 
     <!-- <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" /> -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

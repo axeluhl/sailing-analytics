@@ -34,7 +34,7 @@ public class RegattaActivity extends AbstractRegattaActivity{
         setMarks(new ArrayList<MarkInfo>());
 
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
-        checkinDigest = intent.getStringExtra(getString(R.string.leaderboard_name));
+        leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
 
         // checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
         // manager = new CheckinManager(checkinUrl.urlString, this);
