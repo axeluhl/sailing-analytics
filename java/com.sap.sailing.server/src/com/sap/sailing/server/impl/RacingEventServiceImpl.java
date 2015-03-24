@@ -13,8 +13,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -978,11 +980,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog) {
         GPSFixTrack<Mark, GPSFix> track = null;
+        // If no spanning track is found, the fix closest to the time point requested is used instead
+        GPSFix nonSpanningFallback = null;
         for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
             GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
-            if (trackCandidate != null && spansTimePoint(trackCandidate, timePoint)) {
-                track = trackCandidate;
-                break;
+            if (trackCandidate != null) {
+                if (spansTimePoint(trackCandidate, timePoint)) {
+                    track = trackCandidate;
+                    break;
+                } else {
+                    nonSpanningFallback = improveTimewiseClosestFix(nonSpanningFallback, trackCandidate, timePoint);
+                }
             }
         }
         if (track == null) { // no spanning track found in any tracked race, or no tracked races found
@@ -1008,7 +1016,38 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }
-        return track.getEstimatedPosition(timePoint, /* extrapolate */ false);
+        Position result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
+        if (result == null) {
+            result = nonSpanningFallback == null ? null : nonSpanningFallback.getPosition();
+        }
+        return result;
+    }
+
+    private GPSFix improveTimewiseClosestFix(GPSFix nonSpanningFallback, GPSFixTrack<Mark, GPSFix> track, final TimePoint timePoint) {
+        GPSFix lastAtOrBefore = track.getLastFixAtOrBefore(timePoint);
+        GPSFix firstAtOrAfter = track.getFirstFixAtOrAfter(timePoint);
+        // find the fix closes to timePoint, sorting null values to the end and fixes near timePoint to the beginning
+        final List<GPSFix> list = Arrays.asList(nonSpanningFallback, lastAtOrBefore, firstAtOrAfter);
+        list.sort(new Comparator<GPSFix>() {
+            @Override
+            public int compare(GPSFix o1, GPSFix o2) {
+                final int result;
+                if (o1 == null) {
+                    if (o2 == null) {
+                        result = 0;
+                    } else {
+                        result = 1;
+                    }
+                } else if (o2 == null) {
+                    result = -1;
+                } else {
+                    result = new Long(Math.abs(o1.getTimePoint().until(timePoint).asMillis())).compareTo(
+                            Math.abs(o2.getTimePoint().until(timePoint).asMillis()));
+                }
+                return result;
+            }
+        });
+        return list.get(0);
     }
 
     private boolean spansTimePoint(GPSFixTrack<Mark, GPSFix> track, TimePoint timePoint) {
