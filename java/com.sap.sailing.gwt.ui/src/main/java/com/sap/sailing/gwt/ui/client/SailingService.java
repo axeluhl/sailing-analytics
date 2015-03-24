@@ -458,7 +458,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * 
      * @see RaceLogTrackingAdapter#startTracking
      */
-    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
+    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind, boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception;
     
     void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);

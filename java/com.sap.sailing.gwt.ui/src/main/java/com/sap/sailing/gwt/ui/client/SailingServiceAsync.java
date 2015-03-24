@@ -571,8 +571,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
 
-    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Void> callback);
+    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind,
+            boolean correctWindByDeclination, AsyncCallback<Void> callback);
 
     /**
      * Set the competitor registrations in the racelog. Unregisters formerly registered competitors

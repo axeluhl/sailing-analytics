@@ -5211,13 +5211,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
+    public void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, final boolean trackWind, final boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
-        
-        getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet);
+        final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet);
+        if (raceHandle != null && trackWind) {
+            new Thread("Wind tracking starter for race " + leaderboardName + "/" + raceColumnName + "/" + fleetName) {
+                public void run() {
+                    try {
+                        startTrackingWind(raceHandle, correctWindByDeclination,
+                                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }.start();
+        }
     }
     
     @Override
