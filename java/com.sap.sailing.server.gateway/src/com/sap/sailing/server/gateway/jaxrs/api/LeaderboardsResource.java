@@ -84,10 +84,12 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v1/leaderboards")
@@ -591,7 +593,11 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         JSONArray array = new JSONArray();
         for (Mark mark : marks) {
-            array.add(markSerializer.serialize(mark));
+            final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+            Position lastKnownPosition = getService().getMarkPosition(mark,
+                    (LeaderboardThatHasRegattaLike) leaderboard, now,
+                    /* raceLog==null means use all race logs */ null);
+            array.add(markWithPositionSerializer.serialize(new Pair<>(mark, lastKnownPosition)));
         }
         JSONObject result = new JSONObject();
         result.put("marks", array);
@@ -610,10 +616,14 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     }
 
     private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
+    private final MarkJsonSerializerWithPosition markWithPositionSerializer = new MarkJsonSerializerWithPosition(markSerializer, new FlatGPSFixJsonSerializer());
     private final FlatGPSFixJsonDeserializer fixDeserializer = new FlatGPSFixJsonDeserializer();
     private final FlatGPSFixJsonSerializer fixSerializer = new FlatGPSFixJsonSerializer();
 
-    RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+    /**
+     * Mockito requires this to be public in order to be able to mock it :-(
+     */
+    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
     }
 

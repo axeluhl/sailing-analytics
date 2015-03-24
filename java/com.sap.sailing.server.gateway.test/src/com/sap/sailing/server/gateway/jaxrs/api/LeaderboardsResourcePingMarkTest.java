@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.doReturn;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +27,6 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
-import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.server.gateway.test.jaxrs.AbstractJaxRsApiTest;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -72,12 +72,8 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testCheckinAndCheckout() throws Exception {
-        LeaderboardsResource resource = spyResource(new LeaderboardsResource() {
-            @Override
-            RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
-                return RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(racingEventService.getBaseDomainFactory());
-            }
-        });
+        LeaderboardsResource resource = spyResource(new LeaderboardsResource());
+        doReturn(RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(racingEventService.getBaseDomainFactory())).when(resource).getRaceLogTrackingAdapter();
         {
         Response response = resource.pingMark(PING_MARK_JSON, leaderboard.getName(), mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
