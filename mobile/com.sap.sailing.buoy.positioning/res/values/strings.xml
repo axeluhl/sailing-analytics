@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">SAP Buoy Positioning App</string>
+    <string name="app_name" translatable="false">SAP Buoy Positioning App</string>
     <string name="title_activity_start" translatable="false">Buoy Positioning App</string>
     <string name="title_activity_positioning">Set Mark Position</string>
     <string name="course_type">Course Type</string>

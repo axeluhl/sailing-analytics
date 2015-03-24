@@ -25,10 +25,6 @@ android {
             storePassword 'stg_debug'
         }
     }
-    
-    lintOptions {
-          abortOnError false
-      }
 
     buildTypes {
         debug {
@@ -38,8 +34,11 @@ android {
 }
 
 dependencies {
+    compile "net.hockeyapp.android:HockeySDK:3.5.0"
+
     /* support libraries */
     compile 'com.android.support:appcompat-v7:22.0.0'
+
     /* local dependencies */
     compile project(':java:com.sap.sailing.domain.common')
     compile project(':java:com.sap.sailing.domain.shared.android')
