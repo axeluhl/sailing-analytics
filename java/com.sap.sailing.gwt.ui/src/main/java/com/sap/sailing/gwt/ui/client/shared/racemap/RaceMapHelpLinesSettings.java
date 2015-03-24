@@ -10,7 +10,7 @@ public class RaceMapHelpLinesSettings {
      * Types of help lines on the map
      */
     public enum HelpLineTypes {
-        STARTLINE, FINISHLINE, ADVANTAGELINE, COURSEMIDDLELINE, BUOYZONE, BOATTAILS
+        STARTLINE, FINISHLINE, ADVANTAGELINE, COURSEMIDDLELINE, BUOYZONE, BOATTAILS, STARTLINETOFIRSTMARKTRIANGLE
     }
     
     private final Set<HelpLineTypes> visibleHelpLines;

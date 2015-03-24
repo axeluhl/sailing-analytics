@@ -11,17 +11,29 @@ import com.sap.sse.datamining.components.Processor;
 public abstract class AbstractRetrievalProcessor<InputType, WorkingType, ResultType> extends
         AbstractPartitioningParallelProcessor<InputType, WorkingType, ResultType> {
 
+    private final int retrievalLevel;
+    
     private final Lock retrievedDataAmountLock;
     private int retrievedDataAmount;
 
-    public AbstractRetrievalProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
+    /**
+     * 
+     * @param inputType
+     * @param resultType
+     * @param executor
+     * @param resultReceivers
+     * @param retrievalLevel The position of this retriever in it's chain. <code>0</code> represents the first.
+     */
+    public AbstractRetrievalProcessor(Class<InputType> inputType, Class<ResultType> resultType,
+            ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers, int retrievalLevel) {
         super(inputType, resultType, executor, resultReceivers);
+        this.retrievalLevel = retrievalLevel;
         retrievedDataAmountLock = new ReentrantLock(); 
     }
 
     @Override
-    protected ProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement) {
-        return new ProcessorInstruction<ResultType>(this) {
+    protected AbstractProcessorInstruction<ResultType> createInstruction(final WorkingType partialElement) {
+        return new AbstractProcessorInstruction<ResultType>(this, ProcessorInstructionPriority.createRetrievalPriority(retrievalLevel)) {
             @Override
             public ResultType computeResult() {
                 incrementRetrievedDataAmount();

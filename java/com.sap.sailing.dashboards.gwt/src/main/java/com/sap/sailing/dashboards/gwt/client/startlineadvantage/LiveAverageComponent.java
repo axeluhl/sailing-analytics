@@ -9,7 +9,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -17,6 +16,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.windchart.VerticalWindChartClickListener;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * The purpose of the class is to display a live and an average value of a continuously updating data source.
@@ -66,8 +66,7 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
     @UiField
     HTMLPanel averagePanel;
 
-    int sizeForUnit;
-
+    private StringMessages stringConstants;
     public LiveAverageComponent() {
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -79,7 +78,8 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
      *            sets a special size
      * 
      * */
-    public @UiConstructor LiveAverageComponent(String header, String unit) {
+    public LiveAverageComponent(String header, String unit) {
+        stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
         liveAveragePanel.getElement().getStyle().setProperty("backgroundColor", "white");
         this.header.setInnerText(header);
@@ -94,8 +94,8 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
             this.liveUnit.getStyle().setPosition(Position.ABSOLUTE);
             this.averageUnit.getStyle().setPosition(Position.ABSOLUTE);
         }
-        this.liveLabel.setInnerHTML("live");
-        this.averageLabel.setInnerHTML("average<br>(15 minutes)");
+        this.liveLabel.setInnerHTML(stringConstants.dashboardLiveWind());
+        this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(15));
     }
 
     public void updateValues(String liveValue, String averageValue) {
@@ -125,10 +125,6 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
 
     @Override
     public void clickedWindChartWithNewIntervalChangeInMillis(int windChartIntervallInMillis) {
-        if(windChartIntervallInMillis > 15){
-            this.averageLabel.setInnerHTML("average<br>(1 hour)");
-        }else{
-            this.averageLabel.setInnerHTML("average<br>(15 minutes)");
-        }
+        this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(windChartIntervallInMillis));
     }
 }
