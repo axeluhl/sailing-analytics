@@ -11,11 +11,9 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -46,7 +44,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
-        SplitLayoutPanel splitPanel = new SplitLayoutPanel();
+        SplitLayoutPanel splitPanel = new SplitLayoutPanel(15);
         rootPanel.add(splitPanel);
 
         DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
@@ -65,25 +63,11 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         
         splitPanel.add(selectionDockPanel);
         
-        QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
+        final QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
-        queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProviderWithControls));
-    }
 
-    private LogoAndTitlePanel createLogoAndTitlePanel() {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages().dataMining(), getStringMessages(), this, getUserService());
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(getStringMessages(), true, null, null, /* event */ null, null);
-        logoAndTitlePanel.add(globalNavigationPanel);
-        return logoAndTitlePanel;
-    }
-
-    private Widget createSettingsControlWidget(final QueryRunner queryRunner, final QueryDefinitionProvider queryDefinitionProvider) {
-        HorizontalPanel panel = new HorizontalPanel();
-        panel.setSpacing(5);
-        
         Label runnerSettingsLabel = new Label(queryRunner.getLocalizedShortName() + ":");
-        panel.add(runnerSettingsLabel);
+        queryDefinitionProviderWithControls.addControl(runnerSettingsLabel);
         Anchor runnerSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
         runnerSettingsAnchor.setTitle(getStringMessages().settings());
         runnerSettingsAnchor.addClickHandler(new ClickHandler() {
@@ -92,9 +76,15 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 new SettingsDialog<QueryRunnerSettings>(queryRunner, getStringMessages()).show();
             }
         });
-        panel.add(runnerSettingsAnchor);
-        
-        return panel;
+        queryDefinitionProviderWithControls.addControl(runnerSettingsAnchor);
+    }
+
+    private LogoAndTitlePanel createLogoAndTitlePanel() {
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages().dataMining(), getStringMessages(), this, getUserService());
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(getStringMessages(), true, null, null, /* event */ null, null);
+        logoAndTitlePanel.add(globalNavigationPanel);
+        return logoAndTitlePanel;
     }
 
 }

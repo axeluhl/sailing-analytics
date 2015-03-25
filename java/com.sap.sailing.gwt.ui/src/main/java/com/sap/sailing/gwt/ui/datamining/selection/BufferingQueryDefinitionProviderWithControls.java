@@ -12,8 +12,8 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -33,6 +33,7 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryDefinitionDTOImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.panels.HorizontalFlowPanel;
 
 public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
 
@@ -47,7 +48,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private final Timer queryDefinitionReleaseTimer;
     
     private final DockLayoutPanel mainPanel;
-    private HorizontalPanel controlsPanel;
+    private HorizontalFlowPanel controlsPanel;
     
     private StatisticProvider statisticProvider;
     private SimpleDataRetrieverChainDefinitionProvider retrieverChainProvider;
@@ -81,10 +82,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
 
     private Widget createFunctionsPanel() {
-        HorizontalPanel functionsPanel = new HorizontalPanel();
-        functionsPanel.setSpacing(5);
-
-        VerticalPanel statisticAndRetrieverChainPanel = new VerticalPanel();
+        FlowPanel statisticAndRetrieverChainPanel = new FlowPanel();
         statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
         statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
             @Override
@@ -102,7 +100,6 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             }
         });
         statisticAndRetrieverChainPanel.add(retrieverChainProvider.getEntryWidget());
-        functionsPanel.add(statisticAndRetrieverChainPanel);
 
         groupBySelectionPanel = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
         groupBySelectionPanel.addGroupingChangedListener(new GroupingChangedListener() {
@@ -111,7 +108,10 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
                 scheduleQueryDefinitionChanged();
             }
         });
-        functionsPanel.add(groupBySelectionPanel.getEntryWidget());
+        ScrollPanel groupBySelectionScrollPanel = new ScrollPanel(groupBySelectionPanel.getEntryWidget());
+        
+        controlsPanel = new HorizontalFlowPanel();
+        controlsPanel.addStyleName("definitionProviderControls");
 
         Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
@@ -120,13 +120,13 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
                 selectionProvider.clearSelection();
             }
         });
-        functionsPanel.add(clearSelectionButton);
+        addControl(clearSelectionButton);
         
-        controlsPanel = new HorizontalPanel();
-        controlsPanel.setSpacing(5);
-        functionsPanel.add(controlsPanel);
-
-        return functionsPanel;
+        DockLayoutPanel controlsDockPanel = new DockLayoutPanel(Unit.PX);
+        controlsDockPanel.addWest(statisticAndRetrieverChainPanel, 800);
+        controlsDockPanel.addEast(controlsPanel, 300);
+        controlsDockPanel.add(groupBySelectionScrollPanel);
+        return controlsDockPanel;
     }
     
     private void scheduleQueryDefinitionChanged() {
@@ -163,6 +163,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
     @Override
     public void addControl(Widget controlWidget) {
+        controlWidget.addStyleName("definitionProviderControlsElements");
         controlsPanel.add(controlWidget);
     }
 
