@@ -16,6 +16,7 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
@@ -148,7 +149,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 if (callBack != null) {
                     callBack.loadingQueueDone(this);
                 }
-               
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -197,10 +198,11 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     @Override
     public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {
         synchronized (loadingQueueDoneCallBacks) {
-            if (queue.isEmpty()) {
+            Triple<A, B, C> lastInQueue = queue.peekLast();
+            if (lastInQueue == null) {
                 callback.loadingQueueDone(this);
             } else {
-                loadingQueueDoneCallBacks.put(queue.getLast(), callback);
+                loadingQueueDoneCallBacks.put(lastInQueue, callback);
             }
         }
     }
