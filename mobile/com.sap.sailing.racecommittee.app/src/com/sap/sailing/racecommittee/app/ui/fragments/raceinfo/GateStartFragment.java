@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -256,7 +257,7 @@ public class GateStartFragment {
                         if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
                             openMainScheduleFragment();
                         } else {
-                            replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+                            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                         }
                     }
                 });

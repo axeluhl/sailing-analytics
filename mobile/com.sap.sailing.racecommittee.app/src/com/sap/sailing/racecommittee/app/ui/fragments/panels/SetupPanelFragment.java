@@ -312,7 +312,7 @@ public class SetupPanelFragment extends BasePanelFragment  {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE);
                 switch (toggleMarker(v, R.id.start_procedure_marker)) {
                     case 0:
-                        replaceFragment(RaceFlagViewerFragment.newInstance());
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                         break;
 
                     case 1:
@@ -337,7 +337,7 @@ public class SetupPanelFragment extends BasePanelFragment  {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_MODE);
                 switch (toggleMarker(v, R.id.start_mode_marker)) {
                     case 0:
-                        replaceFragment(RaceFlagViewerFragment.newInstance());
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                         break;
 
                     case 1:
@@ -361,7 +361,7 @@ public class SetupPanelFragment extends BasePanelFragment  {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COURSE);
                 switch (toggleMarker(v, R.id.course_marker)) {
                     case 0:
-                        replaceFragment(RaceFlagViewerFragment.newInstance());
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                         break;
 
                     case 1:
@@ -385,7 +385,7 @@ public class SetupPanelFragment extends BasePanelFragment  {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_WIND);
                 switch (toggleMarker(v, R.id.wind_marker)) {
                     case 0:
-                        replaceFragment(RaceFlagViewerFragment.newInstance());
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                         break;
 
                     case 1:

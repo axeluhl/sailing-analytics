@@ -120,7 +120,7 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
         if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
             openMainScheduleFragment();
         } else {
-            replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }
 }

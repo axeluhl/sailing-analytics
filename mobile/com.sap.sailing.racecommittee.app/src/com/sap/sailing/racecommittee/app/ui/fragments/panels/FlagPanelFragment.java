@@ -186,7 +186,7 @@ public class FlagPanelFragment extends BasePanelFragment{
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_ABANDON);
             switch (toggleMarker(v, R.id.abandon_flags_marker)) {
                 case 0:
-                    replaceFragment(RaceFlagViewerFragment.newInstance());
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case 1:
@@ -208,7 +208,7 @@ public class FlagPanelFragment extends BasePanelFragment{
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_RECALL);
             switch (toggleMarker(v, R.id.recall_flags_marker)) {
                 case 0:
-                    replaceFragment(RaceFlagViewerFragment.newInstance());
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case 1:
@@ -230,7 +230,7 @@ public class FlagPanelFragment extends BasePanelFragment{
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSTPONE);
             switch (toggleMarker(v, R.id.postpone_flags_marker)) {
                 case 0:
-                    replaceFragment(RaceFlagViewerFragment.newInstance());
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case 1:
@@ -252,7 +252,7 @@ public class FlagPanelFragment extends BasePanelFragment{
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COURSE);
             switch (toggleMarker(v, R.id.course_flags_marker)) {
                 case 0:
-                    replaceFragment(RaceFlagViewerFragment.newInstance());
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case 1:
@@ -274,7 +274,7 @@ public class FlagPanelFragment extends BasePanelFragment{
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_MORE);
             switch (toggleMarker(v, R.id.more_flags_marker)) {
                 case 0:
-                    replaceFragment(RaceFlagViewerFragment.newInstance());
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case 1:

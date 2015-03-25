@@ -10,6 +10,7 @@ import android.widget.ListView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.CourseNameAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -87,7 +88,7 @@ public class CourseFragmentName extends CourseFragment implements CourseNameAdap
         if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
             openMainScheduleFragment();
         } else {
-            replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }
 }

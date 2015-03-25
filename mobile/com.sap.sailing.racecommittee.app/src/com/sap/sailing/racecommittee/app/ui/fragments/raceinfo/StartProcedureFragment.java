@@ -111,7 +111,7 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
                 openMainScheduleFragment();
             } else {
                 getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime());
-                replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
             }
         } else {
             if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {

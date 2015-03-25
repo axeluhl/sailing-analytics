@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.basic.BasicRacingProcedure;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 
 public class RaceInfoRaceFragment extends BaseRaceInfoRaceFragment<BasicRacingProcedure> {
@@ -25,7 +26,7 @@ public class RaceInfoRaceFragment extends BaseRaceInfoRaceFragment<BasicRacingPr
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        replaceFragment(RaceFlagViewerFragment.newInstance());
+        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
     }
 
     @Override

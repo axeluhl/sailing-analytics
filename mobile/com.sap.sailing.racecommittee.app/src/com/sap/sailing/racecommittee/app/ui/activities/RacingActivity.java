@@ -38,6 +38,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRa
 import com.sap.sailing.racecommittee.app.ui.fragments.*;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -249,6 +250,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
         filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
+        filter.addAction(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
     }
 
@@ -592,6 +594,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 }
                 if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
                     view.setVisibility(View.VISIBLE);
+                }
+                if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
+                    Bundle args = new Bundle();
+                    args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
+                    Fragment fragment = RaceFlagViewerFragment.newInstance();
+                    fragment.setArguments(args);
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.replace(R.id.race_frame, fragment).commit();
                 }
             }
         }

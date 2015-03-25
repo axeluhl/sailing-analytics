@@ -426,7 +426,7 @@ public class WindFragment extends ScheduleFragment
         saveEntriesInPreferences(wind);
         switch (getArguments().getInt(STARTMODE, 0)) {
             case 1:
-                replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
 
             default:

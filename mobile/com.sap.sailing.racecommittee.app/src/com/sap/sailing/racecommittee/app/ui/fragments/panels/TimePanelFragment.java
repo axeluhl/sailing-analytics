@@ -142,7 +142,7 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_TIME);
             switch (toggleMarker(v, R.id.time_marker)) {
                 case 0:
-                    replaceFragment(RaceFlagViewerFragment.newInstance());
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
                 case 1:

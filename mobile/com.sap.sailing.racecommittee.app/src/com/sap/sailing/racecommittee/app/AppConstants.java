@@ -52,4 +52,5 @@ public class AppConstants {
     // clears all toggle buttons
     public final static String INTENT_ACTION_CLEAR_TOGGLE = PACKAGE_NAME + ".action.toggle.clear";
 
+    public final static String INTENT_ACTION_SHOW_MAIN_CONTENT = PACKAGE_NAME + ".action.show.main";
 }
