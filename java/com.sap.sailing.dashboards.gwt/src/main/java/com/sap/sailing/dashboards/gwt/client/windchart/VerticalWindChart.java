@@ -3,8 +3,6 @@ package com.sap.sailing.dashboards.gwt.client.windchart;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -38,7 +36,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardEntryPoint;
 
 /**
  * The class represents a wind chart that is displayed vertically. Because it is meant to be used to display wind fixes,
@@ -70,8 +67,6 @@ public class VerticalWindChart extends Composite implements HasWidgets {
     private static final int SMALL_DISPLAY_INTERVALL_IN_MINUTES = 15;
     
     private static final int MAX_SERIES_POINTS = 100000000;
-
-    private static final Logger logger = Logger.getLogger(RibDashboardEntryPoint.class.getName());
 
     private static VerticalWindChartUiBinder uiBinder = GWT.create(VerticalWindChartUiBinder.class);
 
@@ -246,7 +241,6 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         } else {
             pointRangeInMilliseconds = 0;
         }
-        logger.log(Level.INFO, "Points Range " + pointRangeInMilliseconds);
         return pointRangeInMilliseconds;
     }
 
