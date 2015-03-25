@@ -22,17 +22,17 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.ResizingFlowPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.ResizingSimplePanel;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -76,7 +76,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
     };
     
     private final StringMessages stringMessages;
-    private final FlowPanel mainPanel;
+    private final DockLayoutPanel mainPanel;
 
     private final HorizontalPanel sortByPanel;
     private final ValueListBox<Comparator<GroupKey>> keyComparatorListBox;
@@ -95,17 +95,10 @@ public class ResultsChart implements ResultsPresenter<Number> {
         super();
         this.stringMessages = stringMessages;
         
-        mainPanel = new ResizingFlowPanel() {
-            @Override
-            public void onResize() {
-                presentationPanel.onResize();
-            }
-        };
+        mainPanel = new DockLayoutPanel(Unit.PX);
         
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
-        sortByPanel.setVisible(false);
-        mainPanel.add(sortByPanel);
         sortByPanel.add(new Label(stringMessages.sortBy()));
         keyComparatorListBox = new ValueListBox<>(new AbstractRenderer<Comparator<?>>() {
             @Override
@@ -121,6 +114,8 @@ public class ResultsChart implements ResultsPresenter<Number> {
             }
         });
         sortByPanel.add(keyComparatorListBox);
+        mainPanel.addNorth(sortByPanel, 40);
+        mainPanel.setWidgetHidden(sortByPanel, true);
         
         presentationPanel = new ResizingSimplePanel() {
             @Override
@@ -182,7 +177,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
     }
 
     private void updateKeyComparatorListBox() {
-        boolean visible = false;
+        boolean hidden = true;
         Comparator<GroupKey> valueToBeSelected = standardKeyComparator;
         Collection<Comparator<GroupKey>> acceptableValues = new ArrayList<>();
         acceptableValues.add(valueToBeSelected);
@@ -190,11 +185,12 @@ public class ResultsChart implements ResultsPresenter<Number> {
             valueToBeSelected = getKeyComparator() != null ? getKeyComparator() : valueToBeSelected;
             acceptableValues.add(ascendingByValueKeyComparator);
             acceptableValues.add(descendingByValueKeyComparator);
-            visible = true;
+            hidden = false;
         }
         keyComparatorListBox.setValue(valueToBeSelected);
         keyComparatorListBox.setAcceptableValues(acceptableValues);
-        sortByPanel.setVisible(visible);
+        mainPanel.setWidgetHidden(sortByPanel, hidden);
+        mainPanel.forceLayout();
     }
 
     private boolean isCurrentResultSimple() {
