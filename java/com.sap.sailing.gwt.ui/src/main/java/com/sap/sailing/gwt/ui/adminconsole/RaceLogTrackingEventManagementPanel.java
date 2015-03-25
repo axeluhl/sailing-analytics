@@ -270,8 +270,16 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                                 @Override
                                 public void cancel() {}
                     }).show();
-                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_START_TIME.equals(value)) {
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_EDIT.equals(value)) {
+                    editRaceColumnOfLeaderboard(object);
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK.equals(value)) {
+                    unlinkRaceColumnFromTrackedRace(object.getA().getRaceColumnName(), object.getB());
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG.equals(value)) {
+                    refreshRaceLog(object.getA(), object.getB(), true);
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_STARTTIME.equals(value)) {
                     setStartTime(getSelectedRaceColumnWithFleet().getA(), getSelectedRaceColumnWithFleet().getB());
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
+                    showRaceLog(object.getA(), object.getB());
                 }
             }
         });
