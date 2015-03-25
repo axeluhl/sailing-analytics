@@ -1,5 +1,9 @@
 package com.sap.sailing.domain.tractracadapter;
 
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracRaceTrackerImpl;
+
 
 public interface Receiver {
     /**
@@ -35,5 +39,16 @@ public interface Receiver {
      */
     void join(long timeoutInMilliseconds) throws InterruptedException;
     
+    /**
+     * Allows to "mark" the currently last event in the queue and provides callback as soon as this event has been handled.
+     * 
+     * This is used in {@link TracTracRaceTrackerImpl} to ensure that queued events during loading phase will be processed
+     * before the new {@link TrackedRaceStatus} is propagated to the {@link TrackedRace}.
+     * 
+     * @param callback
+     *            {@link LoadingQueueDoneCallBack#loadingQueueDone(Receiver)} Will be called as soon as the event that
+     *            was last in the queue at the time of calling
+     *            {@link #callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack)} has been handled.
+     */
     void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback);
 }
