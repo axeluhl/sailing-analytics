@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -39,7 +40,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final DynamicTrackedRegatta trackedRegatta;
     private final Simulator simulator;
     private final Thread thread;
-    private final ConcurrentHashMap<Util.Triple<A, B, C>, LoadingQueueDoneCallBack> loadingQueueDoneCallBacks;
+    private final Map<Util.Triple<A, B, C>, LoadingQueueDoneCallBack> loadingQueueDoneCallBacks;
 
     /**
      * used by {@link #stopAfterNotReceivingEventsForSomeTime(long)} and {@link #run()} to check if an event was received
@@ -58,7 +59,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         this.simulator = simulator;
         this.queue = new LinkedBlockingDeque<Util.Triple<A, B, C>>();
         this.thread = new Thread(this, getClass().getName());
-        this.loadingQueueDoneCallBacks = new ConcurrentHashMap<>();
+        this.loadingQueueDoneCallBacks = new HashMap<>();
     }
     
     protected IEventSubscriber getEventSubscriber() {
@@ -140,10 +141,14 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 if (!isStopEvent(event)) {
                     handleEvent(event);
                 }
-                LoadingQueueDoneCallBack callBack = loadingQueueDoneCallBacks.remove(event);
+                LoadingQueueDoneCallBack callBack;
+                synchronized (loadingQueueDoneCallBacks) {
+                    callBack = loadingQueueDoneCallBacks.remove(event);
+                }
                 if (callBack != null) {
                     callBack.loadingQueueDone(this);
                 }
+               
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -191,10 +196,12 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     
     @Override
     public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {
-        if (queue.isEmpty()) {
-            callback.loadingQueueDone(this);
-        } else {
-            loadingQueueDoneCallBacks.put(queue.getLast(), callback);
+        synchronized (loadingQueueDoneCallBacks) {
+            if (queue.isEmpty()) {
+                callback.loadingQueueDone(this);
+            } else {
+                loadingQueueDoneCallBacks.put(queue.getLast(), callback);
+            }
         }
     }
 }
