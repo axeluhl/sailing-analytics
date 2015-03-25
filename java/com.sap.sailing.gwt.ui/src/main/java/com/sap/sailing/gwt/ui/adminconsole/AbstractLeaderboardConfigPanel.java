@@ -2,8 +2,10 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,8 +31,11 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -39,11 +44,13 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider,
@@ -518,5 +525,98 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected LeaderboardsRefresher getLeaderboardsRefresher() {
         return leaderboardsRefresher;
+    }
+
+    protected void editRaceColumnOfLeaderboard(final RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnWithFleet) {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        final boolean oldIsMedalRace = raceColumnWithFleet.getA().isMedalRace();
+        final String oldRaceColumnName = raceColumnWithFleet.getA().getRaceColumnName();
+        final Double oldExplicitFactor = raceColumnWithFleet.getA().getExplicitFactor();
+        // use a set to avoid duplicates in the case of regatta leaderboards with multiple fleets per column
+        Set<RaceColumnDTO> existingRacesWithoutThisRace = new HashSet<RaceColumnDTO>();
+        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality pair : raceColumnTable.getDataProvider().getList()) {
+            existingRacesWithoutThisRace.add(pair.getA());
+        }
+        existingRacesWithoutThisRace.remove(raceColumnWithFleet.getA());
+        final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(existingRacesWithoutThisRace,
+                raceColumnWithFleet.getA(), getSelectedLeaderboard().type.isRegattaLeaderboard(), stringMessages, new DialogCallback<RaceColumnDescriptor>() {
+            @Override
+            public void cancel() {
+            }
+    
+            @Override
+            public void ok(final RaceColumnDescriptor result) {
+                boolean rename = !oldRaceColumnName.equals(result.getName());
+                boolean updateIsMedalRace = oldIsMedalRace != result.isMedalRace();
+                boolean updateFactor = oldExplicitFactor != result.getExplicitFactor();
+                List<ParallelExecutionCallback<Void>> callbacks = new ArrayList<ParallelExecutionCallback<Void>>();
+                final ParallelExecutionCallback<Void> renameLeaderboardColumnCallback = new ParallelExecutionCallback<Void>();
+                if (rename) {
+                    callbacks.add(renameLeaderboardColumnCallback);
+                }
+                final ParallelExecutionCallback<Void> updateIsMedalRaceCallback = new ParallelExecutionCallback<Void>();
+                if (updateIsMedalRace) {
+                    callbacks.add(updateIsMedalRaceCallback);
+                }
+                final ParallelExecutionCallback<Void> updateLeaderboardColumnFactorCallback = new ParallelExecutionCallback<Void>();
+                if (updateFactor) {
+                    callbacks.add(updateLeaderboardColumnFactorCallback);
+                }
+                new ParallelExecutionHolder(callbacks.toArray(new ParallelExecutionCallback<?>[0])) {
+                    @Override
+                    public void handleSuccess() {
+                        loadAndRefreshLeaderboard(selectedLeaderboardName, result.getName());
+                    }
+                    @Override
+                    public void handleFailure(Throwable t) {
+                        errorReporter.reportError("Error trying to update data of race column "
+                                + oldRaceColumnName + " in leaderboard " + selectedLeaderboardName + ": "
+                                + t.getMessage());
+                    }
+                };
+                if (rename) {
+                    sailingService.renameLeaderboardColumn(selectedLeaderboardName, oldRaceColumnName,
+                            result.getName(), renameLeaderboardColumnCallback);
+                }
+                if (updateIsMedalRace) {
+                    sailingService.updateIsMedalRace(selectedLeaderboardName, result.getName(),
+                            result.isMedalRace(), updateIsMedalRaceCallback);
+                }
+                if (updateFactor) {
+                    sailingService.updateLeaderboardColumnFactor(selectedLeaderboardName, result.getName(),
+                            result.getExplicitFactor(), updateLeaderboardColumnFactorCallback);
+                }
+            }
+        });
+        raceDialog.show();
+    }
+
+    protected void showRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        sailingService.getRaceLog(selectedLeaderboardName, raceColumnDTO, fleetDTO,
+                new MarkedAsyncCallback<RaceLogDTO>(
+                        new AsyncCallback<RaceLogDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage(), true);
+                            }
+                            @Override
+                            public void onSuccess(RaceLogDTO result) {
+                                openRaceLogDialog(result);
+                            }
+                        }));
+    }
+
+    private void openRaceLogDialog(RaceLogDTO raceLogDTO) {
+        RaceLogDialog dialog = new RaceLogDialog(raceLogDTO, stringMessages, new DialogCallback<RaceLogDTO>() { 
+            @Override
+            public void cancel() {
+            }
+    
+            @Override
+            public void ok(RaceLogDTO result) {
+            }
+        });
+        dialog.show();
     }
 }

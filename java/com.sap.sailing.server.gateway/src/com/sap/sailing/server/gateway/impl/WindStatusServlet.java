@@ -215,7 +215,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
     }
     
     private class IgtimiMessageInfo {
-        Wind wind;
+        private Wind wind;
         private String deviceSerialInfo;
         
         public IgtimiMessageInfo(Wind wind, String deviceSerialInfo) {
