@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -41,13 +42,13 @@ public class CheckinManager {
     private AppPreferences prefs;
     private String url;
 
-    public CheckinManager(String url, CheckinDataActivity activity){
+    public CheckinManager(String url, CheckinDataActivity activity) {
         this.activity = activity;
         this.url = url;
         prefs = new AppPreferences(activity);
     }
 
-    public void callServerAndGenerateCheckinData(){
+    public void callServerAndGenerateCheckinData() {
         Uri uri = Uri.parse(url);
 
         // TODO: assuming scheme is http, is this valid?
@@ -57,8 +58,7 @@ public class CheckinManager {
         }
 
         final URLData urlData = extractRequestParametersFromUri(uri, scheme);
-        if (urlData == null)
-        {
+        if (urlData == null) {
             setCheckinData(null);
             return;
         }
@@ -93,7 +93,7 @@ public class CheckinManager {
             Toast.makeText(activity, activity.getString(R.string.error_invalid_qr_code), Toast.LENGTH_LONG).show();
             urlData = null;
         }
-        if(urlData != null) {
+        if (urlData != null) {
             urlData.leaderboardName = leaderboardNameFromQR;
 
             urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
@@ -148,28 +148,42 @@ public class CheckinManager {
                     }
                 });
     }
-    
-	private void getMarksFromServer(final String leaderboardName,
-			HttpGetRequest getMarksRequest, final URLData urlData) {
-		NetworkHelper.getInstance(activity).executeHttpJsonRequestAsnchronously(getMarksRequest, new NetworkHelperSuccessListener() {
-			
-			@Override
-			public void performAction(JSONObject response) {
-				try {
+
+    private void getMarksFromServer(final String leaderboardName,
+                                    HttpGetRequest getMarksRequest, final URLData urlData) {
+        NetworkHelper.getInstance(activity).executeHttpJsonRequestAsnchronously(getMarksRequest, new NetworkHelperSuccessListener() {
+
+            @Override
+            public void performAction(JSONObject response) {
+                try {
                     JSONArray markArray = response.getJSONArray("marks");
                     String checkinDigest = generateCheckindigest(urlData.uriStr);
                     List<MarkInfo> marks = new ArrayList<MarkInfo>();
-                    for(int i = 0; i< markArray.length(); i++){
-                    	JSONObject jsonMark = (JSONObject) markArray.get(i);
-                    	MarkInfo mark = new MarkInfo();
-                    	mark.setCheckinDigest(checkinDigest);
-                    	mark.setClassName(jsonMark.getString("@class"));
-                    	mark.setName(jsonMark.getString("name"));
-                    	mark.setId(jsonMark.getString("id"));
-                    	mark.setType(jsonMark.getString("type"));
-                    	marks.add(mark);
+                    List<MarkPingInfo> pings = new ArrayList<MarkPingInfo>();
+                    for (int i = 0; i < markArray.length(); i++) {
+                        JSONObject jsonMark = (JSONObject) markArray.get(i);
+                        MarkInfo mark = new MarkInfo();
+                        mark.setCheckinDigest(checkinDigest);
+                        mark.setClassName(jsonMark.getString("@class"));
+                        mark.setName(jsonMark.getString("name"));
+                        mark.setId(jsonMark.getString("id"));
+                        if (jsonMark.has("position")) {
+                            if (!jsonMark.get("position").equals(null)) {
+                                JSONObject positionJson = jsonMark.getJSONObject("position");
+                                MarkPingInfo ping = new MarkPingInfo();
+                                ping.setLattitude(positionJson.getString("latitude"));
+                                ping.setLongitude(positionJson.getString("longitude"));
+                                ping.setTimestamp(positionJson.getInt("timestamp"));
+                                ping.setAccuracy(positionJson.getDouble("accuracy"));
+                                ping.setMarkId(mark.getId());
+                                pings.add(ping);
+                            }
+                        }
+                        mark.setType(jsonMark.getString("type"));
+                        marks.add(mark);
                     }
                     urlData.marks = marks;
+                    urlData.pings = pings;
                     saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
 
                 } catch (JSONException e) {
@@ -179,24 +193,25 @@ public class CheckinManager {
                     displayAPIErrorRecommendRetry();
                     return;
                 }
-				
-			}
-		}, new NetworkHelper.NetworkHelperFailureListener() {
-			
-			@Override
+
+            }
+        }, new NetworkHelper.NetworkHelperFailureListener() {
+
+            @Override
             public void performAction(NetworkHelper.NetworkHelperError e) {
                 ExLog.e(activity, TAG, "Failed to get marks from API: " + e.getMessage());
                 activity.dismissProgressDialog();
                 displayAPIErrorRecommendRetry();
             }
-		});
-	}
+        });
+    }
 
     private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
         CheckinData data = new CheckinData();
         data.serverWithPort = urlData.hostWithPort;
         data.leaderboardName = leaderboardName;
         data.marks = urlData.marks;
+        data.pings = urlData.pings;
         data.deviceUid = urlData.deviceUuid
                 .getStringRepresentation();
         data.uriString = urlData.uriStr;
@@ -223,12 +238,12 @@ public class CheckinManager {
         }
     }
 
-    public void setCheckinData(AbstractCheckinData data){
+    public void setCheckinData(AbstractCheckinData data) {
         checkinData = data;
         activity.onCheckinDataAvailable(getCheckinData());
     }
 
-    public AbstractCheckinData getCheckinData(){
+    public AbstractCheckinData getCheckinData() {
         return checkinData;
     }
 
@@ -251,44 +266,44 @@ public class CheckinManager {
         alert.show();
         setCheckinData(null);
     }
-    
-    private String generateCheckindigest(String url)
-    {
-    	String checkinDigest = "";
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			md.update(url.getBytes("UTF-8"));
-			byte[] digest = md.digest();
-			StringBuffer buf = new StringBuffer();
-			for (byte byt : digest) {
-				buf.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
-				checkinDigest = buf.toString();
-			}
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return checkinDigest;
+
+    private String generateCheckindigest(String url) {
+        String checkinDigest = "";
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(url.getBytes("UTF-8"));
+            byte[] digest = md.digest();
+            StringBuffer buf = new StringBuffer();
+            for (byte byt : digest) {
+                buf.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
+                checkinDigest = buf.toString();
+            }
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return checkinDigest;
     }
 
-    public interface CheckinDataHandler{
+    public interface CheckinDataHandler {
     }
 
-    private class URLData{
+    private class URLData {
         public String uriStr;
         public String server;
         public int port;
         public String hostWithPort;
         public List<MarkInfo> marks;
+        public List<MarkPingInfo> pings;
         public String leaderboardName;
         public DeviceIdentifier deviceUuid;
         public String getMarkUrl;
         public String getLeaderboardUrl;
 
-        public URLData(){
+        public URLData() {
 
         }
     }

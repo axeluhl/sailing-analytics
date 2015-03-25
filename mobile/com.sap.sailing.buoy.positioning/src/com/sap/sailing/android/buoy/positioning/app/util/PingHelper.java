@@ -79,6 +79,6 @@ public class PingHelper {
 		pingInfo.setLongitude("" + location.getLongitude());
 		pingInfo.setAccuracy(location.getAccuracy());
 		pingInfo.setTimestamp((int) location.getTime());
-		DatabaseHelper.getInstance().storeMarkPing(context, mark, pingInfo);
+		DatabaseHelper.getInstance().storeMarkPing(context, pingInfo);
 	}
 }

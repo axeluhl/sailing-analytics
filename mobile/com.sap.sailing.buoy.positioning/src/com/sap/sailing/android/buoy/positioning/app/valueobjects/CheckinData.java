@@ -16,6 +16,7 @@ public class CheckinData extends AbstractCheckinData{
 	public String checkinDigest;
 	public String serverWithPort;
 	public List<MarkInfo> marks;
+    public List<MarkPingInfo> pings;
 
 	public void setCheckinDigestFromString(String checkinString)
 			throws UnsupportedEncodingException, NoSuchAlgorithmException {
