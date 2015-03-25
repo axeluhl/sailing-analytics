@@ -16,7 +16,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -186,23 +185,21 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
 
         // determine apparent wind at next path position & time
         Wind posWind = this.parameters.getWindField().getWind(pathPos);
-        PolarDiagram pd = this.parameters.getBoatPolarDiagram();
-        pd.setWind(posWind);
-        Wind appWind = new WindImpl(posWind.getPosition(), posWind.getTimePoint(), pd.getWind());
 
-        // calculate height-position with reference to apparent wind
-        Position posHeight = pathPos.getPosition().projectToLineThrough(posEnd, appWind.getBearing());
+        // calculate height-position with reference to target
+        Bearing bearVrt = posStart.getBearingGreatCircle(posEnd);
+        Position posHeight = pathPos.getPosition().projectToLineThrough(posEnd, bearVrt.reverse());
 
         // calculate vertical distance as distance of height-position to end
         Bearing bearHeight = posEnd.getBearingGreatCircle(posHeight);
-        double bearHeightSide = appWind.getBearing().getDifferenceTo(bearHeight).getDegrees();
-        double vrtSide = (this.upwindLeg ? -1.0 : +1.0);
+        double bearHeightSide = bearVrt.reverse().getDifferenceTo(bearHeight).getDegrees();
+        double vrtSide = -1.0;
         if (Math.abs(bearHeightSide) > 170.0) {
-            vrtSide = (this.upwindLeg ? +1.0 : -1.0);
+            vrtSide = +1.0;
         }
         double vrtDist = vrtSide * Math.round(posHeight.getDistance(posEnd).getMeters() * 1000.0) / 1000.0;
 
-        // scale last step to exactly reach height of posEnd (in reference to appWind) and adjust time correspondingly
+        // scale last step to exactly reach height of posEnd (in reference to target) and adjust time correspondingly
         boolean reachedEnd = false;
         if ((!path.reached) && (vrtDist > 0.0)) {
             // scale last step so that vrtDist ~ tgtHeight
@@ -221,7 +218,6 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         // calculate horizontal side: left or right in reference to race course
         double posSide = 1;
         Bearing posBear = posStart.getBearingGreatCircle(pathPos.getPosition());
-        Bearing bearVrt = posStart.getBearingGreatCircle(posEnd);
         double posBearDiff = bearVrt.getDifferenceTo(posBear).getDegrees();
         if ((posBearDiff < 0.0) || (posBearDiff > 180.0)) {
             posSide = -1;
