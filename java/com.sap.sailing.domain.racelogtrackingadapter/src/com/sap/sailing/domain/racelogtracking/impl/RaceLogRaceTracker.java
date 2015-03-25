@@ -267,8 +267,9 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             }
         }
 
-        trackedRace.setStartOfTrackingReceived(earliestMappingStart);
-        trackedRace.setEndOfTrackingReceived(latestMappingEnd);
+        // FIXME need better way to come to a realistic and adjusting start/end of tracking
+//        trackedRace.setStartOfTrackingReceived(earliestMappingStart);
+//        trackedRace.setEndOfTrackingReceived(latestMappingEnd);
     }
 
     private <ItemT extends WithID, FixT extends GPSFix> boolean hasMappingAlreadyBeenLoaded(
