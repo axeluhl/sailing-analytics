@@ -1,11 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.annotation.TargetApi;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -22,7 +28,7 @@ import java.text.SimpleDateFormat;
 
 public class MainScheduleFragment extends RaceFragment implements View.OnClickListener {
 
-    public static final String STARTTIME ="StartTime";
+    public static final String STARTTIME = "StartTime";
 
     private static final String TAG = MainScheduleFragment.class.getName();
 
@@ -37,6 +43,7 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
     private TextView mStartModeValue;
     private ImageView mStartModeFlag;
     private TextView mCourseValue;
+    private ImageView mCourseSymbol;
 
     public static MainScheduleFragment newInstance() {
         MainScheduleFragment fragment = new MainScheduleFragment();
@@ -47,46 +54,48 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule, container, false);
 
-        View startTime = layout.findViewById(R.id.start_time);
+        View startTime = ViewHolder.get(layout, R.id.start_time);
         if (startTime != null) {
             startTime.setOnClickListener(this);
         }
-        mStartTime = (TextView) layout.findViewById(R.id.start_time_value);
+        mStartTime = ViewHolder.get(layout, R.id.start_time_value);
 
-        View startProcedure = layout.findViewById(R.id.start_procedure);
+        View startProcedure = ViewHolder.get(layout, R.id.start_procedure);
         if (startProcedure != null) {
             startProcedure.setOnClickListener(this);
         }
 
-        mStartProcedureValue = (TextView) layout.findViewById(R.id.start_procedure_value);
+        mStartProcedureValue = ViewHolder.get(layout, R.id.start_procedure_value);
 
-        mStartMode = layout.findViewById(R.id.start_mode);
+        mStartMode = ViewHolder.get(layout, R.id.start_mode);
         if (mStartMode != null) {
             mStartMode.setOnClickListener(this);
         }
-        mStartModeValue = (TextView) layout.findViewById(R.id.start_mode_value);
-        mStartModeFlag = (ImageView) layout.findViewById(R.id.start_mode_flag);
+        mStartModeValue = ViewHolder.get(layout, R.id.start_mode_value);
+        mStartModeFlag = ViewHolder.get(layout, R.id.start_mode_flag);
 
-        View course = layout.findViewById(R.id.start_course);
+        View course = ViewHolder.get(layout, R.id.start_course);
         if (course != null) {
             course.setOnClickListener(this);
         }
-        mCourseValue = (TextView) layout.findViewById(R.id.start_course_value);
+        mCourseSymbol = ViewHolder.get(layout, R.id.start_course_symbol);
+        mCourseValue = ViewHolder.get(layout, R.id.start_course_value);
 
-        View start = layout.findViewById(R.id.start_race);
+        View start = ViewHolder.get(layout, R.id.start_race);
         if (start != null) {
             start.setOnClickListener(this);
         }
 
-        View wind = layout.findViewById(R.id.wind);
+        View wind = ViewHolder.get(layout, R.id.wind);
         if (wind != null) {
             wind.setOnClickListener(this);
         }
-        mWindValue = (TextView) layout.findViewById(R.id.wind_value);
+        mWindValue = ViewHolder.get(layout, R.id.wind_value);
 
         return layout;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onResume() {
         super.onResume();
@@ -124,11 +133,31 @@ public class MainScheduleFragment extends RaceFragment implements View.OnClickLi
                     mStartMode.setVisibility(View.GONE);
                 }
                 if (mStartProcedureValue != null) {
-                    mStartProcedureValue.setText(getRaceState().getRacingProcedure().getType()==null?"":getRaceState().getRacingProcedure().getType().toString());
+                    if (getRaceState().getRacingProcedure().getType() != null) {
+                        mStartProcedureValue.setText(getRaceState().getRacingProcedure().getType().toString());
+                    }
                 }
 
                 if (mCourseValue != null) {
-                    mCourseValue.setText(getRaceState().getCourseDesign()==null?"":getRaceState().getCourseDesign().getName());
+                    if (getRaceState().getCourseDesign() != null) {
+                        String courseName = getRaceState().getCourseDesign().getName();
+                        mCourseValue.setText(courseName);
+                        if (mCourseSymbol != null && !TextUtils.isEmpty(courseName)) {
+                            int resId;
+                            if (courseName.toLowerCase().startsWith("i")) {
+                                resId = R.drawable.course_updown_48dp;
+                            } else {
+                                resId = R.drawable.course_triangle_48dp;
+                            }
+                            Drawable drawable;
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                drawable = getResources().getDrawable(resId, null);
+                            } else {
+                                drawable = getResources().getDrawable(resId);
+                            }
+                            mCourseSymbol.setImageDrawable(drawable);
+                        }
+                    }
                 }
             }
         }

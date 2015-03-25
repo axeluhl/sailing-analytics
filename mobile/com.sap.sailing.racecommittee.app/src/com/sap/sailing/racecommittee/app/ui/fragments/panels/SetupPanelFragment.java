@@ -1,12 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,10 +26,13 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.*;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
-public class SetupPanelFragment extends BasePanelFragment  {
+public class SetupPanelFragment extends BasePanelFragment {
 
     private RaceStateChangedListener mStateListener;
     private RaceProcedureChangedListener mProcedureListener;
@@ -126,9 +133,30 @@ public class SetupPanelFragment extends BasePanelFragment  {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void refreshPanel() {
-        if (mCourseValue != null && getRaceState().getCourseDesign() != null) {
-            mCourseValue.setText(getRaceState().getCourseDesign().getName());
+        if (mCourseValue != null) {
+            mCourseValue.setText(null);
+            mCourseValue.setCompoundDrawables(null, null, null, null);
+            if (getRaceState().getCourseDesign() != null) {
+                String courseName = getRaceState().getCourseDesign().getName();
+                mCourseValue.setText(courseName);
+                Drawable drawable = null;
+                if (!TextUtils.isEmpty(courseName)) {
+                    int resId;
+                    if (courseName.toLowerCase().startsWith("i")) {
+                        resId = R.drawable.course_updown_64dp;
+                    } else {
+                        resId = R.drawable.course_triangle_64dp;
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        drawable = getResources().getDrawable(resId, null);
+                    } else {
+                        drawable = getResources().getDrawable(resId);
+                    }
+                }
+                mCourseValue.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
+            }
         }
 
         if (mStartProcedureValue != null && getRaceState().getTypedRacingProcedure() != null) {

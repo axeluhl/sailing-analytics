@@ -178,8 +178,8 @@
                     android:gravity="center_horizontal"
                     android:textSize="@dimen/textSize_22"
                     android:textColor="?white"
-                    android:drawableTop="@drawable/course_updown_64dp"
-                    tools:text="012"/>
+                    tools:drawableTop="@drawable/course_updown_64dp"
+                    tools:text="012" />
             </RelativeLayout>
         </RelativeLayout>
 
@@ -237,7 +237,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/wind_no_data"
                     android:textColor="?white"
-                    android:textSize="@dimen/textSize_22"/>
+                    android:textSize="@dimen/textSize_22" />
             </RelativeLayout>
         </RelativeLayout>
     </LinearLayout>

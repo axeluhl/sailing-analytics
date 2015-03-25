@@ -35,8 +35,11 @@ import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.*;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
+import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
@@ -592,9 +595,11 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
                     view.setVisibility(View.GONE);
                 }
+
                 if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
                     view.setVisibility(View.VISIBLE);
                 }
+
                 if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
                     Bundle args = new Bundle();
                     args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
