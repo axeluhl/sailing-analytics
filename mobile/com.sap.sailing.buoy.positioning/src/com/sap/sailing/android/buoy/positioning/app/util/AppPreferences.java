@@ -17,8 +17,9 @@ public class AppPreferences extends BaseAppPreferences {
 	}
 	
 	public String getServerMarkPath(String leaderboardName){
+        String cleanLeaderBoardName = leaderboardName.replaceAll(" ", "%20");
 		return context.getString(R.string.preference_server_marks_path,
-				"/leaderboards").replace("{leaderboard_name}", leaderboardName);
+				"/leaderboards").replace("{leaderboard_name}", cleanLeaderBoardName);
 	}
 	
 	public String getServerMarkPingPath(String leaderBoardName, String markID){
