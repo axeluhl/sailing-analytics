@@ -10,7 +10,4 @@
     
 	<dimen name="preference_margin">72dp</dimen>
 
-    <dimen name="textSize_32">22sp</dimen>
-    <dimen name="textSize_40">26sp</dimen>
-
 </resources>

@@ -9,14 +9,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
@@ -30,10 +29,12 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
     public final static String TOGGLED = "toggled";
 
+    private RaceStateChangedListener mStateListener;
     private IntentReceiver mReceiver;
     private SimpleDateFormat dateFormat;
 
     private View mRaceHeader;
+    private View mTimeLock;
     private TextView mCurrentTime;
     private TextView mHeaderTime;
     private TextView mTimeStart;
@@ -54,12 +55,14 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
         View layout = inflater.inflate(R.layout.race_panel_time, container, false);
 
         dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
+        mStateListener = new RaceStateChangedListener();
 
         mRaceHeader = ViewHolder.get(layout, R.id.race_content_header);
         if (mRaceHeader != null) {
             mRaceHeader.setOnClickListener(new RaceHeaderClick());
         }
 
+        mTimeLock = ViewHolder.get(layout, R.id.time_start_lock);
         mCurrentTime = ViewHolder.get(layout, R.id.current_time);
         mTimeFinish = ViewHolder.get(layout, R.id.time_finish);
         mHeaderTime = ViewHolder.get(layout, R.id.timer_text);
@@ -77,6 +80,9 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
 
         TickSingleton.INSTANCE.registerListener(this);
         notifyTick();
+        checkStatus();
+
+        getRaceState().addChangedListener(mStateListener);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
@@ -87,6 +93,8 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
     @Override
     public void onPause() {
         super.onStop();
+
+        getRaceState().removeChangedListener(mStateListener);
 
         TickSingleton.INSTANCE.unregisterListener(this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
@@ -129,8 +137,41 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
     private void uncheckMarker(View view) {
         if (view != null) {
             if (!view.equals(mRaceHeader)) {
+                resetFragment(mTimeLock, this.getClass());
                 setMarkerLevel(mRaceHeader, R.id.time_marker, 0);
             }
+        }
+    }
+
+    private void checkStatus() {
+        switch (getRace().getStatus()) {
+            case UNSCHEDULED:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
+
+            case SCHEDULED:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
+
+            case STARTPHASE:
+                changeVisibility(mTimeLock, View.GONE);
+                break;
+
+            case RUNNING:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
+
+            case FINISHING:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
+
+            case FINISHED:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
+
+            default:
+                changeVisibility(mTimeLock, View.VISIBLE);
+                break;
         }
     }
 
@@ -139,19 +180,21 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
         private final String TAG = RaceHeaderClick.class.getName();
 
         public void onClick(View v) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_TIME);
-            switch (toggleMarker(v, R.id.time_marker)) {
-                case 0:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+            if (mTimeLock == null || mTimeLock.getVisibility() == View.GONE) {
+                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_TIME);
+                switch (toggleMarker(v, R.id.time_marker)) {
+                    case 0:
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                        break;
 
-                case 1:
-                    replaceFragment(StartTimeFragment.newInstance(2));
-                    break;
+                    case 1:
+                        replaceFragment(StartTimeFragment.newInstance(2));
+                        break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
+                    default:
+                        ExLog.i(getActivity(), TAG, "Unknown return value");
+                        break;
+                }
             }
         }
     }
@@ -175,6 +218,23 @@ public class TimePanelFragment extends BasePanelFragment implements TickListener
                     }
                 }
             }
+        }
+    }
+
+    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
+
+        private View mView;
+
+        public RaceStateChangedListener() {
+            mView = new View(getActivity());
+        }
+
+        @Override
+        public void onStatusChanged(ReadonlyRaceState state) {
+            super.onStatusChanged(state);
+
+            checkStatus();
+            uncheckMarker(mView);
         }
     }
 }
