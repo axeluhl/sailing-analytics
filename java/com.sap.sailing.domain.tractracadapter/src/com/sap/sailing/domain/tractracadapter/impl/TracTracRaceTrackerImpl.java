@@ -43,6 +43,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
@@ -577,7 +578,25 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             } 
         }
         logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
-        lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
+        if (progress==1.0) {
+            LoadingQueueDoneCallBack callBackHandler = new LoadingQueueDoneCallBack() {
+                
+                private Set<Receiver> receivers = new HashSet<>(TracTracRaceTrackerImpl.this.receivers);
+                
+                @Override
+                public void loadingQueueDone(Receiver receiver) {
+                    receivers.remove(receiver);
+                    if (this.receivers.isEmpty()) {
+                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, progress);
+                        updateStatusOfTrackedRaces();
+                    }
+                }
+            };
+            for (Receiver receiver : receivers) {
+                receiver.callBackWhenLoadingQueueIsDone(callBackHandler);
+            }
+        }
+        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
         lastProgressPerID.put(getID(), new Util.Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();
     }
@@ -621,20 +640,35 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void stopped(Object o) {
         logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces()+" while in status "+lastStatus);
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
-        updateStatusOfTrackedRaces();
-        if (!stopped) {
-            try {
-                for (RaceDefinition race : getRaces()) {
-                    // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the TracAPI then
-                    // all subscriptions have received all their data and it's therefore safe to stop all subscriptions
-                    // at this point without missing any data.
-                    trackedRegattaRegistry.stopTracking(regatta, race);
+        LoadingQueueDoneCallBack callBackHandler = new LoadingQueueDoneCallBack() {
+            
+            private Set<Receiver> receivers = new HashSet<>(TracTracRaceTrackerImpl.this.receivers);
+            
+            @Override
+            public void loadingQueueDone(Receiver receiver) {
+                receivers.remove(receiver);
+                if (this.receivers.isEmpty()) {
+                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
+                    updateStatusOfTrackedRaces();
+                    if (!stopped) {
+                        try {
+                            for (RaceDefinition race : getRaces()) {
+                                // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the TracAPI then
+                                // all subscriptions have received all their data and it's therefore safe to stop all subscriptions
+                                // at this point without missing any data.
+                                trackedRegattaRegistry.stopTracking(regatta, race);
+                            }
+                        } catch (InterruptedException | IOException e) {
+                            logger.log(Level.INFO, "Interrupted while trying to stop tracker "+this, e);
+                        }
+                    }
                 }
-            } catch (InterruptedException | IOException e) {
-                logger.log(Level.INFO, "Interrupted while trying to stop tracker "+this, e);
             }
+        };
+        for (Receiver receiver : receivers) {
+            receiver.callBackWhenLoadingQueueIsDone(callBackHandler);
         }
+        
     }
 
     @Override

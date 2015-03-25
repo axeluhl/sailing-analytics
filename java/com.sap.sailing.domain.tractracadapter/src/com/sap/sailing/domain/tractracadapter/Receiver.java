@@ -34,4 +34,6 @@ public interface Receiver {
      * Waits until this received has stopped, but no longer than <code>timeout</code> milliseconds
      */
     void join(long timeoutInMilliseconds) throws InterruptedException;
+    
+    void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback);
 }
