@@ -150,7 +150,7 @@ public class DatabaseHelper {
      * @throws RemoteException
      */
     public void storeCheckinRow(Context context, List<MarkInfo> markList,
-                                LeaderboardInfo leaderboard, CheckinUrlInfo checkinURL)
+                                LeaderboardInfo leaderboard, CheckinUrlInfo checkinURL, List<MarkPingInfo> pings)
             throws GeneralDatabaseHelperException {
 
         // inserting leaderboard first
@@ -179,6 +179,10 @@ public class DatabaseHelper {
         	opList.add(ContentProviderOperation.newInsert(Mark.CONTENT_URI).withValues(cmv).build());
 		}
 
+        for(MarkPingInfo ping: pings){
+            storeMarkPing(context, ping);
+        }
+
         // checkin url
 
         ContentValues ccuv = new ContentValues();
@@ -199,12 +203,12 @@ public class DatabaseHelper {
     }
 
     
-    public void storeMarkPing(Context context, MarkInfo mark, MarkPingInfo markPing) throws GeneralDatabaseHelperException{
+    public void storeMarkPing(Context context, MarkPingInfo markPing) throws GeneralDatabaseHelperException{
     	ContentResolver cr = context.getContentResolver();
 
         ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
         ContentValues mpcv = new ContentValues();
-        mpcv.put(MarkPing.MARK_ID, mark.getId());
+        mpcv.put(MarkPing.MARK_ID, markPing.getMarkId());
         mpcv.put(MarkPing.MARK_PING_LATITUDE, markPing.getLattitude());
         mpcv.put(MarkPing.MARK_PING_LONGITUDE, markPing.getLongitude());
         mpcv.put(MarkPing.MARK_PING_ACCURACY, markPing.getAccuracy());
