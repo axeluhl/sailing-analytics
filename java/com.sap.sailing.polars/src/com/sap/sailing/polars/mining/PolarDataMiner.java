@@ -43,7 +43,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
@@ -58,7 +57,7 @@ public class PolarDataMiner {
     private static final int THREAD_POOL_SIZE = Math.max((int) (Runtime.getRuntime().availableProcessors() * (3.0/4.0)), 3);
     private final ThreadPoolExecutor executor = createExecutor();
     private final PolarSheetGenerationSettings backendPolarSheetGenerationSettings;
-    private final Map<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForReplayRacesWhichAreStillLoading = new HashMap<>();
+    private final Map<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new HashMap<>();
     
     private final Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
     
@@ -188,22 +187,22 @@ public class PolarDataMiner {
 
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
         GPSFixMovingWithOriginInfo fixWithOriginInfo = new GPSFixMovingWithOriginInfo(fix, trackedRace, competitor);
-        if (isReplayAndFinishedOrLive(trackedRace)) {
-            processFix(trackedRace, fixWithOriginInfo);
-        } else {
+        if (trackedRace.getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
             /*
              * logger.info("Received fix for replay race which has not finished loading. Queuing. " +
              * (trackedRace.getRace() != null ? trackedRace.getRace().getName() : trackedRace.getRaceIdentifier()
              * .getRaceName()));
              */
-            synchronized (fixesForReplayRacesWhichAreStillLoading) {
-                Set<GPSFixMovingWithOriginInfo> fixes = fixesForReplayRacesWhichAreStillLoading.get(trackedRace);
+            synchronized (fixesForRacesWhichAreStillLoading) {
+                Set<GPSFixMovingWithOriginInfo> fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
                 if (fixes == null) {
                     fixes = new HashSet<>();
-                    fixesForReplayRacesWhichAreStillLoading.put(trackedRace, fixes);
+                    fixesForRacesWhichAreStillLoading.put(trackedRace, fixes);
                 }
                 fixes.add(fixWithOriginInfo);
             }
+        } else {
+            processFix(trackedRace, fixWithOriginInfo);
         }
     }
 
@@ -219,16 +218,6 @@ public class PolarDataMiner {
                 }
             }
         }
-    }
-
-    private boolean isReplayAndFinishedOrLive(TrackedRace trackedRace) {
-        boolean isLive = trackedRace.isLive(new MillisecondsTimePoint(System.currentTimeMillis()));
-        boolean loadingFinished = false;
-        if (trackedRace.getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED) {
-            loadingFinished = true;
-        }
-        boolean replayRaceAndFinished = !isLive && loadingFinished;
-        return replayRaceAndFinished || isLive;
     }
 
     public boolean isCurrentlyActiveAndOrHasQueue() {
@@ -399,11 +388,11 @@ public class PolarDataMiner {
 
     public void raceFinishedTracking(TrackedRace race) {
         Set<GPSFixMovingWithOriginInfo> fixes = null;
-        synchronized (fixesForReplayRacesWhichAreStillLoading) {
-            fixes = fixesForReplayRacesWhichAreStillLoading.remove(race);
+        synchronized (fixesForRacesWhichAreStillLoading) {
+            fixes = fixesForRacesWhichAreStillLoading.remove(race);
         }
         if (fixes != null) {
-            logger.info("All queued fixes for newly completed race will process now. " + (race.getRace() != null ? race
+            logger.info("All queued fixes for newly loaded race will process now. " + (race.getRace() != null ? race
                     .getRace().getName() : race.getRaceIdentifier().getRaceName()));
             for (GPSFixMovingWithOriginInfo fix : fixes) {
                 processFix(race, fix);

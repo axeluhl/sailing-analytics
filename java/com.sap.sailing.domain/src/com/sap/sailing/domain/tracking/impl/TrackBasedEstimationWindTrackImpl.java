@@ -667,7 +667,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         }
 
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the
             // cache
             // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
