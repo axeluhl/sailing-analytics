@@ -899,17 +899,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private void storeDeviceMappingEvent(DeviceMappingEvent<?, ?> event, DBObject result) {
+    private void storeDeviceMappingEvent(DeviceMappingEvent<?, ?> event, DBObject result, FieldNames fromField, FieldNames toField) {
         try {
             result.put(FieldNames.DEVICE_ID.name(), storeDeviceId(deviceIdentifierServiceFinder, event.getDevice()));
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store device identifier for mappng event", e);
         }
         if (event.getFrom() != null) {
-            storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
+            storeTimePoint(event.getFrom(), result, fromField);
         }
         if (event.getTo() != null) {
-            storeTimePoint(event.getTo(), result, FieldNames.RACE_LOG_TO);
+            storeTimePoint(event.getTo(), result, toField);
         }
     }
 
@@ -917,7 +917,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDeviceCompetitorMappingEvent.class.getSimpleName());
-        storeDeviceMappingEvent(event, result);
+        storeDeviceMappingEvent(event, result, FieldNames.RACE_LOG_FROM, FieldNames.RACE_LOG_TO);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
         return result;
     }
@@ -926,7 +926,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDeviceMarkMappingEvent.class.getSimpleName());
-        storeDeviceMappingEvent(event, result);
+        storeDeviceMappingEvent(event, result, FieldNames.RACE_LOG_FROM, FieldNames.RACE_LOG_TO);
         result.put(FieldNames.MARK.name(), storeMark(event.getMappedTo()));
         return result;
     }
@@ -1307,7 +1307,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceCompetitorMappingEvent event) {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName());
-        storeDeviceMappingEvent(event, result);
+        storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
         storeRegattaLogEvent(regattaLikeId, result);
     }
@@ -1315,7 +1315,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceMarkMappingEvent event) {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceMarkMappingEvent.class.getSimpleName());
-        storeDeviceMappingEvent(event, result);
+        storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.MARK.name(), storeMark(event.getMappedTo()));
         storeRegattaLogEvent(regattaLikeId, result);
     }
