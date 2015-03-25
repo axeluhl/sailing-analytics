@@ -1,11 +1,12 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.app.Activity;
-import android.test.ActivityUnitTestCase;
-import android.view.ContextThemeWrapper;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.action.ViewActions;
+import android.support.test.espresso.matcher.ViewMatchers;
+import android.test.ActivityInstrumentationTestCase2;
 import com.sap.sailing.android.tracking.app.R;
 
-public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
+public class StartActivityTest extends ActivityInstrumentationTestCase2<StartActivity> {
 
     public StartActivityTest() {
         super(StartActivity.class);
@@ -14,13 +15,10 @@ public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
     public void setUp() throws Exception {
         super.setUp();
 
-        ContextThemeWrapper context = new ContextThemeWrapper(getInstrumentation().getTargetContext(), R.style.AppTheme);
-        setActivityContext(context);
+        getActivity();
     }
 
     public void testActivity() throws Exception {
-        Activity activity = getActivity();
-
-        assertNull(activity);
+        Espresso.onView(ViewMatchers.withId(R.id.noQrCode)).perform(ViewActions.click());
     }
 }

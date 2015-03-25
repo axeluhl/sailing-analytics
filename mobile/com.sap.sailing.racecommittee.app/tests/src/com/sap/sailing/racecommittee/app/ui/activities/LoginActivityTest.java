@@ -1,11 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import android.app.Activity;
-import android.test.ActivityUnitTestCase;
-import android.view.ContextThemeWrapper;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.action.ViewActions;
+import android.support.test.espresso.matcher.ViewMatchers;
+import android.test.ActivityInstrumentationTestCase2;
 import com.sap.sailing.racecommittee.app.R;
 
-public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
+public class LoginActivityTest extends ActivityInstrumentationTestCase2<LoginActivity> {
 
     public LoginActivityTest() {
         super(LoginActivity.class);
@@ -14,13 +15,10 @@ public class LoginActivityTest extends ActivityUnitTestCase<LoginActivity> {
     public void setUp() throws Exception {
         super.setUp();
 
-        ContextThemeWrapper context = new ContextThemeWrapper(getInstrumentation().getTargetContext(), R.style.AppTheme_Dark);
-        setActivityContext(context);
+        getActivity();
     }
 
     public void testActivity() throws Exception {
-        Activity activity = getActivity();
-
-        assertNull(activity);
+        Espresso.onView(ViewMatchers.withId(R.id.login_view_backdrop)).perform(ViewActions.click());
     }
 }

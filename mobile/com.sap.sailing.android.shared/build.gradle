@@ -31,10 +31,6 @@ android {
             signingConfig signingConfigs.stg_debug
         }
     }
-
-    lintOptions {
-        abortOnError false
-    }
 }
 
 dependencies {

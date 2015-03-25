@@ -14,6 +14,9 @@ android {
         versionCode verCode
         versionName "$verCode - Laser"
         useJack false // not working on Windows yet
+
+        /* UI testing with espresso */
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     sourceSets {
@@ -55,10 +58,6 @@ android {
         }
     }
 
-    lintOptions {
-        abortOnError false
-    }
-
     packagingOptions {
         exclude "LICENSE.txt"
         exclude ".readme"
@@ -80,6 +79,14 @@ dependencies {
 
     /* all local jar-libs */
     compile fileTree(dir: "libs", include: ["*.jar"])
+
+    /* UI testing with espresso */
+    androidTestCompile "com.android.support.test.espresso:espresso-core:2.0"
+    androidTestCompile ('com.android.support.test.espresso:espresso-contrib:2.0') {
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude module: 'recyclerview-v7'
+    }
 }
 
 // Custom tasks
