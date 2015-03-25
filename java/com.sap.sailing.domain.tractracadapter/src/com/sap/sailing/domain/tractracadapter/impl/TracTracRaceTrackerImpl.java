@@ -585,10 +585,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 
                 @Override
                 public void loadingQueueDone(Receiver receiver) {
-                    receivers.remove(receiver);
-                    if (this.receivers.isEmpty()) {
-                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, progress);
-                        updateStatusOfTrackedRaces();
+                    synchronized (this.receivers) {
+                        receivers.remove(receiver);
+                        if (this.receivers.isEmpty()) {
+                            lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, progress);
+                            updateStatusOfTrackedRaces();
+                        }
                     }
                 }
             };
@@ -646,20 +648,22 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             
             @Override
             public void loadingQueueDone(Receiver receiver) {
-                receivers.remove(receiver);
-                if (this.receivers.isEmpty()) {
-                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
-                    updateStatusOfTrackedRaces();
-                    if (!stopped) {
-                        try {
-                            for (RaceDefinition race : getRaces()) {
-                                // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the TracAPI then
-                                // all subscriptions have received all their data and it's therefore safe to stop all subscriptions
-                                // at this point without missing any data.
-                                trackedRegattaRegistry.stopTracking(regatta, race);
+                synchronized (this.receivers) {
+                    receivers.remove(receiver);
+                    if (this.receivers.isEmpty()) {
+                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
+                        updateStatusOfTrackedRaces();
+                        if (!stopped) {
+                            try {
+                                for (RaceDefinition race : getRaces()) {
+                                    // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the TracAPI then
+                                    // all subscriptions have received all their data and it's therefore safe to stop all subscriptions
+                                    // at this point without missing any data.
+                                    trackedRegattaRegistry.stopTracking(regatta, race);
+                                }
+                            } catch (InterruptedException | IOException e) {
+                                logger.log(Level.INFO, "Interrupted while trying to stop tracker "+this, e);
                             }
-                        } catch (InterruptedException | IOException e) {
-                            logger.log(Level.INFO, "Interrupted while trying to stop tracker "+this, e);
                         }
                     }
                 }

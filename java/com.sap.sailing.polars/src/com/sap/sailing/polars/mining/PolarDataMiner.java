@@ -43,6 +43,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
@@ -78,14 +79,14 @@ public class PolarDataMiner {
                 synchronized (fixQueue) {
                     while (this.getQueue().size() < (EXECUTOR_QUEUE_SIZE / 10) && !fixQueue.isEmpty()) {
                         GPSFixMovingWithOriginInfo fix = fixQueue.poll();
-                        enrichingProcessor.processElement(fix);
+                        preFilteringProcessor.processElement(fix);
                     }
                 }
             }
         };
     }
     
-    private AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext> enrichingProcessor;
+    
     
     /**
      * This processor keeps track of the moving average of the speed values and the average angle for each course (legtype tack combination)
@@ -99,6 +100,7 @@ public class PolarDataMiner {
     private CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor;
     
     private SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor;
+    private ParallelFilteringProcessor<GPSFixMovingWithOriginInfo> preFilteringProcessor;
 
     public PolarDataMiner() {
         this(PolarSheetGenerationSettingsImpl.createBackendPolarSettings());
@@ -169,15 +171,42 @@ public class PolarDataMiner {
                 .asList(filteringProcessor);
 
 
-        enrichingProcessor = new AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext>(
-                GPSFixMovingWithOriginInfo.class, GPSFixMovingWithPolarContext.class, executor, enrichingResultReceivers) {
+        AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext> enrichingProcessor = new AbstractEnrichingProcessor<GPSFixMovingWithOriginInfo, GPSFixMovingWithPolarContext>(
+                GPSFixMovingWithOriginInfo.class, GPSFixMovingWithPolarContext.class, executor,
+                enrichingResultReceivers) {
 
             @Override
             protected GPSFixMovingWithPolarContext enrich(GPSFixMovingWithOriginInfo element) {
-                return new GPSFixMovingWithPolarContext(element.getFix(), element.getTrackedRace(), element.getCompetitor(),
-                        speedClusterGroup, angleClusterGroup);
+                GPSFixMovingWithPolarContext result = null;
+                result = new GPSFixMovingWithPolarContext(element.getFix(), element.getTrackedRace(),
+                        element.getCompetitor(), speedClusterGroup, angleClusterGroup);
+                return result;
             }
         };
+        
+        Collection<Processor<GPSFixMovingWithOriginInfo, ?>> preFilterResultReceivers = Arrays
+                .asList(enrichingProcessor);
+        
+        preFilteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithOriginInfo>(
+                GPSFixMovingWithOriginInfo.class, executor, preFilterResultReceivers, new FilterCriterion<GPSFixMovingWithOriginInfo>() {
+
+                    @Override
+                    public boolean matches(GPSFixMovingWithOriginInfo element) {
+                        boolean result = false;
+                        if (PolarFixFilterCriteria.isInLeadingCompetitors(element.getTrackedRace(), element.getCompetitor(),
+                                backendPolarSheetGenerationSettings.getPctOfLeadingCompetitorsToInclude())) {
+                            result = true;
+                        }
+                        return result;
+                    }
+
+                    @Override
+                    public Class<GPSFixMovingWithOriginInfo> getElementType() {
+                        return GPSFixMovingWithOriginInfo.class;
+                    }
+                });
+
+
     }
 
 
@@ -207,15 +236,11 @@ public class PolarDataMiner {
     }
 
     private void processFix(TrackedRace trackedRace, GPSFixMovingWithOriginInfo fixWithOriginInfo) {
-        // Pre Filter for performance. We don't need to run wind estimation for this filter
-        if (PolarFixFilterCriteria.isInLeadingCompetitors(trackedRace, fixWithOriginInfo.getCompetitor(),
-                backendPolarSheetGenerationSettings.getPctOfLeadingCompetitorsToInclude())) {
-            synchronized (fixQueue) {
-                if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 10) {
-                    fixQueue.add(fixWithOriginInfo);
-                } else {
-                    enrichingProcessor.processElement(fixWithOriginInfo);
-                }
+        synchronized (fixQueue) {
+            if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 10) {
+                fixQueue.add(fixWithOriginInfo);
+            } else {
+                preFilteringProcessor.processElement(fixWithOriginInfo);
             }
         }
     }
