@@ -11,9 +11,9 @@ import java.util.Set;
 
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -29,40 +29,33 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public class RetrieverLevelSpecificSelectionProvider implements SelectionProvider<Object>, DataRetrieverChainDefinitionChangedListener {
+public class RetrieverLevelSpecificSelectionProvider implements SelectionProvider<Object>, DataRetrieverChainDefinitionChangedListener,
+                                                                SelectionChangedListener {
     
     private final DataMiningSession session;
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<SelectionChangedListener> listeners;
-    private final SelectionChangedListener singleRetrieverLevelSelectionProvidersListener;
     
     private DataRetrieverChainDefinitionDTO retrieverChain;
     
     private final ScrollPanel mainPanel;
-    private final VerticalPanel contentPanel;
-    private final Collection<SingleRetrieverLevelSelectionProviderPrototype> singleRetrieverLevelSelectionProviders;
+    private final FlowPanel contentPanel;
+    private final Collection<SingleRetrieverLevelSelectionProviderPrototype> SingleRetrieverLevelSelectionProviderPrototypes;
     
-    public RetrieverLevelSpecificSelectionProvider(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+    public RetrieverLevelSpecificSelectionProvider(DataMiningSession session, StringMessages stringMessages,
+                                                   DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                                    DataRetrieverChainDefinitionProvider dataRetrieverChainDefinitionProvider) {
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
-        singleRetrieverLevelSelectionProvidersListener = new SelectionChangedListener() {
-            @Override
-            public void selectionChanged() {
-                for (SelectionChangedListener listener : listeners) {
-                    listener.selectionChanged();
-                }
-            }
-        };
         
-        singleRetrieverLevelSelectionProviders = new ArrayList<>();
+        SingleRetrieverLevelSelectionProviderPrototypes = new ArrayList<>();
         
-        contentPanel = new VerticalPanel();
+        contentPanel = new FlowPanel();
         mainPanel = new ScrollPanel(contentPanel);
         
         dataRetrieverChainDefinitionProvider.addDataRetrieverChainDefinitionChangedListener(this);
@@ -76,37 +69,12 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
                 updateRetrievalLevels();
             } else {
                 contentPanel.clear();
-                singleRetrieverLevelSelectionProviders.clear();
+                SingleRetrieverLevelSelectionProviderPrototypes.clear();
             }
         }
     }
 
     private void updateRetrievalLevels() {
-        contentPanel.clear();
-        singleRetrieverLevelSelectionProviders.clear();
-        
-        int retrieverLevel = 0;
-        boolean first = true;
-        for (LocalizedTypeDTO retrievedDataType : retrieverChain.getRetrievedDataTypesChain()) {
-            if (!first) {
-                contentPanel.add(new Label("|"));
-            }
-            first = false;
-            
-            SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider = new SingleRetrieverLevelSelectionProviderPrototype(session, stringMessages, dataMiningService, errorReporter,
-                                                                                                                                    retrieverChain, retrievedDataType, retrieverLevel );
-            singleRetrieverLevelSelectionProvider.addSelectionChangedListener(singleRetrieverLevelSelectionProvidersListener);
-            
-            contentPanel.add(singleRetrieverLevelSelectionProvider);
-            singleRetrieverLevelSelectionProviders.add(singleRetrieverLevelSelectionProvider);
-            
-            retrieverLevel++;
-        }
-        
-        udpateAvailableDimensions();
-    }
-
-    private void udpateAvailableDimensions() {
         dataMiningService.getDimensionsFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -114,13 +82,35 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
             }
             @Override
             public void onSuccess(Iterable<FunctionDTO> dimensions) {
+                contentPanel.clear();
+                SingleRetrieverLevelSelectionProviderPrototypes.clear();
+
                 Map<String, Collection<FunctionDTO>> dimensionsMappedBySourceType = mapBySourceType(dimensions);
-                
-                for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : singleRetrieverLevelSelectionProviders) {
-                    String sourceType = singleRetrieverLevelSelectionProvider.getRetrievedDataType().getTypeName();
-                    if (dimensionsMappedBySourceType.containsKey(sourceType)) {
-                        singleRetrieverLevelSelectionProvider.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceType));
+                int retrieverLevel = 0;
+                boolean first = true;
+                for (LocalizedTypeDTO retrievedDataType : retrieverChain.getRetrievedDataTypesChain()) {
+                    if (!first) {
+                        Label retrieverLevelSeparatorLabel = new Label("|");
+                        contentPanel.add(retrieverLevelSeparatorLabel);
                     }
+                    first = false;
+
+                    String sourceTypeName = retrievedDataType.getTypeName();
+                    if (dimensionsMappedBySourceType.containsKey(sourceTypeName) &&
+                        !dimensionsMappedBySourceType.get(sourceTypeName).isEmpty()) {
+                        SingleRetrieverLevelSelectionProviderPrototype SingleRetrieverLevelSelectionProviderPrototype =
+                                new SingleRetrieverLevelSelectionProviderPrototype(session, stringMessages, dataMiningService, errorReporter,
+                                                                                   retrieverChain, retrievedDataType, retrieverLevel );
+                        SingleRetrieverLevelSelectionProviderPrototype.addSelectionChangedListener(RetrieverLevelSpecificSelectionProvider.this);
+                        
+                        contentPanel.add(SingleRetrieverLevelSelectionProviderPrototype);
+                        SingleRetrieverLevelSelectionProviderPrototypes.add(SingleRetrieverLevelSelectionProviderPrototype);
+                        SingleRetrieverLevelSelectionProviderPrototype.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceTypeName));
+                    } else {
+                        contentPanel.add(new Label(retrievedDataType.getDisplayName()));
+                    }
+                    
+                    retrieverLevel++;
                 }
             }
         });
@@ -140,10 +130,10 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
     @Override
     public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getFilterSelection() {
         Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = new HashMap<>();
-        for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : singleRetrieverLevelSelectionProviders) {
-            Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection = singleRetrieverLevelSelectionProvider.getFilterSelection();
+        for (SingleRetrieverLevelSelectionProviderPrototype SingleRetrieverLevelSelectionProviderPrototype : SingleRetrieverLevelSelectionProviderPrototypes) {
+            Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection = SingleRetrieverLevelSelectionProviderPrototype.getFilterSelection();
             if (!levelFilterSelection.isEmpty()) {
-                filterSelection.put(singleRetrieverLevelSelectionProvider.getRetrieverLevel(),
+                filterSelection.put(SingleRetrieverLevelSelectionProviderPrototype.getRetrieverLevel(),
                         new HashMap<FunctionDTO, Collection<? extends Serializable>>(levelFilterSelection));
             }
         }
@@ -152,19 +142,26 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
 
     @Override
     public void applySelection(QueryDefinitionDTO queryDefinition) {
-        for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : singleRetrieverLevelSelectionProviders) {
+        for (SingleRetrieverLevelSelectionProviderPrototype SingleRetrieverLevelSelectionProviderPrototype : SingleRetrieverLevelSelectionProviderPrototypes) {
             Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
-            int retrieverLevel = singleRetrieverLevelSelectionProvider.getRetrieverLevel();
+            int retrieverLevel = SingleRetrieverLevelSelectionProviderPrototype.getRetrieverLevel();
             if (filterSelection.containsKey(retrieverLevel)) {
-                singleRetrieverLevelSelectionProvider.applySelection(filterSelection.get(retrieverLevel));
+                SingleRetrieverLevelSelectionProviderPrototype.applySelection(filterSelection.get(retrieverLevel));
             }
         }
     }
 
     @Override
     public void clearSelection() {
-        for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : singleRetrieverLevelSelectionProviders) {
-            singleRetrieverLevelSelectionProvider.clearSelection();
+        for (SingleRetrieverLevelSelectionProviderPrototype SingleRetrieverLevelSelectionProviderPrototype : SingleRetrieverLevelSelectionProviderPrototypes) {
+            SingleRetrieverLevelSelectionProviderPrototype.clearSelection();
+        }
+    }
+    
+    @Override
+    public void selectionChanged() {
+        for (SelectionChangedListener listener : listeners) {
+            listener.selectionChanged();
         }
     }
 
