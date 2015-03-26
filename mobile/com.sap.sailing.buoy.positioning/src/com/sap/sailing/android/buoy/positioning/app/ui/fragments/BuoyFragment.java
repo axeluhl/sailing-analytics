@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -35,11 +36,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private OpenSansTextView accuracyTextView;
     private OpenSansButton setPositionButton;
     private OpenSansButton resetPositionButton;
-    private MapView mapView;
+    private MapFragment mapView;
     private Location lastKnownLocation;
     private LatLng savedPosition;
     private LocationManager locationManager;
-    private String locationProvider;
     private pingListener pingListener;
 
     @Override
@@ -48,8 +48,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_buoy_postion_detail,
                 container, false);
-
-        mapView = (MapView) view.findViewById(R.id.map);
 
         markHeaderTextView = (OpenSansTextView) view
                 .findViewById(R.id.mark_header);
@@ -81,10 +79,11 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         if (mark != null) {
             markHeaderTextView.setText(mark.getName());
             setUpPingUI();
-            //setUpMap();
+            setUpMap();
         }
-        if(lastKnownLocation != null) {
-            //mapView.getMap().animateCamera(CameraUpdateFactory.newLatLng(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude())));
+        if(savedPosition != null) {
+            mapView.getMap().animateCamera(CameraUpdateFactory.newLatLng(savedPosition));
+            mapView.getMap().animateCamera(CameraUpdateFactory.zoomTo(10));
         }
     }
 
@@ -105,7 +104,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     public void onLocationChanged(Location location) {
         if(getActivity() instanceof PositioningActivity) {
             lastKnownLocation = location;
-            //setUpMap();
+            setUpMap();
         }
     }
 
@@ -138,12 +137,17 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     public void setUpMap() {
+        mapView = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
         GoogleMap map = mapView.getMap();
         map.clear();
+        map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        map.setMyLocationEnabled(true);
+        map.setPadding(0, 50, 0, 0);
         if (savedPosition != null) {
             MarkerOptions savedLocactionOptions = new MarkerOptions();
             savedLocactionOptions.position(savedPosition);
-            // mySelfOptions.visible(true);
+            savedLocactionOptions.visible(true);
             map.addMarker(savedLocactionOptions);
         }
         if(lastKnownLocation != null)
@@ -151,7 +155,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             MarkerOptions mySelfOptions = new MarkerOptions();
             LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
             mySelfOptions.position(lastKnownLatLng);
-            // mySelfOptions.visible(true);
+            mySelfOptions.visible(true);
             map.addMarker(mySelfOptions);
         }
 

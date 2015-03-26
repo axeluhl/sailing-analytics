@@ -13,6 +13,12 @@
         android:layout_weight="1"
         android:background="@color/white">
 
+        <fragment
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            class="com.google.android.gms.maps.MapFragment" />
+
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/mark_header"
             android:layout_width="match_parent"
@@ -29,12 +35,6 @@
             android:paddingTop="7dp"
             android:textColor="@color/white"
             android:textSize="14sp" />
-
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
 
     </RelativeLayout>
 
