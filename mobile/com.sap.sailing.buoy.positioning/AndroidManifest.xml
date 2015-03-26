@@ -21,10 +21,6 @@
         android:glEsVersion="0x00020000"
         android:required="true" />
 
-    <uses-library
-        android:name="com.google.android.maps"
-        android:required="true" />
-
     <application
         android:name="com.sap.sailing.android.shared.application.LoggableApplication"
         android:allowBackup="true"
