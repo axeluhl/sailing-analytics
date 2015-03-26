@@ -9,14 +9,8 @@ import com.google.gwt.resources.client.ImageResource;
 public interface HeaderResources extends ClientBundle {
     public static final HeaderResources INSTANCE = GWT.create(HeaderResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/shared/header/Header.css")
+    @Source("com/sap/sailing/gwt/home/client/shared/header/Header.gss")
     LocalCss css();
-
-    public interface MinWidth50emCss extends LocalCss {
-    }
-
-    @Source("com/sap/sailing/gwt/home/client/shared/header/HeaderLarge.css")
-    MinWidth50emCss largeCss();
 
     @Shared
     public interface LocalCss extends CssResource {

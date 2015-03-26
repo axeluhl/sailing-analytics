@@ -9,9 +9,7 @@ package com.sap.sailing.dashboards.gwt.shared;
  */
 public enum ResponseMessage
 {
-    OK,
-    BETWEEN_RACES,
-    NO_RACE_LIVE,
-    NO_COMPETITOR_SELECTED
+    RACE_LIVE,
+    NO_RACE_LIVE
 }
 

@@ -55,7 +55,8 @@ public class TestRaceLogRemovalInRegatta extends AbstractTestStoringAndRetrievin
         RaceLogStartTimeEvent expectedEventBlue = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, author, 0, MillisecondsTimePoint.now());
         blueLog.add(expectedEventBlue);
         // these events are now expected to be stored persistently in the race log store
-        db.getLastError(); // synchronize on DB
+        //getLastError() is now deprecated - seems to run fine without (at least locally)
+        //db.getLastError(); // synchronize on DB
         qualification.removeRaceColumn(raceColumnName);
         qualification.addRaceColumn(raceColumnName, /* trackedRegattaRegistry */ null /* no re-association with tracked regatta required */);
         RaceLog yellowLogAfterRecreation = qualification.getRaceColumnByName(raceColumnName).getRaceLog(yellowFleet);

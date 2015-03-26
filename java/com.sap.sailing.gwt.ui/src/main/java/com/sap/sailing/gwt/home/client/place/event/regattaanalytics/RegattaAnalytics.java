@@ -182,6 +182,7 @@ public class RegattaAnalytics extends Composite implements LeaderboardUpdateList
         setActiveTabPanel(competitorChartsTabPanel, competitorChartsAnchor);
         DetailType selectedChartDetailType = oldCompetitorChartsComposite.getSelectedChartDetailType();
         regattaAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+        oldCompetitorChartsComposite.updateSelectionState(regattaAnalyticsManager.getCompetitorSelectionProvider());
         handleClickEvent(event, competitorChartsNavigation);
     }
 

@@ -270,11 +270,11 @@ public class WindTest {
         Waypoint w1 = domainFactory.createWaypoint(startFinish, /*passingInstruction*/ null);
         Waypoint w2 = domainFactory.createWaypoint(top, /*passingInstruction*/ null);
         Waypoint w3 = domainFactory.createWaypoint(startFinish, /*passingInstruction*/ null);
-        Competitor competitor = new CompetitorImpl(123, "Test Competitor", Color.RED, new TeamImpl("STG", Collections.singleton(
-                new PersonImpl("Test Competitor", new NationalityImpl("GER"),
-                /* dateOfBirth */null, "This is famous " + "Test Competitor")), new PersonImpl("Rigo van Maas",
-                new NationalityImpl("NED"),
-                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Test Competitor" + "'s boat",
+        Competitor competitor = new CompetitorImpl(123, "Test Competitor", Color.RED, null, new TeamImpl("STG", Collections.singleton(
+                        new PersonImpl("Test Competitor", new NationalityImpl("GER"),
+                        /* dateOfBirth */null, "This is famous " + "Test Competitor")), new PersonImpl("Rigo van Maas",
+                        new NationalityImpl("NED"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Test Competitor" + "'s boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
         final BoatClass boatClass = domainFactory.getOrCreateBoatClass("ESS40");
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(

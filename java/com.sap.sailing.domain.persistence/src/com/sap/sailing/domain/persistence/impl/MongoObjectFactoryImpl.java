@@ -203,7 +203,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public DBCollection getWindTrackCollection() {
         DBCollection result = database.getCollection(CollectionNames.WIND_TRACKS.name());
-        result.ensureIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), null));
+        result.createIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), null));
         return result;
     }
 
@@ -212,7 +212,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject index = new BasicDBObject();
         index.put(FieldNames.DEVICE_ID.name(), null);
         index.put(FieldNames.TIME_AS_MILLIS.name(), null);
-        gpsFixCollection.ensureIndex(index);
+        gpsFixCollection.createIndex(index);
         return gpsFixCollection;
     }
 
@@ -220,7 +220,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection collection = database.getCollection(CollectionNames.GPS_FIXES_METADATA.name());
         DBObject index = new BasicDBObject();
         index.put(FieldNames.DEVICE_ID.name(), null);
-        collection.ensureIndex(index);
+        collection.createIndex(index);
         return collection;
     }
     
@@ -265,7 +265,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeLeaderboard(Leaderboard leaderboard) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         try {
-            leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());
+            leaderboardCollection.createIndex(new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), 1));
         } catch (NullPointerException npe) {
             // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
             logger.log(Level.SEVERE, "storeLeaderboard", npe);
@@ -440,7 +440,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
 
         try {
-            leaderboardGroupCollection.ensureIndex(FieldNames.LEADERBOARD_GROUP_NAME.name());
+            leaderboardGroupCollection.createIndex(new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), 1));
         } catch (NullPointerException npe) {
             // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
             logger.log(Level.SEVERE, "storeLeaderboardGroup", npe);
@@ -496,7 +496,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeSailingServer(RemoteSailingServerReference server) {
         DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
-        serverCollection.ensureIndex(FieldNames.SERVER_NAME.name());
+        serverCollection.createIndex(new BasicDBObject(FieldNames.SERVER_NAME.name(), 1));
         DBObject query = new BasicDBObject();
         query.put(FieldNames.SERVER_NAME.name(), server.getName());
         DBObject serverDBObject = new BasicDBObject();
@@ -515,7 +515,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeEvent(Event event) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
-        eventCollection.ensureIndex(FieldNames.EVENT_ID.name());
+        eventCollection.createIndex(new BasicDBObject(FieldNames.EVENT_ID.name(), 1));
         DBObject query = new BasicDBObject();
         query.put(FieldNames.EVENT_ID.name(), event.getId());
         DBObject eventDBObject = new BasicDBObject();
@@ -547,7 +547,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
         // now store the links to the leaderboard groups
         DBCollection linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
-        linksCollection.ensureIndex(FieldNames.EVENT_ID.name());
+        linksCollection.createIndex(new BasicDBObject(FieldNames.EVENT_ID.name(), 1));
         BasicDBList lgUUIDs = new BasicDBList();
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             lgUUIDs.add(lg.getId());
@@ -590,8 +590,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeRegatta(Regatta regatta) {
         DBCollection regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
-        regattasCollection.ensureIndex(FieldNames.REGATTA_NAME.name());
-        regattasCollection.ensureIndex(FieldNames.REGATTA_ID.name());
+        regattasCollection.createIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), 1));
+        regattasCollection.createIndex(new BasicDBObject(FieldNames.REGATTA_ID.name(), 1));
         DBObject dbRegatta = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
@@ -692,7 +692,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public DBCollection getRaceLogCollection() {
         DBCollection result = database.getCollection(CollectionNames.RACE_LOGS.name());
-        result.ensureIndex(new BasicDBObject(FieldNames.RACE_LOG_IDENTIFIER.name(), null));
+        result.createIndex(new BasicDBObject(FieldNames.RACE_LOG_IDENTIFIER.name(), null));
         return result;
     }
     
@@ -915,17 +915,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private void storeDeviceMappingEvent(DeviceMappingEvent<?, ?> event, DBObject result) {
+    private void storeDeviceMappingEvent(DeviceMappingEvent<?, ?> event, DBObject result, FieldNames fromField, FieldNames toField) {
         try {
             result.put(FieldNames.DEVICE_ID.name(), storeDeviceId(deviceIdentifierServiceFinder, event.getDevice()));
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store device identifier for mappng event", e);
         }
         if (event.getFrom() != null) {
-            storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
+            storeTimePoint(event.getFrom(), result, fromField);
         }
         if (event.getTo() != null) {
-            storeTimePoint(event.getTo(), result, FieldNames.RACE_LOG_TO);
+            storeTimePoint(event.getTo(), result, toField);
         }
     }
 
@@ -933,7 +933,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDeviceCompetitorMappingEvent.class.getSimpleName());
-        storeDeviceMappingEvent(event, result);
+        storeDeviceMappingEvent(event, result, FieldNames.RACE_LOG_FROM, FieldNames.RACE_LOG_TO);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
         return result;
     }
@@ -942,7 +942,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDeviceMarkMappingEvent.class.getSimpleName());
-        storeDeviceMappingEvent(event, result);
+        storeDeviceMappingEvent(event, result, FieldNames.RACE_LOG_FROM, FieldNames.RACE_LOG_TO);
         result.put(FieldNames.MARK.name(), storeMark(event.getMappedTo()));
         return result;
     }
@@ -1312,7 +1312,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection result = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         DBObject index = new BasicDBObject(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), null);
         index.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), null);
-        result.ensureIndex(index);
+        result.createIndex(index);
         return result;
     }
     
@@ -1340,7 +1340,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceCompetitorMappingEvent event) {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName());
-        storeDeviceMappingEvent(event, result);
+        storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
         storeRegattaLogEvent(regattaLikeId, result);
     }
@@ -1348,7 +1348,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceMarkMappingEvent event) {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceMarkMappingEvent.class.getSimpleName());
-        storeDeviceMappingEvent(event, result);
+        storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.MARK.name(), storeMark(event.getMappedTo()));
         storeRegattaLogEvent(regattaLikeId, result);
     }

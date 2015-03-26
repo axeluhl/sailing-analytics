@@ -7,18 +7,32 @@ We have decided to handle checkins etc. at the level of ``Leaderboard``s instead
 
 This document supplements the [documentation of the existing REST API](http://www.sapsailing.com/sailingserver/webservices/api/v1/index.html), highlighting those resources necessary for the tracking app, and specifying such resources that are not yet present in the API.
 
+For the moment, this document also contains the API for the proposed [Buoy Tender (Tonnenleger) App](#buoy-tender-app), which can be moved to a separate document at some point.
+
 ### URL base
 ```
 http://<host>/sailingserver/api/v1/
 ```
 All relative URLs given below are relative to this base URL.
 
+## Process
+
+The endpoints listed below should mostly be called in the order they are listed here.
+That is, after
+
+1. receiving the [Checkin Information](#tracking-checkin-info), the App can 
+2. then perform the [Check-In](#checkin) for the competitor in question
+3. and proceed with sending [GPS Fixes](#fixes).
+
+
 ## Push Notifications
+
+_not yet implemented_
 
 Event data can be updated via push notifications. These are limited on iOS to 256 bytes (not characters). For this reason, on receiving a push notification, the app must GET the event data.
 
-
-## Checkin Information
+## Check-In Information
+<div id="tracking-checkin-info"></div>
 
 ### URL and QRCode
 
@@ -39,8 +53,8 @@ This information is represented in a URL with the following structure:
 ```
 http://<host>/tracking/checkin
   ?event_id=<event-id>
-  &leaderboard_name=<leaderboard-name>
-  &competitor_id=<competitor-id>
+  &leaderboardName=<leaderboard-name>
+  &competitorId=<competitor-id>
 ```
 
 **Additional Notes:**
@@ -105,6 +119,7 @@ _**Note:** Consider using the leaderboard-dependent verison below - which includ
 
 
 ## Check-In
+<div id="checkin"></div>
 
 After the user has received the event data with the short URL, the smartphone is mapped to a competitor.
 
@@ -162,6 +177,7 @@ Ends the device to competitor coupling. Does not delete it, but rather marks the
 
 
 ## Send Measurements (to the Fix Store)
+<div id="fixes"></div>
 
 The main data sent by the app.
 
@@ -252,3 +268,112 @@ $ curl -H "Content-Type:image/jpeg" --data-binary @<path-to-jpeg> \
   "teamImageUri" : "http://training.sapsailing.com/team_images/9871d3a2c554b27151cacf1422eec048.jpeg"
 }
 ```
+## Leaderboard Integration
+
+The leaderboard buttons loads the online leaderboard into an web-view. 
+
+```
+http://<host>/gwt/Leaderboard.html?name=<leaderboardName>&showRaceDetails=false&embedded=true&hideToolbar=true
+```
+
+# Buoy Tender (Tonnenleger) App
+<div id="buoy-tender-app"></div>
+
+An app aimed at buoy tenders. In v1, this only allows marks of a race to be _pinged_. The steps for doing so are
+
+1. provide the information for which leaderboard and race to ping marks
+2. get the marks for that race (potentially form the RaceLog, if no TrackedRace is yet present)
+3. ping the marks by submitting fixes
+
+## Check-In Information
+<div id="bouy-tender-checkin-info"></div>
+
+_see [bug 2650](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2650)_
+
+In contrast to the _Tracking App_, we won't perform a check-in. However, we can deliver the information on leaderboard and race analogously through a URL (potentially QRCode), which is why this section is also called _Check-In Information_.
+
+This information is represented in a URL with the following structure:
+```
+http://<host>/buoy-tender/checkin?leaderboard_name=<leaderboard-name>
+```
+
+_also see [Tracking App Check-In Information](#tracking-checkin-info) for additional notes that might apply_
+
+## Get Marks
+
+_see [bug 2651](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2651)_
+
+Do not use the course to get the list of marks to ping. Instead, use the ``RaceLogDefineMarkEvent``s in the RaceLog, or ``TrackedRace#getMarks()``. As the JavaDoc of the latter states, not all marks for a race are necessarily present in the course - e.g. if they are backup buoys to be used in the case of a wind shift.
+
+**Path:** ``leaderboards/{leaderboard-name}/marks?raceColumn={race-column-name}&fleet={fleet-name}``
+
+The parameters ``raceColumn`` and ``fleet`` are optional. 
+
+* neither ``raceColumn`` nor ``fleet``: all marks of the leaderboard get returned
+* only ``raceColumn``:  all marks of the leaderboard's raceColumn get returned
+* both ``raceColumn`` and ``fleet``: all marks of a certain fleet of a leaderboard's raceColumn
+* only ``fleet``: HTTP/400 Bad Request 
+
+Specifying an invalid leaderboard/raceColumn/fleet leads to an HTTP/404 Not found
+
+**Verb:** ``GET``
+
+**Response:**
+```
+[
+  {
+    "@class": "Mark",
+    "name": "Start (1)",
+    "id": "Start (1)",
+    "type": "BUOY"
+  },
+  {
+    "@class": "Mark",
+    "name": "Start (2)",
+    "id": "Start (2)",
+    "type": "BUOY"
+  },
+  {
+    "@class": "Mark",
+    "name": "Windward",
+    "id": "22a53380-046e-0132-0da7-60a44ce903c3",
+    "type": "BUOY"
+  }
+]
+```
+
+## Ping Marks
+
+_see [bug 2652](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2652)_
+
+Instead of the checkin/checkout process of the tracking app, marks can be pinged using an API that hides the inner workings on the server completely. The server creates a device-mapping in the regatta-log for the exact timepoint of every fix, and adds the fixes to the GPSFixStore.
+
+**Path:** ``leaderboards/{leaderboard-name}/marks/{mark-id}/gps_fixes``
+
+**Verb:** ``POST``
+
+**Request:**
+```
+{
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
+}
+```
+
+**Response:**
+If there is no existent GPS Fix for the Mark HTTP/200 will be returned.
+If there is an existent GPS Fix the latest known Position of the Mark will be returned:
+```
+{
+      "timestamp" : 14144160080000,
+      "latitude" : 54.325246,
+      "longitude" : 10.148556,
+}
+```
+
+**Additional Notes:**
+* the path for this endpoint intentionally has the leaderboard as a parent item
+  * each mark should have a unique ID (``SharedDomainFactory#getOrCreateMark(String toStringRepresentationOfID, String name)``)
+  * however, the mark cannot be pinged without the leaderboard as context, however, as the GPSFixStore contains only fixes with a device ID, and the mapping from that device to a mark has to be established through a RegattaLog (or RaceLog), which is attached to a (Flexible|Regatta)Leaderboard
+  * an alternative endpoint definition might be ``POST marks/{mid}/gps_fixes?leaderboard_name={ln}``

@@ -101,4 +101,9 @@ public class SettingsActivity extends PreferenceActivity {
     public boolean isRedirected() {
         return isRedirectedToTemp;
     }
+    
+    @Override
+    protected boolean isValidFragment(String fragmentName) {
+        return true;
+    }
 }

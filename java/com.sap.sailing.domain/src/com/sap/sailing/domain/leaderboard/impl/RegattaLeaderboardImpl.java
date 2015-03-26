@@ -3,11 +3,14 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
@@ -94,6 +97,17 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         } else {
             return super.getResultDiscardingRule();
         }
+    }
+    
+    /**
+     * Delegates to {@link Regatta#getAllCompetitors()} which is expected to deliver all competitors from this
+     * leaderboard's regatta which includes those belonging to {@link RaceDefinition races}
+     * {@link Regatta#getAllRaces() belonging to the regatta} as well as competitors listed on the regatta's
+     * {@link RegattaLog}.
+     */
+    @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        return regatta.getAllCompetitors();
     }
     
     @Override

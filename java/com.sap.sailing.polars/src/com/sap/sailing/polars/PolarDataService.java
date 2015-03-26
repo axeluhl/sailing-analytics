@@ -4,6 +4,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
@@ -17,7 +19,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
+import com.sap.sailing.polars.mining.MovingAverageProcessor;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.common.Util.Pair;
 
@@ -26,14 +28,14 @@ import com.sap.sse.common.Util.Pair;
  * (sometimes also referred to as a "VPP" (velocity prediction program)) makes a prediction how fast the boat will
  * sail at a given true wind angle and a given true wind speed.<p>
  * 
- * This service uses a {@link PolarSheetAnalyzer} for more advanced analysis. Its methods are facaded in this interface for
+ * This service uses a {@link MovingAverageProcessor} for more advanced analysis. Its methods are facaded in this interface for
  * central access.<p>
  * The interesting methods for a client are {@link #getSpeed(BoatClass, Speed, Bearing, boolean)} if data for a specific angle is
- * needed and {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack)} 
+ * needed and {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack, boolean)} 
  * which also returns the average angle for the parameters provided.
  * 
  * @author Frederik Petersen (D054528)
- * @autho Axel Uhl (D043530)
+ * @author Axel Uhl (D043530)
  * 
  */
 public interface PolarDataService {
@@ -59,6 +61,7 @@ public interface PolarDataService {
      *            courses yet. Use getSpeed for the desired angle to get rawer information on other courses for now.
      * @param tack
      *            Polar data can vary depending on the tack the boat is on.
+     * @param useRegressionForSpeed TODO
      * @return The estimated average speed of a boat for the supplied parameters with the estimated average bearing to
      *         the true wind and a confidence which consists of the confidences of the wind speed, and boat speed sources (50%)
      *         and a confidence calculated using the amount of underlying fixes (50%). 0 <= confidence < 1<br/>
@@ -77,7 +80,7 @@ public interface PolarDataService {
      *             If there is not enough data to supply a value with some kind of significance.
      */
     SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
-            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
+            LegType legType, Tack tack, boolean useRegressionForSpeed) throws NotEnoughDataHasBeenAddedException;
 
 
     /**
@@ -164,4 +167,32 @@ public interface PolarDataService {
      *         speed and true wind angle in the {@link Pair#getB() second} component.
      */
     Pair<Double, SpeedWithBearingWithConfidence<Void>> getManeuverLikelihoodAndTwsTwa(BoatClass boatClass, Speed speedOverGround, double courseChangeDeg, ManeuverType maneuverType);
+
+    /**
+     * This method is not intended to be used directly apart from debugging purposes. If you intend to use the polar service please 
+     * use the {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack, boolean)} method.
+     * 
+     * @param boatClass
+     * @param legType
+     * @param tack
+     * @return The estimating function for the tack and legtype combination estimating boatspeed over windspeed for the
+     *         given boat class. All values in kn.
+     * @throws NotEnoughDataHasBeenAddedException 
+     */
+    PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
+    
+    /**
+     * This method is not intended to be used directly apart from debugging purposes. If you intend to use the polar service please 
+     * use the {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack, boolean)} method.
+     * 
+     * @param boatClass
+     * @param legType
+     * @param tack
+     * @return The estimating function for the tack and legtype combination estimating true wind angle over windspeed for the
+     *         given boat class. TWA in degrees and windspeeds in knots.
+     * @throws NotEnoughDataHasBeenAddedException 
+     */
+    PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
+
+    void raceFinishedTracking(TrackedRace race);
 }

@@ -84,15 +84,14 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         List<String> races = table.getRaceNames();
         
         assertThat(races.size(), equalTo(5));
-        assertThat(table.getEntries().size(), equalTo(0));
-        
+        assertThat(table.getEntries().size(), equalTo(28)); // the regatta already has the races linked; regatta leaderboard obtains competitors from regatta 
         adminConsoleWindow.switchToWindow();
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
         
         Integer[] expectedPointsForFindelJens = new Integer[] {2, 18, 12, 4, 7};
-        Integer[] expectedRankForFindelJens = new Integer[] {3, 9, 11, 7, 6};
+        Integer[] expectedRankForFindelJens = new Integer[] {2, 9, 11, 7, 6}; // Bogacki with no score in R1 expected to end up at end of leaderboard
         
         // Link the races and check the leaderboard again
         for (int i = 0; i < 5; i++) {

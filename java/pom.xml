@@ -16,6 +16,9 @@
     <module>com.sap.sse</module>
     <module>com.sap.sse.common</module>
     <module>com.sap.sse.shared.android</module>
+    <module>com.sap.sse.mail</module>
+    <module>com.sap.sse.mail.replication.test</module>
+    <module>com.sap.sse.mail.replication.testsupport</module>
     <module>com.sap.sse.mongodb</module>
     <module>com.sap.sse.gwt</module>
     <module>com.sap.sse.gwt.adminconsole</module>
@@ -27,7 +30,9 @@
     <module>com.sap.sse.security.userstore.mongodb</module>
     <module>com.sap.sse.operationaltransformation</module>
     <module>com.sap.sse.replication</module>
+    <module>com.sap.sse.threadmanager</module>
     <module>com.sap.sse.filestorage</module>
+    <module>com.sap.sse.gwt.theme</module>
     <module>com.sap.sailing.domain.common</module>
     <module>com.sap.sailing.domain.shared.android</module>
     <module>com.sap.sailing.domain</module>
@@ -56,10 +61,10 @@
     <module>com.sap.sailing.www</module>
     <module>com.sap.sailing.www.events</module>
     <module>com.sap.sailing.xmlexport</module>
+    <module>com.google.gwt.dev</module>
     <module>com.google.gwt.osgi</module>
     <module>com.tractrac.clientmodule</module>
     <module>org.json.simple</module>
-    <module>com.mongodb.driver</module>
     <module>com.googlecode.java-diff-utils</module>
     <module>com.googlecode.mgwt</module>
     <module>com.sap.sailing.dashboards.gwt</module>
@@ -82,9 +87,9 @@
     <module>com.sap.sailing.gwt.ui</module>
     <module>com.sap.sailing.domain.test</module>
     <module>com.sap.sse.replication.testsupport</module>
-    <!-- The following test fragment doesn't yet do what it should in the Maven context...
+    <!-- The following test fragment doesn't yet do what it should in the Maven context... -->
     <module>com.sap.sse.gwt.test</module>
-    -->
+    <!-- -->
     <module>com.sap.sse.datamining.test</module>
     <module>com.sap.sse.security.replication.test</module>
     <module>com.sap.sse.security.test</module>
@@ -150,13 +155,13 @@
       -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
     </parameters.common>
     <parameters.vm-settings>
-      -ea -Xmx1024m -XX:PermSize=256m -XX:+UseG1GC
+      -ea -Xmx1024m -XX:+UseG1GC
     </parameters.vm-settings>
     <parameters.tractrac>
       -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost
     </parameters.tractrac>
     <parameters.mongodb>
-      -Dmongo.host=localhost
+      -Dmongo.host=127.0.0.1
     </parameters.mongodb>
     <parameters.debug>
       -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y
@@ -185,7 +190,7 @@
       <id>no-debug.without-proxy</id>
       <properties>
         <tycho.build.argLine>
-          ${parameters.common} ${parameters.vm-settings}
+          ${parameters.common} ${parameters.vm-settings} ${parameters.mongodb}
         </tycho.build.argLine>
       </properties>
     </profile>
@@ -193,7 +198,7 @@
       <id>debug.with-proxy</id>
       <properties>
         <tycho.build.argLine>
-          ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug}
+          ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug} ${parameters.mongodb}
         </tycho.build.argLine>
       </properties>
     </profile>
@@ -201,7 +206,7 @@
       <id>debug.without-proxy</id>
       <properties>
         <tycho.build.argLine>
-          ${parameters.common} ${parameters.vm-settings} ${parameters.debug}
+          ${parameters.common} ${parameters.vm-settings} ${parameters.debug} ${parameters.mongodb}
         </tycho.build.argLine>
       </properties>
     </profile>
@@ -257,6 +262,15 @@
         <version>${tycho-version}</version>
         <configuration>
           <resolver>p2</resolver>
+	  <dependency-resolution>
+	    <extraRequirements>
+	      <requirement>
+	        <type>eclipse-plugin</type>
+		<id>com.google.gwt.dev</id>
+                <versionRange>0.0.0</versionRange>
+	      </requirement>
+	    </extraRequirements>
+	  </dependency-resolution>
           <target>
             <artifact>
               <groupId>${project.groupId}</groupId>

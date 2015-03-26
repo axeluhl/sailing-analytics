@@ -341,18 +341,14 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                     jsonLegs.add(jsonLeg);
                 }
                 jsonRace.put("legs", jsonLegs);
-                try {
-                    JSONArray jsonRaceRanking = new JSONArray();
-                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                        JSONObject competitorRank = new JSONObject();
-                        competitorRank.put("competitor", competitor.getName());
-                        competitorRank.put("rank", trackedRace.getRank(competitor, timePoint));
-                        jsonRaceRanking.add(competitorRank);
-                    }
-                    jsonRace.put("ranks", jsonRaceRanking);
-                } catch (NoWindException e) {
-                    // well, we don't know the wind direction... then no windward distance will be shown...
+                JSONArray jsonRaceRanking = new JSONArray();
+                for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                    JSONObject competitorRank = new JSONObject();
+                    competitorRank.put("competitor", competitor.getName());
+                    competitorRank.put("rank", trackedRace.getRank(competitor, timePoint));
+                    jsonRaceRanking.add(competitorRank);
                 }
+                jsonRace.put("ranks", jsonRaceRanking);
                 setJsonResponseHeader(resp);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
@@ -372,7 +368,7 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                 jsonEvent.put("boatclass", regatta.getBoatClass().getName());
             }
             JSONArray jsonCompetitors = new JSONArray();
-            for (Competitor competitor : regatta.getCompetitors()) {
+            for (Competitor competitor : regatta.getAllCompetitors()) {
                 JSONObject jsonCompetitor = new JSONObject();
                 jsonCompetitor.put("name", competitor.getName());
                 jsonCompetitor.put("sailID", competitor.getBoat()==null?"":competitor.getBoat().getSailID());

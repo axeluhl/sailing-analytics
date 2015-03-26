@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -60,7 +61,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     }
     
     private Mongo newMongo() throws UnknownHostException, MongoException {
-        return new Mongo(dbConfiguration.getHostName(),
+        return new MongoClient(dbConfiguration.getHostName(),
                 dbConfiguration.getPort());
     }
     

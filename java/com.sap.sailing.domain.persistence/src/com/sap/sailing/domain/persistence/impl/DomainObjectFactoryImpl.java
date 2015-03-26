@@ -28,6 +28,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -174,6 +175,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -279,14 +281,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private void ensureIndicesOnWindTracks(DBCollection windTracks) {
-        windTracks.ensureIndex(FieldNames.RACE_ID.name()); // for new programmatic access
-        windTracks.ensureIndex(FieldNames.REGATTA_NAME.name()); // for export or human look-up
+        windTracks.createIndex(new BasicDBObject(FieldNames.RACE_ID.name(), 1)); // for new programmatic access
+        windTracks.createIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), 1)); // for export or human look-up
         // for legacy access to not yet migrated fixes
-        windTracks.ensureIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1)
+        windTracks.createIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1)
                 .add(FieldNames.RACE_NAME.name(), 1).get());
         // Unique index
         try {
-            windTracks.ensureIndex(
+            windTracks.createIndex(
                     new BasicDBObjectBuilder().add(FieldNames.RACE_ID.name(), 1)
                             .add(FieldNames.WIND_SOURCE_NAME.name(), 1).add(FieldNames.WIND_SOURCE_ID.name(), 1)
                             .add(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1).get(),
@@ -1623,7 +1625,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), identifier.getIdentifierType());
             query.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), identifier.getName());
-            loadRegattaLogEvents(result, query);
+            loadRegattaLogEvents(result, query, identifier);
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new regatta log
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded regatta log data. Check MongoDB settings.");
@@ -1632,11 +1634,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private void loadRegattaLogEvents(RegattaLog targetRegattaLog, BasicDBObject query) {
+    private void loadRegattaLogEvents(RegattaLog targetRegattaLog, BasicDBObject query, RegattaLikeIdentifier regattaLogIdentifier) {
         DBCollection collection = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         for (DBObject o : collection.find(query)) {
             try {
-                RegattaLogEvent event = loadRegattaLogEvent((DBObject) o.get(FieldNames.REGATTA_LOG_EVENT.name()));
+                RegattaLogEvent event = loadRegattaLogEvent(o, regattaLogIdentifier);
                 if (event != null) {
                     targetRegattaLog.load(event);
                 }
@@ -1646,7 +1648,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    public RegattaLogEvent loadRegattaLogEvent(DBObject dbObject) {
+    private RegattaLogEvent loadRegattaLogEvent(DBObject o, RegattaLikeIdentifier regattaLogIdentifier) {
+        DBObject dbObject = (DBObject) o.get(FieldNames.REGATTA_LOG_EVENT.name());
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
         Serializable id = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_EVENT_ID.name());
@@ -1657,9 +1660,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         //CloseOpenEnded, DeviceCompMapping, DeviceMarkMapping, RegisterComp, Revoke
         String eventClass = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName())) {
-            return loadRegattaLogDeviceCompetitorMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
+            return loadRegattaLogDeviceCompetitorMappingEvent(createdAt, author, logicalTimePoint, id, dbObject, regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogDeviceMarkMappingEvent.class.getSimpleName())) {
-            return loadRegattaLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
+            return loadRegattaLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, dbObject, regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
             return loadRegattaLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRegisterCompetitorEvent.class.getSimpleName())) {
@@ -1699,7 +1702,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private RegattaLogDeviceMarkMappingEvent loadRegattaLogDeviceMarkMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
+            TimePoint logicalTimePoint, Serializable id, DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
         DeviceIdentifier device = null;
         try {
             device = loadDeviceId(deviceIdentifierServiceFinder,
@@ -1710,13 +1713,57 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         //have to load complete mark, as no order is guaranteed for loading of racelog events
         Mark mappedTo = loadMark((DBObject) dbObject.get(FieldNames.MARK.name()));
-        TimePoint from = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM);
-        TimePoint to = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_TO);
-        return new RegattaLogDeviceMarkMappingEventImpl(createdAt, author, logicalTimePoint, id, mappedTo, device, from, to);
+        Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, FieldNames.RACE_LOG_FROM, FieldNames.REGATTA_LOG_TO, FieldNames.RACE_LOG_TO);
+        final TimePoint from = times.getA();
+        final TimePoint to = times.getB();
+        final RegattaLogDeviceMarkMappingEventImpl result = new RegattaLogDeviceMarkMappingEventImpl(createdAt, author, logicalTimePoint, id, mappedTo, device, from, to);
+        final boolean needsMigration = times.getC();
+        if (needsMigration) {
+            // remove old version of mapping event
+            WriteResult removeResult = database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(outerDBObject);
+            assert removeResult.getN() == 1;
+            // and then insert using the fixed storage implementation
+            new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier, result);
+        }
+        return result;
     }
 
+    /**
+     * Loads a from and a to time point from <code>fromField</code> and <code>toField</code> of <code>dbObject</code>.
+     * If the <code>fromField</code> is not found, the <code>fromFieldDeprecated</code> is attempted. If found, migration
+     * is deemed necessary, expressed by returning <code>true</code> in the {@link Triple#getC()} component of the result.
+     * Same for the to-field.
+     * 
+     * @return the from-time in {@link Triple#getA()}, the to-time in {@link Triple#getB()} and whether or not migration is
+     * necessary because a value was only found in a deprecated field in {@link Triple#getC()}.
+     */
+    private Triple<TimePoint, TimePoint, Boolean> loadFromToTimePoint(final DBObject dbObject, FieldNames fromField, FieldNames fromFieldDeprecated,
+            FieldNames toField, FieldNames toFieldDeprecated) {
+        boolean needsMigration = false;
+        TimePoint from = loadTimePoint(dbObject, fromField);
+        if (from == null) {
+            // see bug 2733: erroneously, some records before the fix were written using RACE_LOG_FROM instead of REGATTA_LOG_FROM
+            // If such a case is found here, migrate the record.
+            from = loadTimePoint(dbObject, fromFieldDeprecated);
+            if (from != null) {
+                needsMigration = true;
+            }
+        }
+        TimePoint to = loadTimePoint(dbObject, toField);
+        if (to == null) {
+            // see bug 2733: erroneously, some records before the fix were written using RACE_LOG_FROM instead of REGATTA_LOG_FROM
+            // If such a case is found here, migrate the record.
+            to = loadTimePoint(dbObject, toFieldDeprecated);
+            if (to != null) {
+                needsMigration = true;
+            }
+        }
+        return new Triple<>(from, to, needsMigration);
+    }
+    
     private RegattaLogDeviceCompetitorMappingEvent loadRegattaLogDeviceCompetitorMappingEvent(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, final DBObject dbObject,
+            RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
         DeviceIdentifier device = null;
         try {
             device = loadDeviceId(deviceIdentifierServiceFinder,
@@ -1727,9 +1774,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         Competitor mappedTo = baseDomainFactory.getExistingCompetitorById(
                 (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
-        TimePoint from = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM);
-        TimePoint to = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_TO);
-        return new RegattaLogDeviceCompetitorMappingEventImpl(createdAt, author, logicalTimePoint, id, mappedTo, device, from, to);
+        Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, FieldNames.RACE_LOG_FROM, FieldNames.REGATTA_LOG_TO, FieldNames.RACE_LOG_TO);
+        final TimePoint from = times.getA();
+        final TimePoint to = times.getB();
+        final boolean needsMigration = times.getC();
+        final RegattaLogDeviceCompetitorMappingEventImpl result = new RegattaLogDeviceCompetitorMappingEventImpl(createdAt, author, logicalTimePoint, id, mappedTo, device, from, to);
+        if (needsMigration) {
+            // remove old version of mapping event
+            WriteResult removeResult = database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(outerDBObject);
+            assert removeResult.getN() == 1;
+            // and then insert using the fixed storage implementation
+            new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier, result);
+        }
+        return result;
     }
 
     /**

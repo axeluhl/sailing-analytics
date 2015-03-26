@@ -7,8 +7,8 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMessages {
     
-    private static final String MESSAGE_PARAMETER_START = "\\{";
-    private static final String MESSAGE_PARAMETER_END = "\\}";
+    private static final String MESSAGE_PARAMETER_START = "{";
+    private static final String MESSAGE_PARAMETER_END = "}";
     
     private final String resourceBaseName;
     private final ClassLoader resourceClassLoader;
@@ -28,8 +28,8 @@ public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMes
         String result = getResourceBundle(locale).getString(messageKey);
         
         for (int i = 0; i < parameters.length; i++) {
-            String replacementRegex = MESSAGE_PARAMETER_START + i + MESSAGE_PARAMETER_END;
-            result = result.replaceAll(replacementRegex, parameters[i]);
+            String target = MESSAGE_PARAMETER_START + i + MESSAGE_PARAMETER_END;
+            result = result.replace(target, parameters[i]);
         }
         return result;
     }

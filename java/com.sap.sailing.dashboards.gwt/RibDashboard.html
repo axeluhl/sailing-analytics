@@ -1,15 +1,17 @@
 <!doctype html>
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
+
 <html>
 <head>
 
-<!--[if lt IE 9]>
-	   <meta http-equiv="REFRESH" content="0; url=http://www.sapsailing.com/browser-info.html">
-	<![endif]-->
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<link href='src/main/resources/images/dashboardicon.png'
-	rel='apple-touch-startup-image'>
-<link href='src/main/resources/images/dashboardicon.png' rel='apple-touch-icon'>
-<link rel="shortcut icon" type="image/x-icon" href="src/main/resources/images/dashboardicon.png" />
+    
+<link href='images/dashboardicon.png' rel='apple-touch-icon'>
 
 <title>ESS Dashboard</title>
 
@@ -19,7 +21,7 @@
 <script type="text/javascript"
 	src="com.sap.sailing.dashboards.gwt.RibDashboard/com.sap.sailing.dashboards.gwt.RibDashboard.nocache.js"></script>
 
-<!-- Disables vertical scrolling whole website over edge on apple browsers -->
+<!-- Disables scrolling whole website vertically over edge on apple browsers -->
 <script type="text/javascript">
     document.ontouchmove = function(event){
     event.preventDefault();

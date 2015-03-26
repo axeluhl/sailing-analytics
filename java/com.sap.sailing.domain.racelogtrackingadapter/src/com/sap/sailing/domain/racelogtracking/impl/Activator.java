@@ -18,6 +18,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixMovingJsonDeserializer;
@@ -36,6 +37,12 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
+    
+    private static BundleContext context;
+    
+    public static BundleContext getContext() {
+        return context;
+    }
 	
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
@@ -53,6 +60,8 @@ public class Activator implements BundleActivator {
     
     @Override
     public void start(BundleContext context) throws Exception {
+        Activator.context = context;
+        
         registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new SmartphoneUUIDMongoHandler(), getDict(SmartphoneUUIDIdentifier.TYPE)));
         registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new SmartphoneUUIDJsonHandler(), getDict(SmartphoneUUIDIdentifier.TYPE)));
         registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new SmartphoneUUIDStringSerializationHandler(), getDict(SmartphoneUUIDIdentifier.TYPE)));
@@ -70,11 +79,17 @@ public class Activator implements BundleActivator {
         registerGPSFixJsonService(context, new GPSFixMovingNmeaDTOJsonDeserializer(), new GPSFixMovingNmeaDTOJsonSerializer(), GPSFixMovingNmeaDTOJsonDeserializer.TYPE);
         
         registrations.add(context.registerService(RaceLogTrackingAdapterFactory.class, RaceLogTrackingAdapterFactory.INSTANCE, null));
+
+        registrations.add(context.registerService(MasterDataImportClassLoaderService.class,
+                new MasterDataImportClassLoaderServiceImpl(), null));
+        
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        Activator.context = null;
+        
         for (ServiceRegistration<?> reg : registrations) {
             reg.unregister();
         }

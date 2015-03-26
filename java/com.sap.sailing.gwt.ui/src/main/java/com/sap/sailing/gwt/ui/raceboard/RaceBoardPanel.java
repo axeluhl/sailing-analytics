@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -49,6 +50,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -117,6 +119,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private final FlowPanel regattaAndRaceTimeInformationHeader;
     private boolean currentRaceHasBeenSelectedOnce;
     
+    private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
+    
     /**
      * @param event
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
@@ -156,8 +160,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
                 
+        raceMapResources.combinedWindPanelStyle().ensureInjected();
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(), selectedRaceIdentifier);
+                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(), selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle());
         CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionModel, stringMessages, raceMap,
                 new LeaderboardFetcher() {
                     @Override
@@ -259,7 +264,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
                         /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
-                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier), /* showRegattaRank */ false);
+                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier), /* showRegattaRank */ false,
+                        /*showCompetitorSailIdColumn*/true, /*showCompetitorFullNameColumn*/true);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier != null, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, /* showRaceDetails */ true, competitorSearchTextBox,

@@ -4,6 +4,24 @@
 <div id="mainContent">
 	<h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
 	<div class="innerContent">
+		<h5 class="articleSubheadline">March 2015</h5>
+
+		<ul class="bulletList">
+		    <li>Added competitor chart type for Course Over Ground (COG)
+		    </li>
+		    <li>Added leaderboard column and competitor chart entry for distances considering
+		        gate starts. With gate starts, late starters sail a shorter distance in their first
+		        leg. To still make distances comparable, a new metric has been introduced that for a gate
+		        start adds the distance between the port side of the start line and the position where
+		        the competitor started to the distance sailed in the first leg.
+		    </li>
+		    <li>The weights of the wind measurement units, the wind estimation and manual wind inputs by the
+		        race committee are now used properly for the wind streamlet visualization. This fixes issues
+		        with exaggerated weights for an estimated wind direction of very low confidence. 
+		    </li>
+		    <li>The expand/collapse toggle button in the race viewer's time panel has correct arrows now.
+		    </li>
+		</ul>
 		<h5 class="articleSubheadline">February 2015</h5>
 
 		<ul class="bulletList">
@@ -180,7 +198,7 @@
 			<li>China races, such as in Qingdao, may have the map background displayed at slightly wrong locations.
 			    This is due to an intentional random transformation that Google applies to GPS locations for
 			    China. You can circumvent this issue by switching to satellite view where the map background is displayed
-			    correctly. <img src="images/mapsatellite.png"/>
+			    correctly. <img src="/images/mapsatellite.png"/>
 			</li>
 			<li>Fixed a bug that in some cases has caused the wind chart, the advantage line, the wind indicator on the map
 			    and the leaderboard to use slightly different wind values. The problem was related to different averaging and

@@ -88,6 +88,7 @@ public class QuickRanksLiveCache {
                     }
                 }, getClass().getName());
         fromRefToRaceIdentifier = new HashMap<>();
+        referencesToGarbageCollectedRaces = new ReferenceQueue<>();
         new Thread("QuickRanksLiveCache garbage collector") {
             @Override
             public void run() {
@@ -107,7 +108,6 @@ public class QuickRanksLiveCache {
                 logger.info("Received stop in QuickRanksLiveCache garbage collector; terminating");
             }
         }.start();
-        referencesToGarbageCollectedRaces = new ReferenceQueue<>();
     }
 
     private void remove(RegattaAndRaceIdentifier raceIdentifier) {
@@ -126,8 +126,8 @@ public class QuickRanksLiveCache {
                 trackedRace.addListener(new Listener(raceIdentifier)); // register for all changes that may affect the quick ranks
                 cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);
             }
+            result = cache.get(raceIdentifier, /* wait for latest result */ true);
         }
-        result = cache.get(raceIdentifier, /* wait for latest result */ true);
         return result;
     }
 

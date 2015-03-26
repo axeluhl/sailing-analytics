@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -93,7 +92,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
                 String tooltip;
                 switch (mediaPlayerManagerComponent.getAssignedMediaTracks().size()) {
                 case 0:
-                    caption = "No Videos";
+                    caption = stringMessages.mediaNoVideosCaption();
                     tooltip = caption;
                     mediaSelectionButton.setVisible(false);
                     break;
@@ -114,11 +113,12 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
                     tooltip = stringMessages.mediaSelectVideoTooltip();
                     break;
                 }
-                if (Document.get().getClientWidth() <= 1024) {
-                    mediaSelectionButton.setHTML("&nbsp;");
+                if (mediaPlayerManagerComponent.isPlaying()) {
+                    mediaSelectionButton.addStyleDependentName("mediaplaying");
                 } else {
-                    mediaSelectionButton.setText(caption);
+                    mediaSelectionButton.removeStyleDependentName("mediaplaying");
                 }
+                mediaSelectionButton.setText(caption);
                 mediaSelectionButton.setTitle(tooltip);
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
             }

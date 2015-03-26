@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONValue;
 
-public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
+public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
     String tracTracEvents();
@@ -34,6 +35,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String carry();
     String competitor();
     String competitors();
+    String competitorsSelected(int selectedCompetitorsCount, int competitorsCount);
     String defaultLeaderboard();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
@@ -356,6 +358,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String waypoint();
     String showAllCompetitors();
     String boatTails();
+    String startFirstMarkTriangle();
     String resultImportUrls();
     String errorRefreshingResultImportUrlList(String message);
     String successfullyUpdatedResultImportUrls();
@@ -751,6 +754,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String protestEndsAt();
     String unknown();
     String raceLog();
+    String regattaLog();
     String refreshRaceLog();
     String raceLogReloaded();
     String reloadAllRaceLogs();
@@ -848,6 +852,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String noCustomGrouperScriptTextError();
     String noDimensionToGroupBySelectedError();
     String noGrouperSelectedError();
+    String noDataRetrieverChainDefinitonSelectedError();
     String windImport_Upload();
     String windImport_Title();
     String windImport_BoatId();
@@ -1088,6 +1093,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
+    String mediaNoVideosCaption();
     String mediaShowVideoCaption();
     String mediaShowVideoTooltip(String title);
     String mediaHideVideoCaption();
@@ -1153,4 +1159,53 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorRemovingSupressedPassing(String message);
     String errorTryingToObtainMarkPassing(String message);
     String errorTryingToObtainRaceLogMarkPassingData(String message);
+    String email();
+    String pleaseEnterAnEmail();
+    String inviteCompetitors();
+    String notAllCompetitorsProvideEmail();
+    String sendingMailsFailed();
+    String sendingMailsSuccessfull();
+    String selectEventForInvitation();
+    String imageURL();
+    String upload();
+    String removeResult(JSONValue status, JSONValue message);
+    String uploadSuccessful();
+    String fileUploadResult(JSONValue status, JSONValue message);
+    String showCompetitorSailIdColumn();
+    String showCompetitorFullNameColumn();
+    String loadingDimensionValues();
+    String runningQuery();
+    String inviteBuoyTenders();
+    String orMultipleEmails();
+    String courseOverGroundTrueDegreesTooltip();
+    String courseOverGroundTrueDegrees();
+    String distanceIncludingGateStartInMeters();
+    String distanceTraveledIncludingGateStartTooltip();
+    String raceDistanceTraveledIncludingGateStartTooltip();
+    String results();
+    String group();
+    String valueAscending();
+    String valueDescending();
+    String sortBy();
+    
+    String dashboardWindBotLoading();
+    String dashboardWindBotNotAvailable();
+    String dashboardWindBot();
+    String dashboardTrueWindSpeed();
+    String dashboardTrueWindDirection();
+    String dashboardTrueWindSpeedUnit();
+    String dashboardTrueWindDirectionUnit();
+    String dashboardLiveWind();
+    String dashboardAverageWind();
+    String dashboardAverageWindMinutes(int minutes);
+    String dashboardWindChartHint();
+    
+    String dashboardNewStartAnalysisAvailable();
+    
+    String dashboardStartlineAdvantageByWind();
+    String dashboardStartlineAdvantageByGeometry();
+    String dashboardRankAtFirstMark();
+    String dashboardTeam();
+    String dashboardDistanceToLineInM();
+    String dashboardSpeedInKts();
     }

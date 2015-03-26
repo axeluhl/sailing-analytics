@@ -800,4 +800,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     protected MarkPassingCalculator createMarkPassingCalculator() {
         return new MarkPassingCalculator(this, true); 
     }
+
+    @Override
+    public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
+        return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
+    }
 }

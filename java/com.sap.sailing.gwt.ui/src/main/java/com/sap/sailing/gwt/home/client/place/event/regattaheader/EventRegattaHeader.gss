@@ -1,0 +1,164 @@
+/**
+ * The header of a regatta of an event
+ */
+.eventregattaheader {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.regattanavigation {
+  font-size: 16px;
+  font-size: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+.regattanavigation_link {
+  display: inline-block;
+  margin-right: 1.875em;
+  padding: 0.9375em 0 0.6875em 0;
+  border-bottom: 0.25em solid transparent;
+  font-weight: 600;
+  color: #666;
+}
+.regattanavigation_link:hover,
+.regattanavigation_link:focus {
+  border-bottom-color: #ddd;
+  text-decoration: none;
+  color: #333;
+}
+.regattanavigation_linkactive {
+  border-bottom-color: #f0ab00;
+}
+.regattanavigation_linkactive:hover,
+.regattanavigation_linkactive:focus {
+  border-bottom-color: #d89a00;
+}
+.regatta {
+  font-size: 16px;
+  font-size: 1rem;
+  border-bottom: 1px solid #d9d9d9;
+  padding: 1.25em 0;
+}
+.regattacompact {
+  border-top: 1px solid #ccc;
+  padding-left: 3.75em;
+  padding-right: 3.75em;
+}
+.regattacompact .regatta_intro_details_itemhideoncompact {
+  display: none;
+}
+.regattalink:hover {
+  background-color: #fafafa;
+}
+.regattalink:hover .regatta_intro_image {
+  opacity: 0.9;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
+  filter: alpha(opacity=90);
+}
+.regattalink:nth-child(even) {
+  background-color: #f8f8f8;
+}
+.regattalink:nth-child(even):hover {
+  background-color: #f3f3f3;
+}
+.regatta_intro {
+  display: block;
+  padding-left: 9.6875em;
+  min-height: 8.75em;
+  position: relative;
+}
+.regatta_intro:hover,
+.regatta_intro:focus {
+  text-decoration: none;
+}
+.regatta_intro_image {
+  border: 1px solid #ccc;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.regatta_intro_header {
+  margin-bottom: 0.625em;
+  padding-top: 0.3125em;
+  padding-bottom: 0.625em;
+  border-bottom: 1px solid #d9d9d9;
+  position: relative;
+}
+.regatta_intro_header_logo {
+  vertical-align: middle;
+}
+.regatta_intro_header_name {
+  display: inline-block;
+  font-size: 1.25em;
+  margin: 0;
+  margin-right: 0.25em;
+}
+.regatta_intro_header_name:hover {
+  text-decoration: underline;
+}
+.regatta_intro_header_labels {
+  display: inline-block;
+  position: absolute;
+  right: 0;
+  top: 0.1875em;
+}
+.regatta_intro_header_labels .label {
+  vertical-align: baseline;
+}
+.regatta_intro_races {
+  position: relative;
+  min-height: 1.875em;
+  margin-bottom: 0.625em;
+  padding-bottom: 0.625em;
+  padding-left: 0.3125em;
+  border-bottom: 1px solid #d9d9d9;
+}
+.regatta_intro_races_race {
+  display: inline-block;
+  background-color: #ccc;
+  height: 0.625em;
+  width: 0.9375em;
+  -webkit-transform: skew(-45deg);
+  -moz-transform: skew(-45deg);
+  -o-transform: skew(-45deg);
+  -ms-transform: skew(-45deg);
+  transform: skew(-45deg);
+}
+.regatta_intro_races_race[data-finished='true'],
+.regatta_intro_races_race[data-finished='data-finished'] {
+  background-color: #f0ab00;
+}
+.regatta_intro_meta {
+  position: relative;
+  font-weight: 600;
+}
+.regatta_intro_meta_scoring {
+  color: #008fcc;
+  display: inline-block;
+}
+.regatta_intro_meta_leaderboardlink {
+  position: absolute;
+  top: 0;
+  right: 0;
+  text-transform: uppercase;
+  line-height: 2.8125em;
+}
+.regatta_intro_details {
+  font-weight: 600;
+  color: #666;
+}
+.regatta_intro_details_item {
+  display: inline-block;
+  margin-right: 2.1875em;
+}
+.regatta_intro_details_item:last-child {
+  margin-right: 0;
+}
+.regatta_intro_details_item_sub {
+  display: inline;
+}
+.regatta_intro_details_item_sub:last-child:after {
+  content: '';
+}
+.regatta_intro_details_item_value {
+  color: #008fcc;
+}

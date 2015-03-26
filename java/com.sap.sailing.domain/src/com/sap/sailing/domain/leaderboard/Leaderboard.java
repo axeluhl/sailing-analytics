@@ -88,7 +88,9 @@ public interface Leaderboard extends LeaderboardBase {
      * in a regular view of the leaderboard. Editors for leaderboards shall, though, also display the suppressed competitors
      * together with a visual indication showing which competitors are currently suppressed. The "suppressed-state" of a
      * competitor can change over the life cycle of a leaderboard. A typical use case for suppressing a competitor is
-     * removing one-time entries from a series (meta-)leaderboard or suppressing a camera boat in scoring.
+     * removing one-time entries from a series (meta-)leaderboard or suppressing a camera boat in scoring.<p>
+     * 
+     * @return all competitors in this leaderboard, including the suppressed ones.
      */
     Iterable<Competitor> getAllCompetitors();
     
@@ -193,7 +195,7 @@ public interface Leaderboard extends LeaderboardBase {
      * @param race
      *            a race that is contained in the {@link #getRaceColumns()} result
      */
-    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
@@ -207,7 +209,7 @@ public interface Leaderboard extends LeaderboardBase {
      * @return <code>null</code> if the competitor didn't participate in the race or the race hasn't started yet at
      *         <code>timePoint</code>
      */
-    Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException;
+    Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
 
     /**
      * Tells if and why a competitor received "penalty" points for a race (however the scoring rules define the
@@ -276,7 +278,7 @@ public interface Leaderboard extends LeaderboardBase {
      * created per call, so the caller may freely manipulate the result.
      * @throws NoWindException 
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
     
     /**
      * Returns the total rank of the given competitor.
@@ -458,7 +460,7 @@ public interface Leaderboard extends LeaderboardBase {
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
     Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
-            Set<RaceColumn> discardedRaceColumns) throws NoWindException;
+            Set<RaceColumn> discardedRaceColumns);
 
     TimePoint getNowMinusDelay();
     

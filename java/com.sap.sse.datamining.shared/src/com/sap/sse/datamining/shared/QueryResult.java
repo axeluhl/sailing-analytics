@@ -5,7 +5,9 @@ import java.util.Map;
 
 public interface QueryResult<AggregatedType> extends Serializable {
     
-    int getRetrievedDataAmount();
+    public QueryResultState getState();
+    
+    public int getRetrievedDataAmount();
     public double getCalculationTimeInSeconds();
 
     /**
@@ -14,6 +16,7 @@ public interface QueryResult<AggregatedType> extends Serializable {
     public String getResultSignifier();
     
     public Unit getUnit();
+    public String getUnitSignifier();
     public int getValueDecimals();
 
     public boolean isEmpty();

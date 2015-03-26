@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
+import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryDefinitionDTO;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -56,7 +57,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     
     private SelectionProvider<?> selectionProvider;
 
-    public BufferingQueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+    public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, SailingServiceAsync sailingService, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, dataMiningService, errorReporter);
         
         mainPanel = new ResizingFlowPanel() {
@@ -71,7 +72,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
         mainPanel.add(createFunctionsPanel());
 
-        selectionProvider = new RetrieverLevelSpecificSelectionProvider(stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        selectionProvider = new RetrieverLevelSpecificSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
             @Override
             public void selectionChanged() {

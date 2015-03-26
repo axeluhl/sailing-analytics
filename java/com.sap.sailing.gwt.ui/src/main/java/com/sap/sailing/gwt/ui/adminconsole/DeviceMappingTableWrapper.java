@@ -30,8 +30,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
 
     public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, new SingleSelectionModel<DeviceMappingDTO>(), true);
-        
+        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
         showPingMappingsCb = new CheckBox(stringMessages.showPingMarkMappings());
         showPingMappingsCb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -40,12 +39,9 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
             }
         });
         mainPanel.insert(showPingMappingsCb, 0);
-        
         table.setWidth("1000px", true);
         table.addStyleName("wrap-cols");
-        
-        ListHandler<DeviceMappingDTO> listHandler = new ListHandler<DeviceMappingDTO>(dataProvider.getList());
-        
+        ListHandler<DeviceMappingDTO> listHandler = getColumnSortHandler();
         TextColumn<DeviceMappingDTO> itemTypeCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {

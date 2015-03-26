@@ -33,10 +33,10 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
         RibDashboardServiceAsync ribdashboardService = GWT.create(RibDashboardService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) ribdashboardService, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, RemoteServiceMappingConstants.ribdashboardServiceRemotePath);
         
-        RibDashboardDataRetriever dataRetriever = RibDashboardDataRetriever.getInstance(ribdashboardService);
+        RibDashboardDataRetriever dataRetriever = new RibDashboardDataRetriever(ribdashboardService);
 
         applyMGWTSettings();
-        RibDashboardPanel ribDashboardPanel = new RibDashboardPanel(ribdashboardService);
+        RibDashboardPanel ribDashboardPanel = new RibDashboardPanel(ribdashboardService, sailingService, dataRetriever);
         RootLayoutPanel.get().add(ribDashboardPanel);
         WindBotDataRetriever windBotDataRetriever = new WindBotDataRetriever(sailingService);
         windBotDataRetriever.addNumberOfWindBotsChangeListeners(ribDashboardPanel);

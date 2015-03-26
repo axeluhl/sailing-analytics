@@ -131,11 +131,11 @@ public class PolarDiagramGPSDirect implements PolarDiagram, Serializable  {
 	public Bearing[] optimalDirectionsUpwind() {
 		try {
 			if (beatPort == null) {
-				SpeedWithBearing beatPortRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind, LegType.UPWIND, Tack.PORT).getObject();
+				SpeedWithBearing beatPortRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind, LegType.UPWIND, Tack.PORT, true).getObject();
 				beatPort = new KnotSpeedWithBearingImpl(beatPortRelative.getKnots(), this.wind.getBearing().reverse().add(beatPortRelative.getBearing()));
 			}
 			if (beatStar == null) {
-				SpeedWithBearing beatStarRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind, LegType.UPWIND, Tack.STARBOARD).getObject();
+				SpeedWithBearing beatStarRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind, LegType.UPWIND, Tack.STARBOARD, true).getObject();
 				beatStar = new KnotSpeedWithBearingImpl(beatStarRelative.getKnots(), this.wind.getBearing().reverse().add(beatStarRelative.getBearing()));
 			}
 		} catch (NotEnoughDataHasBeenAddedException e) {
@@ -156,11 +156,11 @@ public class PolarDiagramGPSDirect implements PolarDiagram, Serializable  {
 	public Bearing[] optimalDirectionsDownwind() {
 		try {
 			if (jibePort ==null) {
-				SpeedWithBearing jibePortRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind, LegType.DOWNWIND, Tack.PORT).getObject();
+				SpeedWithBearing jibePortRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind, LegType.DOWNWIND, Tack.PORT, true).getObject();
 				jibePort = new KnotSpeedWithBearingImpl(jibePortRelative.getKnots(), this.wind.getBearing().reverse().add(jibePortRelative.getBearing()));
 			}
 			if (jibeStar == null) {
-				SpeedWithBearing jibeStarRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind, LegType.DOWNWIND, Tack.STARBOARD).getObject();
+				SpeedWithBearing jibeStarRelative = this.polarData.getAverageSpeedWithBearing(this.boatClass, wind, LegType.DOWNWIND, Tack.STARBOARD, true).getObject();
 				jibeStar = new KnotSpeedWithBearingImpl(jibeStarRelative.getKnots(), this.wind.getBearing().reverse().add(jibeStarRelative.getBearing()));
 			}
 		} catch (NotEnoughDataHasBeenAddedException e) {

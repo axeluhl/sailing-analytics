@@ -73,9 +73,10 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.ReplicationReceiver;
+import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
-    private Pair<com.sap.sse.replication.testsupport.AbstractServerReplicationTest.ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
+    private Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
@@ -84,10 +85,10 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
     @Override
     public void setUp() throws Exception {
         persistenceSetUp(/* dropDB */ true);
-        this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
-        this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+        this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+        this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
     }
     
     private void performReplicationSetup() throws Exception {

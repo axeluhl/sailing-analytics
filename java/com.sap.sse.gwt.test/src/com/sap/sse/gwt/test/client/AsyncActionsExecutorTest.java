@@ -55,7 +55,16 @@ public class AsyncActionsExecutorTest extends GWTTestCase {
     }; 
     
     private AsyncActionsExecutor executor;
-    
+
+    /**
+     * Delegate to super; this has the effect of putting this class on the stack frame before the module loading takes place.
+     * Therefore, this class's class loader will be consulted for resolving the GWT module definition.
+     */
+    @Override
+    public void runTest() {
+        super.run();
+    }
+
     @Test
     public void testThatANonTriggeringActionLeadsToPendingCall() {
         executor = new AsyncActionsExecutor(/*maxPendingCalls*/6, /*maxPendingCallsPerType*/5,

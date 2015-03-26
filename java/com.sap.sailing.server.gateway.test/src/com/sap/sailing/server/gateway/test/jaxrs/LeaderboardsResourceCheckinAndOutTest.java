@@ -44,8 +44,8 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
     public void setUp() {
         super.setUp();
         Competitor c = createCompetitors(1).get(0);
-        competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitor(c.getId(), c.getName(), c.getColor(),
-                (DynamicTeam) c.getTeam(), (DynamicBoat) c.getBoat());
+        competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitor(c.getId(), c.getName(),
+                c.getColor(), c.getEmail(), (DynamicTeam) c.getTeam(), (DynamicBoat) c.getBoat());
 
         Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), MillisecondsTimePoint.now(),
                 MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, Collections
@@ -62,7 +62,7 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         LeaderboardsResource resource = spyResource(new LeaderboardsResource());
         UUID deviceUuid = UUID.randomUUID();
 
-        //checkin
+        // checkin
         long fromMillis = 500;
         JSONObject json = new JSONObject();
         json.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitor.getId().toString());
@@ -82,22 +82,24 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         DeviceMapping<Competitor> mappingForC = mappingsForC.get(0);
         assertThat("that mapping is for the correct device",
                 ((SmartphoneUUIDIdentifier) mappingForC.getDevice()).getUUID(), equalTo(deviceUuid));
-        assertThat("that mapping starts at the correct timepoint", mappingForC.getTimeRange().from().asMillis(), equalTo(fromMillis));
+        assertThat("that mapping starts at the correct timepoint", mappingForC.getTimeRange().from().asMillis(),
+                equalTo(fromMillis));
         assertThat("that mapping is open-ended", mappingForC.getTimeRange().hasOpenEnd(), equalTo(true));
-        
-        //checkout
+
+        // checkout
         long toMillis = 1000;
         json = new JSONObject();
         json.put(DeviceMappingConstants.JSON_TO_MILLIS, toMillis);
         json.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitor.getId().toString());
         json.put(DeviceMappingConstants.JSON_DEVICE_UUID, deviceUuid.toString());
-        
+
         response = resource.postCheckout(json.toString(), leaderboard.getName());
         assertThat("checkout returns OK", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-        
+
         mappings = new DeviceCompetitorMappingFinder<>(log).analyze();
         mappingForC = mappings.get(competitor).get(0);
-        assertThat("mapping now ends at checkout timepoint", mappingForC.getTimeRange().to().asMillis(), equalTo(toMillis));
+        assertThat("mapping now ends at checkout timepoint", mappingForC.getTimeRange().to().asMillis(),
+                equalTo(toMillis));
     }
 
 }

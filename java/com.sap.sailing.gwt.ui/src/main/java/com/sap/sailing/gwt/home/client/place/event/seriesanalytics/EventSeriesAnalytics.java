@@ -213,6 +213,7 @@ public class EventSeriesAnalytics extends Composite implements LeaderboardUpdate
         setActiveTabPanel(competitorChartsTabPanel, eventSeriesAnalyticsManager.getMultiCompetitorChart(), competitorChartsAnchor);
         DetailType selectedChartDetailType = oldCompetitorChartsComposite.getSelectedChartDetailType();
         eventSeriesAnalyticsManager.showCompetitorChart(selectedChartDetailType);
+        oldCompetitorChartsComposite.updateSelectionState(eventSeriesAnalyticsManager.getCompetitorSelectionProvider());
         handleClickEvent(event, competitorChartsNavigation);
     }
 

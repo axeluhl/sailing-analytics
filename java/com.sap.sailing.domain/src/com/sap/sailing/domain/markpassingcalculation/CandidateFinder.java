@@ -26,6 +26,8 @@ public interface CandidateFinder {
      */
     Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
 
+
+
     /**
      * When initializing or refreshing the calculator, the whole race until now is evaluated. For that purpose all of the
      * {@link Candidate}s are needed instead of just the deltas.
