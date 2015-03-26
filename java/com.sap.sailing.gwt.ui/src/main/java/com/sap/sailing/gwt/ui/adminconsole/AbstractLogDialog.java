@@ -49,6 +49,13 @@ public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends A
                 return String.valueOf(logEventDTO.getAuthorName());
             }
         };
+        logEventAuthorColumn.setSortable(true);
+        columnSortHandler.setComparator(logEventAuthorColumn, new Comparator<E>() {
+            @Override
+            public int compare(E r1, E r2) {
+                return new NaturalComparator().compare(r1.getAuthorName(), r1.getAuthorName());
+            }
+        });
 
         TextColumn<E> logEventAuthorPriorityColumn = new TextColumn<E>() {
             @Override
@@ -56,6 +63,13 @@ public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends A
                 return String.valueOf(logEventDTO.getAuthorPriority());
             }
         };
+        logEventAuthorPriorityColumn.setSortable(true);
+        columnSortHandler.setComparator(logEventAuthorPriorityColumn, new Comparator<E>() {
+            @Override
+            public int compare(E r1, E r2) {
+                return r1.getAuthorPriority() - r2.getAuthorPriority();
+            }
+        });
 
         TextColumn<E> logEventCreatedColumn = new TextColumn<E>() {
             @Override
@@ -75,7 +89,6 @@ public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends A
                 if (r1.getCreatedAt() != null && r2.getCreatedAt() != null) {
                     return r1.getCreatedAt().compareTo(r2.getCreatedAt());
                 }
-
                 return r1.getCreatedAt() == null ? (r2.getCreatedAt() == null ? 0 : -1) : 1;
             }
         });
@@ -84,7 +97,7 @@ public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends A
             @Override
             public String getValue(E logEventDTO) {
                 Date logicalTimePoint = logEventDTO.getLogicalTimePoint();
-                if(logicalTimePoint != null) {
+                if (logicalTimePoint != null) {
                     return DateAndTimeFormatterUtil.defaultDateFormatter.render(logicalTimePoint) + " " + 
                             DateAndTimeFormatterUtil.defaultTimeFormatter.render(logicalTimePoint);
                 }
@@ -92,13 +105,12 @@ public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends A
             }
         };
         logEventLogicalTimeColumn.setSortable(true);
-        columnSortHandler.setComparator(logEventCreatedColumn, new Comparator<E>() {
+        columnSortHandler.setComparator(logEventLogicalTimeColumn, new Comparator<E>() {
             @Override
             public int compare(E r1, E r2) {
                 if (r1.getLogicalTimePoint() != null && r2.getLogicalTimePoint() != null) {
                     return r1.getLogicalTimePoint().compareTo(r2.getLogicalTimePoint());
                 }
-
                 return r1.getLogicalTimePoint() == null ? (r2.getLogicalTimePoint() == null ? 0 : -1) : 1;
             }
         });
@@ -123,6 +135,13 @@ public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends A
                 return logEventDTO.getInfo();
             }
         };
+        logEventInfoColumn.setSortable(true);
+        columnSortHandler.setComparator(logEventInfoColumn, new Comparator<E>() {
+            @Override
+            public int compare(E o1, E o2) {
+                return new NaturalComparator().compare(o1.getInfo(), o2.getInfo());
+            }
+        });
         
         addFirstColumns(raceLogEventsTable, columnSortHandler);
         raceLogEventsTable.addColumn(logEventTypeColumn, stringMessages.type());

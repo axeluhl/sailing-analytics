@@ -383,8 +383,9 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     }
 
     private void onStartTrackingEvent(RaceLogStartTrackingEvent event) {
-        if (trackedRace == null)
+        if (trackedRace == null) {
             startTracking(event);
+        }
     }
 
     private void onCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent event) {
