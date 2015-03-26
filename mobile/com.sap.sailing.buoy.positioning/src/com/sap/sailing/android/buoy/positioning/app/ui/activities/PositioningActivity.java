@@ -31,11 +31,11 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 				getString(R.string.checkin_digest));
 		List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this,
 				checkinDigest);
-		leaderBoard = DatabaseHelper.getInstance().getLeaderboard(this,
-				checkinDigest);
+		setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this,
+				checkinDigest));
 		for (MarkInfo mark : marks) {
 			if (mark.getId().equals(markerID)) {
-				markInfo = mark;
+				setMarkInfo(mark);
 				break;
 			}
 		}

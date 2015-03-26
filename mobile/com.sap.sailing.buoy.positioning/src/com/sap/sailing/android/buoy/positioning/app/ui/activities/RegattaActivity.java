@@ -52,6 +52,7 @@ public class RegattaActivity extends AbstractRegattaActivity{
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
             toolbar.setPadding(20, 0, 0, 0);
+            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             getSupportActionBar().setTitle(leaderboardName);
         }
         RegattaFragment regattaFragment = new RegattaFragment();
