@@ -73,7 +73,8 @@
                     <NumberPicker
                         android:id="@+id/time_launch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        />
                 </LinearLayout>
 
                 <TextView
@@ -110,13 +111,12 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="@dimen/default_margin"
                 android:layout_marginRight="@dimen/default_margin"
-                android:background="?sap_blue_1"
-                android:padding="@dimen/default_padding"
-                android:text="Set Gate Time"
+                android:text="@string/gate_start_set"
                 android:textAllCaps="true"
-                android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textSize="@dimen/textSize_22"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                style="@style/AppTheme.Dark.Button"
+                android:padding="@dimen/default_padding" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

@@ -24,7 +24,7 @@
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
             android:text="@string/wind_off"
-            android:textSize="@dimen/textSize_26"/>
+            android:textSize="@dimen/textSize_26" />
 
         <ImageView
             android:id="@+id/wind_off"
@@ -96,12 +96,12 @@
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/default_margin_half"
-            android:background="?sap_blue_1"
             android:enabled="false"
             android:padding="@dimen/default_padding_half"
             android:text="@string/wind_set_data"
             android:textAllCaps="true"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            style="@style/AppTheme.Dark.Button" />
 
         <Button
             android:id="@+id/set_position"
@@ -111,12 +111,12 @@
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/default_margin_half"
-            android:background="?sap_blue_1"
             android:padding="@dimen/default_padding_half"
             android:text="@string/wind_set_position"
             android:textAllCaps="true"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:visibility="invisible" />
+            android:visibility="invisible"
+            style="@style/AppTheme.Dark.Button" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -136,13 +136,13 @@
                     android:layout_centerHorizontal="true"
                     android:layout_margin="@dimen/default_margin"
                     android:text="@string/wind_from"
-                    android:textSize="@dimen/textSize_22"/>
+                    android:textSize="@dimen/textSize_22" />
 
                 <com.sap.sailing.racecommittee.app.ui.views.CompassView
                     android:id="@+id/compassView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"/>
+                    android:layout_centerInParent="true" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -161,7 +161,7 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_margin="@dimen/default_margin"
                     android:text="@string/wind_speed"
-                    android:textSize="@dimen/textSize_22"/>
+                    android:textSize="@dimen/textSize_22" />
 
                 <NumberPicker
                     android:id="@+id/wind_speed"

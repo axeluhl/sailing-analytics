@@ -297,7 +297,11 @@
     <string name="race_select">Select a Race</string>
 
     <string name="gate_start_pathfinder">Gate Start Pathfinder</string>
+    <string name="gate_start_nationality">Nationality</string>
+    <string name="gate_start_number">Number</string>
+    <string name="gate_start_set_pathfinder">Set Pathfinder</string>
     <string name="gate_start_timing">Gate Start Timing</string>
+    <string name="gate_start_set">Set Gate Time</string>
 
     <string name="time_launch">Gate Launch</string>
     <string name="time_golf">Golf</string>
@@ -345,5 +349,6 @@
     <string name="race_begin_finish_header">Begin Finish</string>
     <string name="race_begin_finish_current">Use Current Time</string>
     <string name="race_begin_finish_custom">Use Custom Time</string>
+    <string name="race_setup_confirm">Confirm Setup</string>
 
 </resources>

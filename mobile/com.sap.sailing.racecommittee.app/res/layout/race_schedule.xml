@@ -127,7 +127,9 @@
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/start_mode"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_26" />
+            android:textSize="@dimen/textSize_26"
+            android:layout_toLeftOf="@+id/start_mode_flag"
+            android:layout_toStartOf="@+id/start_mode_flag" />
 
         <ImageView
             android:id="@+id/start_mode_icon"
@@ -190,7 +192,9 @@
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/course"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_26" />
+            android:textSize="@dimen/textSize_26"
+            android:layout_toLeftOf="@+id/start_course_symbol"
+            android:layout_toStartOf="@+id/start_course_symbol" />
 
         <ImageView
             android:id="@+id/start_course_icon"
@@ -252,7 +256,9 @@
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/wind"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_26" />
+            android:textSize="@dimen/textSize_26"
+            android:layout_toLeftOf="@+id/wind_sensor"
+            android:layout_toStartOf="@+id/wind_sensor" />
 
         <ImageView
             android:id="@+id/wind_icon"
@@ -266,6 +272,7 @@
             android:src="@drawable/ic_chevron_right_grey600_24dp" />
 
         <ImageView
+            android:id="@+id/wind_sensor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -303,13 +310,13 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/default_margin_twice"
-        android:background="?sap_blue_1"
         android:paddingBottom="@dimen/default_padding"
         android:paddingLeft="@dimen/default_padding_twice"
         android:paddingRight="@dimen/default_padding_twice"
         android:paddingTop="@dimen/default_padding"
-        android:text="CONFIRM SETUP"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="?white"
-        android:textStyle="bold" />
+        android:textAllCaps="true"
+        android:text="@string/race_setup_confirm"
+        android:textSize="@dimen/textSize_22"
+        android:textStyle="bold"
+        style="@style/AppTheme.Dark.Button" />
 </RelativeLayout>

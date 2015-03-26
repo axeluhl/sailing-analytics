@@ -331,5 +331,11 @@
     <string name="preference_offline_header">Offline Modus</string>
     <string name="preference_offline_summary">Deaktiviert die Verbindung zum Server und benutzt statische Daten</string>
     <string name="preference_theme_header">Theme</string>
+    <string name="gate_start_nationality">Nationality</string>
+    <string name="gate_start_number">Number</string>
+    <string name="gate_start_set_pathfinder">Set Pathfinder</string>
+    <string name="gate_start_set">Set Gate Time</string>
+    <string name="preference_theme_default">dark</string>
+    <string name="race_setup_confirm">Confirm Setup</string>
 
 </resources>

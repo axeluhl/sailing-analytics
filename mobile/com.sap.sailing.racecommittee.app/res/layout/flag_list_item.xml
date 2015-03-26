@@ -30,14 +30,14 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginRight="@dimen/default_margin"
-        android:background="?sap_blue_1"
         android:paddingLeft="@dimen/default_padding"
         android:paddingRight="@dimen/default_padding"
         android:layout_toLeftOf="@id/more_data"
         android:text="@string/set_signal"
         android:textAllCaps="true"
         android:visibility="gone"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentRight="true"
+        style="@style/AppTheme.Dark.Button" />
 
     <LinearLayout
         android:layout_width="match_parent"
