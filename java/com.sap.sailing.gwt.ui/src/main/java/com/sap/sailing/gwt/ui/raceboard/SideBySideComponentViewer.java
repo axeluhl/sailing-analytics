@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
+import com.sap.sailing.domain.common.security.Roles;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaManagementControl;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
@@ -26,8 +27,8 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -291,7 +292,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
     public void onUserStatusChange(UserDTO user) {
         Button toggleButton = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel).getToggleButton();
         if (user != null
-                && (user.hasRole(UserRoles.administrator.getRolename()) || user.hasRole(UserRoles.eventmanager.getRolename()))) {
+                && (user.hasRole(DefaultRoles.ADMIN.getRolename()) || user.hasRole(Roles.eventmanager.getRolename()))) {
             toggleButton.setVisible(true);
             forceLayout();
         } else {
