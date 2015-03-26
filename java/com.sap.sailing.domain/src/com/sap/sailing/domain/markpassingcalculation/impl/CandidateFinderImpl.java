@@ -554,7 +554,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                 List<Distance> distances = new ArrayList<>();
                 result.put(w, distances);
                 for (Util.Pair<Position, Bearing> crossingInfo : getCrossingInformation(w, t)) {
-                    distances.add(p.crossTrackError(crossingInfo.getA(), crossingInfo.getB()));
+                    if (crossingInfo.getA() != null && crossingInfo.getB() != null) {
+                        distances.add(p.crossTrackError(crossingInfo.getA(), crossingInfo.getB()));
+                    }
                 }
             }
             xteCache.get(c).put(fix, result);
