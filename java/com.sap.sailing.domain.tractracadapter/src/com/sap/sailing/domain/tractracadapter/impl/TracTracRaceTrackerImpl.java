@@ -510,8 +510,20 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     receiver.stopAfterProcessingQueuedEvents();
                 }
             }
-            lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
-            updateStatusOfTrackedRaces();
+            if (!stopReceiversPreemtively) {
+                // wait for their queues to be worked down before signalling the FINISHED state.
+                new AbstractLoadingQueueDoneCallBack(receivers) {
+                    @Override
+                    protected void executeWhenAllReceiversAreDoneLoading() {
+                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                        updateStatusOfTrackedRaces();
+                    }
+                };
+            } else {
+                // queues contents were cleared preemptively; this means we're done with loading immediately
+                lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                updateStatusOfTrackedRaces();
+            }
         }
     }
 
