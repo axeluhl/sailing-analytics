@@ -178,20 +178,23 @@ public class StartTimeFragment
         switch (view.getId()) {
             case R.id.minute_inc:
             case R.id.minute_dec:
-                Integer minutes;
-                try {
-                    minutes = Integer.valueOf("" + view.getTag());
-                } catch (Exception ex) {
-                    minutes = 0;
+                String operator = String.valueOf(view.getTag());
+                if (!operator.equals("null")) {
+                    Calendar newStart = Calendar.getInstance();
+                    newStart.setTime(mStartTime.asDate());
+                    String secondsCountdown = mCountdown.getText().toString();
+                    secondsCountdown = secondsCountdown.substring(secondsCountdown.length() - 2);
+                    int seconds = Integer.parseInt(secondsCountdown);
+                    if (operator.equals("-")) {
+                        seconds = -1 * seconds;
+                    } else {
+                        seconds = 60 - seconds;
+                    }
+                    newStart.add(Calendar.SECOND, seconds);
+                    mStartTime = new MillisecondsTimePoint(newStart.getTimeInMillis());
+                    mListenerIgnore = true;
+                    setPickerTime();
                 }
-                Calendar time = Calendar.getInstance();
-                int seconds = time.get(Calendar.SECOND);
-                time.setTime(mStartTime.asDate());
-                time.set(Calendar.SECOND, seconds);
-                time.add(Calendar.MINUTE, minutes);
-                mStartTime = new MillisecondsTimePoint(time.getTimeInMillis());
-                mListenerIgnore = true;
-                setPickerTime();
                 break;
 
             case R.id.set_start_time:
@@ -225,7 +228,7 @@ public class StartTimeFragment
 
     private void setPickerTime() {
         Calendar today = Calendar.getInstance();
-        Calendar newTime = Calendar.getInstance();
+        Calendar newTime = (Calendar) today.clone();
         newTime.setTime(mStartTime.asDate());
 
         int days = TimeUtils.daysBetween(today, newTime);

@@ -8,7 +8,8 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray">
+        android:background="?sap_gray"
+        >
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -38,7 +39,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/selector_header_height">
+        android:layout_height="@dimen/selector_header_height"
+        android:id="@+id/buttonBar">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -52,7 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_padding"
-                android:tag="1"
+                android:tag="+"
                 android:src="@drawable/value_next"
                 style="?android:attr/borderlessButtonStyle"/>
 
@@ -73,7 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_padding"
-                android:tag="-1"
+                android:tag="-"
                 android:src="@drawable/value_prev"
                 style="?android:attr/borderlessButtonStyle"/>
         </LinearLayout>
@@ -83,11 +85,11 @@
         android:id="@+id/line_top"
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
-        android:layout_below="@id/header"
+        android:layout_below="@+id/buttonBar"
         android:background="?black" />
 
     <RelativeLayout
-        android:layout_below="@id/header"
+        android:layout_below="@+id/buttonBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?sap_gray_black_30">
