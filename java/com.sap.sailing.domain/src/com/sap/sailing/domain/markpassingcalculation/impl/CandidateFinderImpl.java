@@ -281,7 +281,11 @@ public class CandidateFinderImpl implements CandidateFinder {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         try {
             track.lockForRead();
-            for (GPSFix fix : track.getFixes()) {
+            for (GPSFix fix : track.getFixes(
+                    race.getStartOfTracking()==null?TimePoint.BeginningOfTime:race.getStartOfTracking(),
+                    /* fromInclusive */ true,
+                    race.getEndOfTracking()==null?TimePoint.EndOfTime:race.getEndOfTracking(),
+                    /* toInclusive */ true)) {
                 fixes.add(fix);
             }
         } finally {
