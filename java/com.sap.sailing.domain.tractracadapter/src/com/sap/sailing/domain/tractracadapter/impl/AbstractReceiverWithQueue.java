@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -41,7 +43,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final DynamicTrackedRegatta trackedRegatta;
     private final Simulator simulator;
     private final Thread thread;
-    private final Map<Util.Triple<A, B, C>, LoadingQueueDoneCallBack> loadingQueueDoneCallBacks;
+    private final Map<Util.Triple<A, B, C>, Set<LoadingQueueDoneCallBack>> loadingQueueDoneCallBacks;
 
     /**
      * used by {@link #stopAfterNotReceivingEventsForSomeTime(long)} and {@link #run()} to check if an event was received
@@ -142,12 +144,14 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 if (!isStopEvent(event)) {
                     handleEvent(event);
                 }
-                LoadingQueueDoneCallBack callBack;
+                Set<LoadingQueueDoneCallBack> callBacks;
                 synchronized (loadingQueueDoneCallBacks) {
-                    callBack = loadingQueueDoneCallBacks.remove(event);
+                    callBacks = loadingQueueDoneCallBacks.remove(event);
                 }
-                if (callBack != null) {
-                    callBack.loadingQueueDone(this);
+                if (callBacks != null) {
+                    for (LoadingQueueDoneCallBack callback : callBacks) {
+                        callback.loadingQueueDone(this);
+                    }
                 }
 
             } catch (InterruptedException e) {
@@ -199,10 +203,16 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {
         synchronized (loadingQueueDoneCallBacks) {
             Triple<A, B, C> lastInQueue = queue.peekLast();
-            if (lastInQueue == null) {
+            // when simulator is attached, consider loading already done; the simulator simulates "live" tracking
+            if (lastInQueue == null || getSimulator() != null) {
                 callback.loadingQueueDone(this);
             } else {
-                loadingQueueDoneCallBacks.put(lastInQueue, callback);
+                Set<LoadingQueueDoneCallBack> set = loadingQueueDoneCallBacks.get(lastInQueue);
+                if (set == null) {
+                    set = new HashSet<>();
+                    loadingQueueDoneCallBacks.put(lastInQueue, set);
+                }
+                set.add(callback);
             }
         }
     }
