@@ -144,9 +144,21 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 if (!isStopEvent(event)) {
                     handleEvent(event);
                 }
-                Set<LoadingQueueDoneCallBack> callBacks;
+                final Set<LoadingQueueDoneCallBack> callBacks;
                 synchronized (loadingQueueDoneCallBacks) {
-                    callBacks = loadingQueueDoneCallBacks.remove(event);
+                    if (getSimulator() != null) {
+                        // when simulator is running, loading is considered finished and all callbacks will
+                        // be satisfied instantly
+                        callBacks = new HashSet<>();
+                        for (Set<LoadingQueueDoneCallBack> set : loadingQueueDoneCallBacks.values()) {
+                            callBacks.addAll(set);
+                        }
+                        loadingQueueDoneCallBacks.clear();
+                    } else {
+                        // otherwise, check only if there are callbacks that registered at the event
+                        // currently consumed and notify if any are found
+                        callBacks = loadingQueueDoneCallBacks.remove(event);
+                    }
                 }
                 if (callBacks != null) {
                     for (LoadingQueueDoneCallBack callback : callBacks) {
