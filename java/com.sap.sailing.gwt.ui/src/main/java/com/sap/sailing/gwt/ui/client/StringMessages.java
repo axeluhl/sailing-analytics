@@ -1164,7 +1164,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String inviteCompetitors();
     String notAllCompetitorsProvideEmail();
     String sendingMailsFailed();
-    String sendingMailsSuccessfull();
+    String sendingMailsSuccessful();
     String selectEventForInvitation();
     String imageURL();
     String upload();
@@ -1208,4 +1208,4 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardTeam();
     String dashboardDistanceToLineInM();
     String dashboardSpeedInKts();
-    }
+}

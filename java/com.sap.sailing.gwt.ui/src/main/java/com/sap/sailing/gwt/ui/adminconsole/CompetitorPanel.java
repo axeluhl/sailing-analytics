@@ -295,7 +295,7 @@ public class CompetitorPanel extends SimplePanel {
 
                             @Override
                             public void onSuccess(Void result) {
-                                Window.alert(stringMessages.sendingMailsSuccessfull());
+                                Window.alert(stringMessages.sendingMailsSuccessful());
                             }
                         });
             }
