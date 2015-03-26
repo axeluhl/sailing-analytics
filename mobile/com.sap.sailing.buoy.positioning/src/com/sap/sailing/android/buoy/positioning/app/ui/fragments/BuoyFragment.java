@@ -1,7 +1,6 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
 import android.content.Context;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -15,8 +14,8 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
@@ -36,7 +35,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private OpenSansTextView accuracyTextView;
     private OpenSansButton setPositionButton;
     private OpenSansButton resetPositionButton;
-    private MapFragment mapView;
+    private MapFragment mapFragment;
     private Location lastKnownLocation;
     private LatLng savedPosition;
     private LocationManager locationManager;
@@ -81,9 +80,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             setUpPingUI();
             setUpMap();
         }
-        if(savedPosition != null) {
-            mapView.getMap().animateCamera(CameraUpdateFactory.newLatLng(savedPosition));
-            mapView.getMap().animateCamera(CameraUpdateFactory.zoomTo(10));
+        if(lastKnownLocation != null) {
+            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
+            mapFragment.getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng,15));
         }
     }
 
@@ -137,10 +136,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     public void setUpMap() {
-        mapView = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
-        GoogleMap map = mapView.getMap();
+        mapFragment = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+        GoogleMap map = mapFragment.getMap();
         map.clear();
-        map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         map.getUiSettings().setZoomControlsEnabled(true);
         map.setMyLocationEnabled(true);
         map.setPadding(0, 50, 0, 0);
