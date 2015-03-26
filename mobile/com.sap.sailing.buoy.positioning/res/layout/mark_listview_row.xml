@@ -25,6 +25,7 @@
         android:layout_marginTop="15dp"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
+        android:textSize="20sp"
         android:singleLine="true"
         android:textColor="@color/white" />
 
@@ -35,10 +36,11 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/mark_name"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="2dp"
         android:layout_marginBottom="15dp"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
+        android:textSize="14sp"
         android:singleLine="true"
         android:textColor="@color/white" />
 

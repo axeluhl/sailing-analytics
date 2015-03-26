@@ -34,7 +34,7 @@ public class MarkAdapter extends ResourceCursorAdapter {
         }
         else{
         	setText = context.getString(R.string.set);
-        	String accuracy = " (" + markPings.get(0).getAccuracy() + ")";
+        	String accuracy = " (~ " + markPings.get(0).getAccuracy() + ")";
         	setText += accuracy;
         }
         markName.setText(name);

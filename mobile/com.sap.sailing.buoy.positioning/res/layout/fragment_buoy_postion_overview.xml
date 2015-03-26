@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
         android:text="@string/course_type"
-        android:textSize="18sp" />
+        android:textSize="20sp" />
 
 
     <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:text="@string/marks"
-        android:textSize="18sp" />
+        android:textSize="20sp" />
 
     <View style="@style/Divider" />
     

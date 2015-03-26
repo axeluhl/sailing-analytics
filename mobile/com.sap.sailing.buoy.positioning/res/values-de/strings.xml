@@ -9,7 +9,7 @@
     <string name="set_position">Position setzen</string>
     <string name="reset_position">Position zurücksetzen</string>
     <string name="getting_marks">Empfangen der Markierungen..</string>
-    <string name="set">gesetzt</string>
-    <string name="not_set">nicht gesetzt</string>
+    <string name="set">Gesetzt</string>
+    <string name="not_set">Nicht gesetzt</string>
 
 </resources>
