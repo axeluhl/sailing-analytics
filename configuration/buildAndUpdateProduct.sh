@@ -232,6 +232,7 @@ if [[ "$@" == "release" ]]; then
     fi
 
     mkdir -p $PROJECT_HOME/dist
+    rm -rf $PROJECT_HOME/dist/*
     mkdir -p $PROJECT_HOME/build
 
     RELEASE_NOTES="Release $VERSION_INFO\n$RELEASE_NOTES"

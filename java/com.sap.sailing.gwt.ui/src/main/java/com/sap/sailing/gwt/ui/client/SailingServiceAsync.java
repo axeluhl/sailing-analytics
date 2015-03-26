@@ -572,8 +572,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
 
-    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Void> callback);
+    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind,
+            boolean correctWindByDeclination, AsyncCallback<Void> callback);
 
     /**
      * Set the competitor registrations in the racelog. Unregisters formerly registered competitors
@@ -596,7 +596,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
             AsyncCallback<Void> callback);
 
     void getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Collection<MarkDTO>> callback);
+            AsyncCallback<Iterable<MarkDTO>> callback);
 
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
@@ -688,5 +688,10 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
-            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback); 
+            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
+
+    void getMarksInRaceLogsAndTrackedRaces(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
+
+    void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
+            String emails, String localeInfoName, AsyncCallback<Void> callback); 
 }

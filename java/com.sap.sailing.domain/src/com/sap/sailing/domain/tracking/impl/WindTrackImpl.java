@@ -357,6 +357,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             return null;
         }
         @Override
+        public Duration getDuration(Distance distance) {
+            return null;
+        }
+        @Override
         public SpeedWithBearing add(SpeedWithBearing other) {
             return null;
         }

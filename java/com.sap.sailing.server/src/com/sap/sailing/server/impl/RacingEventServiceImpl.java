@@ -13,8 +13,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,6 +45,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -85,6 +88,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -125,11 +129,13 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -144,6 +150,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.polars.PolarDataService;
@@ -984,6 +991,83 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Leaderboard getLeaderboardByName(String name) {
         return leaderboardsByName.get(name);
+    }
+
+    @Override
+    public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog) {
+        GPSFixTrack<Mark, GPSFix> track = null;
+        // If no spanning track is found, the fix closest to the time point requested is used instead
+        GPSFix nonSpanningFallback = null;
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
+            if (trackCandidate != null) {
+                if (spansTimePoint(trackCandidate, timePoint)) {
+                    track = trackCandidate;
+                    break;
+                } else {
+                    nonSpanningFallback = improveTimewiseClosestFix(nonSpanningFallback, trackCandidate, timePoint);
+                }
+            }
+        }
+        if (track == null) { // no spanning track found in any tracked race, or no tracked races found
+            // try to load from store
+            DynamicGPSFixTrackImpl<Mark> loadedTrack = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
+            track = loadedTrack;
+            Set<AbstractLog<?, ?>> logs = new HashSet<>();
+            logs.add(leaderboard.getRegattaLike().getRegattaLog());
+            if (raceLog == null) { // no race log explicitly provided --> use all race logs
+                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        logs.add(raceColumn.getRaceLog(fleet));
+                    }
+                }
+            } else {
+                logs.add(raceLog);
+            }
+            for (AbstractLog<?, ?> log : logs) {
+                try {
+                    getGPSFixStore().loadMarkTrack(loadedTrack, log, mark);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Couldn't load mark track for mark " + mark + " from log " + log, e);
+                }
+            }
+        }
+        Position result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
+        if (result == null) {
+            result = nonSpanningFallback == null ? null : nonSpanningFallback.getPosition();
+        }
+        return result;
+    }
+
+    private GPSFix improveTimewiseClosestFix(GPSFix nonSpanningFallback, GPSFixTrack<Mark, GPSFix> track, final TimePoint timePoint) {
+        GPSFix lastAtOrBefore = track.getLastFixAtOrBefore(timePoint);
+        GPSFix firstAtOrAfter = track.getFirstFixAtOrAfter(timePoint);
+        // find the fix closes to timePoint, sorting null values to the end and fixes near timePoint to the beginning
+        final List<GPSFix> list = Arrays.asList(nonSpanningFallback, lastAtOrBefore, firstAtOrAfter);
+        list.sort(new Comparator<GPSFix>() {
+            @Override
+            public int compare(GPSFix o1, GPSFix o2) {
+                final int result;
+                if (o1 == null) {
+                    if (o2 == null) {
+                        result = 0;
+                    } else {
+                        result = 1;
+                    }
+                } else if (o2 == null) {
+                    result = -1;
+                } else {
+                    result = new Long(Math.abs(o1.getTimePoint().until(timePoint).asMillis())).compareTo(
+                            Math.abs(o2.getTimePoint().until(timePoint).asMillis()));
+                }
+                return result;
+            }
+        });
+        return list.get(0);
+    }
+
+    private boolean spansTimePoint(GPSFixTrack<Mark, GPSFix> track, TimePoint timePoint) {
+        return track.getLastFixAtOrBefore(timePoint) != null && track.getFirstFixAtOrAfter(timePoint) != null;
     }
 
     @Override
