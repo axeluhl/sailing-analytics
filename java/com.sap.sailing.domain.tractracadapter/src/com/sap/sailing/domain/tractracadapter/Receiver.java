@@ -40,10 +40,12 @@ public interface Receiver {
     void join(long timeoutInMilliseconds) throws InterruptedException;
     
     /**
-     * Allows to "mark" the currently last event in the queue and provides callback as soon as this event has been handled.
+     * Allows to "mark" the currently last event in the queue and provides callback as soon as this event has been
+     * handled.
+     * <p>
      * 
-     * This is used in {@link TracTracRaceTrackerImpl} to ensure that queued events during loading phase will be processed
-     * before the new {@link TrackedRaceStatus} is propagated to the {@link TrackedRace}.
+     * This is used in {@link TracTracRaceTrackerImpl} to ensure that events queued during loading phase will be
+     * processed before the new {@link TrackedRaceStatus} is propagated to the {@link TrackedRace}.
      * 
      * @param callback
      *            {@link LoadingQueueDoneCallBack#loadingQueueDone(Receiver)} Will be called as soon as the event that

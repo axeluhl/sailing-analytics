@@ -577,6 +577,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             } 
         }
         logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
+        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
         if (progress==1.0) {
             new AbstractLoadingQueueDoneCallBack(receivers) {
                 @Override
@@ -586,7 +587,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 }
             };
         }
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
         lastProgressPerID.put(getID(), new Util.Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();
     }
