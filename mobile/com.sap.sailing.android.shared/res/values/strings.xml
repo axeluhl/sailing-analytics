@@ -30,6 +30,7 @@
     
     <!-- Regatta -->
     <string name="your_regattas">Your Regattas:</string>
+    <string name="options_refresh">Refresh</string>
     
     <!-- QR Code -->
     <string name="notify_user_db_operation_failed">Error: Database operation has failed.</string>

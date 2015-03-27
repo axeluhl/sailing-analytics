@@ -1,28 +1,36 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
+import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
+import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 
-public class RegattaActivity extends AbstractRegattaActivity{
-	
-	private String leaderboardName;
-	private String checkinDigest;
-	private List<MarkInfo> marks;
-	// private CheckinUrlInfo checkinUrl;
-	
-	private AppPreferences prefs;
+import java.util.ArrayList;
+import java.util.List;
+
+public class RegattaActivity extends AbstractRegattaActivity {
+
+    private String leaderboardName;
+    private String checkinDigest;
+    private List<MarkInfo> marks;
+    private final String TAG = RegattaActivity.class.getName();
+    private String checkinUrl;
+
+    private AppPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +44,7 @@ public class RegattaActivity extends AbstractRegattaActivity{
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
         leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
 
-        // checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
-        // manager = new CheckinManager(checkinUrl.urlString, this);
+        checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest).urlString;
 
         setMarks(DatabaseHelper.getInstance().getMarks(this, checkinDigest));
 
@@ -58,35 +65,74 @@ public class RegattaActivity extends AbstractRegattaActivity{
         RegattaFragment regattaFragment = new RegattaFragment();
         replaceFragment(R.id.content_frame, regattaFragment);
     }
-	
 
-	@Override
-	public void onCheckinDataAvailable(AbstractCheckinData arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    protected void onResume() {
+        super.onResume();
+        leaderboardName = (String) getIntent().getExtras().get(getString(R.string.leaderboard_name));
+        setTitle(leaderboardName);
+    }
 
-	@Override
-	protected int getOptionsMenuResId() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-		leaderboardName = (String) getIntent().getExtras().get(getString(R.string.leaderboard_name));
-		setTitle(leaderboardName);
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.regatta_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.refresh:
+                ExLog.i(this, TAG, "Clicked REFRESH.");
+                CheckinManager manager = new CheckinManager(checkinUrl, this);
+                manager.callServerAndGenerateCheckinData();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected int getOptionsMenuResId() {
+        return R.menu.regatta_menu;
+    }
 
 
-	public List<MarkInfo> getMarks() {
-		return marks;
-	}
+    @Override
+    public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
+        CheckinData data = (CheckinData) checkinData;
+        try {
+            DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, data.checkinDigest);
+            DatabaseHelper.getInstance().storeCheckinRow(this,
+                    data.marks, data.getLeaderboard(),
+                    data.getCheckinUrl(), data.pings);
+            getRegattaFragment().getAdapter().notifyDataSetChanged();
+        } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+            ExLog.e(this, TAG,
+                    "Batch insert failed: " + e.getMessage());
+            displayDatabaseError();
+            return;
+        }
+
+        if (BuildConfig.DEBUG) {
+            ExLog.i(this, TAG,
+                    "Batch-insert of checkinData completed.");
+        }
+    }
+
+    public RegattaFragment getRegattaFragment() {
+        return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+    }
 
 
-	public void setMarks(List<MarkInfo> marks) {
-		this.marks = marks;
-	}
+    public List<MarkInfo> getMarks() {
+        return marks;
+    }
+
+
+    public void setMarks(List<MarkInfo> marks) {
+        this.marks = marks;
+    }
 
 }

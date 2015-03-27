@@ -1,8 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -23,6 +20,9 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper {
 
@@ -114,14 +114,19 @@ public class DatabaseHelper {
     	int d1 = cr.delete(MarkPing.CONTENT_URI, MarkPing.MARK_ID + " = \"" + markID + "\"", null);
     	
     	if (BuildConfig.DEBUG) {
-    		 ExLog.i(context, TAG, "Checkout, number of markpings deleted: " + d1);
+    		 ExLog.i(context, TAG, "Checkout, number of markpings for mark: " + markID + " deleted: " + d1);
     	}
     }
 
     public void deleteRegattaFromDatabase(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
 
-        // int d1 = cr.delete(Event.CONTENT_URI, Event.EVENT_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null);
+        List<MarkInfo> marks = getMarks(context,checkinDigest);
+
+        for(MarkInfo mark : marks){
+            deletePingsFromDataBase(context, mark.getId());
+        }
+
         int d2 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest
                 + "\"", null);
         int d3 = cr.delete(Mark.CONTENT_URI, Mark.MARK_CHECKIN_DIGEST + " = \"" + checkinDigest
@@ -130,7 +135,6 @@ public class DatabaseHelper {
                 + "\"", null);
 
         if (BuildConfig.DEBUG) {
-            // ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
             ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d2);
             ExLog.i(context, TAG, "Checkout, number of marks deleted: " + d3);
             ExLog.i(context, TAG, "Checkout, number of checkinurls deleted: " + d4);

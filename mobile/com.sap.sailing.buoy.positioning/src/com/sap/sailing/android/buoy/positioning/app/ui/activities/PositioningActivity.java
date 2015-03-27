@@ -1,7 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import java.util.List;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +11,8 @@ import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
+
+import java.util.List;
 
 public class PositioningActivity extends BaseActivity implements pingListener {
 
