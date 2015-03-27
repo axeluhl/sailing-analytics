@@ -3,6 +3,9 @@ package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.BuoyFragment;
@@ -11,6 +14,7 @@ import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
+import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 
 import java.util.List;
 
@@ -43,8 +47,10 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 			setPingFromDatabase(markerID);
 		}
 
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
 		if (toolbar != null) {
+            toolbar.hideSubtitle();
+            toolbar.setTitleSize(20);
 			setSupportActionBar(toolbar);
 			toolbar.setBackgroundColor(getResources().getColor(
 					R.color.colorPrimary));
@@ -62,6 +68,26 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 		replaceFragment(R.id.content_frame, fragment);
 
 	}
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.empty_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected int getOptionsMenuResId() {
+        return R.menu.empty_menu;
+    }
 
 	public void setPingFromDatabase(String markerID) {
 		List<MarkPingInfo> markPings = DatabaseHelper.getInstance()
