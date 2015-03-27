@@ -190,7 +190,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                         // a start edge: determine a probability not based on distance traveled but based on the
                         // time difference between scheduled start time and candidate's time point
                         final double estimatedDistanceProbability;
-                        if (isGateStart==true || early.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
+                        if (isGateStart==Boolean.TRUE || early.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
                             estimatedDistanceProbability = 1; // no start time point known; all candidate time points equally likely
                         } else {
                             final Duration timeGapBetweenStartOfRaceAndCandidateTimePoint = early.getTimePoint().plus(MILLISECONDS_BEFORE_STARTTIME).until(late.getTimePoint());
