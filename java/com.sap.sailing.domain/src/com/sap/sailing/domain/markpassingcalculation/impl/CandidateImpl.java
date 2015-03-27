@@ -40,7 +40,7 @@ public class CandidateImpl implements Candidate {
     }
 
     public String toString() {
-        return "Candidate for waypoint" + oneBasedIndexOfWaypoint + " with cost " + getProbability() + "and Timepoint " + p;
+        return "Candidate for waypoint " + oneBasedIndexOfWaypoint + " with cost " + getProbability() + " and Timepoint " + p;
     }
 
     @Override
