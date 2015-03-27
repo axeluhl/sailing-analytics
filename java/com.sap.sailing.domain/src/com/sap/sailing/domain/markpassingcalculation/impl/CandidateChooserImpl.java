@@ -228,7 +228,11 @@ public class CandidateChooserImpl implements CandidateChooser {
     /**
      * Calculates the most likely series of {@link MarkPassings} using the edges in {@link allEdges}. These are saved in
      * {@link #currentMarkPasses} and the {@link DynamicTrackedRace} is
-     * {@link DynamicTrackedRace#updateMarkPassings(Competitor, Iterable) notified}.
+     * {@link DynamicTrackedRace#updateMarkPassings(Competitor, Iterable) notified}.<p>
+     * 
+     * The algorithm works out optimal solutions between fixed mark passings. By default, start and end proxy
+     * candidates are the only fixed elements. If more fixed elements are provided, the algorithm solves the
+     * optimization problem separately for each segment and concatenates the solutions.
      */
     private void findShortestPath(Competitor c) {
         Map<Candidate, Set<Edge>> allCompetitorEdges = allEdges.get(c);
@@ -262,16 +266,22 @@ public class CandidateChooserImpl implements CandidateChooser {
                 Double currentCheapestCost = cheapestEdgeWithCost.getB();
                 // If the shortest path to this candidate is already known the new edge is not added.
                 if (!candidateWithParentAndSmallestTotalCost.containsKey(currentCheapestEdge.getEnd())) {
+                    // The cheapest edge taking us to currentCheapestEdge.getEnd() is found. Remember it.
                     candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Util.Pair<Candidate, Double>(
                             currentCheapestEdge.getStart(), currentCheapestCost));
                     logger.finest("Added "+ currentCheapestEdge + "as cheapest edge for " + c);
                     endFound = currentCheapestEdge.getEnd() == endOfFixedInterval;
                     if (!endFound) {
+                        // the end of the segment was not yet found; add edges leading away from
+                        // currentCheapestEdge.getEnd(), summing up their cost with the cost required
+                        // to reach currentCheapestEdge.getEnd()
                         Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentCheapestEdge.getEnd());
                         for (Edge e : edgesForNewCandidate) {
-                            int oneBasedIndexOFEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
-                            if (oneBasedIndexOFEndOfEdge <= indexOfEndOfFixedInterval
-                                    && (oneBasedIndexOFEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
+                            int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
+                            // only add edge if it stays within the current segment, not exceeding
+                            // the next fixed mark passing
+                            if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
+                                    && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
                                 currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(e, currentCheapestCost + e.getCost()));
                             }
                         }
@@ -348,13 +358,14 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
         Distance actualDistance = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
         double differenceInMeters = actualDistance.getMeters() - totalEstimatedDistance.getMeters();
-        double differenceInPercent = differenceInMeters / totalEstimatedDistance.getMeters();
+        double ratio = differenceInMeters / totalEstimatedDistance.getMeters();
         // A smaller distance than estimated is very unlikely, somewhere between the distance estimated and double that
         // is likely and anything greater than that gradually becomes unlikely
-        if (differenceInPercent < 0) {
-            result = 3.5 * differenceInPercent + 1;
-        } else if (differenceInPercent > 1) {
-            result = Math.sqrt((-differenceInPercent + 3) / 2);
+        if (ratio < 0) {
+            // TODO shouldn't these factors be constants in the class header for easy fine-tuning?
+            result = 3.5 * ratio + 1;
+        } else if (ratio > 1) {
+            result = Math.sqrt((-ratio + 3) / 2);
         } else {
             result = 1;
         }
