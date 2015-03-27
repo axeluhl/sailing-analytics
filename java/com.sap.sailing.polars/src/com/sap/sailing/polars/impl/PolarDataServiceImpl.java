@@ -148,7 +148,7 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     @Override
-    public void raceFinishedTracking(TrackedRace race) {
+    public void raceFinishedLoading(TrackedRace race) {
         polarDataMiner.raceFinishedTracking(race);
     }
 }

@@ -1540,9 +1540,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
-            if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
-                polarDataService.raceFinishedTracking(race);
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+            if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING
+                    && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+                polarDataService.raceFinishedLoading(race);
             }
         }
 
@@ -1617,7 +1618,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             replicate(new UpdateTrackedRaceStatus(getRaceIdentifier(), newStatus));
         }
 

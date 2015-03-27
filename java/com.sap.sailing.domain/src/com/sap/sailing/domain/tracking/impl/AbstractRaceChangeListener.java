@@ -40,7 +40,7 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void statusChanged(TrackedRaceStatus newStatus) {
+    public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
         defaultAction();
     }
 

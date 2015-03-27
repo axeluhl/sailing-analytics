@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -615,6 +616,35 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     
             @Override
             public void ok(RaceLogDTO result) {
+            }
+        });
+        dialog.show();
+    }
+
+    protected void showRegattaLog() {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        sailingService.getRegattaLog(selectedLeaderboardName,
+                new MarkedAsyncCallback<RegattaLogDTO>(
+                        new AsyncCallback<RegattaLogDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage(), true);
+                            }
+                            @Override
+                            public void onSuccess(RegattaLogDTO result) {
+                                openRegattaLogDialog(result);
+                            }
+                        }));
+    }
+
+    private void openRegattaLogDialog(RegattaLogDTO regattaLogDTO) {
+        RegattaLogDialog dialog = new RegattaLogDialog(regattaLogDTO, stringMessages, new DialogCallback<RegattaLogDTO>() { 
+            @Override
+            public void cancel() {
+            }
+    
+            @Override
+            public void ok(RegattaLogDTO result) {
             }
         });
         dialog.show();

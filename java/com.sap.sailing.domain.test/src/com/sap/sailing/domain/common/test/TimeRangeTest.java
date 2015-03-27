@@ -129,4 +129,10 @@ public class TimeRangeTest {
         assertEquals(0, one.timeDifference(new MillisecondsTimePoint(7)).asMillis());
         assertEquals(2, one.timeDifference(new MillisecondsTimePoint(12)).asMillis());
     }
+    
+    @Test
+    public void testEndOfTime() {
+        assertTrue(TimePoint.EndOfTime.after(TimePoint.BeginningOfTime));
+        assertTrue(TimePoint.EndOfTime.after(MillisecondsTimePoint.now()));
+    }
 }
