@@ -2,6 +2,7 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.annotations.Statistic;
@@ -47,6 +48,11 @@ public interface Speed extends Comparable<Speed>, Serializable {
         }
         
         @Override
+        public Duration getDuration(Distance distance) {
+            throw new ArithmeticException("Cannot determine duration for any distance with zero speed");
+        }
+
+        @Override
         public String toString() {
             return "0kn";
         }
@@ -67,5 +73,11 @@ public interface Speed extends Comparable<Speed>, Serializable {
      * amount then so will the resulting distance.
      */
     Distance travel(TimePoint from, TimePoint to);
+
+    /**
+     * The duration it takes to travel the <code>distance</code> specified on a great circle (the "straight
+     * line" on a sphere) with this speed.
+     */
+    Duration getDuration(Distance distance);
     
 }

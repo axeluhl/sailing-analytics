@@ -871,4 +871,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
         return new com.sap.sse.common.Util.Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
     }
+
+    @Override
+    public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
+        return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
+    }
 }

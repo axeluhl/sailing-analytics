@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -19,7 +20,17 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.DateParser;
 
 public abstract class AbstractSailingServerResource {
-    @Context ServletContext servletContext; 
+    @Context ServletContext servletContext;
+    
+    protected <T> T getService(Class<T> clazz) {
+        BundleContext context = (BundleContext) servletContext
+                .getAttribute(RestServletContainer.OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);
+        ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);
+        tracker.open();
+        T service = tracker.getService();
+        tracker.close();
+        return service;
+    }
 
     public RacingEventService getService() {
         @SuppressWarnings("unchecked")

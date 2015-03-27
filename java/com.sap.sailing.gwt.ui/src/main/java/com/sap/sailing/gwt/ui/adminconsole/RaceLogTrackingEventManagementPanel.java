@@ -9,6 +9,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -16,6 +17,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -31,9 +33,11 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -44,6 +48,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel implements LeaderboardsDisplayer {
     private Button startTrackingButton;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
+    private CheckBox correctWindDirectionForDeclination;
+    private CheckBox trackWind;
     
     public RaceLogTrackingEventManagementPanel(SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
@@ -132,6 +138,10 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
                     new AddDeviceMappingToRegattaLogDialog(sailingService, errorReporter, stringMessages,
                             leaderboardName).show();
+                } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_INVITE_BUOY_TENDERS.equals(value)) {
+                    openChooseEventDialogAndSendMails(leaderboardName);
+                } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_SHOW_REGATTA_LOG.equals(value)) {
+                    showRegattaLog();
                 }
             }
         });
@@ -262,8 +272,16 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                                 @Override
                                 public void cancel() {}
                     }).show();
-                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_START_TIME.equals(value)) {
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_EDIT.equals(value)) {
+                    editRaceColumnOfLeaderboard(object);
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK.equals(value)) {
+                    unlinkRaceColumnFromTrackedRace(object.getA().getRaceColumnName(), object.getB());
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG.equals(value)) {
+                    refreshRaceLog(object.getA(), object.getB(), true);
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_STARTTIME.equals(value)) {
                     setStartTime(getSelectedRaceColumnWithFleet().getA(), getSelectedRaceColumnWithFleet().getB());
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
+                    showRaceLog(object.getA(), object.getB());
                 }
             }
         });
@@ -287,13 +305,17 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
 
     @Override
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {
+        trackWind = new CheckBox(stringMessages.trackWind());
+        correctWindDirectionForDeclination = new CheckBox(stringMessages.declinationCheckbox());
         startTrackingButton = new Button(stringMessages.startTracking());
         startTrackingButton.setEnabled(false);
+        racesPanel.add(trackWind);
+        racesPanel.add(correctWindDirectionForDeclination);
         racesPanel.add(startTrackingButton);
         startTrackingButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                startTracking(raceColumnTableSelectionModel.getSelectedSet());
+                startTracking(raceColumnTableSelectionModel.getSelectedSet(), trackWind.getValue(), correctWindDirectionForDeclination.getValue());
             }
         });
         
@@ -393,13 +415,12 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         });
     }
     
-    private void startTracking(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races) {
+    private void startTracking(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races, boolean trackWind, boolean correctWindByDeclination) {
         final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
-        
         //prompt user if competitor registrations are missing for same races
         String namesOfRacesMissingRegistrations = "";
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
-            if (! doCompetitorResgistrationsExist(race)) {
+            if (!doCompetitorResgistrationsExist(race)) {
                 namesOfRacesMissingRegistrations += race.getA().getName() + "/" + race.getB().getName() + " ";
             }
         }
@@ -410,12 +431,11 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 return;
             }
         }
-
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
             final RaceColumnDTO raceColumn = race.getA();
             final FleetDTO fleet = race.getB();
-
             sailingService.startRaceLogTracking(leaderboard.name, raceColumn.getName(), fleet.getName(),
+                    trackWind, correctWindByDeclination,
                     new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
@@ -457,5 +477,34 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             @Override
             public void cancel() { }
         }).show();
+    }
+    
+    private String getLocaleInfo() {
+        return LocaleInfo.getCurrentLocale().getLocaleName();
+    }
+    
+    private void openChooseEventDialogAndSendMails(final String leaderBoardName) {
+        new InviteBuoyTenderDialog(stringMessages, sailingService, leaderBoardName, errorReporter, new DialogCallback<Triple<EventDTO, String, String>>() {
+            @Override
+            public void ok(Triple<EventDTO, String, String> result) {
+                sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderBoardName, result.getC(), getLocaleInfo(), new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Window.alert(stringMessages.sendingMailsSuccessfull());
+                            }
+                        });
+            }
+
+            @Override
+            public void cancel() {
+                
+            }
+        }).show();
+        
     }
 }
