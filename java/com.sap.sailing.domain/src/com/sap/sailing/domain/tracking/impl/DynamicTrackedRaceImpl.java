@@ -150,8 +150,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setStatus(TrackedRaceStatus newStatus) {
+        TrackedRaceStatus oldStatus = getStatus();
         super.setStatus(newStatus);
-        notifyListeners(newStatus);
+        notifyListeners(newStatus, oldStatus);
     }
 
     @Override
@@ -418,8 +419,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.competitorPositionChanged(fix, competitor));
     }
 
-    private void notifyListeners(TrackedRaceStatus status) {
-        notifyListeners(listener -> listener.statusChanged(status));
+    private void notifyListeners(TrackedRaceStatus status, TrackedRaceStatus oldStatus) {
+        notifyListeners(listener -> listener.statusChanged(status, oldStatus));
     }
 
     private void notifyListeners(Wind wind, WindSource windSource) {
