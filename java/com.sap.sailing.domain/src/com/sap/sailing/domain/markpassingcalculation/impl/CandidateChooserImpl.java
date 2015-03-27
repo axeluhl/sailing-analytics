@@ -287,7 +287,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                     newMarkPassings.add(newMarkPassing);
                 }
             }
-            logger.fine("Updating MarkPasses for " + c);
+            logger.fine("Updating MarkPasses for " + c + " in case "+race.getRace().getName());
             race.updateMarkPassings(c, newMarkPassings);
         }
     }

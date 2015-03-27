@@ -425,13 +425,13 @@ public class CandidateFinderImpl implements CandidateFinder {
             Iterable<GPSFix> fixes, Iterable<Waypoint> waypoints) {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         for (GPSFix fix : fixes) {
             TimePoint t = fix.getTimePoint();
             GPSFix fixBefore;
             GPSFix fixAfter;
-            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+            track.lockForRead();
             try {
-                track.lockForRead();
                 fixBefore = track.getLastFixBefore(t);
                 fixAfter = track.getFirstFixAfter(t);
             } finally {
@@ -466,14 +466,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                     if (xte == 0) {
                         newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
                     } else {
-                        if (fixAfter != null && xtesAfter != null) {
+                        if (fixAfter != null && xtesAfter != null && !xtesAfter.get(w).isEmpty()) {
                             Double xteAfter = xtesAfter.get(w).get(0).getMeters();
                             if (xteAfter != null && xte < 0 != xteAfter <= 0) {
                                 newCandidates.put(Arrays.asList(fix, fixAfter),
                                         createCandidate(c, xte, xteAfter, t, tAfter, w, true));
                             }
                         }
-                        if (fixBefore != null) {
+                        if (fixBefore != null && !xtesBefore.get(w).isEmpty()) {
                             Double xteBefore = xtesBefore.get(w).get(0).getMeters();
                             if (xte < 0 != xteBefore <= 0) {
                                 newCandidates.put(Arrays.asList(fixBefore, fix),
