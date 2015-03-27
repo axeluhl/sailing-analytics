@@ -356,7 +356,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                         Distance disBefore = disBeforeIter.next();
                         Distance disAfter = disAfterIter.next();
                         if (dis != null && disBefore != null && disAfter != null) {
-                            if (dis.getMeters() < disBefore.getMeters() && dis.getMeters() < disAfter.getMeters()) {
+                            if (Math.abs(dis.getMeters()) < Math.abs(disBefore.getMeters()) &&
+                                    Math.abs(dis.getMeters()) < Math.abs(disAfter.getMeters())) {
                                 t = fix.getTimePoint();
                                 p = fix.getPosition();
                                 Double newProbability = getDistanceBasedProbability(w, t, dis);
