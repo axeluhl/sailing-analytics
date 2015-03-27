@@ -292,7 +292,7 @@
     <string name="flags_abandon">Abandon</string>
     <string name="flags_recall">Recall</string>
     <string name="flags_course">Course</string>
-    <string name="flags_more">More</string>
+    <string name="flags_more">Finish</string>
     <string name="flags_postpone">Postpone</string>
     <string name="race_select">Select a Race</string>
 
@@ -347,8 +347,21 @@
     <string name="race_reset_cancel">No Thanks</string>
     <string name="race_reset_message">Do you really want to reset this race including all settings and actions that have be made? This can not be undone.</string>
     <string name="race_begin_finish_header">Begin Finish</string>
+    <string name="race_end_finish_header">End Finish</string>
     <string name="race_begin_finish_current">Use Current Time</string>
     <string name="race_begin_finish_custom">Use Custom Time</string>
     <string name="race_setup_confirm">Confirm Setup</string>
+
+    <string name="race_summary_title">Race Summary</string>
+    <string name="race_summary_start">Race Start</string>
+    <string name="race_summary_finish_begin">Begin Finish</string>
+    <string name="race_summary_finish_end">End Finish</string>
+    <string name="race_summary_finish_duration">Finish Duration</string>
+    <string name="race_summary_wind_direction">Average Wind Direction</string>
+    <string name="race_summary_wind_direction_value" translatable="false">from #VALUE#°</string>
+    <string name="race_summary_wind_speed">Average Wind Speed</string>
+    <string name="race_summary_wind_speed_value" translatable="false">#VALUE# kts</string>
+    <string name="race_summary_individual_recalls">Individual Recalls</string>
+    <string name="race_summary_time" translatable="false">#VALUE# min</string>
 
 </resources>

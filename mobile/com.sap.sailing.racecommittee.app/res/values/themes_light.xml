@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- Base application theme -->
     <style name="AppTheme.Light" parent="AppTheme.Light.Base" />
 
     <style name="AppTheme.Light.Base" parent="Theme.AppCompat.Light.NoActionBar">
@@ -15,6 +15,7 @@
         <item name="android:editTextStyle">@android:style/Widget.EditText</item>
 
         <!-- custom attributes because of custom themes -->
+        <!-- colors -->
         <item name="black">@color/light_black</item>
         <item name="sap_blue_1">@color/constant_sap_blue_1</item>
         <item name="sap_gray">@color/light_sap_gray</item>
@@ -26,6 +27,11 @@
         <item name="sap_red_1">@color/constant_sap_red_1</item>
         <item name="sap_yellow_1">@color/constant_sap_yellow_1</item>
         <item name="white">@color/light_white</item>
+
+        <!-- styles -->
+        <item name="buttonSolid">@style/AppTheme.Light.Button</item>
+        <item name="textNormal">@style/AppTheme.Light.TextNormal</item>
+
     </style>
 
     <style name="AppTheme.Light.Widget.NumberPicker" parent="@android:style/Theme.Holo.Light">
@@ -39,6 +45,11 @@
     <style name="AppTheme.Light.Button">
         <item name="android:textColor">@color/constant_white</item>
         <item name="android:background">@drawable/button_light</item>
+    </style>
+
+    <style name="AppTheme.Light.TextNormal">
+        <item name="android:textColor">?white</item>
+        <item name="android:textSize">@dimen/textSize_26</item>
     </style>
 
 </resources>

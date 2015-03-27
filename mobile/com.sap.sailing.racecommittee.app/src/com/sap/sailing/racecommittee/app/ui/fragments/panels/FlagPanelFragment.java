@@ -15,9 +15,12 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.*;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.AbortFlagsFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EmptyFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.MoreFlagsFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RecallFlagsFragment;
 
-public class FlagPanelFragment extends BasePanelFragment{
+public class FlagPanelFragment extends BasePanelFragment {
 
     private RaceStateChangedListener mStateListener;
     private IntentReceiver mReceiver;
@@ -278,7 +281,7 @@ public class FlagPanelFragment extends BasePanelFragment{
                     break;
 
                 case 1:
-                    replaceFragment(MoreFlagsFragment.newInstance());
+                    replaceFragment(MoreFlagsFragment.FinishingTimeFragment.newInstance(0));
                     break;
 
                 default:

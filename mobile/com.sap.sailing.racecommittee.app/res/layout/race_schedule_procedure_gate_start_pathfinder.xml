@@ -29,8 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/gate_start_pathfinder"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_26" />
+                android:textAppearance="?textNormal" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -97,8 +96,7 @@
                         android:layout_weight="1"
                         android:hint="@string/gate_start_nationality"
                         android:inputType="textCapCharacters"
-                        android:textColor="?white"
-                        android:textSize="@dimen/textSize_26"
+                        android:textAppearance="?textNormal"
                         android:layout_gravity="center_vertical" />
 
                     <EditText
@@ -108,8 +106,7 @@
                         android:layout_weight="1"
                         android:hint="@string/gate_start_number"
                         android:inputType="textCapCharacters"
-                        android:textColor="?white"
-                        android:textSize="@dimen/textSize_26"
+                        android:textAppearance="?textNormal"
                         android:layout_gravity="center_vertical" />
 
                     <RelativeLayout
@@ -128,7 +125,7 @@
                             android:layout_centerInParent="true"
                             android:textSize="@dimen/textSize_22"
                             android:textStyle="bold"
-                            style="@style/AppTheme.Dark.Button"
+                            style="?attr/buttonSolid"
                             android:padding="@dimen/default_padding" />
                     </RelativeLayout>
                 </LinearLayout>

@@ -24,28 +24,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_chevron_left_white_24dp" />
+                android:src="@drawable/ic_chevron_left_white_24dp"
+                android:visibility="gone" />
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/flag_blue_48dp"
+                android:src="@drawable/flag_first_blue_48dp"
                 android:layout_marginRight="@dimen/default_margin"
-                android:layout_marginLeft="@dimen/default_margin"/>
+                android:layout_marginLeft="@dimen/default_margin"
+                android:id="@+id/header_flag" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/race_begin_finish_header"
-                android:textColor="?white"
+                android:textAppearance="?textNormal"
                 android:layout_gravity="center_vertical"
-                android:textSize="@dimen/textSize_26" />
+                android:id="@+id/header_headline" />
         </LinearLayout>
 
         <View
             android:id="@+id/line_top"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/thick_line"
+            android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
             android:background="?black" />
     </RelativeLayout>
@@ -96,8 +98,8 @@
                     android:padding="@dimen/default_padding"
                     android:textAllCaps="true"
                     android:textSize="@dimen/textSize_22"
-                    android:background="?sap_blue_1"
-                    android:layout_centerInParent="true"/>
+                    android:layout_centerInParent="true"
+                    style="?attr/buttonSolid" />
             </RelativeLayout>
         </LinearLayout>
 
@@ -113,11 +115,12 @@
                 android:layout_height="match_parent"
                 android:layout_weight="11">
 
-                <include android:id="@+id/time_picker"
+                <include
+                    android:id="@+id/time_picker"
                     layout="@layout/time_picker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"/>
+                    android:layout_centerInParent="true" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -133,8 +136,8 @@
                     android:padding="@dimen/default_padding"
                     android:textAllCaps="true"
                     android:textSize="@dimen/textSize_22"
-                    android:background="?sap_blue_1"
-                    android:layout_centerInParent="true"/>
+                    android:layout_centerInParent="true"
+                    style="?attr/buttonSolid" />
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

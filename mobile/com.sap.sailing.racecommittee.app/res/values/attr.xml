@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- custom colors -->
     <attr name="black" format="color" />
     <attr name="sap_blue_1" format="color" />
     <attr name="sap_gray" format="color" />
@@ -12,5 +13,9 @@
     <attr name="sap_red_1" format="color" />
     <attr name="sap_yellow_1" format="color" />
     <attr name="white" format="color" />
+
+    <!-- custom references (e.g. styles) -->
+    <attr name="buttonSolid" format="reference" />
+    <attr name="textNormal" format="reference" />
 
 </resources>

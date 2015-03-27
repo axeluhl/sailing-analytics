@@ -29,8 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/start_procedure"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_26" />
+                android:textAppearance="?textNormal" />
         </LinearLayout>
 
         <View

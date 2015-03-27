@@ -20,8 +20,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/set_time"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_26" />
+            android:textAppearance="?textNormal" />
 
         <ImageView
             android:id="@+id/start_time_icon"
@@ -73,8 +72,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/start_procedure"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_26" />
+            android:textAppearance="?textNormal" />
 
         <ImageView
             android:id="@+id/start_procedure_icon"
@@ -126,8 +124,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/start_mode"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_26"
+            android:textAppearance="?textNormal"
             android:layout_toLeftOf="@+id/start_mode_flag"
             android:layout_toStartOf="@+id/start_mode_flag" />
 
@@ -191,8 +188,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/course"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_26"
+            android:textAppearance="?textNormal"
             android:layout_toLeftOf="@+id/start_course_symbol"
             android:layout_toStartOf="@+id/start_course_symbol" />
 
@@ -255,8 +251,7 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:text="@string/wind"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_26"
+            android:textAppearance="?textNormal"
             android:layout_toLeftOf="@+id/wind_sensor"
             android:layout_toStartOf="@+id/wind_sensor" />
 
@@ -318,5 +313,5 @@
         android:text="@string/race_setup_confirm"
         android:textSize="@dimen/textSize_22"
         android:textStyle="bold"
-        style="@style/AppTheme.Dark.Button" />
+        style="?attr/buttonSolid" />
 </RelativeLayout>

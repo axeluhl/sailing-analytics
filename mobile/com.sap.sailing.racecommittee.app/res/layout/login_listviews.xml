@@ -16,8 +16,7 @@
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/default_padding"
             android:text="@string/label_login_events"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_26" />
+            android:textAppearance="?textNormal" />
 
         <ImageView
             android:id="@+id/icon_event"
@@ -66,8 +65,7 @@
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/default_padding"
             android:text="@string/label_login_course_area"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_26" />
+            android:textAppearance="?textNormal" />
 
         <ImageView
             android:id="@+id/icon_area"
@@ -116,8 +114,7 @@
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/default_padding"
             android:text="@string/label_login_position"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_26" />
+            android:textAppearance="?textNormal" />
 
         <ImageView
             android:id="@+id/icon_position"
@@ -171,5 +168,5 @@
         android:textSize="@dimen/textSize_26"
         android:textStyle="bold"
         android:visibility="visible"
-        style="@style/AppTheme.Dark.Button"/>
+        style="?attr/buttonSolid" />
 </RelativeLayout>
