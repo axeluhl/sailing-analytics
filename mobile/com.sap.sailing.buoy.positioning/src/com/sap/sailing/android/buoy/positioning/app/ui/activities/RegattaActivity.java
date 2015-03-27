@@ -6,6 +6,9 @@ import java.util.List;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
@@ -14,6 +17,7 @@ import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
+import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 
 public class RegattaActivity extends AbstractRegattaActivity{
 	
@@ -42,8 +46,10 @@ public class RegattaActivity extends AbstractRegattaActivity{
         setMarks(DatabaseHelper.getInstance().getMarks(this, checkinDigest));
 
         setContentView(R.layout.fragment_container);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
+            toolbar.hideSubtitle();
+            toolbar.setTitleSize(20);
             setSupportActionBar(toolbar);
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
@@ -58,18 +64,32 @@ public class RegattaActivity extends AbstractRegattaActivity{
         RegattaFragment regattaFragment = new RegattaFragment();
         replaceFragment(R.id.content_frame, regattaFragment);
     }
-	
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.empty_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected int getOptionsMenuResId() {
+        return R.menu.empty_menu;
+    }
 
 	@Override
 	public void onCheckinDataAvailable(AbstractCheckinData arg0) {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	protected int getOptionsMenuResId() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 	
 	@Override

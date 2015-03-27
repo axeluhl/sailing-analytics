@@ -3,6 +3,9 @@ package com.sap.sailing.android.shared.ui.customviews;
 import android.content.Context;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.View;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.R;
@@ -44,4 +47,17 @@ public class OpenSansToolbar extends Toolbar {
 		TextView subtitleTextView = (TextView)findViewById(R.id.toolbar_subtitle);
 		subtitleTextView.setText(arg0);
 	}
+
+    public void hideSubtitle(){
+        TextView titleTextView = (TextView)findViewById(R.id.toolbar_title);
+        titleTextView.setPadding(0,6,0,0);
+        TextView subtitleTextView = (TextView)findViewById(R.id.toolbar_subtitle);
+        subtitleTextView.setVisibility(View.GONE);
+    }
+
+    public void setTitleSize(float size){
+        TextView titleTextView = (TextView)findViewById(R.id.toolbar_title);
+        titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
+        titleTextView.setTextColor(getResources().getColor(R.color.white));
+    }
 }

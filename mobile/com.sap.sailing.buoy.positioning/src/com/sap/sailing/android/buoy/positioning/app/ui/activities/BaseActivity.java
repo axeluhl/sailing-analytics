@@ -2,8 +2,10 @@ package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.shared.ui.activities.AbstractBaseActivity;
 
@@ -19,8 +21,8 @@ public class BaseActivity extends AbstractBaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //MenuInflater inflater = getMenuInflater();
-        //inflater.inflate(R.menu.options_menu, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.empty_menu, menu);
         return true;
     }
 
@@ -34,6 +36,6 @@ public class BaseActivity extends AbstractBaseActivity {
 
     @Override
     protected int getOptionsMenuResId() {
-        return 0;
+        return R.menu.empty_menu;
     }
 }
