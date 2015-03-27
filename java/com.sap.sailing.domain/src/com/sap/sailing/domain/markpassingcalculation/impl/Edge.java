@@ -19,7 +19,9 @@ import com.sap.sse.common.Util;
 public class Edge implements Comparable<Edge> {
     private final Candidate start;
     private final Candidate end;
+    // TODO what is the meaning of this constant?
     private final static double penaltyForSkipped = 0.7;
+    // TODO what is the meaning of this constant?
     private final static double penaltyForSkippedToEnd = 0.6;
     private final double estimatedDistanceProbability;
     private final Course course;

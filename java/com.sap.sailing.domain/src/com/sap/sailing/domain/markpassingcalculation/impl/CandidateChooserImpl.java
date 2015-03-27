@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -41,7 +42,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * 
  */
 public class CandidateChooserImpl implements CandidateChooser {
-
+    // TODO what is the meaning of this constant?
     private static final int MILLISECONDS_BEFORE_STARTTIME = 5000;
     private final static double MINIMUM_PROBABILITY = 1 - Edge.getPenaltyForSkipping();
 
@@ -53,6 +54,12 @@ public class CandidateChooserImpl implements CandidateChooser {
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private Map<Competitor, Integer> suppressedPassings = new HashMap<>();
     private TimePoint raceStartTime;
+    
+    /**
+     * An artificial proxy candidate that comes before the start mark passing. Its time point is set to
+     * {@link #MILLISECONDS_BEFORE_STARTTIME} milliseconds before the race start time or <code>null</code>
+     * in case the race start time is not known.
+     */
     private final CandidateWithSettableTime start;
     private final Candidate end;
     private final DynamicTrackedRace race;
@@ -85,7 +92,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
-       TimePoint startOfRace =   race.getStartOfRace();
+       TimePoint startOfRace = race.getStartOfRace();
         if (startOfRace != null) {
             if (raceStartTime == null || !startOfRace.minus(MILLISECONDS_BEFORE_STARTTIME).equals(raceStartTime)) {
                 raceStartTime = startOfRace.minus(MILLISECONDS_BEFORE_STARTTIME);
@@ -155,6 +162,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
+        final Boolean isGateStart = race.isGateStart();
         Map<Candidate, Set<Edge>> edges = allEdges.get(c);
         for (Candidate newCan : newCandidates) {
             for (Candidate oldCan : candidates.get(c)) {
@@ -167,7 +175,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                     late = oldCan;
                     early = newCan;
                 } else {
-                    continue;
+                    continue; // don't create edge from/to same waypoint
                 }
 
                 // If one of the candidates is fixed, the edge is always created unless they travel backwards in time.
@@ -175,18 +183,32 @@ public class CandidateChooserImpl implements CandidateChooser {
                 // candidates are not the proxy and or start is close enough to the actual distance sailed.
                 NavigableSet<Candidate> fixed = fixedPassings.get(c);
                 if (fixed.contains(early) || fixed.contains(late)) {
-                    if (late == end || early == start && (early.getTimePoint() == null || late.getTimePoint().after(early.getTimePoint()))) {
-                        addEdge(edges, new Edge(early, late, 1, race.getRace().getCourse()));
+                    if (late == end) {
+                        // final edge
+                        addEdge(edges, new Edge(early, late, /* estimated distance probability */ 1, race.getRace().getCourse()));
+                    } else if (early == start && (early.getTimePoint() == null || late.getTimePoint().after(early.getTimePoint()))) {
+                        // a start edge: determine a probability not based on distance traveled but based on the
+                        // time difference between scheduled start time and candidate's time point
+                        final double estimatedDistanceProbability;
+                        if (isGateStart==true || early.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
+                            estimatedDistanceProbability = 1; // no start time point known; all candidate time points equally likely
+                        } else {
+                            final Duration timeGapBetweenStartOfRaceAndCandidateTimePoint = early.getTimePoint().plus(MILLISECONDS_BEFORE_STARTTIME).until(late.getTimePoint());
+                            // Being MILLISECONDS_BEFORE_STARTTIME off means a probability of 1/2; being twice this time off means 1/3, and so on
+                            estimatedDistanceProbability = (double) MILLISECONDS_BEFORE_STARTTIME /
+                                    (double) (MILLISECONDS_BEFORE_STARTTIME + Math.abs(timeGapBetweenStartOfRaceAndCandidateTimePoint.asMillis()));
+                        }
+                        addEdge(edges, new Edge(early, late, estimatedDistanceProbability, race.getRace().getCourse()));
                     } else {
                         if (late.getTimePoint().after(early.getTimePoint())) {
-                            final double probability = getDistanceEstimationBasedProbability(c, early, late);
-                            addEdge(edges, new Edge(early, late, probability, race.getRace().getCourse()));
+                            final double estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
+                            addEdge(edges, new Edge(early, late, estimatedDistanceProbability, race.getRace().getCourse()));
                         }
                     }
                 } else if (late.getTimePoint().after(early.getTimePoint())) {
-                    final double probability = getDistanceEstimationBasedProbability(c, early, late);
-                    if (probability > MINIMUM_PROBABILITY) {
-                        addEdge(edges, new Edge(early, late, probability, race.getRace().getCourse()));
+                    final double estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
+                    if (estimatedDistanceProbability > MINIMUM_PROBABILITY) {
+                        addEdge(edges, new Edge(early, late, estimatedDistanceProbability, race.getRace().getCourse()));
                     }
                 }
             }
@@ -232,7 +254,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
 
             boolean endFound = false;
-            currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, 1, null), startOfFixedInterval,
+            currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
                     0, race.getRace().getCourse()), 0.0));
             while (!endFound) {
                 Util.Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
