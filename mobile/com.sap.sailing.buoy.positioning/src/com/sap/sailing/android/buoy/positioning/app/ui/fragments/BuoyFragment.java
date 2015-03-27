@@ -86,6 +86,13 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Unsubscribe location updates for power saving
+        locationManager.removeUpdates(this);
+    }
+
     public void setUpPingUI() {
         MarkPingInfo markPing = ((PositioningActivity) getActivity())
                 .getMarkPing();
