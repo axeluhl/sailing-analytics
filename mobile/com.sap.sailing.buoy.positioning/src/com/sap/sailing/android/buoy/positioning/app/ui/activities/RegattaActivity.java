@@ -18,6 +18,7 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
+import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +50,10 @@ public class RegattaActivity extends AbstractRegattaActivity {
         setMarks(DatabaseHelper.getInstance().getMarks(this, checkinDigest));
 
         setContentView(R.layout.fragment_container);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
+            toolbar.hideSubtitle();
+            toolbar.setTitleSize(20);
             setSupportActionBar(toolbar);
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
