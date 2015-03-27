@@ -37,6 +37,13 @@ public class Edge implements Comparable<Edge> {
         return penaltyForSkipped;
     }
 
+    /**
+     * The cost for skipping a waypoint is 2*{@link #penaltyForSkipped} but is reduced to {@link #penaltyForSkippedToEnd} when
+     * skipping to the end. The reason for preferring skips to the end proxy node is that in live situations where the course
+     * hasn't been completed yet it is required to skip to the end. Additional cost comes from the inverse probability of
+     * the product of the start node, end node and distance-based probabilities. If these probabilities multiply to zero,
+     * an additional cost of 1.0 is added to any skip penalty.
+     */
     public Double getCost() {
         double penalty = end.getOneBasedIndexOfWaypoint() == Util.size(course.getWaypoints()) + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
         return 1 - (start.getProbability() * end.getProbability() * estimatedDistanceProbability) + 2 * penalty

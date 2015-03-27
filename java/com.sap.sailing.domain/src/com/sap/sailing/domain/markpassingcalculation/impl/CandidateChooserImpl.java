@@ -24,7 +24,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -183,22 +182,24 @@ public class CandidateChooserImpl implements CandidateChooser {
                 // candidates are not the proxy and or start is close enough to the actual distance sailed.
                 NavigableSet<Candidate> fixed = fixedPassings.get(c);
                 if (fixed.contains(early) || fixed.contains(late)) {
-                    if (late == end) {
-                        // final edge
-                        addEdge(edges, new Edge(early, late, /* estimated distance probability */ 1, race.getRace().getCourse()));
-                    } else if (early == start && (early.getTimePoint() == null || late.getTimePoint().after(early.getTimePoint()))) {
+                    if (early == start && (start.getTimePoint() == null || late.getTimePoint().after(start.getTimePoint()))) {
                         // a start edge: determine a probability not based on distance traveled but based on the
                         // time difference between scheduled start time and candidate's time point
                         final double estimatedDistanceProbability;
                         if (isGateStart==Boolean.TRUE || early.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
                             estimatedDistanceProbability = 1; // no start time point known; all candidate time points equally likely
                         } else {
-                            final Duration timeGapBetweenStartOfRaceAndCandidateTimePoint = early.getTimePoint().plus(MILLISECONDS_BEFORE_STARTTIME).until(late.getTimePoint());
+                            // FIXME See discussion on bug 2741: we need to value start mark passings closer to the start time better than those further away
+//                            final Duration timeGapBetweenStartOfRaceAndCandidateTimePoint = early.getTimePoint().plus(MILLISECONDS_BEFORE_STARTTIME).until(late.getTimePoint());
                             // Being MILLISECONDS_BEFORE_STARTTIME off means a probability of 1/2; being twice this time off means 1/3, and so on
-                            estimatedDistanceProbability = (double) MILLISECONDS_BEFORE_STARTTIME /
-                                    (double) (MILLISECONDS_BEFORE_STARTTIME + Math.abs(timeGapBetweenStartOfRaceAndCandidateTimePoint.asMillis()));
+//                            estimatedDistanceProbability = (double) MILLISECONDS_BEFORE_STARTTIME /
+//                                    (double) (MILLISECONDS_BEFORE_STARTTIME + Math.abs(timeGapBetweenStartOfRaceAndCandidateTimePoint.asMillis()));
+                            estimatedDistanceProbability = 1;
                         }
                         addEdge(edges, new Edge(early, late, estimatedDistanceProbability, race.getRace().getCourse()));
+                    } else if (late == end) {
+                        // final edge and first node is not start node or start time not known, so no start time offset-based probability can be found
+                        addEdge(edges, new Edge(early, late, /* estimated distance probability */ 1, race.getRace().getCourse()));
                     } else {
                         if (late.getTimePoint().after(early.getTimePoint())) {
                             final double estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
@@ -207,6 +208,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                     }
                 } else if (late.getTimePoint().after(early.getTimePoint())) {
                     final double estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
+                    // TODO this comparison does not exactly implement the condition "if distance is more likely than skipping"
                     if (estimatedDistanceProbability > MINIMUM_PROBABILITY) {
                         addEdge(edges, new Edge(early, late, estimatedDistanceProbability, race.getRace().getCourse()));
                     }
