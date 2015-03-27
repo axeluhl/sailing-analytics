@@ -29,5 +29,6 @@
 	
 	<!-- Regatta -->
     <string name="your_regattas">Ihre Regattas:</string>
+    <string name="options_refresh">Aktualisieren</string>
     
 </resources>

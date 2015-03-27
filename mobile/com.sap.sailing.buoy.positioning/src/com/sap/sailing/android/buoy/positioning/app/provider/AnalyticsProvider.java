@@ -1,7 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.provider;
 
-import java.util.Arrays;
-
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -21,6 +19,8 @@ import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsDatabase.T
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.SelectionBuilder;
+
+import java.util.Arrays;
 
 public class AnalyticsProvider extends ContentProvider {
 

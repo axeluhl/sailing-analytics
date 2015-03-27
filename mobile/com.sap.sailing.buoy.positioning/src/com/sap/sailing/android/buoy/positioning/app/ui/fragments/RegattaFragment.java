@@ -23,7 +23,7 @@ import com.sap.sailing.android.ui.fragments.BaseFragment;
 public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cursor>{
 	private static final int MARKER_LOADER = 1;
 	private MarkAdapter adapter;
-	
+
 	@SuppressLint("InflateParams")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,6 +45,11 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
         super.onResume();
         getLoaderManager().restartLoader(MARKER_LOADER, null, this);
         }
+
+    public MarkAdapter getAdapter()
+    {
+        return adapter;
+    }
 
 	@Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
