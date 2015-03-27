@@ -121,12 +121,8 @@
                             android:background="@drawable/button_dark"
                             android:enabled="false"
                             android:text="@string/gate_start_set_pathfinder"
-                            android:textAllCaps="true"
                             android:layout_centerInParent="true"
-                            android:textSize="@dimen/textSize_22"
-                            android:textStyle="bold"
-                            style="?attr/buttonSolid"
-                            android:padding="@dimen/default_padding" />
+                            style="?attr/buttonSolidSmall" />
                     </RelativeLayout>
                 </LinearLayout>
             </RelativeLayout>

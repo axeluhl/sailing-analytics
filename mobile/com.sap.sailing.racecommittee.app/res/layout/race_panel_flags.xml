@@ -40,8 +40,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:text="@string/flags_postpone"
-                    android:textSize="@dimen/textSize_22"
-                    android:textColor="?white"/>
+                    android:textAppearance="?textSmall" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -74,8 +73,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:text="@string/flags_abandon"
-                    android:textSize="@dimen/textSize_22"
-                    android:textColor="?white"/>
+                    android:textAppearance="?textSmall" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -108,8 +106,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:text="@string/flags_recall"
-                    android:textSize="@dimen/textSize_22"
-                    android:textColor="?white"/>
+                    android:textAppearance="?textSmall" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -143,8 +140,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:text="@string/flags_course"
-                    android:textSize="@dimen/textSize_22"
-                    android:textColor="?white"/>
+                    android:textAppearance="?textSmall" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -177,8 +173,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:text="@string/flags_more"
-                    android:textSize="@dimen/textSize_22"
-                    android:textColor="?white"/>
+                    android:textAppearance="?textSmall" />
             </LinearLayout>
         </RelativeLayout>
     </LinearLayout>

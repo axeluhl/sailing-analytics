@@ -45,8 +45,7 @@
             android:layout_toRightOf="@id/start_time_caption"
             android:layout_toStartOf="@id/start_time_icon"
             android:gravity="end"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_22"
+            android:textAppearance="?textSmall"
             tools:text="14:00" />
 
         <View
@@ -97,8 +96,7 @@
             android:layout_toRightOf="@id/start_procedure_caption"
             android:layout_toStartOf="@id/start_procedure_icon"
             android:gravity="end"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_22"
+            android:textAppearance="?textSmall"
             tools:text="Fix Line Start (RRS26)" />
 
         <View
@@ -161,8 +159,7 @@
             android:layout_toStartOf="@+id/start_mode_icon"
             android:gravity="end"
             android:singleLine="true"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_22"
+            android:textAppearance="?textSmall"
             tools:text="Papa" />
 
         <View
@@ -224,8 +221,7 @@
             android:layout_toStartOf="@+id/start_course_icon"
             android:gravity="end"
             android:singleLine="true"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_22"
+            android:textAppearance="?textSmall"
             tools:text="O3" />
 
         <View
@@ -287,8 +283,7 @@
             android:layout_toStartOf="@id/wind_icon"
             android:gravity="end"
             android:text="@string/wind_unknown"
-            android:textColor="?white"
-            android:textSize="@dimen/textSize_22" />
+            android:textAppearance="?textSmall" />
 
         <View
             android:layout_width="match_parent"
@@ -305,13 +300,6 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/default_margin_twice"
-        android:paddingBottom="@dimen/default_padding"
-        android:paddingLeft="@dimen/default_padding_twice"
-        android:paddingRight="@dimen/default_padding_twice"
-        android:paddingTop="@dimen/default_padding"
-        android:textAllCaps="true"
         android:text="@string/race_setup_confirm"
-        android:textSize="@dimen/textSize_22"
-        android:textStyle="bold"
-        style="?attr/buttonSolid" />
+        style="?attr/buttonSolidSmall" />
 </RelativeLayout>

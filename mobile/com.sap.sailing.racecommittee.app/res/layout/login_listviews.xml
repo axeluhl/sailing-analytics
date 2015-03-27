@@ -161,12 +161,8 @@
         android:layout_marginEnd="@dimen/default_margin_twice"
         android:layout_marginRight="@dimen/default_margin_twice"
         android:enabled="false"
-        android:paddingLeft="@dimen/default_padding"
-        android:paddingRight="@dimen/default_padding"
         android:text="@string/sign_up"
-        android:textAllCaps="true"
         android:textSize="@dimen/textSize_26"
-        android:textStyle="bold"
         android:visibility="visible"
-        style="?attr/buttonSolid" />
+        style="?attr/buttonSolidNormal" />
 </RelativeLayout>

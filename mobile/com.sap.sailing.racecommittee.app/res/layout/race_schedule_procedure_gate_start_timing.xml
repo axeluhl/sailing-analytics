@@ -111,11 +111,7 @@
                 android:layout_marginLeft="@dimen/default_margin"
                 android:layout_marginRight="@dimen/default_margin"
                 android:text="@string/gate_start_set"
-                android:textAllCaps="true"
-                android:textSize="@dimen/textSize_22"
-                android:textStyle="bold"
-                style="?attr/buttonSolid"
-                android:padding="@dimen/default_padding" />
+                style="?attr/buttonSolidSmall" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

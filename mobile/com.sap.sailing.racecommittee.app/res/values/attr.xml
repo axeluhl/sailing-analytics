@@ -15,7 +15,11 @@
     <attr name="white" format="color" />
 
     <!-- custom references (e.g. styles) -->
-    <attr name="buttonSolid" format="reference" />
+    <attr name="buttonSolidSmall" format="reference" />
+    <attr name="buttonSolidNormal" format="reference" />
+    <attr name="textSmall" format="reference" />
     <attr name="textNormal" format="reference" />
+    <attr name="textLarge" format="reference" />
+    <attr name="textXLarge" format="reference" />
 
 </resources>

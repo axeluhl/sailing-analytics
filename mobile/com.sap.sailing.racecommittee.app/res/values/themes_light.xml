@@ -29,8 +29,12 @@
         <item name="white">@color/light_white</item>
 
         <!-- styles -->
-        <item name="buttonSolid">@style/AppTheme.Light.Button</item>
-        <item name="textNormal">@style/AppTheme.Light.TextNormal</item>
+        <item name="buttonSolidSmall">@style/AppTheme.Light.Button.Small</item>
+        <item name="buttonSolidNormal">@style/AppTheme.Light.Button.Normal</item>
+        <item name="textSmall">@style/AppTheme.Light.Text.Small</item>
+        <item name="textNormal">@style/AppTheme.Light.Text.Normal</item>
+        <item name="textLarge">@style/AppTheme.Light.Text.Large</item>
+        <item name="textXLarge">@style/AppTheme.Light.Text.XLarge</item>
 
     </style>
 
@@ -45,11 +49,40 @@
     <style name="AppTheme.Light.Button">
         <item name="android:textColor">@color/constant_white</item>
         <item name="android:background">@drawable/button_light</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:paddingTop">@dimen/default_padding_half</item>
+        <item name="android:paddingRight">@dimen/default_padding</item>
+        <item name="android:paddingBottom">@dimen/default_padding_half</item>
+        <item name="android:paddingLeft">@dimen/default_padding</item>
     </style>
 
-    <style name="AppTheme.Light.TextNormal">
+    <style name="AppTheme.Light.Button.Small">
+        <item name="android:textSize">@dimen/textSize_22</item>
+    </style>
+
+    <style name="AppTheme.Light.Button.Normal">
+        <item name="android:textSize">@dimen/textSize_22</item>
+    </style>
+
+    <style name="AppTheme.Light.Text">
         <item name="android:textColor">?white</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.Small">
+        <item name="android:textSize">@dimen/textSize_22</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.Normal">
         <item name="android:textSize">@dimen/textSize_26</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.Large">
+        <item name="android:textSize">@dimen/textSize_32</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.XLarge">
+        <item name="android:textSize">@dimen/textSize_40</item>
     </style>
 
 </resources>

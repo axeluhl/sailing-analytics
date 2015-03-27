@@ -122,11 +122,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerInParent="true"
             android:layout_margin="@dimen/default_margin_twice"
-            android:padding="@dimen/default_padding"
             android:text="@string/race_set_start"
-            android:textAllCaps="true"
-            android:textSize="@dimen/textSize_22"
-            android:textStyle="bold"
-            style="?attr/buttonSolid" />
+            style="?attr/buttonSolidSmall" />
     </RelativeLayout>
 </RelativeLayout>

@@ -64,8 +64,7 @@
                     android:gravity="center_horizontal"
                     android:paddingLeft="@dimen/default_padding_half"
                     android:paddingRight="@dimen/default_padding_half"
-                    android:textColor="?white"
-                    android:textSize="@dimen/textSize_22"
+                    android:textAppearance="?textSmall"
                     tools:text="@string/start_procedure_line_start" />
             </RelativeLayout>
         </RelativeLayout>
@@ -176,8 +175,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:gravity="center_horizontal"
-                    android:textSize="@dimen/textSize_22"
-                    android:textColor="?white"
+                    android:textAppearance="?textSmall"
                     tools:drawableTop="@drawable/course_updown_64dp"
                     tools:text="012" />
             </RelativeLayout>
@@ -236,8 +234,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/wind_no_data"
-                    android:textColor="?white"
-                    android:textSize="@dimen/textSize_22" />
+                    android:textAppearance="?textSmall" />
             </RelativeLayout>
         </RelativeLayout>
     </LinearLayout>
