@@ -347,35 +347,21 @@ public class CandidateFinderImpl implements CandidateFinder {
                     List<Distance> waypointDistances = fixDistances.get(w);
                     List<Distance> waypointDistancesBefore = fixDistancesBefore.get(w);
                     List<Distance> waypointDistancesAfter = fixDistancesAfter.get(w);
-                    Distance dis = waypointDistances.get(0);
-                    Distance disBefore = waypointDistancesBefore.get(0);
-                    Distance disAfter = waypointDistancesAfter.get(0);
-                    if (dis != null && disBefore != null && disAfter != null) {
-                        if (Math.abs(dis.getMeters()) < Math.abs(disBefore.getMeters())
-                                && Math.abs(dis.getMeters()) < Math.abs(disAfter.getMeters())) {
-                            t = fix.getTimePoint();
-                            p = fix.getPosition();
-                            probability = getDistanceBasedProbability(w, t, dis);
-                            if (probability != null) {
-                                probability *= isOnCorrectSideOfWaypoint(w, p, t, true) ? penaltyForDistanceCandidates
-                                        : penaltyForDistanceCandidates * penaltyForWrongSide;
-                                if (probability > penaltyForSkipping) {
-                                    isCan = true;
-                                }
-                            }
-                        }
-                    }
-                    if (waypointDistances.size() != 1) {
-                        dis = waypointDistances.get(1);
-                        disBefore = waypointDistancesBefore.get(1);
-                        disAfter = waypointDistancesAfter.get(1);
+                    Iterator<Distance> disIter = waypointDistances.iterator();
+                    Iterator<Distance> disBeforeIter = waypointDistancesBefore.iterator();
+                    Iterator<Distance> disAfterIter = waypointDistancesAfter.iterator();
+                    boolean portMark = true;
+                    while (disIter.hasNext() && disBeforeIter.hasNext() && disAfterIter.hasNext()) {
+                        Distance dis = disIter.next();
+                        Distance disBefore = disBeforeIter.next();
+                        Distance disAfter = disAfterIter.next();
                         if (dis != null && disBefore != null && disAfter != null) {
                             if (dis.getMeters() < disBefore.getMeters() && dis.getMeters() < disAfter.getMeters()) {
                                 t = fix.getTimePoint();
                                 p = fix.getPosition();
                                 Double newProbability = getDistanceBasedProbability(w, t, dis);
                                 if (newProbability != null) {
-                                    newProbability *= isOnCorrectSideOfWaypoint(w, p, t, false) ? penaltyForDistanceCandidates
+                                    newProbability *= isOnCorrectSideOfWaypoint(w, p, t, portMark) ? penaltyForDistanceCandidates
                                             : penaltyForDistanceCandidates * penaltyForWrongSide;
                                     if (newProbability > penaltyForSkipping
                                             && (probability == null || newProbability > probability)) {
@@ -385,6 +371,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                 }
                             }
                         }
+                        portMark = false;
                     }
                     oldCan = distanceCandidates.get(c).get(w).get(fix);
                     if (oldCan != null) {
@@ -598,8 +585,9 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     /**
      * Determines whether a candidate is on the correct side of a waypoint. This is defined by the crossing information.
-     * The cross-track error of <code>p</code> to the crossing Position and the crossing Bearing rotated by 90� need
-     * to be negative. If the passing Instructions are line, it checks whether the boat passed between the two marks.
+     * The cross-track error of <code>p</code> to the crossing Position and the crossing Bearing rotated by 90deg need
+     * to be negative. If the passing instructions are {@link PassingInstruction#Line}, it checks whether the boat
+     * passed between the two marks.
      */
     private boolean isOnCorrectSideOfWaypoint(Waypoint w, Position p, TimePoint t, boolean portMark) {
         boolean result = true;
@@ -626,8 +614,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Starboard
                     || instruction == PassingInstruction.FixedBearing) {
                 m = w.getMarks().iterator().next();
-            }
-            if (instruction == PassingInstruction.Gate) {
+            } else if (instruction == PassingInstruction.Gate) {
                 Util.Pair<Mark, Mark> pair = getPortAndStarboardMarks(t, w);
                 m = portMark ? pair.getA() : pair.getB();
             }
@@ -710,22 +697,25 @@ public class CandidateFinderImpl implements CandidateFinder {
             break;
         case Gate:
             Util.Pair<Mark, Mark> posGate = getPortAndStarboardMarks(t, w);
-            Position portGatePosition = posGate.getA() == null ? null : race.getOrCreateTrack(posGate.getA())
-                    .getEstimatedPosition(t, false);
-            Position starboardGatePosition = posGate.getB() == null ? null : race.getOrCreateTrack(posGate.getB())
-                    .getEstimatedPosition(t, false);
-            distances.add(portGatePosition != null ? p.getDistance(portGatePosition) : null);
-            distances.add(starboardGatePosition != null ? p.getDistance(starboardGatePosition) : null);
-
+            if (posGate.getA() != null && posGate.getB() != null) {
+                Position portGatePosition = posGate.getA() == null ? null : race.getOrCreateTrack(posGate.getA())
+                        .getEstimatedPosition(t, false);
+                Position starboardGatePosition = posGate.getB() == null ? null : race.getOrCreateTrack(posGate.getB())
+                        .getEstimatedPosition(t, false);
+                distances.add(portGatePosition != null ? p.getDistance(portGatePosition) : null);
+                distances.add(starboardGatePosition != null ? p.getDistance(starboardGatePosition) : null);
+            }
             break;
         case Line:
             Util.Pair<Mark, Mark> posLine = getPortAndStarboardMarks(t, w);
-            Position portLinePosition = race.getOrCreateTrack(posLine.getA()).getEstimatedPosition(t, false);
-            Position starboardLinePosition = race.getOrCreateTrack(posLine.getB()).getEstimatedPosition(t, false);
-            distances.add((portLinePosition != null && starboardLinePosition != null) ? p.getDistanceToLine(
-                    portLinePosition, starboardLinePosition) : portLinePosition != null ? p
-                    .getDistance(portLinePosition) : starboardLinePosition != null ? p.getDistance(portLinePosition)
-                    : null);
+            if (posLine.getA() != null && posLine.getB() != null) {
+                Position portLinePosition = race.getOrCreateTrack(posLine.getA()).getEstimatedPosition(t, false);
+                Position starboardLinePosition = race.getOrCreateTrack(posLine.getB()).getEstimatedPosition(t, false);
+                distances.add((portLinePosition != null && starboardLinePosition != null) ? p.getDistanceToLine(
+                        portLinePosition, starboardLinePosition) : portLinePosition != null ? p
+                        .getDistance(portLinePosition) : starboardLinePosition != null ? p
+                        .getDistance(portLinePosition) : null);
+            }
             break;
         case Offset:
             // TODO

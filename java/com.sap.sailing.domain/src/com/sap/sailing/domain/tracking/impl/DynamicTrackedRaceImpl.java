@@ -74,20 +74,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private transient Set<RaceAbortedListener> raceAbortedListeners;
     
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
-            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation, boolean useMarkPassingCalculator) {
-        super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
+                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation, useMarkPassingCalculator);
-		this.logListener = new DynamicTrackedRaceLogListener(this);
-		if (markPassingCalculator != null) {
-			logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
-		}
-		this.courseDesignChangedListeners = new HashSet<>();
-		this.startTimeChangedListeners = new HashSet<>();
+        this.logListener = new DynamicTrackedRaceLogListener(this);
+        if (markPassingCalculator != null) {
+            logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
+        }
+        this.courseDesignChangedListeners = new HashSet<>();
+        this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
-        if(markPassingCalculator!=null){
-        	logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
+        if (markPassingCalculator != null) {
+            logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
         }
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();

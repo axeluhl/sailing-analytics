@@ -32,4 +32,8 @@ public class SuppressedMarkPassingsEventImpl extends RaceLogEventImpl implements
         return indexOfFirstSuppressedWaypoint;
     }
 
+    @Override
+    public String getShortInfo() {
+        return getInvolvedBoats().get(0).getName()+" at mark "+getZeroBasedIndexOfFirstSuppressedWaypoint();
+    }
 }

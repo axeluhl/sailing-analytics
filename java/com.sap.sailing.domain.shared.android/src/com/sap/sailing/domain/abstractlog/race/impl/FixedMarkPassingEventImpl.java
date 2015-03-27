@@ -40,5 +40,8 @@ public class FixedMarkPassingEventImpl extends RaceLogEventImpl implements Fixed
         return timePointOfPassing;
     }
 
-
+    @Override
+    public String getShortInfo() {
+        return getInvolvedBoats().get(0).getName()+" at mark "+getZeroBasedIndexOfPassedWaypoint()+" at "+getTimePointOfFixedPassing();
+    }
 }
