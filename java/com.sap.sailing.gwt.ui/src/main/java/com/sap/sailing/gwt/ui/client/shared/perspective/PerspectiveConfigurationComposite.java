@@ -10,7 +10,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class PerspectiveConfigurationComposite extends Composite {
     @UiField Label nameUi;
@@ -33,15 +36,18 @@ public class PerspectiveConfigurationComposite extends Composite {
         nameUi.setText(this.perspective.getPerspectiveName());
         
         for(final Component<?> component: perspective.getComponents()) {
-            Button settingsButton = new Button(component.getLocalizedShortName());
+            final Button settingsButton = new Button(component.getLocalizedShortName());
             settingsButton.setStyleName(PerspectiveConfigurationCompositeResources.INSTANCE.css().someClass());
             
             settingsButton.addClickHandler(new ClickHandler() {
                 
                 @Override
                 public void onClick(ClickEvent event) {
+                    SettingsDialog settingsDialog = new SettingsDialog(component, StringMessages.INSTANCE);
+                    settingsDialog.show();
                 }
             });
+            perspectiveConfigurationPanel.add(settingsButton);
         }
     }
 

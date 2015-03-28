@@ -14,7 +14,7 @@ public class RaceMapSettingsDialog extends SettingsDialog<RaceMapSettings> {
         super(new ProxyRaceMapComponent(raceMapSettings, stringMessages), stringMessages, callback);
     }
     
-    private static class ProxyRaceMapComponent implements Component<RaceMapSettings> {
+    public static class ProxyRaceMapComponent implements Component<RaceMapSettings> {
         private final StringMessages stringMessages;
         private final RaceMapSettingsDialogComponent settingsDialogComponent;
         
