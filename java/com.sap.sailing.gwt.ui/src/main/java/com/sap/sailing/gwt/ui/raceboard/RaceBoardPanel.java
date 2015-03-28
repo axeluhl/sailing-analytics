@@ -43,7 +43,6 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.Perspective;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
@@ -74,7 +73,7 @@ import com.sap.sse.security.ui.client.UserService;
  *
  */
 public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener, 
-    LeaderboardUpdateListener, PopupPositionProvider, Perspective {
+    LeaderboardUpdateListener, PopupPositionProvider {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final EventDTO event;
@@ -435,16 +434,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         DateTimeFormat formatter = DateTimeFormat.getFormat("E d/M/y");
         raceInformationLabel.setText(formatter.format(raceColumn.getStartDate(fleet)));
         return raceInformationLabel;
-    }
-
-    @Override
-    public Iterable<Component<?>> getComponents() {
-        return components;
-    }
-    
-    @Override
-    public String getPerspectiveName() {
-        return "Raceboard";
     }
 }
 

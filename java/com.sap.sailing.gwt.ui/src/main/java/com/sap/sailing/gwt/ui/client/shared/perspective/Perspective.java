@@ -1,4 +1,6 @@
-package com.sap.sailing.gwt.ui.client.shared.components;
+package com.sap.sailing.gwt.ui.client.shared.perspective;
+
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
 
 /**
  * A perspective is a composition of UI components into a view/page

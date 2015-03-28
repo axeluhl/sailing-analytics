@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,14 +10,14 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.perspective.Perspective;
 
 /**
- * A perspective containing only a LeaderboardPanel
+ * A perspective containing a race viewer with all components like map, leaderboard, charts, etc.  
  * @author Frank
  *
  */
-public class LeaderboardPerspective implements Perspective {
+public class RaceViewerPerspective implements Perspective {
     private final List<Component<?>> components;
     
-    public LeaderboardPerspective() {
+    public RaceViewerPerspective() {
         components = new ArrayList<Component<?>>();
     }
 
@@ -33,7 +33,7 @@ public class LeaderboardPerspective implements Perspective {
 
     @Override
     public String getPerspectiveName() {
-        return StringMessages.INSTANCE.leaderboard();
+        return "RaceViewer";
     }
 
 

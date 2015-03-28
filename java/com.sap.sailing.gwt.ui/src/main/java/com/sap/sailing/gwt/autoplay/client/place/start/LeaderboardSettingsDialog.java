@@ -21,7 +21,7 @@ public class LeaderboardSettingsDialog extends SettingsDialog<LeaderboardSetting
         super(new ProxyLeaderboardComponent(stringMessages, leaderboard), stringMessages, callback);
     }
     
-    private static class ProxyLeaderboardComponent implements Component<LeaderboardSettings> {
+    public static class ProxyLeaderboardComponent implements Component<LeaderboardSettings> {
         private final StringMessages stringMessages;
         private final LeaderboardSettingsDialogComponent settingsDialogComponent;
         

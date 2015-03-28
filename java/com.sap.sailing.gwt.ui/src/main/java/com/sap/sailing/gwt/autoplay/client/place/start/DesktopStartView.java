@@ -10,12 +10,10 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -24,16 +22,17 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.autoplay.client.AutoPlayEntryPoint;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Perspective;
+import com.sap.sailing.gwt.ui.client.shared.perspective.Perspective;
+import com.sap.sailing.gwt.ui.client.shared.perspective.PerspectiveConfigurationComposite;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspective;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.raceboard.RaceViewerPerspective;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -60,10 +59,6 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField DivElement leaderboardAutoZoomDiv;
     @UiField DivElement screenConfiguraionUi;
     
-    @UiField Button leaderboardSettingsButton;
-    @UiField Button mapInRaceboardSettingsButton;
-    @UiField Button leaderboardInRaceboardSettingsButton;
-    
     @UiField CheckBox autoSwitchToRaceboard;
     @UiField TextBox timeToRaceStartInSeconds;
     @UiField TabPanel componentConfigurationTabPanel;
@@ -76,6 +71,9 @@ public class DesktopStartView extends Composite implements StartView {
     private Map<String, String> leaderboardParameters;
     
     private List<Perspective> supportedPerspectives;
+
+    private LeaderboardPerspective leaderboardPerspective;
+    private RaceViewerPerspective raceViewerPerspective;
     
     private final int defaultTimeToStartTimeInSeconds = 180;
 
@@ -96,7 +94,11 @@ public class DesktopStartView extends Composite implements StartView {
         localeSelectionBox = new ListBox();
         localeSelectionBox.setMultipleSelect(false);
 
-        supportedPerspectives.add(new LeaderboardPerspective(null));
+        leaderboardPerspective = new LeaderboardPerspective();
+        raceViewerPerspective = new RaceViewerPerspective(); 
+        
+        supportedPerspectives.add(leaderboardPerspective);
+        supportedPerspectives.add(raceViewerPerspective);
         
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
@@ -123,7 +125,6 @@ public class DesktopStartView extends Composite implements StartView {
         leaderboardSelectionUi.getStyle().setVisibility(Visibility.HIDDEN);
         screenConfiguraionUi.getStyle().setVisibility(Visibility.HIDDEN);
         
-        componentConfigurationTabPanel.getTabBar().selectTab(0);
         componentConfigurationTabPanel.setVisible(false);
         
         startAutoPlayButton.setEnabled(false);
@@ -163,6 +164,16 @@ public class DesktopStartView extends Composite implements StartView {
             startAutoPlayButton.setEnabled(true);
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
 
+            StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
+            
+            leaderboardPerspective.setLeaderboard(selectedLeaderboard);
+            raceViewerPerspective.setLeaderboard(selectedLeaderboard);
+            
+            componentConfigurationTabPanel.clear();
+            for(Perspective perspective: supportedPerspectives) {
+                componentConfigurationTabPanel.add(new PerspectiveConfigurationComposite(perspective), perspective.getPerspectiveName());
+            }
+            componentConfigurationTabPanel.getTabBar().selectTab(0);
         } else {
             startAutoPlayButton.setEnabled(false);
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
@@ -195,33 +206,22 @@ public class DesktopStartView extends Composite implements StartView {
         }
     }
 
-    @UiHandler("leaderboardSettingsButton")
-    void handleLeaderboardSettingsClick(ClickEvent e) {
-        EventDTO selectedEvent = getSelectedEvent();
-        String selectedLeaderboardName = getSelectedLeaderboardName();
-        for(LeaderboardGroupDTO leaderboardGroup: selectedEvent.getLeaderboardGroups()) {
-            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
-                if(leaderboard.name.equals(selectedLeaderboardName)) {
-                    LeaderboardSettingsDialog dialog = new LeaderboardSettingsDialog(StringMessages.INSTANCE, leaderboard, 
-                            new DialogCallback<LeaderboardSettings>() {
-                        @Override
-                        public void cancel() {
-                        }
-    
-                        @Override
-                        public void ok(LeaderboardSettings newSettings) {
-                            AutoPlayEntryPoint.leaderboardSettings = newSettings;
-                        }
-                    });
-                    dialog.show();
-                }
+    private void handleLeaderboardSettingsClick(ClickEvent e) {
+        LeaderboardSettingsDialog dialog = new LeaderboardSettingsDialog(StringMessages.INSTANCE, getSelectedLeaderboard(), 
+                new DialogCallback<LeaderboardSettings>() {
+            @Override
+            public void cancel() {
             }
-        }
+
+            @Override
+            public void ok(LeaderboardSettings newSettings) {
+            }
+        });
+        dialog.show();
     }
 
-    @UiHandler("mapInRaceboardSettingsButton")
-    void handleMapInRaceboardSettingsClick(ClickEvent e) {
-        RaceMapSettings settings = AutoPlayEntryPoint.raceMapSettings != null ? AutoPlayEntryPoint.raceMapSettings : new RaceMapSettings();
+    private void handleMapInRaceboardSettingsClick(ClickEvent e) {
+        RaceMapSettings settings = new RaceMapSettings();
         RaceMapSettingsDialog dialog = new RaceMapSettingsDialog(settings, StringMessages.INSTANCE, 
                 new DialogCallback<RaceMapSettings>() {
             @Override
@@ -230,21 +230,15 @@ public class DesktopStartView extends Composite implements StartView {
 
             @Override
             public void ok(RaceMapSettings newSettings) {
-                AutoPlayEntryPoint.raceMapSettings = newSettings;
             }
         });
         dialog.show();
     }
 
-    @UiHandler("leaderboardInRaceboardSettingsButton")
-    void handleLeaderboardInRaceboardSettingsClick(ClickEvent e) {
-        Window.alert("Not implemented yet.");
-    }
-
-    @UiHandler("leaderboardAutoZoomBox")
-    public void onLeaderboardAutoZoomClicked(ValueChangeEvent<Boolean> ev) {
-        leaderboardZoomBox.setEnabled(!leaderboardAutoZoomBox.getValue());
-    }
+//    @UiHandler("leaderboardAutoZoomBox")
+//    public void onLeaderboardAutoZoomClicked(ValueChangeEvent<Boolean> ev) {
+//        leaderboardZoomBox.setEnabled(!leaderboardAutoZoomBox.getValue());
+//    }
     
     private String getLeaderboardZoom() {
         return leaderboardAutoZoomBox.getValue() == true ? "auto" : String.valueOf(leaderboardZoomBox.getValue());
@@ -276,6 +270,19 @@ public class DesktopStartView extends Composite implements StartView {
             result = leaderboardSelectionBox.getItemText(selectedIndex);
         }
         return result;
+    }
+
+    private StrippedLeaderboardDTO getSelectedLeaderboard() {
+        EventDTO selectedEvent = getSelectedEvent();
+        String selectedLeaderboardName = getSelectedLeaderboardName();
+        for (LeaderboardGroupDTO leaderboardGroup : selectedEvent.getLeaderboardGroups()) {
+            for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
+                if (leaderboard.name.equals(selectedLeaderboardName)) {
+                    return leaderboard;
+                }
+            }
+        }
+        return null;
     }
 
     private EventDTO getSelectedEvent() {
