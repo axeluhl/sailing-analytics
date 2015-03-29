@@ -181,12 +181,16 @@ public class CandidateChooserImpl implements CandidateChooser {
                 // Otherwise the edge is only created if the distance estimation, which can be calculated as long as the
                 // candidates are not the proxy and or start is close enough to the actual distance sailed.
                 NavigableSet<Candidate> fixed = fixedPassings.get(c);
+                boolean addEdge = false;
+                double estimatedDistanceProbability;
                 if (fixed.contains(early) || fixed.contains(late)) {
                     if (early == start && (start.getTimePoint() == null || late.getTimePoint().after(start.getTimePoint()))) {
-                        // a start edge: determine a probability not based on distance traveled but based on the
-                        // time difference between scheduled start time and candidate's time point
-                        final double estimatedDistanceProbability;
-                        if (isGateStart==Boolean.TRUE || early.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
+                        // A start edge: determine a probability not based on distance traveled but based on the
+                        // time difference between scheduled start time and candidate's time point. If the "late" candidate
+                        // is not for the start mark/line, meaning that mark passings including the actual start are
+                        // skipped, use getDistanceEstimationBasedProbability assuming a start mark passing at
+                        // the race's start time.
+                        if (isGateStart==Boolean.TRUE || start.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
                             estimatedDistanceProbability = 1; // no start time point known; all candidate time points equally likely
                         } else {
                             // FIXME See discussion on bug 2741: we need to value start mark passings closer to the start time better than those further away
@@ -196,22 +200,26 @@ public class CandidateChooserImpl implements CandidateChooser {
 //                                    (double) (MILLISECONDS_BEFORE_STARTTIME + Math.abs(timeGapBetweenStartOfRaceAndCandidateTimePoint.asMillis()));
                             estimatedDistanceProbability = 1;
                         }
-                        addEdge(edges, new Edge(early, late, estimatedDistanceProbability, race.getRace().getCourse()));
+                        addEdge = true;
                     } else if (late == end) {
                         // final edge and first node is not start node or start time not known, so no start time offset-based probability can be found
-                        addEdge(edges, new Edge(early, late, /* estimated distance probability */ 1, race.getRace().getCourse()));
+                        estimatedDistanceProbability = 1;
+                        addEdge = true;
                     } else {
                         if (late.getTimePoint().after(early.getTimePoint())) {
-                            final double estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
-                            addEdge(edges, new Edge(early, late, estimatedDistanceProbability, race.getRace().getCourse()));
+                            estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
+                            addEdge = true;
                         }
                     }
                 } else if (late.getTimePoint().after(early.getTimePoint())) {
-                    final double estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
                     // TODO this comparison does not exactly implement the condition "if distance is more likely than skipping"
+                    estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
                     if (estimatedDistanceProbability > MINIMUM_PROBABILITY) {
-                        addEdge(edges, new Edge(early, late, estimatedDistanceProbability, race.getRace().getCourse()));
+                        addEdge = true;
                     }
+                }
+                if (addEdge) {
+                    addEdge(edges, new Edge(early, late, /* estimated distance probability */ 1, race.getRace().getCourse()));
                 }
             }
         }
@@ -334,9 +342,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     private double getDistanceEstimationBasedProbability(Competitor c, Candidate c1, Candidate c2) {
         final double result;
         assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();
-        assert c1 != start;
         assert c2 != end;
-        Distance totalEstimatedDistance = new MeterDistance(0);
         Waypoint first;
         final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
         if (c1.getOneBasedIndexOfWaypoint() == 0) {
@@ -344,25 +350,36 @@ public class CandidateChooserImpl implements CandidateChooser {
         } else {
             first = c1.getWaypoint();
         }
-        boolean legsAreBetweenCandidates = false;
-        for (Iterator<TrackedLeg> it = race.getTrackedLegs().iterator(); it.hasNext();) {
-            TrackedLeg leg = it.next();
-            Waypoint from = leg.getLeg().getFrom();
-            if (from == c2.getWaypoint()) {
-                break;
-            }
-            if (from == first) {
-                legsAreBetweenCandidates = true;
-            }
-            if (legsAreBetweenCandidates) {
-                totalEstimatedDistance = totalEstimatedDistance.add(leg.getGreatCircleDistance(middleOfc1Andc2));
-            }
-        }
-        Distance actualDistance = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
-        double differenceInMeters = actualDistance.getMeters() - totalEstimatedDistance.getMeters();
-        double ratio = differenceInMeters / totalEstimatedDistance.getMeters();
-        // A smaller distance than estimated is very unlikely, somewhere between the distance estimated and double that
-        // is likely and anything greater than that gradually becomes unlikely
+        final Waypoint second = c2.getWaypoint();
+        Distance totalGreatCircleDistance = getTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
+        Distance actualDistanceTraveled = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
+        result = getProbabilityOfActualDistanceGivenGreatCircleDistance(totalGreatCircleDistance, actualDistanceTraveled);
+        return result;
+    }
+
+    /**
+     * Based on a direct great-circle distance between waypoints and an actual distance sailed, determines how likely it
+     * is that this distance sailed could have happened between those waypoints. For a reaching leg, this would be based
+     * on a straight comparison of the numbers. However, with upwind and downwind legs and boats not going from mark to
+     * mark on a great circle segment, distances sailed will exceed the great line circle distances.
+     * <p>
+     * 
+     * A smaller distance than great circle from mark to mark is very unlikely, somewhere between the distance estimated
+     * and double that is likely and anything greater than that gradually becomes unlikely.
+     * 
+     * @return a number between 0 and 1 with 1 representing a "fair chance" that the actual distance sailed could have
+     *         been sailed for the given great circle distance; 1 is returned for actual distances being in the range of
+     *         1..2 times the great circle distance. Actual distances outside this interval reduce probability linearly
+     *         for smaller distances (gradient 3.5) and varies with the square root for distances that exceed twice the
+     *         great circle distance.
+     */
+    private double getProbabilityOfActualDistanceGivenGreatCircleDistance(Distance totalGreatCircleDistance,
+            Distance actualDistanceTraveled) {
+        final double result;
+        double differenceInMeters = actualDistanceTraveled.getMeters() - totalGreatCircleDistance.getMeters();
+        double ratio = differenceInMeters / totalGreatCircleDistance.getMeters();
+        // A smaller distance than great circle from mark to mark is very unlikely, somewhere between the distance
+        // estimated and double that is likely and anything greater than that gradually becomes unlikely
         if (ratio < 0) {
             // TODO shouldn't these factors be constants in the class header for easy fine-tuning?
             result = 3.5 * ratio + 1;
@@ -372,6 +389,25 @@ public class CandidateChooserImpl implements CandidateChooser {
             result = 1;
         }
         return result;
+    }
+
+    private Distance getTotalGreatCircleDistanceBetweenWaypoints(Waypoint first, final Waypoint second,
+            final TimePoint timePoint) {
+        Distance totalGreatCircleDistance = new MeterDistance(0);
+        boolean legsAreBetweenCandidates = false;
+        for (TrackedLeg leg : race.getTrackedLegs()) {
+            Waypoint from = leg.getLeg().getFrom();
+            if (from == second) {
+                break;
+            }
+            if (from == first) {
+                legsAreBetweenCandidates = true;
+            }
+            if (legsAreBetweenCandidates) {
+                totalGreatCircleDistance = totalGreatCircleDistance.add(leg.getGreatCircleDistance(timePoint));
+            }
+        }
+        return totalGreatCircleDistance;
     }
 
     private void addCandidates(Competitor c, Iterable<Candidate> newCandidates) {
