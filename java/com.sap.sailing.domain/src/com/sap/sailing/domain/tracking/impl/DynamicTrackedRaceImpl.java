@@ -190,7 +190,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setAndFixDelayToLiveInMillis(long delayToLiveInMillis) {
-        super.setDelayToLiveInMillis(delayToLiveInMillis);
+        if (getDelayToLiveInMillis() != delayToLiveInMillis) {
+            super.setDelayToLiveInMillis(delayToLiveInMillis);
+            notifyListenersDelayToLiveChanged(delayToLiveInMillis);
+        }
         delayToLiveInMillisFixed = true;
     }
 
