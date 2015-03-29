@@ -23,14 +23,14 @@ public class Edge implements Comparable<Edge> {
     private final static double penaltyForSkipped = 0.7;
     // TODO what is the meaning of this constant?
     private final static double penaltyForSkippedToEnd = 0.6;
-    private final double estimatedDistanceProbability;
+    private final double estimatedDistanceAndStartTimingProbability;
     private final Course course;
 
-    public Edge(Candidate start, Candidate end, double estimatedDistanceProbability, Course course) {
+    public Edge(Candidate start, Candidate end, double estimatedDistanceAndStartTimingProbability, Course course) {
         this.course = course;
         this.start = start;
         this.end = end;
-        this.estimatedDistanceProbability = estimatedDistanceProbability;
+        this.estimatedDistanceAndStartTimingProbability = estimatedDistanceAndStartTimingProbability;
     }
 
     public static double getPenaltyForSkipping() {
@@ -46,7 +46,7 @@ public class Edge implements Comparable<Edge> {
      */
     public Double getCost() {
         double penalty = end.getOneBasedIndexOfWaypoint() == Util.size(course.getWaypoints()) + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
-        return 1 - (start.getProbability() * end.getProbability() * estimatedDistanceProbability) + 2 * penalty
+        return 1 - (start.getProbability() * end.getProbability() * estimatedDistanceAndStartTimingProbability) + 2 * penalty
                 * (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1);
     }
 

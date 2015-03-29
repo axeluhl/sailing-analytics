@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -177,52 +178,61 @@ public class CandidateChooserImpl implements CandidateChooser {
                     continue; // don't create edge from/to same waypoint
                 }
 
+                final double estimatedDistanceProbability;
+                final double startTimingProbability;
+                if (early == start) {
+                    // An edge starting at the start proxy node. If the late candidate is for a start mark passing,
+                    // determine a probability not based on distance traveled but based on the
+                    // time difference between scheduled start time and candidate's time point. If the "late" candidate
+                    // is not for the start mark/line, meaning that mark passings including the actual start are
+                    // skipped, as usual use getDistanceEstimationBasedProbability assuming a start mark passing at
+                    // the race's start time.
+                    if (isGateStart == Boolean.TRUE || start.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
+                        startTimingProbability = 1; // no start time point known; all candidate time points equally likely
+                        estimatedDistanceProbability = 1; // can't tell distance sailed either because we don't know the start time
+                    } else {
+                        if (late.getWaypoint() == race.getRace().getCourse().getFirstWaypoint()) {
+                            // no skips; going from the start proxy node to a candidate for the start mark passing;
+                            // calculate the probability for the start being the start given its timing and multiply
+                            // with the estimation for the distance-based probability:
+                            final Duration timeGapBetweenStartOfRaceAndCandidateTimePoint = early.getTimePoint()
+                                    .plus(MILLISECONDS_BEFORE_STARTTIME).until(late.getTimePoint());
+                            // Being MILLISECONDS_BEFORE_STARTTIME off means a probability of 1/2; being twice this time
+                            // off means 1/3, and so on
+                            startTimingProbability = (double) MILLISECONDS_BEFORE_STARTTIME
+                                    / (double) (MILLISECONDS_BEFORE_STARTTIME + Math
+                                            .abs(timeGapBetweenStartOfRaceAndCandidateTimePoint.asMillis()));
+                            estimatedDistanceProbability = 1;
+                        } else {
+                            startTimingProbability = 0.1; // can't really tell how well the start time was matched when
+                                                          // we don't have a start candidate
+                            estimatedDistanceProbability = late == end ? 1 : getDistanceEstimationBasedProbability(c, early, late);
+                        }
+                    }
+                } else {
+                    startTimingProbability = 1; // no penalty for any start time difference because this edge doesn't cover a start
+                    if (late == end) {
+                        // final edge; we don't know anything about distances for the end proxy node
+                        estimatedDistanceProbability = 1;
+                    } else {
+                        estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
+                    }
+                }
                 // If one of the candidates is fixed, the edge is always created unless they travel backwards in time.
                 // Otherwise the edge is only created if the distance estimation, which can be calculated as long as the
                 // candidates are not the proxy and or start is close enough to the actual distance sailed.
-                NavigableSet<Candidate> fixed = fixedPassings.get(c);
-                boolean addEdge = false;
-                double estimatedDistanceProbability;
-                if (fixed.contains(early) || fixed.contains(late)) {
-                    if (early == start && (start.getTimePoint() == null || late.getTimePoint().after(start.getTimePoint()))) {
-                        // A start edge: determine a probability not based on distance traveled but based on the
-                        // time difference between scheduled start time and candidate's time point. If the "late" candidate
-                        // is not for the start mark/line, meaning that mark passings including the actual start are
-                        // skipped, use getDistanceEstimationBasedProbability assuming a start mark passing at
-                        // the race's start time.
-                        if (isGateStart==Boolean.TRUE || start.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
-                            estimatedDistanceProbability = 1; // no start time point known; all candidate time points equally likely
-                        } else {
-                            // FIXME See discussion on bug 2741: we need to value start mark passings closer to the start time better than those further away
-//                            final Duration timeGapBetweenStartOfRaceAndCandidateTimePoint = early.getTimePoint().plus(MILLISECONDS_BEFORE_STARTTIME).until(late.getTimePoint());
-                            // Being MILLISECONDS_BEFORE_STARTTIME off means a probability of 1/2; being twice this time off means 1/3, and so on
-//                            estimatedDistanceProbability = (double) MILLISECONDS_BEFORE_STARTTIME /
-//                                    (double) (MILLISECONDS_BEFORE_STARTTIME + Math.abs(timeGapBetweenStartOfRaceAndCandidateTimePoint.asMillis()));
-                            estimatedDistanceProbability = 1;
-                        }
-                        addEdge = true;
-                    } else if (late == end) {
-                        // final edge and first node is not start node or start time not known, so no start time offset-based probability can be found
-                        estimatedDistanceProbability = 1;
-                        addEdge = true;
-                    } else {
-                        if (late.getTimePoint().after(early.getTimePoint())) {
-                            estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
-                            addEdge = true;
-                        }
-                    }
-                } else if (late.getTimePoint().after(early.getTimePoint())) {
-                    // TODO this comparison does not exactly implement the condition "if distance is more likely than skipping"
-                    estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
-                    if (estimatedDistanceProbability > MINIMUM_PROBABILITY) {
-                        addEdge = true;
-                    }
-                }
-                if (addEdge) {
-                    addEdge(edges, new Edge(early, late, /* estimated distance probability */ 1, race.getRace().getCourse()));
+                final NavigableSet<Candidate> fixed = fixedPassings.get(c);
+                // TODO this comparison does not exactly implement the condition "if distance is more likely than skipping"
+                if (travelingForwardInTimeOrUnknown(early, late) &&
+                        (fixed.contains(early) || fixed.contains(late) || estimatedDistanceProbability > MINIMUM_PROBABILITY)) {
+                    addEdge(edges, new Edge(early, late, startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse()));
                 }
             }
         }
+    }
+
+    private boolean travelingForwardInTimeOrUnknown(Candidate early, Candidate late) {
+        return early.getTimePoint() == null || late.getTimePoint() == null || early.getTimePoint().before(late.getTimePoint());
     }
 
     private void addEdge(Map<Candidate, Set<Edge>> edges, Edge e) {
