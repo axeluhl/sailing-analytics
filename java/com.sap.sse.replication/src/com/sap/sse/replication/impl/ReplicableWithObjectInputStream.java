@@ -70,7 +70,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         try {
             final ObjectInputStream objectInputStream = createObjectInputStreamResolvingAgainstCache(is);
             ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            Thread.currentThread().setContextClassLoader(getDeserializationClassLoader());
             try {
                 initiallyFillFromInternal(objectInputStream);
             } finally {
@@ -79,6 +79,13 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         } finally {
             setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
         }
+    }
+    
+    /**
+     * The class loader to use for de-serializing objects. By default, this object's class's class loader is used.
+     */
+    default ClassLoader getDeserializationClassLoader() {
+        return getClass().getClassLoader();
     }
     
     /**
@@ -92,7 +99,13 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     
     @Override
     default O readOperation(InputStream inputStream) throws IOException, ClassNotFoundException {
-        return readOperationInternal(createObjectInputStreamResolvingAgainstCache(inputStream));
+        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getDeserializationClassLoader());
+        try {
+            return readOperationInternal(createObjectInputStreamResolvingAgainstCache(inputStream));
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldContextClassloader);
+        }
     }
 
     @Override
