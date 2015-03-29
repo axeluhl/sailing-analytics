@@ -2288,6 +2288,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
         return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
     }
+    
+    @Override
+    public ClassLoader getDeserializationClassLoader() {
+        return getCombinedMasterDataClassLoader();
+    }
 
     @Override
     public Serializable getId() {
