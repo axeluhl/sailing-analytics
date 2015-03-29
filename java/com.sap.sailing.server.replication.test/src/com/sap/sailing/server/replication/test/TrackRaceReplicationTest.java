@@ -174,7 +174,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
-        Thread.sleep(2000);
+        Thread.sleep(5000);
         assertEquals(now, replicaTrackedRace.getStartOfRace());
     }
 
@@ -188,7 +188,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         masterTrackedRace.setWindSourcesToExclude(Collections.singleton(new WindSourceImpl(WindSourceType.WEB)));
         assertEquals(1, Util.size(masterTrackedRace.getWindSourcesToExclude()));
         assertEquals(WindSourceType.WEB, masterTrackedRace.getWindSourcesToExclude().iterator().next().getType());
-        Thread.sleep(2000);
+        Thread.sleep(5000);
         assertEquals(1, Util.size(replicaTrackedRace.getWindSourcesToExclude()));
         assertEquals(WindSourceType.WEB, replicaTrackedRace.getWindSourcesToExclude().iterator().next().getType());
     }
