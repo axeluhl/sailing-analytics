@@ -36,7 +36,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.polars.PolarDataService;
@@ -175,12 +174,6 @@ public class SimulationServiceImpl implements SimulationService {
         public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
             // relevant for simulation: start of leg 1 changes; requires update of leg 1
             // TODO: update leg 1
-        }
-
-        @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
-            // relevant for simulation: update all legs when switched to "replay"
-            // TODO: update all legs
         }
 
         @Override
