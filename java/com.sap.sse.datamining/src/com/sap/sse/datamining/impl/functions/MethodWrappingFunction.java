@@ -124,12 +124,27 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         if (!isLocalizable()) {
             return getSimpleName();
         }
-        return stringMessages.get(locale, additionalData.getMessageKey());
+        
+        String localizedName = "";
+        if (!additionalData.getMessageKey().isEmpty()) {
+            localizedName = stringMessages.get(locale, additionalData.getMessageKey());
+        }
+        
+        if (hasUnit()) {
+            String unitSignifier = stringMessages.get(locale, getResultUnit().toString());
+            localizedName = stringMessages.get(locale, "SignifierInUnit", localizedName, unitSignifier);
+        }
+        
+        return localizedName;
     }
 
     @Override
     public boolean isLocalizable() {
-        return additionalData != null && !additionalData.getMessageKey().isEmpty();
+        return additionalData != null && (!additionalData.getMessageKey().isEmpty() || hasUnit());
+    }
+    
+    private boolean hasUnit() {
+        return getResultUnit() != null && getResultUnit() != Unit.None;
     }
     
     @Override

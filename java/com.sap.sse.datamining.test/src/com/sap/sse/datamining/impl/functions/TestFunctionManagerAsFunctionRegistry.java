@@ -46,7 +46,7 @@ public class TestFunctionManagerAsFunctionRegistry {
     @Test
     public void testRegistration() throws NoSuchMethodException, SecurityException {
         OpenFunctionManager registry = new OpenFunctionManager();
-        registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
+        registry.registerAllClasses(internalClassesToScan);
         registry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
         
         Collection<Function<?>> expectedDimensions = new HashSet<>();
@@ -64,7 +64,7 @@ public class TestFunctionManagerAsFunctionRegistry {
     @Test
     public void testUnregistration() {
         OpenFunctionManager registry = new OpenFunctionManager();
-        registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
+        registry.registerAllClasses(internalClassesToScan);
         
         Collection<Function<?>> expectedDimensions = new HashSet<>();
         expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
@@ -78,7 +78,7 @@ public class TestFunctionManagerAsFunctionRegistry {
         expectedDimensions = expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
         assertThat(registry.getDimensions(), is(expectedDimensions));
 
-        registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
+        registry.registerAllClasses(internalClassesToScan);
         classesToUnregister = new HashSet<>();
         classesToUnregister.add(Test_HasRaceContext.class);
         registry.unregisterAllFunctionsOf(classesToUnregister);

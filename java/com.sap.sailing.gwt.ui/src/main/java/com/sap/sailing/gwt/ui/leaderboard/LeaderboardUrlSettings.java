@@ -27,6 +27,16 @@ public class LeaderboardUrlSettings {
     public static final String PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED = "showNumberOfRacesCompleted";
     
     /**
+     * Parameter to control the visibility of the competitor name columns. The following
+     * values are supported: SailId and Name. If the value is empty then none of the two columns are displayed.
+     * If the value can not be read then both are displayed.
+     */
+    public static final String PARAM_SHOW_COMPETITOR_NAME_COLUMNS="showCompetitorNameColumns";
+    
+    public static final String COMPETITOR_NAME_COLUMN_SAIL_ID = "SailId";
+    public static final String COMPETITOR_NAME_COLUMN_FULL_NAME = "Name";
+    
+    /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the
      * CSS3 zoom property or by applying scale operation to the body element. This comes in handy
      * when having to deal with screens that have high resolutions and that can't be controlled manually.
@@ -141,11 +151,21 @@ public class LeaderboardUrlSettings {
             maneuverDetails.append('=');
             maneuverDetails.append(maneuverDetail.name());
         }
-        StringBuilder showAddedScores = new StringBuilder();
-        showAddedScores.append('&');
-        showAddedScores.append(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES);
-        showAddedScores.append('=');
-        showAddedScores.append(settings.getLeaderboardSettings().isShowAddedScores());
+        StringBuilder additionalOverallParams = new StringBuilder();
+        additionalOverallParams.append('&');
+        additionalOverallParams.append(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES);
+        additionalOverallParams.append('=');
+        additionalOverallParams.append(settings.getLeaderboardSettings().isShowAddedScores());
+        if (!settings.getLeaderboardSettings().isShowCompetitorSailIdColumn() || !settings.getLeaderboardSettings().isShowCompetitorFullNameColumn()) {
+            additionalOverallParams.append('&');
+            additionalOverallParams.append(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS);
+            additionalOverallParams.append('=');
+            if (settings.getLeaderboardSettings().isShowCompetitorSailIdColumn()) {
+                additionalOverallParams.append(LeaderboardUrlSettings.COMPETITOR_NAME_COLUMN_SAIL_ID);
+            } else if (settings.getLeaderboardSettings().isShowCompetitorFullNameColumn()) {
+                additionalOverallParams.append(LeaderboardUrlSettings.COMPETITOR_NAME_COLUMN_FULL_NAME);
+            }
+        }
 
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboardName
@@ -167,7 +187,7 @@ public class LeaderboardUrlSettings {
                 + (settings.isAutoExpandLastRaceColumn() ? "&"+LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN+"=true" : "")
                 + (settings.getLeaderboardSettings().getNumberOfLastRacesToShow() == null ? "" :
                     "&"+LeaderboardUrlSettings.PARAM_NAME_LAST_N+"="+settings.getLeaderboardSettings().getNumberOfLastRacesToShow())
-                + showAddedScores.toString()
+                + additionalOverallParams.toString()
                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
         return link;
     }

@@ -13,8 +13,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  * For general information see {@link AdditionalResultDataBuilder}.<br />
  * Conflict resolving strategy:
  * <ul>
- *      <li>Builds the sum of all given retrieved/filtered data amounts</li>
- *      <li>Other values are overwritten</li>
+ *      <li>Old values will be overwritten from the new ones</li>
  * </ul>
  */
 public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder {
@@ -22,7 +21,7 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     private int retrievedDataAmount;
     private Function<?> extractionFunction;
     private String aggregationNameMessageKey;
-    private Unit unit;
+    private Unit resultUnit;
     private int resultDecimals;
     
     /**
@@ -30,13 +29,16 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
      */
     public OverwritingResultDataBuilder() {
         retrievedDataAmount = 0;
-        unit = Unit.None;
+        resultUnit = Unit.None;
         resultDecimals = 0;
     }
 
     @Override
     public AdditionalResultData build(long calculationTimeInNanos, ResourceBundleStringMessages stringMessages, Locale locale) {
-        return new AdditionalResultDataImpl(retrievedDataAmount, buildResultSignifier(stringMessages, locale), unit, resultDecimals, calculationTimeInNanos);
+        String unitSignifier = buildUnitSignifier(stringMessages, locale);
+        String resultSignifier = buildResultSignifier(stringMessages, locale);
+        return new AdditionalResultDataImpl(retrievedDataAmount, resultSignifier, resultUnit, unitSignifier,
+                resultDecimals, calculationTimeInNanos);
     }
 
     private String buildResultSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
@@ -47,6 +49,14 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
         String extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
         String aggregationName = stringMessages.get(locale, aggregationNameMessageKey);
         return stringMessages.get(locale, "ResultSignifier", extractedStatisticName, aggregationName);
+    }
+
+    private String buildUnitSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
+        if (resultUnit == null || resultUnit == Unit.None) {
+            return "";
+        }
+        
+        return stringMessages.get(locale, resultUnit.toString());
     }
 
     @Override
@@ -62,8 +72,18 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     @Override
     public void setExtractionFunction(Function<?> extractionFunction) {
         this.extractionFunction = extractionFunction;
-        unit = extractionFunction.getResultUnit();
-        resultDecimals = extractionFunction.getResultDecimals();
+        setResultUnit(extractionFunction.getResultUnit());
+        setResultDecimals(extractionFunction.getResultDecimals());
+    }
+    
+    @Override
+    public void setResultUnit(Unit resultUnit) {
+        this.resultUnit = resultUnit;
+    }
+    
+    @Override
+    public void setResultDecimals(int resultDecimals) {
+        this.resultDecimals = resultDecimals;
     }
 
     @Override

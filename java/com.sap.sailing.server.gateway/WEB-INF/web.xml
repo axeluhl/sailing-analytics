@@ -254,7 +254,15 @@
 		<servlet-name>TrackFilesImportServlet</servlet-name>
 		<url-pattern>/trackfiles/import</url-pattern>
 	</servlet-mapping>
-   
+	<servlet>
+		<servlet-name>FileUploadServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.FileUploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FileUploadServlet</servlet-name>
+		<url-pattern>/fileupload</url-pattern>
+	</servlet-mapping>
+	
     <servlet>
         <servlet-name>websockettest</servlet-name>
         <servlet-class>com.sap.sailing.server.gateway.impl.WebSocketTestServlet</servlet-class>

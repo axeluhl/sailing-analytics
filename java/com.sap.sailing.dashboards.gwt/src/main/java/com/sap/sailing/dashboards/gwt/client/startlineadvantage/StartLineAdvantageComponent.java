@@ -5,6 +5,7 @@ import com.sap.sailing.dashboards.gwt.client.RibDashboardDataRetriever;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardDataRetrieverListener;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * The purpose of the class is to display the live and average start line advantage either by wind or by geometry. There
@@ -21,15 +22,14 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
     private StartLineAdvantageComponentState startLineAdvantageComponentState;
     private StartLineAdvantageComponentStateShowsAdvantageByWind startLineAdvantageComponentStateShowsAdvantageByWind;
     private StartLineAdvantageComponentStateShowsAdvantageByGeometry startLineAdvantageComponentStateShowsAdvantageByGeometry;
+    private StringMessages stringConstants;
     
-    private static final String HEADER_ADVANTAGE_BY_WIND = "Startline advantage by wind";
-    private static final String HEADER_ADVANTAGE_BY_GEOMETRY = "Startline advantage by geometry";
-    
-    public StartLineAdvantageComponent() {
+    public StartLineAdvantageComponent(RibDashboardDataRetriever ribDashboardDataRetriever) {
         super();
+        stringConstants = StringMessages.INSTANCE;
         initAndSetStartLineAdvantageStates();
         StartLineAdvantageComponentRessources.INSTANCE.css().ensureInjected();
-        this.header.setInnerText(HEADER_ADVANTAGE_BY_WIND);
+        this.header.setInnerText(stringConstants.dashboardStartlineAdvantageByWind());
         this.header.addClassName(StartLineAdvantageComponentRessources.INSTANCE.css()
                 .startLineAdvantageComponent_header());
         liveAveragePanel.getElement().addClassName(
@@ -40,9 +40,9 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
                 StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_middleLine());
         averagePanel.getElement().addClassName(
                 StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_averagePanel());
-        this.liveLabel.setInnerHTML("live");
-        this.averageLabel.setInnerHTML("average<br>(1 hour)");
-        RibDashboardDataRetriever.getInstance(null).addDataObserver(this);
+        this.liveLabel.setInnerHTML(stringConstants.dashboardLiveWind());
+        this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(60));
+        ribDashboardDataRetriever.addDataObserver(this);
     }
 
     private void initAndSetStartLineAdvantageStates() {
@@ -116,7 +116,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
         @Override
         public void changeStartLineAdvatageComponentsStateToOtherState(
                 StartLineAdvantageComponent startLineAdvantageComponent) {
-            startLineAdvantageComponent.header.setInnerText(HEADER_ADVANTAGE_BY_GEOMETRY);
+            startLineAdvantageComponent.header.setInnerText(stringConstants.dashboardStartlineAdvantageByWind());
             startLineAdvantageComponent.startLineAdvantageComponentState = startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry;
             startLineAdvantageComponent.liveNumber
                     .setInnerText(startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry
@@ -149,7 +149,7 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
         @Override
         public void changeStartLineAdvatageComponentsStateToOtherState(
                 StartLineAdvantageComponent startLineAdvantageComponent) {
-            startLineAdvantageComponent.header.setInnerText(HEADER_ADVANTAGE_BY_WIND);
+            startLineAdvantageComponent.header.setInnerText(stringConstants.dashboardStartlineAdvantageByGeometry());
             startLineAdvantageComponent.startLineAdvantageComponentState = startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind;
             startLineAdvantageComponent.liveNumber
                     .setInnerText(startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind

@@ -2,7 +2,6 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.common.Util.Pair;
@@ -47,10 +46,10 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
     }
 
     @Override
-    protected Callable<GroupedDataEntry<DataType>> createInstruction(final DataType element) {
-        return new Callable<GroupedDataEntry<DataType>>() {
+    protected AbstractProcessorInstruction<GroupedDataEntry<DataType>> createInstruction(final DataType element) {
+        return new AbstractProcessorInstruction<GroupedDataEntry<DataType>>(this, ProcessorInstructionPriority.Grouping) {
             @Override
-            public GroupedDataEntry<DataType> call() throws Exception {
+            public GroupedDataEntry<DataType> computeResult() {
                 return new GroupedDataEntry<DataType>(createCompoundKeyFor(element,
                         dimensionsWithParameterProvider.iterator()), element);
             }

@@ -48,6 +48,10 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
             if (statisticError != null && !statisticError.isEmpty()) {
                 errorMessages.add(statisticError);
             }
+            String retrieverChainError = validateDataRetrieverChain(queryDefinition);
+            if (retrieverChainError != null && !retrieverChainError.isEmpty()) {
+                errorMessages.add(retrieverChainError);
+            }
         }
         
         return errorMessages;
@@ -64,6 +68,10 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
 
     private String validateStatisticAndAggregator(QueryDefinitionDTO queryDefinition) {
         return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
+    }
+
+    private String validateDataRetrieverChain(QueryDefinitionDTO queryDefinition) {
+        return queryDefinition.getDataRetrieverChainDefinition() == null ? stringMessages.noDataRetrieverChainDefinitonSelectedError() : null;
     }
 
     @Override
@@ -95,7 +103,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         if (queryDefinition.getStatisticToCalculate() != null) { // The consistency can't be checked, if no statistic is selected
             String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
             
-            if (queryDefinition.getDataRetrieverChainDefinition() == null || 
+            if (queryDefinition.getDataRetrieverChainDefinition() != null && 
                 !sourceTypeName.equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
                 return false;
             }

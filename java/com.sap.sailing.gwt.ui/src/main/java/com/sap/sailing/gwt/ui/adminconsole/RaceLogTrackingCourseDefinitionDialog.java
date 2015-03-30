@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collection;
-
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -125,9 +123,9 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
                 }
             });
             
-            sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<MarkDTO>>() {
+            sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Iterable<MarkDTO>>() {
                 @Override
-                public void onSuccess(Collection<MarkDTO> result) {
+                public void onSuccess(Iterable<MarkDTO> result) {
                     marks.refresh(result);
                 }
                 

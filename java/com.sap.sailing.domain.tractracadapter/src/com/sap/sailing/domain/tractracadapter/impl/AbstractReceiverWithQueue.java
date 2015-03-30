@@ -1,6 +1,10 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -11,9 +15,11 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.tractrac.model.lib.api.event.IEvent;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
+import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
@@ -29,7 +35,7 @@ import com.tractrac.subscription.lib.api.IRaceSubscriber;
 public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Receiver {
     private static Logger logger = Logger.getLogger(AbstractReceiverWithQueue.class.getName());
     
-    private final LinkedBlockingQueue<Util.Triple<A, B, C>> queue;
+    private final LinkedBlockingDeque<Util.Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
     private final IEvent tractracEvent;
     private final IEventSubscriber eventSubscriber;
@@ -37,6 +43,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final DynamicTrackedRegatta trackedRegatta;
     private final Simulator simulator;
     private final Thread thread;
+    private final Map<Util.Triple<A, B, C>, Set<LoadingQueueDoneCallBack>> loadingQueueDoneCallBacks;
 
     /**
      * used by {@link #stopAfterNotReceivingEventsForSomeTime(long)} and {@link #run()} to check if an event was received
@@ -53,8 +60,9 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         this.trackedRegatta = trackedRegatta;
         this.domainFactory = domainFactory;
         this.simulator = simulator;
-        this.queue = new LinkedBlockingQueue<Util.Triple<A, B, C>>();
+        this.queue = new LinkedBlockingDeque<Util.Triple<A, B, C>>();
         this.thread = new Thread(this, getClass().getName());
+        this.loadingQueueDoneCallBacks = new HashMap<>();
     }
     
     protected IEventSubscriber getEventSubscriber() {
@@ -136,12 +144,31 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 if (!isStopEvent(event)) {
                     handleEvent(event);
                 }
+                final Set<LoadingQueueDoneCallBack> callBacks;
+                synchronized (loadingQueueDoneCallBacks) {
+                    if (getSimulator() != null) {
+                        // when simulator is running, loading is considered finished and all callbacks will
+                        // be satisfied instantly
+                        callBacks = new HashSet<>();
+                        for (Set<LoadingQueueDoneCallBack> set : loadingQueueDoneCallBacks.values()) {
+                            callBacks.addAll(set);
+                        }
+                        loadingQueueDoneCallBacks.clear();
+                    } else {
+                        // otherwise, check only if there are callbacks that registered at the event
+                        // currently consumed and notify if any are found
+                        callBacks = loadingQueueDoneCallBacks.remove(event);
+                    }
+                }
+                if (callBacks != null) {
+                    for (LoadingQueueDoneCallBack callback : callBacks) {
+                        callback.loadingQueueDone(this);
+                    }
+                }
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-        if (simulator != null) {
-            simulator.stop();
         }
         unsubscribe();
     }
@@ -182,5 +209,23 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
             }
         }
         return result;
+    }
+    
+    @Override
+    public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {
+        synchronized (loadingQueueDoneCallBacks) {
+            Triple<A, B, C> lastInQueue = queue.peekLast();
+            // when simulator is attached, consider loading already done; the simulator simulates "live" tracking
+            if (lastInQueue == null || getSimulator() != null) {
+                callback.loadingQueueDone(this);
+            } else {
+                Set<LoadingQueueDoneCallBack> set = loadingQueueDoneCallBacks.get(lastInQueue);
+                if (set == null) {
+                    set = new HashSet<>();
+                    loadingQueueDoneCallBacks.put(lastInQueue, set);
+                }
+                set.add(callback);
+            }
+        }
     }
 }

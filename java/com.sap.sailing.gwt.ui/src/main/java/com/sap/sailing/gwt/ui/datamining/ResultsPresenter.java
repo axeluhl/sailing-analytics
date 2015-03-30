@@ -12,4 +12,6 @@ public interface ResultsPresenter<ResultType> {
     public void showError(String error);
     public void showError(String mainError, Iterable<String> detailedErrors);
 
+    public void showBusyIndicator();
+
 }

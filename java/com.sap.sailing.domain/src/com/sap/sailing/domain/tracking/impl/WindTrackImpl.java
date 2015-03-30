@@ -25,6 +25,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
@@ -79,6 +80,15 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         listeners = new HashSet<WindListener>();
     }
     
+    /**
+     * By default, wind tracks respond with a valid result to {@link #getAveragedWindWithConfidence(Position, TimePoint)},
+     * so <code>null</code> is the result of this default implementation.
+     */
+    @Override
+    public Duration getResolutionOutsideOfWhichNoFixWillBeReturned() {
+        return null;
+    }
+
     @Override
     protected Wind getDummyFix(TimePoint timePoint) {
         return new DummyWind(timePoint);
@@ -344,6 +354,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         }
         @Override
         public Distance travel(TimePoint from, TimePoint to) {
+            return null;
+        }
+        @Override
+        public Duration getDuration(Distance distance) {
             return null;
         }
         @Override

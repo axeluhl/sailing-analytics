@@ -48,6 +48,19 @@ public class NestingCompoundGroupKey extends AbstractGroupKey {
     public void setSubKey(GroupKey subKey) {
         this.subKey = subKey;
     }
+    
+    @Override
+    public int compareTo(GroupKey key) {
+        int result = super.compareTo(key);
+        if (key instanceof NestingCompoundGroupKey) {
+            NestingCompoundGroupKey nestingCompoundGroupKey = (NestingCompoundGroupKey) key;
+            result = mainKey.compareTo(nestingCompoundGroupKey.mainKey);
+            if (result == 0) {
+                result = subKey.compareTo(nestingCompoundGroupKey.subKey);
+            }
+        }
+        return result;
+    }
 
     @Override
     public int hashCode() {

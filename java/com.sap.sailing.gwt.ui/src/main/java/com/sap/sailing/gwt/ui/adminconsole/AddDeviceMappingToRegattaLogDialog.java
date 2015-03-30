@@ -88,14 +88,16 @@ public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog
 
         // load table content
         sailingService.getCompetitorRegistrations(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
-        // TODO marks from RegattaLog also?
-
+        // fetching marks definitions from the race logs; note that currently there are no mark *definitions*
+        // on regatta logs although there can be mark/device assignments on a regatta log which then gives the
+        // mark a position that applies across all races in the regatta-like thing
+        sailingService.getMarksInRaceLogsAndTrackedRaces(leaderboardName, itemSelectionPanel.getSetMarksCallback());
         qrWidget = new DeviceMappingQRCodeWidget(stringMessages, new DeviceMappingQRCodeWidget.URLFactory() {
             @Override
             public String createURL(String baseUrlWithoutTrailingSlash, String mappedItemType, String mappedItemId)
                     throws QRCodeURLCreationException {
                 if (events.getValue() == null) {
-                    throw new QRCodeURLCreationException("no event selected");
+                    throw new QRCodeURLCreationException(stringMessages.noEventSelected());
                 }
                 String eventIdAsString = events.getValue().id.toString();
                 return DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash, eventIdAsString,
