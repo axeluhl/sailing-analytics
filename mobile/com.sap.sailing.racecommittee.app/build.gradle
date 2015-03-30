@@ -1,4 +1,5 @@
 apply plugin: "com.android.application"
+apply from: "../git.gradle"
 
 def packageName = "com.sap.sailing.racecommittee.app"
 def verCode = 6
