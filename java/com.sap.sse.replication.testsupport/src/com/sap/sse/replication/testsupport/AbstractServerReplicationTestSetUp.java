@@ -45,7 +45,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
     
     protected static final int DEFAULT_SERVLET_PORT = 9990;
     
-    private final int servletPort;
+    private int servletPort;
     protected ReplicableImpl replica;
     protected ReplicableImpl master;
     protected ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator;
@@ -54,7 +54,6 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
     protected ReplicationMasterDescriptor masterDescriptor;
     
     protected AbstractServerReplicationTestSetUp() {
-        servletPort = DEFAULT_SERVLET_PORT;
     }
     
     protected AbstractServerReplicationTestSetUp(int servletPort) {
@@ -127,9 +126,10 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         masterReplicator.registerReplica(replicaDescriptor);
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
-        masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, 0, UUID.randomUUID().toString(), "localhost", servletPort);
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,
-                this.replica, this.master, masterReplicator, masterDescriptor, servletPort);
+                this.replica, this.master, masterReplicator, masterDescriptor);
+        masterDescriptor = replicaReplicator.getMasterDescriptor();
+        servletPort = masterDescriptor.getServletPort();
         Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
         logger.info("starting initial load transmission servlet for "+getClass().getName());
         initialLoadTestServerThread = replicaReplicator.startInitialLoadTransmissionServlet();
@@ -197,28 +197,30 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         private final ReplicaDescriptor replicaDescriptor;
         private final ReplicationService masterReplicationService;
         private final ReplicationMasterDescriptor masterDescriptor;
-        private final int servletPort;
+        private final ServerSocket ss;
         
         public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, ReplicationInstancesManager replicationInstancesManager,
                 ReplicaDescriptor replicaDescriptor, ReplicableInterface replica,
-                ReplicableInterface master, ReplicationService masterReplicationService, ReplicationMasterDescriptor masterDescriptor,
-                int servletPort)
+                ReplicableInterface master, ReplicationService masterReplicationService, ReplicationMasterDescriptor masterDescriptor)
                 throws IOException {
             super(exchangeName, exchangeHost, 0, replicationInstancesManager, new SingletonReplicablesProvider(replica));
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
+            ss = new ServerSocket(0); // bind to any free port
             this.masterReplicationService = masterReplicationService;
-            this.masterDescriptor = masterDescriptor;
-            this.servletPort = servletPort;
+            this.masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, /* messagingPort */ 0,
+                    UUID.randomUUID().toString(), "localhost", ss.getLocalPort());
         }
         
+        ReplicationMasterDescriptor getMasterDescriptor() {
+            return masterDescriptor;
+        }
+
         private Thread startInitialLoadTransmissionServlet() throws InterruptedException {
             final boolean[] listening = new boolean[] { false };
             Thread initialLoadTestServerThread = new Thread("Replication initial load test server") {
                 public void run() {
-                    ServerSocket ss = null;
                     try {
-                        ss = new ServerSocket(servletPort);
                         synchronized (listening) {
                             listening[0] = true;
                             listening.notifyAll();

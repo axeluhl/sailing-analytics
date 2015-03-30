@@ -37,12 +37,9 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
-import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
-import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -52,7 +49,6 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
@@ -265,6 +261,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     Map<String, String> dashboardURLParameters = new HashMap<String, String>();
                     dashboardURLParameters.put("leaderboardName", leaderboardDTO.name);
                     Window.open(EntryPointLinkFactory.createDashboardLink(dashboardURLParameters), "", null);
+                } else if (LeaderboardConfigImagesBarCell.ACTION_SHOW_REGATTA_LOG.equals(value)) {
+                    showRegattaLog();
                 }
             }
         });
@@ -482,35 +480,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         }).show();
     }
 
-    private void showRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {
-        final String selectedLeaderboardName = getSelectedLeaderboardName();
-        sailingService.getRaceLog(selectedLeaderboardName, raceColumnDTO, fleetDTO,
-                new MarkedAsyncCallback<RaceLogDTO>(
-                        new AsyncCallback<RaceLogDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(caught.getMessage(), true);
-                            }
-                            @Override
-                            public void onSuccess(RaceLogDTO result) {
-                                openRaceLogDialog(result);
-                            }
-                        }));
-    }
-
-    private void openRaceLogDialog(RaceLogDTO raceLogDTO) {
-        RaceLogDialog dialog = new RaceLogDialog(raceLogDTO, stringMessages, new DialogCallback<RaceLogDTO>() { 
-            @Override
-            public void cancel() {
-            }
-
-            @Override
-            public void ok(RaceLogDTO result) {
-            }
-        });
-        dialog.show();
-    }
-
     private void removeRaceColumn(final RaceColumnDTO raceColumnDTO) {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
         final String raceColumnString = raceColumnDTO.getRaceColumnName();
@@ -590,70 +559,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             columnMoveDownButton.setEnabled(false);
             trackedRacesListComposite.clearSelection();
         }
-    }
-
-    private void editRaceColumnOfLeaderboard(final RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnWithFleet) {
-        final String selectedLeaderboardName = getSelectedLeaderboardName();
-        final boolean oldIsMedalRace = raceColumnWithFleet.getA().isMedalRace();
-        final String oldRaceColumnName = raceColumnWithFleet.getA().getRaceColumnName();
-        final Double oldExplicitFactor = raceColumnWithFleet.getA().getExplicitFactor();
-        // use a set to avoid duplicates in the case of regatta leaderboards with multiple fleets per column
-        Set<RaceColumnDTO> existingRacesWithoutThisRace = new HashSet<RaceColumnDTO>();
-        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality pair : raceColumnTable.getDataProvider().getList()) {
-            existingRacesWithoutThisRace.add(pair.getA());
-        }
-        existingRacesWithoutThisRace.remove(raceColumnWithFleet.getA());
-        final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(existingRacesWithoutThisRace,
-                raceColumnWithFleet.getA(), getSelectedLeaderboard().type.isRegattaLeaderboard(), stringMessages, new DialogCallback<RaceColumnDescriptor>() {
-            @Override
-            public void cancel() {
-            }
-
-            @Override
-            public void ok(final RaceColumnDescriptor result) {
-                boolean rename = !oldRaceColumnName.equals(result.getName());
-                boolean updateIsMedalRace = oldIsMedalRace != result.isMedalRace();
-                boolean updateFactor = oldExplicitFactor != result.getExplicitFactor();
-                List<ParallelExecutionCallback<Void>> callbacks = new ArrayList<ParallelExecutionCallback<Void>>();
-                final ParallelExecutionCallback<Void> renameLeaderboardColumnCallback = new ParallelExecutionCallback<Void>();
-                if (rename) {
-                    callbacks.add(renameLeaderboardColumnCallback);
-                }
-                final ParallelExecutionCallback<Void> updateIsMedalRaceCallback = new ParallelExecutionCallback<Void>();
-                if (updateIsMedalRace) {
-                    callbacks.add(updateIsMedalRaceCallback);
-                }
-                final ParallelExecutionCallback<Void> updateLeaderboardColumnFactorCallback = new ParallelExecutionCallback<Void>();
-                if (updateFactor) {
-                    callbacks.add(updateLeaderboardColumnFactorCallback);
-                }
-                new ParallelExecutionHolder(callbacks.toArray(new ParallelExecutionCallback<?>[0])) {
-                    @Override
-                    public void handleSuccess() {
-                        loadAndRefreshLeaderboard(selectedLeaderboardName, result.getName());
-                    }
-                    @Override
-                    public void handleFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to update data of race column "
-                                + oldRaceColumnName + " in leaderboard " + selectedLeaderboardName + ": "
-                                + t.getMessage());
-                    }
-                };
-                if (rename) {
-                    sailingService.renameLeaderboardColumn(selectedLeaderboardName, oldRaceColumnName,
-                            result.getName(), renameLeaderboardColumnCallback);
-                }
-                if (updateIsMedalRace) {
-                    sailingService.updateIsMedalRace(selectedLeaderboardName, result.getName(),
-                            result.isMedalRace(), updateIsMedalRaceCallback);
-                }
-                if (updateFactor) {
-                    sailingService.updateLeaderboardColumnFactor(selectedLeaderboardName, result.getName(),
-                            result.getExplicitFactor(), updateLeaderboardColumnFactorCallback);
-                }
-            }
-        });
-        raceDialog.show();
     }
 
     private void setIsMedalRace(String leaderboardName, final RaceColumnDTO raceInLeaderboard,

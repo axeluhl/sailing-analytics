@@ -6,7 +6,6 @@ import java.util.Comparator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -98,20 +97,6 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
             @Override
             public int compare(MarkDTO o1, MarkDTO o2) {
                 return o1.getName().compareTo(o2.getName());
-            }
-        });
-    }
-    
-    public void refresh(String leaderboardName, String raceColumnName, String fleetName) {
-        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Iterable<MarkDTO>>() {
-            @Override
-            public void onSuccess(Iterable<MarkDTO> result) {
-                refresh(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load marks: " + caught.getMessage());
             }
         });
     }

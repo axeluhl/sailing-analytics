@@ -269,7 +269,7 @@ public class TrackedLegImpl implements TrackedLeg {
          * no-op; the leg doesn't mind the tracked race's status being updated
          */
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
         }
 
         /**

@@ -80,14 +80,15 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
             TimePoint from, TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException,
             TransformationException {
-        long fromMillis = from.asMillis() - (inclusive ? 1 : 0);
-        long toMillis = to.asMillis() + (inclusive ? 1 : 0);
-
         Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
-
-        DBObject query = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
-                .and(FieldNames.TIME_AS_MILLIS.name()).greaterThan(fromMillis)
-                .and(FieldNames.TIME_AS_MILLIS.name()).lessThan(toMillis).get();
+        final QueryBuilder queryBuilder = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
+                .and(FieldNames.TIME_AS_MILLIS.name());
+        if (inclusive) {
+            queryBuilder.greaterThanEquals(from.asMillis()).and(FieldNames.TIME_AS_MILLIS.name()).lessThanEquals(to.asMillis());
+        } else {
+            queryBuilder.greaterThan(from.asMillis()).and(FieldNames.TIME_AS_MILLIS.name()).lessThan(to.asMillis());
+        }
+        DBObject query = queryBuilder.get();
 
         DBCursor result = fixesCollection.find(query);
         for (DBObject fixObject : result) {
