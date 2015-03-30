@@ -31,3 +31,4 @@ gen/
 out/
 .gradle
 local.properties
+git.xml
