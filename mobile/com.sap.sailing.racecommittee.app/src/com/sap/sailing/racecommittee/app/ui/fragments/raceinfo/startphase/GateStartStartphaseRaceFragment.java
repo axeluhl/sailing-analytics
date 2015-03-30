@@ -37,12 +37,7 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
 
 //        getRacingProcedure().removeChangedListener(changeListener);
     }
-    
-    
-    @Override
-    protected int getActionsLayoutId() {
-        return R.layout.race_startphase_gate_actions;
-    }
+
 
     @Override
     protected void setupUi() {

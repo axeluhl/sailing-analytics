@@ -4,147 +4,151 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.finished;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.activities.ResultsCapturingActivity;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.FinishedButtonFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.FinishedSubmitFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import org.w3c.dom.Text;
+
+import java.text.SimpleDateFormat;
 
 public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
 
-    private static String getFullRaceName(ManagedRace race) {
-        return String.format("%s - %s", new BoatClassSeriesFleet(race).getDisplayName(), race.getRaceName());
-    }
-    
-    TextView headerView;
-    TextView startTimeView;
-    TextView firstBoatFinishedView;
-    TextView finishTimeView;
-    TextView timeLimitView;
-    TextView protestStartTimeView;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.race_finished_view, container, false);
+        View layout = inflater.inflate(R.layout.race_finished, container, false);
+
+        return layout;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        headerView = (TextView) getView().findViewById(R.id.textFinishedRace);
-        startTimeView = (TextView) getView().findViewById(R.id.textFinishedRaceStarted);
-        firstBoatFinishedView = (TextView) getView().findViewById(R.id.textFirstBoatFinished);
-        finishTimeView = (TextView) getView().findViewById(R.id.textFinishedRaceEnded);
-        timeLimitView = (TextView) getView().findViewById(R.id.textTimeLimit);
-        protestStartTimeView = (TextView) getView().findViewById(R.id.textProtestStartTime);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
-        ImageButton cameraButton = (ImageButton) getView().findViewById(R.id.buttonCamera);
-        cameraButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(ResultsCapturingActivity.createIntent(view.getContext(),
-                        String.format(getString(R.string.results_mail_subject), getFullRaceName(getRace())),
-                        String.format(getString(R.string.results_mail_body), getFullRaceName(getRace()))));
+        if (getView() != null) {
+            replaceFragment(FinishedButtonFragment.newInstance(getArguments()), R.id.finished_panel_left);
+            replaceFragment(FinishedSubmitFragment.newInstance(getArguments()), R.id.finished_panel_right);
+
+            ImageView button = ViewHolder.get(getView(), R.id.edit_summary);
+            if (button != null) {
+                button.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //TODO
+                    }
+                });
             }
-        });
-    }
-    
-    @Override
-    public void onStart() {
-        super.onStart();
-        getRaceState().addChangedListener(changeListener);
+
+            TextView start_time = ViewHolder.get(getView(), R.id.race_start_time);
+            if (start_time != null) {
+                start_time.setText(dateFormat.format(getRaceState().getStartTime().asDate()));
+            }
+
+            TextView finish_start_time = ViewHolder.get(getView(), R.id.race_finish_begin_time);
+            if (finish_start_time != null) {
+                finish_start_time.setText(dateFormat.format(getRaceState().getFinishingTime().asDate()));
+            }
+
+            TextView finish_start_duration = ViewHolder.get(getView(), R.id.race_finish_begin_duration);
+            if (finish_start_duration != null) {
+                finish_start_duration.setText(calcDuration(getRaceState().getStartTime(), getRaceState().getFinishingTime()));
+            }
+
+            TextView finish_end_time = ViewHolder.get(getView(), R.id.race_finish_end_time);
+            if (finish_end_time != null) {
+                finish_end_time.setText(dateFormat.format(getRaceState().getFinishedTime().asDate()));
+            }
+
+            TextView finish_end_duration = ViewHolder.get(getView(), R.id.race_finish_end_duration);
+            if (finish_end_duration != null) {
+                finish_end_duration.setText(calcDuration(getRaceState().getStartTime(), getRaceState().getFinishedTime()));
+            }
+
+            TextView finish_duration = ViewHolder.get(getView(), R.id.race_finish_duration);
+            if (finish_duration != null) {
+                finish_duration.setText(calcDuration(getRaceState().getFinishingTime(), getRaceState().getFinishedTime()));
+            }
+
+            View region_wind = ViewHolder.get(getView(), R.id.region_wind);
+            if (region_wind != null) {
+                region_wind.setVisibility(View.GONE);
+                if (getRaceState().getWindFix() != null) {
+                    region_wind.setVisibility(View.VISIBLE);
+
+                    Wind wind = getRaceState().getWindFix();
+
+                    TextView direction = ViewHolder.get(getView(), R.id.wind_direction);
+                    if (direction != null) {
+                        String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value), wind.getFrom());
+                        direction.setText(wind_direction);
+                    }
+
+                    TextView speed = ViewHolder.get(getView(), R.id.wind_speed);
+                    if (speed != null) {
+                        String wind_speed = String.format(getString(R.string.race_summary_wind_speed_value), wind.getKnots());
+                        speed.setText(wind_speed);
+                    }
+                }
+            }
+
+            View region_recall = ViewHolder.get(getView(), R.id.region_individual_recalls);
+            if (region_recall != null) {
+                region_recall.setVisibility(View.GONE);
+            }
+        }
     }
 
-    @Override
-    public void onStop() {
-        getRaceState().removeChangedListener(changeListener);
-        super.onStop();
-    }
-    
     @Override
     protected void setupUi() {
-        headerView.setText(getHeaderText());
-        startTimeView.setText(getStartTimeText());
-        firstBoatFinishedView.setText(getFirstBoatFinishedTimeText());
-        finishTimeView.setText(getFinishTimeText());
-        timeLimitView.setText(getTimeLimitText());
-        protestStartTimeView.setText(getProtestStartTimeText());
+
     }
 
-    private CharSequence getProtestStartTimeText() {
-        TimePoint protestStartTime = getRaceState().getProtestTime();
-        if (protestStartTime != null) {
-            return String.format(getString(R.string.protest_start_time), TimeUtils.formatTime(protestStartTime));
+    private String calcDuration(TimePoint from, TimePoint to) {
+        String retValue;
+
+        Duration duration = from.until(to);
+
+        int sec = (int) Math.ceil(duration.asSeconds());
+        int min = sec / 60;
+        sec = sec - min * 60;
+
+        String time = doubleZero(min) + ":" + doubleZero(sec);
+        retValue = String.format(getString(R.string.race_summary_time), time);
+
+        return retValue;
+    }
+
+    private String doubleZero(int value) {
+        String retValue = String.valueOf(value);
+
+        int len = retValue.length();
+        for (int i = len; i < 2; i++) {
+            retValue = "0" + retValue;
         }
-        return getString(R.string.empty);
-    }
 
-    protected CharSequence getTimeLimitText() {
-        return getString(R.string.empty);
+        return retValue;
     }
-
-    private CharSequence getFinishTimeText() {
-        TimePoint finishTime = getRaceState().getFinishedTime();
-        if (finishTime != null) {
-            return String.format("%s %s", getString(R.string.race_finished_end_time), TimeUtils.formatTime(finishTime));
-        }
-        return getString(R.string.empty);
-    }
-
-    private CharSequence getFirstBoatFinishedTimeText() {
-        TimePoint firstBoatTime = getRaceState().getFinishingTime();
-        if (firstBoatTime != null) {
-            return String.format("%s %s", getString(R.string.race_first_boat_finished), TimeUtils.formatTime(firstBoatTime));
-        }
-        return getString(R.string.empty);
-    }
-
-    private CharSequence getStartTimeText() {
-        TimePoint startTime = getRaceState().getStartTime();
-        if (startTime != null) {
-            return String.format("%s %s", getString(R.string.race_finished_start_time), TimeUtils.formatTime(startTime));
-        }
-        return getString(R.string.empty);
-    }
-
-    private String getHeaderText() {
-        return String.format(String.valueOf(getText(R.string.race_finished_template)), getRace().getName());
-    }
-    
-    private RaceStateChangedListener changeListener = new BaseRaceStateChangedListener() {
-        @Override
-        public void onStartTimeChanged(ReadonlyRaceState state) {
-            setupUi();
-        }
-        
-        @Override
-        public void onFinishingTimeChanged(ReadonlyRaceState state) {
-            setupUi();
-        };
-        
-        @Override
-        public void onFinishedTimeChanged(ReadonlyRaceState state) {
-            setupUi();
-        };
-        
-        @Override
-        public void onProtestTimeChanged(ReadonlyRaceState state) {
-            setupUi();
-        }
-    };
-
 }

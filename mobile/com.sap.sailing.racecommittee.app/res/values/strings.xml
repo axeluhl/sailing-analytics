@@ -358,11 +358,28 @@
     <string name="race_summary_finish_end">End Finish</string>
     <string name="race_summary_finish_duration">Finish Duration</string>
     <string name="race_summary_wind_direction">Average Wind Direction</string>
-    <string name="race_summary_wind_direction_value" translatable="false">from #VALUE#°</string>
+    <string name="race_summary_wind_direction_value" translatable="false">from %s°</string>
     <string name="race_summary_wind_speed">Average Wind Speed</string>
-    <string name="race_summary_wind_speed_value" translatable="false">#VALUE# kts</string>
+    <string name="race_summary_wind_speed_value" translatable="false">%.1f kts</string>
     <string name="race_summary_individual_recalls">Individual Recalls</string>
-    <string name="race_summary_time" translatable="false">#VALUE# min</string>
+    <string name="race_summary_time" translatable="false">%s min</string>
     <string name="record_voice">Record Voice</string>
+    <string name="finishing_started">First vessel in finish at #TIME#</string>
+    <string name="finishing_done">Down now</string>
+
+    <string name="finished_recording">Recording</string>
+    <string name="finished_replay">Replay Voice</string>
+    <string name="finished_list">Finish List</string>
+    <string name="finished_photos">Take Photos</string>
+    <string name="finished_tracking">Tracking</string>
+    <string name="finished_edit">Edit List</string>
+    <string name="finished_publishing">Publishing</string>
+    <string name="finished_submit">Submit</string>
+    <string name="finished_duration">#TIME# min</string>
+
+    <string name="finished_text_01">Please evaluate and submit this race summary.</string>
+    <string name="finished_text_02">Your evaluation has been published. Changes need to be re-submitted to be in effect.</string>
+
+    <string name="protest_time">Protest Time</string>
 
 </resources>

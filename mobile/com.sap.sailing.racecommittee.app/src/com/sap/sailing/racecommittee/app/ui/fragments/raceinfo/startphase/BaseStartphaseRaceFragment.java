@@ -17,16 +17,6 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         return layout;
     }
 
-    protected int getActionsLayoutId() {
-        return 0;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-    }
-
     @Override
     protected void setupUi() {
     }

@@ -3,15 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
+    <FrameLayout
         android:id="@+id/finished_panel_left"
-        layout="@layout/race_finished_left"
         android:layout_width="@dimen/side_button_width_large"
         android:layout_height="match_parent" />
 
-    <include
+    <FrameLayout
         android:id="@+id/finished_panel_right"
-        layout="@layout/race_finished_right"
         android:layout_width="@dimen/side_button_width_large"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
