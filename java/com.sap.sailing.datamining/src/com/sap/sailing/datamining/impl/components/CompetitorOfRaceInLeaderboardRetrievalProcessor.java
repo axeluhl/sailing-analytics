@@ -16,8 +16,8 @@ public class CompetitorOfRaceInLeaderboardRetrievalProcessor extends
         AbstractSimpleRetrievalProcessor<HasLeaderboardContext, HasRaceResultOfCompetitorContext> {
 
     public CompetitorOfRaceInLeaderboardRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasRaceResultOfCompetitorContext, ?>> resultReceivers) {
-        super(HasLeaderboardContext.class, HasRaceResultOfCompetitorContext.class, executor, resultReceivers);
+            Collection<Processor<HasRaceResultOfCompetitorContext, ?>> resultReceivers, int retrievalLevel) {
+        super(HasLeaderboardContext.class, HasRaceResultOfCompetitorContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override
@@ -25,7 +25,8 @@ public class CompetitorOfRaceInLeaderboardRetrievalProcessor extends
         Collection<HasRaceResultOfCompetitorContext> raceResultsOfCompetitor = new ArrayList<>();
         for (RaceColumn raceColumn : element.getLeaderboard().getRaceColumns()) {
             for (Competitor competitor : element.getLeaderboard().getCompetitors()) {
-                HasRaceResultOfCompetitorContext raceResultOfCompetitorContext = new RaceResultOfCompetitorWithContext(element, raceColumn, competitor);
+                HasRaceResultOfCompetitorContext raceResultOfCompetitorContext = new RaceResultOfCompetitorWithContext(element, raceColumn, competitor,
+                		element.getPolarDataService());
                 raceResultsOfCompetitor.add(raceResultOfCompetitorContext);
             }
         }

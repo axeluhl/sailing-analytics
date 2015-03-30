@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -77,6 +78,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
     private static final long serialVersionUID = -4397496421917807499L;
 
     private static final SpeedWithBearing defaultSpeedWithBearing = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
+    
+    private static Duration RESOLUTION = Duration.ONE_SECOND;
 
     private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;
 
@@ -664,7 +667,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         }
 
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the
             // cache
             // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
@@ -788,7 +791,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
          */
         private EstimatedWindFixesAsNavigableSet(TrackedRace trackedRace,
                 TimePoint from, TimePoint to) {
-            super(TrackBasedEstimationWindTrackImpl.this, trackedRace, from, to, /* resolution in milliseconds */ 1000l);
+            super(TrackBasedEstimationWindTrackImpl.this, trackedRace, from, to, RESOLUTION.asMillis());
         }
 
         @Override
@@ -815,4 +818,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
     public void windDataReceived(WindImpl wind, WindSource realWindSource) {
         listener.windDataReceived(wind, realWindSource);
     }
+
+    @Override
+    public Duration getResolutionOutsideOfWhichNoFixWillBeReturned() {
+        return RESOLUTION;
+    }
+
 }

@@ -23,6 +23,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Boat;
@@ -64,7 +65,8 @@ public class TestDimensionsValuesQuery {
     public void testDimensionsValuesQuery() throws InterruptedException, ExecutionException {
         Query<Set<Object>> dimensionsValueQuery = createDimensionsValuesQuery();
         Map<GroupKey, Set<Object>> expectedResultData = buildExpectedResultData();
-        ConcurrencyTestsUtil.verifyResultData(dimensionsValueQuery.run().getResults(), (Map<GroupKey, Set<Object>>) expectedResultData);
+        QueryResult<Set<Object>> result = dimensionsValueQuery.run();
+        ConcurrencyTestsUtil.verifyResultData(result.getResults(), (Map<GroupKey, Set<Object>>) expectedResultData);
     }
 
     private Query<Set<Object>> createDimensionsValuesQuery() {

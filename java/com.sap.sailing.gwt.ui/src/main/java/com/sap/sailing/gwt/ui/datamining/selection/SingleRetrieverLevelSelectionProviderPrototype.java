@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
+import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -31,13 +32,16 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
 public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPanel {
     
     /* This implementation is a prototype and mustn't be used to develop a productive UI component.
      * Instead start from scratch and use this prototype as orientation to get a cleaner result.
      * */
-    
+
+    private final DataMiningSession session;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<SelectionChangedListener> listeners;
@@ -52,14 +56,16 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
     private Map<FunctionDTO, Collection<? extends Serializable>> filterSelectionToBeApplied;
     
     private final Label filterByLabel;
+    private final HorizontalPanel labeledBusyIndicator;
     private final HorizontalPanel filterSelectionPanel;
     
     private final List<ValueListBox<FunctionDTO>> dimensionToFilterByBoxes;
     private final Map<ValueListBox<?>, VerticalPanel> singleDimensionFilterSelectionPanelsMappedBySelectionBox;
     private final Map<ValueListBox<?>, SelectionTable<?>> selectionTablesMappedBySelectionBox;
 
-    public SingleRetrieverLevelSelectionProviderPrototype(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+    public SingleRetrieverLevelSelectionProviderPrototype(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                                  DataRetrieverChainDefinitionDTO retrieverChain, LocalizedTypeDTO retrievedDataType, int retrieverLevel) {
+        this.session = session;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
@@ -82,6 +88,14 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
         filterByLabel = new Label(stringMessages.filterBy());
         filterByLabel.setVisible(false);
         add(filterByLabel);
+        
+        labeledBusyIndicator = new HorizontalPanel();
+        labeledBusyIndicator.setVisible(false);
+        labeledBusyIndicator.setSpacing(5);
+        BusyIndicator busyIndicator = new SimpleBusyIndicator(true, 0.7f);
+        labeledBusyIndicator.add(busyIndicator);
+        labeledBusyIndicator.add(new Label(stringMessages.loadingDimensionValues()));
+        add(labeledBusyIndicator);
         
         filterSelectionPanel = new HorizontalPanel();
         filterSelectionPanel.setVisible(false);
@@ -111,7 +125,8 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
         filterSelectionPanel.setVisible(isFiltrationPossible);
         if (isFiltrationPossible) {
             Collections.sort(availableDimensions);
-            dataMiningService.getDimensionValuesFor(retrieverChain, retrieverLevel, dimensions, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
+            labeledBusyIndicator.setVisible(true);
+            dataMiningService.getDimensionValuesFor(session, retrieverChain, retrieverLevel, dimensions, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
                 @Override
                 public void onSuccess(QueryResult<Set<Object>> result) {
                     dimensionValuesMappedByDimension.clear();
@@ -125,10 +140,13 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
                         applySelection(filterSelectionToBeApplied);
                         filterSelectionToBeApplied = null;
                     }
+
+                    labeledBusyIndicator.setVisible(false);
                 }
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error fetching the dimension values: " + caught.getMessage());
+                    labeledBusyIndicator.setVisible(false);
                 }
             });
         }

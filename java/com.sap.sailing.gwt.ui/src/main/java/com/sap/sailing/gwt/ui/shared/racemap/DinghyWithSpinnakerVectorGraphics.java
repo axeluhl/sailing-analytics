@@ -71,7 +71,7 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
 
     @Override
     protected void drawDownwindPortTackSails(Context2d ctx) {
-
+        
         ctx.setFillStyle(SAIL_FILLCOLOR);
         ctx.setStrokeStyle(SAIL_FILLCOLOR);
         ctx.setLineWidth(1.0);
@@ -95,9 +95,9 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
         ctx.stroke();
         
         ctx.beginPath();
-        ctx.moveTo(307.81752, 937.22012);
-        ctx.bezierCurveTo(314.345, 964.9351099999999, 316.56174, 997.0000399999999, 283.42062, 1048.3229);
-        ctx.bezierCurveTo(283.42062, 1048.3229, 259.83009, 1093.7070999999999, 180.78139, 1133.9968);
+        ctx.moveTo(307.81752,937.22012);
+        ctx.bezierCurveTo(327.345,973.93511,320.56174,1038,293.42062,1072.3229);
+        ctx.bezierCurveTo(295.15614999999997,1075.7939999999999,224.69723999999997,1140.4414,180.78139,1133.9968);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
@@ -132,8 +132,8 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(308.21838,933.17535);
-        ctx.bezierCurveTo(316.60510000000005,897.97361,304.70538000000005,871.99857,281.72357,823.37622);
-        ctx.bezierCurveTo(268.51855,799.4476,218.11345,743.28885,174.32941,729.90564);
+        ctx.bezierCurveTo(316.60510000000005,897.97361,329.70538000000005,858.99857,296.72357000000005,799.37622);
+        ctx.bezierCurveTo(259.51855000000006,749.4476,211.11345000000006,737.28885,174.32941000000005,729.90564);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
@@ -184,18 +184,17 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(309.42857,939.99996);
-        ctx.bezierCurveTo(272.42857,954.99996,235.42856999999998,970.99996,187.42856999999998,969.99996);
-        ctx.bezierCurveTo(151.42856999999998,973.99996,98.42856999999998,965.99996,44.42856999999998,953.99996);
+        ctx.bezierCurveTo(284.42857,965.99996,272.42857,991.99996,224.42856999999998,990.99996);
+        ctx.bezierCurveTo(188.42856999999998,994.99996,98.42856999999998,965.99996,44.42856999999998,953.99996);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
         //Draw head sail
-        ctx.beginPath();
-        ctx.moveTo(485.38382,936.09069);
-        ctx.bezierCurveTo(439.4015,987.37151,411.41227000000003,1006.2644,371.42765,1017.0605);
-        ctx.bezierCurveTo(315.44918,1026.5069,296.45649000000003,1026.5069,252.47341000000003,1017.0605);
-        ctx.bezierCurveTo(328.44418,1006.2644,404.41496000000006,987.3715100000001,485.38382,936.09069);
+        ctx.moveTo(329,939);
+        ctx.lineTo(482,939);
+        ctx.bezierCurveTo(431.2033,992.12409,365.02878,1010.6481,293,1016);
+        ctx.bezierCurveTo(308.37324,991.77921,330.90565,970.62611,329,939);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
@@ -219,19 +218,19 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
         ctx.setStrokeStyle(SAIL_FILLCOLOR);
         ctx.setLineWidth(1.0);
         ctx.beginPath();
-        ctx.moveTo(485.38386,937.92122);
-        ctx.bezierCurveTo(439.40153000000004,884.50601,411.41228,870.1750999999999,371.42765,859.75262);
-        ctx.bezierCurveTo(315.44916,849.33014,296.45645,841.51328,252.47335000000004,857.1469999999999);
-        ctx.bezierCurveTo(328.44416,868.8722899999999,404.41497000000004,885.80882,485.38386,937.92122);
+        ctx.moveTo(308,933);
+        ctx.bezierCurveTo(276,900,260,882,219,882);
+        ctx.bezierCurveTo(172,881,90.4,906,43.4,918);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
         //Draw head sail
         ctx.beginPath();
-        ctx.moveTo(308.42857,932.99996);
-        ctx.bezierCurveTo(267.42857,911.99996,225.42856999999998,899.99996,184.42856999999998,899.99996);
-        ctx.bezierCurveTo(137.42856999999998,898.99996,90.42856999999998,905.99996,43.42856999999998,917.99996);
+        ctx.moveTo(331,936);
+        ctx.lineTo(482,940);
+        ctx.bezierCurveTo(428.25579,880.50234,358.31076,864.65787,292,860);
+        ctx.bezierCurveTo(309.42057,879.09774,329.05764,903.69536,331,936);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();

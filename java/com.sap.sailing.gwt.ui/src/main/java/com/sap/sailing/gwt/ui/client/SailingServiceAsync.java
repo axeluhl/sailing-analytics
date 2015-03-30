@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
@@ -506,8 +507,9 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<RaceLogDTO> callback);
 
-    void importMasterData(String host, String[] names, boolean override, boolean compress,
- boolean exportWind,
+    void getRegattaLog(String leaderboardName, AsyncCallback<RegattaLogDTO> callback); 
+
+    void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
             AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
@@ -571,8 +573,8 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
 
-    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Void> callback);
+    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind,
+            boolean correctWindByDeclination, AsyncCallback<Void> callback);
 
     /**
      * Set the competitor registrations in the racelog. Unregisters formerly registered competitors
@@ -595,7 +597,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
             AsyncCallback<Void> callback);
 
     void getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Collection<MarkDTO>> callback);
+            AsyncCallback<Iterable<MarkDTO>> callback);
 
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
@@ -687,5 +689,11 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
-            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback); 
+            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
+
+    void getMarksInRaceLogsAndTrackedRaces(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
+
+    void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
+            String emails, String localeInfoName, AsyncCallback<Void> callback);
+
 }

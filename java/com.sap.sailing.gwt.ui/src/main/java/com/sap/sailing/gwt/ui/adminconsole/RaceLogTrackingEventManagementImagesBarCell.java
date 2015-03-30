@@ -11,6 +11,8 @@ public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
     public static final String ACTION_DENOTE_FOR_RACELOG_TRACKING = "ACTION_DENOTE_FOR_RACELOG_TRACKING";
     public final static String ACTION_COMPETITOR_REGISTRATIONS = "ACTION_COMPETITOR_REGISTRATIONS";
     public final static String ACTION_MAP_DEVICES = "ACTION_MAP_DEVICES";
+    public final static String ACTION_INVITE_BUOY_TENDERS = "ACTION_INVITE_BUOY_TENDERS";
+    public static final String ACTION_SHOW_REGATTA_LOG = "ACTION_SHOW_REGATTA_LOG";
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private final StringMessages stringMessages;
     
@@ -34,7 +36,11 @@ public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
                 makeImagePrototype(resources.competitorRegistrations())));
         result.add(new ImageSpec(ACTION_MAP_DEVICES, stringMessages.mapDevices(),
                 makeImagePrototype(resources.mapDevices())));
-
+        result.add(new ImageSpec(ACTION_INVITE_BUOY_TENDERS, stringMessages.inviteBuoyTenders(),
+                makeImagePrototype(resources.inviteBuoyTenders())));
+        result.add(new ImageSpec(ACTION_SHOW_REGATTA_LOG, stringMessages.regattaLog(),
+                makeImagePrototype(resources.flagIcon())));
+        
         return result;
     }
 }

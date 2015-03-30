@@ -159,6 +159,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * Polyline for the advantage line (the leading line for the boats, orthogonal to the wind direction; touching the leading boat).
      */
     private Polyline advantageLine;
+    
+    /**
+     * The windward of two Polylines representing a triangle between startline and first mark.
+     */
+    private Polyline windwardStartLineMarkToFirstMarkLine;
+    
+    /**
+     * The leeward of two Polylines representing a triangle between startline and first mark.
+     */
+    private Polyline leewardStartLineMarkToFirstMarkLine;
 
     private class AdvantageLineMouseOverMapHandler implements MouseOverMapHandler {
         private double trueWindAngle;
@@ -325,7 +335,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
             StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets, boolean showViewSimulation,
-            RegattaAndRaceIdentifier raceIdentifier) {
+            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle) {
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -356,7 +366,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(showMapControls);
         
-        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, stringMessages);
+        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages);
         combinedWindPanel.setVisible(false);
     }
     
@@ -770,6 +780,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         showCourseMarksOnMap(raceMapDataDTO.coursePositions);
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
                         showStartAndFinishLines(raceMapDataDTO.coursePositions);
+                        showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
                         // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
                         // adjust to new boat positions
                         showAdvantageLine(competitorsToShow, newTime);
@@ -1060,6 +1071,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 boolean isVisibleLeaderInfoComplete = false;
                 boolean isLegTypeKnown = false;
                 WindTrackInfoDTO windDataForLegMiddle = null;
+                LegInfoDTO legInfoDTO = null;
                 if (visibleLeaderInfo != null
                         && visibleLeaderInfo.getA() > 0
                         && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()
@@ -1068,14 +1080,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                 .getCombinedWindOnLegMiddle(visibleLeaderInfo.getA() - 1)) != null
                         && !windDataForLegMiddle.windFixes.isEmpty()) {
                     isVisibleLeaderInfoComplete = true;
-                    LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
+                    legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
                     if (legInfoDTO.legType != null) {
                         isLegTypeKnown = true;
                     }
                     lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                 }
                 if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null && lastBoatFix.speedWithBearing != null) {
-                    LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
                     double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible
                                                           // area of the map; bug 616
                     double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().getBoatClass()
@@ -1171,6 +1182,50 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * active while auto-zooming whereas stopping them seems the better option for manual zooms.
      */
     private boolean autoZoomInProgress;
+    
+    private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
+        if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)){
+            LatLng windwardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(0).latDeg, courseDTO.startMarkPositions.get(0).lngDeg); 
+            LatLng leewardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(1).latDeg, courseDTO.startMarkPositions.get(1).lngDeg);
+            LatLng firstMarkPoint = LatLng.newInstance(courseDTO.waypointPositions.get(1).latDeg, courseDTO.waypointPositions.get(1).lngDeg);
+            
+            if (windwardStartLineMarkToFirstMarkLine == null && leewardStartLineMarkToFirstMarkLine == null) {
+                PolylineOptions options = PolylineOptions.newInstance();
+                options.setGeodesic(true);
+                options.setStrokeColor("grey");
+                options.setStrokeWeight(1);
+                options.setStrokeOpacity(1.0);
+
+                MVCArray<LatLng> windwardLinePoints = MVCArray.newInstance();
+                windwardLinePoints.insertAt(0, windwardStartLinePoint);
+                windwardLinePoints.insertAt(1, firstMarkPoint);
+
+                MVCArray<LatLng> leewardLinePoints = MVCArray.newInstance();
+                windwardLinePoints.insertAt(0, leewardStartLinePoint);
+                windwardLinePoints.insertAt(1, firstMarkPoint);
+
+                windwardStartLineMarkToFirstMarkLine = Polyline.newInstance(options);
+                windwardStartLineMarkToFirstMarkLine.setPath(windwardLinePoints);
+
+                leewardStartLineMarkToFirstMarkLine = Polyline.newInstance(options);
+                leewardStartLineMarkToFirstMarkLine.setPath(leewardLinePoints);
+
+                windwardStartLineMarkToFirstMarkLine.setMap(map);
+                leewardStartLineMarkToFirstMarkLine.setMap(map);
+                
+            } else {
+                windwardStartLineMarkToFirstMarkLine.getPath().removeAt(1);
+                windwardStartLineMarkToFirstMarkLine.getPath().removeAt(0);
+                windwardStartLineMarkToFirstMarkLine.getPath().insertAt(0, windwardStartLinePoint);
+                windwardStartLineMarkToFirstMarkLine.getPath().insertAt(1, firstMarkPoint);
+                
+                leewardStartLineMarkToFirstMarkLine.getPath().removeAt(1);
+                leewardStartLineMarkToFirstMarkLine.getPath().removeAt(0);
+                leewardStartLineMarkToFirstMarkLine.getPath().insertAt(0, leewardStartLinePoint);
+                leewardStartLineMarkToFirstMarkLine.getPath().insertAt(1, firstMarkPoint);
+            }
+        }
+    }
 
     private void showStartAndFinishLines(final CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null && lastRaceTimesInfo != null) {

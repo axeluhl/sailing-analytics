@@ -83,11 +83,8 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
         mainPanel.add(panel);
         CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
-        final Class<?> selectionModelType = MultiSelectionModel.class;
-        @SuppressWarnings("unchecked")
-        final Class<MultiSelectionModel<CompetitorDTO>> multiSelectionType = (Class<MultiSelectionModel<CompetitorDTO>>) selectionModelType;
-        allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, multiSelectionType, true);
-        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, multiSelectionType, true);
+        allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true);
+        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true);
         allCompetitorsPanel.add(allCompetitorsTable);
         registeredCompetitorsPanel.add(registeredCompetitorsTable);
         VerticalPanel movePanel = new VerticalPanel();
