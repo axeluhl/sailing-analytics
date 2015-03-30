@@ -21,7 +21,6 @@ public class EventLogo extends Image {
 
     public static EventLogo getEventLogoFromEventId(SailingServiceAsync sailingServiceAsync, String eventId) {
         final EventLogo eventLogo = new EventLogo();
-        eventLogo.getElement().setAttribute("src", "someURL");
         try {
             final UUID eventUUID = UUID.fromString(eventId);
             sailingServiceAsync.getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
@@ -29,17 +28,11 @@ public class EventLogo extends Image {
                 public void onSuccess(final EventDTO event) {
                     logger.log(Level.INFO, "GOT EVENT: ");
                     final String logoUrl = event.getLogoImageURL();
-//                    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-//
-//                        @Override
-//                        public void execute() {
                             if (logoUrl != null) {
                                 eventLogo.getElement().setAttribute("src", logoUrl);
                             } else {
                                 eventLogo.getElement().getStyle().setVisibility(Visibility.HIDDEN);
                             }
-//                        }
-//                    });
                 }
 
                 @Override

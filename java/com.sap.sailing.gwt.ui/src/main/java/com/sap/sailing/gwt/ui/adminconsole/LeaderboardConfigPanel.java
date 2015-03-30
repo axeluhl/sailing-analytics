@@ -261,6 +261,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     Map<String, String> dashboardURLParameters = new HashMap<String, String>();
                     dashboardURLParameters.put("leaderboardName", leaderboardDTO.name);
                     Window.open(EntryPointLinkFactory.createDashboardLink(dashboardURLParameters), "", null);
+                } else if (LeaderboardConfigImagesBarCell.ACTION_SHOW_REGATTA_LOG.equals(value)) {
+                    showRegattaLog();
                 }
             }
         });

@@ -28,6 +28,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -152,9 +153,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
-import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
-import com.sap.sailing.domain.regattalike.RegattaLikeIdentifierResolver;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
@@ -1607,7 +1606,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), identifier.getIdentifierType());
             query.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), identifier.getName());
-            loadRegattaLogEvents(result, query);
+            loadRegattaLogEvents(result, query, identifier);
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new regatta log
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded regatta log data. Check MongoDB settings.");
@@ -1616,11 +1615,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private void loadRegattaLogEvents(RegattaLog targetRegattaLog, BasicDBObject query) {
+    private void loadRegattaLogEvents(RegattaLog targetRegattaLog, BasicDBObject query, RegattaLikeIdentifier regattaLogIdentifier) {
         DBCollection collection = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         for (DBObject o : collection.find(query)) {
             try {
-                RegattaLogEvent event = loadRegattaLogEvent((DBObject) o.get(FieldNames.REGATTA_LOG_EVENT.name()));
+                RegattaLogEvent event = loadRegattaLogEvent(o, regattaLogIdentifier);
                 if (event != null) {
                     targetRegattaLog.load(event);
                 }
@@ -1630,7 +1629,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    public RegattaLogEvent loadRegattaLogEvent(DBObject dbObject) {
+    private RegattaLogEvent loadRegattaLogEvent(DBObject o, RegattaLikeIdentifier regattaLogIdentifier) {
+        DBObject dbObject = (DBObject) o.get(FieldNames.REGATTA_LOG_EVENT.name());
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
         Serializable id = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_EVENT_ID.name());
@@ -1641,9 +1641,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         //CloseOpenEnded, DeviceCompMapping, DeviceMarkMapping, RegisterComp, Revoke
         String eventClass = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName())) {
-            return loadRegattaLogDeviceCompetitorMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
+            return loadRegattaLogDeviceCompetitorMappingEvent(createdAt, author, logicalTimePoint, id, dbObject, regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogDeviceMarkMappingEvent.class.getSimpleName())) {
-            return loadRegattaLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
+            return loadRegattaLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, dbObject, regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
             return loadRegattaLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRegisterCompetitorEvent.class.getSimpleName())) {
@@ -1682,33 +1682,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 deviceMappingEventId, closingTimePoint);
     }
 
-    private static class RegattaLogDBObjectAsRegattaLikeIdentifier extends RegattaAsRegattaLikeIdentifier {
-        private static final long serialVersionUID = -3316332305586210952L;
-        private final DBObject dbObject;
-
-        public RegattaLogDBObjectAsRegattaLikeIdentifier(DBObject dbObject) {
-            super(/*regatta*/null);
-            this.dbObject = dbObject;
-        }
-
-        @Override
-        public String getName() {
-            return (String) dbObject.get(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name());
-        }
-
-        @Override
-        public void resolve(RegattaLikeIdentifierResolver resolver) {
-            resolver.resolveOnRegattaIdentifier(this);
-        }
-
-        @Override
-        public String getIdentifierType() {
-            return (String) dbObject.get(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name());
-        }
-    }
-
     private RegattaLogDeviceMarkMappingEvent loadRegattaLogDeviceMarkMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
+            TimePoint logicalTimePoint, Serializable id, DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
         DeviceIdentifier device = null;
         try {
             device = loadDeviceId(deviceIdentifierServiceFinder,
@@ -1726,9 +1701,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final boolean needsMigration = times.getC();
         if (needsMigration) {
             // remove old version of mapping event
-            database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(dbObject);
+            WriteResult removeResult = database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(outerDBObject);
+            assert removeResult.getN() == 1;
             // and then insert using the fixed storage implementation
-            new MongoObjectFactoryImpl(database).storeRegattaLogEvent(new RegattaLogDBObjectAsRegattaLikeIdentifier(dbObject), result);
+            new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier, result);
         }
         return result;
     }
@@ -1767,7 +1743,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private RegattaLogDeviceCompetitorMappingEvent loadRegattaLogDeviceCompetitorMappingEvent(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, final DBObject dbObject) {
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, final DBObject dbObject,
+            RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
         DeviceIdentifier device = null;
         try {
             device = loadDeviceId(deviceIdentifierServiceFinder,
@@ -1785,9 +1762,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final RegattaLogDeviceCompetitorMappingEventImpl result = new RegattaLogDeviceCompetitorMappingEventImpl(createdAt, author, logicalTimePoint, id, mappedTo, device, from, to);
         if (needsMigration) {
             // remove old version of mapping event
-            database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(dbObject);
+            WriteResult removeResult = database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(outerDBObject);
+            assert removeResult.getN() == 1;
             // and then insert using the fixed storage implementation
-            new MongoObjectFactoryImpl(database).storeRegattaLogEvent(new RegattaLogDBObjectAsRegattaLikeIdentifier(dbObject), result);
+            new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier, result);
         }
         return result;
     }

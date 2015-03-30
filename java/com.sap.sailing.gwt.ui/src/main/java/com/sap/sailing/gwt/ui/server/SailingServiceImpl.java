@@ -74,6 +74,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMa
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
@@ -302,6 +303,8 @@ import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
@@ -1416,19 +1419,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier) {
+    public boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier) {
+        final boolean result;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        BoatClass boatClass = trackedRace.getRace().getBoatClass();
-        PolarDataService polarData = getService().getPolarDataService();
-        PolarDiagram polarDiagram;
-        try {
-            polarDiagram = new PolarDiagramGPS(boatClass, polarData);
-        } catch (SparsePolarDataException e) {
-            polarDiagram = null;
-            // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
+        if (trackedRace == null) {
+            result = false;
+        } else {
+            BoatClass boatClass = trackedRace.getRace().getBoatClass();
+            PolarDataService polarData = getService().getPolarDataService();
+            PolarDiagram polarDiagram;
+            try {
+                polarDiagram = new PolarDiagramGPS(boatClass, polarData);
+            } catch (SparsePolarDataException e) {
+                polarDiagram = null;
+                // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
+            }
+            result = polarDiagram != null;
         }
-        return new Boolean(polarDiagram != null);
-    };
+        return result;
+    }
 
     @Override
     public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) {
@@ -4200,6 +4209,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public RegattaLogDTO getRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
+        RegattaLogDTO result = null;
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        if (regattaLog != null) {
+            List<RegattaLogEventDTO> entries = new ArrayList<>();
+            result = new RegattaLogDTO(leaderboardName, entries);
+            regattaLog.lockForRead();
+            try {
+                for(RegattaLogEvent raceLogEvent: regattaLog.getRawFixes()) {
+                    RegattaLogEventDTO entry = new RegattaLogEventDTO( 
+                            raceLogEvent.getAuthor().getName(), raceLogEvent.getAuthor().getPriority(), 
+                            raceLogEvent.getCreatedAt() != null ? raceLogEvent.getCreatedAt().asDate() : null,
+                            raceLogEvent.getLogicalTimePoint() != null ? raceLogEvent.getLogicalTimePoint().asDate() : null,
+                            raceLogEvent.getClass().getSimpleName(), raceLogEvent.getShortInfo());
+                    entries.add(entry);
+                }
+            } finally {
+                regattaLog.unlockAfterRead();
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<String> getLeaderboardGroupNamesFromRemoteServer(String url) {
         com.sap.sse.common.Util.Pair<String, Integer> hostnameAndPort = parseHostAndPort(url);
         String hostname = hostnameAndPort.getA();
@@ -4766,7 +4799,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return getRaceLog(triple.getA(), triple.getB(), triple.getC());
     }
     
-    private RegattaLog getRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
+    private RegattaLog getRegattaLogInternal(String leaderboardName) throws DoesNotHaveRegattaLogException {
         Leaderboard l = getService().getLeaderboardByName(leaderboardName);
         if (! (l instanceof HasRegattaLike)) {
             throw new DoesNotHaveRegattaLogException();
@@ -4792,7 +4825,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throws DoesNotHaveRegattaLogException {
         return convertToCompetitorDTOs(
                 new RegisteredCompetitorsAnalyzer<>(
-                        getRegattaLog(leaderboardName)).analyze());
+                        getRegattaLogInternal(leaderboardName)).analyze());
     }
     
     private Competitor getCompetitor(CompetitorDTO dto) {
@@ -4814,7 +4847,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitorDTOs)
             throws DoesNotHaveRegattaLogException {
-        RegattaLog regattaLog = getRegattaLog(leaderboardName);
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         Set<Competitor> competitors = new HashSet<Competitor>();
         for (CompetitorDTO dto : competitorDTOs) {
             competitors.add(getCompetitor(dto));
