@@ -257,7 +257,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * these race states can be garbage-collected when the race log is no longer attached. The race states are created
      * lazily, synchronizing on this weak hash map.
      */
-    protected final transient WeakHashMap<RaceLog, ReadonlyRaceState> raceStates;
+    protected transient WeakHashMap<RaceLog, ReadonlyRaceState> raceStates;
 
     protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
 
@@ -494,6 +494,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
+        raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         // The short time wind cache needs to be there before operations such as maneuver recalculation try to access it
