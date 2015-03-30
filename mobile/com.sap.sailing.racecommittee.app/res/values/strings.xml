@@ -155,6 +155,7 @@
     <string name="settings_polling_active_header">Activate Polling</string>
     <string name="settings_polling_active_description">When active the server will be polled for changes.</string>
     <string name="settings_polling_interval_header">Polling Interval (seconds)</string>
+    <string name="settings_category_developer">Developer Options</string>
     <string name="compass_view_compass">Compass</string>
     <string name="compass_view_needle">Needle</string>
     <string name="racing_course_area_missing">Course area could not be loaded. Please go back to the login page.</string>
@@ -206,6 +207,9 @@
     <string name="update_app_description">Force an update from the server. It\'s a better idea to use the synchronize option.</string>
     <string name="preference_wakelock_header">Stay screen on</string>
     <string name="preference_wakelock_summary">Force the screen to stay awake. Caution: Uses more battery.</string>
+    <string name="preference_offline_header">Offline Mode</string>
+    <string name="preference_offline_summary">Disables the connection to a server and uses static data</string>
+    <string name="preference_theme_header">Theme</string>
     <string name="options_menu_info">Expert Information</string>
     <string name="auto_update_install">Install</string>
     <string name="auto_update_install_anyway">Install anyway</string>
@@ -236,8 +240,8 @@
     <string name="race_start_in_4_minutes">4 Minutes</string>
     <string name="race_start_in_2_minutes">2 Minutes</string>
     <string name="race_start_in_1_minute">1 Minute</string>
-    <string name="race_start_time_in">Start in #TIME#</string>
-    <string name="race_start_time_ago">Start #TIME# ago</string>
+    <string name="race_start_time_in">-#TIME#</string>
+    <string name="race_start_time_ago">#TIME#</string>
     <string name="race_set_start">Set Start</string>
     <string name="race_reset_course">Reset course</string>
     <string name="no_course_active">No course active</string>
@@ -288,12 +292,16 @@
     <string name="flags_abandon">Abandon</string>
     <string name="flags_recall">Recall</string>
     <string name="flags_course">Course</string>
-    <string name="flags_more">More</string>
+    <string name="flags_more">Finish</string>
     <string name="flags_postpone">Postpone</string>
     <string name="race_select">Select a Race</string>
 
     <string name="gate_start_pathfinder">Gate Start Pathfinder</string>
+    <string name="gate_start_nationality">Nationality</string>
+    <string name="gate_start_number">Number</string>
+    <string name="gate_start_set_pathfinder">Set Pathfinder</string>
     <string name="gate_start_timing">Gate Start Timing</string>
+    <string name="gate_start_set">Set Gate Time</string>
 
     <string name="time_launch">Gate Launch</string>
     <string name="time_golf">Golf</string>
@@ -339,7 +347,39 @@
     <string name="race_reset_cancel">No Thanks</string>
     <string name="race_reset_message">Do you really want to reset this race including all settings and actions that have be made? This can not be undone.</string>
     <string name="race_begin_finish_header">Begin Finish</string>
+    <string name="race_end_finish_header">End Finish</string>
     <string name="race_begin_finish_current">Use Current Time</string>
     <string name="race_begin_finish_custom">Use Custom Time</string>
+    <string name="race_setup_confirm">Confirm Setup</string>
+
+    <string name="race_summary_title">Race Summary</string>
+    <string name="race_summary_start">Race Start</string>
+    <string name="race_summary_finish_begin">Begin Finish</string>
+    <string name="race_summary_finish_end">End Finish</string>
+    <string name="race_summary_finish_duration">Finish Duration</string>
+    <string name="race_summary_wind_direction">Average Wind Direction</string>
+    <string name="race_summary_wind_direction_value" translatable="false">from %s°</string>
+    <string name="race_summary_wind_speed">Average Wind Speed</string>
+    <string name="race_summary_wind_speed_value" translatable="false">%.1f kts</string>
+    <string name="race_summary_individual_recalls">Individual Recalls</string>
+    <string name="race_summary_time" translatable="false">%s min</string>
+    <string name="record_voice">Record Voice</string>
+    <string name="finishing_started">First vessel in finish at #TIME#</string>
+    <string name="finishing_done">Down now</string>
+
+    <string name="finished_recording">Recording</string>
+    <string name="finished_replay">Replay Voice</string>
+    <string name="finished_list">Finish List</string>
+    <string name="finished_photos">Take Photos</string>
+    <string name="finished_tracking">Tracking</string>
+    <string name="finished_edit">Edit List</string>
+    <string name="finished_publishing">Publishing</string>
+    <string name="finished_submit">Submit</string>
+    <string name="finished_duration">#TIME# min</string>
+
+    <string name="finished_text_01">Please evaluate and submit this race summary.</string>
+    <string name="finished_text_02">Your evaluation has been published. Changes need to be re-submitted to be in effect.</string>
+
+    <string name="protest_time">Protest Time</string>
 
 </resources>

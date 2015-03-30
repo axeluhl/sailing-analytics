@@ -6,11 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -19,7 +21,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import java.util.Calendar;
 import java.util.List;
 
-public class RaceFlagViewerFragment extends RaceFragment {
+public class RaceFlagViewerFragment extends ScheduleFragment {
 
     private LinearLayout mLayout;
 
@@ -29,6 +31,8 @@ public class RaceFlagViewerFragment extends RaceFragment {
 
     public static RaceFlagViewerFragment newInstance() {
         RaceFlagViewerFragment fragment = new RaceFlagViewerFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -36,7 +40,7 @@ public class RaceFlagViewerFragment extends RaceFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.race_flag_screen, container, false);
 
-        mLayout = (LinearLayout) layout.findViewById(R.id.flags);
+        mLayout = ViewHolder.get(layout, R.id.flags);
 
         return layout;
     }
@@ -88,6 +92,13 @@ public class RaceFlagViewerFragment extends RaceFragment {
         flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.getUpperFlag().name(), 96));
         if (flag.getUpperFlag() == Flags.CLASS && getRace().getFleet().getColor() != null) {
             flagView.setBackgroundColor(getFleetColorId());
+            flagView.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(view.getContext(), flag.getUpperFlag().name() + "|" + flag.getLowerFlag().name(), Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
         textView.setText("");
@@ -109,17 +120,6 @@ public class RaceFlagViewerFragment extends RaceFragment {
                 downView.setVisibility(View.GONE);
                 upView.setVisibility(View.INVISIBLE);
             }
-        }
-
-        View layoutFlag = layout.findViewById(R.id.layout_flag);
-        if (layoutFlag != null) {
-            layoutFlag.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(view.getContext(), flag.getUpperFlag().name() + "|" + flag.getLowerFlag().name(), Toast.LENGTH_SHORT).show();
-                }
-            });
         }
 
         return layout;

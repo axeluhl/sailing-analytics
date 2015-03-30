@@ -7,10 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedure;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedureAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
@@ -37,22 +40,7 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_procedure, container, false);
 
-        if (getArguments() != null) {
-            switch (getArguments().getInt(STARTMODE, 0)) {
-                case 1:
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    if (header != null) {
-                        header.setVisibility(View.GONE);
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        LinearLayout headerText = (LinearLayout) layout.findViewById(R.id.header_text);
+        LinearLayout headerText = ViewHolder.get(layout, R.id.header_text);
         if (headerText != null) {
             headerText.setOnClickListener(new View.OnClickListener() {
 
@@ -69,6 +57,20 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (getArguments() != null) {
+            switch (getArguments().getInt(STARTMODE, 0)) {
+                case 1:
+                    if (getView() != null) {
+                        View header = getView().findViewById(R.id.header);
+                        header.setVisibility(View.GONE);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         String className;
         for (RacingProcedureType procedureType : RacingProcedureType.validValues()) {
@@ -88,6 +90,20 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+    }
+
+    @Override
     public void onClick(RacingProcedureType procedureType, String className) {
         getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
         if (TextUtils.isEmpty(className)) {
@@ -95,8 +111,7 @@ public class StartProcedureFragment extends ScheduleFragment implements StartPro
                 openMainScheduleFragment();
             } else {
                 getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime());
-                replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
-                sendIntent(R.string.intent_uncheck_all);
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
             }
         } else {
             if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {

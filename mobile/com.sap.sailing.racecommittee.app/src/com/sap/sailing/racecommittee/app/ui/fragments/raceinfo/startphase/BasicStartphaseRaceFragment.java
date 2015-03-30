@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
 import android.os.Bundle;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.basic.BasicRacingProcedure;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 
 public class BasicStartphaseRaceFragment extends BaseStartphaseRaceFragment<BasicRacingProcedure> {
@@ -15,6 +16,6 @@ public class BasicStartphaseRaceFragment extends BaseStartphaseRaceFragment<Basi
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        replaceFragment(RaceFlagViewerFragment.newInstance());
+        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
     }
 }

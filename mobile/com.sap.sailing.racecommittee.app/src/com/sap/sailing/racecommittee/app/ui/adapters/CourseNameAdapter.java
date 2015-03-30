@@ -1,7 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +14,10 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragmentName;
 
 import java.util.Collections;
 import java.util.List;
 
-/**
-* Created by mars3142 on 04.03.15.
-*/
 public class CourseNameAdapter extends BaseAdapter implements View.OnClickListener {
 
     private Context mContext;
@@ -48,6 +47,7 @@ public class CourseNameAdapter extends BaseAdapter implements View.OnClickListen
         return position;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -55,9 +55,10 @@ public class CourseNameAdapter extends BaseAdapter implements View.OnClickListen
             convertView = inflater.inflate(R.layout.flag_list_item, parent, false);
         }
 
+        String courseName = getItem(position);
         TextView firstLine = ViewHolder.get(convertView, R.id.first_line);
         if (firstLine != null) {
-            firstLine.setText(getItem(position));
+            firstLine.setText(courseName);
         }
 
         TextView secondLine = ViewHolder.get(convertView, R.id.second_line);
@@ -67,7 +68,19 @@ public class CourseNameAdapter extends BaseAdapter implements View.OnClickListen
 
         ImageView flag = ViewHolder.get(convertView, R.id.flag);
         if (flag != null) {
-            flag.setImageDrawable(mContext.getResources().getDrawable(R.drawable.course_updown_48dp));
+            int resId;
+            if (courseName.toLowerCase().startsWith("i")) {
+                resId = R.drawable.course_updown_48dp;
+            } else {
+                resId = R.drawable.course_triangle_48dp;
+            }
+            Drawable flagDrawable;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                flagDrawable = mContext.getResources().getDrawable(resId, null);
+            } else {
+                flagDrawable = mContext.getResources().getDrawable(resId);
+            }
+            flag.setImageDrawable(flagDrawable);
         }
 
         convertView.setOnClickListener(this);

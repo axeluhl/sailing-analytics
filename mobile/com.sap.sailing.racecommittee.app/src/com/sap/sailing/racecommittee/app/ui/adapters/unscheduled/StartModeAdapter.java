@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 
 public class StartModeAdapter extends BaseAdapter implements OnClickListener {
 
@@ -61,9 +62,9 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
         TextView flagName = ViewHolder.get(convertView, R.id.flag_name);
         if (flagName != null) {
             flagName.setText(startMode.getFlagName());
-            flagName.setTextColor(mContext.getResources().getColor(R.color.sap_light_gray));
+            flagName.setTextColor(ColorHelper.getThemedColor(mContext, R.attr.sap_light_gray));
             if (startMode.isChecked()) {
-                flagName.setTextColor(mContext.getResources().getColor(R.color.white));
+                flagName.setTextColor(ColorHelper.getThemedColor(mContext, R.attr.white));
             }
         }
 

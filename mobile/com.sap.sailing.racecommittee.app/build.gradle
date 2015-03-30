@@ -1,19 +1,23 @@
 apply plugin: "com.android.application"
+apply from: "../git.gradle"
 
 def packageName = "com.sap.sailing.racecommittee.app"
 def verCode = 6
 
 android {
-    buildToolsVersion "21.1.2"
-    compileSdkVersion 21
+    buildToolsVersion "22.0.1"
+    compileSdkVersion 22
 
     defaultConfig {
         applicationId packageName
         minSdkVersion 14
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionCode verCode
         versionName "$verCode - Laser"
         useJack false // not working on Windows yet
+
+        /* UI testing with espresso */
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     sourceSets {
@@ -55,12 +59,6 @@ android {
         }
     }
 
-    android {
-        lintOptions {
-            abortOnError false
-        }
-    }
-
     packagingOptions {
         exclude "LICENSE.txt"
         exclude ".readme"
@@ -71,17 +69,25 @@ android {
 
 dependencies {
     /* support libraries */
-    compile "com.android.support:appcompat-v7:21.0.3"
-    compile "com.android.support:recyclerview-v7:21.0.3"
+    compile "com.android.support:appcompat-v7:22.0.0"
+    compile "com.android.support:recyclerview-v7:22.0.0"
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-location:6.5.87"
+    compile "com.google.android.gms:play-services-location:7.0.0"
 
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
 
     /* all local jar-libs */
     compile fileTree(dir: "libs", include: ["*.jar"])
+
+    /* UI testing with espresso */
+    androidTestCompile "com.android.support.test.espresso:espresso-core:2.0"
+    androidTestCompile ('com.android.support.test.espresso:espresso-contrib:2.0') {
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude module: 'recyclerview-v7'
+    }
 }
 
 // Custom tasks

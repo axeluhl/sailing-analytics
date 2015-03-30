@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme -->
+    <style name="AppTheme.Light" parent="AppTheme.Light.Base" />
+
+    <style name="AppTheme.Light.Base" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionModeOverlay">true</item>
+
+        <item name="colorPrimary">@color/light_colorPrimary</item>
+        <item name="colorPrimaryDark">@color/light_colorPrimaryDark</item>
+        <item name="colorAccent">@color/light_colorAccent</item>
+
+        <item name="drawerArrowStyle">@style/AppTheme.Light.Widget.DrawerArrowStyle</item>
+        <item name="android:editTextStyle">@android:style/Widget.EditText</item>
+
+        <!-- custom attributes because of custom themes -->
+        <!-- colors -->
+        <item name="black">@color/light_black</item>
+        <item name="sap_blue_1">@color/constant_sap_blue_1</item>
+        <item name="sap_gray">@color/light_sap_gray</item>
+        <item name="sap_gray_black_20">@color/light_sap_gray_black_20</item>
+        <item name="sap_gray_black_30">@color/light_sap_gray_black_30</item>
+        <item name="sap_gray_black_40">@color/light_sap_gray_black_40</item>
+        <item name="sap_gray_white_10">@color/light_sap_gray_white_10</item>
+        <item name="sap_light_gray">@color/light_sap_light_gray</item>
+        <item name="sap_red_1">@color/constant_sap_red_1</item>
+        <item name="sap_yellow_1">@color/constant_sap_yellow_1</item>
+        <item name="white">@color/light_white</item>
+
+        <!-- styles -->
+        <item name="buttonSolidSmall">@style/AppTheme.Light.Button.Small</item>
+        <item name="buttonSolidNormal">@style/AppTheme.Light.Button.Normal</item>
+        <item name="textSmall">@style/AppTheme.Light.Text.Small</item>
+        <item name="textNormal">@style/AppTheme.Light.Text.Normal</item>
+        <item name="textLarge">@style/AppTheme.Light.Text.Large</item>
+        <item name="textXLarge">@style/AppTheme.Light.Text.XLarge</item>
+
+        <!-- drawables -->
+        <item name="access_time_36dp">@drawable/ic_access_time_black_36dp</item>
+        <item name="check_18dp">@drawable/ic_check_black_18dp</item>
+        <item name="dns_48dp">@drawable/ic_dns_black_48dp</item>
+        <item name="hearing_48dp">@drawable/ic_hearing_black_48dp</item>
+        <item name="mic_48dp">@drawable/ic_mic_black_48dp</item>
+        <item name="photo_camera_48dp">@drawable/ic_photo_camera_black_48dp</item>
+    </style>
+
+    <style name="AppTheme.Light.Widget.NumberPicker" parent="@android:style/Theme.Holo.Light">
+        <item name="android:divider">@color/light_colorAccent</item>
+    </style>
+
+    <style name="AppTheme.Light.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">false</item>
+    </style>
+
+    <style name="AppTheme.Light.Button">
+        <item name="android:textColor">@color/constant_white</item>
+        <item name="android:background">@drawable/button_light</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:paddingTop">@dimen/default_padding_half</item>
+        <item name="android:paddingRight">@dimen/default_padding</item>
+        <item name="android:paddingBottom">@dimen/default_padding_half</item>
+        <item name="android:paddingLeft">@dimen/default_padding</item>
+    </style>
+
+    <!-- custom styles -->
+    <style name="AppTheme.Light.Button.Small">
+        <item name="android:textSize">@dimen/textSize_22</item>
+    </style>
+
+    <style name="AppTheme.Light.Button.Normal">
+        <item name="android:textSize">@dimen/textSize_22</item>
+    </style>
+
+    <style name="AppTheme.Light.Text">
+        <item name="android:textColor">?white</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.Small">
+        <item name="android:textSize">@dimen/textSize_22</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.Normal">
+        <item name="android:textSize">@dimen/textSize_26</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.Large">
+        <item name="android:textSize">@dimen/textSize_32</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.XLarge">
+        <item name="android:textSize">@dimen/textSize_40</item>
+    </style>
+
+</resources>

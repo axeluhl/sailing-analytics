@@ -147,8 +147,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setStatus(TrackedRaceStatus newStatus) {
+        TrackedRaceStatus oldStatus = getStatus();
         super.setStatus(newStatus);
-        notifyListeners(newStatus);
+        notifyListeners(newStatus, oldStatus);
     }
 
     @Override
@@ -189,7 +190,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setAndFixDelayToLiveInMillis(long delayToLiveInMillis) {
-        super.setDelayToLiveInMillis(delayToLiveInMillis);
+        if (getDelayToLiveInMillis() != delayToLiveInMillis) {
+            super.setDelayToLiveInMillis(delayToLiveInMillis);
+            notifyListenersDelayToLiveChanged(delayToLiveInMillis);
+        }
         delayToLiveInMillisFixed = true;
     }
 
@@ -415,8 +419,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.competitorPositionChanged(fix, competitor));
     }
 
-    private void notifyListeners(TrackedRaceStatus status) {
-        notifyListeners(listener -> listener.statusChanged(status));
+    private void notifyListeners(TrackedRaceStatus status, TrackedRaceStatus oldStatus) {
+        notifyListeners(listener -> listener.statusChanged(status, oldStatus));
     }
 
     private void notifyListeners(Wind wind, WindSource windSource) {
@@ -870,5 +874,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
         }
         return new com.sap.sse.common.Util.Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
+    }
+
+    @Override
+    public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
+        return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
 }

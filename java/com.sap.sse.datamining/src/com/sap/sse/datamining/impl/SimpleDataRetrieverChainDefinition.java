@@ -105,7 +105,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     private <InputType, ResultType> void checkThatRetrieverHasUsableConstructor(
             Class<? extends Processor<InputType, ResultType>> retrieverType) {
         try {
-            retrieverType.getConstructor(ExecutorService.class, Collection.class);
+            retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
         } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException("Couldn't get an usable constructor from the given nextRetrieverType '"
                     + retrieverType.getSimpleName() + "'", e);

@@ -9,6 +9,8 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -24,6 +26,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -39,6 +42,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseArea
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 import java.io.FileNotFoundException;
@@ -59,6 +63,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private String eventName = null;
     private String courseName = null;
     private String positionName = null;
+    private View backdrop;
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
@@ -154,6 +159,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeHelper.setTheme(this);
 
         setContentView(R.layout.login_view);
         setSupportProgressBarIndeterminateVisibility(false);
@@ -179,44 +185,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
         new AutoUpdater(this).notifyAfterUpdate();
 
-        final View backdrop = findViewById(R.id.login_view_backdrop);
+        backdrop = findViewById(R.id.login_view_backdrop);
         if (backdrop != null) {
-            backdrop.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    if (view.getY() == 0) {
-                        long aniTime = getResources().getInteger(android.R.integer.config_longAnimTime);
-                        final View bottomView = findViewById(R.id.login_listview);
-                        View title = findViewById(R.id.backdrop_title);
-                        View subTitle = findViewById(R.id.backdrop_subtitle);
-                        View settings = findViewById(R.id.settings_button);
-                        subTitle.setAlpha(0f);
-
-                        ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(view, "y", 0, -view.getHeight() + (view.getHeight() / 5));
-                        ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
-                        ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
-                        ObjectAnimator settingsAnimation = ObjectAnimator.ofFloat(settings, "alpha", 0f, 1f);
-
-                        ValueAnimator heightAnimation = ValueAnimator.ofInt(0, view.getHeight() - (view.getHeight() / 5));
-                        heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                int val = (Integer) valueAnimator.getAnimatedValue();
-                                ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
-                                layoutParams.height = val;
-                                bottomView.setLayoutParams(layoutParams);
-                            }
-                        });
-
-                        AnimatorSet animatorSet = new AnimatorSet();
-                        animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, settingsAnimation);
-                        animatorSet.setDuration(aniTime);
-                        animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-                        animatorSet.start();
-                    }
-                }
-            });
+            backdrop.setOnClickListener(new BackdropClick());
         }
     }
 
@@ -256,14 +227,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
-        if (resultCode != ConnectionResult.SUCCESS) {
+        if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
             GooglePlayServicesUtil.getErrorDialog(resultCode, this, RQS_GooglePlayServices).show();
         }
 
         if (mSelectedEvent != null && preferences.isSetUp()) {
             showCourseAreaListFragment(mSelectedEvent);
 
-            Intent message = new Intent(LoginActivity.this, RacingActivity.class);
+            Intent message = new Intent(this, RacingActivity.class);
             message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
             message.putExtra(AppConstants.EventIdTag, mSelectedEvent);
             fadeActivity(message);
@@ -325,11 +296,25 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                         Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                         // showCourseAreaListFragment(eventId);
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                backdrop.performClick();
+                            }
+                        };
+                        handler.postDelayed(runnable, 1000);
+
                     }
                 });
 
-        // always reload the configuration...
-        getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
+        if (!AppPreferences.on(this).isOfflineMode()) {
+            // always reload the configuration...
+            getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
+        } else {
+            setSupportProgressBarIndeterminate(false);
+            progressDialog.dismiss();
+        }
     }
 
     private void showAreaPositionListFragment() {
@@ -350,5 +335,42 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     public String getPositionName() {
         return positionName;
+    }
+
+    private class BackdropClick implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            if (view.getY() == 0) {
+                long aniTime = getResources().getInteger(android.R.integer.config_longAnimTime);
+                final View bottomView = findViewById(R.id.login_listview);
+                View title = findViewById(R.id.backdrop_title);
+                View subTitle = findViewById(R.id.backdrop_subtitle);
+                View settings = findViewById(R.id.settings_button);
+                subTitle.setAlpha(0f);
+
+                ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(view, "y", 0, -view.getHeight() + (view.getHeight() / 5));
+                ObjectAnimator titleAnimation = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
+                ObjectAnimator subTitleAnimation = ObjectAnimator.ofFloat(subTitle, "alpha", 0f, 1f);
+                ObjectAnimator settingsAnimation = ObjectAnimator.ofFloat(settings, "alpha", 0f, 1f);
+
+                ValueAnimator heightAnimation = ValueAnimator.ofInt(0, view.getHeight() - (view.getHeight() / 5));
+                heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                        int val = (Integer) valueAnimator.getAnimatedValue();
+                        ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
+                        layoutParams.height = val;
+                        bottomView.setLayoutParams(layoutParams);
+                    }
+                });
+
+                AnimatorSet animatorSet = new AnimatorSet();
+                animatorSet.playTogether(heightAnimation, frameAnimation, titleAnimation, subTitleAnimation, settingsAnimation);
+                animatorSet.setDuration(aniTime);
+                animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+                animatorSet.start();
+            }
+        }
     }
 }

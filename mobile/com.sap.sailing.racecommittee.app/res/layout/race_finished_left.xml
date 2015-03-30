@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="@dimen/side_button_width_large"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/voice_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textAllCaps="true"
+            android:textColor="?sap_light_gray"
+            android:textSize="@dimen/textSize_22"
+            android:layout_marginTop="@dimen/default_margin"
+            android:text="@string/finished_recording"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/voice_header">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="?hearing_48dp"
+                android:drawablePadding="@dimen/default_padding"
+                android:textAppearance="?textNormal"
+                android:layout_centerInParent="true"
+                android:text="@string/finished_replay"/>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:background="?black"
+            android:layout_alignParentRight="true" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:background="?black"
+            android:layout_alignParentBottom="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/photo_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textAllCaps="true"
+            android:textColor="?sap_light_gray"
+            android:textSize="@dimen/textSize_22"
+            android:layout_marginTop="@dimen/default_margin"
+            android:text="@string/finished_list"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/photo_header">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="?photo_camera_48dp"
+                android:drawablePadding="@dimen/default_padding"
+                android:textAppearance="?textNormal"
+                android:layout_centerInParent="true"
+                android:text="@string/finished_photos"/>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:background="?black"
+            android:layout_alignParentRight="true" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:background="?black"
+            android:layout_alignParentBottom="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/list_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textAllCaps="true"
+            android:textColor="?sap_light_gray"
+            android:textSize="@dimen/textSize_22"
+            android:layout_marginTop="@dimen/default_margin"
+            android:text="@string/finished_tracking"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/list_header">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="?dns_48dp"
+                android:drawablePadding="@dimen/default_padding"
+                android:textAppearance="?textNormal"
+                android:layout_centerInParent="true"
+                android:text="@string/finished_edit"/>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:background="?black"
+            android:layout_alignParentRight="true" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:background="?black"
+            android:layout_alignParentBottom="true"/>
+    </RelativeLayout>
+</LinearLayout>

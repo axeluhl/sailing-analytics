@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- pressed -->
+    <item android:drawable="@color/light_sap_gray_black_40" android:state_pressed="true"/>
+
+    <!-- focused -->
+    <item android:drawable="@color/light_sap_gray_black_40" android:state_focused="true"/>
+
+    <!-- disabled -->
+    <item android:drawable="@color/light_sap_gray_white_10" android:state_enabled="false"/>
+
+    <!-- default -->
+    <item android:drawable="@color/light_sap_gray_black_40"/>
+
+</selector>

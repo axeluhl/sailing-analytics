@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <solid android:color="@color/sap_gray_black_30" />
-    <stroke
-        android:width="@dimen/thin_line"
-        android:color="@color/sap_gray_black_30" />
+    <!-- pressed -->
+    <item android:drawable="@drawable/round_button_pressed" android:state_pressed="true" />
 
-</shape>
+    <!-- focused -->
+    <item android:drawable="@drawable/round_button_normal" android:state_focused="true" />
+
+    <!-- disabled -->
+    <item android:drawable="@drawable/round_button_normal" android:state_enabled="false" />
+
+    <!-- default -->
+    <item android:drawable="@drawable/round_button_normal" />
+
+</selector>

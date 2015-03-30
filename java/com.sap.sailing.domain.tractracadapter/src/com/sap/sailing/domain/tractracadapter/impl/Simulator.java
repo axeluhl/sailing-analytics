@@ -32,7 +32,6 @@ public class Simulator {
     private final WindStore windStore;
     private long advanceInMillis = -1;
     private Timer timer = new Timer("Timer for TracTrac Simulator");
-    private boolean stopped;
     
     public Simulator(WindStore windStore) {
         super();
@@ -77,9 +76,6 @@ public class Simulator {
                     windTrack.lockForRead();
                     try {
                         for (Wind wind : windTrack.getRawFixes()) {
-                            if (stopped) {
-                                break;
-                            }
                             trackedRace.recordWind(delayWind(wind), windSourceAndTrack.getKey());
                         }
                     } finally {
@@ -88,10 +84,6 @@ public class Simulator {
                 }
             }.start();
         }
-    }
-    
-    public void stop() {
-        stopped = true;
     }
     
     private Wind delayWind(Wind wind) {

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Dark Theme -->
+    <item
+        android:drawable="@color/dark_sap_gray"
+        android:maxLevel="0" />
+    <item
+        android:drawable="@color/constant_sap_yellow_1"
+        android:maxLevel="1" />
+
+    <!-- Light Theme -->
+    <item
+        android:drawable="@color/dark_sap_gray"
+        android:maxLevel="10" />
+    <item
+        android:drawable="@color/constant_sap_yellow_1"
+        android:maxLevel="11" />
+
+</level-list>

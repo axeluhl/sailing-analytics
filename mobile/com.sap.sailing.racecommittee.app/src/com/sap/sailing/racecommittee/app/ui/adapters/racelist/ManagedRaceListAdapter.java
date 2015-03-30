@@ -11,7 +11,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -33,8 +32,9 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
-import com.sap.sailing.racecommittee.app.ui.utils.FlagsBitmapCache;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.ColorHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -62,6 +62,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private Resources mResources;
     private List<RaceListDataType> mShownViewItems;
 
+    private ImageView marker;
     private ImageView update_badge;
     private LinearLayout race_flag;
     private TextView time;
@@ -75,6 +76,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private TextView flag_timer;
     private ImageView arrow_direction;
     private SimpleDateFormat dateFormat;
+
+    private RaceListDataType mSelectedRace;
 
     public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems,
             JuryFlagClickedListener juryListener) {
@@ -189,6 +192,15 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             final RaceListDataTypeRace race = (RaceListDataTypeRace) raceListElement;
             resetValues(convertView);
 
+            if (convertView != null) {
+                if (mSelectedRace != null && mSelectedRace.equals(race)) {
+                    setMarker(1 - getLevel());
+                    convertView.setBackgroundColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_gray_black_20));
+                } else {
+                    convertView.setBackgroundColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_gray));
+                }
+            }
+
             group_name.setText(race.getRace().getSeries().getName());
             if (!TextUtils.isEmpty(race.getRaceName())) {
                 if (race.getRace().getFleet() != null) {
@@ -197,8 +209,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_name.setText(race.getRaceName());
                 }
                 SpannableString raceName = new SpannableString(race_name.getText());
-                StyleSpan boldStyleSpan = new StyleSpan(Typeface.BOLD);
-                raceName.setSpan(boldStyleSpan, 0, raceName.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 race_name.setText(raceName);
             }
             RaceState state = race.getRace().getState();
@@ -207,7 +217,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_started.setText(mResources.getString(R.string.race_started,
                             dateFormat.format(state.getStartTime().asDate())));
                     if (state.getFinishedTime() == null) {
-                        time.setText(getDuration(state.getStartTime().asDate(), Calendar.getInstance().getTime()));
+                        String duration = getDuration(state.getStartTime().asDate(), Calendar.getInstance().getTime());
+                        time.setText(duration);
+                        float textSize = getContext().getResources().getDimension(R.dimen.textSize_40);
+                        if (!TextUtils.isEmpty(duration) && duration.length() >= 6) {
+                            textSize = getContext().getResources().getDimension(R.dimen.textSize_32);
+                        }
+                        time.setTextSize(textSize);
                     }
                 }
                 if (state.getFinishedTime() != null) {
@@ -221,10 +237,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_unscheduled.setVisibility(View.VISIBLE);
                 } else {
                     if (group_name != null) {
-                        group_name.setTextColor(getContext().getResources().getColor(R.color.white));
+                        group_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.white));
                     }
                     if (race_name != null) {
-                        race_name.setTextColor(getContext().getResources().getColor(R.color.white));
+                        race_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.white));
                     }
                 }
             }
@@ -251,7 +267,12 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         }
     }
 
+    public void setSelectedRace(RaceListDataType id) {
+        mSelectedRace = id;
+    }
+
     private void findViews(View convertView) {
+        marker = ViewHolder.get(convertView, R.id.race_marker);
         arrow_direction = ViewHolder.get(convertView, R.id.arrow_direction);
         current_flag = ViewHolder.get(convertView, R.id.current_flag);
         group_name = ViewHolder.get(convertView, R.id.group_name);
@@ -290,11 +311,12 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 race_unscheduled.setVisibility(View.GONE);
             }
             if (race_name != null) {
-                race_name.setTextColor(getContext().getResources().getColor(R.color.sap_light_gray));
+                race_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_light_gray));
             }
             if (group_name != null) {
-                group_name.setTextColor(getContext().getResources().getColor(R.color.sap_light_gray));
+                group_name.setTextColor(ColorHelper.getThemedColor(getContext(), R.attr.sap_light_gray));
             }
+            setMarker(0);
         }
     }
 
@@ -303,25 +325,46 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (state == null || state.getStartTime() == null) {
             return;
         }
-        FlagPoleState flagPoleState = state.getTypedRacingProcedure().getActiveFlags(state.getStartTime(),
-                MillisecondsTimePoint.now());
+        FlagPoleState flagPoleState = state.getTypedRacingProcedure().getActiveFlags(state.getStartTime(), MillisecondsTimePoint.now());
         List<FlagPole> flagChanges = flagPoleState.computeUpcomingChanges();
         if (!flagChanges.isEmpty()) {
             TimePoint changeAt = flagPoleState.getNextStateValidFrom();
             FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
 
-            current_flag.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 48));
-            String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
-            flag_timer.setText(text.replace("-", ""));
-            Resources resources = getContext().getResources();
-            Bitmap arrow;
-            if (changePole.isDisplayed()) {
-                arrow = BitmapFactory.decodeResource(resources, R.drawable.arrow_up);
-            } else {
-                arrow = BitmapFactory.decodeResource(resources, R.drawable.arrow_down);
+            if (changeAt != null) {
+                current_flag.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), changePole.getUpperFlag().name(), 48));
+                String text = getDuration(changeAt.asDate(), Calendar.getInstance().getTime());
+                flag_timer.setText(text.replace("-", ""));
+                Resources resources = getContext().getResources();
+                Bitmap arrow;
+                if (changePole.isDisplayed()) {
+                    arrow = BitmapFactory.decodeResource(resources, R.drawable.arrow_up);
+                } else {
+                    arrow = BitmapFactory.decodeResource(resources, R.drawable.arrow_down);
+                }
+                arrow_direction.setImageBitmap(arrow);
+                race_flag.setVisibility(View.VISIBLE);
             }
-            arrow_direction.setImageBitmap(arrow);
-            race_flag.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void setMarker(int level) {
+        if (marker != null) {
+            Drawable drawable = marker.getDrawable();
+            if (drawable != null) {
+                drawable.setLevel(level + ThemeHelper.getThemeOffset(getContext()));
+            }
+        }
+    }
+
+    private int getLevel() {
+        int level = 0;
+        if (marker != null) {
+            Drawable drawable = marker.getDrawable();
+            if (drawable != null) {
+                level = drawable.getLevel();
+            }
+        }
+        return level;
     }
 }

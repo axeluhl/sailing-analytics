@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/nav_drawer_header" />
+        android:src="@color/constant_black" />
 
     <View
         android:layout_width="match_parent"
@@ -34,6 +34,7 @@
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@id/nav_button"
         android:layout_toStartOf="@id/nav_button"
+        android:textColor="@color/constant_white"
         android:padding="10dp"
         android:text="@string/nav_header"
         android:textSize="@dimen/textSize_32" />

@@ -14,9 +14,11 @@ import android.widget.*;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartModeFragment extends ScheduleFragment implements StartModeAdapter.StartModeClick {
@@ -31,13 +33,8 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
         }
     }
 
-    private StartModeAdapter mAdapter;
     private ListView mListView;
     private RRS26RacingProcedure mProcedure;
-
-    public StartModeFragment() {
-
-    }
 
     public static StartModeFragment newInstance(int startMode) {
         StartModeFragment fragment = new StartModeFragment();
@@ -51,25 +48,26 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mProcedure = getRaceState().getTypedRacingProcedure();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_schedule_mode, container, false);
-
         if (getArguments() != null) {
             switch (getArguments().getInt(STARTMODE, 0)) {
                 case 1:
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    header.setVisibility(View.GONE);
+                    if (getView() != null)  {
+                        View header = getView().findViewById(R.id.header);
+                        header.setVisibility(View.GONE);
+                    }
                     break;
 
                 default:
                     break;
             }
         }
+
+        mProcedure = getRaceState().getTypedRacingProcedure();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View layout = inflater.inflate(R.layout.race_schedule_mode, container, false);
 
         mListView = (ListView) layout.findViewById(R.id.listView);
 
@@ -103,8 +101,17 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
         }
 
         Collections.sort(startMode, new StartModeComparator());
-        mAdapter = new StartModeAdapter(getActivity(), startMode, this);
-        mListView.setAdapter(mAdapter);
+        StartModeAdapter adapter = new StartModeAdapter(getActivity(), startMode, this);
+        mListView.setAdapter(adapter);
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     @Override
@@ -113,8 +120,7 @@ public class StartModeFragment extends ScheduleFragment implements StartModeAdap
         if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
             openMainScheduleFragment();
         } else {
-            replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
-            sendIntent(R.string.intent_uncheck_all);
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }
 }

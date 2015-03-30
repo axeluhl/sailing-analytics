@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -52,6 +53,7 @@ public class SettingsActivity extends PreferenceActivity {
         return isRedirectedToTemp;
     }
 
+    @Override
     protected boolean isValidFragment(String fragmentName) {
         return true;
     }

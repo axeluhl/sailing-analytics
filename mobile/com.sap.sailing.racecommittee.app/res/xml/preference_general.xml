@@ -2,7 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <PreferenceCategory android:title="Connection" >
-
         <!--
         This is a somewhat special preference, because when set to an empty
         string the getter on AppPreferences will return the device's unique identifier
@@ -17,7 +16,6 @@
             android:key="@string/preference_server_url_key"
             android:summary="@string/empty"
             android:title="@string/settings_advanced_service_header" />
-
         <Preference
             android:key="@string/preference_sync_key"
             android:summary="@string/synchronize_connection_settings_description"
@@ -27,6 +25,7 @@
             android:summary="@string/update_app_description"
             android:title="@string/update_app_header" />
     </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/settings_category_polling" >
         <CheckBoxPreference
             android:defaultValue="@bool/preference_polling_active_default"
@@ -37,9 +36,11 @@
         <com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
             android:defaultValue="@integer/preference_polling_interval_default"
             android:key="@string/preference_polling_interval_key"
-            android:title="@string/settings_polling_interval_header" />
+            android:title="@string/settings_polling_interval_header"
+            android:numeric="integer"/>
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/settings_category_general" >
+
+    <PreferenceCategory android:title="@string/settings_category_general">
         <Preference
             android:key="languagePref"
             android:summary="@string/settings_general_language_description"
@@ -64,4 +65,19 @@
             android:title="@string/preference_wakelock_header" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/settings_category_developer"
+        android:key="@string/preference_developer_key">
+        <ListPreference
+            android:key="@string/preference_theme_key"
+            android:title="@string/preference_theme_header"
+            android:defaultValue="@string/preference_theme_default"
+            android:entries="@array/preference_theme_entries"
+            android:entryValues="@array/preference_theme_values"/>
+
+        <CheckBoxPreference
+            android:defaultValue="@bool/preference_offline_default"
+            android:key="@string/preference_offline_key"
+            android:summary="@string/preference_offline_summary"
+            android:title="@string/preference_offline_header"/>
+    </PreferenceCategory>
 </PreferenceScreen>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme.Dark" parent="AppTheme.Dark.Base">
+        <item name="android:colorPrimary">@color/dark_colorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/dark_colorPrimaryDark</item>
+        <item name="android:colorAccent">@color/dark_colorAccent</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
+
+        <item name="android:alertDialogTheme">@style/AppTheme.Dark.AlertDialog</item>
+    </style>
+
+    <style name="AppTheme.Dark.AlertDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:colorPrimary">@color/dark_colorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/dark_colorPrimaryDark</item>
+        <item name="android:colorAccent">@color/dark_colorAccent</item>
+    </style>
+
+</resources>

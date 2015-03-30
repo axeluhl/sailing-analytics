@@ -142,9 +142,17 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         TickSingleton.INSTANCE.unregisterListener(this);
     }
 
-    public void sendIntent(@StringRes int intentAction) {
-        LocalBroadcastManager
-                .getInstance(getActivity())
-                .sendBroadcast(new Intent(getString(intentAction)));
+    protected void sendIntent(String action) {
+        sendIntent(action, null, null);
+    }
+
+    protected void sendIntent(String action, String extra_key, String extra_value) {
+        if (action != null) {
+            Intent intent = new Intent(action);
+            if (extra_key != null) {
+                intent.putExtra(extra_key, extra_value);
+            }
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        }
     }
 }

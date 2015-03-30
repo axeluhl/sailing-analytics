@@ -38,11 +38,9 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
                     }
 
                 }, /* animationEnabled */ false, callback);
-        
         this.stringMessages = stringMessages;
-        
         controlPointsWrapper = new ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>>(
-                new SingleSelectionModel<ControlPointDTO>(), sailingService, stringMessages, errorReporter);
+                /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         controlPointsWrapper.getDataProvider().getList().addAll(controlPoints);
         
         passingInstructions = createListBox(false);

@@ -54,6 +54,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
+    private class DistanceTraveledIncludingGateStartInMeters extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
+            return entry.distanceTraveledIncludingGateStartInMeters;
+        }
+    }
+    
     private class TimeTraveledInSeconds extends AbstractLegDetailField<Double> {
         @Override
         protected Double getFromNonNullEntry(LegEntryDTO entry) {
@@ -234,6 +241,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     
     public static DetailType[] getAvailableLegDetailColumnTypes() {
         return new DetailType[] { DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, DetailType.DISTANCE_TRAVELED,
+                DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START,
                 DetailType.GAP_TO_LEADER_IN_SECONDS, DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS,
                 DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
@@ -251,6 +259,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         result.put(DetailType.DISTANCE_TRAVELED,
                 new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TRAVELED, new DistanceTraveledInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         
+        result.put(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START,
+                new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START, new DistanceTraveledIncludingGateStartInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+
         result.put(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, 
                 new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new AverageSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         

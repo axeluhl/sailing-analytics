@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/listView_row_height"
-    android:background="@color/sap_gray_black_30">
+    android:background="?sap_gray_black_30">
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:textColor="@color/white"
+            android:textColor="?white"
             android:textSize="@dimen/textSize_26" />
 
         <TextView
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@id/list_item"
-            android:textColor="@color/sap_light_gray"
+            android:textColor="?sap_light_gray"
             android:textSize="@dimen/textSize_18"
             android:visibility="gone" />
     </RelativeLayout>
@@ -38,7 +38,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:paddingRight="@dimen/default_padding"
-        android:src="@drawable/ic_check_white_18dp"
+        android:src="?check_18dp"
         android:visibility="invisible" />
 
     <View
@@ -47,5 +47,5 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
-        android:background="@color/sap_gray" />
+        android:background="?sap_gray" />
 </RelativeLayout>

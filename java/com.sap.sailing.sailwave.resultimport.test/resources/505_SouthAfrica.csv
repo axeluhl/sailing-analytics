@@ -1,0 +1,9 @@
+Rank;Nat;SailNo;Club;HelmName;CrewName;R1;R2;R3;R4;R5;R6;R7;R8;R9;Total;
+1;RSA;9094;;Peter Funke;Thomas Funke;1;1;1;(2);1;;;;;6;
+2;RSA;9063;;James Largier;Richard Hutton-Squire;(2);2;2;1;2;;;;;9;
+3;RSA;8719;;Alex Ham;Warwick Ham;3;3;4;(5);3;;;;;18;
+4;GER;9026;;Tina Plattner;Holger Yess;(9,DNC);9,DNC;3;3;4;;;;;28;
+5;RSA;8789;;Jonathan Ham;Gary Norton;(9,DNF);9,DNC;5;4;5;;;;;32;
+6;RSA;8707;;Albrecht Holm;Marius Fourie;(9,DNC);4;6;6;7;;;;;32;
+7;RSA;8537;;Kevin Foreman;Adman vd. Ploeg;(9,DNF);9,DNF;7;7;6;;;;;38;
+8;RSA;6268;;Andrew Arthur;John Anderson;(9,DNF);9,DNF;8;8;9,DNF;;;;;43;

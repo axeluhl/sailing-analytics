@@ -1,11 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.dom.client.Style.Cursor;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -14,7 +11,6 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
 public class CombinedWindPanel extends FlowPanel {
-    private static final int LABEL_HEIGHT = 12;
     
     private final ImageTransformer transformer;
     private final StringMessages stringMessages;
@@ -26,28 +22,20 @@ public class CombinedWindPanel extends FlowPanel {
     private WindSource windSource;
     
     private Canvas canvas;
-
-    private static String CSS_STYLE_COMBINED_WIND_PANEL = "CombinedWindPanel";
-   
-    /**
-     */
-    public CombinedWindPanel(RaceMapImageManager theRaceMapResources, StringMessages stringMessages) {
+    
+    private CombinedWindPanelStyle combinedWindPanelStyle;
+    
+    public CombinedWindPanel(RaceMapImageManager theRaceMapResources, CombinedWindPanelStyle combinedWindPanelStyle, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.raceMapResources = theRaceMapResources;
+        this.combinedWindPanelStyle = combinedWindPanelStyle;
+        addStyleName(combinedWindPanelStyle.combinedWindPanel());
         transformer = raceMapResources.getCombinedWindIconTransformer();
         canvas = transformer.getCanvas();
-        int canvasWidth = canvas.getCanvasElement().getWidth();
-        
-        addStyleName(CSS_STYLE_COMBINED_WIND_PANEL);
-        
-        canvas.getElement().getStyle().setCursor(Cursor.POINTER);
-        canvas.setWidth(canvasWidth + LABEL_HEIGHT + "px");
-        textLabel = new Label("");
-        textLabel.setSize(canvasWidth + LABEL_HEIGHT +"px", ""+LABEL_HEIGHT+"px");
-        textLabel.getElement().getStyle().setFontSize(LABEL_HEIGHT, Unit.PX);
-        textLabel.setWordWrap(false);
-        textLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        canvas.addStyleName(this.combinedWindPanelStyle.combinedWindPanelCanvas());
         add(canvas);
+        textLabel = new Label("");
+        textLabel.addStyleName(this.combinedWindPanelStyle.combinedWindPanelTextLabel());
         add(textLabel);
     }
 

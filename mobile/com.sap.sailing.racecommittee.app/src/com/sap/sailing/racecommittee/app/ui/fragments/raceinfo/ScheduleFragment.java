@@ -24,7 +24,5 @@ public class ScheduleFragment extends RaceFragment {
         fragment.setArguments(args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(viewId, fragment).commit();
-
-        sendIntent(R.string.intent_update_ui);
     }
 }

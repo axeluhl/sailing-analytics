@@ -38,7 +38,7 @@
         android:layout_alignStart="@+id/imageView"
         android:layout_marginBottom="@dimen/default_margin"
         android:text="@string/login_text"
-        android:textColor="@color/white"
+        android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_40" />
 
     <TextView
@@ -53,7 +53,7 @@
         android:drawablePadding="@dimen/default_padding_half"
         android:drawableStart="@drawable/ic_assignment_white_48dp"
         android:text="@string/login_sub_text"
-        android:textColor="@color/white"
+        android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_40" />
 
     <ImageView
@@ -64,15 +64,15 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/default_margin"
-        android:alpha="0"
         android:background="@drawable/round_button"
         android:padding="10dp"
-        android:src="@drawable/ic_settings_white_48dp" />
+        android:src="@drawable/ic_settings_white_48dp"
+        android:alpha="0" />
 
     <View
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/sap_yellow_1" />
+        android:background="?sap_yellow_1" />
 </RelativeLayout>

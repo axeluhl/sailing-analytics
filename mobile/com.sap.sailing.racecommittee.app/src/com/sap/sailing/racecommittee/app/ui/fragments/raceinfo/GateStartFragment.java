@@ -9,7 +9,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.NumberPicker;
+import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -55,20 +57,10 @@ public class GateStartFragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             final View layout = inflater.inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
 
-            if (getArguments() != null) {
-                if (getArguments().getInt(STARTMODE, 0) != 0) {
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    if (header != null) {
-                        header.setVisibility(View.GONE);
-                    }
-                }
-            }
-
-            mNat = (EditText) layout.findViewById(R.id.pathfinder_nat);
-            mNum = (EditText) layout.findViewById(R.id.pathfinder_num);
-            mHeader = layout.findViewById(R.id.header_text);
-            mButton = layout.findViewById(R.id.set_path_finder);
+            mNat = ViewHolder.get(layout, R.id.pathfinder_nat);
+            mNum = ViewHolder.get(layout, R.id.pathfinder_num);
+            mHeader = ViewHolder.get(layout, R.id.header_text);
+            mButton = ViewHolder.get(layout, R.id.set_path_finder);
 
             if (getArguments() != null) {
                 if (mNat != null) {
@@ -131,6 +123,17 @@ public class GateStartFragment {
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
+            if (getArguments() != null) {
+                if (getArguments().getInt(STARTMODE, 0) != 0) {
+                    if (getView() != null) {
+                        View header = ViewHolder.get(getView(), R.id.header);
+                        if (header != null) {
+                            header.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            }
+
             if (mButton != null) {
                 mButton.setOnClickListener(new OnClickListener() {
 
@@ -185,17 +188,7 @@ public class GateStartFragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View layout = inflater.inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
 
-            if (getArguments() != null) {
-                if (getArguments().getInt(STARTMODE, 0) != 0) {
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    if (header != null) {
-                        header.setVisibility(View.GONE);
-                    }
-                }
-            }
-
-            View caption = layout.findViewById(R.id.header_text);
+            View caption = ViewHolder.get(layout, R.id.header_text);
             if (caption != null) {
                 caption.setOnClickListener(new OnClickListener() {
 
@@ -213,13 +206,24 @@ public class GateStartFragment {
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
+            if (getArguments() != null) {
+                if (getArguments().getInt(STARTMODE, 0) != 0) {
+                    if (getView() != null) {
+                        View header = getView().findViewById(R.id.header);
+                        if (header != null) {
+                            header.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            }
+
             ArrayList<String> timeValues = getTimeValues();
             final NumberPicker time_launch = (NumberPicker) getActivity().findViewById(R.id.time_launch);
             if (time_launch != null) {
                 time_launch.setMinValue(0);
                 time_launch.setMaxValue(timeValues.size() - 1);
                 time_launch.setDisplayedValues(timeValues.toArray(new String[timeValues.size()]));
-                int value = (int)GateStartRacingProcedure.DefaultGateLaunchStopTime / ONE_MINUTE_MILLISECONDS;
+                int value = (int) GateStartRacingProcedure.DefaultGateLaunchStopTime / ONE_MINUTE_MILLISECONDS;
                 time_launch.setValue(value - 1);
             }
 
@@ -228,7 +232,7 @@ public class GateStartFragment {
                 time_golf.setMinValue(0);
                 time_golf.setMaxValue(timeValues.size() - 1);
                 time_golf.setDisplayedValues(timeValues.toArray(new String[timeValues.size()]));
-                int value = (int)GateStartRacingProcedure.DefaultGolfDownTime / ONE_MINUTE_MILLISECONDS;
+                int value = (int) GateStartRacingProcedure.DefaultGolfDownTime / ONE_MINUTE_MILLISECONDS;
                 time_golf.setValue(value - 1);
             }
 
@@ -253,8 +257,7 @@ public class GateStartFragment {
                         if (getArguments() != null && getArguments().getInt(STARTMODE, 0) == 0) {
                             openMainScheduleFragment();
                         } else {
-                            replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
-                            sendIntent(R.string.intent_uncheck_all);
+                            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                         }
                     }
                 });

@@ -1,5 +1,6 @@
 -dontwarn javax.beans.**
 -dontwarn javax.security.**
 -dontwarn org.osgi.**
+-dontwarn org.hamcrest.**
 -libraryjars <java.home>/lib/rt.jar
 -keep class javax.** {*;}

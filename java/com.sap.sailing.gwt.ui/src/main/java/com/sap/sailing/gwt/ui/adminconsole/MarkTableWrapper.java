@@ -1,13 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -19,10 +17,9 @@ import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
-    public MarkTableWrapper(S selectionModel, SailingServiceAsync sailingService, StringMessages stringMessages,
+    public MarkTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, selectionModel, true);
-        
+        super(sailingService, stringMessages, errorReporter, multiSelection, true);
         TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {
@@ -94,28 +91,12 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
         table.addColumn(markUUIDColumn, "UUID");
     }
     
-    public void refresh(Collection<MarkDTO> marks) {
-        dataProvider.getList().clear();
-        dataProvider.getList().addAll(marks);
-        dataProvider.flush();
+    public void refresh(Iterable<MarkDTO> marks) {
+        super.refresh(marks);
         Collections.sort(dataProvider.getList(), new Comparator<MarkDTO>() {
             @Override
             public int compare(MarkDTO o1, MarkDTO o2) {
                 return o1.getName().compareTo(o2.getName());
-            }
-        });
-    }
-    
-    public void refresh(String leaderboardName, String raceColumnName, String fleetName) {
-        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<MarkDTO>>() {
-            @Override
-            public void onSuccess(Collection<MarkDTO> result) {
-                refresh(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load marks: " + caught.getMessage());
             }
         });
     }

@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/default_margin"
-            android:src="@drawable/arrow_large_up"
+            android:src="@drawable/arrow_up_large"
             android:visibility="gone" />
 
         <ImageView
@@ -43,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/arrow_large_down"
+            android:src="@drawable/arrow_down_large"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -53,5 +53,5 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:background="@color/black" />
+        android:background="?black" />
 </RelativeLayout>

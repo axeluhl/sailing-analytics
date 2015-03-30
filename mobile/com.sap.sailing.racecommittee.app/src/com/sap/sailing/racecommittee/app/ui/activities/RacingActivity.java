@@ -3,8 +3,8 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.*;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,21 +35,23 @@ import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.*;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
+import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
-import com.sap.sailing.racecommittee.app.utils.TickListener;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
-import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 
-public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks, TickListener, OnClickListener {
+public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks, OnClickListener {
     private static final String TAG = RacingActivity.class.getName();
     private static final String WIND = "wind";
     private static final String RACE = "race";
@@ -60,10 +62,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     private static ProgressBar mProgressSpinner;
 
-    private TextView currentTime;
-    private TextView headerTime;
-    private TextView timeStart;
-    private TextView timeFinish;
+    private IntentReceiver mReceiver;
     private TextView windValue;
     private ReadonlyDataManager dataManager;
     private RaceInfoFragment infoFragment;
@@ -77,26 +76,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     private EventBase mEvent;
     private CourseArea mCourseArea;
     private Serializable mCourseAreaId;
-    private RelativeLayout mStartProcedureLayout;
-    private RelativeLayout mStartModeLayout;
-    private RelativeLayout mCourseLayout;
-    private RelativeLayout mWindLayout;
-    private RelativeLayout mAbandonFlagsLayout;
-    private RelativeLayout mRecallFlagsLayout;
-    private RelativeLayout mPostponeFlagsLayout;
-    private RelativeLayout mCourseFlagsLayout;
-    private RelativeLayout mMoreFlagsLayout;
-    private ImageView mStartProcedureMarker;
-    private ImageView mStartModeMarker;
-    private ImageView mCourseMarker;
-    private ImageView mWindMarker;
-    private ImageView mAbandonFlagsMarker;
-    private ImageView mRecallFlagsMarker;
-    private ImageView mPostponeFlagsMarker;
-    private ImageView mCourseFlagsMarker;
-    private ImageView mMoreFlagsMarker;
-    private SimpleDateFormat dateFormat;
     private TimePoint startTime;
+    private TimePanelFragment timeFragment;
 
     private void setupFragments() {
         new Handler().post(new Runnable() {
@@ -166,7 +147,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         if ((windFragment != null && !windFragment.isFragmentUIActive()) || windFragment == null) {
             windFragment = WindFragment.newInstance(0);
 
-            showMarker(mWindMarker, 1);
             getFragmentManager().beginTransaction()
                     // .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                     .replace(R.id.racing_view_container, windFragment)
@@ -176,41 +156,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     public void logout() {
         logoutSession();
-    }
-
-    @Override
-    public void notifyTick() {
-        TimePoint now = MillisecondsTimePoint.now();
-
-        currentTime = (TextView) findViewById(R.id.current_time);
-        if (currentTime != null) {
-            currentTime.setText(dateFormat.format(now.asMillis()));
-        }
-
-        if (mSelectedRace != null && mSelectedRace.getState() != null) {
-            TimePoint startTime = mSelectedRace.getState().getStartTime();
-
-            timeStart = (TextView) findViewById(R.id.time_start);
-            if (timeStart != null && startTime != null) {
-                timeStart.setText(getString(R.string.time_start).replace("#TIME#", dateFormat.format(startTime.asDate())));
-            }
-
-            timeFinish = (TextView) findViewById(R.id.time_finish);
-            //TODO Add this later
-
-            headerTime = (TextView) findViewById(R.id.timer_text);
-            if (headerTime != null && startTime != null) {
-                String time;
-                if (startTime.asMillis() > now.asMillis()) {
-                    time = TimeUtils.formatDurationUntil(startTime.minus(now.asMillis()).asMillis());
-                } else {
-                    time = TimeUtils.formatDurationSince(now.minus(startTime.asMillis()).asMillis());
-                }
-                headerTime.setText(getString(R.string.time).replace("#TIME#", time));
-            }
-        }
-
-        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(getString(R.string.intent_update_ui)));
     }
 
     @Override
@@ -228,8 +173,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                     getFragmentManager().popBackStackImmediate();
                     onRaceItemClicked(mSelectedRace);
                 }
-                setRightPanelVisibility(View.VISIBLE);
-                resetMarker();
             }
         } else {
             logoutSession();
@@ -238,7 +181,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
     @Override
     public void onClick(View view) {
-        resetMarker();
         switch (view.getId()) {
             case R.id.wind:
                 loadWindFragment();
@@ -256,6 +198,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         super.onCreate(savedInstanceState);
 
+        ThemeHelper.setTheme(this);
         setContentView(R.layout.racing_view);
 
         dataManager = DataManager.create(this);
@@ -266,7 +209,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             setSupportActionBar(toolbar);
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
-        dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
         mCourseAreaId = courseAreaId;
@@ -276,20 +218,20 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         ExLog.i(this, this.getClass().toString(), "trying to load courseArea via id: " + courseAreaId);
         mCourseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
 
-        getPanelWidgets();
-
         Serializable eventId = getEventIdFromIntent();
         if (eventId == null) {
             throw new IllegalStateException("There was no event id transmitted...");
         }
         mEventId = eventId;
 
-        EventBase e = dataManager.getDataStore().getEvent(eventId);
-        if (e == null) {
+        EventBase event = dataManager.getDataStore().getEvent(eventId);
+        if (event == null) {
             ExLog.e(this, TAG, "Noooo the event is null :/");
-            loadEvents();
-            // setupDataStore();
-            // loadNavDrawer( courseAreaId, eventId);
+            preferences.isSetUp(false);
+            PackageManager pm = getPackageManager();
+            Intent intent = pm.getLaunchIntentForPackage(getPackageName());
+            startActivity(intent);
+            finish();
         } else {
             if (mCourseArea != null) {
                 loadRaces(mCourseArea);
@@ -298,9 +240,28 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 ExLog.i(this, this.getClass().toString(), "courseArea == null :(");
                 Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
             }
-            loadNavDrawer(mCourseArea, e);
+            loadNavDrawer(mCourseArea, event);
             loadWelcomeFragment();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mReceiver = new IntentReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
+        filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
+        filter.addAction(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
     private void loadNavDrawer(CourseArea courseArea, EventBase event) {
@@ -352,9 +313,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         setupActionBar(managedRace);
 
         getFragmentManager().beginTransaction()
-                // .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
+//                .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
                 .replace(R.id.racing_view_container, infoFragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+//                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .commit();
     }
 
     @Override
@@ -389,21 +351,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        TickSingleton.INSTANCE.registerListener(this);
-        notifyTick();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        TickSingleton.INSTANCE.unregisterListener(this);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.options_menu_reset:
@@ -433,7 +380,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             }
         }
 
-        setRightPanelVisibility(View.VISIBLE);
         getFragmentManager().popBackStackImmediate();
 
         if (infoFragment != null && infoFragment.isFragmentUIActive()) {
@@ -485,59 +431,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         getSupportActionBar().setTitle(title);
     }
 
-    private void getPanelWidgets() {
-        // Left Panel
-        mStartProcedureLayout = (RelativeLayout) findViewById(R.id.start_procedure);
-        if (mStartProcedureLayout != null) {
-            mStartProcedureLayout.setOnClickListener(this);
-        }
-        mStartProcedureMarker = (ImageView) findViewById(R.id.start_procedure_marker);
-        mStartModeLayout = (RelativeLayout) findViewById(R.id.start_mode);
-        if (mStartModeLayout != null) {
-            mStartModeLayout.setOnClickListener(this);
-        }
-        mStartModeMarker = (ImageView) findViewById(R.id.start_mode_marker);
-        mCourseLayout = (RelativeLayout) findViewById(R.id.course);
-        if (mCourseLayout != null) {
-            mCourseLayout.setOnClickListener(this);
-        }
-        mCourseMarker = (ImageView) findViewById(R.id.course_marker);
-        mWindLayout = (RelativeLayout) findViewById(R.id.wind);
-        if (mWindLayout != null) {
-            mWindLayout.setOnClickListener(this);
-        }
-        mWindMarker = (ImageView) findViewById(R.id.wind_marker);
-
-        // Right Panel
-        mAbandonFlagsLayout = (RelativeLayout) findViewById(R.id.abandon_flags);
-        if (mAbandonFlagsLayout != null) {
-            mAbandonFlagsLayout.setOnClickListener(this);
-        }
-        mAbandonFlagsMarker = (ImageView) findViewById(R.id.abandon_flags_marker);
-        mRecallFlagsLayout = (RelativeLayout) findViewById(R.id.recall_flags);
-        if (mRecallFlagsLayout != null) {
-            mRecallFlagsLayout.setOnClickListener(this);
-        }
-        mRecallFlagsMarker = (ImageView) findViewById(R.id.recall_flags_marker);
-        mPostponeFlagsLayout = (RelativeLayout) findViewById(R.id.postpone_flags);
-        if (mPostponeFlagsLayout != null) {
-            mPostponeFlagsLayout.setOnClickListener(this);
-        }
-        mPostponeFlagsMarker = (ImageView) findViewById(R.id.postpone_flags_marker);
-        mCourseFlagsLayout = (RelativeLayout) findViewById(R.id.course_flags);
-        if (mCourseFlagsLayout != null) {
-            mCourseFlagsLayout.setOnClickListener(this);
-        }
-        mCourseFlagsMarker = (ImageView) findViewById(R.id.course_flags_marker);
-        mMoreFlagsLayout = (RelativeLayout) findViewById(R.id.more_flags);
-        if (mMoreFlagsLayout != null) {
-            mMoreFlagsLayout.setOnClickListener(this);
-        }
-        mMoreFlagsMarker = (ImageView) findViewById(R.id.more_flags_marker);
-
-        resetMarker();
-    }
-
     public void resetRace() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.race_reset_confirmation_title));
@@ -560,29 +453,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             }
         });
         builder.create().show();
-    }
-
-
-    public void setRightPanelVisibility(int visibility) {
-        LinearLayout layout = (LinearLayout) findViewById(R.id.panel_right);
-        if (layout != null) {
-            layout.setVisibility(visibility);
-        }
-    }
-
-    private void resetMarker() {
-        // Left Panel
-        showMarker(mStartProcedureMarker, 0);
-        showMarker(mStartModeMarker, 0);
-        showMarker(mCourseMarker, 0);
-        showMarker(mWindMarker, 0);
-
-        // Right Panel
-        showMarker(mAbandonFlagsMarker, 0);
-        showMarker(mRecallFlagsMarker, 0);
-        showMarker(mPostponeFlagsMarker, 0);
-        showMarker(mCourseFlagsMarker, 0);
-        showMarker(mMoreFlagsMarker, 0);
     }
 
     public void showMarker(ImageView view, int level) {
@@ -710,6 +580,33 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 if (course.getId().toString().equals(mCourseAreaId.toString())) {
                     mCourseArea = course;
                     setupFragments();
+                }
+            }
+        }
+    }
+
+    private class IntentReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            View view = findViewById(R.id.race_panel_top);
+            if (view != null) {
+                if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
+                    view.setVisibility(View.GONE);
+                }
+
+                if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
+                    view.setVisibility(View.VISIBLE);
+                }
+
+                if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
+                    Bundle args = new Bundle();
+                    args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
+                    Fragment fragment = RaceFlagViewerFragment.newInstance();
+                    fragment.setArguments(args);
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.replace(R.id.race_frame, fragment).commit();
                 }
             }
         }

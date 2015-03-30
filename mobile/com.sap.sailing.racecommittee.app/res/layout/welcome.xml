@@ -12,7 +12,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_transparent" />
+        android:background="@color/constant_black_transparent" />
 
     <TextView
         android:id="@+id/backdrop_title"
@@ -25,7 +25,7 @@
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginStart="@dimen/default_margin"
         android:text="@string/login_text"
-        android:textColor="@color/white"
+        android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_40" />
 
     <ImageView

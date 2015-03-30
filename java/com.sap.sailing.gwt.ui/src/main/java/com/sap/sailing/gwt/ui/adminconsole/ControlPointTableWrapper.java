@@ -10,10 +10,9 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class ControlPointTableWrapper<S extends SelectionModel<ControlPointDTO>> extends TableWrapper<ControlPointDTO, S> {    
-    public ControlPointTableWrapper(S selectionModel, SailingServiceAsync sailingService, final StringMessages stringMessages,
+    public ControlPointTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, selectionModel, true);
-        
+        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ true);
         TextColumn<ControlPointDTO> nameColumn = new TextColumn<ControlPointDTO>() {
             @Override
             public String getValue(ControlPointDTO d) {

@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -23,12 +22,13 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
-import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter.JuryFlagClickedListener;
@@ -38,6 +38,7 @@ import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleet
 import com.sap.sailing.racecommittee.app.ui.comparators.ManagedRaceStartTimeComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
+import com.sap.sailing.racecommittee.app.utils.ColorHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
@@ -119,15 +120,15 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mAdapter.notifyDataSetChanged();
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void filterChanged() {
         mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.getFilter().filterByMode(getFilterMode());
         mAdapter.notifyDataSetChanged();
 
         if (mCurrent != null && mAll != null) {
-            int colorGrey = getResources().getColor(R.color.sap_light_gray);
-            int colorOrange = getResources().getColor(R.color.sap_yellow_1);
+            int colorGrey = ColorHelper.getThemedColor(getActivity(), R.attr.sap_light_gray);
+            int colorOrange = ColorHelper.getThemedColor(getActivity(), R.attr.sap_yellow_1);
             mCurrent.setTextColor(colorGrey);
             mAll.setTextColor(colorGrey);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -138,7 +139,18 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 mAll.setBackgroundDrawable(null);
             }
 
-            Drawable drawable = getResources().getDrawable(R.drawable.nav_drawer_tab_button);
+            int id;
+            if (AppPreferences.on(getActivity()).getTheme().equals(AppConstants.LIGHT_THEME)) {
+                id = R.drawable.nav_drawer_tab_button_light;
+            } else {
+                id = R.drawable.nav_drawer_tab_button_dark;
+            }
+            Drawable drawable;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                drawable = getActivity().getDrawable(id);
+            } else {
+                drawable = getResources().getDrawable(id);
+            }
             switch (getFilterMode()) {
                 case ALL:
                     mAll.setTextColor(colorOrange);
@@ -271,6 +283,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         ExLog.i(getActivity(), TAG, "Touched " + mAdapter.getItem(position).toString());
 
         mDrawerLayout.closeDrawers();
+        mAdapter.setSelectedRace(mAdapter.getItem(position));
         mCallbacks.onRaceListItemSelected(mAdapter.getItem(position));
     }
 
@@ -351,7 +364,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
     public void setUp(DrawerLayout drawerLayout, SpannableString header) {
         mDrawerLayout = drawerLayout;
-        mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        mDrawerLayout.setStatusBarBackgroundColor(ColorHelper.getThemedColor(getActivity(), R.attr.colorPrimaryDark));
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, (Toolbar) getActivity().findViewById(
                 R.id.toolbar), R.string.nav_drawer_open, R.string.nav_drawer_close) {
             @Override

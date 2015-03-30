@@ -81,7 +81,7 @@ public class AppPreferences {
             }
         }
     };
-    private Set<PollingActiveChangedListener> pollingActiveChangedListeners = new HashSet<AppPreferences.PollingActiveChangedListener>();
+    private Set<PollingActiveChangedListener> pollingActiveChangedListeners = new HashSet<>();
 
     protected final SharedPreferences preferences;
     protected AppPreferences(Context context) {
@@ -472,9 +472,17 @@ public class AppPreferences {
     }
 
     public boolean wakelockEnabled() {
-        return preferences.getBoolean(context.getResources().getString(R.string.preference_wakelock_key), context
-                .getResources().getBoolean(R.bool.preference_wakelock_default));
+        return preferences.getBoolean(context.getResources().getString(R.string.preference_wakelock_key),
+                context.getResources().getBoolean(R.bool.preference_wakelock_default));
     }
 
+    public boolean isOfflineMode() {
+        return preferences.getBoolean(context.getString(R.string.preference_offline_key),
+                context.getResources().getBoolean(R.bool.preference_offline_default));
+    }
 
+    public String getTheme() {
+        return preferences.getString(context.getString(R.string.preference_theme_key),
+                context.getResources().getString(R.string.preference_theme_default));
+    }
 }

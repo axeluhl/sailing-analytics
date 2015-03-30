@@ -39,18 +39,14 @@ public class BottomNotification extends FocusPanel {
         bottomNotificationClickListeners = new ArrayList<BottomNotificationClickListener>();
     }
 
-    public void initClickHander() {
-
-    }
-
-    public void show(String message, String backgroundColorAsHex, String textcolorAsHex, boolean dismissAfter20Seconds) {
+    public void show(BottomNotificationType bottomNotificationType) {
         shown = true;
         this.removeStyleName("bottomnotificationhidden");
         this.addStyleName("bottomnotificationshow");
-        this.getElement().setInnerHTML(message);
-        this.getElement().getStyle().setBackgroundColor(backgroundColorAsHex);
-        this.getElement().getStyle().setColor(textcolorAsHex);
-        if (dismissAfter20Seconds) {
+        this.getElement().setInnerHTML(bottomNotificationType.getMessage());
+        this.getElement().getStyle().setBackgroundColor(bottomNotificationType.getBackgroundColorAsHex());
+        this.getElement().getStyle().setColor(bottomNotificationType.getTextColorAsHex());
+        if (bottomNotificationType.isShouldDisappearAfter20Seconds()) {
             Timer timer = new Timer() {
                 public void run() {
                     hide();

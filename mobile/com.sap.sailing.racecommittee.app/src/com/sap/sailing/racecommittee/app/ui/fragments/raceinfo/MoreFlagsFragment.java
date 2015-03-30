@@ -1,16 +1,18 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.annotation.TargetApi;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.TimePicker;
-import android.widget.Toast;
+import android.widget.*;
 import com.sap.sailing.android.shared.util.ViewHolder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
@@ -30,6 +32,8 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
 
     public static MoreFlagsFragment newInstance() {
         MoreFlagsFragment fragment = new MoreFlagsFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -56,7 +60,7 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
     public void showMore(MoreFlag flag) {
         switch (flag.flag) {
             case BLUE:
-                replaceFragment(FinishingTimeFragment.newInstance(), R.id.race_frame);
+                replaceFragment(FinishingTimeFragment.newInstance(0), R.id.race_frame);
                 break;
 
             default:
@@ -64,7 +68,23 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+    }
+
     public static class FinishingTimeFragment extends ScheduleFragment implements View.OnClickListener {
+
+        public static final String STARTMODE = "startMode";
 
         private TimePicker mTimePicker;
 
@@ -72,38 +92,73 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
 
         }
 
-        public static FinishingTimeFragment newInstance() {
+        public static FinishingTimeFragment newInstance(int startMode) {
             FinishingTimeFragment fragment = new FinishingTimeFragment();
             Bundle args = new Bundle();
+            args.putInt(STARTMODE, startMode);
             fragment.setArguments(args);
             return fragment;
         }
 
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View layout = inflater.inflate(R.layout.race_finish_config, container, false);
 
             View header = ViewHolder.get(layout, R.id.header_text);
             if (header != null) {
-                header.setOnClickListener(this);
+//                header.setOnClickListener(this);
             }
 
-            mTimePicker = (TimePicker) layout.findViewById(R.id.time_picker);
+            mTimePicker = ViewHolder.get(layout, R.id.time_picker);
             if (mTimePicker != null) {
                 mTimePicker.setIs24HourView(true);
             }
 
-            View currentTime = layout.findViewById(R.id.finish_current);
+            View currentTime = ViewHolder.get(layout, R.id.finish_current);
             if (currentTime != null) {
                 currentTime.setOnClickListener(this);
             }
 
-            View customTime = layout.findViewById(R.id.finish_custom);
+            View customTime = ViewHolder.get(layout, R.id.finish_custom);
             if (customTime != null) {
                 customTime.setOnClickListener(this);
             }
 
+            if (getArguments().getInt(STARTMODE, 0) != 0) {
+                ImageView flag = ViewHolder.get(layout, R.id.header_flag);
+                if (flag != null) {
+                    int resId = R.drawable.flag_blue_48dp;
+                    Drawable drawable;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        drawable = getResources().getDrawable(resId, null);
+                    } else {
+                        drawable = getResources().getDrawable(resId);
+                    }
+                    flag.setImageDrawable(drawable);
+                }
+
+                TextView headline = ViewHolder.get(layout, R.id.header_headline);
+                if (headline != null) {
+                    headline.setText(getString(R.string.race_end_finish_header));
+                }
+            }
+
             return layout;
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+
+            sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+
+            sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
         }
 
         @Override
@@ -124,24 +179,23 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
         }
 
         private void setFinishTime(boolean current) {
-            TimePoint finishedTime;
+            TimePoint finishingTime;
             if (current) {
-                finishedTime = MillisecondsTimePoint.now();
+                finishingTime = MillisecondsTimePoint.now();
             } else {
-                finishedTime = getFinishedTime();
+                finishingTime = getFinishingTime();
             }
-            FinishingTimeFinder finishingTimeFinder = new FinishingTimeFinder(getRace().getRaceLog());
-            if (finishingTimeFinder.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
-                if (finishingTimeFinder.analyze().before(finishedTime)) {
-                    getRaceState().setFinishedTime(finishedTime);
-                    replaceFragment(FinishingWaitingFragment.newInstance(), R.id.race_frame);
-                }else{
-                    Toast.makeText(getActivity(), "The given finish time is earlier than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG).show();
+            StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
+            if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
+                if (stf.analyze().before(finishingTime)) {
+                    getRace().getState().setFinishingTime(finishingTime);
+                } else {
+                    Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
                 }
             }
         }
 
-        private TimePoint getFinishedTime() {
+        private TimePoint getFinishingTime() {
             Calendar time = Calendar.getInstance();
             time.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
             time.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
@@ -159,6 +213,8 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
 
         public static FinishingWaitingFragment newInstance() {
             FinishingWaitingFragment fragment = new FinishingWaitingFragment();
+            Bundle args = new Bundle();
+            fragment.setArguments(args);
             return fragment;
         }
 

@@ -20,8 +20,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -34,10 +36,12 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
 import com.sap.sailing.racecommittee.app.ui.fragments.maps.WindMap;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
@@ -143,19 +147,6 @@ public class WindFragment extends ScheduleFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.wind_view, container, false);
 
-        if (getArguments() != null) {
-            switch (getArguments().getInt(STARTMODE, 0)) {
-                case 1:
-                    layout.findViewById(R.id.race_header).setVisibility(View.VISIBLE);
-                    View header = layout.findViewById(R.id.header);
-                    header.setVisibility(View.GONE);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
         mHeader = layout.findViewById(R.id.header_text);
         mDarkLayer = layout.findViewById(R.id.dark_layer);
         mLayoutDirection = layout.findViewById(R.id.layout_direction);
@@ -181,6 +172,20 @@ public class WindFragment extends ScheduleFragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (getArguments() != null) {
+            switch (getArguments().getInt(STARTMODE, 0)) {
+                case 1:
+                    if (getView() != null) {
+                        View header = getView().findViewById(R.id.header);
+                        header.setVisibility(View.GONE);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         if (mWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             String sensorData = getString(R.string.wind_sensor);
@@ -331,6 +336,8 @@ public class WindFragment extends ScheduleFragment
 
     @Override
     public void onPause() {
+        super.onPause();
+
         if (apiClient.isConnected()) {
             apiClient.unregisterConnectionFailedListener(this);
             apiClient.unregisterConnectionCallbacks(this);
@@ -345,7 +352,7 @@ public class WindFragment extends ScheduleFragment
             transaction.commit();
         }
 
-        super.onPause();
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     @Override
@@ -353,6 +360,7 @@ public class WindFragment extends ScheduleFragment
         super.onResume();
 
         setupLocationClient();
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
 
     @Override
@@ -418,8 +426,7 @@ public class WindFragment extends ScheduleFragment
         saveEntriesInPreferences(wind);
         switch (getArguments().getInt(STARTMODE, 0)) {
             case 1:
-                replaceFragment(RaceFlagViewerFragment.newInstance(), R.id.race_frame);
-                sendIntent(R.string.intent_uncheck_all);
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
 
             default:
@@ -495,7 +502,15 @@ public class WindFragment extends ScheduleFragment
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
         windMap.centerMap(location.getLatitude(), location.getLongitude());
-        windMap.getMap().getUiSettings().setAllGesturesEnabled(false);
+
+        GoogleMap map = windMap.getMap();
+        if (map != null) {
+            UiSettings uiSettings = map.getUiSettings();
+            if (uiSettings != null) {
+                uiSettings.setAllGesturesEnabled(false);
+            }
+        }
+
         windMap.addAccuracyCircle(location);
         if (windMap.windMarker != null) {
             windMap.windMarker.setDraggable(false);
@@ -504,6 +519,7 @@ public class WindFragment extends ScheduleFragment
         if (mDarkLayer != null) {
             mDarkLayer.setVisibility(View.GONE);
         }
+
         setWind(true);
         showElements(true);
         if (mDarkLayer != null) {

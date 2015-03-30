@@ -25,7 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/white"
+                android:textColor="?white"
                 android:textSize="@dimen/textSize_40"
                 tools:text="13:36" />
 
@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_started"
-                android:textColor="@color/white"
+                android:textColor="?white"
                 android:textSize="@dimen/textSize_18" />
 
             <TextView
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_finished"
-                android:textColor="@color/white"
+                android:textColor="?white"
                 android:textSize="@dimen/textSize_18" />
         </LinearLayout>
 
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/race_unscheduled"
-            android:textColor="@color/sap_light_gray"
+            android:textColor="?sap_light_gray"
             android:textSize="@dimen/textSize_18"
             android:visibility="gone" />
     </RelativeLayout>
@@ -63,9 +63,14 @@
         android:id="@+id/panel_left"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="2dp"
         android:layout_toLeftOf="@id/panel_right"
         android:layout_toStartOf="@id/panel_right">
+
+        <ImageView
+            android:id="@+id/race_marker"
+            android:layout_width="@dimen/thick_line"
+            android:layout_height="match_parent"
+            android:src="@drawable/marker_race"/>
 
         <LinearLayout
             android:id="@+id/race_flag"
@@ -102,7 +107,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:textColor="@color/white"
+                    android:textColor="?white"
                     android:textSize="@dimen/textSize_18"
                     tools:text="01:12" />
             </LinearLayout>
@@ -114,8 +119,8 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
-            android:layout_marginStart="5dp"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
             android:layout_toLeftOf="@id/race_flag"
             android:layout_toStartOf="@id/race_flag"
             android:orientation="vertical">

@@ -1,27 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- color definition by Make Studio -->
-    <color name="white">#ffffff</color>
-    <color name="sap_light_gray">#929292</color>
-    <color name="sap_gray">#333333</color>
-    <color name="sap_gray_white_10">#474747</color>
-    <color name="sap_gray_black_20">#2a2a2a</color>
-    <color name="sap_gray_black_30">#242424</color>
-    <color name="sap_gray_black_40">#1f1f1f</color>
-    <color name="black">#000000</color>
-    <color name="sap_yellow_1">#f0ab00</color>
-    <color name="sap_red_1">#e94a1b</color>
-    <color name="sap_blue_1">#008fcc</color>
-    <!-- color definition end -->
+    <color name="constant_white">#ffffff</color>
+    <color name="constant_black">#000000</color>
+    <color name="constant_sap_yellow_1">#f0ab00</color>
+    <color name="constant_sap_red_1">#e94a1b</color>
+    <color name="constant_sap_blue_1">#008fcc</color>
 
-    <!-- default color -->
-    <color name="colorPrimary">@color/black</color>
-    <color name="colorPrimaryDark">@color/black</color>
-    <color name="colorAccent">@color/sap_yellow_1</color>
-    <!-- default color end -->
-
-    <color name="black_light">#ff242424</color>
-    <color name="black_transparent">#99000000</color>
+    <color name="constant_black_light">#ff242424</color>
+    <color name="constant_black_transparent">#99000000</color>
 
 </resources>
