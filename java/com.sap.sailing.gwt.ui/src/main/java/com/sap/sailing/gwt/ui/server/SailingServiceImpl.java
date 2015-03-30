@@ -1423,8 +1423,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier) {
-        final Boolean result;
+    public boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier) {
+        final boolean result;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace == null) {
             result = false;
@@ -1432,7 +1432,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BoatClass boatClass = trackedRace.getRace().getBoatClass();
             PolarDataService polarData = getService().getPolarDataService();
             PolarDiagram polarDiagram = new PolarDiagramGPS(boatClass, polarData);
-            result = new Boolean(polarDiagram != null);
+            result = polarDiagram != null;
         }
         return result;
     }
