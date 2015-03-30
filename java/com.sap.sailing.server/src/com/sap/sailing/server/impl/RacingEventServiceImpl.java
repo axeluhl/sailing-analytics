@@ -2291,8 +2291,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public ClassLoader getDeserializationClassLoader() {
-//        return getCombinedMasterDataClassLoader();  // FIXME bug 2743: tentatively going back to getClass().getClassLoader() to see which part of the commit was causing the two replication tests to fail
-        return getClass().getClassLoader();
+        return getCombinedMasterDataClassLoader();  // FIXME bug 2743: tentatively going back to getClass().getClassLoader() to see which part of the commit was causing the two replication tests to fail
+//        return getClass().getClassLoader();
     }
 
     @Override

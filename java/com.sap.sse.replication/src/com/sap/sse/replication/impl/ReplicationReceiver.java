@@ -156,6 +156,11 @@ public class ReplicationReceiver implements Runnable {
                 Delivery delivery = consumer.nextDelivery();
                 messageCount++;
                 if (_queue != null) {
+                    synchronized (this) {
+                        if (getInboundMessageQueue().isEmpty()) {
+                            notifyAll(); // wake up anyone waiting for isQueueEmpty()
+                        }
+                    }
                     if (logsFine || messageCount % 10l == 0) {
                         try {
                             logger.log(messageCount%10l==0 ? Level.INFO : Level.FINE,
@@ -312,9 +317,6 @@ public class ReplicationReceiver implements Runnable {
         if (queue == null) {
             queue = new ArrayList<>();
             queueByReplicableIdAsString.put(replicableIdAsString, queue);
-        }
-        if (queue.isEmpty()) {
-            notifyAll();
         }
         queue.add(new Pair<String, OperationWithResult<?, ?>>(replicable.getId().toString(), operation));
         assert !queue.isEmpty();
