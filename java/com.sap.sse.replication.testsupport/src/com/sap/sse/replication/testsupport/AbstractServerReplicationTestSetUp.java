@@ -179,10 +179,13 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
              * original exception propagate */
             logger.log(Level.SEVERE, "Exception trying to connect to initial load test servlet to STOP it", ex);
         }
-        synchronized (replicaReplicator.getReplicator()) {
-            while (!replicaReplicator.getReplicator().isQueueEmptyOrStopped()) {
-                logger.info("Waiting for replication queue to drain...");
-                replicaReplicator.getReplicator().wait();
+        ReplicationReceiver replicaReplicatorReplicator = replicaReplicator.getReplicator();
+        if (replicaReplicatorReplicator != null) {
+            synchronized (replicaReplicatorReplicator) {
+                while (!replicaReplicatorReplicator.isQueueEmptyOrStopped()) {
+                    logger.info("Waiting for replication queue to drain...");
+                    replicaReplicatorReplicator.wait();
+                }
             }
         }
         logger.info("Replication queue has been drained...");
