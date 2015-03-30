@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="git_hash" translatable="false">#GITHASH#</string>
+
+</resources>
