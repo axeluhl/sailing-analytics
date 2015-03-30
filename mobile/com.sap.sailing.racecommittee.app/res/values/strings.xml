@@ -363,5 +363,6 @@
     <string name="race_summary_wind_speed_value" translatable="false">#VALUE# kts</string>
     <string name="race_summary_individual_recalls">Individual Recalls</string>
     <string name="race_summary_time" translatable="false">#VALUE# min</string>
+    <string name="record_voice">Record Voice</string>
 
 </resources>

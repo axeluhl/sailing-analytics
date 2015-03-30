@@ -22,4 +22,12 @@
     <attr name="textLarge" format="reference" />
     <attr name="textXLarge" format="reference" />
 
+    <!-- drawable -->
+    <attr name="access_time_36dp" format="reference" />
+    <attr name="check_18dp" format="reference" />
+    <attr name="dns_48dp" format="reference" />
+    <attr name="hearing_48dp" format="reference" />
+    <attr name="mic_48dp" format="reference" />
+    <attr name="photo_camera_48dp" format="reference" />
+    
 </resources>

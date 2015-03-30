@@ -2,9 +2,9 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
 
-    <solid android:color="@color/dark_sap_gray_black_30" />
+    <solid android:color="@color/dark_sap_gray" />
     <stroke
         android:width="@dimen/thin_line"
-        android:color="@color/dark_sap_gray_black_30" />
+        android:color="@color/dark_sap_gray" />
 
 </shape>

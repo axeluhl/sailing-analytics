@@ -346,5 +346,6 @@
     <string name="race_summary_title">Race Summary</string>
     <string name="race_summary_wind_direction">Average Wind Direction</string>
     <string name="race_summary_wind_speed">Average Wind Speed</string>
+    <string name="record_voice">Record Voice</string>
 
 </resources>

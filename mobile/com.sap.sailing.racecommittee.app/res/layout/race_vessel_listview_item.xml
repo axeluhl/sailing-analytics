@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -14,8 +15,8 @@
         android:layout_marginStart="@dimen/default_margin"
         android:layout_marginTop="@dimen/default_margin"
         android:gravity="right"
-        android:text="10"
-        android:textSize="@dimen/textSize_32" />
+        android:textSize="@dimen/textSize_32"
+        tools:text="10" />
 
     <ImageView
         android:id="@+id/vessel_nationality"
@@ -30,13 +31,13 @@
 
     <TextView
         android:id="@+id/vessel_number"
-        android:layout_width="130dp"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/vessel_nationality"
         android:layout_toRightOf="@+id/vessel_nationality"
-        android:text="GER 001"
-        android:textSize="@dimen/textSize_32" />
+        android:textSize="@dimen/textSize_32"
+        tools:text="GER 001" />
 
     <ImageView
         android:id="@+id/line_marked"
@@ -46,17 +47,19 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="@dimen/default_margin"
-        android:src="@drawable/ic_check_white_18dp" />
+        android:src="?check_18dp"
+        />
 
     <TextView
         android:id="@+id/vessel_crew"
-        android:layout_width="200dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/default_margin"
-        android:layout_toEndOf="@id/vessel_number"
         android:layout_toRightOf="@id/vessel_number"
         android:singleLine="true"
-        android:text="Annita Wagner"
-        android:textSize="@dimen/textSize_32" />
+        android:textSize="@dimen/textSize_32"
+        tools:text="Annita Wagner"
+        android:layout_toLeftOf="@+id/line_marked"
+        android:layout_toStartOf="@+id/line_marked" />
 </RelativeLayout>

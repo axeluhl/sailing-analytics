@@ -36,6 +36,13 @@
         <item name="textLarge">@style/AppTheme.Light.Text.Large</item>
         <item name="textXLarge">@style/AppTheme.Light.Text.XLarge</item>
 
+        <!-- drawables -->
+        <item name="access_time_36dp">@drawable/ic_access_time_black_36dp</item>
+        <item name="check_18dp">@drawable/ic_check_black_18dp</item>
+        <item name="dns_48dp">@drawable/ic_dns_black_48dp</item>
+        <item name="hearing_48dp">@drawable/ic_hearing_black_48dp</item>
+        <item name="mic_48dp">@drawable/ic_mic_black_48dp</item>
+        <item name="photo_camera_48dp">@drawable/ic_photo_camera_black_48dp</item>
     </style>
 
     <style name="AppTheme.Light.Widget.NumberPicker" parent="@android:style/Theme.Holo.Light">
@@ -57,6 +64,7 @@
         <item name="android:paddingLeft">@dimen/default_padding</item>
     </style>
 
+    <!-- custom styles -->
     <style name="AppTheme.Light.Button.Small">
         <item name="android:textSize">@dimen/textSize_22</item>
     </style>

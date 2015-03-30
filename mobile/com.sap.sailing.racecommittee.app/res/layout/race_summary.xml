@@ -6,7 +6,8 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="?sap_gray_black_30">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -47,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_marginBottom="@dimen/default_margin"
-                android:background="?sap_yellow_1" />
+                android:background="?sap_gray" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -170,7 +171,7 @@
                     android:layout_height="@dimen/thin_line"
                     android:layout_marginTop="@dimen/default_margin"
                     android:layout_marginBottom="@dimen/default_margin"
-                    android:background="?sap_yellow_1" />
+                    android:background="?sap_gray" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -228,7 +229,7 @@
                     android:layout_height="@dimen/thin_line"
                     android:layout_marginTop="@dimen/default_margin"
                     android:layout_marginBottom="@dimen/default_margin"
-                    android:background="?sap_yellow_1" />
+                    android:background="?sap_gray" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

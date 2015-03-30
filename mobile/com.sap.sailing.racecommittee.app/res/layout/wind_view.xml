@@ -244,7 +244,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
-                            android:background="@drawable/white_border"
+                            android:background="@drawable/border_white"
                             android:padding="@dimen/default_padding"
                             android:text="@string/wind_enter_position"
                             android:textAllCaps="true"

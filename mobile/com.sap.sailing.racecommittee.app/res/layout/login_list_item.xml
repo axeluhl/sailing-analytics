@@ -38,7 +38,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:paddingRight="@dimen/default_padding"
-        android:src="@drawable/ic_check_white_18dp"
+        android:src="?check_18dp"
         android:visibility="invisible" />
 
     <View
