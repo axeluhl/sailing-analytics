@@ -25,6 +25,7 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansButton;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
+import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
 public class BuoyFragment extends BaseFragment implements LocationListener {
@@ -39,6 +40,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private LatLng savedPosition;
     private LocationManager locationManager;
     private pingListener pingListener;
+    private SignalQualityIndicatorView signalQualityIndicatorView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -59,12 +61,16 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
         setPositionButton = (OpenSansButton) view
                 .findViewById(R.id.marker_set_position_button);
+        setPositionButton.setVisibility(View.GONE);
         setPositionButton.setOnClickListener(clickListener);
 
         resetPositionButton = (OpenSansButton) view
                 .findViewById(R.id.marker_reset_position_button);
         resetPositionButton.setOnClickListener(clickListener);
         resetPositionButton.setVisibility(View.GONE);
+
+        signalQualityIndicatorView = (SignalQualityIndicatorView) view.findViewById(R.id.signal_quality_indicator);
+        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
         return view;
     }
 
@@ -76,12 +82,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
         if (mark != null) {
             markHeaderTextView.setText(mark.getName());
-            setUpPingUI();
+            setUpTextUI(lastKnownLocation);
             setUpMap();
         }
-        if(lastKnownLocation != null) {
-            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
-            mapFragment.getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng,15));
+        if (lastKnownLocation != null) {
+            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+            mapFragment.getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
+            setPositionButton.setVisibility(View.VISIBLE);
+            reportGPSQuality(lastKnownLocation.getAccuracy());
         }
     }
 
@@ -92,44 +100,62 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         locationManager.removeUpdates(this);
     }
 
-    public void setUpPingUI() {
+    public void setUpTextUI(Location location) {
+        String longitudeText = "";
+        String latitudeText = "";
+        String accuracyText = "";
+        if (location != null) {
+            latitudeText += location.getLatitude();
+            longitudeText += location.getLongitude();
+            accuracyText += "~" + location.getAccuracy();
+        } else {
+            latitudeText += "n/a";
+            longitudeText += "n/a";
+            accuracyText += "n/a";
+        }
         MarkPingInfo markPing = ((PositioningActivity) getActivity())
                 .getMarkPing();
         if (markPing != null) {
-            double savedLatitude = Double.parseDouble(markPing.getLattitude());
+            double savedLatitude = Double.parseDouble(markPing.getLatitude());
             double savedLongitude = Double.parseDouble(markPing.getLongitude());
             savedPosition = new LatLng(savedLatitude, savedLongitude);
-            latitudeTextView.setText(markPing.getLattitude());
-            longitudeTextView.setText(markPing.getLongitude());
-            accuracyTextView.setText("~" + markPing.getAccuracy());
+            latitudeText += " (" + markPing.getLatitude() + ")";
+            longitudeText += " (" + markPing.getLongitude() + ")";
+            accuracyText += " (" + "~" + markPing.getAccuracy() + ")";
         }
+        latitudeTextView.setText(latitudeText);
+        longitudeTextView.setText(longitudeText);
+        accuracyTextView.setText(accuracyText);
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        if(getActivity() instanceof PositioningActivity) {
+        if (getActivity() instanceof PositioningActivity) {
             lastKnownLocation = location;
+            reportGPSQuality(lastKnownLocation.getAccuracy());
+            setPositionButton.setVisibility(View.VISIBLE);
+            setUpTextUI(lastKnownLocation);
             setUpMap();
         }
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        if(getActivity() instanceof PositioningActivity) {
+        if (getActivity() instanceof PositioningActivity) {
             initLocationProvider();
         }
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        if(getActivity() instanceof PositioningActivity) {
+        if (getActivity() instanceof PositioningActivity) {
             initLocationProvider();
         }
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        if(getActivity() instanceof PositioningActivity) {
+        if (getActivity() instanceof PositioningActivity) {
             initLocationProvider();
         }
     }
@@ -138,7 +164,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         locationManager = (LocationManager) getActivity().getSystemService(
                 Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,500.0f, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 500.0f, this);
     }
 
     public void setUpMap() {
@@ -155,8 +181,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             savedLocactionOptions.visible(true);
             map.addMarker(savedLocactionOptions);
         }
-        if(lastKnownLocation != null)
-        {
+        if (lastKnownLocation != null) {
             MarkerOptions mySelfOptions = new MarkerOptions();
             LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
             mySelfOptions.position(lastKnownLatLng);
@@ -166,8 +191,36 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
     }
 
+    public void reportGPSQuality(float gpsAccuracy) {
+        GPSQuality quality = GPSQuality.noSignal;
+
+        if (gpsAccuracy > 48) {
+            quality = GPSQuality.poor;
+        } else if (gpsAccuracy > 10) {
+            quality = GPSQuality.good;
+        } else if (gpsAccuracy <= 10) {
+            quality = GPSQuality.great;
+        }
+        signalQualityIndicatorView.setSignalQuality(quality.toInt());
+
+    }
+
     public void setPingListener(pingListener listener) {
         pingListener = listener;
+    }
+
+    public enum GPSQuality {
+        noSignal(0), poor(2), good(3), great(4);
+
+        private final int gpsQuality;
+
+        GPSQuality(int quality) {
+            this.gpsQuality = quality;
+        }
+
+        public int toInt() {
+            return this.gpsQuality;
+        }
     }
 
     public interface pingListener {
@@ -191,9 +244,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                                 lastKnownLocation, mark);
                         helper.sendPingToServer(getActivity(),
                                 lastKnownLocation, leaderBoard, mark);
+                        ((PositioningActivity) getActivity()).updatePing();
                         savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                         pingListener.updatePing();
-                        setUpPingUI();
+                        setUpTextUI(lastKnownLocation);
                     } else {
                         Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                     }

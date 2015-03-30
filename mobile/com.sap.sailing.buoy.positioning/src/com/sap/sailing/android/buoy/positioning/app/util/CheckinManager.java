@@ -171,7 +171,7 @@ public class CheckinManager {
                             if (!jsonMark.get("position").equals(null)) {
                                 JSONObject positionJson = jsonMark.getJSONObject("position");
                                 MarkPingInfo ping = new MarkPingInfo();
-                                ping.setLattitude(positionJson.getString("latitude"));
+                                ping.setLatitude(positionJson.getString("latitude"));
                                 ping.setLongitude(positionJson.getString("longitude"));
                                 ping.setTimestamp(positionJson.getInt("timestamp"));
                                 ping.setAccuracy(positionJson.getDouble("accuracy"));

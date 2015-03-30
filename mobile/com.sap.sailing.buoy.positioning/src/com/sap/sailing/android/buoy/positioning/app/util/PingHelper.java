@@ -49,7 +49,7 @@ public class PingHelper {
 			MarkInfo mark) throws GeneralDatabaseHelperException {
 		MarkPingInfo pingInfo = new MarkPingInfo();
 		pingInfo.setMarkId(mark.getId());
-		pingInfo.setLattitude(""+ location.getLatitude());
+		pingInfo.setLatitude("" + location.getLatitude());
 		pingInfo.setLongitude("" + location.getLongitude());
 		pingInfo.setAccuracy(location.getAccuracy());
 		pingInfo.setTimestamp((int) location.getTime());
