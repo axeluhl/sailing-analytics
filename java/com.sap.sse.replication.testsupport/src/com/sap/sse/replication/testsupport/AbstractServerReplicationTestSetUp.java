@@ -179,7 +179,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
              * original exception propagate */
             logger.log(Level.SEVERE, "Exception trying to connect to initial load test servlet to STOP it", ex);
         }
-        ReplicationReceiver replicaReplicatorReplicator = replicaReplicator.getReplicator();
+        final ReplicationReceiver replicaReplicatorReplicator = replicaReplicator.getReplicator();
         if (replicaReplicatorReplicator != null) {
             synchronized (replicaReplicatorReplicator) {
                 while (!replicaReplicatorReplicator.isQueueEmptyOrStopped()) {
