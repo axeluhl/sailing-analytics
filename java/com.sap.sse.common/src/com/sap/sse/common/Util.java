@@ -338,7 +338,7 @@ public class Util {
     }
 
     public static String join(String separator, Iterable<? extends Named> nameds) {
-        return join(separator, toArray(nameds, new Named[size(nameds)]));
+        return join(separator, toArray(nameds, new Named[0]));
     }
 
     public static String join(String separator, Named... nameds) {

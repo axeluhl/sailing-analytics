@@ -194,5 +194,5 @@ public interface PolarDataService {
      */
     PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
 
-    void raceFinishedTracking(TrackedRace race);
+    void raceFinishedLoading(TrackedRace race);
 }
