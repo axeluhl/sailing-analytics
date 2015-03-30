@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -19,6 +21,8 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescriptor {
+    private static final Logger logger = Logger.getLogger(ReplicationMasterDescriptorImpl.class.getName());
+    
     private static final String REPLICATION_SERVLET = "/replication/replication";
     private final String masterServletHostname;
     private final String exchangeName;
@@ -161,7 +165,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         } catch (Exception ex) {
             // ignore any exception during abort. close can yield a broad
             // number of exceptions that we don't want to know or to log.
-            ex.printStackTrace();
+            logger.log(Level.SEVERE, "Exception while closing replication channel consumer", ex);
         }
     }
 
