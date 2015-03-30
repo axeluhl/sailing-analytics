@@ -147,7 +147,6 @@ public class ReplicationReceiver implements Runnable {
      */
     @Override
     public void run() {
-        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         long messageCount = 0;
         long operationCount = 0;
         final boolean logsFine = logger.isLoggable(Level.FINE);
@@ -179,7 +178,6 @@ public class ReplicationReceiver implements Runnable {
                 String replicableIdAsString = new DataInputStream(uncompressedInputStream).readUTF();
                 Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
-                    Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
                     ObjectInputStream ois = new ObjectInputStream(uncompressedInputStream); // no special stream required; only reading a generic byte[]
                     int operationsInMessage = 0;
                     try {
@@ -253,8 +251,6 @@ public class ReplicationReceiver implements Runnable {
             } catch (Exception e) {
                 logger.info("Exception while processing replica: "+e.getMessage());
                 logger.log(Level.SEVERE, "run", e);
-            } finally {
-                Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         }
         logger.info("Stopped replicator thread. This server will no longer receive events from a master.");
@@ -361,6 +357,7 @@ public class ReplicationReceiver implements Runnable {
         logger.info("Signaled Replicator thread to stop asap.");
         stopped = true;
         master.stopConnection();
+        notifyAll(); // notify those waiting for stopped
     }
     
     public synchronized boolean isBeingStopped() {
@@ -376,8 +373,9 @@ public class ReplicationReceiver implements Runnable {
     /**
      * @return <code>true</code> if all queues for all replicables are empty
      */
-    public boolean isQueueEmpty() throws IllegalAccessException {
-        return (_queue == null || getInboundMessageQueue().isEmpty()) && !queueByReplicableIdAsString.values().stream().anyMatch(q->!q.isEmpty());
+    public boolean isQueueEmptyOrStopped() throws IllegalAccessException {
+        return isBeingStopped() ||
+                (_queue == null || getInboundMessageQueue().isEmpty()) && !queueByReplicableIdAsString.values().stream().anyMatch(q->!q.isEmpty());
     }
 
 }

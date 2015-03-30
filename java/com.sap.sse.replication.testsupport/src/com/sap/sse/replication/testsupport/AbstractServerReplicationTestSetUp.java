@@ -180,7 +180,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
             logger.log(Level.SEVERE, "Exception trying to connect to initial load test servlet to STOP it", ex);
         }
         synchronized (replicaReplicator.getReplicator()) {
-            while (!replicaReplicator.getReplicator().isQueueEmpty()) {
+            while (!replicaReplicator.getReplicator().isQueueEmptyOrStopped()) {
                 logger.info("Waiting for replication queue to drain...");
                 replicaReplicator.getReplicator().wait();
             }
@@ -334,7 +334,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         
         public void waitUntilQueueIsEmpty() throws InterruptedException, IllegalAccessException {
             synchronized (getReplicator()) {
-                while (!getReplicator().isQueueEmpty()) {
+                while (!getReplicator().isQueueEmptyOrStopped()) {
                     getReplicator().wait();
                 }
             }
