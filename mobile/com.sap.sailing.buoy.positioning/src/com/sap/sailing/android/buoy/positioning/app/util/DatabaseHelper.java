@@ -100,7 +100,7 @@ public class DatabaseHelper {
         	markPingInfo.setMarkId(markID);
         	markPingInfo.setTimestamp(mpc.getInt((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
         	markPingInfo.setLongitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
-        	markPingInfo.setLattitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
+        	markPingInfo.setLatitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
         	markPingInfo.setAccuracy(mpc.getDouble((mpc.getColumnIndex(MarkPing.MARK_PING_ACCURACY))));
         	marks.add(markPingInfo);
             mpc.moveToNext();
@@ -211,7 +211,7 @@ public class DatabaseHelper {
         ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
         ContentValues mpcv = new ContentValues();
         mpcv.put(MarkPing.MARK_ID, markPing.getMarkId());
-        mpcv.put(MarkPing.MARK_PING_LATITUDE, markPing.getLattitude());
+        mpcv.put(MarkPing.MARK_PING_LATITUDE, markPing.getLatitude());
         mpcv.put(MarkPing.MARK_PING_LONGITUDE, markPing.getLongitude());
         mpcv.put(MarkPing.MARK_PING_ACCURACY, markPing.getAccuracy());
         mpcv.put(MarkPing.MARK_PING_TIMESTAMP, markPing.getTimestamp());

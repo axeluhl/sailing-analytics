@@ -85,6 +85,40 @@
     </LinearLayout>
 
     <View style="@style/Divider" />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="12dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="12dp">
+
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/latitude"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <!-- Empty view to right align the following element -->
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            android:id="@+id/marker_gps_latitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <View style="@style/Divider" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -111,40 +145,6 @@
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/marker_gps_longitude"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-    </LinearLayout>
-
-    <View style="@style/Divider" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingBottom="12dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="12dp">
-
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/latitude"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-        <!-- Empty view to right align the following element -->
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-            android:id="@+id/marker_gps_latitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""

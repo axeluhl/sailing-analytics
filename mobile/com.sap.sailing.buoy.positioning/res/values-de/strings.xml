@@ -4,8 +4,6 @@
     <string name="title_activity_positioning">Markierungs Position setzen</string>
     <string name="course_type">Kurstyp</string>
     <string name="marks">Kursmarkierungen</string>
-    <string name="longitude">Längengrad</string>
-    <string name="latitude">Breitengrad</string>
     <string name="set_position">Position setzen</string>
     <string name="reset_position">Position zurücksetzen</string>
     <string name="getting_marks">Empfangen der Markierungen..</string>

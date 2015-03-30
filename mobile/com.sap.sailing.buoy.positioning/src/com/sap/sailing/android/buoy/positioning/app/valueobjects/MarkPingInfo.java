@@ -3,7 +3,7 @@ package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 public class MarkPingInfo {
 	private String markId;
 	private String longitude;
-	private String lattitude;
+	private String latitude;
 	private double accuracy;
 	private int timestamp;
 
@@ -23,12 +23,12 @@ public class MarkPingInfo {
 		this.longitude = longitude;
 	}
 
-	public String getLattitude() {
-		return lattitude;
+	public String getLatitude() {
+		return latitude;
 	}
 
-	public void setLattitude(String lattitude) {
-		this.lattitude = lattitude;
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
 	}
 
 	public double getAccuracy() {

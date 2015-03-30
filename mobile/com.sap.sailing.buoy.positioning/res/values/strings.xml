@@ -5,8 +5,8 @@
     <string name="title_activity_positioning">Set Mark Position</string>
     <string name="course_type">Course Type</string>
     <string name="marks">Marks</string>
-    <string name="longitude">Longitude</string>
-    <string name="latitude">Latitude</string>
+    <string name="longitude" translatable="false">Lng</string>
+    <string name="latitude" translatable="false">Lat</string>
     <string name="set_position">Set Position</string>
     <string name="reset_position">Reset Position</string>
     <string name="getting_marks">Getting race marks..</string>
