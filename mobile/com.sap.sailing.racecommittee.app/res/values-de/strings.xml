@@ -360,5 +360,6 @@
     <string name="finished_text_01">Please evaluate and submit this race summary.</string>
     <string name="finished_text_02">Your evaluation has been published. Changes need to be re-submitted to be in effect.</string>
     <string name="protest_time">Protest Time</string>
+    <string name="finished_duration">#TIME# min</string>
 
 </resources>
