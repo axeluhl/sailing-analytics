@@ -113,7 +113,7 @@ public class HomeFragment extends AbstractHomeFragment implements
 	 * Start regatta activity.
 	 * 
 	 * @param leaderboardName
-	 * @param checkinDigest2 
+	 * @param checkinDigest
 	 */
 	private void startRegatta(String leaderboardName, String checkinDigest) {
 		Intent intent = new Intent(getActivity(), RegattaActivity.class);

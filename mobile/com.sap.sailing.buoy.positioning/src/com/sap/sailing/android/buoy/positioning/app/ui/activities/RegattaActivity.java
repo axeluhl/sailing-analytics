@@ -152,6 +152,10 @@ public class RegattaActivity extends AbstractRegattaActivity {
         }
     }
 
+    public String getCheckinDigest(){
+        return checkinDigest;
+    }
+
     public RegattaFragment getRegattaFragment() {
         return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
