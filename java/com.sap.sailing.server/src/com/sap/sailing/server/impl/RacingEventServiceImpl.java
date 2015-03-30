@@ -383,6 +383,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             .withInitial(() -> false);
     
     private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
+    
+    private final JoinedClassLoader joinedClassLoader;
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
@@ -461,6 +463,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
         this.masterDataClassLoaders.add(this.getClass().getClassLoader());
+        joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
         this.operationsSentToMasterForReplication = new HashSet<>();
         if (windStore == null) {
             try {
@@ -2307,7 +2310,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public ClassLoader getDeserializationClassLoader() {
-        return getCombinedMasterDataClassLoader();
+        return joinedClassLoader;
     }
 
     @Override
