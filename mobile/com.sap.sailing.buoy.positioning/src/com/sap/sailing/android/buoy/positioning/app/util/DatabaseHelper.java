@@ -145,8 +145,6 @@ public class DatabaseHelper {
      * When checking in, store info on the event, the competitor and the leaderboard in the database.
      * 
      * @param context
-     * @param event
-     * @param competitor
      * @param leaderboard
      * @return success or failure
      * @throws GeneralDatabaseHelperException
@@ -209,7 +207,7 @@ public class DatabaseHelper {
     
     public void storeMarkPing(Context context, MarkPingInfo markPing) throws GeneralDatabaseHelperException{
     	ContentResolver cr = context.getContentResolver();
-
+        deletePingsFromDataBase(context, markPing.getMarkId());
         ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
         ContentValues mpcv = new ContentValues();
         mpcv.put(MarkPing.MARK_ID, markPing.getMarkId());

@@ -1,8 +1,11 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,6 +20,7 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 
@@ -32,6 +36,8 @@ public class RegattaActivity extends AbstractRegattaActivity {
     private String checkinUrl;
 
     private AppPreferences prefs;
+    private MessageSendingService messageSendingService;
+    private boolean messageSendingServiceBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +80,28 @@ public class RegattaActivity extends AbstractRegattaActivity {
         super.onResume();
         leaderboardName = (String) getIntent().getExtras().get(getString(R.string.leaderboard_name));
         setTitle(leaderboardName);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Intent messageSendingServiceIntent = new Intent(this, MessageSendingService.class);
+        bindService(messageSendingServiceIntent, messageSendingServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (messageSendingServiceBound) {
+            messageSendingService.unregisterAPIConnectivityListener();
+            unbindService(messageSendingServiceConnection);
+
+            messageSendingServiceBound = false;
+
+            if (BuildConfig.DEBUG) {
+                ExLog.i(this, TAG, "Unbound transmitting Service");
+            }
+        }
     }
 
     @Override
@@ -137,5 +165,26 @@ public class RegattaActivity extends AbstractRegattaActivity {
     public void setMarks(List<MarkInfo> marks) {
         this.marks = marks;
     }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection messageSendingServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get
+            // LocalService instance
+            MessageSendingService.MessageSendingBinder binder = (MessageSendingService.MessageSendingBinder) service;
+            messageSendingService = binder.getService();
+            messageSendingServiceBound = true;
+            if (BuildConfig.DEBUG) {
+                ExLog.i(RegattaActivity.this, TAG, "connected to message sending service");
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            messageSendingServiceBound = false;
+        }
+    };
 
 }
