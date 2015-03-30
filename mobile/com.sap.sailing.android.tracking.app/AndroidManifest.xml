@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="21" />
+        android:targetSdkVersion="22" />
 
     <permission
         android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"
@@ -85,7 +85,6 @@
         <activity
             android:name=".ui.activities.SettingsActivity"
             android:screenOrientation="unspecified" />
-        <activity android:name="net.hockeyapp.android.UpdateActivity" />
         <service
             android:name=".services.TrackingService"
             android:exported="false"
