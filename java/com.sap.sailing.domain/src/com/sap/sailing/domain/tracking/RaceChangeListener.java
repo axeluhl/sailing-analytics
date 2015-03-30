@@ -50,5 +50,5 @@ public interface RaceChangeListener extends CourseListener {
 
     void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude);
 
-    void statusChanged(TrackedRaceStatus newStatus);
+    void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus);
 }

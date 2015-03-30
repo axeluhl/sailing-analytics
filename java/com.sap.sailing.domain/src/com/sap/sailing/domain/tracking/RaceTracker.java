@@ -42,7 +42,11 @@ public interface RaceTracker {
 
     /**
      * Stops tracking the races.
-     * @param preemptive TODO
+     * 
+     * @param preemptive
+     *            if <code>false</code>, the tracker will continue to process data already received but will stop
+     *            receiving new data. If <code>true</code>, the tracker will stop processing data immediately, ignoring
+     *            (dropping) all data already received but not yet processed.
      */
     void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException;
 

@@ -157,7 +157,8 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                     notifyListeners(wind, aws.getSensor().getDeviceSerialNumber());
                 } else {
                     if (!loggedWindFixGenerationProblem) {
-                        logger.info("Not enough information to build a Wind fix out of data provided. AWS received but most probably HDG or HDGM not received (yet) - check your compass.");
+                        logger.info("Not enough information to build a Wind fix out of data provided by sensor "+aws.getSensor()+
+                                ". AWS received but most probably HDG or HDGM not received (yet) - check your compass.");
                         loggedWindFixGenerationProblem = true;
                     }
                 }

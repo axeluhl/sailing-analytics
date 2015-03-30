@@ -91,13 +91,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
         windloadinghintleft.setInnerText(stringConstants.dashboardWindBotLoading());
         windloadinghintright.setInnerText(stringConstants.dashboardWindBotLoading());
-    
-        String eventId = Window.Location.getParameter(EVENT_ID_PARAMETER);
-        EventLogo eventLogo = EventLogo.getEventLogoFromEventId(sailingServiceAsync, eventId);
-        if(eventLogo != null){
-            Document.get().getBody().appendChild(eventLogo.getElement());
-        }
-        
+        loadAndDisplayEventLogo(sailingServiceAsync);
     }
 
     private void initLogos() {
@@ -105,6 +99,16 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         logo.setResource(RibDashboardImageResources.INSTANCE.logo_sap());
         logo.getElement().addClassName(style.logo());
         Document.get().getBody().appendChild(logo.getElement());
+    }
+    
+    private void loadAndDisplayEventLogo(SailingServiceAsync sailingServiceAsync){
+        String eventId = Window.Location.getParameter(EVENT_ID_PARAMETER);
+        if (eventId != null) {
+            EventLogo eventLogo = EventLogo.getEventLogoFromEventId(sailingServiceAsync, eventId);
+            if (eventLogo != null) {
+                Document.get().getBody().appendChild(eventLogo.getElement());
+            }
+        }
     }
 
     private void initWindBotComponents(List<String> windBotIDs,

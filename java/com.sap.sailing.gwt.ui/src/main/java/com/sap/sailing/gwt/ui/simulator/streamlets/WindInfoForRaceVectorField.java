@@ -88,13 +88,8 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         return true;
     }
 
-    private final static Position where = new DegreePosition(-33.85741596360764,151.22181591282387);
-    
     @Override
     public Vector getVector(Position p, Date at) {
-        if (where.getDistance(p).getMeters() < 50) {
-            System.out.println("Here we are");
-        }
         final PositionDTO request = new PositionDTO(p.getLatDeg(), p.getLngDeg());
         double speedConfidenceSum = 0;
         double knotSpeedSumScaledByConfidence = 0;
@@ -171,7 +166,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         // and where null is returned when there is no fix at the rounded time point; mimic this behavior here. See
         // also bug 2689 comment #13.
         if (windTrackInfo.resolutionOutsideOfWhichNoFixWillBeReturned != null) {
-            if (Math.abs(preResult.requestTimepoint-at.getTime()) > windTrackInfo.resolutionOutsideOfWhichNoFixWillBeReturned.asMillis()) {
+            if (preResult == null || Math.abs(preResult.requestTimepoint-at.getTime()) > windTrackInfo.resolutionOutsideOfWhichNoFixWillBeReturned.asMillis()) {
                 result = null;
             } else {
                 result = preResult;
