@@ -18,12 +18,13 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.adapter.MarkAdapter;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
+import com.sap.sailing.android.buoy.positioning.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
 public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cursor>{
 	private static final int MARKER_LOADER = 1;
 	private MarkAdapter adapter;
-	
+
 	@SuppressLint("InflateParams")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,12 +47,21 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
         getLoaderManager().restartLoader(MARKER_LOADER, null, this);
         }
 
+    public MarkAdapter getAdapter()
+    {
+        return adapter;
+    }
+
 	@Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+        String checkinDigest = ((RegattaActivity)getActivity()).getCheckinDigest();
         switch (loaderId) {
         case MARKER_LOADER:
-            return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsMarksJoined.CONTENT_URI,
-                    null, null, null, null);
+            return new CursorLoader(getActivity(), AnalyticsContract.MarksLeaderBoardsJoined.CONTENT_URI,
+                    null,
+                    AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?",
+                    new String[]{checkinDigest},
+                    null);
 
         default:
             return null;

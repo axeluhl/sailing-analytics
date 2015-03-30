@@ -1,8 +1,6 @@
 package com.sap.sailing.android.buoy.positioning.app.adapter;
 
 
-import java.util.List;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.ResourceCursorAdapter;
@@ -13,6 +11,8 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
+
+import java.util.List;
 
 
 public class MarkAdapter extends ResourceCursorAdapter {
@@ -34,7 +34,7 @@ public class MarkAdapter extends ResourceCursorAdapter {
         }
         else{
         	setText = context.getString(R.string.set);
-        	String accuracy = " (" + markPings.get(0).getAccuracy() + ")";
+        	String accuracy = " (~ " + markPings.get(0).getAccuracy() + ")";
         	setText += accuracy;
         }
         markName.setText(name);

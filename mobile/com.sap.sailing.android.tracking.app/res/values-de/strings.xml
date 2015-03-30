@@ -9,7 +9,6 @@
     <string name="options_menu_checkout">Checkout</string>
     <string name="options_add_team_photo">Team Foto hinzufügen</string>
     <string name="options_replace_team_photo">Team Foto ersetzen</string>
-    <string name="options_refresh">Aktualisieren</string>
     <string name="settings_category_other">Andere Einstellungen</string>
     <string name="scan_hint">Der QR-Code befindet sich auf Ihrer Teilnahmebestätigung</string>
     <string name="device_identifier">Geräte-ID</string>

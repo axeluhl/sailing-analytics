@@ -1,13 +1,13 @@
 package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
+import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
-import com.sap.sailing.android.shared.data.CheckinUrlInfo;
-import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
 public class CheckinData extends AbstractCheckinData{
 	public String leaderboardName;
@@ -16,6 +16,7 @@ public class CheckinData extends AbstractCheckinData{
 	public String checkinDigest;
 	public String serverWithPort;
 	public List<MarkInfo> marks;
+    public List<MarkPingInfo> pings;
 
 	public void setCheckinDigestFromString(String checkinString)
 			throws UnsupportedEncodingException, NoSuchAlgorithmException {

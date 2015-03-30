@@ -1,8 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -23,6 +20,9 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper {
 
@@ -100,7 +100,7 @@ public class DatabaseHelper {
         	markPingInfo.setMarkId(markID);
         	markPingInfo.setTimestamp(mpc.getInt((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
         	markPingInfo.setLongitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
-        	markPingInfo.setLattitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
+        	markPingInfo.setLatitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
         	markPingInfo.setAccuracy(mpc.getDouble((mpc.getColumnIndex(MarkPing.MARK_PING_ACCURACY))));
         	marks.add(markPingInfo);
             mpc.moveToNext();
@@ -114,14 +114,19 @@ public class DatabaseHelper {
     	int d1 = cr.delete(MarkPing.CONTENT_URI, MarkPing.MARK_ID + " = \"" + markID + "\"", null);
     	
     	if (BuildConfig.DEBUG) {
-    		 ExLog.i(context, TAG, "Checkout, number of markpings deleted: " + d1);
+    		 ExLog.i(context, TAG, "Checkout, number of markpings for mark: " + markID + " deleted: " + d1);
     	}
     }
 
     public void deleteRegattaFromDatabase(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
 
-        // int d1 = cr.delete(Event.CONTENT_URI, Event.EVENT_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null);
+        List<MarkInfo> marks = getMarks(context,checkinDigest);
+
+        for(MarkInfo mark : marks){
+            deletePingsFromDataBase(context, mark.getId());
+        }
+
         int d2 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest
                 + "\"", null);
         int d3 = cr.delete(Mark.CONTENT_URI, Mark.MARK_CHECKIN_DIGEST + " = \"" + checkinDigest
@@ -130,7 +135,6 @@ public class DatabaseHelper {
                 + "\"", null);
 
         if (BuildConfig.DEBUG) {
-            // ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
             ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d2);
             ExLog.i(context, TAG, "Checkout, number of marks deleted: " + d3);
             ExLog.i(context, TAG, "Checkout, number of checkinurls deleted: " + d4);
@@ -141,8 +145,6 @@ public class DatabaseHelper {
      * When checking in, store info on the event, the competitor and the leaderboard in the database.
      * 
      * @param context
-     * @param event
-     * @param competitor
      * @param leaderboard
      * @return success or failure
      * @throws GeneralDatabaseHelperException
@@ -150,7 +152,7 @@ public class DatabaseHelper {
      * @throws RemoteException
      */
     public void storeCheckinRow(Context context, List<MarkInfo> markList,
-                                LeaderboardInfo leaderboard, CheckinUrlInfo checkinURL)
+                                LeaderboardInfo leaderboard, CheckinUrlInfo checkinURL, List<MarkPingInfo> pings)
             throws GeneralDatabaseHelperException {
 
         // inserting leaderboard first
@@ -179,6 +181,10 @@ public class DatabaseHelper {
         	opList.add(ContentProviderOperation.newInsert(Mark.CONTENT_URI).withValues(cmv).build());
 		}
 
+        for(MarkPingInfo ping: pings){
+            storeMarkPing(context, ping);
+        }
+
         // checkin url
 
         ContentValues ccuv = new ContentValues();
@@ -199,13 +205,13 @@ public class DatabaseHelper {
     }
 
     
-    public void storeMarkPing(Context context, MarkInfo mark, MarkPingInfo markPing) throws GeneralDatabaseHelperException{
+    public void storeMarkPing(Context context, MarkPingInfo markPing) throws GeneralDatabaseHelperException{
     	ContentResolver cr = context.getContentResolver();
-
+        deletePingsFromDataBase(context, markPing.getMarkId());
         ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
         ContentValues mpcv = new ContentValues();
-        mpcv.put(MarkPing.MARK_ID, mark.getId());
-        mpcv.put(MarkPing.MARK_PING_LATITUDE, markPing.getLattitude());
+        mpcv.put(MarkPing.MARK_ID, markPing.getMarkId());
+        mpcv.put(MarkPing.MARK_PING_LATITUDE, markPing.getLatitude());
         mpcv.put(MarkPing.MARK_PING_LONGITUDE, markPing.getLongitude());
         mpcv.put(MarkPing.MARK_PING_ACCURACY, markPing.getAccuracy());
         mpcv.put(MarkPing.MARK_PING_TIMESTAMP, markPing.getTimestamp());
