@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sse.common.Util;
 import com.tractrac.model.lib.api.route.IControlRoute;
@@ -66,6 +67,10 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
                         }
                     }
                 });
+            }
+
+            @Override
+            public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) { 
             }
         };
         addListenersForStoredDataAndStartController(Collections.singleton(receiver));

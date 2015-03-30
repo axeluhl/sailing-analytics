@@ -754,6 +754,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String protestEndsAt();
     String unknown();
     String raceLog();
+    String regattaLog();
     String refreshRaceLog();
     String raceLogReloaded();
     String reloadAllRaceLogs();
