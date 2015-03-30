@@ -254,6 +254,10 @@ public class ReplicationReceiver implements Runnable {
             }
         }
         logger.info("Stopped replicator thread. This server will no longer receive events from a master.");
+        synchronized (this) {
+            stopped = true;
+            notifyAll();
+        }
     }
 
     /**
