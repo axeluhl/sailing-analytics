@@ -97,8 +97,7 @@ public class HomeFragment extends AbstractHomeFragment implements
 			ExLog.i(getActivity(), TAG,
 					"Batch-insert of checkinData completed.");
 		}
-		((StartActivity) getActivity())
-				.startRegatta(checkinData.leaderboardName);
+        startRegatta(checkinData.leaderboardName, checkinData.checkinDigest);
 	}
 
 	@Override
