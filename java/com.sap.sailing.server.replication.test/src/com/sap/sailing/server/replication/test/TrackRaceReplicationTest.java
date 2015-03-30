@@ -129,6 +129,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
 
     @Test
     public void testReassignmentToLeaderboardReplication() throws Exception {
+        logger.info("Running testReassignmentToLeaderboardReplication()");
         final String leaderboardName = "Test Leaderboard";
         Leaderboard masterLeaderboard = master.apply(new CreateFlexibleLeaderboard(leaderboardName, null, new int[0], new LowPoint(), null));
         final String columnName = "R1";
@@ -153,10 +154,12 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         RaceColumn column = replicaLeaderboard.getRaceColumnByName(columnName);
         assertNotNull(column);
         assertSame(replicaTrackedRace, column.getTrackedRace(defaultFleet));
+        logger.info("Done running testReassignmentToLeaderboardReplication()");
     }
     
     @Test
     public void testRaceTimeReplication() throws InterruptedException, Exception {
+        logger.info("Running testRaceTimeReplication()");
         startTracking();
         // now wait at least until the start of tracking time has been received on the master copy
         boolean receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
@@ -174,23 +177,29 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
-        Thread.sleep(5000);
+        Thread.sleep(1000);
         assertEquals(now, replicaTrackedRace.getStartOfRace());
+        logger.info("Done running testRaceTimeReplication()");
     }
 
     @Test
     public void testWindSourcesToExcludeReplication() throws InterruptedException, Exception {
-        startTracking();
-        Thread.sleep(1000);
-        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-        assertTrue(Util.isEmpty(masterTrackedRace.getWindSourcesToExclude()));
-        assertTrue(Util.isEmpty(replicaTrackedRace.getWindSourcesToExclude()));
-        masterTrackedRace.setWindSourcesToExclude(Collections.singleton(new WindSourceImpl(WindSourceType.WEB)));
-        assertEquals(1, Util.size(masterTrackedRace.getWindSourcesToExclude()));
-        assertEquals(WindSourceType.WEB, masterTrackedRace.getWindSourcesToExclude().iterator().next().getType());
-        Thread.sleep(5000);
-        assertEquals(1, Util.size(replicaTrackedRace.getWindSourcesToExclude()));
-        assertEquals(WindSourceType.WEB, replicaTrackedRace.getWindSourcesToExclude().iterator().next().getType());
+        try {
+            logger.info("Running testWindSourcesToExcludeReplication()");
+            startTracking();
+            Thread.sleep(1000);
+            TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+            assertTrue(Util.isEmpty(masterTrackedRace.getWindSourcesToExclude()));
+            assertTrue(Util.isEmpty(replicaTrackedRace.getWindSourcesToExclude()));
+            masterTrackedRace.setWindSourcesToExclude(Collections.singleton(new WindSourceImpl(WindSourceType.WEB)));
+            assertEquals(1, Util.size(masterTrackedRace.getWindSourcesToExclude()));
+            assertEquals(WindSourceType.WEB, masterTrackedRace.getWindSourcesToExclude().iterator().next().getType());
+            Thread.sleep(1000);
+            assertEquals(1, Util.size(replicaTrackedRace.getWindSourcesToExclude()));
+            assertEquals(WindSourceType.WEB, replicaTrackedRace.getWindSourcesToExclude().iterator().next().getType());
+        } finally {
+            logger.info("Done running testWindSourcesToExcludeReplication()");
+        }
     }
 
     @After

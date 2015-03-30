@@ -67,12 +67,6 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     }
 
     private class MailServerReplicationTestSetUp extends AbstractMailServiceReplicationTest.MailServerReplicationTestSetUp {
-        private static final int SERVLET_PORT = 9991;
-        
-        public MailServerReplicationTestSetUp() {
-            super(SERVLET_PORT);
-        }
-        
         @Override
         protected MailServiceImpl createNewMaster() throws MailException {
             return masterMailService;
