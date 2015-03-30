@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
 

@@ -1,6 +1,5 @@
 package com.sap.sailing.android.shared.ui.activities;
 
-import net.hockeyapp.android.CrashManager;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -66,7 +65,6 @@ public abstract class AbstractStartActivity extends CheckinDataActivity{
 	@Override
     protected void onResume() {
     	super.onResume();
-    	checkForCrashes();
         //checkForUpdates();
         
     	int googleServicesResultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -76,11 +74,4 @@ public abstract class AbstractStartActivity extends CheckinDataActivity{
     		dialog.show();
     	}
     }
-	
-    /**
-     * Hockeyapp integration method.
-     */
-	private void checkForCrashes() {
-		CrashManager.register(this, "060ff0c8a907638e3b31d3146091c87b");
-	}
 }
