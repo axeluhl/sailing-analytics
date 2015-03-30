@@ -22,6 +22,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -250,6 +251,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient Object cacheInvalidationTimerLock;
 
     protected transient ConcurrentHashMap<Serializable, RaceLog> attachedRaceLogs;
+    
+    /**
+     * Holds optional race states for the race logs in {@link #attachedRaceLogs}. By using a {@link WeakHashMap},
+     * these race states can be garbage-collected when the race log is no longer attached. The race states are created
+     * lazily, synchronizing on this weak hash map.
+     */
+    protected final transient WeakHashMap<RaceLog, ReadonlyRaceState> raceStates;
 
     protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
 
@@ -304,6 +312,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
+        raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
@@ -2844,6 +2853,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         loadFixesForLog(raceLog, attachedRaceLogs);
     }
     
+    private ReadonlyRaceState getRaceState(RaceLog raceLog) {
+        ReadonlyRaceState result;
+        synchronized (raceStates) {
+            result = raceStates.get(raceLog);
+            if (result == null) {
+                result = RaceStateImpl.create(raceLog);
+                raceStates.put(raceLog, result);
+            }
+        }
+        return result;
+    }
+    
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
         loadFixesForLog(regattaLog, attachedRegattaLogs);
@@ -3312,8 +3333,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Boolean isGateStart() {
         Boolean result = null;
         for (RaceLog raceLog : attachedRaceLogs.values()) {
-            ReadonlyRaceState raceState = RaceStateImpl.create(raceLog);
-            ReadonlyRacingProcedure procedure = raceState.getRacingProcedure();
+            ReadonlyRaceState raceState = getRaceState(raceLog);
+            ReadonlyRacingProcedure procedure = raceState.getRacingProcedureNoFallback();
             if (procedure != null && procedure.getType() != null) {
                 result = procedure.getType() == RacingProcedureType.GateStart;
                 break;
@@ -3327,7 +3348,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final Distance result;
         final Leg startLeg = getRace().getCourse().getFirstLeg();
         final TrackedLegOfCompetitor competitorLeg;
-        if (startLeg != null && isGateStart() == true && (competitorLeg=getTrackedLeg(competitor, startLeg)).hasStartedLeg(timePoint)) {
+        if (startLeg != null && isGateStart() == Boolean.TRUE && (competitorLeg=getTrackedLeg(competitor, startLeg)).hasStartedLeg(timePoint)) {
             TimePoint competitorLegStartTime = competitorLeg.getStartTime();
             final Mark portMarkOfStartLine = getStartLine(competitorLegStartTime).getPortMarkWhileApproachingLine();
             final Position portSideOfStartLinePosition = getOrCreateTrack(portMarkOfStartLine)
