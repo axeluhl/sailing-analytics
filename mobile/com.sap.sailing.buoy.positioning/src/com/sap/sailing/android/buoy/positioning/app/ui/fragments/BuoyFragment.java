@@ -87,9 +87,13 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
         if (mark != null) {
+            initialLocationUpdate = false;
             markHeaderTextView.setText(mark.getName());
             setUpTextUI(null);
+            GoogleMap map = mapFragment.getMap();
+            configureMap(map);
             updateMap();
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(savedPosition, 15));
         }
     }
 
@@ -142,13 +146,17 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         if(initialLocationUpdate){
             LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
             GoogleMap map = mapFragment.getMap();
+            configureMap(map);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
-            map.setMyLocationEnabled(true);
-            map.getUiSettings().setZoomControlsEnabled(true);
-            map.setPadding(0, 50, 0, 0);
             initialLocationUpdate = false;
         }
 
+    }
+
+    private void configureMap(GoogleMap map) {
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        map.setPadding(0, 50, 0, 0);
     }
 
     @Override
