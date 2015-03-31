@@ -1,7 +1,6 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
 import android.content.Context;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -83,13 +82,11 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onResume();
         initialLocationUpdate = true;
         initLocationProvider();
-        String locationProvider = locationManager.getBestProvider(new Criteria(), true);
-        lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
         MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
-        reportGPSQuality(GPSQuality.noSignal.toInt());
+        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
         if (mark != null) {
             markHeaderTextView.setText(mark.getName());
-            setUpTextUI(lastKnownLocation);
+            setUpTextUI(null);
             setUpMap();
         }
     }
@@ -143,6 +140,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         if(initialLocationUpdate){
             LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
             mapFragment.getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
+            mapFragment.getMap().setMyLocationEnabled(true);
             initialLocationUpdate = false;
         }
 
@@ -173,8 +171,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         locationManager = (LocationManager) getActivity().getSystemService(
                 Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
-        String locationProvider = locationManager.getBestProvider(new Criteria(), true);
-        locationManager.requestLocationUpdates(locationProvider, 60000, 10, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5, this);
     }
 
     public void setUpMap() {
@@ -183,7 +180,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         map.clear();
         map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         map.getUiSettings().setZoomControlsEnabled(true);
-        map.setMyLocationEnabled(true);
         map.setPadding(0, 50, 0, 0);
 
         if (savedPosition != null) {
