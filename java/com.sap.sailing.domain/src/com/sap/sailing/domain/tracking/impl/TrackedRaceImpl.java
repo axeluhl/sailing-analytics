@@ -311,9 +311,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private transient ShortTimeWindCache shortTimeWindCache;
 
-    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
+    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race,
+            final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation, boolean useInternalMarkPassingAlgorithm) {
+            long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
+            boolean useInternalMarkPassingAlgorithm) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);

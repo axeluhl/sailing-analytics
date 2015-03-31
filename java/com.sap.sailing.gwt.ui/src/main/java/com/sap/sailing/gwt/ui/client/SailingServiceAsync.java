@@ -124,10 +124,10 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
             String hostname, int port, boolean trackWind, boolean correctWindByDeclination,
-            AsyncCallback<Void> asyncCallback);
+            boolean useInternalMarkPassingAlgorithm, AsyncCallback<Void> asyncCallback);
 
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
-            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow,
+            boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
             AsyncCallback<Void> asyncCallback);
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);

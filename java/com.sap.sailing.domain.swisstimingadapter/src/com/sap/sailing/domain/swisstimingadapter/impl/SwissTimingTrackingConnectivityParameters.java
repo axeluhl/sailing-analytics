@@ -27,10 +27,12 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     private final RegattaLogStore regattaLogStore;
     private final long delayToLiveInMillis;
     private final StartList startList;
+    private final boolean useInternalMarkPassingAlgorithm;
     
     public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
             String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) {
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
+            RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm) {
         super();
         this.hostname = hostname;
         this.port = port;
@@ -44,21 +46,23 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
         this.domainFactory = domainFactory;
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
+        this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
     }
     
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             GPSFixStore gpsFixStore) throws Exception {
         return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port,
-                startList, delayToLiveInMillis, raceLogStore, regattaLogStore, windStore, gpsFixStore, domainFactory,
-                trackedRegattaRegistry);
+                startList, delayToLiveInMillis, raceLogStore, regattaLogStore, windStore, gpsFixStore, useInternalMarkPassingAlgorithm,
+                domainFactory, trackedRegattaRegistry);
     }
 
     @Override
-    public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore)
-            throws Exception {
-        return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, windStore, gpsFixStore, domainFactory,
-                trackedRegattaRegistry);
+    public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
+            WindStore windStore, GPSFixStore gpsFixStore) throws Exception {
+        return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname,
+                port, startList, delayToLiveInMillis, windStore, gpsFixStore, useInternalMarkPassingAlgorithm,
+                domainFactory, trackedRegattaRegistry);
     }
 
     @Override
