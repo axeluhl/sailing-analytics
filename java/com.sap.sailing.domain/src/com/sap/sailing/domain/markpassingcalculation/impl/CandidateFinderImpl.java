@@ -799,8 +799,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         List<Position> markPositions = new ArrayList<Position>();
         for (Mark mark : w.getMarks()) {
-            final Position estimatedMarkPosition = race.getOrCreateTrack(mark).getEstimatedPosition(t, /* extrapolate */
-            false);
+            final Position estimatedMarkPosition = race.getOrCreateTrack(mark).getEstimatedPosition(t, /* extrapolate */ false);
             if (estimatedMarkPosition == null) {
                 return new Util.Pair<Mark, Mark>(null, null);
             }
@@ -808,6 +807,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         final List<Leg> legs = race.getRace().getCourse().getLegs();
         final int indexOfWaypoint = race.getRace().getCourse().getIndexOfWaypoint(w);
+        if (indexOfWaypoint < 0) {
+            return new Util.Pair<Mark, Mark>(null, null);
+        }
         final boolean isStartLine = indexOfWaypoint == 0;
         final Bearing legDeterminingDirectionBearing = race.getTrackedLeg(
                 legs.get(isStartLine ? 0 : indexOfWaypoint - 1)).getLegBearing(t);

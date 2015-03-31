@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
@@ -26,6 +27,7 @@ import com.sap.sse.common.Util.Triple;
  * 
  */
 public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
+    private static final Logger logger = Logger.getLogger(MarkPassingUpdateListener.class.getName());
     private LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
     private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
         @Override
@@ -90,6 +92,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     }
 
     public void stop() {
+        logger.info("Stopping "+this);
         queue.add(endMarker);
     }
 

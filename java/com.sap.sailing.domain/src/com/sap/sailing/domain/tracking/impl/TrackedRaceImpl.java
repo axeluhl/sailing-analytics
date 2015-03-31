@@ -104,6 +104,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -428,6 +429,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         if (useInternalMarkPassingAlgorithm){
             markPassingCalculator = createMarkPassingCalculator();
+            this.trackedRegatta.addRaceListener(new RaceListener() {
+                @Override
+                public void raceAdded(TrackedRace trackedRace) {}
+                @Override
+                public void raceRemoved(TrackedRace trackedRace) {
+                    // stop mark passing calculator when tracked race is removed:
+                    markPassingCalculator.stop();
+                }
+            });
         } else {
             markPassingCalculator = null;
         }
@@ -2770,7 +2780,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
             resumeAllCachesNotUpdatingWhileLoading();
         }
-
+        if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+            // no more new data can be expected; stop mark passing calculator if one is being used
+            if (isUsingMarkPassingCalculator()) {
+                markPassingCalculator.stop();
+            }
+        }
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {

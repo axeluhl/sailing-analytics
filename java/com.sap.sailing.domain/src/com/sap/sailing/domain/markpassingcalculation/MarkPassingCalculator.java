@@ -111,6 +111,7 @@ public class MarkPassingCalculator {
                 logger.finer("MPC recieved "+ allNewFixInsertions.size()+" new updates.");
                 for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
                     if (listener.isEndMarker(fixInsertion)) {
+                        logger.info("Stopping "+MarkPassingCalculator.this+"'s listener");
                         finished = true;
                     } else {
                         fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
@@ -165,7 +166,7 @@ public class MarkPassingCalculator {
 
         /**
          * The calculation has two steps. For every mark with new fixes those competitor fixes are calculated that may
-         * have changed their status as {@link Candidate} (see {@link FixesAffectedByNewMarkFixes}. Then, the
+         * have changed their status as {@link Candidate} (see {@code FixesAffectedByNewMarkFixes}). Then, the
          * {@link CandidateFinder} uses those fixes along with any new competitor fixes to calculate any new or wrong
          * Candidates. These are passed to the {@link CandidateChooser} to calculate any new {@link MarkPassing}s (see
          * {@link ComputeMarkPassings}).
@@ -173,7 +174,6 @@ public class MarkPassingCalculator {
          */
         private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes,
                 Map<Mark, List<GPSFix>> newMarkFixes) {
-
             logger.finer("Calculating markpassings with " + newCompetitorFixes.size() + " new competitor Fixes and "
                     + newMarkFixes.size() + "new mark fixes.");
             Map<Competitor, Set<GPSFix>> combinedCompetitorFixes = new HashMap<>();
