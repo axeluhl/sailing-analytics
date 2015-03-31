@@ -80,6 +80,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     @Override
     public void onResume() {
         super.onResume();
+        mapFragment = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         initialLocationUpdate = true;
         initLocationProvider();
         MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
@@ -87,7 +89,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         if (mark != null) {
             markHeaderTextView.setText(mark.getName());
             setUpTextUI(null);
-            setUpMap();
+            updateMap();
         }
     }
 
@@ -134,13 +136,16 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             reportGPSQuality(lastKnownLocation.getAccuracy());
             setPositionButton.setVisibility(View.VISIBLE);
             setUpTextUI(lastKnownLocation);
-            setUpMap();
+            updateMap();
         }
 
         if(initialLocationUpdate){
             LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-            mapFragment.getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
-            mapFragment.getMap().setMyLocationEnabled(true);
+            GoogleMap map = mapFragment.getMap();
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
+            map.setMyLocationEnabled(true);
+            map.getUiSettings().setZoomControlsEnabled(true);
+            map.setPadding(0, 50, 0, 0);
             initialLocationUpdate = false;
         }
 
@@ -171,16 +176,12 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         locationManager = (LocationManager) getActivity().getSystemService(
                 Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10, this);
     }
 
-    public void setUpMap() {
-        mapFragment = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+    public void updateMap() {
         GoogleMap map = mapFragment.getMap();
         map.clear();
-        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        map.getUiSettings().setZoomControlsEnabled(true);
-        map.setPadding(0, 50, 0, 0);
 
         if (savedPosition != null) {
             MarkerOptions savedLocactionOptions = new MarkerOptions();
@@ -248,7 +249,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                         savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                         pingListener.updatePing();
                         setUpTextUI(lastKnownLocation);
-                        setUpMap();
+                        updateMap();
                     } else {
                         Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                     }
