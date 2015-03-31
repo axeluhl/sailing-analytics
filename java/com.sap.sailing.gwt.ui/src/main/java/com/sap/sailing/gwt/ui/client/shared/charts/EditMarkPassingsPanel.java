@@ -16,8 +16,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -45,7 +47,7 @@ import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class EditMarkPassingsPanel extends FlexTable implements Component<Void>, RaceSelectionChangeListener,
+public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Void>, RaceSelectionChangeListener,
         CompetitorSelectionChangeListener {
 
     private static class AnchorCell extends AbstractCell<SafeHtml> {
@@ -262,13 +264,18 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                 });
             }
         });
-
         refreshWaypoints();
-        setWidget(1, 0, wayPointSelectionTable);
-        setWidget(2, 0, setTimeAsMarkPassingsButton);
-        setWidget(2, 1, removeFixedMarkPassingsButton);
-        setWidget(3, 0, suppressPassingsButton);
-        setWidget(3, 1, removeSuppressedPassingButton);
+        HorizontalPanel tableAndButtons = new HorizontalPanel();
+        add(tableAndButtons, 0, 0);
+        tableAndButtons.setSpacing(3);
+        tableAndButtons.add(wayPointSelectionTable);
+        VerticalPanel buttonPanel = new VerticalPanel();
+        buttonPanel.setSpacing(3);
+        tableAndButtons.add(buttonPanel);
+        buttonPanel.add(setTimeAsMarkPassingsButton);
+        buttonPanel.add(removeFixedMarkPassingsButton);
+        buttonPanel.add(suppressPassingsButton);
+        buttonPanel.add(removeSuppressedPassingButton);
         enableButtons();
     }
 
