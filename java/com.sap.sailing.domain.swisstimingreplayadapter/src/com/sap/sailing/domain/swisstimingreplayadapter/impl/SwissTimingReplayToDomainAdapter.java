@@ -260,7 +260,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short trueWindDirectionInDegrees) {
         final List<String> markNames = new ArrayList<>();
         markNames.add(id1.trim());
-        if (id2 != null) {
+        if (id2 != null && !id2.trim().isEmpty()) {
             markNames.add(id2.trim());
         }
         final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(markNames);
