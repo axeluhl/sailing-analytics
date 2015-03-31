@@ -354,7 +354,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 trackedRace.recordFix(competitor, fix);
                 Course course = trackedRace.getRace().getCourse();
                 // record a mark passing, but not if the mark passing has happened longer than 30s before the race start
-                if (bestStartTimePerRaceID.get(currentRaceID) != null &&
+                if (!useInternalMarkPassingAlgorithm && bestStartTimePerRaceID.get(currentRaceID) != null &&
                         !bestStartTimePerRaceID.get(currentRaceID).after(
                                 raceTimePoint.plus(THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS)) &&
                                 (!lastNextMark.containsKey(competitor) || lastNextMark.get(competitor) != nextMark) && nextMark > 0) {
