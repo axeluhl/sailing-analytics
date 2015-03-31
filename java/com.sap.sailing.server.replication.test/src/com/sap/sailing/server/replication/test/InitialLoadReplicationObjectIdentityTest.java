@@ -190,7 +190,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         replicationDescriptorPair.getA().initialLoad();
         replicator.setSuspended(false);
         synchronized (replicator) {
-            while (!replicator.isQueueEmpty()) {
+            while (!replicator.isQueueEmptyOrStopped()) {
                 replicator.wait();
             }
         }
