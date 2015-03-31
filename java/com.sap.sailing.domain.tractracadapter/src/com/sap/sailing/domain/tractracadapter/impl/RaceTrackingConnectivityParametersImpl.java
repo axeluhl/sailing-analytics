@@ -35,11 +35,11 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     private final String tracTracPassword;
     private final String raceStatus;
     private final String raceVisibility;
-    private final boolean ignoreTracTracMarkPassings;
+    private final boolean useInternalMarkPassingAlgorithm;
 
     public RaceTrackingConnectivityParametersImpl(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow,  boolean ignoreTracTracMarkPassings, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            boolean simulateWithStartTimeNow,  boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             DomainFactory domainFactory, String tracTracUsername, String tracTracPassword, String raceStatus,
             String raceVisibility) {
         super();
@@ -58,7 +58,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
         this.tracTracPassword = tracTracPassword;
         this.raceStatus = raceStatus;
         this.raceVisibility = raceVisibility;
-        this.ignoreTracTracMarkPassings = ignoreTracTracMarkPassings;
+        this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
             GPSFixStore gpsFixStore) throws MalformedURLException, FileNotFoundException, URISyntaxException,
             CreateModelException, SubscriberInitializationException {
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, ignoreTracTracMarkPassings, raceLogStore,
+                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
                 raceVisibility, trackedRegattaRegistry);
         return tracker;
@@ -76,7 +76,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
             WindStore windStore, GPSFixStore gpsFixStore) throws Exception {
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, paramURL, liveURI, storedURI,
-                courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, ignoreTracTracMarkPassings,
+                courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm,
                 raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
                 raceVisibility, trackedRegattaRegistry);
         return tracker;

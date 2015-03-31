@@ -111,7 +111,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
      *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
      *            events received such that they seem to be sent in "real-time." So, more or less the time points
      *            attached to the events sent to the receivers will again approximate the wall time.
-     * @param ignoreTracTracMarkPassings
+     * @param useInternalMarkPassingAlgorithm
      *            whether or not to ignore the TracTrac-provided mark passings; if <code>true</code>, a separate mark
      *            passing calculator is used, and the TracTrac-provided ones are ignored.
      * @param storedURImay
@@ -120,7 +120,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo,
             Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
-            boolean simulateWithStartTimeNow, boolean ignoreTracTracMarkPassings, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
+            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
             String hostname, int port, boolean trackWind, boolean correctWindByDeclination,

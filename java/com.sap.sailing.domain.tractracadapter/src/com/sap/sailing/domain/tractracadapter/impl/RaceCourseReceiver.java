@@ -59,13 +59,13 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
     private final String tracTracPassword;
     private final IRace tractracRace;
     private final IControlRouteChangeListener listener;
-    private final boolean ignoreTracTracMarkPassings;
+    private final boolean useInternalMarkPassingAlgorithm;
     
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             IRace tractracRace, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, Simulator simulator,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
-            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean ignoreTracTracMarkPassings) {
+            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
         this.tractracRace = tractracRace;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
@@ -79,7 +79,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         this.tracTracUpdateURI = courseDesignUpdateURI;
         this.tracTracUsername = tracTracUsername;
         this.tracTracPassword = tracTracPassword;
-        this.ignoreTracTracMarkPassings = ignoreTracTracMarkPassings;
+        this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
         listener = new IControlRouteChangeListener() {
             @Override
             public void gotRouteChange(IControlRoute controlRoute, long timeStamp) {
@@ -155,7 +155,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                     getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(), competitorsAndDominantBoatClass.getA(),
                     competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
-                    getTracTracEvent().getId(), tracTracUsername, tracTracPassword, ignoreTracTracMarkPassings);
+                    getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm);
             needToUpdateRaceTimes = true;
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
@@ -220,7 +220,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines,
                 windStore, EmptyGPSFixStore.INSTANCE, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                raceDefinitionSetToUpdate, ignoreTracTracMarkPassings);
+                raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm);
         getDomainFactory().addTracTracUpdateHandlers(tracTracUpdateURI, getTracTracEvent().getId(), tracTracUsername, tracTracPassword, race, trackedRace);
         return trackedRace;
     }
