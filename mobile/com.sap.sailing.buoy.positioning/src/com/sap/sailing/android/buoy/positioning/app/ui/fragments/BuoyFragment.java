@@ -44,6 +44,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private LocationManager locationManager;
     private pingListener pingListener;
     private SignalQualityIndicatorView signalQualityIndicatorView;
+    private boolean initialLocationUpdate;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -80,20 +81,16 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     @Override
     public void onResume() {
         super.onResume();
+        initialLocationUpdate = true;
         initLocationProvider();
         String locationProvider = locationManager.getBestProvider(new Criteria(), true);
         lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
         MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
+        reportGPSQuality(GPSQuality.noSignal.toInt());
         if (mark != null) {
             markHeaderTextView.setText(mark.getName());
             setUpTextUI(lastKnownLocation);
             setUpMap();
-        }
-        if (lastKnownLocation != null) {
-            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-            mapFragment.getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
-            setPositionButton.setVisibility(View.VISIBLE);
-            reportGPSQuality(lastKnownLocation.getAccuracy());
         }
     }
 
@@ -142,6 +139,13 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             setUpTextUI(lastKnownLocation);
             setUpMap();
         }
+
+        if(initialLocationUpdate){
+            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+            mapFragment.getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
+            initialLocationUpdate = false;
+        }
+
     }
 
     @Override
