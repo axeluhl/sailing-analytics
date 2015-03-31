@@ -1,6 +1,7 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
 import android.content.Context;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,6 +28,8 @@ import com.sap.sailing.android.shared.ui.customviews.OpenSansButton;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
+
+import java.text.DecimalFormat;
 
 public class BuoyFragment extends BaseFragment implements LocationListener {
     private OpenSansTextView markHeaderTextView;
@@ -78,7 +81,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     public void onResume() {
         super.onResume();
         initLocationProvider();
-        lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        String locationProvider = locationManager.getBestProvider(new Criteria(), true);
+        lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
         MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
         if (mark != null) {
             markHeaderTextView.setText(mark.getName());
@@ -104,9 +108,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         String longitudeText = "";
         String latitudeText = "";
         String accuracyText = "";
+        DecimalFormat formatter = new DecimalFormat("#.######");
         if (location != null) {
-            latitudeText += location.getLatitude();
-            longitudeText += location.getLongitude();
+            latitudeText += formatter.format(location.getLatitude());
+            longitudeText += formatter.format(location.getLongitude());
             accuracyText += "~" + location.getAccuracy();
         } else {
             latitudeText += "n/a";
@@ -119,8 +124,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             double savedLatitude = Double.parseDouble(markPing.getLatitude());
             double savedLongitude = Double.parseDouble(markPing.getLongitude());
             savedPosition = new LatLng(savedLatitude, savedLongitude);
-            latitudeText += " (" + markPing.getLatitude() + ")";
-            longitudeText += " (" + markPing.getLongitude() + ")";
+            latitudeText += " (" + formatter.format(savedLatitude) + ")";
+            longitudeText += " (" + formatter.format(savedLongitude) + ")";
             accuracyText += " (" + "~" + markPing.getAccuracy() + ")";
         }
         latitudeTextView.setText(latitudeText);
@@ -164,7 +169,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         locationManager = (LocationManager) getActivity().getSystemService(
                 Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 500.0f, this);
+        String locationProvider = locationManager.getBestProvider(new Criteria(), true);
+        locationManager.requestLocationUpdates(locationProvider, 60000, 10, this);
     }
 
     public void setUpMap() {
@@ -175,18 +181,12 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         map.getUiSettings().setZoomControlsEnabled(true);
         map.setMyLocationEnabled(true);
         map.setPadding(0, 50, 0, 0);
+
         if (savedPosition != null) {
             MarkerOptions savedLocactionOptions = new MarkerOptions();
             savedLocactionOptions.position(savedPosition);
             savedLocactionOptions.visible(true);
             map.addMarker(savedLocactionOptions);
-        }
-        if (lastKnownLocation != null) {
-            MarkerOptions mySelfOptions = new MarkerOptions();
-            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-            mySelfOptions.position(lastKnownLatLng);
-            mySelfOptions.visible(true);
-            map.addMarker(mySelfOptions);
         }
 
     }
@@ -248,6 +248,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                         savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                         pingListener.updatePing();
                         setUpTextUI(lastKnownLocation);
+                        setUpMap();
                     } else {
                         Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                     }
