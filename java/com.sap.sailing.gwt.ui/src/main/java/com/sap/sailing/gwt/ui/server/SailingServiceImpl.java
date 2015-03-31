@@ -2695,7 +2695,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 } else {
                     regatta = getService().getRegatta(regattaIdentifier);
                 }
-                getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService());
+                getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService(), useInternalMarkPassingAlgorithm);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }
