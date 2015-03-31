@@ -28,7 +28,6 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
     private final long delayToLiveInMillis;
-    private final boolean useMarkPassingCalculator;
     
     /**
      * If a {@link WindStore} is provided to this command, it will be used for the construction of the tracked race.
@@ -53,14 +52,13 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
      *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyWindStore}.
      */
     public CreateTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, GPSFixStore gpsFixStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator) {
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(raceIdentifier);
         this.windStore = windStore;
         this.gpsFixStore = gpsFixStore;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
-        this.useMarkPassingCalculator = useMarkPassingCalculator;
     }
 
     @Override
@@ -79,7 +77,10 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
     public DynamicTrackedRace internalApplyTo(RacingEventService toState) {
         return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore, 
         		gpsFixStore == null ? EmptyGPSFixStore.INSTANCE : gpsFixStore,
-                delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, useMarkPassingCalculator);
+                delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                /* useMarkPassingCalculator */ false); // no separate mark passing calculations in replica;
+        // Mark passings are computed on master and are replicated separately.
+        // See UpdateMarkPassings
     }
 
 }

@@ -1510,7 +1510,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             CreateTrackedRace op = new CreateTrackedRace(trackedRace.getRaceIdentifier(), trackedRace.getWindStore(),
                     trackedRace.getGPSFixStore(), trackedRace.getDelayToLiveInMillis(),
                     trackedRace.getMillisecondsOverWhichToAverageWind(),
-                    trackedRace.getMillisecondsOverWhichToAverageSpeed(), trackedRace.isUsingMarkPassingCalculator());
+                    trackedRace.getMillisecondsOverWhichToAverageSpeed());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName

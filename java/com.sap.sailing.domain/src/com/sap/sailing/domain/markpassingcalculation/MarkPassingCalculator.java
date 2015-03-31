@@ -140,7 +140,6 @@ public class MarkPassingCalculator {
                     removedFixedMarkPassings.clear();
                     suppressedMarkPassings.clear();
                     unsuppressedMarkPassings.clear();
-
                 }
             }
         }
