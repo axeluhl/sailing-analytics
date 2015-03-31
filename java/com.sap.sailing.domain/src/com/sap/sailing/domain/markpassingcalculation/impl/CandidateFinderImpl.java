@@ -347,53 +347,58 @@ public class CandidateFinderImpl implements CandidateFinder {
                     List<Distance> waypointDistances = fixDistances.get(w);
                     List<Distance> waypointDistancesBefore = fixDistancesBefore.get(w);
                     List<Distance> waypointDistancesAfter = fixDistancesAfter.get(w);
-                    Iterator<Distance> disIter = waypointDistances.iterator();
-                    Iterator<Distance> disBeforeIter = waypointDistancesBefore.iterator();
-                    Iterator<Distance> disAfterIter = waypointDistancesAfter.iterator();
-                    boolean portMark = true;
-                    while (disIter.hasNext() && disBeforeIter.hasNext() && disAfterIter.hasNext()) {
-                        Distance dis = disIter.next();
-                        Distance disBefore = disBeforeIter.next();
-                        Distance disAfter = disAfterIter.next();
-                        if (dis != null && disBefore != null && disAfter != null) {
-                            if (Math.abs(dis.getMeters()) < Math.abs(disBefore.getMeters()) &&
-                                    Math.abs(dis.getMeters()) < Math.abs(disAfter.getMeters())) {
-                                t = fix.getTimePoint();
-                                p = fix.getPosition();
-                                Double newProbability = getDistanceBasedProbability(w, t, dis);
-                                if (newProbability != null) {
-                                    newProbability *= isOnCorrectSideOfWaypoint(w, p, t, portMark) ? penaltyForDistanceCandidates
-                                            : penaltyForDistanceCandidates * penaltyForWrongSide;
-                                    if (newProbability > penaltyForSkipping
-                                            && (probability == null || newProbability > probability)) {
-                                        isCan = true;
-                                        probability = newProbability;
+                    // due to course changes, waypoints that exist in the waypoints collection may not have a corresponding
+                    // key in passingInstructions' key set which is the basis for the waypoints for which getDistances(...)
+                    // computes results; so we have to check for null here:
+                    if (waypointDistances != null && waypointDistancesBefore != null && waypointDistancesAfter != null) {
+                        Iterator<Distance> disIter = waypointDistances.iterator();
+                        Iterator<Distance> disBeforeIter = waypointDistancesBefore.iterator();
+                        Iterator<Distance> disAfterIter = waypointDistancesAfter.iterator();
+                        boolean portMark = true;
+                        while (disIter.hasNext() && disBeforeIter.hasNext() && disAfterIter.hasNext()) {
+                            Distance dis = disIter.next();
+                            Distance disBefore = disBeforeIter.next();
+                            Distance disAfter = disAfterIter.next();
+                            if (dis != null && disBefore != null && disAfter != null) {
+                                if (Math.abs(dis.getMeters()) < Math.abs(disBefore.getMeters())
+                                        && Math.abs(dis.getMeters()) < Math.abs(disAfter.getMeters())) {
+                                    t = fix.getTimePoint();
+                                    p = fix.getPosition();
+                                    Double newProbability = getDistanceBasedProbability(w, t, dis);
+                                    if (newProbability != null) {
+                                        newProbability *= isOnCorrectSideOfWaypoint(w, p, t, portMark) ? penaltyForDistanceCandidates
+                                                : penaltyForDistanceCandidates * penaltyForWrongSide;
+                                        if (newProbability > penaltyForSkipping
+                                                && (probability == null || newProbability > probability)) {
+                                            isCan = true;
+                                            probability = newProbability;
+                                        }
                                     }
                                 }
                             }
+                            portMark = false;
                         }
-                        portMark = false;
-                    }
-                    oldCan = distanceCandidates.get(c).get(w).get(fix);
-                    if (oldCan != null) {
-                        wasCan = true;
-                    }
-                    if (!wasCan && isCan) {
-                        Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t,
-                                probability, w);
-                        distanceCandidates.get(c).get(w).put(fix, newCan);
-                        result.getA().add(newCan);
-                        logger.finest("Added distance" + newCan.toString() + "for " + c);
-                    } else if (wasCan && !isCan) {
-                        distanceCandidates.get(c).get(w).remove(fix);
-                        result.getB().add(oldCan);
-                    } else if (wasCan && isCan && oldCan.getProbability() != probability) {
-                        Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t,
-                                probability, w);
-                        distanceCandidates.get(c).get(w).put(fix, newCan);
-                        result.getA().add(newCan);
-                        logger.finest("Added distance" + newCan.toString() + "for " + c);
-                        result.getB().add(oldCan);
+                        oldCan = distanceCandidates.get(c).get(w).get(fix);
+                        if (oldCan != null) {
+                            wasCan = true;
+                        }
+                        if (!wasCan && isCan) {
+                            Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t,
+                                    probability, w);
+                            distanceCandidates.get(c).get(w).put(fix, newCan);
+                            result.getA().add(newCan);
+                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                        } else if (wasCan && !isCan) {
+                            distanceCandidates.get(c).get(w).remove(fix);
+                            result.getB().add(oldCan);
+                        } else if (wasCan && isCan && oldCan.getProbability() != probability) {
+                            Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t,
+                                    probability, w);
+                            distanceCandidates.get(c).get(w).put(fix, newCan);
+                            result.getA().add(newCan);
+                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                            result.getB().add(oldCan);
+                        }
                     }
                 }
             }
@@ -698,13 +703,17 @@ public class CandidateFinderImpl implements CandidateFinder {
             break;
         case Gate:
             Util.Pair<Mark, Mark> posGate = getPortAndStarboardMarks(t, w);
-            if (posGate.getA() != null && posGate.getB() != null) {
-                Position portGatePosition = posGate.getA() == null ? null : race.getOrCreateTrack(posGate.getA())
-                        .getEstimatedPosition(t, false);
-                Position starboardGatePosition = posGate.getB() == null ? null : race.getOrCreateTrack(posGate.getB())
-                        .getEstimatedPosition(t, false);
+            if (posGate.getA() != null) {
+                Position portGatePosition = race.getOrCreateTrack(posGate.getA()).getEstimatedPosition(t, false);
                 distances.add(portGatePosition != null ? p.getDistance(portGatePosition) : null);
+            } else {
+                distances.add(null);
+            }
+            if (posGate.getB() != null) {
+                Position starboardGatePosition = race.getOrCreateTrack(posGate.getB()).getEstimatedPosition(t, false);
                 distances.add(starboardGatePosition != null ? p.getDistance(starboardGatePosition) : null);
+            } else {
+                distances.add(null);
             }
             break;
         case Line:
