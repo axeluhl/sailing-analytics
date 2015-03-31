@@ -19,6 +19,7 @@
     <!-- Generic -->
     <string name="empty" translatable="false"></string>
     <string name="generic_error">Error</string>
+    <string name="about">About</string>
     
     <!-- Signal quality -->
     <string name="signal_accuracy_indicator_view_description">GPS Accuracy</string>

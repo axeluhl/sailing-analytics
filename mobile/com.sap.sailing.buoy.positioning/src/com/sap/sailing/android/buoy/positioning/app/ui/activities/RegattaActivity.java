@@ -23,6 +23,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
+import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,6 +119,10 @@ public class RegattaActivity extends AbstractRegattaActivity {
                 ExLog.i(this, TAG, "Clicked REFRESH.");
                 CheckinManager manager = new CheckinManager(checkinUrl, this);
                 manager.callServerAndGenerateCheckinData();
+                return true;
+            case R.id.about:
+                AboutDialog aboutDialog = new AboutDialog(this);
+                aboutDialog.show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

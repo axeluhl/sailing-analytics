@@ -16,6 +16,7 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
+import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 
 public class PositioningActivity extends BaseActivity implements pingListener {
 
@@ -71,13 +72,17 @@ public class PositioningActivity extends BaseActivity implements pingListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.empty_menu, menu);
+        inflater.inflate(R.menu.about_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.about:
+                AboutDialog aboutDialog = new AboutDialog(this);
+                aboutDialog.show();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -85,7 +90,7 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 
     @Override
     protected int getOptionsMenuResId() {
-        return R.menu.empty_menu;
+        return R.menu.about_menu;
     }
 
 	public void setPingFromDatabase(String markerID) {

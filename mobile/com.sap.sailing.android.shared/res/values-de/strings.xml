@@ -9,6 +9,7 @@
 
     <!-- Generic -->
     <string name="generic_error">Fehler</string>
+    <string name="about">Info</string>
     <string name="signal_accuracy_indicator_view_description">GPS Genauigkeit</string>
     <string name="poor">schwach</string>
     <string name="good">gut</string>

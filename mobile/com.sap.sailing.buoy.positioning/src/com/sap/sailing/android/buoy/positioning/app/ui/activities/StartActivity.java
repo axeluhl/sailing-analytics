@@ -10,6 +10,7 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
+import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 
@@ -32,13 +33,17 @@ public class StartActivity extends AbstractStartActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.empty_menu, menu);
+        inflater.inflate(R.menu.about_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.about:
+                AboutDialog aboutDialog = new AboutDialog(this);
+                aboutDialog.show();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -46,7 +51,7 @@ public class StartActivity extends AbstractStartActivity {
 
     @Override
     protected int getOptionsMenuResId() {
-        return R.menu.empty_menu;
+        return R.menu.about_menu;
     }
 
 	public AbstractHomeFragment getHomeFragment() {

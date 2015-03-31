@@ -22,7 +22,7 @@ public class BaseActivity extends AbstractBaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.empty_menu, menu);
+        inflater.inflate(R.menu.about_menu, menu);
         return true;
     }
 
@@ -36,6 +36,6 @@ public class BaseActivity extends AbstractBaseActivity {
 
     @Override
     protected int getOptionsMenuResId() {
-        return R.menu.empty_menu;
+        return R.menu.about_menu;
     }
 }
