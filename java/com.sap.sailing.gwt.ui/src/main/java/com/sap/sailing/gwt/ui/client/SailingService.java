@@ -560,6 +560,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO);
 
+    /**
+     * Obtains fixed mark passings and mark passing suppressions from the race log identified by
+     * <code>leaderboardName</code>, <code>raceColumnDTO</code> and <code>fleet</code>. The result contains
+     * pairs of zero-based waypoint numbers and times where <code>null</code> represents a suppressed mark
+     * passing and a valid {@link Date} objects represents a fixed mark passing.
+     */
     Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             CompetitorDTO competitor);
 

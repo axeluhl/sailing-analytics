@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -64,9 +65,17 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
     private RaceColumnDTO column;
 
     private CompetitorDTO competitor;
+    
+    /**
+     * The fixed mark passings; keys are zero-based waypoint indexes
+     */
     private Map<Integer, Date> currentCompetitorEdits = new HashMap<>();
+    
     private Integer zeroBasedIndexOfFirstSuppressedWaypoint;
 
+    /**
+     * The waypoints table uses pairs of zero-based waypoint numbers and current passing times.
+     */
     private final CellTable<Util.Pair<Integer, Date>> wayPointSelectionTable;
     private final ListDataProvider<Util.Pair<Integer, Date>> waypointList;
     private final SingleSelectionModel<Util.Pair<Integer, Date>> waypointSelectionModel;
@@ -99,9 +108,11 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Pair<Integer, Date> selectedObject = waypointSelectionModel.getSelectedObject();
-                Date timePoint = selectedObject.getB();
-                if (timePoint != null) {
-                    timer.setTime(timePoint.getTime());
+                if (selectedObject != null) {
+                    Date timePoint = selectedObject.getB();
+                    if (timePoint != null) {
+                        timer.setTime(timePoint.getTime());
+                    }
                 }
                 enableButtons();
             }
@@ -120,6 +131,7 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                 };
             }
         }, stringMessages.waypoint());
+        final DateTimeFormat timeFormat = DateTimeFormat.getFormat("HH:mm:ss");
         wayPointSelectionTable.addColumn(new Column<Util.Pair<Integer, Date>, SafeHtml>(new AnchorCell()) {
             @Override
             public SafeHtml getValue(final Pair<Integer, Date> object) {
@@ -130,18 +142,18 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
 
                     @Override
                     public String asString() {
-                        // TODO this is really unclean (Problem: no
-                        // calendar)
-                        String string = "";
+                        // TODO this is really unclean (Problem: no calendar)
+                        String string;
                         if (date != null) {
-                            string = date.toString();
-                            string = string.substring(10, 20);
+                            string = timeFormat.format(date);
                             if (currentCompetitorEdits.containsKey(object.getA())) {
-                                string = string + " (f)";
+                                string += " "+stringMessages.fixedMarkPassing();
                             }
                         } else if (zeroBasedIndexOfFirstSuppressedWaypoint != null
                                 && !(object.getA() < zeroBasedIndexOfFirstSuppressedWaypoint)) {
-                            string = "(s)";
+                            string = " "+stringMessages.suppressedMarkPassing();
+                        } else {
+                            string = "";
                         }
                         return string;
                     }
@@ -280,15 +292,13 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
     }
 
     private void disableEditing() {
-        waypointList.setList(new ArrayList<Util.Pair<Integer, Date>>());
+        waypointList.getList().clear();
         clearInfo();
     }
 
     private void refillList() {
         clearInfo();
-
         competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
-
         // Get current mark passings
         asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
             @Override
@@ -308,19 +318,16 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
                     int index = currentWaypoints.indexOf(waypoint);
                     newMarkPassings.add(new Util.Pair<Integer, Date>(index, result.get(index)));
                 }
-                waypointList.setList(newMarkPassings);
-                wayPointSelectionTable.redraw();
+                waypointList.getList().clear();
+                waypointList.getList().addAll(newMarkPassings);
             }
         });
-
         // Get current edits
-
         asyncExecutor.execute(new AsyncAction<Map<Integer, Date>>() {
             @Override
             public void execute(AsyncCallback<Map<Integer, Date>> callback) {
                 sailingService.getCompetitorRaceLogMarkPassingData(leaderboardName, column,
                         column.getFleet(raceIdentifier), competitor, callback);
-
             }
         }, new AsyncCallback<Map<Integer, Date>>() {
             @Override
@@ -343,6 +350,10 @@ public class EditMarkPassingsPanel extends FlexTable implements Component<Void>,
         });
     }
 
+    /**
+     * Removes all competitor selection-specific data, particularly the fixed and suppressed mark
+     * passings and the reference to the competitor selected.
+     */
     private void clearInfo() {
         currentCompetitorEdits.clear();
         competitor = null;
