@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -27,12 +29,16 @@ import java.util.List;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
+    private final RaceStateChangedListener raceStateChangedListener;
     private final ProcedureChangedListener procedureListener;
+
     protected RaceInfoListener infoListener;
     private FlagPoleCache flagPoleCache;
 
     public BaseRaceInfoRaceFragment() {
+        raceStateChangedListener = new RaceStateChangedListener();
         procedureListener = new ProcedureChangedListener();
+
         flagPoleCache = null;
     }
 
@@ -61,6 +67,8 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         super.onStart();
 
         setupUi();
+
+        getRaceState().addChangedListener(raceStateChangedListener);
         getRacingProcedure().addChangedListener(procedureListener);
     }
 
@@ -68,6 +76,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     public void onStop() {
         super.onStop();
 
+        getRaceState().removeChangedListener(raceStateChangedListener);
         getRacingProcedure().removeChangedListener(procedureListener);
     }
 
@@ -162,6 +171,16 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             this.flagPole = flagPole;
             this.timePoint = timePoint;
             this.hasNextFlag = hasNextFlag;
+        }
+    }
+
+    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
+
+        @Override
+        public void onFinishedTimeChanged(ReadonlyRaceState state) {
+            super.onFinishedTimeChanged(state);
+
+
         }
     }
 

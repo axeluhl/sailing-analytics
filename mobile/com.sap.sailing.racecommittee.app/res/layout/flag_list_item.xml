@@ -32,7 +32,7 @@
         android:layout_marginRight="@dimen/default_margin"
         android:layout_toLeftOf="@id/more_data"
         android:text="@string/set_signal"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_alignParentRight="true"
         style="?attr/buttonSolidNormal" />
 

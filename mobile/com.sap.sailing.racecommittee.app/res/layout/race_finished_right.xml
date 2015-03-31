@@ -17,7 +17,8 @@
             android:padding="@dimen/default_padding_half"
             android:textAppearance="?textNormal"
             android:layout_centerInParent="true"
-            android:text="@string/protest_time" />
+            android:text="@string/protest_time"
+            android:id="@+id/protest_button" />
 
         <View
             android:layout_width="match_parent"
@@ -54,7 +55,8 @@
             android:layout_centerInParent="true"
             android:text="@string/finished_text_01"
             android:gravity="center"
-            style="?textSmall" />
+            style="?textSmall"
+            android:id="@+id/publish_advice" />
 
         <Button
             android:layout_width="wrap_content"
@@ -63,7 +65,8 @@
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="@dimen/default_margin_twice"
             android:text="@string/finished_submit"
-            style="?buttonSolidSmall" />
+            style="?buttonSolidSmall"
+            android:id="@+id/submit_button" />
 
         <View
             android:layout_width="@dimen/thin_line"

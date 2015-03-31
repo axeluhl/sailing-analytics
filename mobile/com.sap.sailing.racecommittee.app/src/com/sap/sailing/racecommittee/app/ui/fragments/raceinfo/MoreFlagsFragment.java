@@ -20,6 +20,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagIt
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemClick {
@@ -86,7 +87,9 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
 
         public static final String STARTMODE = "startMode";
 
+        private SimpleDateFormat mDateFormat;
         private TimePicker mTimePicker;
+        private TextView mCurrentTime;
 
         public FinishingTimeFragment() {
 
@@ -105,6 +108,8 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View layout = inflater.inflate(R.layout.race_finish_config, container, false);
 
+            mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
+
             View header = ViewHolder.get(layout, R.id.header_text);
             if (header != null) {
 //                header.setOnClickListener(this);
@@ -115,14 +120,16 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
                 mTimePicker.setIs24HourView(true);
             }
 
-            View currentTime = ViewHolder.get(layout, R.id.finish_current);
-            if (currentTime != null) {
-                currentTime.setOnClickListener(this);
+            mCurrentTime = ViewHolder.get(layout, R.id.current_time);
+
+            View finishCurrent = ViewHolder.get(layout, R.id.finish_current);
+            if (finishCurrent != null) {
+                finishCurrent.setOnClickListener(this);
             }
 
-            View customTime = ViewHolder.get(layout, R.id.finish_custom);
-            if (customTime != null) {
-                customTime.setOnClickListener(this);
+            View finishCustom = ViewHolder.get(layout, R.id.finish_custom);
+            if (finishCustom != null) {
+                finishCustom.setOnClickListener(this);
             }
 
             if (getArguments().getInt(STARTMODE, 0) != 0) {
@@ -175,6 +182,18 @@ public class MoreFlagsFragment extends ScheduleFragment implements MoreFlagItemC
                 default:
                     replaceFragment(MoreFlagsFragment.newInstance(), R.id.race_frame);
                     break;
+            }
+        }
+
+        @Override
+        public void notifyTick() {
+            super.notifyTick();
+
+            TimePoint now = MillisecondsTimePoint.now();
+
+            if (mCurrentTime != null) {
+                mCurrentTime.setText(mDateFormat.format(now.asMillis()));
+                mCurrentTime.setVisibility(View.VISIBLE);
             }
         }
 

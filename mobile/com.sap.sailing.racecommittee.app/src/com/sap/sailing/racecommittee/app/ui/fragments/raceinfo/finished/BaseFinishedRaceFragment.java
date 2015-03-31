@@ -23,6 +23,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.activities.ResultsCapturingActivity;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.BasePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.FinishedButtonFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.FinishedSubmitFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
@@ -32,9 +33,12 @@ import com.sap.sse.common.TimePoint;
 import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
 
+    private Calendar mCalendar;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_finished, container, false);
@@ -52,7 +56,21 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
             replaceFragment(FinishedButtonFragment.newInstance(getArguments()), R.id.finished_panel_left);
             replaceFragment(FinishedSubmitFragment.newInstance(getArguments()), R.id.finished_panel_right);
 
-            ImageView button = ViewHolder.get(getView(), R.id.edit_summary);
+            mCalendar = Calendar.getInstance();
+
+            Calendar start = (Calendar) mCalendar.clone();
+            start.setTime(getRaceState().getStartTime().asDate());
+            Calendar startTime = floorTime(start);
+
+            Calendar finishing = (Calendar) mCalendar.clone();
+            finishing.setTime(getRaceState().getFinishingTime().asDate());
+            Calendar finishingTime = floorTime(finishing);
+
+            Calendar finished = (Calendar) mCalendar.clone();
+            finished.setTime(getRaceState().getFinishedTime().asDate());
+            Calendar finishedTime = floorTime(finished);
+
+            final ImageView button = ViewHolder.get(getView(), R.id.edit_summary);
             if (button != null) {
                 button.setOnClickListener(new OnClickListener() {
                     @Override
@@ -64,32 +82,32 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
 
             TextView start_time = ViewHolder.get(getView(), R.id.race_start_time);
             if (start_time != null) {
-                start_time.setText(dateFormat.format(getRaceState().getStartTime().asDate()));
+                start_time.setText(dateFormat.format(startTime.getTime()));
             }
 
             TextView finish_start_time = ViewHolder.get(getView(), R.id.race_finish_begin_time);
             if (finish_start_time != null) {
-                finish_start_time.setText(dateFormat.format(getRaceState().getFinishingTime().asDate()));
+                finish_start_time.setText(dateFormat.format(finishingTime.getTime()));
             }
 
             TextView finish_start_duration = ViewHolder.get(getView(), R.id.race_finish_begin_duration);
             if (finish_start_duration != null) {
-                finish_start_duration.setText(calcDuration(getRaceState().getStartTime(), getRaceState().getFinishingTime()));
+                finish_start_duration.setText(calcDuration(startTime, finishingTime));
             }
 
             TextView finish_end_time = ViewHolder.get(getView(), R.id.race_finish_end_time);
             if (finish_end_time != null) {
-                finish_end_time.setText(dateFormat.format(getRaceState().getFinishedTime().asDate()));
+                finish_end_time.setText(dateFormat.format(finishedTime.getTime()));
             }
 
             TextView finish_end_duration = ViewHolder.get(getView(), R.id.race_finish_end_duration);
             if (finish_end_duration != null) {
-                finish_end_duration.setText(calcDuration(getRaceState().getStartTime(), getRaceState().getFinishedTime()));
+                finish_end_duration.setText(calcDuration(startTime, finishedTime));
             }
 
             TextView finish_duration = ViewHolder.get(getView(), R.id.race_finish_duration);
             if (finish_duration != null) {
-                finish_duration.setText(calcDuration(getRaceState().getFinishingTime(), getRaceState().getFinishedTime()));
+                finish_duration.setText(calcDuration(finishingTime, finishedTime));
             }
 
             View region_wind = ViewHolder.get(getView(), R.id.region_wind);
@@ -102,7 +120,7 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
 
                     TextView direction = ViewHolder.get(getView(), R.id.wind_direction);
                     if (direction != null) {
-                        String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value), wind.getFrom());
+                        String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value), wind.getFrom().getDegrees());
                         direction.setText(wind_direction);
                     }
 
@@ -126,29 +144,31 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
 
     }
 
-    private String calcDuration(TimePoint from, TimePoint to) {
+    private String calcDuration(Calendar from, Calendar to) {
         String retValue;
 
-        Duration duration = from.until(to);
+        long millis = to.getTimeInMillis() - from.getTimeInMillis();
 
-        int sec = (int) Math.ceil(duration.asSeconds());
-        int min = sec / 60;
-        sec = sec - min * 60;
+        long min = millis / (1000 * 60);
+        long sec = (millis - (min * 60 * 1000)) / 1000;
 
-        String time = doubleZero(min) + ":" + doubleZero(sec);
-        retValue = String.format(getString(R.string.race_summary_time), time);
+        retValue = String.valueOf(sec) + "\"";
+        if (retValue.length() == 2) {
+            retValue = "0" + retValue;
+        }
+        if (min > 0) {
+            retValue = String.valueOf(min) + "' " + retValue;
+        }
 
         return retValue;
     }
 
-    private String doubleZero(int value) {
-        String retValue = String.valueOf(value);
-
-        int len = retValue.length();
-        for (int i = len; i < 2; i++) {
-            retValue = "0" + retValue;
+    private Calendar floorTime(Calendar calendar) {
+        if (calendar == null) {
+            calendar = Calendar.getInstance();
         }
+        calendar.set(Calendar.MILLISECOND, 0);
 
-        return retValue;
+        return calendar;
     }
 }

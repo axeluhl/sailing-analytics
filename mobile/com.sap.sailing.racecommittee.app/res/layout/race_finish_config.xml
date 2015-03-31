@@ -82,7 +82,8 @@
                     android:drawableStart="?access_time_36dp"
                     tools:text="@string/time"
                     android:textSize="@dimen/textSize_40"
-                    android:gravity="center" />
+                    android:gravity="center"
+                    android:visibility="invisible" />
             </RelativeLayout>
 
             <RelativeLayout

@@ -9,6 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -98,5 +99,13 @@ public abstract class BasePanelFragment extends RaceFragment {
                 .beginTransaction()
                 .replace(R.id.race_frame, fragment)
                 .commit();
+    }
+
+    protected class NotYetImplemented implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            Toast.makeText(getActivity(), "Function not yet implemented.", Toast.LENGTH_SHORT).show();
+        }
     }
 }

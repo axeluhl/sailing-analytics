@@ -358,7 +358,7 @@
     <string name="race_summary_finish_end">End Finish</string>
     <string name="race_summary_finish_duration">Finish Duration</string>
     <string name="race_summary_wind_direction">Average Wind Direction</string>
-    <string name="race_summary_wind_direction_value" translatable="false">from %s°</string>
+    <string name="race_summary_wind_direction_value" translatable="false">from %.0f°</string>
     <string name="race_summary_wind_speed">Average Wind Speed</string>
     <string name="race_summary_wind_speed_value" translatable="false">%.1f kts</string>
     <string name="race_summary_individual_recalls">Individual Recalls</string>
