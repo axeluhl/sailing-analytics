@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+@SuppressWarnings("deprecation")
 public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "CameraPreview";
 

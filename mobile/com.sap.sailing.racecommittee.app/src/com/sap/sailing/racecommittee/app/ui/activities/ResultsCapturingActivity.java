@@ -28,6 +28,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.PhotoAdapter;
 import com.sap.sailing.racecommittee.app.ui.views.CameraView;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
 
+@SuppressWarnings("deprecation")
 public class ResultsCapturingActivity extends SessionActivity {
     private static String ARGUMENTS_KEY_SUBJECT = "subject";
     private static String ARGUMENTS_KEY_TEXT = "text";
@@ -129,7 +130,7 @@ public class ResultsCapturingActivity extends SessionActivity {
         }
     }
     
-    private int getBackCameraId() {
+	private int getBackCameraId() {
         for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
             CameraInfo info = new CameraInfo();
             Camera.getCameraInfo(i, info);
