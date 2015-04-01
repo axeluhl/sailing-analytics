@@ -2,10 +2,12 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -50,7 +52,7 @@ public class WaypointPositionAndDistanceCache {
      * Weak keys are the waypoints; values are time-ordered maps mapping the center of a time range
      * to the approximate waypoint position at that time.
      */
-    private final ConcurrentWeakHashMap<Waypoint, Map<TimePoint, Position>> waypointPositionCache;
+    private final ConcurrentWeakHashMap<Waypoint, SortedMap<TimePoint, Position>> waypointPositionCache;
     
     /**
      * Caches distances between the positions cached in {@link #waypointPositionCache}. As soon as an entry
@@ -58,7 +60,7 @@ public class WaypointPositionAndDistanceCache {
      * symmetrically under the map's monitor being held, i.e., if (w1, w2) is a cache key then so is
      * (w2, w1), with equal value.
      */
-    private final ConcurrentHashMap<Pair<Waypoint, Waypoint>, Map<TimePoint, Distance>> distanceCache;
+    private final ConcurrentHashMap<Pair<Waypoint, Waypoint>, SortedMap<TimePoint, Distance>> distanceCache;
     
     /**
      * The duration of the time ranges whose center time points serve as keys for the {@link NavigableMap}s used as
@@ -121,24 +123,27 @@ public class WaypointPositionAndDistanceCache {
      *            the additional key supplied by this object. If the supplier is <code>null</code> or supplies <code>null</code>,
      *            no additional cache entry except one for the standard <code>key</code> will be produced
      */
-    private <K, R> R getApproximateResult(K cacheKey, TimePoint timePoint, Map<K, Map<TimePoint, R>> cacheMap,
+    private <K, R> R getApproximateResult(K cacheKey, TimePoint timePoint, Map<K, SortedMap<TimePoint, R>> cacheMap,
             Function<TimePoint, R> resultCalculator, Supplier<K> alternateKeySupplier) {
-        Map<TimePoint, R> map = cacheMap.get(cacheKey);
-        if (map == null) {
-            map = Collections.synchronizedMap(new HashMap<TimePoint, R>());
-            cacheMap.put(cacheKey, map);
-        }
+        SortedMap<TimePoint, R> map = cacheMap.get(cacheKey);
+        final R cachedResult;
         final TimePoint roundedToTimeRangeCenter = roundToResolution(timePoint);
-        final R cachedResult = map.get(roundedToTimeRangeCenter);
+        if (map == null) {
+            map = Collections.synchronizedSortedMap(new TreeMap<TimePoint, R>());
+            cacheMap.put(cacheKey, map);
+            cachedResult = null;
+        } else {
+            cachedResult = map.get(roundedToTimeRangeCenter);
+        }
         final R result;
         if (cachedResult == null) {
             result = computeResult(resultCalculator, roundedToTimeRangeCenter);
             map.put(roundedToTimeRangeCenter, result);
             K alternateKey;
             if (alternateKeySupplier != null && (alternateKey=alternateKeySupplier.get()) != null) {
-                Map<TimePoint, R> mapForAlternateKey = cacheMap.get(alternateKey);
+                SortedMap<TimePoint, R> mapForAlternateKey = cacheMap.get(alternateKey);
                 if (mapForAlternateKey == null) {
-                    mapForAlternateKey = Collections.synchronizedMap(new HashMap<TimePoint, R>());
+                    mapForAlternateKey = Collections.synchronizedSortedMap(new TreeMap<TimePoint, R>());
                     cacheMap.put(alternateKey, mapForAlternateKey);
                 }
                 mapForAlternateKey.put(roundedToTimeRangeCenter, result);
@@ -180,11 +185,14 @@ public class WaypointPositionAndDistanceCache {
     }
 
     private void invalidate(Waypoint waypoint, TimeRange affectedTimeRange) {
-        Map<TimePoint, Position> map = waypointPositionCache.get(waypoint);
+        SortedMap<TimePoint, Position> map = waypointPositionCache.get(waypoint);
         if (map != null) {
-            for (TimePoint timePoint = roundToResolution(affectedTimeRange.from());
-                 !timePoint.after(affectedTimeRange.to());
-                 timePoint = timePoint.plus(timeRangeResolution)) {
+            final SortedMap<TimePoint, Position> tailMap = map.tailMap(roundToResolution(affectedTimeRange.from()));
+            for (Entry<TimePoint, Position> e : tailMap.entrySet()) {
+                final TimePoint timePoint = e.getKey();
+                if (timePoint.after(affectedTimeRange.to())) {
+                    break;
+                }
                 assert timePoint.equals(roundToResolution(timePoint));
                 map.remove(timePoint);
                 synchronized (waypoints) {
