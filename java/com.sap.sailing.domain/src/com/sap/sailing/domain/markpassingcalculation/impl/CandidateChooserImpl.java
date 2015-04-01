@@ -62,16 +62,16 @@ public class CandidateChooserImpl implements CandidateChooser {
      * in case the race start time is not known.
      */
     private final CandidateWithSettableTime start;
-    private final Candidate end;
+    private final CandidateWithSettableWaypointIndex end;
     private final DynamicTrackedRace race;
 
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME) : null;
         start = new CandidateWithSettableTime(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null);
-        end = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */
-        null,
-        /* Probability */1, /* Waypoint */null);
+        end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse()
+                .getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */null,
+                /* Probability */1, /* Waypoint */null);
         candidates = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
@@ -113,12 +113,18 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     @Override
-    public void removeWaypoints(Iterable<Waypoint> ways) {
+    public void removeWaypoints(Iterable<Waypoint> waypoints) {
         for (Competitor c : currentMarkPasses.keySet()) {
-            for (Waypoint w : ways) {
+            for (Waypoint w : waypoints) {
                 currentMarkPasses.get(c).remove(w);
             }
         }
+        end.setOneBasedWaypointIndex(end.getOneBasedIndexOfWaypoint()-Util.size(waypoints));
+    }
+    
+    @Override
+    public void addWaypoints(Iterable<Waypoint> waypoints) {
+        end.setOneBasedWaypointIndex(end.getOneBasedIndexOfWaypoint()+Util.size(waypoints));
     }
 
     @Override
@@ -191,6 +197,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                         startTimingProbability = 1; // no start time point known; all candidate time points equally likely
                         estimatedDistanceProbability = 1; // can't tell distance sailed either because we don't know the start time
                     } else {
+                        // no gate start and we know the race start time
                         if (late.getWaypoint() == race.getRace().getCourse().getFirstWaypoint()) {
                             // no skips; going from the start proxy node to a candidate for the start mark passing;
                             // calculate the probability for the start being the start given its timing and multiply
@@ -449,13 +456,38 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private class CandidateWithSettableTime extends CandidateImpl {
-
+        private TimePoint variableTimePoint;
+        
         public CandidateWithSettableTime(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
-            super(oneBasedIndexOfWaypoint, p, distanceProbability, w);
+            super(oneBasedIndexOfWaypoint, /* time point */ null, distanceProbability, w);
+            this.variableTimePoint = p;
         }
 
         public void setTimePoint(TimePoint t) {
-            p = t;
+            variableTimePoint = t;
+        }
+        
+        @Override
+        public TimePoint getTimePoint() {
+            return variableTimePoint;
+        }
+    }
+
+    private class CandidateWithSettableWaypointIndex extends CandidateImpl {
+        private int variableOneBasedWaypointIndex;
+        
+        public CandidateWithSettableWaypointIndex(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
+            super(/* oneBasedIndexOfWaypoint */ -1, p, distanceProbability, w);
+            this.variableOneBasedWaypointIndex = oneBasedIndexOfWaypoint;
+        }
+
+        public void setOneBasedWaypointIndex(int oneBasedWaypointIndex) {
+            this.variableOneBasedWaypointIndex = oneBasedWaypointIndex;
+        }
+        
+        @Override
+        public int getOneBasedIndexOfWaypoint() {
+            return variableOneBasedWaypointIndex;
         }
     }
 }

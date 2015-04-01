@@ -19,6 +19,8 @@ public interface CandidateChooser {
 
     void removeWaypoints(Iterable<Waypoint> ways);
 
+    void addWaypoints(Iterable<Waypoint> waypoints);
+
     void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t);
 
     void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint);
@@ -26,5 +28,6 @@ public interface CandidateChooser {
     void suppressMarkPassings(Competitor c, Integer zeroBasedIndexOfWaypoint);
 
     void stopSuppressingMarkPassings(Competitor c);
+
 
 }
