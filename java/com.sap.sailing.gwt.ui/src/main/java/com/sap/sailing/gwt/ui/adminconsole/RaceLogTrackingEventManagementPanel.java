@@ -495,7 +495,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
 
                             @Override
                             public void onSuccess(Void result) {
-                                Window.alert(stringMessages.sendingMailsSuccessfull());
+                                Window.alert(stringMessages.sendingMailsSuccessful());
                             }
                         });
             }

@@ -78,7 +78,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0);
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false);
 
         trackedRace.attachRaceLog(raceLog);
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
@@ -123,7 +123,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0);
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false);
 
         trackedRace.addListener(new AbstractRaceChangeListener() {
             @Override

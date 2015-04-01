@@ -1147,12 +1147,24 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeHighPointEssOverallDescription();
     String timeBetweenRaceStartAndCompetitorStartInSeconds();
     String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
+    String useInternalAlgorithm();
+    String editMarkPassings();
+    String removeFixedPassings();
+    String setFixedPassing();
+    String setSuppressedPassing();
+    String removeSuppressedPassing();
+    String errorRemovingFixedPassing(String message);
+    String errorSettingFixedPassing(String message);
+    String errorSuppressingPassing(String message);
+    String errorRemovingSupressedPassing(String message);
+    String errorTryingToObtainMarkPassing(String message);
+    String errorTryingToObtainRaceLogMarkPassingData(String message);
     String email();
     String pleaseEnterAnEmail();
     String inviteCompetitors();
     String notAllCompetitorsProvideEmail();
     String sendingMailsFailed();
-    String sendingMailsSuccessfull();
+    String sendingMailsSuccessful();
     String selectEventForInvitation();
     String imageURL();
     String upload();
@@ -1196,4 +1208,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardTeam();
     String dashboardDistanceToLineInM();
     String dashboardSpeedInKts();
+    String fixedMarkPassing();
+    String suppressedMarkPassing();
 }

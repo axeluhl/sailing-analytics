@@ -33,6 +33,7 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public class CourseImpl extends NamedImpl implements Course {
+
     private static final long serialVersionUID = -4280487649617132403L;
 
     private static final Logger logger = Logger.getLogger(CourseImpl.class.getName());

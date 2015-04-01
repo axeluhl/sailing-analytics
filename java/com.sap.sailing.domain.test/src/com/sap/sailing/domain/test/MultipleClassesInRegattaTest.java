@@ -57,7 +57,7 @@ public class MultipleClassesInRegattaTest {
                                 httpAndHost
                                         + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=cce678c8-97e6-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI),
-                        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */
+                        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */ false, /* ignoreTracTracMarkPassings*/
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
@@ -68,7 +68,7 @@ public class MultipleClassesInRegattaTest {
                                 httpAndHost
                                         + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=11290bd6-97e7-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI),
-                        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */
+                        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */ false, /* ignoreTracTracMarkPassings*/
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
@@ -79,7 +79,7 @@ public class MultipleClassesInRegattaTest {
                                 httpAndHost
                                         + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=39635b24-97e7-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI),
-                        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */
+                        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */ false, /* ignoreTracTracMarkPassings*/
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
@@ -90,7 +90,7 @@ public class MultipleClassesInRegattaTest {
                                 httpAndHost
                                         + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=04498426-7dfd-11e0-8236-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI),
-                        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */
+                        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */ false, /* ignoreTracTracMarkPassings*/
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,

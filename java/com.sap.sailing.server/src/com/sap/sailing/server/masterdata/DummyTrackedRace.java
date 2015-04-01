@@ -567,4 +567,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         return null;
     }
 
+    @Override
+    public boolean isUsingMarkPassingCalculator() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

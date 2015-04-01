@@ -751,4 +751,6 @@ public interface TrackedRace extends Serializable {
      */
     Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint);
 
+    boolean isUsingMarkPassingCalculator();
+
 }

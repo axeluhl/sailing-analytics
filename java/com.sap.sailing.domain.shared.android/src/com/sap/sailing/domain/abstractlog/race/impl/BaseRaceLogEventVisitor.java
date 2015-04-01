@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
+import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
@@ -136,6 +138,16 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     
     @Override
     public void visit(RaceLogAdditionalScoringInformationEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(FixedMarkPassingEvent event){
+        
+    }
+
+    @Override
+    public void visit(SuppressedMarkPassingsEvent event) {
         
     }
 }

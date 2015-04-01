@@ -592,4 +592,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return null;
     }
 
+    @Override
+    public boolean isUsingMarkPassingCalculator() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }
