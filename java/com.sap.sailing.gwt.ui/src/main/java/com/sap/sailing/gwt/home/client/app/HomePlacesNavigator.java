@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.Multiregatt
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
@@ -76,8 +76,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
-        // TODO RegattaOverviewPlace not implemented yet
-        RegattaRacesPlace eventPlace = new RegattaRacesPlace(eventUuidAsString, leaderboardIdAsNameString);
+        RegattaOverviewPlace eventPlace = new RegattaOverviewPlace(eventUuidAsString, leaderboardIdAsNameString);
         return (PlaceNavigation) createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace);
     }
 

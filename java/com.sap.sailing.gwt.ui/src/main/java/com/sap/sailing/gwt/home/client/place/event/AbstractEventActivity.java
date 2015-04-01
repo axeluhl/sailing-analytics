@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.client.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
@@ -96,9 +97,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public AbstractEventRegattaPlace getPlaceForRegatta(String regattaId) {
-        // TODO Overview isn't implemented yet
-        // return new RegattaOverviewPlace(contextForRegatta(regattaId));
-        return new RegattaRacesPlace(contextForRegatta(regattaId));
+        return new RegattaOverviewPlace(contextForRegatta(regattaId));
     }
 
     @Override
@@ -156,8 +155,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
 
     @Override
-    public PlaceNavigation<RegattaRacesPlace> getRegattaNavigation(String regattaId) {
-        return homePlacesNavigator.getEventNavigation(getPlaceForRegattaRaces(regattaId), null, false);
+    public PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String regattaId) {
+        return homePlacesNavigator.getEventNavigation(getPlaceForRegatta(regattaId), null, false);
     }
 
     @Override
