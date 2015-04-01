@@ -84,7 +84,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             }
                         },
                         /* trackedRegattaRegistry */null, getTracTracRace(), null, /* courseDesignUpdateURI */
-                        /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber())) {
+                        /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false)) {
             receiver.subscribe();
             getRaceSubscriber().start();
         }
@@ -96,7 +96,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
                         }, /* trackedRegattaRegistry */null, getTracTracRace(), null, /* courseDesignUpdateURI */
-                        /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber()));
+                        /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false));
     }
 
     @Test

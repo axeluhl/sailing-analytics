@@ -379,6 +379,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             .withInitial(() -> false);
     
     private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
+    
+    private final JoinedClassLoader joinedClassLoader;
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
@@ -457,6 +459,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
         this.masterDataClassLoaders.add(this.getClass().getClassLoader());
+        joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
         this.operationsSentToMasterForReplication = new HashSet<>();
         if (windStore == null) {
             try {
@@ -1444,12 +1447,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed) {
+            long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* raceDefinitionSetToUpdate */null);
+                /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -2287,6 +2290,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
         return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
+    }
+    
+    @Override
+    public ClassLoader getDeserializationClassLoader() {
+        return joinedClassLoader;
     }
 
     @Override

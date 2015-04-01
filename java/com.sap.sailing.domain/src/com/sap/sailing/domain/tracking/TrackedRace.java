@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sse.common.TimePoint;
@@ -745,10 +746,18 @@ public interface TrackedRace extends Serializable {
     Boolean isGateStart();
     
     /**
+     * Returns the time in milliseconds when the line was closed with lowering flag {@link Flags#GOLF} if {@link #isGateStart()} is <code>true</code>.
+     * If flag was not raised or {@link #isGateStart()} is <code>false</code> it returns <code>null</code>. 
+     */
+    long getGateStartGolfDownTime();
+    
+    /**
      * If the race was started with a gate start (see {@link #isGateStart()}, this method returns the distance between
      * the competitor's starting position and the port side of the start line (pin end); otherwise, returns a zero
      * distance.
      */
     Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint);
+
+    boolean isUsingMarkPassingCalculator();
 
 }

@@ -567,4 +567,14 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         return null;
     }
 
+    @Override
+    public long getGateStartGolfDownTime() {
+        return 0;
+    }
+
+    @Override
+    public boolean isUsingMarkPassingCalculator() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

@@ -211,15 +211,17 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
     }
 
+    /**
+     * Expected to be called before {@link #lastRaceTimesInfo} has been updated to <code>newRaceTimesInfo</code>
+     */
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
         boolean requiresMarkerUpdate = true;
-        
         // updating the sliderbar markers requires a lot of time, therefore we need to do this only if required
-        if(lastRaceTimesInfo != null  && lastRaceTimesInfo.markPassingTimes.size() == newRaceTimesInfo.markPassingTimes.size()) {
+        if (lastRaceTimesInfo != null && lastRaceTimesInfo.markPassingTimes.size() == newRaceTimesInfo.markPassingTimes.size()) {
             requiresMarkerUpdate = false;
             int numberOfLegs = newRaceTimesInfo.markPassingTimes.size();
-            for(int i = 0; i < numberOfLegs; i++) {
-                if(newRaceTimesInfo.markPassingTimes.get(i).firstPassingDate != lastRaceTimesInfo.markPassingTimes.get(i).firstPassingDate) {
+            for (int i = 0; i < numberOfLegs; i++) {
+                if (!Util.equalsWithNull(newRaceTimesInfo.markPassingTimes.get(i).firstPassingDate, lastRaceTimesInfo.markPassingTimes.get(i).firstPassingDate)) {
                     requiresMarkerUpdate = true;
                     break;
                 }
@@ -245,18 +247,18 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private void redrawAllMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
         List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
         timeSlider.clearMarkers();
-        if(newRaceTimesInfo.startOfRace != null) {
+        if (newRaceTimesInfo.startOfRace != null) {
             long markerTime = newRaceTimesInfo.startOfRace.getTime();
-            if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+            if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
                 timeSlider.addMarker("S", new Double(markerTime));
             }
         }
         int markPassingCounter = 1;
         for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
             // ignore the start mark passing
-            if(markPassingCounter > 1 && markPassingTimesDTO.firstPassingDate != null) {
+            if (markPassingCounter > 1 && markPassingTimesDTO.firstPassingDate != null) {
                 long markerTime = markPassingTimesDTO.firstPassingDate.getTime();
-                if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+                if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
                     timeSlider.addMarker(markPassingTimesDTO.getName(), new Double(markerTime));
                 }
             }
@@ -264,7 +266,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
         if (newRaceTimesInfo.endOfRace != null) {
             long markerTime = newRaceTimesInfo.endOfRace.getTime();
-            if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+            if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
                 timeSlider.addMarker("E", new Double(markerTime));
             }
         }

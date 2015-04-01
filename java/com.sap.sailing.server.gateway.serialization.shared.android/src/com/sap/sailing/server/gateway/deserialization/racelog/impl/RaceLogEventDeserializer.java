@@ -29,6 +29,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDeviceCo
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDeviceMarkMappingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningListChangedEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFixedMarkPassingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogGateLineOpeningTimeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPassChangeEventSerializer;
@@ -40,6 +41,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRevokeEv
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartProcedureChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTimeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTrackingEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSuppressedMarkPassingsEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogWindFixEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 
@@ -82,7 +84,9 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogRegisterCompetitorEventDeserializer(competitorDeserializer),
                 new RaceLogDefineMarkEventDeserializer(competitorDeserializer, new MarkDeserializer(domainFactory)),
                 new RaceLogCloseOpenEndedDeviceMappingEventDeserializer(competitorDeserializer),
-                new RaceLogAdditionalScoringInformationEventDeserializer(competitorDeserializer));
+                new RaceLogAdditionalScoringInformationEventDeserializer(competitorDeserializer),
+                new RaceLogFixedMarkPassingEventDeserializer(competitorDeserializer),
+                new RaceLogSuppressedMarkPassingsEventDeserializer(competitorDeserializer));
     }
 
     protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
@@ -107,6 +111,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> defineMarkEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> closeOpenEndedDeviceMappingEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> additionalScoringInformationEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> fixedMarkPassingEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> suppressedMarkPassingsDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -129,7 +135,9 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> registerCompetitorEventDeserializer,
             JsonDeserializer<RaceLogEvent> defineMarkEventDeserializer,
             JsonDeserializer<RaceLogEvent> closeOpenEndedDeviceMappingEventDeserializer,
-            JsonDeserializer<RaceLogEvent> additionalScoringInformationEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> additionalScoringInformationEventDeserializer, 
+            JsonDeserializer<RaceLogEvent> fixedMarkPassingEventDeserializer,
+            JsonDeserializer<RaceLogEvent> suppressedMarkPassingsEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.raceStatusEventDeserializer = raceStatusEventDeserializer;
@@ -152,6 +160,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.defineMarkEventDeserializer = defineMarkEventDeserializer;
         this.closeOpenEndedDeviceMappingEventDeserializer = closeOpenEndedDeviceMappingEventDeserializer;
         this.additionalScoringInformationEventDeserializer = additionalScoringInformationEventDeserializer;
+        this.fixedMarkPassingEventDeserializer = fixedMarkPassingEventDeserializer;
+        this.suppressedMarkPassingsDeserializer = suppressedMarkPassingsEventDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
@@ -201,6 +211,10 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return closeOpenEndedDeviceMappingEventDeserializer;
         } else if (type.equals(RaceLogAdditionalScoringInformationSerializer.VALUE_CLASS)) {
             return additionalScoringInformationEventDeserializer;
+        } else if (type.equals(RaceLogFixedMarkPassingEventSerializer.VALUE_CLASS)) {
+            return fixedMarkPassingEventDeserializer;
+        } else if (type.equals(RaceLogSuppressedMarkPassingsEventSerializer.VALUE_CLASS)){
+            return suppressedMarkPassingsDeserializer;
         }
 
         throw new JsonDeserializationException(String.format("There is no deserializer defined for event type %s.",

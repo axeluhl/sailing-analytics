@@ -137,7 +137,7 @@ public class LeaderboardCourseChangeTest {
         TrackedRegatta mockedTrackedRegatta = createMockedTrackedRegatta(regatta);
         RaceDefinition mockedRace = createMockedRace(course, boatClass);
         TrackedRace spyedTrackedRace = spy(new DynamicTrackedRaceImpl(mockedTrackedRegatta, mockedRace,
-                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 5000, 20000, 20000));
+                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 5000, 20000, 20000, /*useMarkPassingCalculator*/ false));
 
         return spyedTrackedRace;
     }
