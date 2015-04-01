@@ -11,7 +11,7 @@ import com.sap.sse.common.TimePoint;
 public abstract class AbstractStartAnalysisCreationValidator {
     
     private static int MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS = 3;
-    private static long RACE_PROGRESSION_THREHOLD_AT_GATE_START_RACES_IN_MILLISECONDS = 6*60*1000;
+    private static long MINIMUM_RACE_PROGRESSION_IN_MILLISECONDS = 6*60*1000;
     
     protected boolean threeCompetitorsPassedSecondWayPoint(TrackedRace trackedRace){
         Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
@@ -36,7 +36,7 @@ public abstract class AbstractStartAnalysisCreationValidator {
             TimePoint timeStartOfRace = trackedRace.getStartOfRace();
             TimePoint timeNewestEvent = trackedRace.getTimePointOfNewestEvent();
             if(timeStartOfRace != null && timeNewestEvent != null){
-                if(timeStartOfRace.asMillis()+RACE_PROGRESSION_THREHOLD_AT_GATE_START_RACES_IN_MILLISECONDS > timeNewestEvent.asMillis()){
+                if(timeStartOfRace.asMillis()+MINIMUM_RACE_PROGRESSION_IN_MILLISECONDS > timeNewestEvent.asMillis()){
                     return true;
                 }
             }
