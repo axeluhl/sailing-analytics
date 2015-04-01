@@ -71,8 +71,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
         raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME) : null;
         start = new CandidateWithSettableTime(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null);
-        end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse()
-                .getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */null,
+        end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints() + 1, /* TimePoint */null,
                 /* Probability */1, /* Waypoint */null);
         candidates = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
@@ -427,7 +426,8 @@ public class CandidateChooserImpl implements CandidateChooser {
                 legsAreBetweenCandidates = true;
             }
             if (legsAreBetweenCandidates) {
-                totalGreatCircleDistance = waypointPositionAndDistanceCache.getApproximateDistance(from, leg.getLeg().getTo(), timePoint);
+                totalGreatCircleDistance = totalGreatCircleDistance.add(
+                        waypointPositionAndDistanceCache.getApproximateDistance(from, leg.getLeg().getTo(), timePoint));
             }
         }
         return totalGreatCircleDistance;
