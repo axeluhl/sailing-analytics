@@ -12,6 +12,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
+import com.sap.sailing.gwt.ui.server.dispatch.handlers.BatchActionHandler;
 import com.sap.sailing.gwt.ui.server.dispatch.handlers.GetLiveRacesActionHandler;
 import com.sap.sailing.gwt.ui.server.dispatch.handlers.OtherActionHandler;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
@@ -41,6 +42,7 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
     }
 
     private void addHandlers() {
+        addHandler(new BatchActionHandler());
         addHandler(new GetLiveRacesActionHandler(racingEventServiceTracker));
         addHandler(new OtherActionHandler(racingEventServiceTracker));
 
