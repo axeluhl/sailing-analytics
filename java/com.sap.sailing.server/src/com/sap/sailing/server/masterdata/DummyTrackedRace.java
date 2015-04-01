@@ -567,4 +567,8 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         return null;
     }
 
+    @Override
+    public long getGateStartGolfDownTime() {
+        return 0;
+    }
 }

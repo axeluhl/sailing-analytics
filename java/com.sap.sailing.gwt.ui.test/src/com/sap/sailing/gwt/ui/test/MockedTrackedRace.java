@@ -894,4 +894,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public long getGateStartGolfDownTime() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }

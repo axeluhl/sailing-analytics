@@ -35,7 +35,10 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -3338,6 +3341,26 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (procedure != null && procedure.getType() != null) {
                 result = procedure.getType() == RacingProcedureType.GateStart;
                 break;
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public long getGateStartGolfDownTime() {
+        long result = 0;
+        if (isGateStart()) {
+            for (RaceLog raceLog : attachedRaceLogs.values()) {
+                raceLog.lockForRead();
+                for(RaceLogEvent raceLogEvent: raceLog.getRawFixes()) {
+                    logger.log(Level.INFO, ""+raceLogEvent.getClass().getName());
+                    if(raceLogEvent.getClass().equals(RaceLogGateLineOpeningTimeEventImpl.class)){
+                        logger.log(Level.INFO, "GOT RIGHT EVENT"+raceLogEvent.getClass().getName());
+                        RaceLogGateLineOpeningTimeEvent raceLogGateLineOpeningTimeEvent = (RaceLogGateLineOpeningTimeEvent) raceLogEvent;
+                        result = raceLogGateLineOpeningTimeEvent.getGateLineOpeningTimes().getGolfDownTime();
+                    }
+                }
+                raceLog.unlockAfterRead();
             }
         }
         return result;

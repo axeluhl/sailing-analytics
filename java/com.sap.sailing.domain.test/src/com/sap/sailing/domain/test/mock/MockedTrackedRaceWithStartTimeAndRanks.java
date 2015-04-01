@@ -592,4 +592,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return null;
     }
 
+    @Override
+    public long getGateStartGolfDownTime() {
+        return 0;
+    }
 }
