@@ -64,6 +64,16 @@
 	</servlet-mapping>
 
 	<servlet>
+	    <display-name>Dispatch Service</display-name>
+	    <servlet-name>DispatchService</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.ui.server.dispatch.DispatchRPCImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DispatchService</servlet-name>
+		<url-pattern>/service/dispatch</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<display-name>Media Service</display-name>
 	    <servlet-name>MediaService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.MediaServiceImpl</servlet-class>
