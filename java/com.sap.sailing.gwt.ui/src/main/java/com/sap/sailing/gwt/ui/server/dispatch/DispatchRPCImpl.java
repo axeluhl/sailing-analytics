@@ -1,32 +1,32 @@
 package com.sap.sailing.gwt.ui.server.dispatch;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
+import com.sap.sailing.gwt.ui.server.dispatch.handlers.GetLiveRacesActionHandler;
+import com.sap.sailing.gwt.ui.server.dispatch.handlers.OtherActionHandler;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
 import com.sap.sailing.gwt.ui.shared.dispatch.Result;
-import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRacesDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.OtherAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.OtherDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.rpc.DispatchRPC;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements DispatchRPC {
 
     private static final long serialVersionUID = -245230476512348999L;
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+
+    private final Map<Class<? extends Action<?>>, Handler<? extends Result, ? extends Action<?>>> handlers = new HashMap<>();
 
     public DispatchRPCImpl() {
         BundleContext context = Activator.getDefault();
@@ -36,6 +36,25 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
             // activator.setSailingService(this); // register so this service is informed when the bundle shuts down
         }
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+
+        addHandlers();
+    }
+
+    private void addHandlers() {
+        addHandler(new GetLiveRacesActionHandler(racingEventServiceTracker));
+        addHandler(new OtherActionHandler(racingEventServiceTracker));
+
+    }
+
+    private <R extends Result, A extends Action<R>> void addHandler(Handler<R, A> handler) {
+        Class<A> actionType = handler.getType();
+        if (handlers.containsKey(actionType)) {
+            String errorMessage = MessageFormat.format(
+                    "A handler for Action {0} is already registered. Registered handler: {1}, new handler: {2}",
+                    actionType.getName(), handlers.get(actionType).getClass().getName(), handler.getClass().getName());
+            throw new IllegalStateException(errorMessage);
+        }
+        handlers.put(actionType, handler);
     }
 
     protected RacingEventService getService() {
@@ -44,35 +63,35 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
 
     @Override
     public <R extends Result, A extends Action<R>> R execute(A action) throws DispatchException {
-        // TODO move to handler classes
-        if (action instanceof GetLiveRacesAction) {
-            MillisecondsTimePoint now = MillisecondsTimePoint.now();
-            LiveRacesDTO result = new LiveRacesDTO();
-            
-            GetLiveRacesAction getLiveRacesAction = (GetLiveRacesAction) action;
-            Event event = getService().getEvent(getLiveRacesAction.getEventId());
-            for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-                for (Leaderboard lb : lg.getLeaderboards()) {
-//                    Regatta regatta = getService().getRegattaByName(lb.getName());
-                    for (TrackedRace trackedRace : lb.getTrackedRaces()) {
-//                        trackedRace.getMarks()
-                        if(trackedRace.getStartOfRace().before(now) && trackedRace.getEndOfRace().after(now)) {
-                            result.addRace(new LiveRaceDTO(trackedRace.getRace().getName()));
-                        }
-                    }
-//                    for (RaceDefinition rd : regatta.getAllRaces()) {
-//                        rd.
-//                    }
-                }
-            }
-            return (R) new ResultWithTTL<LiveRacesDTO>(5000, result);
+        return execute(action, new DispatchContextImpl(getThreadLocalRequest(), getThreadLocalResponse()));
+    }
+    
+    @SuppressWarnings({ "unchecked" })
+    public <R extends Result, A extends Action<R>> R execute(A action, DispatchContext context) throws DispatchException {
+        Class<A> actionType = (Class<A>) action.getClass();
+        
+        Handler<R, A> handler = (Handler<R, A>) handlers.get(actionType);
+        if (handler != null) {
+            return handler.execute(action, context);
+        }
+        String errorMessage = MessageFormat.format("No handler found for Action {0}", actionType.getName());
+        throw new IllegalStateException(errorMessage);
+    }
+    
+    private class DispatchContextImpl implements DispatchContext {
+        @SuppressWarnings("unused")
+        private final HttpServletRequest req;
+        @SuppressWarnings("unused")
+        private final HttpServletResponse resp;
+
+        public DispatchContextImpl(HttpServletRequest req, HttpServletResponse resp) {
+            this.req = req;
+            this.resp = resp;
         }
         
-        if (action instanceof OtherAction) {
-            return (R) new ResultWithTTL<OtherDTO>(3000, new OtherDTO());
+        public <R extends Result, A extends Action<R>> R execute(A action) throws DispatchException {
+            return DispatchRPCImpl.this.execute(action, this);
         }
-        // TODO other actions
-        return null;
     }
 
 }
