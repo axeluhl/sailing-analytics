@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -52,6 +53,7 @@ public class WaypointPositionAndDistanceCacheTest {
     private Mark pinEnd;
     private Mark startBoat;
     private Mark windward;
+    private ControlPointWithTwoMarks startFinish;
     
     @Before
     public void setUp() {
@@ -61,7 +63,7 @@ public class WaypointPositionAndDistanceCacheTest {
         pinEnd = new MarkImpl("Pin End");
         startBoat = new MarkImpl("Start Boat");
         windward = new MarkImpl("Windward");
-        ControlPointWithTwoMarks startFinish = new ControlPointWithTwoMarksImpl(UUID.randomUUID(), pinEnd, startBoat, "Start/Finish");
+        startFinish = new ControlPointWithTwoMarksImpl(UUID.randomUUID(), pinEnd, startBoat, "Start/Finish");
         start = new WaypointImpl(startFinish);
         windwardWaypoint = new WaypointImpl(windward);
         finish = new WaypointImpl(startFinish);
@@ -143,5 +145,17 @@ public class WaypointPositionAndDistanceCacheTest {
         assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
         assertEquals(60, cache.getApproximateDistance(windwardWaypoint, start, now).getNauticalMiles(), 0.01);
         assertEquals(3, recalculations); // one for the position of each waypoint, one for the distance; second / third request from cache
+    }
+
+    @Test
+    public void testTwoLapCourseWithSameControlPointsButDifferentWaypoints() {
+        Waypoint leewardGate = new WaypointImpl(startFinish, PassingInstruction.Gate);
+        Waypoint windward2 = new WaypointImpl(windward);
+        trackedRace.getRace().getCourse().addWaypoint(2, leewardGate);
+        trackedRace.getRace().getCourse().addWaypoint(3, windward2);
+        assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
+        assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
+        assertEquals(60, cache.getApproximateDistance(leewardGate, windward2, now).getNauticalMiles(), 0.01);
+        assertEquals(3, recalculations); // one for the position of each waypoint, one for the distance; second and third request coming from cache
     }
 }
