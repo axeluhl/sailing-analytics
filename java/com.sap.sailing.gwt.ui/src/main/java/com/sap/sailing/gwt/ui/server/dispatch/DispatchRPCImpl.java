@@ -57,10 +57,6 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
         handlers.put(actionType, handler);
     }
 
-    protected RacingEventService getService() {
-        return racingEventServiceTracker.getService(); // grab the service
-    }
-
     @Override
     public <R extends Result, A extends Action<R>> R execute(A action) throws DispatchException {
         return execute(action, new DispatchContextImpl(getThreadLocalRequest(), getThreadLocalResponse()));
