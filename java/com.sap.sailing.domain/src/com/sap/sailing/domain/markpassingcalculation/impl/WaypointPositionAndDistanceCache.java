@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
@@ -52,7 +53,7 @@ public class WaypointPositionAndDistanceCache {
      * Weak keys are the waypoints; values are time-ordered maps mapping the center of a time range
      * to the approximate waypoint position at that time.
      */
-    private final ConcurrentWeakHashMap<Waypoint, SortedMap<TimePoint, Position>> waypointPositionCache;
+    private final ConcurrentWeakHashMap<ControlPoint, SortedMap<TimePoint, Position>> waypointPositionCache;
     
     /**
      * Caches distances between the positions cached in {@link #waypointPositionCache}. As soon as an entry
@@ -60,7 +61,7 @@ public class WaypointPositionAndDistanceCache {
      * symmetrically under the map's monitor being held, i.e., if (w1, w2) is a cache key then so is
      * (w2, w1), with equal value.
      */
-    private final ConcurrentHashMap<Pair<Waypoint, Waypoint>, SortedMap<TimePoint, Distance>> distanceCache;
+    private final ConcurrentHashMap<Pair<ControlPoint, ControlPoint>, SortedMap<TimePoint, Distance>> distanceCache;
     
     /**
      * The duration of the time ranges whose center time points serve as keys for the {@link NavigableMap}s used as
@@ -109,7 +110,7 @@ public class WaypointPositionAndDistanceCache {
     }
     
     public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
-        return getApproximateResult(waypoint, timePoint, waypointPositionCache,
+        return getApproximateResult(waypoint.getControlPoint(), timePoint, waypointPositionCache,
                 roundedToTimeRangeCenter->trackedRace.getApproximatePosition(waypoint, roundedToTimeRangeCenter),
                 /* alternateKeySupplier */ null);
     }
@@ -163,9 +164,10 @@ public class WaypointPositionAndDistanceCache {
     }
     
     public Distance getApproximateDistance(Waypoint w1, Waypoint w2, TimePoint timePoint) {
-        return getApproximateResult(new Pair<>(w1, w2), timePoint, distanceCache,
-                roundedToTimeRangeCenter->getApproximatePosition(w1, roundedToTimeRangeCenter).getDistance(getApproximatePosition(w2, roundedToTimeRangeCenter)),
-                /* alternate key supplier */ ()->new Pair<>(w2, w1));
+        return getApproximateResult(new Pair<>(w1.getControlPoint(), w2.getControlPoint()), timePoint, distanceCache,
+                roundedToTimeRangeCenter->getApproximatePosition(w1, roundedToTimeRangeCenter).getDistance(
+                        getApproximatePosition(w2, roundedToTimeRangeCenter)),
+                        /* alternate key supplier */ ()->new Pair<>(w2.getControlPoint(), w1.getControlPoint()));
     }
     
     /**
@@ -178,14 +180,14 @@ public class WaypointPositionAndDistanceCache {
         synchronized (waypoints) { // it's a synchronized list, so grabbing the list's monitor will grant us exclusive access here
             for (Waypoint waypoint : waypoints) {
                 if (Util.contains(waypoint.getMarks(), mark)) {
-                    invalidate(waypoint, affectedTimeRange);
+                    invalidate(waypoint.getControlPoint(), affectedTimeRange);
                 }
             }
         }
     }
 
-    private void invalidate(Waypoint waypoint, TimeRange affectedTimeRange) {
-        SortedMap<TimePoint, Position> map = waypointPositionCache.get(waypoint);
+    private void invalidate(ControlPoint controlPoint, TimeRange affectedTimeRange) {
+        SortedMap<TimePoint, Position> map = waypointPositionCache.get(controlPoint);
         if (map != null) {
             final SortedMap<TimePoint, Position> tailMap = map.tailMap(roundToResolution(affectedTimeRange.from()));
             for (Entry<TimePoint, Position> e : tailMap.entrySet()) {
@@ -197,12 +199,13 @@ public class WaypointPositionAndDistanceCache {
                 map.remove(timePoint);
                 synchronized (waypoints) {
                     for (Waypoint otherWaypoint : waypoints) {
-                        if (otherWaypoint != waypoint) {
-                            final Map<TimePoint, Distance> distanceMap = distanceCache.get(new Pair<>(waypoint, otherWaypoint));
+                        ControlPoint otherControlPoint = otherWaypoint.getControlPoint();
+                        if (otherControlPoint != controlPoint) {
+                            final Map<TimePoint, Distance> distanceMap = distanceCache.get(new Pair<>(controlPoint, otherControlPoint));
                             if (distanceMap != null) {
                                 distanceMap.remove(timePoint);
                             }
-                            final Map<TimePoint, Distance> otherDistanceMap = distanceCache.get(new Pair<>(otherWaypoint, waypoint));
+                            final Map<TimePoint, Distance> otherDistanceMap = distanceCache.get(new Pair<>(otherControlPoint, controlPoint));
                             if (otherDistanceMap != null) {
                                 otherDistanceMap.remove(timePoint);
                             }
