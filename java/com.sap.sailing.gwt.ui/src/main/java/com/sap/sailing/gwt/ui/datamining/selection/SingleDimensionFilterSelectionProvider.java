@@ -1,42 +1,46 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
 class SingleDimensionFilterSelectionProvider {
     
-//    private final StringMessages stringMessages;
-//    private final DataMiningServiceAsync dataMiningService;
-//    private final ErrorReporter errorReporter;
-//    private final DataMiningSession session;
-//    private final SingleRetrieverLevelSelectionProvider retrieverLevelSelectionProvider;
+    private final DataMiningServiceAsync dataMiningService;
+    private final ErrorReporter errorReporter;
+    private final DataMiningSession session;
+    private final SingleRetrieverLevelSelectionProvider retrieverLevelSelectionProvider;
 
-    private final DockLayoutPanel mainPanel;
+    private final FlowPanel mainPanel;
     private final ValueListBox<FunctionDTO> dimensionListBox;
+    private final SimpleBusyIndicator busyIndicator;
     private final SimpleSelectionTable<?> selectionTable;
     
-    public SingleDimensionFilterSelectionProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-                                                  DataMiningSession session, SingleRetrieverLevelSelectionProvider retrieverLevelSelectionProvider) {
-//        this.stringMessages = stringMessages;
-//        this.dataMiningService = dataMiningService;
-//        this.errorReporter = errorReporter;
-//        this.session = session;
-//        this.retrieverLevelSelectionProvider = retrieverLevelSelectionProvider;
+    public SingleDimensionFilterSelectionProvider(DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
+                                                  SingleRetrieverLevelSelectionProvider retrieverLevelSelectionProvider) {
+        this.dataMiningService = dataMiningService;
+        this.errorReporter = errorReporter;
+        this.session = session;
+        this.retrieverLevelSelectionProvider = retrieverLevelSelectionProvider;
         
-        mainPanel = new DockLayoutPanel(Unit.PX);
+        mainPanel = new FlowPanel();
         
         dimensionListBox = new ValueListBox<FunctionDTO>(new AbstractObjectRenderer<FunctionDTO>() {
             @Override
@@ -45,25 +49,59 @@ class SingleDimensionFilterSelectionProvider {
             }
         });
         dimensionListBox.addValueChangeHandler(new DimensionChangedHandler());
-        mainPanel.addNorth(dimensionListBox, 30);
+        mainPanel.add(dimensionListBox);
+        
+        busyIndicator = new SimpleBusyIndicator(true, 0.7f);
+        busyIndicator.setVisible(false);
+        mainPanel.add(busyIndicator);
         
         selectionTable = new SimpleSelectionTable<>();
+        selectionTable.setVisible(false);
         mainPanel.add(selectionTable);
     }
     
     private class DimensionChangedHandler implements ValueChangeHandler<FunctionDTO> {
         @Override
         public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
-            // TODO Auto-generated method stub
-            
+            final FunctionDTO dimension = getSelectedDimension();
+            selectionTable.setVisible(false);
+            if (dimension != null) {
+                Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
+                dimensionDTOs.add(dimension);
+                busyIndicator.setVisible(true);
+                dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider
+                        .getDataRetrieverChain(), retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs,
+                        LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
+                            @Override
+                            public void onSuccess(QueryResult<Set<Object>> result) {
+                                //TODO Set the content of the selection table
+                                
+                                busyIndicator.setVisible(false);
+                                selectionTable.setVisible(true);
+                                
+                                //TODO Add a new dimension filter to the retrieverLevelSelectionProvider
+                            }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error fetching the dimension values of " + dimension + ": "
+                                        + caught.getMessage());
+                            }
+                        });
+            } else {
+                //TODO Remove this dimension filter from the retrieverLevelSelectionProvider
+            }
         }
     }
+    
+    void setAvailableDimensions(Collection<FunctionDTO> availableDimensions) {
+        dimensionListBox.setAcceptableValues(availableDimensions);
+    }
 
-    public FunctionDTO getDimension() {
+    public FunctionDTO getSelectedDimension() {
         return dimensionListBox.getValue();
     }
     
-    public void setSelection(Iterable<?> elements) {
+    void setSelection(Iterable<?> elements) {
         selectionTable.setSelection(elements);
     }
 
@@ -71,10 +109,14 @@ class SingleDimensionFilterSelectionProvider {
         return selectionTable.getSelectionAsValues();
     }
     
-    public void clearSelection() {
+    void clearSelection() {
         selectionTable.clearSelection();
     }
-
+    
+    void addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
+        selectionTable.addSelectionChangeHandler(handler);
+    }
+    
     public Widget getEntryWidget() {
         return mainPanel;
     }

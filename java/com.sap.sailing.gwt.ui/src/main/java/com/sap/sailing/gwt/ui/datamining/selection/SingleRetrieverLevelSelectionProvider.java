@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -23,7 +24,6 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.panels.HorizontalFlowPanel;
 
 public class SingleRetrieverLevelSelectionProvider implements Component<Object> {
 
@@ -33,12 +33,14 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     private final Set<SelectionChangedListener> listeners;
     
     private final DataMiningSession session;
+    private final DataRetrieverChainDefinitionDTO retrieverChain;
     private final LocalizedTypeDTO retrievedDataType;
     private final int retrieverLevel;
     private final List<FunctionDTO> availableDimensions;
     
-    private final HorizontalFlowPanel mainPanel;
+    private final HorizontalPanel mainPanel;
     private final Collection<SingleDimensionFilterSelectionProvider> dimensionFilters;
+    private final SelectionChangeEvent.Handler selectionTablesChangedListener;
 
     public SingleRetrieverLevelSelectionProvider(DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -49,15 +51,23 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         listeners = new HashSet<>();
         
         this.session = session;
+        this.retrieverChain = retrieverChain;
         this.retrievedDataType = retrievedDataType;
         this.retrieverLevel = retrieverLevel;
         availableDimensions = new ArrayList<>();
         
+        mainPanel = new HorizontalPanel();
+        mainPanel.setSpacing(5);
         dimensionFilters = new ArrayList<>();
-        mainPanel = new HorizontalFlowPanel();
-        mainPanel.setWidth("100%");
+        selectionTablesChangedListener = new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                notifyListeners();
+            }
+        };
 
-        addWidgetWithMargin(new Label(retrievedDataType.getDisplayName() + " " + stringMessages.filterBy()));
+        Label label = new Label(retrievedDataType.getDisplayName() + " " + this.stringMessages.filterBy());
+        mainPanel.add(label);
     }
 
     public void setAvailableDimensions(Collection<FunctionDTO> dimensions) {
@@ -65,19 +75,21 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         availableDimensions.addAll(dimensions);
         Collections.sort(availableDimensions);
         
-        SingleDimensionFilterSelectionProvider dimensionFilter = new SingleDimensionFilterSelectionProvider(stringMessages, dataMiningService, errorReporter,
-                                                                                                            session, this);
+        SingleDimensionFilterSelectionProvider dimensionFilter = createDimensionFilterSelectionProvider();
+        dimensionFilter.setAvailableDimensions(availableDimensions);
         addDimensionFilter(dimensionFilter);
+    }
+
+    private SingleDimensionFilterSelectionProvider createDimensionFilterSelectionProvider() {
+        SingleDimensionFilterSelectionProvider dimensionFilter = new SingleDimensionFilterSelectionProvider(dataMiningService, errorReporter, session,
+                                                                                                            this);
+        dimensionFilter.addSelectionChangeHandler(selectionTablesChangedListener);
+        return dimensionFilter;
     }
     
     private void addDimensionFilter(SingleDimensionFilterSelectionProvider dimensionFilter) {
         dimensionFilters.add(dimensionFilter);
-        addWidgetWithMargin(dimensionFilter.getEntryWidget());
-    }
-
-    private void addWidgetWithMargin(Widget widget) {
-        widget.getElement().getStyle().setMargin(2, Unit.PX);
-        mainPanel.add(widget);
+        mainPanel.add(dimensionFilter.getEntryWidget());
     }
 
     public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
@@ -85,7 +97,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         for (SingleDimensionFilterSelectionProvider dimensionFilter : dimensionFilters) {
             Collection<? extends Serializable> dimensionFilterSelection = dimensionFilter.getSelection();
             if (!dimensionFilterSelection.isEmpty()) {
-                filterSelection.put(dimensionFilter.getDimension(), dimensionFilterSelection);
+                filterSelection.put(dimensionFilter.getSelectedDimension(), dimensionFilterSelection);
             }
         }
         return filterSelection;
@@ -105,11 +117,15 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         listeners.add(listener);
     }
 
-//    private void notifyListeners() {
-//        for (SelectionChangedListener listener : listeners) {
-//            listener.selectionChanged();
-//        }
-//    }
+    private void notifyListeners() {
+        for (SelectionChangedListener listener : listeners) {
+            listener.selectionChanged();
+        }
+    }
+
+    DataRetrieverChainDefinitionDTO getDataRetrieverChain() {
+        return retrieverChain;
+    }
     
     public int getRetrieverLevel() {
         return retrieverLevel;

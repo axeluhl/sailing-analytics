@@ -158,16 +158,14 @@ public class SelectionTable<ContentType extends Serializable> extends FlowPanel 
         selectionModel.addSelectionChangeHandler(handler);
     }
     
-    @Override
-    public void setWidth(String width) {
-        super.setWidth(width);
-        table.setWidth(width);
+    public void setWidth(int widthInPixel) {
+        super.setWidth(widthInPixel + "px");
+        table.setWidth(widthInPixel + "px");
     }
     
-    @Override
-    public void setHeight(String height) {
-        super.setHeight(height);
-        table.setHeight(height);
+    public void setHeight(int heightInPixel) {
+        super.setHeight(heightInPixel + "px");
+        table.setHeight(heightInPixel - filterPanel.getOffsetHeight() + "px");
     }
 
 }

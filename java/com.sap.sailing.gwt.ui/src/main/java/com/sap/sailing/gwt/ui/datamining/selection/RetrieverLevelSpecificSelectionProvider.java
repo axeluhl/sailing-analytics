@@ -13,6 +13,8 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -41,8 +43,8 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
     private DataRetrieverChainDefinitionDTO retrieverChain;
     
     private final ScrollPanel mainPanel;
-    private final FlowPanel contentPanel;
-    private final Collection<SingleRetrieverLevelSelectionProviderPrototype> SingleRetrieverLevelSelectionProviderPrototypes;
+    private final FlowLayoutPanel contentPanel;
+    private final Collection<SingleRetrieverLevelSelectionProviderPrototype> SingleRetrieverLevelSelectionProviders;
     
     public RetrieverLevelSpecificSelectionProvider(DataMiningSession session, StringMessages stringMessages,
                                                    DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -53,9 +55,9 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
         
-        SingleRetrieverLevelSelectionProviderPrototypes = new ArrayList<>();
+        SingleRetrieverLevelSelectionProviders = new ArrayList<>();
         
-        contentPanel = new FlowPanel();
+        contentPanel = new FlowLayoutPanel();
         mainPanel = new ScrollPanel(contentPanel);
         
         dataRetrieverChainDefinitionProvider.addDataRetrieverChainDefinitionChangedListener(this);
@@ -69,7 +71,7 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
                 updateRetrievalLevels();
             } else {
                 contentPanel.clear();
-                SingleRetrieverLevelSelectionProviderPrototypes.clear();
+                SingleRetrieverLevelSelectionProviders.clear();
             }
         }
     }
@@ -83,7 +85,7 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
             @Override
             public void onSuccess(Iterable<FunctionDTO> dimensions) {
                 contentPanel.clear();
-                SingleRetrieverLevelSelectionProviderPrototypes.clear();
+                SingleRetrieverLevelSelectionProviders.clear();
 
                 Map<String, Collection<FunctionDTO>> dimensionsMappedBySourceType = mapBySourceType(dimensions);
                 int retrieverLevel = 0;
@@ -98,14 +100,13 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
                     String sourceTypeName = retrievedDataType.getTypeName();
                     if (dimensionsMappedBySourceType.containsKey(sourceTypeName) &&
                         !dimensionsMappedBySourceType.get(sourceTypeName).isEmpty()) {
-                        SingleRetrieverLevelSelectionProviderPrototype SingleRetrieverLevelSelectionProviderPrototype =
+                        SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider =
                                 new SingleRetrieverLevelSelectionProviderPrototype(session, stringMessages, dataMiningService, errorReporter,
                                                                                    retrieverChain, retrievedDataType, retrieverLevel );
-                        SingleRetrieverLevelSelectionProviderPrototype.addSelectionChangedListener(RetrieverLevelSpecificSelectionProvider.this);
-                        
-                        contentPanel.add(SingleRetrieverLevelSelectionProviderPrototype);
-                        SingleRetrieverLevelSelectionProviderPrototypes.add(SingleRetrieverLevelSelectionProviderPrototype);
-                        SingleRetrieverLevelSelectionProviderPrototype.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceTypeName));
+                        singleRetrieverLevelSelectionProvider.addSelectionChangedListener(RetrieverLevelSpecificSelectionProvider.this);
+                        contentPanel.add(singleRetrieverLevelSelectionProvider);
+                        SingleRetrieverLevelSelectionProviders.add(singleRetrieverLevelSelectionProvider);
+                        singleRetrieverLevelSelectionProvider.setAvailableDimensions(dimensionsMappedBySourceType.get(sourceTypeName));
                     } else {
                         contentPanel.add(new Label(retrievedDataType.getDisplayName()));
                     }
@@ -130,10 +131,10 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
     @Override
     public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getFilterSelection() {
         Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = new HashMap<>();
-        for (SingleRetrieverLevelSelectionProviderPrototype SingleRetrieverLevelSelectionProviderPrototype : SingleRetrieverLevelSelectionProviderPrototypes) {
-            Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection = SingleRetrieverLevelSelectionProviderPrototype.getFilterSelection();
+        for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : SingleRetrieverLevelSelectionProviders) {
+            Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection = singleRetrieverLevelSelectionProvider.getFilterSelection();
             if (!levelFilterSelection.isEmpty()) {
-                filterSelection.put(SingleRetrieverLevelSelectionProviderPrototype.getRetrieverLevel(),
+                filterSelection.put(singleRetrieverLevelSelectionProvider.getRetrieverLevel(),
                         new HashMap<FunctionDTO, Collection<? extends Serializable>>(levelFilterSelection));
             }
         }
@@ -142,19 +143,19 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
 
     @Override
     public void applySelection(QueryDefinitionDTO queryDefinition) {
-        for (SingleRetrieverLevelSelectionProviderPrototype SingleRetrieverLevelSelectionProviderPrototype : SingleRetrieverLevelSelectionProviderPrototypes) {
+        for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : SingleRetrieverLevelSelectionProviders) {
             Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
-            int retrieverLevel = SingleRetrieverLevelSelectionProviderPrototype.getRetrieverLevel();
+            int retrieverLevel = singleRetrieverLevelSelectionProvider.getRetrieverLevel();
             if (filterSelection.containsKey(retrieverLevel)) {
-                SingleRetrieverLevelSelectionProviderPrototype.applySelection(filterSelection.get(retrieverLevel));
+                singleRetrieverLevelSelectionProvider.applySelection(filterSelection.get(retrieverLevel));
             }
         }
     }
 
     @Override
     public void clearSelection() {
-        for (SingleRetrieverLevelSelectionProviderPrototype SingleRetrieverLevelSelectionProviderPrototype : SingleRetrieverLevelSelectionProviderPrototypes) {
-            SingleRetrieverLevelSelectionProviderPrototype.clearSelection();
+        for (SingleRetrieverLevelSelectionProviderPrototype singleRetrieverLevelSelectionProvider : SingleRetrieverLevelSelectionProviders) {
+            singleRetrieverLevelSelectionProvider.clearSelection();
         }
     }
     
@@ -207,6 +208,16 @@ public class RetrieverLevelSpecificSelectionProvider implements SelectionProvide
 
     @Override
     public void updateSettings(Object newSettings) {
+    }
+    
+    private class FlowLayoutPanel extends FlowPanel implements RequiresResize, ProvidesResize {
+        @Override
+        public void onResize() {
+            for (Widget child : getChildren()) {
+                if (child instanceof RequiresResize)
+                    ((RequiresResize) child).onResize();
+            }
+        }
     }
 
 }

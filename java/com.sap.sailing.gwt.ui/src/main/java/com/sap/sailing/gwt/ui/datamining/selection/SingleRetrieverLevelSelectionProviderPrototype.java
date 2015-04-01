@@ -215,8 +215,8 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
         
         VerticalPanel singleDimensionFilteringSelectionPanel = singleDimensionFilterSelectionPanelsMappedBySelectionBox.get(changedDimensionToFilterByBox);
         singleDimensionFilteringSelectionPanel.add(selectionTable);
-        selectionTable.setWidth(singleDimensionFilteringSelectionPanel.getOffsetWidth() + "px");
-        selectionTable.setHeight("200px");
+        selectionTable.setWidth(singleDimensionFilteringSelectionPanel.getOffsetWidth());
+        selectionTable.setHeight(200);
         selectionTablesMappedBySelectionBox.put(changedDimensionToFilterByBox, selectionTable);
     }
 
