@@ -10,18 +10,18 @@ import com.sap.sse.common.TimePoint;
 
 public abstract class AbstractStartAnalysisCreationValidator {
     
-    private static int MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS = 3;
+    private static int MINIMUM_MARKPASSIINGS_AT_FIRST_MARK = 3;
     private static long MINIMUM_RACE_PROGRESSION_IN_MILLISECONDS = 6*60*1000;
     
     protected boolean threeCompetitorsPassedSecondWayPoint(TrackedRace trackedRace){
         Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
         Iterator<MarkPassing> markPassingsInOrder = trackedRace.getMarkPassingsInOrder(secondWaypoint).iterator();
-        int counter = 0;
-        while (markPassingsInOrder.hasNext()) {
+        int markPassingsCounter = 0;
+        while (markPassingsInOrder.hasNext() || markPassingsCounter < MINIMUM_MARKPASSIINGS_AT_FIRST_MARK) {
             markPassingsInOrder.next();
-            counter ++;
+            markPassingsCounter ++;
         }
-        return counter >= MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS ? true : false;
+        return markPassingsCounter >= MINIMUM_MARKPASSIINGS_AT_FIRST_MARK ? true : false;
     }
     
     private boolean competitorPassedSecondWayPoint(Competitor competitor, TrackedRace trackedRace){

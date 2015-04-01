@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.client;
+package com.sap.sailing.dashboards.gwt.client.dataretriever;
 
 import java.util.ArrayList;
 import java.util.Date;
