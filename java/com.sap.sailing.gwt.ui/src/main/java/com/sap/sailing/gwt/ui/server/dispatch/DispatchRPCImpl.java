@@ -44,7 +44,34 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
 
     @Override
     public <R extends Result, A extends Action<R>> R execute(A action) throws DispatchException {
-        // TODO implement
+        // TODO move to handler classes
+        if (action instanceof GetLiveRacesAction) {
+            MillisecondsTimePoint now = MillisecondsTimePoint.now();
+            LiveRacesDTO result = new LiveRacesDTO();
+            
+            GetLiveRacesAction getLiveRacesAction = (GetLiveRacesAction) action;
+            Event event = getService().getEvent(getLiveRacesAction.getEventId());
+            for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+                for (Leaderboard lb : lg.getLeaderboards()) {
+//                    Regatta regatta = getService().getRegattaByName(lb.getName());
+                    for (TrackedRace trackedRace : lb.getTrackedRaces()) {
+//                        trackedRace.getMarks()
+                        if(trackedRace.getStartOfRace().before(now) && trackedRace.getEndOfRace().after(now)) {
+                            result.addRace(new LiveRaceDTO(trackedRace.getRace().getName()));
+                        }
+                    }
+//                    for (RaceDefinition rd : regatta.getAllRaces()) {
+//                        rd.
+//                    }
+                }
+            }
+            return (R) new ResultWithTTL<LiveRacesDTO>(5000, result);
+        }
+        
+        if (action instanceof OtherAction) {
+            return (R) new ResultWithTTL<OtherDTO>(3000, new OtherDTO());
+        }
+        // TODO other actions
         return null;
     }
 

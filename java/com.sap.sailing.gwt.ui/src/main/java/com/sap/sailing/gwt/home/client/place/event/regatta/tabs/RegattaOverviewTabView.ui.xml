@@ -1,6 +1,15 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <g:HTMLPanel>
-        <p>This is regatta overview tab</p>
-    </g:HTMLPanel>
+  xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.regatta.tabs.overview">
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <g:HTMLPanel>
+    <div class="{res.mediaCss.grid}">
+      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+        <h2>Content 1</h2>
+        <o:ExampleContent ui:field="content1" />
+        <h2>Content 2</h2>
+        <o:OtherContent ui:field="content2" />
+      </div>
+    </div>
+  </g:HTMLPanel>
 </ui:UiBinder>
