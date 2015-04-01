@@ -5,20 +5,20 @@
     android:background="@drawable/background"
     android:descendantFocusability="beforeDescendants"
     android:focusableInTouchMode="true"
-    android:orientation="horizontal" >
+    android:orientation="horizontal">
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:layout_margin="18dp"
         android:background="@color/welter_extralight_gray_transparent"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_margin="18dp"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textCourse"
@@ -31,59 +31,65 @@
                 android:textStyle="bold" />
 
             <TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="1. Enter the wind/local information"
-		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
-	    
-            <ImageButton 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1. Enter the wind/local information"
+                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
+            <ImageButton
                 android:id="@+id/windButton"
-                android:src="@drawable/ic_menu_btn_wind" 
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"/>
-            
+                android:src="@drawable/ic_menu_btn_wind"
+                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
             <TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="2. Select the boat class"
-		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2. Select the boat class"
+                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
             <Spinner
-		            android:id="@+id/classic_course_designer_boat_class"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:gravity="center_horizontal" />
-            
+                android:id="@+id/classic_course_designer_boat_class"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal" />
+
             <TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="3. Select the course layout"
-		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3. Select the course layout"
+                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
             <Spinner
-		            android:id="@+id/classic_course_designer_course_layout"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:gravity="center_horizontal" />
+                android:id="@+id/classic_course_designer_course_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal" />
+
             <TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="4. Select the number of rounds"
-		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4. Select the number of rounds"
+                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
             <Spinner
-		            android:id="@+id/classic_course_designer_number_of_rounds"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:gravity="center_horizontal" />
+                android:id="@+id/classic_course_designer_number_of_rounds"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal" />
+
             <TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="5. Select the target time"
-		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5. Select the target time"
+                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
             <Spinner
-		            android:id="@+id/classic_course_designer_target_time"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:gravity="center_horizontal" />
+                android:id="@+id/classic_course_designer_target_time"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal" />
 
             <Button
                 android:id="@+id/publishCourseDesignButton"
@@ -105,8 +111,7 @@
             android:layout_height="match_parent"
             android:layout_margin="18dp"
             android:background="@color/welter_deep_gray"
-            android:orientation="vertical" >
-        </LinearLayout>
+            android:orientation="vertical"></LinearLayout>
 
         <com.google.android.gms.maps.MapView
             android:id="@+id/mapView"

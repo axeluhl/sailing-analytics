@@ -152,6 +152,7 @@
 
     <Button
         android:id="@+id/login_submit"
+        style="?attr/buttonSolidNormal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -163,6 +164,5 @@
         android:enabled="false"
         android:text="@string/sign_up"
         android:textSize="@dimen/textSize_26"
-        android:visibility="visible"
-        style="?attr/buttonSolidNormal" />
+        android:visibility="visible" />
 </RelativeLayout>

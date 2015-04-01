@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar_layout"
         android:orientation="vertical"
-        android:padding="16dp" >
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/system_information_application_header"
@@ -100,5 +100,4 @@
             android:text="@string/persistence_waiting_clear_events"
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
-
 </RelativeLayout>

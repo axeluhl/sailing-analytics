@@ -11,5 +11,4 @@
             <solid android:color="@color/light_black" />
         </shape>
     </item>
-
 </layer-list>

@@ -3,4 +3,4 @@
     android:drawable="@drawable/ic_play_circle_outline_white_48dp"
     android:fromDegrees="180"
     android:toDegrees="180"
-    android:visible="true"/>
+    android:visible="true" />

@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:dslv="http://schemas.android.com/apk**/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:baselineAligned="false"
     android:orientation="vertical"
-    tools:ignore="ResAuto" >
+    tools:ignore="ResAuto">
 
     <GridView
         android:id="@+id/byNameCourseDesignGrid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:numColumns="10"
-        android:horizontalSpacing="20dp"
-        android:verticalSpacing="20dp"
         android:columnWidth="40dp"
+        android:horizontalSpacing="20dp"
+        android:numColumns="10"
         android:padding="10dp"
-    	>
-    </GridView>
-
+        android:verticalSpacing="20dp" />
 </LinearLayout>

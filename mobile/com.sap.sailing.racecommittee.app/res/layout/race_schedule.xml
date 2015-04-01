@@ -121,10 +121,10 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
-            android:text="@string/start_mode"
-            android:textAppearance="?textNormal"
             android:layout_toLeftOf="@+id/start_mode_flag"
-            android:layout_toStartOf="@+id/start_mode_flag" />
+            android:layout_toStartOf="@+id/start_mode_flag"
+            android:text="@string/start_mode"
+            android:textAppearance="?textNormal" />
 
         <ImageView
             android:id="@+id/start_mode_icon"
@@ -184,10 +184,10 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
-            android:text="@string/course"
-            android:textAppearance="?textNormal"
             android:layout_toLeftOf="@+id/start_course_symbol"
-            android:layout_toStartOf="@+id/start_course_symbol" />
+            android:layout_toStartOf="@+id/start_course_symbol"
+            android:text="@string/course"
+            android:textAppearance="?textNormal" />
 
         <ImageView
             android:id="@+id/start_course_icon"
@@ -246,10 +246,10 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
-            android:text="@string/wind"
-            android:textAppearance="?textNormal"
             android:layout_toLeftOf="@+id/wind_sensor"
-            android:layout_toStartOf="@+id/wind_sensor" />
+            android:layout_toStartOf="@+id/wind_sensor"
+            android:text="@string/wind"
+            android:textAppearance="?textNormal" />
 
         <ImageView
             android:id="@+id/wind_icon"
@@ -294,12 +294,12 @@
 
     <Button
         android:id="@+id/start_race"
+        style="?attr/buttonSolidSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/default_margin_twice"
-        android:text="@string/race_setup_confirm"
-        style="?attr/buttonSolidSmall" />
+        android:text="@string/race_setup_confirm" />
 </RelativeLayout>

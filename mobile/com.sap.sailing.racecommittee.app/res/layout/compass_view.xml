@@ -31,8 +31,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@color/dark_white"
             android:text="0"
+            android:textColor="@color/dark_white"
             android:textSize="@dimen/textSize_40" />
 
         <TextView
@@ -41,8 +41,8 @@
             android:layout_alignTop="@+id/compass_view_degree"
             android:layout_toEndOf="@+id/compass_view_degree"
             android:layout_toRightOf="@+id/compass_view_degree"
-            android:textColor="@color/dark_white"
             android:text="°"
+            android:textColor="@color/dark_white"
             android:textSize="@dimen/textSize_40" />
     </RelativeLayout>
 </RelativeLayout>

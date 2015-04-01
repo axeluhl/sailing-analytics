@@ -2,24 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
 
-	<ImageButton
-	    android:id="@+id/race_startphase_rrs26_actions_startmode"
-	    android:layout_width="200dp"
-	    android:layout_height="110dp"
-	    android:contentDescription="@string/choose_start_mode_flag"
-	    android:scaleType="fitCenter"
-	    android:src="@drawable/startmode_flags" />
-	
-	<TextView
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_marginBottom="20dp"
-	    android:layout_marginTop="2dp"
-	    android:text="@string/choose_startmode"
-	    android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
-    
+    <ImageButton
+        android:id="@+id/race_startphase_rrs26_actions_startmode"
+        android:layout_width="200dp"
+        android:layout_height="110dp"
+        android:contentDescription="@string/choose_start_mode_flag"
+        android:scaleType="fitCenter"
+        android:src="@drawable/startmode_flags" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="2dp"
+        android:text="@string/choose_startmode"
+        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 </LinearLayout>

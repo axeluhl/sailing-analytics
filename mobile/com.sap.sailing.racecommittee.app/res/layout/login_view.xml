@@ -4,9 +4,9 @@
 
     <fragment
         android:id="@+id/login_view_backdrop"
+        class="com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop"
         tools:layout="@layout/login_backdrop" />
 
     <FrameLayout

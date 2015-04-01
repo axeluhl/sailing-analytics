@@ -47,8 +47,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="@dimen/default_margin"
-        android:src="?check_18dp"
-        />
+        android:src="?check_18dp" />
 
     <TextView
         android:id="@+id/vessel_crew"
@@ -56,10 +55,10 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/default_margin"
+        android:layout_toLeftOf="@+id/line_marked"
         android:layout_toRightOf="@id/vessel_number"
+        android:layout_toStartOf="@+id/line_marked"
         android:singleLine="true"
         android:textSize="@dimen/textSize_32"
-        tools:text="Annita Wagner"
-        android:layout_toLeftOf="@+id/line_marked"
-        android:layout_toStartOf="@+id/line_marked" />
+        tools:text="Annita Wagner" />
 </RelativeLayout>

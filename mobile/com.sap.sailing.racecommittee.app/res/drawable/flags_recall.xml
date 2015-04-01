@@ -24,5 +24,4 @@
             android:gravity="center"
             android:src="@drawable/flag_first_substitute_96dp" />
     </item>
-
 </layer-list>

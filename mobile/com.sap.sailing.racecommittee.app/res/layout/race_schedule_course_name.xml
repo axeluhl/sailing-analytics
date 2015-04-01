@@ -42,9 +42,9 @@
 
     <ListView
         android:id="@+id/listView"
-        android:layout_below="@id/header"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/header"
         android:background="?sap_gray_black_30"
         android:divider="@null"
         android:dividerHeight="0dp" />

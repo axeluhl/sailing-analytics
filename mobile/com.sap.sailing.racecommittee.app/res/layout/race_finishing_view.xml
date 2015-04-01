@@ -36,7 +36,7 @@
         android:layout_marginRight="10dip"
         android:layout_marginTop="10dip"
         android:baselineAligned="false"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/race_finishing_inner_container"
@@ -58,7 +58,7 @@
             android:layout_width="225dp"
             android:layout_height="match_parent"
             android:gravity="center_horizontal"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/race_finishing_finished"
@@ -93,7 +93,7 @@
                 android:layout_marginTop="2dp"
                 android:text="@string/abort_running_race"
                 android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
-            
+
             <Button
                 android:id="@+id/race_finishing_reset_course"
                 android:layout_width="140dp"

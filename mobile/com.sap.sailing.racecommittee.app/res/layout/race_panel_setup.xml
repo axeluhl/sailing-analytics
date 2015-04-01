@@ -227,12 +227,12 @@
                 android:layout_below="@id/wind_header">
 
                 <TextView
-                    android:drawableTop="@drawable/wind_off"
                     android:id="@+id/wind_value"
-                    android:gravity="center"
-                    android:layout_centerInParent="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:drawableTop="@drawable/wind_off"
+                    android:gravity="center"
                     android:text="@string/wind_no_data"
                     android:textAppearance="?textSmall" />
             </RelativeLayout>

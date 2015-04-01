@@ -4,7 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="50dp"
     android:background="@color/welter_light_gray_transparent"
-    android:gravity="center_vertical" >
+    android:gravity="center_vertical">
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -13,7 +13,7 @@
         android:paddingEnd="5dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:paddingStart="5dp" >
+        android:paddingStart="5dp">
 
         <ImageButton
             android:id="@+id/Welter.Cell.OneRowNoImageLabel.btnJury"
@@ -27,7 +27,7 @@
             android:src="@drawable/bravo_mini"
             android:textColor="@color/welter_red"
             android:textSize="@dimen/Welter.RegularTextSize" />
-        
+
         <TextView
             android:id="@+id/Welter.Cell.OneRowNoImageLabel.txtTitle"
             android:layout_width="match_parent"
@@ -37,7 +37,5 @@
             android:layout_toStartOf="@+id/Welter.Cell.OneRowNoImageLabel.btnJury"
             android:alpha="1"
             android:textSize="@dimen/Welter.RegularTextSize" />
-
     </RelativeLayout>
-
 </LinearLayout>

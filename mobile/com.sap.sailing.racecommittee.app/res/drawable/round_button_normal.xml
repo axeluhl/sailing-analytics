@@ -6,5 +6,4 @@
     <stroke
         android:width="@dimen/thin_line"
         android:color="@color/dark_sap_gray" />
-
 </shape>

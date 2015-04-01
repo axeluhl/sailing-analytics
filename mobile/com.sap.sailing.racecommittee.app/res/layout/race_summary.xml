@@ -13,35 +13,35 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingRight="@dimen/default_padding_twice"
-            android:paddingLeft="@dimen/default_padding_twice">
+            android:paddingLeft="@dimen/default_padding_twice"
+            android:paddingRight="@dimen/default_padding_twice">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/default_padding"
-                android:paddingBottom="@dimen/default_padding">
+                android:paddingBottom="@dimen/default_padding"
+                android:paddingTop="@dimen/default_padding">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="?white"
-                    android:textSize="@dimen/textSize_40"
-                    android:text="@string/race_summary_title"
-                    android:layout_centerVertical="true"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
                     android:layout_toLeftOf="@+id/edit_summary"
-                    android:layout_toStartOf="@+id/edit_summary" />
+                    android:layout_toStartOf="@+id/edit_summary"
+                    android:text="@string/race_summary_title"
+                    android:textColor="?white"
+                    android:textSize="@dimen/textSize_40" />
 
                 <ImageView
                     android:id="@+id/edit_summary"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:src="@drawable/ic_create_white_48dp"
-                    android:background="@drawable/round_button"
                     android:layout_alignParentRight="true"
-                    android:padding="20dp" />
+                    android:background="@drawable/round_button"
+                    android:padding="20dp"
+                    android:src="@drawable/ic_create_white_48dp" />
             </RelativeLayout>
 
             <ImageView
@@ -53,25 +53,25 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/default_padding_half"
+                android:orientation="horizontal"
                 android:paddingBottom="@dimen/default_padding_half"
-                android:orientation="horizontal">
+                android:paddingTop="@dimen/default_padding_half">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textAppearance="?attr/textNormal"
-                    android:text="@string/race_summary_start" />
+                    android:text="@string/race_summary_start"
+                    android:textAppearance="?attr/textNormal" />
 
                 <TextView
                     android:id="@+id/race_start_time"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:gravity="right"
                     android:textAppearance="?attr/textNormal"
-                    tools:text="11:00:00"
-                    android:gravity="right" />
+                    tools:text="11:00:00" />
 
                 <View
                     android:layout_width="0dp"
@@ -82,23 +82,23 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/default_padding_half"
-                android:paddingBottom="@dimen/default_padding_half">
+                android:paddingBottom="@dimen/default_padding_half"
+                android:paddingTop="@dimen/default_padding_half">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textAppearance="?attr/textNormal"
-                    android:text="@string/race_summary_finish_begin" />
+                    android:text="@string/race_summary_finish_begin"
+                    android:textAppearance="?attr/textNormal" />
 
                 <TextView
                     android:id="@+id/race_finish_begin_time"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAppearance="?attr/textNormal"
                     android:gravity="right"
+                    android:textAppearance="?attr/textNormal"
                     tools:text="11:12:18" />
 
                 <TextView
@@ -106,31 +106,31 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAppearance="?textNormal"
                     android:gravity="right"
+                    android:textAppearance="?textNormal"
                     tools:text="12:18 min" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/default_padding_half"
-                android:paddingBottom="@dimen/default_padding_half">
+                android:paddingBottom="@dimen/default_padding_half"
+                android:paddingTop="@dimen/default_padding_half">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textAppearance="?attr/textNormal"
-                    android:text="@string/race_summary_finish_end" />
+                    android:text="@string/race_summary_finish_end"
+                    android:textAppearance="?attr/textNormal" />
 
                 <TextView
                     android:id="@+id/race_finish_end_time"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAppearance="?attr/textNormal"
                     android:gravity="right"
+                    android:textAppearance="?attr/textNormal"
                     tools:text="11:16:36" />
 
                 <TextView
@@ -138,124 +138,124 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAppearance="?attr/textNormal"
                     android:gravity="right"
+                    android:textAppearance="?attr/textNormal"
                     tools:text="16:36 min" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/default_padding_half"
-                android:paddingBottom="@dimen/default_padding_half">
+                android:paddingBottom="@dimen/default_padding_half"
+                android:paddingTop="@dimen/default_padding_half">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textAppearance="?attr/textNormal"
-                    android:text="@string/race_summary_finish_duration" />
+                    android:text="@string/race_summary_finish_duration"
+                    android:textAppearance="?attr/textNormal" />
 
                 <TextView
                     android:id="@+id/race_finish_duration"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textAppearance="?attr/textNormal"
                     android:gravity="right"
+                    android:textAppearance="?attr/textNormal"
                     tools:text="04:18 min" />
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/region_wind"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/region_wind">
+                android:orientation="vertical">
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/thin_line"
-                    android:layout_marginTop="@dimen/default_margin"
                     android:layout_marginBottom="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin"
                     android:background="?sap_gray" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/default_padding_half"
-                    android:paddingBottom="@dimen/default_padding_half">
+                    android:paddingBottom="@dimen/default_padding_half"
+                    android:paddingTop="@dimen/default_padding_half">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:textAppearance="?attr/textNormal"
-                        android:text="@string/race_summary_wind_direction" />
+                        android:text="@string/race_summary_wind_direction"
+                        android:textAppearance="?attr/textNormal" />
 
                     <TextView
                         android:id="@+id/wind_direction"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:textAppearance="?attr/textNormal"
                         android:gravity="right"
+                        android:textAppearance="?attr/textNormal"
                         tools:text="from 192°" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/default_padding_half"
-                    android:paddingBottom="@dimen/default_padding_half">
+                    android:paddingBottom="@dimen/default_padding_half"
+                    android:paddingTop="@dimen/default_padding_half">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:textAppearance="?attr/textNormal"
-                        android:text="@string/race_summary_wind_speed" />
+                        android:text="@string/race_summary_wind_speed"
+                        android:textAppearance="?attr/textNormal" />
 
                     <TextView
                         android:id="@+id/wind_speed"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:textAppearance="?attr/textNormal"
                         android:gravity="right"
+                        android:textAppearance="?attr/textNormal"
                         tools:text="6.5 kts" />
                 </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/region_individual_recalls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/region_individual_recalls">
+                android:orientation="vertical">
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/thin_line"
-                    android:layout_marginTop="@dimen/default_margin"
                     android:layout_marginBottom="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin"
                     android:background="?sap_gray" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/default_padding_half"
-                    android:paddingBottom="@dimen/default_padding_half">
+                    android:paddingBottom="@dimen/default_padding_half"
+                    android:paddingTop="@dimen/default_padding_half">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textNormal"
-                        android:text="@string/race_summary_individual_recalls" />
+                        android:text="@string/race_summary_individual_recalls"
+                        android:textAppearance="?attr/textNormal" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textNormal"
                         android:gravity="right"
+                        android:textAppearance="?attr/textNormal"
                         tools:text="AUT 553  GER 766  ITA 912" />
                 </LinearLayout>
             </LinearLayout>

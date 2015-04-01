@@ -41,9 +41,9 @@
         android:background="?black" />
 
     <RelativeLayout
-        android:layout_below="@id/line_top"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/line_top"
         android:background="?sap_gray_black_30">
 
         <LinearLayout
@@ -72,8 +72,7 @@
                     <NumberPicker
                         android:id="@+id/time_launch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        />
+                        android:layout_height="wrap_content" />
                 </LinearLayout>
 
                 <TextView
@@ -105,13 +104,13 @@
 
             <Button
                 android:id="@+id/set_gate_time"
+                style="?attr/buttonSolidSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="@dimen/default_margin"
                 android:layout_marginRight="@dimen/default_margin"
-                android:text="@string/gate_start_set"
-                style="?attr/buttonSolidSmall" />
+                android:text="@string/gate_start_set" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

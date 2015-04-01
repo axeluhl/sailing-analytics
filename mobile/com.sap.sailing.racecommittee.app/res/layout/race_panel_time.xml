@@ -12,9 +12,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_margin"
         android:gravity="center"
-        tools:text="@string/time"
         android:textColor="?white"
-        android:textSize="@dimen/textSize_40" />
+        android:textSize="@dimen/textSize_40"
+        tools:text="@string/time" />
 
     <ImageView
         android:id="@+id/time_marker"
@@ -34,8 +34,8 @@
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical">
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1">
 
             <TextView
                 android:id="@+id/time_start"
@@ -50,40 +50,40 @@
                 android:id="@+id/time_start_lock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/lock_outline"
                 android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/default_margin_half"
                 android:layout_toLeftOf="@+id/time_start"
                 android:layout_toStartOf="@+id/time_start"
-                android:layout_marginRight="@dimen/default_margin_half"
+                android:src="@drawable/lock_outline"
                 android:visibility="gone" />
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical">
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1">
 
             <TextView
-                android:layout_centerVertical="true"
                 android:id="@+id/current_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:layout_centerVertical="true"
                 android:drawableLeft="?access_time_36dp"
                 android:drawablePadding="@dimen/default_padding_half"
                 android:drawableStart="?access_time_36dp"
-                tools:text="@string/time"
-                android:textAppearance="?textSmall"
                 android:gravity="center"
-                android:visibility="invisible" />
+                android:textAppearance="?textSmall"
+                android:visibility="invisible"
+                tools:text="@string/time" />
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical">
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1">
 
             <TextView
                 android:id="@+id/time_finish"

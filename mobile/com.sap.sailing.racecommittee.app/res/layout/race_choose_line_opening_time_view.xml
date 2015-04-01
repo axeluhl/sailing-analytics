@@ -8,14 +8,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-        
-        <TextView 
+        android:orientation="horizontal">
+
+        <TextView
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:text="@string/gate_launch"
-            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"/>
-        
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
         <EditText
             android:id="@+id/gateLaunchStopTimeText"
             android:layout_width="0dp"
@@ -23,7 +23,7 @@
             android:layout_weight="1"
             android:inputType="number"
             android:text="@string/empty"
-            android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel" >
+            android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel">
 
             <requestFocus />
         </EditText>
@@ -34,19 +34,19 @@
             android:text="@string/choose_line_open_min"
             android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
     </LinearLayout>
-    
+
     <LinearLayout
+        android:id="@+id/golfDownTimeContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/golfDownTimeContainer" >
-        
-	<TextView 
+        android:orientation="horizontal">
+
+        <TextView
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:text="@string/golf_down"
             android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
-        
+
         <EditText
             android:id="@+id/golfDownTimeText"
             android:layout_width="0dp"
@@ -54,8 +54,7 @@
             android:layout_weight="1"
             android:inputType="number"
             android:text="@string/empty"
-            android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel" >
-        </EditText>
+            android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel"></EditText>
 
         <TextView
             android:layout_width="wrap_content"

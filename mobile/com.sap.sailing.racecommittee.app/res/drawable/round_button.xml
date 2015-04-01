@@ -12,5 +12,4 @@
 
     <!-- default -->
     <item android:drawable="@drawable/round_button_normal" />
-
 </selector>

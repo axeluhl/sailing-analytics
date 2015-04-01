@@ -10,5 +10,5 @@
         android:layout_height="match_parent"
         android:background="?sap_gray_black_30"
         android:divider="@null"
-        android:dividerHeight="0dp"/>
+        android:dividerHeight="0dp" />
 </LinearLayout>

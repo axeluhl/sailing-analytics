@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="@dimen/side_button_width_large"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -10,27 +10,27 @@
         android:layout_weight="1">
 
         <Button
+            android:id="@+id/protest_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAllCaps="true"
+            android:layout_centerInParent="true"
             android:background="@drawable/border_gray"
             android:padding="@dimen/default_padding_half"
-            android:textAppearance="?textNormal"
-            android:layout_centerInParent="true"
             android:text="@string/protest_time"
-            android:id="@+id/protest_button" />
+            android:textAllCaps="true"
+            android:textAppearance="?textNormal" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
-            android:background="?black"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentBottom="true"
+            android:background="?black" />
 
         <View
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
-            android:background="?black"
-            android:layout_alignParentLeft="true" />
+            android:layout_alignParentLeft="true"
+            android:background="?black" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -41,37 +41,37 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAllCaps="true"
-            android:textColor="?sap_light_gray"
-            android:textSize="@dimen/textSize_20"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/default_margin"
-            android:text="@string/finished_publishing" />
+            android:text="@string/finished_publishing"
+            android:textAllCaps="true"
+            android:textColor="?sap_light_gray"
+            android:textSize="@dimen/textSize_20" />
 
         <TextView
+            android:id="@+id/publish_advice"
+            style="?textSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_margin"
             android:layout_centerInParent="true"
-            android:text="@string/finished_text_01"
+            android:layout_margin="@dimen/default_margin"
             android:gravity="center"
-            style="?textSmall"
-            android:id="@+id/publish_advice" />
+            android:text="@string/finished_text_01" />
 
         <Button
+            android:id="@+id/submit_button"
+            style="?buttonSolidSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
             android:layout_marginBottom="@dimen/default_margin_twice"
-            android:text="@string/finished_submit"
-            style="?buttonSolidSmall"
-            android:id="@+id/submit_button" />
+            android:text="@string/finished_submit" />
 
         <View
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
-            android:background="?black"
-            android:layout_alignParentLeft="true" />
+            android:layout_alignParentLeft="true"
+            android:background="?black" />
     </RelativeLayout>
 </LinearLayout>

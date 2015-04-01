@@ -5,12 +5,12 @@
     android:layout_height="75dp"
     android:background="@drawable/list_selector"
     android:gravity="center_vertical"
-    android:paddingLeft="18dp" >
+    android:paddingLeft="18dp">
 
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="75dp"
-        android:gravity="center_vertical" >
+        android:gravity="center_vertical">
 
         <TextView
             android:id="@+id/Welter.Cell.TwoRowNoImage.lineOne"
@@ -18,8 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:textColor="@drawable/text_selector"
-            android:textSize="@dimen/Welter.RegularTextSize" >
-        </TextView>
+            android:textSize="@dimen/Welter.RegularTextSize" />
 
         <TextView
             android:id="@+id/Welter.Cell.TwoRowNoImage.lineTwo"
@@ -47,5 +46,4 @@
         android:contentDescription="@string/updateIndicator"
         android:src="@drawable/updatelabel"
         android:visibility="gone" />
-
 </RelativeLayout>

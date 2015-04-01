@@ -34,8 +34,8 @@
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@id/nav_button"
         android:layout_toStartOf="@id/nav_button"
-        android:textColor="@color/constant_white"
         android:padding="10dp"
         android:text="@string/nav_header"
+        android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_32" />
 </RelativeLayout>

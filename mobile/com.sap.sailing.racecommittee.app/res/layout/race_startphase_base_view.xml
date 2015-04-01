@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/race_startphase_base_start_countdown"
@@ -34,12 +34,13 @@
         android:layout_marginRight="10dip"
         android:layout_marginTop="10dip"
         android:baselineAligned="false"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
-        <include layout="@layout/race_flag_space"
-		    android:layout_width="match_parent"
-		    android:layout_height="fill_parent"
-		    android:layout_weight="0.618" />
+        <include
+            layout="@layout/race_flag_space"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.618" />
 
         <TextView
             android:layout_width="1dp"
@@ -53,7 +54,7 @@
             android:layout_height="match_parent"
             android:layout_weight="0.99"
             android:gravity="center_horizontal"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <ViewStub
                 android:id="@+id/race_startphase_base_actions"
@@ -77,10 +78,10 @@
                 android:text="@string/abort_starting_phase"
                 android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal" >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal">
 
                 <Button
                     android:id="@+id/raceStartIn4Minutes"
@@ -100,19 +101,19 @@
                     android:text="@string/race_start_in_5_minutes"
                     tools:ignore="ButtonStyle" />
 
-				<Button
-				    android:id="@+id/raceStartIn1Minute"
-				    android:layout_width="wrap_content"
-				    android:layout_height="90dp"
-				    android:text="@string/race_start_in_1_minute" />
-
-                </RelativeLayout>
-
                 <Button
-                    android:id="@+id/raceResetCourse"
-                    android:layout_width="197dp"
-                    android:layout_height="50dp"
-                    android:text="@string/race_reset_course" />
+                    android:id="@+id/raceStartIn1Minute"
+                    android:layout_width="wrap_content"
+                    android:layout_height="90dp"
+                    android:text="@string/race_start_in_1_minute" />
+
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/raceResetCourse"
+                android:layout_width="197dp"
+                android:layout_height="50dp"
+                android:text="@string/race_reset_course" />
 
             <Button
                 android:id="@+id/race_startphase_base_reset_time_button"

@@ -8,8 +8,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray"
-        >
+        android:background="?sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -37,46 +36,46 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/buttonBar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/selector_header_height"
-        android:id="@+id/buttonBar">
+        android:layout_height="@dimen/selector_header_height">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
             android:layout_marginTop="@dimen/default_margin_half"
-            android:orientation="horizontal"
-            android:layout_centerInParent="true">
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/minute_inc"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_padding"
-                android:tag="+"
                 android:src="@drawable/value_next"
-                style="?android:attr/borderlessButtonStyle" />
+                android:tag="+" />
 
             <TextView
                 android:id="@+id/start_countdown"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="@string/race_start_time_in"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/default_margin_half"
+                android:layout_marginRight="@dimen/default_margin_half"
                 android:textColor="?white"
                 android:textSize="@dimen/textSize_40"
                 android:visibility="visible"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/default_margin_half"
-                android:layout_marginRight="@dimen/default_margin_half" />
+                tools:text="@string/race_start_time_in" />
 
             <ImageButton
                 android:id="@+id/minute_dec"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_padding"
-                android:tag="-"
                 android:src="@drawable/value_prev"
-                style="?android:attr/borderlessButtonStyle" />
+                android:tag="-" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -88,9 +87,9 @@
         android:background="?black" />
 
     <RelativeLayout
-        android:layout_below="@+id/buttonBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/buttonBar"
         android:background="?sap_gray_black_30">
 
         <LinearLayout
@@ -108,21 +107,21 @@
 
             <include
                 android:id="@+id/start_time_picker"
+                layout="@layout/time_picker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                layout="@layout/time_picker"
                 android:layout_gravity="center_vertical" />
         </LinearLayout>
 
         <Button
             android:id="@+id/set_start_time"
+            style="?attr/buttonSolidSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerInParent="true"
             android:layout_margin="@dimen/default_margin_twice"
-            android:text="@string/race_set_start"
-            style="?attr/buttonSolidSmall" />
+            android:text="@string/race_set_start" />
     </RelativeLayout>
 </RelativeLayout>

@@ -2,15 +2,15 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- pressed -->
-    <item android:drawable="@color/constant_sap_yellow_1" android:state_pressed="true"/>
+    <item android:drawable="@color/constant_sap_yellow_1" android:state_pressed="true" />
 
     <!-- focused -->
-    <item android:drawable="@color/constant_white" android:state_focused="true"/>
+    <item android:drawable="@color/constant_white" android:state_focused="true" />
 
     <!-- disabled -->
-    <item android:drawable="@color/dark_sap_gray_white_10" android:state_enabled="false"/>
+    <item android:drawable="@color/dark_sap_gray_white_10" android:state_enabled="false" />
 
     <!-- default -->
-    <item android:drawable="@color/constant_white"/>
+    <item android:drawable="@color/constant_white" />
 
 </selector>

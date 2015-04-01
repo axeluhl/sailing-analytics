@@ -70,7 +70,7 @@
             android:id="@+id/race_marker"
             android:layout_width="@dimen/thick_line"
             android:layout_height="match_parent"
-            android:src="@drawable/marker_race"/>
+            android:src="@drawable/marker_race" />
 
         <LinearLayout
             android:id="@+id/race_flag"
@@ -129,16 +129,16 @@
                 android:id="@+id/group_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/textSize_22"
                 android:singleLine="true"
+                android:textSize="@dimen/textSize_22"
                 tools:text="470 - Women" />
 
             <TextView
                 android:id="@+id/race_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/textSize_22"
                 android:singleLine="true"
+                android:textSize="@dimen/textSize_22"
                 tools:text="Fleet Yellow - Race 3" />
         </LinearLayout>
     </RelativeLayout>

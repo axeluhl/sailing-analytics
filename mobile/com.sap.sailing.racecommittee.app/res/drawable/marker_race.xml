@@ -16,5 +16,4 @@
     <item
         android:drawable="@color/constant_sap_yellow_1"
         android:maxLevel="11" />
-
 </level-list>

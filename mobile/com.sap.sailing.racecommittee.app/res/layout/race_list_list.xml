@@ -13,25 +13,25 @@
 
         <Button
             android:id="@+id/races_current"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/races_current"
             android:textColor="?sap_light_gray"
             android:textSize="@dimen/textSize_20"
-            android:textStyle="bold"
-            style="?android:attr/borderlessButtonStyle" />
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/races_all"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/races_all"
             android:textColor="?sap_light_gray"
             android:textSize="@dimen/textSize_20"
-            android:textStyle="bold"
-            style="?android:attr/borderlessButtonStyle" />
+            android:textStyle="bold" />
     </LinearLayout>
 
     <ListView

@@ -20,7 +20,7 @@
         layout="@layout/race_summary"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toRightOf="@id/finished_panel_left"
-        android:layout_toLeftOf="@id/finished_panel_right" />
+        android:layout_toLeftOf="@id/finished_panel_right"
+        android:layout_toRightOf="@id/finished_panel_left" />
 
 </RelativeLayout>

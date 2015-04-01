@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/line"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/line">
+    android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/flag"
@@ -26,24 +26,24 @@
 
     <Button
         android:id="@+id/confirm"
+        style="?attr/buttonSolidNormal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="@dimen/default_margin"
         android:layout_toLeftOf="@id/more_data"
         android:text="@string/set_signal"
-        android:visibility="gone"
-        android:layout_alignParentRight="true"
-        style="?attr/buttonSolidNormal" />
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginTop="@dimen/default_margin"
+        android:layout_marginBottom="@dimen/default_margin"
         android:layout_marginLeft="@dimen/default_margin_half"
         android:layout_marginRight="@dimen/default_margin_half"
-        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_marginTop="@dimen/default_margin"
         android:layout_toLeftOf="@id/confirm"
         android:layout_toRightOf="@id/flag"
         android:orientation="vertical">

@@ -2,63 +2,60 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dip"
-    android:orientation="vertical" >
-    
-    <LinearLayout 
-        android:layout_width="match_parent"
-    	android:layout_height="wrap_content"
-    	android:orientation="horizontal">
-        
-        <TextView 
-	        android:layout_width="150dip"
-	        android:layout_height="wrap_content"
-	        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-	        android:text="@string/nationality"/>
-        
-		<TextView 
-	        android:layout_width="150dip"
-	        android:layout_height="wrap_content"
-	        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-	        android:text="@string/number"/>
-        
-    </LinearLayout>
-    
-    <LinearLayout 
-        android:layout_width="match_parent"
-    	android:layout_height="match_parent"
-    	android:orientation="horizontal">
-        
-	    <EditText
-	        android:id="@+id/pathFinderNationality"
-	        android:layout_width="150dip"
-	        android:layout_height="wrap_content"
-	        android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel"
-	        android:text="@string/empty"
-	        android:inputType="textCapCharacters" >
-	
-	        <requestFocus />
-	    </EditText>
-	    
-	    <EditText
-	        android:id="@+id/pathFinderNumber"
-	        android:layout_width="200dip"
-	        android:layout_height="wrap_content"
-	        android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel"
-	        android:text="@string/empty"
-	        android:inputType="number" >
-	    </EditText>
-	
-	    <Button
-	        android:id="@+id/choosePathFinderButton"
-	        android:layout_width="wrap_content"
-	        android:layout_height="match_parent"
-	        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-	        android:text="@string/choose" />
-	    
-    </LinearLayout>
-    
+    android:orientation="vertical"
+    android:padding="10dip">
 
-    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="150dip"
+            android:layout_height="wrap_content"
+            android:text="@string/nationality"
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
+        <TextView
+            android:layout_width="150dip"
+            android:layout_height="wrap_content"
+            android:text="@string/number"
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/pathFinderNationality"
+            android:layout_width="150dip"
+            android:layout_height="wrap_content"
+            android:inputType="textCapCharacters"
+            android:text="@string/empty"
+            android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel">
+
+            <requestFocus />
+        </EditText>
+
+        <EditText
+            android:id="@+id/pathFinderNumber"
+            android:layout_width="200dip"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="@string/empty"
+            android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel" />
+
+        <Button
+            android:id="@+id/choosePathFinderButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/choose"
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
+    </LinearLayout>
+
 
 </LinearLayout>

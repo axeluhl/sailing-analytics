@@ -35,8 +35,8 @@
         android:layout_toRightOf="@id/flag"
         android:layout_toStartOf="@id/checked"
         android:padding="@dimen/default_padding_half"
-        tools:text="Zulu"
-        android:textSize="@dimen/textSize_26" />
+        android:textSize="@dimen/textSize_26"
+        tools:text="Zulu" />
 
     <View
         android:layout_width="match_parent"
