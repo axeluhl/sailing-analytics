@@ -178,7 +178,7 @@ public class SwissTimingReplayAdapterServiceTest {
     @Test
     public void testRaceData_SAW010955_20120802_WithDomainAdapter() throws Exception {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
-                new DummyTrackedRegattaRegistry());
+                new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false);
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         assertFalse(Util.isEmpty(trackedRaces));
@@ -192,7 +192,7 @@ public class SwissTimingReplayAdapterServiceTest {
     @Test
     public void testStartPerformanceDetection() throws Exception {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
-                new DummyTrackedRegattaRegistry());
+                new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false);
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         TrackedRace trackedRace = trackedRaces.iterator().next();

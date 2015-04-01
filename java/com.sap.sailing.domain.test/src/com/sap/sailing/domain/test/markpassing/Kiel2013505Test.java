@@ -5,7 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 
-import org.junit.Ignore;
+import org.junit.Test;
 
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -16,11 +16,12 @@ public class Kiel2013505Test extends AbstractMarkPassingTest {
         super();
     }
 
-    @Ignore
+    //Takes longer than 2 minutes, so the rule in AbstractTracTracLiveTest needs to be deactivated first.
+    
+    @Test
     public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         testRace("5");
     }
-
 
     @Override
     protected String getFileName() {

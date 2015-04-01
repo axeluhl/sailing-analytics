@@ -96,6 +96,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -106,6 +107,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -242,6 +244,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
+    protected final MarkPassingCalculator markPassingCalculator;
+    
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
     
     private final Map<String, Sideline> courseSidelines;
@@ -311,9 +315,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private transient ShortTimeWindCache shortTimeWindCache;
 
-    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
+    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race,
+            final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation) {
+            long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
+            boolean useInternalMarkPassingAlgorithm) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
@@ -424,6 +430,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
+        if (useInternalMarkPassingAlgorithm){
+            markPassingCalculator = createMarkPassingCalculator();
+            this.trackedRegatta.addRaceListener(new RaceListener() {
+                @Override
+                public void raceAdded(TrackedRace trackedRace) {}
+                @Override
+                public void raceRemoved(TrackedRace trackedRace) {
+                    // stop mark passing calculator when tracked race is removed:
+                    markPassingCalculator.stop();
+                }
+            });
+        } else {
+            markPassingCalculator = null;
+        }
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
         try {
             waitUntilLoadingFromWindStoreComplete();
@@ -2763,15 +2783,26 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
             resumeAllCachesNotUpdatingWhileLoading();
         }
-
+        if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+            // no more new data can be expected; stop mark passing calculator if one is being used
+            if (isUsingMarkPassingCalculator()) {
+                markPassingCalculator.stop();
+            }
+        }
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
+        if (markPassingCalculator != null) {
+            markPassingCalculator.suspend();
+        }
         crossTrackErrorCache.suspend();
         maneuverCache.suspend();
     }
 
     private void resumeAllCachesNotUpdatingWhileLoading() {
+        if (markPassingCalculator != null) {
+            markPassingCalculator.resume();
+        }
         crossTrackErrorCache.resume();
         maneuverCache.resume();
     }
@@ -3300,6 +3331,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public GPSFixStore getGPSFixStore() {
     	return gpsFixStore;
+    }
+    
+    protected abstract MarkPassingCalculator createMarkPassingCalculator();
+    
+    @Override
+    public boolean isUsingMarkPassingCalculator() {
+        return markPassingCalculator!=null;
     }
 
     @Override

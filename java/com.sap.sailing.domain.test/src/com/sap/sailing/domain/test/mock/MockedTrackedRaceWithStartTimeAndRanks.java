@@ -596,4 +596,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public long getGateStartGolfDownTime() {
         return 0;
     }
+
+    @Override
+    public boolean isUsingMarkPassingCalculator() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }
