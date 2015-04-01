@@ -3392,13 +3392,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public long getGateStartGolfDownTime() {
         long result = 0;
-        if (isGateStart()) {
+        Boolean isGateStart = isGateStart();
+        if (isGateStart != null && isGateStart.booleanValue() == true) {
             for (RaceLog raceLog : attachedRaceLogs.values()) {
                 raceLog.lockForRead();
                 for(RaceLogEvent raceLogEvent: raceLog.getRawFixes()) {
-                    logger.log(Level.INFO, ""+raceLogEvent.getClass().getName());
                     if(raceLogEvent.getClass().equals(RaceLogGateLineOpeningTimeEventImpl.class)){
-                        logger.log(Level.INFO, "GOT RIGHT EVENT"+raceLogEvent.getClass().getName());
                         RaceLogGateLineOpeningTimeEvent raceLogGateLineOpeningTimeEvent = (RaceLogGateLineOpeningTimeEvent) raceLogEvent;
                         result = raceLogGateLineOpeningTimeEvent.getGateLineOpeningTimes().getGolfDownTime();
                     }
