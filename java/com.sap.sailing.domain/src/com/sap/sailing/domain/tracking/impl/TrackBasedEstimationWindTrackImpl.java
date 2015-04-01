@@ -35,6 +35,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractTimePoint;
@@ -706,10 +707,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
             // A mark position change can mean a leg type change. The interval over which the wind estimation is
             // affected
             // depends on how the GPS track computes the estimated mark position. Ask it:
-            Util.Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark)
-                    .getEstimatedPositionTimePeriodAffectedBy(fix);
-            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
-            TimePoint endOfInvalidation = interval.getB();
+            TimeRange interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
+            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.from());
+            TimePoint endOfInvalidation = interval.to();
             scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
         }
     }

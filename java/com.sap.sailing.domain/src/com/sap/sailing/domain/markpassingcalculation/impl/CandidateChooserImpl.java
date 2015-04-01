@@ -55,6 +55,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private Map<Competitor, Integer> suppressedPassings = new HashMap<>();
     private TimePoint raceStartTime;
+    private final WaypointPositionAndDistanceCache waypointPositionAndDistanceCache;
     
     /**
      * An artificial proxy candidate that comes before the start mark passing. Its time point is set to
@@ -67,6 +68,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
+        waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
         raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME) : null;
         start = new CandidateWithSettableTime(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null);
         end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse()
@@ -372,7 +374,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             first = c1.getWaypoint();
         }
         final Waypoint second = c2.getWaypoint();
-        Distance totalGreatCircleDistance = getTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
+        Distance totalGreatCircleDistance = getApproximateTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
         Distance actualDistanceTraveled = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
         result = getProbabilityOfActualDistanceGivenGreatCircleDistance(totalGreatCircleDistance, actualDistanceTraveled);
         return result;
@@ -412,7 +414,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         return result;
     }
 
-    private Distance getTotalGreatCircleDistanceBetweenWaypoints(Waypoint first, final Waypoint second,
+    private Distance getApproximateTotalGreatCircleDistanceBetweenWaypoints(Waypoint first, final Waypoint second,
             final TimePoint timePoint) {
         Distance totalGreatCircleDistance = new MeterDistance(0);
         boolean legsAreBetweenCandidates = false;
@@ -425,7 +427,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 legsAreBetweenCandidates = true;
             }
             if (legsAreBetweenCandidates) {
-                totalGreatCircleDistance = totalGreatCircleDistance.add(leg.getGreatCircleDistance(timePoint));
+                totalGreatCircleDistance = waypointPositionAndDistanceCache.getApproximateDistance(from, leg.getLeg().getTo(), timePoint);
             }
         }
         return totalGreatCircleDistance;
