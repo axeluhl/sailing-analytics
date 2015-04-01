@@ -829,7 +829,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
-     * @return the marks of a waypoint with two marks in the order port, starboard (when approching the waypoint from
+     * @return the marks of a waypoint with two marks in the order port, starboard (when approaching the waypoint from
      *         the direction of the waypoint beforehand.
      */
     private Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {

@@ -12,6 +12,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -86,7 +87,6 @@ public class CandidateChooserImpl implements CandidateChooser {
             allEdges.put(c, new HashMap<Candidate, Set<Edge>>());
             fixedPasses.addAll(startAndEnd);
             addCandidates(c, startAndEnd);
-
         }
     }
 
@@ -225,7 +225,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 // TODO this comparison does not exactly implement the condition "if distance is more likely than skipping"
                 if (travelingForwardInTimeOrUnknown(early, late) &&
                         (fixed.contains(early) || fixed.contains(late) || estimatedDistanceProbability > MINIMUM_PROBABILITY)) {
-                    addEdge(edges, new Edge(early, late, startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse()));
+                    addEdge(edges, new Edge(early, late, startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse().getNumberOfWaypoints()));
                 }
             }
         }
@@ -279,7 +279,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
             boolean endFound = false;
             currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
-                    0, race.getRace().getCourse()), 0.0));
+                    0, race.getRace().getCourse().getNumberOfWaypoints()), 0.0));
             while (!endFound) {
                 Util.Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
                 Edge currentCheapestEdge = cheapestEdgeWithCost.getA();
@@ -289,7 +289,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                     // The cheapest edge taking us to currentCheapestEdge.getEnd() is found. Remember it.
                     candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Util.Pair<Candidate, Double>(
                             currentCheapestEdge.getStart(), currentCheapestCost));
-                    logger.finest("Added "+ currentCheapestEdge + "as cheapest edge for " + c);
+                    if (logger.isLoggable(Level.FINEST)) {
+                        logger.finest("Added "+ currentCheapestEdge + "as cheapest edge for " + c);
+                    }
                     endFound = currentCheapestEdge.getEnd() == endOfFixedInterval;
                     if (!endFound) {
                         // the end of the segment was not yet found; add edges leading away from
@@ -339,7 +341,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                     newMarkPassings.add(newMarkPassing);
                 }
             }
-            logger.fine("Updating MarkPasses for " + c + " in case "+race.getRace().getName());
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("Updating MarkPasses for " + c + " in case "+race.getRace().getName());
+            }
             race.updateMarkPassings(c, newMarkPassings);
         }
     }
