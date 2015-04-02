@@ -10,6 +10,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSe
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisCompetitorDTO;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
 
@@ -17,9 +18,11 @@ public class StartAnalysisStartRankTable extends AbsolutePanel {
 
     private CellTable<StartAnalysisCompetitorDTO> table;
     private StringMessages stringConstants;
+    private CompetitorSelectionModel competitorSelectionModel;
 
-    public StartAnalysisStartRankTable(List<StartAnalysisCompetitorDTO> saCompetitors) {
+    public StartAnalysisStartRankTable(List<StartAnalysisCompetitorDTO> saCompetitors, CompetitorSelectionModel competitorSelectionModel) {
         stringConstants = StringMessages.INSTANCE;
+        this.competitorSelectionModel = competitorSelectionModel;
         initTable(saCompetitors);
     }
 
@@ -36,14 +39,22 @@ public class StartAnalysisStartRankTable extends AbsolutePanel {
         StartAnalysisStartRankTableRankAtFirstMarkColumn<StartAnalysisCompetitorDTO> rankColumn = new StartAnalysisStartRankTableRankAtFirstMarkColumn<StartAnalysisCompetitorDTO>() {
             @Override    
             public Pair<String, String> getValue(StartAnalysisCompetitorDTO saCompetitor) {
-                return new Pair<String, String>(""+saCompetitor.rankingTableEntryDTO.rankAtFirstMark, saCompetitor.rankingTableEntryDTO.tailColor);   
+                String competitorColorAsHTML = competitorSelectionModel.getColor(saCompetitor.competitorDTO).getAsHtml();
+                if(competitorColorAsHTML == null){
+                    competitorColorAsHTML = "#121212";
+                }
+                return new Pair<String, String>(""+saCompetitor.rankingTableEntryDTO.rankAtFirstMark, competitorColorAsHTML);   
             }  
         };
         
         StartAnalysisStartRankTableTeamCollumn<StartAnalysisCompetitorDTO> teamColumn = new StartAnalysisStartRankTableTeamCollumn<StartAnalysisCompetitorDTO>() {
             @Override
             public Pair<String, String> getValue(StartAnalysisCompetitorDTO saCompetitor) {
-                return new Pair<String, String>(saCompetitor.rankingTableEntryDTO.teamName, saCompetitor.rankingTableEntryDTO.tailColor);
+                String competitorColorAsHTML = competitorSelectionModel.getColor(saCompetitor.competitorDTO).getAsHtml();
+                if(competitorColorAsHTML == null){
+                    competitorColorAsHTML = "#121212";
+                }
+                return new Pair<String, String>(saCompetitor.rankingTableEntryDTO.teamName, competitorColorAsHTML);
             }
         };
 

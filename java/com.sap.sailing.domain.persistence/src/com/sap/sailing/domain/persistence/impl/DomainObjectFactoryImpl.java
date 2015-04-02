@@ -857,6 +857,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
             ensureIndicesOnWindTracks(windTracks);
             BasicDBObject queryById = new BasicDBObject();
+            // the default query is by the RACE_ID key:
             queryById.put(FieldNames.RACE_ID.name(), race.getId());
             if (constrainToWindSource != null) {
                 queryById.put(FieldNames.WIND_SOURCE_NAME.name(), constrainToWindSource.name());
@@ -864,6 +865,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             for (DBObject dbWind : windTracks.find(queryById)) {
                 loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
             }
+            // Additionally check for legacy wind fixes stored with the old EVENT_NAME key; if any are found, migrate them
             BasicDBObject queryByName = new BasicDBObject();
             queryByName.put(FieldNames.EVENT_NAME.name(), regattaName);
             queryByName.put(FieldNames.RACE_NAME.name(), race.getName());

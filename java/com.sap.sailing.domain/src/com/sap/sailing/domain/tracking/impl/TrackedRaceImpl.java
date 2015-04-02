@@ -35,7 +35,10 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -1246,13 +1249,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         DummyMarkPassingWithTimePointOnly markPassingTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
         TrackedLegOfCompetitor result = null;
         if (!competitorMarkPassings.isEmpty()) {
-            MarkPassing lastMarkPassingAtOfBeforeTimePoint = competitorMarkPassings.floor(markPassingTimePoint);
-            if (lastMarkPassingAtOfBeforeTimePoint != null) {
-                Waypoint waypointPassedLastAtOrBeforeTimePoint = lastMarkPassingAtOfBeforeTimePoint.getWaypoint();
-                // don't return a leg if competitor has already finished last leg and therefore the race
-                if (waypointPassedLastAtOrBeforeTimePoint != getRace().getCourse().getLastWaypoint()) {
-                    result = getTrackedLegStartingAt(waypointPassedLastAtOrBeforeTimePoint).getTrackedLeg(competitor);
+            final Course course = getRace().getCourse();
+            course.lockForRead();
+            try {
+                MarkPassing lastMarkPassingAtOfBeforeTimePoint = competitorMarkPassings.floor(markPassingTimePoint);
+                if (lastMarkPassingAtOfBeforeTimePoint != null) {
+                    Waypoint waypointPassedLastAtOrBeforeTimePoint = lastMarkPassingAtOfBeforeTimePoint.getWaypoint();
+                    // don't return a leg if competitor has already finished last leg and therefore the race
+                    if (waypointPassedLastAtOrBeforeTimePoint != course.getLastWaypoint()) {
+                        result = getTrackedLegStartingAt(waypointPassedLastAtOrBeforeTimePoint).getTrackedLeg(competitor);
+                    }
                 }
+            } finally {
+                course.unlockAfterRead();
             }
         }
         return result;
@@ -1282,6 +1291,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
+    @Override
+    public int getLastLegStarted(TimePoint timePoint) {
+        int result = 0;
+        int indexOfLastWaypointPassed = -1;
+        int legCount = race.getCourse().getLegs().size();
+        for (Map.Entry<Waypoint, NavigableSet<MarkPassing>> entry : markPassingsForWaypoint.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                MarkPassing first = entry.getValue().first();
+                // Did the mark passing happen at or before the requested time point?
+                if (first.getTimePoint().compareTo(timePoint) <= 0) {
+                    int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(entry.getKey());
+                    if (indexOfWaypoint > indexOfLastWaypointPassed) {
+                        indexOfLastWaypointPassed = indexOfWaypoint;
+                    }
+                }
+            }
+        }
+        if(indexOfLastWaypointPassed >= 0) {
+            result = indexOfLastWaypointPassed+1 < legCount ? indexOfLastWaypointPassed+1 : legCount;  
+        }
+        return result;
+    }
+    
     @Override
     public MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint) {
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
@@ -3381,6 +3413,26 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (procedure != null && procedure.getType() != null) {
                 result = procedure.getType() == RacingProcedureType.GateStart;
                 break;
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public long getGateStartGolfDownTime() {
+        long result = 0;
+        if (isGateStart()) {
+            for (RaceLog raceLog : attachedRaceLogs.values()) {
+                raceLog.lockForRead();
+                for(RaceLogEvent raceLogEvent: raceLog.getRawFixes()) {
+                    logger.log(Level.INFO, ""+raceLogEvent.getClass().getName());
+                    if(raceLogEvent.getClass().equals(RaceLogGateLineOpeningTimeEventImpl.class)){
+                        logger.log(Level.INFO, "GOT RIGHT EVENT"+raceLogEvent.getClass().getName());
+                        RaceLogGateLineOpeningTimeEvent raceLogGateLineOpeningTimeEvent = (RaceLogGateLineOpeningTimeEvent) raceLogEvent;
+                        result = raceLogGateLineOpeningTimeEvent.getGateLineOpeningTimes().getGolfDownTime();
+                    }
+                }
+                raceLog.unlockAfterRead();
             }
         }
         return result;

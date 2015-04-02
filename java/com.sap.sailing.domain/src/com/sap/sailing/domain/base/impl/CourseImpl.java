@@ -236,6 +236,11 @@ public class CourseImpl extends NamedImpl implements Course {
             unlockAfterRead();
         }
     }
+    
+    @Override
+    public int getNumberOfWaypoints() {
+        return waypoints.size();
+    }
 
     @Override
     public String toString() {
