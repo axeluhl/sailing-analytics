@@ -9,7 +9,9 @@ import com.sap.sailing.dashboards.gwt.client.device.Location;
 import com.sap.sailing.dashboards.gwt.client.device.LocationListener;
 import com.sap.sailing.dashboards.gwt.client.device.Orientation;
 import com.sap.sailing.dashboards.gwt.client.device.OrientationListener;
+import com.sap.sailing.dashboards.gwt.client.device.OrientationType;
 import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * The classes task is to notify its listeners about changes in distance and angle from the actual device to a pointed
@@ -136,7 +138,7 @@ public class LocationPointerCompassAngleDistance implements LocationListener, Co
     }
 
     @Override
-    public void orientationChanged(double orintationHeading) {
-        setAngleOffsetAtListeners(orintationHeading);
+    public void orientationChanged(Pair<OrientationType, Double> orientation) {
+        setAngleOffsetAtListeners(orientation.getB().doubleValue());
     }
 }
