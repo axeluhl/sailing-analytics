@@ -70,7 +70,10 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     public void setAvailableDimensions(Collection<FunctionDTO> dimensions) {
         availableDimensions.clear();
         availableDimensions.addAll(dimensions);
-        
+        initializeDimensionFilters();
+    }
+
+    private void initializeDimensionFilters() {
         SingleDimensionFilter dimensionFilter = createDimensionFilter();
         List<FunctionDTO> availableDimensionsList = new ArrayList<>(availableDimensions);
         Collections.sort(availableDimensionsList);
@@ -163,9 +166,10 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     }
 
     public void clearSelection() {
-        for (SingleDimensionFilter dimensionFilter : dimensionFilters) {
-            dimensionFilter.clearSelection();
-        }
+        dimensionFilters.clear();
+        mainPanel.clear();
+        initializeDimensionFilters();
+        notifyListeners();
     }
     
     public void addSelectionChangedListener(SelectionChangedListener listener) {
