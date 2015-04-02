@@ -47,7 +47,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     @Override
     public void timeChanged(final Date newTime, Date oldTime) {
-        final Map<DegreePosition, SortedMap<Long, List<DegreePosition>>> windLinesMap = windLinesDTO.getWindLinesMap();
+        final Map<Position, SortedMap<Long, List<Position>>> windLinesMap = windLinesDTO.getWindLinesMap();
 
         if (windLinesMap == null) {
             return;
@@ -59,36 +59,32 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         //context2d.setGlobalCompositeOperation(Composite.LIGHTER) ;
         
         int index = 0;
-        for (final Entry<DegreePosition, SortedMap<Long, List<DegreePosition>>> entry : windLinesMap.entrySet()) {
-            List<DegreePosition> positionDTOToDraw = new ArrayList<DegreePosition>();
-
-            final SortedMap<Long, List<DegreePosition>> headMap = (entry.getValue().headMap(newTime.getTime() + 1));
-
+        for (final Entry<Position, SortedMap<Long, List<Position>>> entry : windLinesMap.entrySet()) {
+            List<Position> positionToDraw = new ArrayList<>();
+            final SortedMap<Long, List<Position>> headMap = (entry.getValue().headMap(newTime.getTime() + 1));
             if (!headMap.isEmpty()) {
-                positionDTOToDraw = headMap.get(headMap.lastKey());
+                positionToDraw = headMap.get(headMap.lastKey());
             }
-            logger.info("In WindLineCanvasOverlay.drawWindField drawing " + positionDTOToDraw.size() + " points"
+            logger.info("In WindLineCanvasOverlay.drawWindField drawing " + positionToDraw.size() + " points"
                     + " @ " + newTime);
-
-            drawWindLine(positionDTOToDraw, ++index);
+            drawWindLine(positionToDraw, ++index);
         }
     }
 
     @Override
     public boolean shallStop() {
-        final Map<DegreePosition, SortedMap<Long, List<DegreePosition>>> positionTimePointPositionDTOMap = windLinesDTO
-                .getWindLinesMap();
+        final Map<Position, SortedMap<Long, List<Position>>> positionTimePointPositionDTOMap = windLinesDTO.getWindLinesMap();
 
         if (!this.isVisible() || positionTimePointPositionDTOMap == null || timer == null
                 || positionTimePointPositionDTOMap.isEmpty()) {
             return true;
         }
-        final Set<DegreePosition> positions = positionTimePointPositionDTOMap.keySet();
+        final Set<Position> positions = positionTimePointPositionDTOMap.keySet();
         if (positions != null && !positions.isEmpty()) {
             /**
              * Just check for one position as it would be the same for all the other positions
              */
-            final SortedMap<Long, List<DegreePosition>> timePointPositionDTOMap = positionTimePointPositionDTOMap.get(positions
+            final SortedMap<Long, List<Position>> timePointPositionDTOMap = positionTimePointPositionDTOMap.get(positions
                     .iterator().next());
             if (timePointPositionDTOMap.lastKey() < timer.getTime().getTime()) {
                 return true;
@@ -145,11 +141,11 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         }
     }
 
-    protected void drawWindLine(final List<DegreePosition> positionDTOList, final int index) {
-        if (positionDTOList == null) {
+    protected void drawWindLine(final List<Position> positionList, final int index) {
+        if (positionList == null) {
             return;
         }
-        final int numPoints = positionDTOList.size();
+        final int numPoints = positionList.size();
         if (numPoints < 1) {
             return;
         }
@@ -157,51 +153,27 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         final String title = "Wind line at " + numPoints + " points.";
         getCanvas().setTitle(title);
 
-        final Iterator<DegreePosition> positionDTOIter = positionDTOList.iterator();
-        Position prevPositionDTO = null;
+        final Iterator<Position> positionDTOIter = positionList.iterator();
+        Position prevPosition = null;
         while (positionDTOIter.hasNext()) {
-            final Position positionDTO = positionDTOIter.next();
-            if (prevPositionDTO != null) {
-                if (checkPointInGrid(prevPositionDTO)  && checkPointInGrid(positionDTO) ) {
-                    drawLine(prevPositionDTO, positionDTO);
+            final Position position = positionDTOIter.next();
+            if (prevPosition != null) {
+                if (checkPointInGrid(prevPosition)  && checkPointInGrid(position) ) {
+                    drawLine(prevPosition, position);
                 } else { 
-                    final Position pointOnBoundary = getPointOnBoundary(prevPositionDTO, positionDTO);
+                    final Position pointOnBoundary = getPointOnBoundary(prevPosition, position);
                     if (pointOnBoundary != null) {
-                        drawLine(prevPositionDTO, pointOnBoundary);
+                        drawLine(prevPosition, pointOnBoundary);
                     }
                 }
             }
-            prevPositionDTO = positionDTO;
+            prevPosition = position;
         }
-
-        /**
-         * Debug code, to be removed
-         */
-        /*
-        PositionDTO p1 = positionDTOList.get(0);
-
-        LatLng positionLatLng = LatLng.newInstance(p1.latDeg, p1.lngDeg);
-        Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
-
-        int x = canvasPositionInPx.getX() - this.getWidgetPosLeft();
-        int y = canvasPositionInPx.getY() - this.getWidgetPosTop();
-        drawPointWithText(x, y, "S" + index);
-
-        PositionDTO p2 = positionDTOList.get(numPoints - 1);
-        positionLatLng = LatLng.newInstance(p2.latDeg, p2.lngDeg);
-        canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
-
-        x = canvasPositionInPx.getX() - this.getWidgetPosLeft();
-        y = canvasPositionInPx.getY() - this.getWidgetPosTop();
-
-        drawPointWithText(x, y, "E" + index);
-        */
     }
 
     private Position getPointOnBoundary(final Position p1, final Position p2) {
         if (boundary != null) {
             final LineSegment line = new LineSegment(p1.getLatDeg(), p1.getLngDeg(), p2.getLatDeg(), p2.getLngDeg());
-
             com.sap.sailing.gwt.ui.simulator.util.LineSegment.Point p = line.intersect(boundary[0]);
             if (p != null) {
                 final Position pDTO = new DegreePosition(p.getX(), p.getY());

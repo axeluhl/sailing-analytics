@@ -2116,7 +2116,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         if (newBounds == null) {
                             newBounds = BoundsUtil.getAsBounds(competitorPosition);
                         } else {
-                            newBounds = newBounds.extend(BoundsUtil.getAsPosition(competitorPosition));
+                            newBounds = newBounds.extend(competitorPosition);
                         }
                     }
                 } catch (IndexOutOfBoundsException e) {

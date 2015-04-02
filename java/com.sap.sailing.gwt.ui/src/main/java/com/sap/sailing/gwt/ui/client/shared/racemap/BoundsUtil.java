@@ -23,10 +23,6 @@ public class BoundsUtil {
                 LatLng.newInstance(bounds.getNorthEast().getLatDeg(), bounds.getNorthEast().getLngDeg()));
     }
     
-    public static Position getAsPosition(Position positionDTO) {
-        return new DegreePosition(positionDTO.getLatDeg(), positionDTO.getLngDeg());
-    }
-
     public static Position getAsPosition(LatLng latLngPosition) {
         return new DegreePosition(latLngPosition.getLatitude(), latLngPosition.getLongitude());
     }
