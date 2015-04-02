@@ -16,8 +16,8 @@ import org.w3c.dom.Element;
 import slash.navigation.base.BaseNavigationPosition;
 import slash.navigation.gpx.binding11.WptType;
 
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.trackfiles.impl.BaseRouteConverterGPSFixImporterImpl;
 import com.sap.sailing.server.trackfiles.impl.RouteConverterGPSFixImporterImpl;
 

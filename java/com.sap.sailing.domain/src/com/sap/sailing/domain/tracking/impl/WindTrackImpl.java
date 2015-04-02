@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
@@ -27,6 +26,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 

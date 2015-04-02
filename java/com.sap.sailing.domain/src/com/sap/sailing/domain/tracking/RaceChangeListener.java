@@ -7,6 +7,8 @@ import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
 
 

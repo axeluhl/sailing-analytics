@@ -1,6 +1,5 @@
-package com.sap.sailing.domain.base;
+package com.sap.sailing.domain.common;
 
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sse.datamining.shared.annotations.Connector;
 
 public interface Moving {

@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixMovingJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixMovingNmeaDTOJsonDeserializer;

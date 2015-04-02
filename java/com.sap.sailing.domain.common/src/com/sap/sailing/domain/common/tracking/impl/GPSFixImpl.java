@@ -1,8 +1,8 @@
-package com.sap.sailing.domain.tracking.impl;
+package com.sap.sailing.domain.common.tracking.impl;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

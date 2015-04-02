@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;

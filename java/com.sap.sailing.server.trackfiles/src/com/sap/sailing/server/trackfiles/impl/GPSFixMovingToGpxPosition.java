@@ -3,7 +3,7 @@ package com.sap.sailing.server.trackfiles.impl;
 import slash.common.type.CompactCalendar;
 import slash.navigation.gpx.GpxPosition;
 
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 
 /**
  * Speed in m/s and bearing is in Degrees

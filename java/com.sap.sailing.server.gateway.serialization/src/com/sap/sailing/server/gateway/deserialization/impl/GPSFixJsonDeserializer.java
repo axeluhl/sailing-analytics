@@ -6,8 +6,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 import com.sap.sse.common.TimePoint;

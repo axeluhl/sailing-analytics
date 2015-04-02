@@ -5,7 +5,7 @@ import java.util.Locale;
 import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;

@@ -20,10 +20,10 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

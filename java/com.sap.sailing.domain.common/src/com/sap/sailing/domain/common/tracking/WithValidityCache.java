@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tracking;
+package com.sap.sailing.domain.common.tracking;
 
 public interface WithValidityCache {
     boolean isValidityCached();

@@ -7,7 +7,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventComparator;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.base.Timed;
+import com.sap.sse.common.Timed;
 
 /**
  * Comparator sorting by pass, then by {@link AbstractLogEventAuthor}, then by {@link RaceLogEvent#getCreatedAt()}

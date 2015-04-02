@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -42,6 +41,7 @@ import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 

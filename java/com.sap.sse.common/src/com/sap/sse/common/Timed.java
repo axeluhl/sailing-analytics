@@ -1,8 +1,6 @@
-package com.sap.sailing.domain.base;
+package com.sap.sse.common;
 
 import java.io.Serializable;
-
-import com.sap.sse.common.TimePoint;
 
 public interface Timed extends Serializable {
     TimePoint getTimePoint();
