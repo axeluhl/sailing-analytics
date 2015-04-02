@@ -41,6 +41,7 @@ import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
+import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
@@ -155,6 +156,11 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             case R.id.options_menu_refresh:
                 manager.callServerAndGenerateCheckinData();
                 return true;
+            case R.id.options_menu_info:
+                ExLog.i(this, TAG, "Clicked INFO.");
+                AboutDialog dialog = new AboutDialog(this);
+                dialog.show();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -263,7 +269,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
     /**
      * Store image for quicker retrieval later and trigger upload to server.
      *
-     * @param images
+     * @param image
      */
     private void storeImageAndSendToServer(Bitmap image, String fileName, boolean sendToServer) {
         File pictureFile = getImageFile(fileName);

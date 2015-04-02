@@ -23,4 +23,8 @@
         android:id="@+id/options_menu_refresh"
         android:title="@string/options_refresh"
         app:showAsAction=""/>
+
+    <item
+        android:id="@+id/options_menu_info"
+        android:title="@string/about" />
 </menu>
