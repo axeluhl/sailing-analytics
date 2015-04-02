@@ -1210,4 +1210,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardSpeedInKts();
     String fixedMarkPassing();
     String suppressedMarkPassing();
+    String windUp();
 }

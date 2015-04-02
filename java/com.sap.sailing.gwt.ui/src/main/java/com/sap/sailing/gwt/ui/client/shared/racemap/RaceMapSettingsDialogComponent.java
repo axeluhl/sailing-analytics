@@ -36,6 +36,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
     private CheckBox showWindStreamletOverlayCheckbox;
+    private CheckBox windUpCHeckbox;
     private CheckBox showSimulationOverlayCheckbox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
@@ -71,6 +72,10 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
         showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
+        
+        windUpCHeckbox = dialog.createCheckbox(stringMessages.windUp());
+        windUpCHeckbox.setValue(initialSettings.isWindUp());
+        vp.add(windUpCHeckbox);
         
         if (showViewSimulation) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
