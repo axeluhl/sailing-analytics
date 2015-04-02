@@ -11,6 +11,8 @@
 			<div ui:field="startanalysis_card_line_advantage"
 				class="{style.startanalysis_card_data} {style.startanalysis_card_line_advantage}"></div>
 		</div>
+		<div ui:field="startanalysis_card_race_time"
+				class="{style.startanalysis_card_race_time}">Time: 00:05:00</div>
 		<g:HTMLPanel ui:field="startanalysis_card_table"
 			styleName="{style.startanalysis_card_table}"></g:HTMLPanel>
 	</g:HTMLPanel>

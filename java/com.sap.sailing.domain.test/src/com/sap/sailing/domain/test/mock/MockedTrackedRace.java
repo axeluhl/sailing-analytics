@@ -893,4 +893,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public GPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return null;
     }
+
+    @Override
+    public long getGateStartGolfDownTime() {
+        return 0;
+    }
 }
