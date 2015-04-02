@@ -20,16 +20,16 @@ public class PositionEntryDialog extends DataEntryDialog<PositionDTO> {
                 new DataEntryDialog.Validator<PositionDTO>() {
                     @Override
                     public String getErrorMessage(PositionDTO valueToValidate) {
-                        if (valueToValidate.latDeg == ERROR_VAL) {
+                        if (valueToValidate.getLatDeg() == ERROR_VAL) {
                             return stringMessages.pleaseEnterA(stringMessages.latitude());
                         }
-                        if (valueToValidate.latDeg > 90 || valueToValidate.latDeg < -90) {
+                        if (valueToValidate.getLatDeg() > 90 || valueToValidate.getLatDeg() < -90) {
                             return stringMessages.pleaseEnterAValidValueFor(stringMessages.latitude(), "-90.0 - 90.0");
                         }
-                        if (valueToValidate.lngDeg == ERROR_VAL) {
+                        if (valueToValidate.getLngDeg() == ERROR_VAL) {
                             return stringMessages.pleaseEnterA(stringMessages.longitude());
                         }
-                        if (valueToValidate.lngDeg > 180 || valueToValidate.lngDeg < -180) {
+                        if (valueToValidate.getLngDeg() > 180 || valueToValidate.getLngDeg() < -180) {
                             return stringMessages.pleaseEnterAValidValueFor(stringMessages.latitude(), "-180.0 - 180.0");
                         }
                         return null;

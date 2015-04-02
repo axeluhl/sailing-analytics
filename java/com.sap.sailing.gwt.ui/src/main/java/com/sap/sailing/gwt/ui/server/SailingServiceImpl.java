@@ -1577,7 +1577,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (trackedRace != null) {
             Position p = null;
             if (windDTO.position != null) {
-                p = new DegreePosition(windDTO.position.latDeg, windDTO.position.lngDeg);
+                p = new DegreePosition(windDTO.position.getLatDeg(), windDTO.position.getLngDeg());
             }
             TimePoint at = null;
             if (windDTO.measureTimepoint != null) {
@@ -2154,7 +2154,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (trackedRace != null) {
             Position p = null;
             if (windDTO.position != null) {
-                p = new DegreePosition(windDTO.position.latDeg, windDTO.position.lngDeg);
+                p = new DegreePosition(windDTO.position.getLatDeg(), windDTO.position.getLngDeg());
             }
             TimePoint at = null;
             if (windDTO.measureTimepoint != null) {
@@ -5045,7 +5045,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private Position convertToPosition(PositionDTO dto) {
-        return new DegreePosition(dto.latDeg, dto.lngDeg);
+        return new DegreePosition(dto.getLatDeg(), dto.getLngDeg());
     }
     
     @Override

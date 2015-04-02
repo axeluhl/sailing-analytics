@@ -199,7 +199,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     private PositionDTO getPointOnBoundary(final PositionDTO p1, final PositionDTO p2) {
         if (boundary != null) {
-            final LineSegment line = new LineSegment(p1.latDeg, p1.lngDeg, p2.latDeg, p2.lngDeg);
+            final LineSegment line = new LineSegment(p1.getLatDeg(), p1.getLngDeg(), p2.getLatDeg(), p2.getLngDeg());
 
             com.sap.sailing.gwt.ui.simulator.util.LineSegment.Point p = line.intersect(boundary[0]);
             if (p != null) {
@@ -228,13 +228,13 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     private void drawLine(final PositionDTO p1, final PositionDTO p2) {
         final double weight = 1.0;
 
-        LatLng positionLatLng = LatLng.newInstance(p1.latDeg, p1.lngDeg);
+        LatLng positionLatLng = LatLng.newInstance(p1.getLatDeg(), p1.getLngDeg());
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         final double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         final double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
-        positionLatLng = LatLng.newInstance(p2.latDeg, p2.lngDeg);
+        positionLatLng = LatLng.newInstance(p2.getLatDeg(), p2.getLngDeg());
         canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         final double x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         final double y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
@@ -247,17 +247,17 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         if (corners != null && corners.length == 4) {
             this.boundary = new LineSegment[4];
 
-            boundary[0] = new LineSegment(corners[0].latDeg, corners[0].lngDeg, corners[1].latDeg, corners[1].lngDeg);
-            boundary[1] = new LineSegment(corners[1].latDeg, corners[1].lngDeg, corners[2].latDeg, corners[2].lngDeg);
-            boundary[2] = new LineSegment(corners[2].latDeg, corners[2].lngDeg, corners[3].latDeg, corners[3].lngDeg);
-            boundary[3] = new LineSegment(corners[3].latDeg, corners[3].lngDeg, corners[0].latDeg, corners[0].lngDeg);
+            boundary[0] = new LineSegment(corners[0].getLatDeg(), corners[0].getLngDeg(), corners[1].getLatDeg(), corners[1].getLngDeg());
+            boundary[1] = new LineSegment(corners[1].getLatDeg(), corners[1].getLngDeg(), corners[2].getLatDeg(), corners[2].getLngDeg());
+            boundary[2] = new LineSegment(corners[2].getLatDeg(), corners[2].getLngDeg(), corners[3].getLatDeg(), corners[3].getLngDeg());
+            boundary[3] = new LineSegment(corners[3].getLatDeg(), corners[3].getLngDeg(), corners[0].getLatDeg(), corners[0].getLngDeg());
             
             center = getCenter();
         }
     }
 
     private Point getPointInDivPixel(final PositionDTO p) {
-        LatLng pLatLng = LatLng.newInstance(p.latDeg, p.lngDeg);
+        LatLng pLatLng = LatLng.newInstance(p.getLatDeg(), p.getLngDeg());
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(pLatLng);
         return Point.newInstance(canvasPositionInPx.getX(), canvasPositionInPx.getY());
     }
@@ -303,13 +303,15 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     private PositionDTO getCenter() {
+        final PositionDTO center;
         if (corners != null && corners.length == 4) {
-            final PositionDTO center = new PositionDTO();
-            center.latDeg = (corners[0].latDeg + corners[1].latDeg + corners[2].latDeg + corners[3].latDeg) / 4.0;
-            center.lngDeg = (corners[0].lngDeg + corners[1].lngDeg + corners[2].lngDeg + corners[3].lngDeg) / 4.0;
-            return center;
+            center = new PositionDTO(
+                    (corners[0].getLatDeg() + corners[1].getLatDeg() + corners[2].getLatDeg() + corners[3].getLatDeg()) / 4.0,
+                    (corners[0].getLngDeg() + corners[1].getLngDeg() + corners[2].getLngDeg() + corners[3].getLngDeg()) / 4.0);
+        } else {
+            center = null;
         }
-        return null;
+        return center;
     }
 
     private boolean checkPointInGrid(final PositionDTO point) {

@@ -200,14 +200,14 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
 
         PositionDTO position = p1.position;
 
-        LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
         position = p2.position;
-        positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         double x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         double y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
@@ -225,7 +225,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
 
         PositionDTO position = p.position;
 
-        LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
@@ -245,14 +245,14 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         }
         PositionDTO position = p1.position;
 
-        LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         double x1 = canvasPositionInPx.getX();
         double y1 = canvasPositionInPx.getY();
 
         position = p2.position;
-        positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
         double x2 = canvasPositionInPx.getX();
         double y2 = canvasPositionInPx.getY();

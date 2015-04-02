@@ -144,8 +144,8 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
             Iterator<SimulatorWindDTO> windDTOIter = windDTOList.iterator();
             final SimulatorWindDTO w0 = windDTOIter.next();
             final SimulatorWindDTO w1 = windDTOIter.next();
-            final LatLng pg0 = LatLng.newInstance(w0.position.latDeg, w0.position.lngDeg);
-            final LatLng pg1 = LatLng.newInstance(w1.position.latDeg, w1.position.lngDeg);
+            final LatLng pg0 = LatLng.newInstance(w0.position.getLatDeg(), w0.position.getLngDeg());
+            final LatLng pg1 = LatLng.newInstance(w1.position.getLatDeg(), w1.position.getLngDeg());
             final Point px0 = mapProjection.fromLatLngToDivPixel(pg0);
             final Point px1 = mapProjection.fromLatLngToDivPixel(pg1);
             final double dx = px0.getX()-px1.getX();
@@ -179,7 +179,7 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
 
         final PositionDTO position = windDTO.position;
 
-        final LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        final LatLng positionLatLng = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
         final Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         final double x = canvasPositionInPx.getX() - getWidgetPosLeft();

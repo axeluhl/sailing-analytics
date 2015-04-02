@@ -154,8 +154,8 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             ctxt.setStrokeStyle(this.colors.getColor(colorIdx));
             ctxt.beginPath();
             for (SimulatorWindDTO point : points) {
-                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg,
-                        point.position.lngDeg));
+                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.getLatDeg(),
+                        point.position.getLngDeg()));
                 if (first) {
                     ctxt.moveTo(px.getX(), px.getY());
                     first = false;
@@ -171,8 +171,8 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                     continue;
                 }
 
-                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.latDeg,
-                        point.position.lngDeg));
+                Point px = mapProjection.fromLatLngToContainerPixel(LatLng.newInstance(point.position.getLatDeg(),
+                        point.position.getLngDeg()));
                 ctxt.beginPath();
                 ctxt.arc(px.getX(), px.getY(), 1.5, 0, 2 * Math.PI);
                 ctxt.closePath();

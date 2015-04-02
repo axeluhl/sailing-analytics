@@ -56,8 +56,8 @@ public class SimulatorField implements VectorField {
         this.startTime = windParams.getStartTime();
         this.timeStep = windParams.getTimeStep();
         this.colorsForSpeeds = createColorsForSpeeds();
-        this.rcStart = new DegreePosition(windData.windData.rcStart.latDeg, windData.windData.rcStart.lngDeg);
-        this.rcEnd = new DegreePosition(windData.windData.rcEnd.latDeg, windData.windData.rcEnd.lngDeg);
+        this.rcStart = new DegreePosition(windData.windData.rcStart.getLatDeg(), windData.windData.rcStart.getLngDeg());
+        this.rcEnd = new DegreePosition(windData.windData.rcEnd.getLatDeg(), windData.windData.rcEnd.getLngDeg());
         this.resX = windData.windData.resX;
         this.resY = windData.windData.resY;
         this.borderX = windData.windData.borderX;

@@ -79,14 +79,14 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     private class SortByLatitude implements Comparator<SimulatorWindDTO> {
         @Override
         public int compare(final SimulatorWindDTO w1, final SimulatorWindDTO w2) {
-            return Double.compare(w1.position.latDeg, w2.position.latDeg);
+            return Double.compare(w1.position.getLatDeg(), w2.position.getLatDeg());
         }
     }
 
     private class SortByLongitude implements Comparator<SimulatorWindDTO> {
         @Override
         public int compare(final SimulatorWindDTO w1, final SimulatorWindDTO w2) {
-            return Double.compare(w1.position.lngDeg, w2.position.lngDeg);
+            return Double.compare(w1.position.getLngDeg(), w2.position.getLngDeg());
         }
     }
 
@@ -239,10 +239,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             final SimulatorWindDTO windDTO1 = windDTOList.get(0);
             final SimulatorWindDTO windDTO2 = windDTOList.get(1);
 
-            final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.latDeg, windDTO1.position.lngDeg);
+            final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.getLatDeg(), windDTO1.position.getLngDeg());
             final Point canvasPositionInPx1 = mapProjection.fromLatLngToDivPixel(positionLatLng1);
 
-            final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.latDeg, windDTO2.position.lngDeg);
+            final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.getLatDeg(), windDTO2.position.getLngDeg());
             final Point canvasPositionInPx2 = mapProjection.fromLatLngToDivPixel(positionLatLng2);
 
             return canvasPositionInPx2.getX() - canvasPositionInPx1.getX();
@@ -264,10 +264,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             final SimulatorWindDTO windDTO1 = windDTOList.get(0);
             final SimulatorWindDTO windDTO2 = windDTOList.get(1);
 
-            final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.latDeg, windDTO1.position.lngDeg);
+            final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.getLatDeg(), windDTO1.position.getLngDeg());
             final Point canvasPositionInPx1 = mapProjection.fromLatLngToDivPixel(positionLatLng1);
 
-            final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.latDeg, windDTO2.position.lngDeg);
+            final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.getLatDeg(), windDTO2.position.getLngDeg());
             final Point canvasPositionInPx2 = mapProjection.fromLatLngToDivPixel(positionLatLng2);
 
             return canvasPositionInPx2.getY() - canvasPositionInPx1.getY();
@@ -324,11 +324,9 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
          * Row before the first row
          */
         for (int j = 0; j < xRes; ++j) {
-            final PositionDTO position = new PositionDTO();
             final PositionDTO p1 = windMatrix[1][j].position;
             final PositionDTO p2 = windMatrix[2][j].position;
-            position.latDeg = 2 * p1.latDeg - p2.latDeg;
-            position.lngDeg = 2 * p1.lngDeg - p2.lngDeg;
+            final PositionDTO position = new PositionDTO(2 * p1.getLatDeg() - p2.getLatDeg(), 2 * p1.getLngDeg() - p2.getLngDeg());
             final SimulatorWindDTO windDTO = new SimulatorWindDTO();
             // Only the position of this windDTO is used
             windDTO.position = position;
@@ -340,11 +338,9 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
          * Row after the last row
          */
         for (int j = 0; j < xRes; ++j) {
-            final PositionDTO position = new PositionDTO();
             final PositionDTO p1 = windMatrix[numRow - 2][j].position;
             final PositionDTO p2 = windMatrix[numRow - 3][j].position;
-            position.latDeg = 2 * p1.latDeg - p2.latDeg;
-            position.lngDeg = 2 * p1.lngDeg - p2.lngDeg;
+            final PositionDTO position = new PositionDTO(2 * p1.getLatDeg() - p2.getLatDeg(), 2 * p1.getLngDeg() - p2.getLngDeg());
             final SimulatorWindDTO windDTO = new SimulatorWindDTO();
             // Only the position of this windDTO is used
             windDTO.position = position;
@@ -411,16 +407,16 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     private void drawGridCell(final GridCell cell) {
 
-        LatLng positionLatLng = LatLng.newInstance(cell.bottomLeft.latDeg, cell.bottomLeft.lngDeg);
+        LatLng positionLatLng = LatLng.newInstance(cell.bottomLeft.getLatDeg(), cell.bottomLeft.getLngDeg());
         final Point blPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
-        positionLatLng = LatLng.newInstance(cell.bottomRight.latDeg, cell.bottomRight.lngDeg);
+        positionLatLng = LatLng.newInstance(cell.bottomRight.getLatDeg(), cell.bottomRight.getLngDeg());
         final Point brPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
-        positionLatLng = LatLng.newInstance(cell.topLeft.latDeg, cell.topLeft.lngDeg);
+        positionLatLng = LatLng.newInstance(cell.topLeft.getLatDeg(), cell.topLeft.getLngDeg());
         final Point tlPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
-        positionLatLng = LatLng.newInstance(cell.topRight.latDeg, cell.topRight.lngDeg);
+        positionLatLng = LatLng.newInstance(cell.topRight.getLatDeg(), cell.topRight.getLngDeg());
         final Point trPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         /*
@@ -449,9 +445,8 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     private PositionDTO getCenter(final PositionDTO a, final PositionDTO b, final PositionDTO c, final PositionDTO d) {
-        final PositionDTO center = new PositionDTO();
-        center.latDeg = (a.latDeg + b.latDeg + c.latDeg + d.latDeg) / 4.0;
-        center.lngDeg = (a.lngDeg + b.lngDeg + c.lngDeg + d.lngDeg) / 4.0;
+        final PositionDTO center = new PositionDTO((a.getLatDeg() + b.getLatDeg() + c.getLatDeg() + d.getLatDeg()) / 4.0,
+                                                   (a.getLngDeg() + b.getLngDeg() + c.getLngDeg() + d.getLngDeg()) / 4.0);
         return center;
     }
 

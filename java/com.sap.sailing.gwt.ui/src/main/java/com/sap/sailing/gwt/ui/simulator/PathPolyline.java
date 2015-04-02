@@ -91,7 +91,7 @@ public class PathPolyline {
             if (pathPoint.isTurn) {
 
                 // counter++;
-                points.add(LatLng.newInstance(pathPoint.position.latDeg, pathPoint.position.lngDeg));
+                points.add(LatLng.newInstance(pathPoint.position.getLatDeg(), pathPoint.position.getLngDeg()));
                 // if (counter > max) {
                 // break;
                 // }

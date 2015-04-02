@@ -101,7 +101,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 lastScale = boatSizeScaleFactor;
                 lastColor = color;
             }
-            LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
+            LatLng latLngPosition = LatLng.newInstance(boatFix.position.getLatDeg(), boatFix.position.getLngDeg());
             Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
@@ -156,7 +156,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
         // the minimum boat length is related to the hull of the boat, not the overall length 
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
         double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection,
-                LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg), boatClass.getHullLengthInMeters());
+                LatLng.newInstance(boatFix.position.getLatDeg(), boatFix.position.getLngDeg()), boatClass.getHullLengthInMeters());
         if (boatHullLengthInPixel < minBoatHullLengthInPx) {
             boatHullLengthInPixel = minBoatHullLengthInPx;
         }

@@ -124,8 +124,8 @@ public class LocationPointerCompassAngleDistance implements LocationListener, Co
     }
 
     public void windBotPositionChanged(PositionDTO positionDTO) {
-        latBot = positionDTO.latDeg;
-        lonBot = positionDTO.lngDeg;
+        latBot = positionDTO.getLatDeg();
+        lonBot = positionDTO.getLngDeg();
         calulateNewAngleAndDistance();
     }
 

@@ -30,7 +30,7 @@ public class BoundsUtil {
     }
     
     public static Position getAsPosition(PositionDTO positionDTO) {
-        return new DegreePosition(positionDTO.latDeg, positionDTO.lngDeg);
+        return new DegreePosition(positionDTO.getLatDeg(), positionDTO.getLngDeg());
     }
 
     public static Position getAsPosition(LatLng latLngPosition) {

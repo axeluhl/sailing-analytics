@@ -832,7 +832,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     LatLng[] sidelinePoints = new LatLng[sidelineDTO.getMarks().size()];
                     int i=0;
                     for (MarkDTO sidelineMark : sidelineDTO.getMarks()) {
-                        sidelinePoints[i] = LatLng.newInstance(sidelineMark.position.latDeg, sidelineMark.position.lngDeg);
+                        sidelinePoints[i] = LatLng.newInstance(sidelineMark.position.getLatDeg(), sidelineMark.position.getLngDeg());
                         i++;
                     }
                     if (sideline == null) {
@@ -1102,7 +1102,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             .getHullLengthInMeters() / 1000.; // one hull length
                     // implement and use Position.translateRhumb()
                     double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
-                    LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
+                    LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.getLatDeg(), lastBoatFix.position.getLngDeg());
                     LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg,
                             distanceFromBoatPositionInKm);
                     final WindDTO windFix = windDataForLegMiddle.windFixes.get(0);
@@ -1194,9 +1194,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
         if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)){
-            LatLng windwardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(0).latDeg, courseDTO.startMarkPositions.get(0).lngDeg); 
-            LatLng leewardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(1).latDeg, courseDTO.startMarkPositions.get(1).lngDeg);
-            LatLng firstMarkPoint = LatLng.newInstance(courseDTO.waypointPositions.get(1).latDeg, courseDTO.waypointPositions.get(1).lngDeg);
+            LatLng windwardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(0).getLatDeg(), courseDTO.startMarkPositions.get(0).getLngDeg()); 
+            LatLng leewardStartLinePoint = LatLng.newInstance(courseDTO.startMarkPositions.get(1).getLatDeg(), courseDTO.startMarkPositions.get(1).getLngDeg());
+            LatLng firstMarkPoint = LatLng.newInstance(courseDTO.waypointPositions.get(1).getLatDeg(), courseDTO.waypointPositions.get(1).getLngDeg());
             
             if (windwardStartLineMarkToFirstMarkLine == null && leewardStartLineMarkToFirstMarkLine == null) {
                 PolylineOptions options = PolylineOptions.newInstance();
@@ -1245,8 +1245,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             updateCountdownCanvas(courseDTO.startMarkPositions);
             if (legOfLeadingCompetitor <= 1 && 
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && courseDTO.startMarkPositions != null && courseDTO.startMarkPositions.size() == 2) {
-                LatLng startLinePoint1 = LatLng.newInstance(courseDTO.startMarkPositions.get(0).latDeg, courseDTO.startMarkPositions.get(0).lngDeg); 
-                LatLng startLinePoint2 = LatLng.newInstance(courseDTO.startMarkPositions.get(1).latDeg, courseDTO.startMarkPositions.get(1).lngDeg); 
+                LatLng startLinePoint1 = LatLng.newInstance(courseDTO.startMarkPositions.get(0).getLatDeg(), courseDTO.startMarkPositions.get(0).getLngDeg()); 
+                LatLng startLinePoint2 = LatLng.newInstance(courseDTO.startMarkPositions.get(1).getLatDeg(), courseDTO.startMarkPositions.get(1).getLngDeg()); 
                 if (courseDTO.startLineAngleToCombinedWind != null) {
                     startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                             NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
@@ -1299,8 +1299,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             // draw the finish line
             if (legOfLeadingCompetitor > 0 && legOfLeadingCompetitor == numberOfLegs &&
                 settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.finishMarkPositions != null && courseDTO.finishMarkPositions.size() == 2) {
-                LatLng finishLinePoint1 = LatLng.newInstance(courseDTO.finishMarkPositions.get(0).latDeg, courseDTO.finishMarkPositions.get(0).lngDeg); 
-                LatLng finishLinePoint2 = LatLng.newInstance(courseDTO.finishMarkPositions.get(1).latDeg, courseDTO.finishMarkPositions.get(1).lngDeg); 
+                LatLng finishLinePoint1 = LatLng.newInstance(courseDTO.finishMarkPositions.get(0).getLatDeg(), courseDTO.finishMarkPositions.get(0).getLngDeg()); 
+                LatLng finishLinePoint2 = LatLng.newInstance(courseDTO.finishMarkPositions.get(1).getLatDeg(), courseDTO.finishMarkPositions.get(1).getLngDeg()); 
                 if (courseDTO.startLineAngleToCombinedWind != null) {
                     finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                             NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
@@ -1356,8 +1356,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)) {
                 PositionDTO position1DTO = courseDTO.waypointPositions.get(legOfLeadingCompetitor-1);
                 PositionDTO position2DTO = courseDTO.waypointPositions.get(legOfLeadingCompetitor);
-                LatLng courseMiddleLinePoint1 = LatLng.newInstance(position1DTO.latDeg, position1DTO.lngDeg);
-                LatLng courseMiddleLinePoint2 = LatLng.newInstance(position2DTO.latDeg, position2DTO.lngDeg); 
+                LatLng courseMiddleLinePoint1 = LatLng.newInstance(position1DTO.getLatDeg(), position1DTO.getLngDeg());
+                LatLng courseMiddleLinePoint2 = LatLng.newInstance(position2DTO.getLatDeg(), position2DTO.getLngDeg()); 
                 if (courseMiddleLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance();
                     options.setClickable(true);
@@ -1564,7 +1564,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     lastInfoWindow.close();
                 }
                 GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
-                LatLng where = LatLng.newInstance(latestFixForCompetitor.position.latDeg, latestFixForCompetitor.position.lngDeg);
+                LatLng where = LatLng.newInstance(latestFixForCompetitor.position.getLatDeg(), latestFixForCompetitor.position.getLngDeg());
                 InfoWindowOptions options = InfoWindowOptions.newInstance();
                 InfoWindow infoWindow = InfoWindow.newInstance(options);
                 infoWindow.setContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
@@ -1642,7 +1642,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if(lastInfoWindow != null) {
                 lastInfoWindow.close();
             }
-            LatLng where = LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg);
+            LatLng where = LatLng.newInstance(windDTO.position.getLatDeg(), windDTO.position.getLngDeg());
             InfoWindowOptions options = InfoWindowOptions.newInstance();
             InfoWindow infoWindow = InfoWindow.newInstance(options);
             infoWindow.setContent(getInfoWindowContent(windSource, windTrackInfoDTO));
@@ -1673,7 +1673,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private Widget getInfoWindowContent(MarkDTO markDTO) {
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.mark(), markDTO.getName()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.latDeg, markDTO.position.lngDeg)));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.getLatDeg(), markDTO.position.getLngDeg())));
         return vPanel;
     }
 
@@ -1684,7 +1684,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSource(), WindSourceTypeFormatter.format(windSource, stringMessages)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.wind(), Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSpeed(), numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(windDTO.position.latDeg, windDTO.position.lngDeg)));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(windDTO.position.getLatDeg(), windDTO.position.getLngDeg())));
         return vPanel;
     }
 
@@ -1804,7 +1804,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 CompetitorDTO competitorDTO = iter.next();
                 List<GPSFixDTO> gpsFix = gpsFixPointMapForCompetitors.get(competitorDTO);
                 for (GPSFixDTO fix : gpsFix) {
-                    LatLng latLng = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
+                    LatLng latLng = LatLng.newInstance(fix.position.getLatDeg(), fix.position.getLngDeg());
                     MarkerOptions options = MarkerOptions.newInstance();
                     options.setTitle(fix.timepoint+": "+fix.position+", "+fix.speedWithBearing.toString());
                     Marker marker = Marker.newInstance(options);
@@ -1826,7 +1826,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 List<ManeuverDTO> maneuversForCompetitor = maneuvers.get(competitorDTO);
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (settings.isShowManeuverType(maneuver.type)) {
-                        LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
+                        LatLng latLng = LatLng.newInstance(maneuver.position.getLatDeg(), maneuver.position.getLngDeg());
                         Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack.get(new com.sap.sse.common.Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack));
                         MarkerOptions options = MarkerOptions.newInstance();
                         options.setTitle(maneuver.toString(stringMessages));
@@ -1882,8 +1882,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // now compute a weighted average depending on the time difference to "date" (see also bug 1924)
                     double factorForAfter = (double) (date.getTime()-fixBefore.timepoint.getTime()) / (double) (fixAfter.timepoint.getTime() - fixBefore.timepoint.getTime());
                     double factorForBefore = 1-factorForAfter;
-                    PositionDTO betweenPosition = new PositionDTO(factorForBefore*fixBefore.position.latDeg + factorForAfter*fixAfter.position.latDeg,
-                            factorForBefore*fixBefore.position.lngDeg + factorForAfter*fixAfter.position.lngDeg);
+                    PositionDTO betweenPosition = new PositionDTO(factorForBefore*fixBefore.position.getLatDeg() + factorForAfter*fixAfter.position.getLatDeg(),
+                            factorForBefore*fixBefore.position.getLngDeg() + factorForAfter*fixAfter.position.getLngDeg());
                     final double betweenBearing;
                     if (fixBefore.speedWithBearing == null) {
                         if (fixAfter.speedWithBearing == null) {

@@ -144,7 +144,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 PositionDTO pos1 = result.getRaceCourse().coursePositions.waypointPositions.get(0);
                 PositionDTO pos2 = result.getRaceCourse().coursePositions.waypointPositions.get(1);
                 
-                raceCourseCanvasOverlay.setStartEndPoint(LatLng.newInstance(pos1.latDeg, pos1.lngDeg), LatLng.newInstance(pos2.latDeg, pos2.lngDeg));
+                raceCourseCanvasOverlay.setStartEndPoint(LatLng.newInstance(pos1.getLatDeg(), pos1.getLngDeg()), LatLng.newInstance(pos2.getLatDeg(), pos2.getLngDeg()));
             }
 
             raceCourseCanvasOverlay.draw();

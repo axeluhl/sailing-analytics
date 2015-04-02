@@ -66,7 +66,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             }
             double markSizeScaleFactor = markScaleAndSize.getA();
             getCanvas().setTitle(getTitle());
-            LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
+            LatLng latLngPosition = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
             // calculate canvas size
             double canvasWidth = markScaleAndSize.getB().getWidth();
             double canvasHeight = markScaleAndSize.getB().getHeight();
@@ -131,7 +131,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         double buoyScaleFactor = 2.0;
 
         Size markSizeInPixel = calculateBoundingBox(mapProjection,
-                LatLng.newInstance(markPosition.latDeg, markPosition.lngDeg),
+                LatLng.newInstance(markPosition.getLatDeg(), markPosition.getLngDeg()),
                 markVectorGraphics.getMarkWidthInMeters() * buoyScaleFactor, markVectorGraphics.getMarkHeightInMeters() * buoyScaleFactor);
         
         double markHeightInPixel = markSizeInPixel.getHeight();
@@ -166,7 +166,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     }
 
     public LatLng getMarkPosition() {
-        return LatLng.newInstance(position.latDeg, position.lngDeg);
+        return LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
     }
 
     public double getBuoyZoneRadiusInMeter() {

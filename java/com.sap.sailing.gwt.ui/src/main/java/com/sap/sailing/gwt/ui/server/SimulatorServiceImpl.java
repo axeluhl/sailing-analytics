@@ -97,22 +97,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     @Override
     public PositionDTO[] getRaceLocations() {
-        PositionDTO lakeGarda = new PositionDTO();
-        lakeGarda.latDeg = 45.57055337226086;
-        lakeGarda.lngDeg = 10.693345069885254;
-
-        PositionDTO lakeGeneva = new PositionDTO();
-        lakeGeneva.latDeg = 46.23376539670794;
-        lakeGeneva.lngDeg = 6.168651580810547;
-
-        PositionDTO kiel = new PositionDTO();
-        kiel.latDeg = 54.3232927;
-        kiel.lngDeg = 10.122765200000003;
-
-        PositionDTO travemuende = new PositionDTO();
-        travemuende.latDeg = 53.978276;
-        travemuende.lngDeg = 10.880156;
-
+        PositionDTO lakeGarda = new PositionDTO(45.57055337226086, 10.693345069885254);
+        PositionDTO lakeGeneva = new PositionDTO(46.23376539670794, 6.168651580810547);
+        PositionDTO kiel = new PositionDTO(54.3232927, 10.122765200000003);
+        PositionDTO travemuende = new PositionDTO(53.978276, 10.880156);
         return new PositionDTO[] { kiel, lakeGeneva, lakeGarda, travemuende };
     }
 
@@ -128,7 +116,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         int gridsizeX = params.getGridsizeX();
         int gridsizeY = params.getGridsizeY();
 
-        Position center = new DegreePosition(params.getCenter().latDeg, params.getCenter().lngDeg);
+        Position center = new DegreePosition(params.getCenter().getLatDeg(), params.getCenter().getLngDeg());
 
         WindLatticeDTO wl = new WindLatticeDTO();
         PositionDTO[][] matrix = new PositionDTO[gridsizeY][gridsizeX];
@@ -180,8 +168,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern)
             throws WindPatternNotFoundException {
         LOGGER.info("Entering getWindField");
-        Position start = new DegreePosition(params.getRaceCourseStart().latDeg, params.getRaceCourseStart().lngDeg);
-        Position end = new DegreePosition(params.getRaceCourseEnd().latDeg, params.getRaceCourseEnd().lngDeg);
+        Position start = new DegreePosition(params.getRaceCourseStart().getLatDeg(), params.getRaceCourseStart().getLngDeg());
+        Position end = new DegreePosition(params.getRaceCourseEnd().getLatDeg(), params.getRaceCourseEnd().getLngDeg());
         List<Position> course = new ArrayList<Position>();
         course.add(start);
         course.add(end);
@@ -260,8 +248,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         if (mode != SailingSimulatorConstants.ModeMeasured) {
-            Position start = new DegreePosition(params.getRaceCourseStart().latDeg, params.getRaceCourseStart().lngDeg);
-            Position end = new DegreePosition(params.getRaceCourseEnd().latDeg, params.getRaceCourseEnd().lngDeg);
+            Position start = new DegreePosition(params.getRaceCourseStart().getLatDeg(), params.getRaceCourseStart().getLngDeg());
+            Position end = new DegreePosition(params.getRaceCourseEnd().getLatDeg(), params.getRaceCourseEnd().getLngDeg());
             course = new ArrayList<Position>();
             course.add(start);
             course.add(end);
@@ -1045,7 +1033,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 turnPoint = turnPoints.get(index1);
                 point = bigList.get(index2);
 
-                if (point.position.latDeg == turnPoint.latDeg && point.position.lngDeg == turnPoint.lngDeg) {
+                if (point.position.getLatDeg() == turnPoint.getLatDeg() && point.position.getLngDeg() == turnPoint.getLngDeg()) {
 
                     result.add(index2);
                     lastIndex = index2;
@@ -1080,8 +1068,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public long getTimeMillisecondsBetween(PositionDTO turn1, PositionDTO turn2, double stepSizeMeters, boolean useRealAverageWindSpeed, Path gpsTrack,
             PolarDiagram polarDiagram, long startTimePoint2) {
 
-        Position p1 = new DegreePosition(turn1.latDeg, turn1.lngDeg);
-        Position p2 = new DegreePosition(turn2.latDeg, turn2.lngDeg);
+        Position p1 = new DegreePosition(turn1.getLatDeg(), turn1.getLngDeg());
+        Position p2 = new DegreePosition(turn2.getLatDeg(), turn2.getLngDeg());
 
         List<Position> points = getIntermediatePoints(p1, p2, stepSizeMeters);
         int noOfPointsMinus1 = points.size() - 1;

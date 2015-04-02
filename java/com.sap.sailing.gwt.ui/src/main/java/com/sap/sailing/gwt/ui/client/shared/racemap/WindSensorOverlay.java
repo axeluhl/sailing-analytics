@@ -61,7 +61,7 @@ public class WindSensorOverlay extends CanvasOverlayV3 {
             if (position != null) {
                 double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
                 transformer.drawToCanvas(getCanvas(), rotationDegOfWindSymbol, 1.0);
-                setLatLngPosition(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
+                setLatLngPosition(LatLng.newInstance(windDTO.position.getLatDeg(), windDTO.position.getLngDeg()));
                 Point sensorPositionInPx = mapProjection.fromLatLngToDivPixel(getLatLngPosition());
                 setCanvasPosition(sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
                 String title = stringMessages.wind() + " ("+ WindSourceTypeFormatter.format(windSource, stringMessages) + "): "; 

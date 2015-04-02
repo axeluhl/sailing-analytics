@@ -58,8 +58,8 @@ public class PositionDTOWeigher implements Weigher<PositionDTO> {
     }
 
     private double getApproximateNauticalMileDistance(PositionDTO p1, PositionDTO p2) {
-        final double latDiffDeg = Math.abs(p1.latDeg - p2.latDeg);
-        final double normalizedLngDiffDeg = getCosineOfAverageLatitude() * Math.abs(p1.lngDeg - p2.lngDeg);
+        final double latDiffDeg = Math.abs(p1.getLatDeg() - p2.getLatDeg());
+        final double normalizedLngDiffDeg = getCosineOfAverageLatitude() * Math.abs(p1.getLngDeg() - p2.getLngDeg());
         // One degree of latitude or one degree of longitude at the equator each correspond to 60 nautical miles.
         return Math.sqrt(latDiffDeg*latDiffDeg + normalizedLngDiffDeg*normalizedLngDiffDeg) * 60.;
     }

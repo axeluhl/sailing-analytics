@@ -86,7 +86,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             for (WindDTO wind : windSourceAndTrack.getValue().windFixes) {
                 if (wind.position != null) {
-                    latitudeSum += wind.position.latDeg;
+                    latitudeSum += wind.position.getLatDeg();
                     latitudeCount++;
                 }
             }

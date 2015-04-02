@@ -131,7 +131,7 @@ public class SimulatorServiceUtils {
         List<Position> newPoints = new ArrayList<Position>();
 
         for (PositionDTO point : points) {
-            newPoints.add(new DegreePosition(point.latDeg, point.lngDeg));
+            newPoints.add(new DegreePosition(point.getLatDeg(), point.getLngDeg()));
         }
 
         return SimulatorServiceUtils.getIntermediatePoints(newPoints, stepSizeMeters);
@@ -315,7 +315,7 @@ public class SimulatorServiceUtils {
     }
 
     public static double getSign(PositionDTO p1, PositionDTO p2, PositionDTO p3) {
-        return (p1.latDeg - p3.latDeg) * (p2.lngDeg - p3.lngDeg) - (p2.latDeg - p3.latDeg) * (p1.lngDeg - p3.lngDeg);
+        return (p1.getLatDeg() - p3.getLatDeg()) * (p2.getLngDeg() - p3.getLngDeg()) - (p2.getLatDeg() - p3.getLatDeg()) * (p1.getLngDeg() - p3.getLngDeg());
     }
 
     public static boolean isPointInsideTriangle(PositionDTO point, PositionDTO corner1, PositionDTO corner2, PositionDTO corner3) {
@@ -439,11 +439,11 @@ public class SimulatorServiceUtils {
     }
 
     public static Position toPosition(PositionDTO positionDTO) {
-        return new DegreePosition(positionDTO.latDeg, positionDTO.lngDeg);
+        return new DegreePosition(positionDTO.getLatDeg(), positionDTO.getLngDeg());
     }
 
     public static boolean equals(Position position, PositionDTO positonDTO) {
-        return (position.getLatDeg() == positonDTO.latDeg && position.getLngDeg() == positonDTO.lngDeg);
+        return (position.getLatDeg() == positonDTO.getLatDeg() && position.getLngDeg() == positonDTO.getLngDeg());
     }
 
     public static SimulatorUISelection toSimulatorUISelection(SimulatorUISelectionDTO selection) {

@@ -4,19 +4,19 @@ import java.io.Serializable;
 
 public class PositionDTO implements Serializable {
     private static final long serialVersionUID = -8799012230990258044L;
-    public double latDeg;
-    public double lngDeg;
+    private double latDeg;
+    private double lngDeg;
     
-    public PositionDTO() {}
+    PositionDTO() {}
     
     public PositionDTO(double latDeg, double lngDeg) {
-        this.latDeg = latDeg;
-        this.lngDeg = lngDeg;
+        this.setLatDeg(latDeg);
+        this.setLngDeg(lngDeg);
     }
 
     @Override
     public String toString() {
-        return "("+latDeg+", "+lngDeg+")";
+        return "("+getLatDeg()+", "+getLngDeg()+")";
     }
 
     @Override
@@ -24,10 +24,26 @@ public class PositionDTO implements Serializable {
         final int prime = 31;
         int result = 1;
         long temp;
-        temp = (int) latDeg;
+        temp = (int) getLatDeg();
         result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = (int) lngDeg;
+        temp = (int) getLngDeg();
         result = prime * result + (int) (temp ^ (temp >>> 32));
         return result;
+    }
+
+    public double getLatDeg() {
+        return latDeg;
+    }
+
+    public void setLatDeg(double latDeg) {
+        this.latDeg = latDeg;
+    }
+
+    public double getLngDeg() {
+        return lngDeg;
+    }
+
+    public void setLngDeg(double lngDeg) {
+        this.lngDeg = lngDeg;
     }
 }

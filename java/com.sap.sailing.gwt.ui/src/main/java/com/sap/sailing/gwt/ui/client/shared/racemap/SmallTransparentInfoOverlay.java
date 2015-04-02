@@ -56,7 +56,7 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
     @Override
     protected void draw() {
         if (mapProjection != null && position != null) {
-            LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
+            LatLng latLngPosition = LatLng.newInstance(position.getLatDeg(), position.getLngDeg());
             Context2d context2d = getCanvas().getContext2d();
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
 
