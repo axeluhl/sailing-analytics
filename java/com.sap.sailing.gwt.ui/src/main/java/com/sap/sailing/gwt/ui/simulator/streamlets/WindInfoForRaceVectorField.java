@@ -89,7 +89,6 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
 
     @Override
     public Vector getVector(Position p, Date at) {
-        final Position request = new DegreePosition(p.getLatDeg(), p.getLngDeg());
         double speedConfidenceSum = 0;
         double knotSpeedSumScaledByConfidence = 0;
         final BearingWithConfidenceCluster<Position> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
@@ -101,7 +100,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue(), at);
                 if (timewiseClosestFixForWindSource != null) {
                     final double confidence = (timewiseClosestFixForWindSource.confidence == null ? 1 : timewiseClosestFixForWindSource.confidence) *
-                            weigher.getConfidence(timewiseClosestFixForWindSource.position, request);
+                            weigher.getConfidence(timewiseClosestFixForWindSource.position, p);
                     if (windSourceAndWindTrack.getKey().getType().useSpeed()) {
                         speedConfidenceSum += confidence;
                         knotSpeedSumScaledByConfidence += confidence * timewiseClosestFixForWindSource.dampenedTrueWindSpeedInKnots;
@@ -111,7 +110,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
                 }
             }
         }
-        final BearingWithConfidence<Position> bearing = bearingCluster.getAverage(request);
+        final BearingWithConfidence<Position> bearing = bearingCluster.getAverage(p);
         final Vector result;
         if (bearing != null && bearing.getObject() != null) {
             final double bearingRad = bearing.getObject().getRadians();
