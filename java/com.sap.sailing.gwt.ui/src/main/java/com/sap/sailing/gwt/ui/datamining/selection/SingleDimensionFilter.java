@@ -120,14 +120,22 @@ class SingleDimensionFilter {
                                         + caught.getMessage());
                             }
                         });
-                if (firstChange) {
+                if (firstChange && retrieverLevelSelectionProvider.canAddDimensionFilter()) {
                     retrieverLevelSelectionProvider.createAndAddDimensionFilter();
                 }
-            } else {
+                firstChange = false;
+            } else if (retrieverLevelSelectionProvider.shouldRemoveDimensionFilter()) {
                 retrieverLevelSelectionProvider.removeDimensionFilter(SingleDimensionFilter.this);
+                firstChange = false;
+            } else {
+                selectionTable.clearSelection();
+                selectionTable.setContent(new ArrayList<>());
+                
+                selectionTable.setVisible(false);
+                toggleFilterButton.setVisible(false);
+                firstChange = true;
             }
             retrieverLevelSelectionProvider.updateAvailableDimensions();
-            firstChange = false;
         }
     }
     

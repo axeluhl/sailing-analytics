@@ -78,6 +78,10 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         addDimensionFilter(dimensionFilter);
     }
     
+    boolean canAddDimensionFilter() {
+        return availableDimensions.size() != getSelectedDimensions().size();
+    }
+    
     void createAndAddDimensionFilter() {
         addDimensionFilter(createDimensionFilter());
     }
@@ -94,7 +98,11 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         mainPanel.onResize();
     }
 
-    public void removeDimensionFilter(SingleDimensionFilter dimensionFilter) {
+    boolean shouldRemoveDimensionFilter() {
+        return availableDimensions.size() - getSelectedDimensions().size() > 1;
+    }
+    
+    void removeDimensionFilter(SingleDimensionFilter dimensionFilter) {
         dimensionFilter.clearSelection(); // Notifies the listeners, if values were selected
         dimensionFilters.remove(dimensionFilter);
         mainPanel.remove(dimensionFilter.getEntryWidget());
@@ -114,6 +122,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
             remainingDimensions.add(null);
             dimensionFilter.setAvailableDimensions(remainingDimensions);
         }
+        mainPanel.onResize();
     }
 
     private Collection<FunctionDTO> getSelectedDimensions() {
@@ -223,7 +232,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     private class HorizontalLayoutPanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
         @Override
         public void onResize() {
-            setSize(sizeProvider.getOffsetWidth() + "px", sizeProvider.getOffsetHeight() + "px");
+            setHeight(sizeProvider.getOffsetHeight() + "px");
             
             int heightInPX = sizeProvider.getOffsetHeight();
             for (SingleDimensionFilter selectionProvider : dimensionFilters) {
