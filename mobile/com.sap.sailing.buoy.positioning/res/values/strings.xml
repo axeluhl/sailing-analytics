@@ -12,6 +12,8 @@
     <string name="getting_marks">Getting race marks..</string>
     <string name="set">set</string>
     <string name="not_set">not set</string>
+    <string name="mark_list_accuracy">(Accurary ca. %1$sm)</string>
+    <string name="buoy_detail_accuracy_ca" translateable="false">ca. %1$sm</string>
     
 
 </resources>

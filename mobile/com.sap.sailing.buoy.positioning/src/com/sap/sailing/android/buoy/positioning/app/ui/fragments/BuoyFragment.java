@@ -108,11 +108,13 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         String longitudeText = "";
         String latitudeText = "";
         String accuracyText = "";
-        DecimalFormat formatter = new DecimalFormat("#.######");
+        DecimalFormat latlngFormatter = new DecimalFormat("#.######");
+        DecimalFormat accuracyFormatter = new DecimalFormat("#.##");
+        String accuracyString = getString(R.string.buoy_detail_accuracy_ca);
         if (location != null) {
-            latitudeText += formatter.format(location.getLatitude());
-            longitudeText += formatter.format(location.getLongitude());
-            accuracyText += "~" + location.getAccuracy();
+            latitudeText += latlngFormatter.format(location.getLatitude());
+            longitudeText += latlngFormatter.format(location.getLongitude());
+            accuracyText += String.format(accuracyString,accuracyFormatter.format(location.getAccuracy()));
         } else {
             latitudeText += "n/a";
             longitudeText += "n/a";
@@ -124,9 +126,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             double savedLatitude = Double.parseDouble(markPing.getLatitude());
             double savedLongitude = Double.parseDouble(markPing.getLongitude());
             savedPosition = new LatLng(savedLatitude, savedLongitude);
-            latitudeText += " (" + formatter.format(savedLatitude) + ")";
-            longitudeText += " (" + formatter.format(savedLongitude) + ")";
-            accuracyText += " (" + "~" + markPing.getAccuracy() + ")";
+            latitudeText += " (" + latlngFormatter.format(savedLatitude) + ")";
+            longitudeText += " (" + latlngFormatter.format(savedLongitude) + ")";
+            accuracyText += " (" + String.format(accuracyString,accuracyFormatter.format(markPing.getAccuracy())) + ")";
         }
         latitudeTextView.setText(latitudeText);
         longitudeTextView.setText(longitudeText);
