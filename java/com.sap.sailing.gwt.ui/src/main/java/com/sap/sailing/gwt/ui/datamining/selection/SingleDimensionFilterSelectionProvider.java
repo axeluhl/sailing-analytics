@@ -5,11 +5,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -31,7 +35,11 @@ class SingleDimensionFilterSelectionProvider {
     private final SingleRetrieverLevelSelectionProvider retrieverLevelSelectionProvider;
 
     private final FlowPanel mainPanel;
+    
+    private final HorizontalPanel controlsPanel;
     private final ValueListBox<FunctionDTO> dimensionListBox;
+    private final ToggleButton toggleFilterButton;
+    
     private final SimpleBusyIndicator busyIndicator;
     private final FilterableSelectionTable<?> selectionTable;
     
@@ -44,6 +52,10 @@ class SingleDimensionFilterSelectionProvider {
         
         mainPanel = new FlowPanel();
         
+        controlsPanel = new HorizontalPanel();
+        controlsPanel.setSpacing(2);
+        mainPanel.add(controlsPanel);
+        
         dimensionListBox = new ValueListBox<FunctionDTO>(new AbstractObjectRenderer<FunctionDTO>() {
             @Override
             protected String convertObjectToString(FunctionDTO function) {
@@ -51,13 +63,24 @@ class SingleDimensionFilterSelectionProvider {
             }
         });
         dimensionListBox.addValueChangeHandler(new DimensionChangedHandler());
-        mainPanel.add(dimensionListBox);
+        controlsPanel.add(dimensionListBox);
+        
+        toggleFilterButton = new ToggleButton("S");
+        toggleFilterButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                selectionTable.setFilterWidgetVisible(toggleFilterButton.isDown());
+            }
+        });
+        toggleFilterButton.setVisible(false);
+        controlsPanel.add(toggleFilterButton);
         
         busyIndicator = new SimpleBusyIndicator(true, 0.7f);
         busyIndicator.setVisible(false);
         mainPanel.add(busyIndicator);
         
         selectionTable = new FilterableSelectionTable<>();
+        selectionTable.setVisible(false);
         mainPanel.add(selectionTable);
     }
     
@@ -65,7 +88,6 @@ class SingleDimensionFilterSelectionProvider {
         @Override
         public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
             final FunctionDTO dimension = getSelectedDimension();
-            selectionTable.setVisible(false);
             if (dimension != null) {
                 Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
                 dimensionDTOs.add(dimension);
@@ -81,6 +103,7 @@ class SingleDimensionFilterSelectionProvider {
                                 
                                 busyIndicator.setVisible(false);
                                 selectionTable.setVisible(true);
+                                toggleFilterButton.setVisible(true);
                                 
                                 //TODO Add a new dimension filter to the retrieverLevelSelectionProvider
                             }
@@ -125,10 +148,10 @@ class SingleDimensionFilterSelectionProvider {
     }
 
     public void resizeToHeight(int heightInPX) {
-        int widthInPX = dimensionListBox.getOffsetWidth();
+        int widthInPX = controlsPanel.getOffsetWidth();
         mainPanel.setSize(widthInPX + "px", heightInPX + "px");
         
-        int remainingHeightInPX = Math.max(0, heightInPX - dimensionListBox.getOffsetHeight());
+        int remainingHeightInPX = Math.max(0, heightInPX - controlsPanel.getOffsetHeight());
         selectionTable.resizeTo(widthInPX, remainingHeightInPX);
     }
     

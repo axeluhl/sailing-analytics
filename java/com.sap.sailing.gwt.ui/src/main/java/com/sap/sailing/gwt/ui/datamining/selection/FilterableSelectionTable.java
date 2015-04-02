@@ -18,6 +18,8 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 public class FilterableSelectionTable<ContentType extends Serializable> extends FlowPanel {
     
     private Collection<ContentType> allData;
+    private int width;
+    private int height;
 
     private AbstractFilterablePanel<ContentType> filterPanel;
     private DataGrid<ContentType> table;
@@ -58,8 +60,10 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
                 return searchableStrings;
             }
         };
-        filterPanel.setWidth("100%");
+        filterPanel.setSpacing(2);
+        filterPanel.setWidth("95%");
         filterPanel.getTextBox().setWidth("95%");
+        filterPanel.setVisible(false);
         
         add(filterPanel);
         add(table);
@@ -148,6 +152,15 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         selectionModel.addSelectionChangeHandler(handler);
     }
     
+    public boolean isFilterWidgetVisible() {
+        return filterPanel.isVisible();
+    }
+    
+    public void setFilterWidgetVisible(boolean visible) {
+        filterPanel.setVisible(visible);
+        resizeTo(width, height);
+    }
+    
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
@@ -156,10 +169,13 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
     }
 
     public void resizeTo(int widthInPX, int heightInPX) {
-        setSize(widthInPX + "px", heightInPX + "px");
+        width = widthInPX;
+        height = heightInPX;
         
-        int remainingHeightInPX = Math.max(0, heightInPX - filterPanel.getOffsetHeight());
-        table.setSize(widthInPX + "px", remainingHeightInPX + "px");
+        setSize(width + "px", height+ "px");
+        
+        int tableHeight = isFilterWidgetVisible() ? Math.max(0, height - filterPanel.getOffsetHeight()) : height;
+        table.setSize(width + "px", tableHeight + "px");
         //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
         table.redraw();
     }
