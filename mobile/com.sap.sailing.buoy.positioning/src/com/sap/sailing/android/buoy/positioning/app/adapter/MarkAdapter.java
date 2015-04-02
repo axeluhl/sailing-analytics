@@ -12,6 +12,7 @@ import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 
@@ -33,9 +34,12 @@ public class MarkAdapter extends ResourceCursorAdapter {
         	setText = context.getString(R.string.not_set);
         }
         else{
+            DecimalFormat df = new DecimalFormat("#.##");
         	setText = context.getString(R.string.set);
-        	String accuracy = " (~ " + markPings.get(0).getAccuracy() + ")";
-        	setText += accuracy;
+            double accuracy = markPings.get(0).getAccuracy();
+        	String accuracyString = context.getString(R.string.mark_list_accuracy);
+            accuracyString = String.format(accuracyString,df.format(accuracy));
+        	setText += " " +accuracyString;
         }
         markName.setText(name);
         markSet.setText(setText);
