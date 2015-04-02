@@ -109,7 +109,7 @@ class SingleDimensionFilterSelectionProvider {
     }
 
     public Collection<? extends Serializable> getSelection() {
-        return selectionTable.getSelectionAsValues();
+        return selectionTable.getSelection();
     }
     
     void clearSelection() {
@@ -128,7 +128,7 @@ class SingleDimensionFilterSelectionProvider {
         int widthInPX = dimensionListBox.getOffsetWidth();
         mainPanel.setSize(widthInPX + "px", heightInPX + "px");
         
-        int remainingHeightInPX = heightInPX - dimensionListBox.getOffsetHeight();
+        int remainingHeightInPX = Math.max(0, heightInPX - dimensionListBox.getOffsetHeight());
         selectionTable.resizeTo(widthInPX, remainingHeightInPX);
     }
     

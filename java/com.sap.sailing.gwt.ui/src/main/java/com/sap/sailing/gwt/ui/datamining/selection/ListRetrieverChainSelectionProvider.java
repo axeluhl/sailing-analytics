@@ -17,6 +17,7 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -66,7 +67,8 @@ public class ListRetrieverChainSelectionProvider implements SelectionProvider<Ob
         retrieverLevelList.setSelectionModel(retrieverLevelSelectionModel);
         retrieverLevelDataProvider = new ListDataProvider<>();
         retrieverLevelDataProvider.addDataDisplay(retrieverLevelList);
-        mainPanel.addWest(retrieverLevelList, 300);
+        ScrollPanel retrieverLevelListScrollPanel = new ScrollPanel(retrieverLevelList);
+        mainPanel.addWest(retrieverLevelListScrollPanel, 300);
         
         DockLayoutPanel innerDockLayoutPanel = new DockLayoutPanel(Unit.PX);
         innerDockLayoutPanel.addNorth(new Label(this.stringMessages.filterBy()), 18);

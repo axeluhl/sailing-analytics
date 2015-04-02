@@ -59,10 +59,14 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
             }
         };
         filterPanel.setWidth("100%");
-        filterPanel.getTextBox().setWidth("90%");
+        filterPanel.getTextBox().setWidth("95%");
         
         add(filterPanel);
         add(table);
+    }
+    
+    private String getElementAsString(ContentType element) {
+        return element.toString();
     }
     
     /**
@@ -121,7 +125,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         return contentKeys;
     }
 
-    public Collection<ContentType> getSelectionAsValues() {
+    public Collection<ContentType> getSelection() {
         return selectionModel.getSelectedSet();
     }
 
@@ -140,10 +144,6 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         selectionModel.clear();
     }
     
-    public String getElementAsString(ContentType element) {
-        return element.toString();
-    }
-    
     public void addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
         selectionModel.addSelectionChangeHandler(handler);
     }
@@ -151,15 +151,17 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
+        //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
         table.redraw();
     }
 
     public void resizeTo(int widthInPX, int heightInPX) {
         setSize(widthInPX + "px", heightInPX + "px");
         
-        int remainingHeightInPX = heightInPX - filterPanel.getOffsetHeight();
+        int remainingHeightInPX = Math.max(0, heightInPX - filterPanel.getOffsetHeight());
         table.setSize(widthInPX + "px", remainingHeightInPX + "px");
-        table.flush();
+        //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
+        table.redraw();
     }
 
 
