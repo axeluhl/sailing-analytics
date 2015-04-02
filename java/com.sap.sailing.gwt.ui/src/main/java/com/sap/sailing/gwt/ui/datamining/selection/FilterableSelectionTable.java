@@ -15,7 +15,7 @@ import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
-public class SimpleSelectionTable<ContentType extends Serializable> extends FlowPanel {
+public class FilterableSelectionTable<ContentType extends Serializable> extends FlowPanel {
     
     private Collection<ContentType> allData;
 
@@ -24,7 +24,7 @@ public class SimpleSelectionTable<ContentType extends Serializable> extends Flow
     private MultiSelectionModel<ContentType> selectionModel;
     private ListDataProvider<ContentType> dataProvider;
     
-    public SimpleSelectionTable() {
+    public FilterableSelectionTable() {
         allData = new ArrayList<ContentType>();
         
         table = new DataGrid<ContentType>();
@@ -34,10 +34,11 @@ public class SimpleSelectionTable<ContentType extends Serializable> extends Flow
         TextColumn<ContentType> contentColumn = new TextColumn<ContentType>() {
             @Override
             public String getValue(ContentType content) {
-                return SimpleSelectionTable.this.getElementAsString(content);
+                return FilterableSelectionTable.this.getElementAsString(content);
             }
         };
         table.addColumn(contentColumn);
+
         selectionModel = new MultiSelectionModel<ContentType>();
         table.setSelectionModel(selectionModel);
         
@@ -139,12 +140,27 @@ public class SimpleSelectionTable<ContentType extends Serializable> extends Flow
         selectionModel.clear();
     }
     
-    protected String getElementAsString(ContentType element) {
+    public String getElementAsString(ContentType element) {
         return element.toString();
     }
     
     public void addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
         selectionModel.addSelectionChangeHandler(handler);
     }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        table.redraw();
+    }
+
+    public void resizeTo(int widthInPX, int heightInPX) {
+        setSize(widthInPX + "px", heightInPX + "px");
+        
+        int remainingHeightInPX = heightInPX - filterPanel.getOffsetHeight();
+        table.setSize(widthInPX + "px", remainingHeightInPX + "px");
+        table.flush();
+    }
+
 
 }

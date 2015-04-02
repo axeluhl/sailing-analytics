@@ -64,7 +64,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
         mainPanel.addNorth(createFunctionsPanel(), 80);
 
-        selectionProvider = new RetrieverLevelSpecificSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        selectionProvider = new ListRetrieverChainSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
             @Override
             public void selectionChanged() {

@@ -85,7 +85,7 @@ public class SingleRetrieverLevelSelectionProviderPrototype extends HorizontalPa
         this.setSpacing(5);
         
         add(new Label(retrievedDataType.getDisplayName()));
-        filterByLabel = new Label(stringMessages.filterBy());
+        filterByLabel = new Label(stringMessages.filteredBy());
         filterByLabel.setVisible(false);
         add(filterByLabel);
         

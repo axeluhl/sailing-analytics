@@ -11,10 +11,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
@@ -27,7 +27,6 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class SingleRetrieverLevelSelectionProvider implements Component<Object> {
 
-    private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<SelectionChangedListener> listeners;
@@ -38,14 +37,14 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     private final int retrieverLevel;
     private final List<FunctionDTO> availableDimensions;
     
-    private final HorizontalPanel mainPanel;
+    private final HorizontalLayoutPanel mainPanel;
     private final Collection<SingleDimensionFilterSelectionProvider> dimensionFilters;
     private final SelectionChangeEvent.Handler selectionTablesChangedListener;
+    private final Widget sizeProvider;
 
-    public SingleRetrieverLevelSelectionProvider(DataMiningSession session, StringMessages stringMessages,
-            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            DataRetrieverChainDefinitionDTO retrieverChain, LocalizedTypeDTO retrievedDataType, int retrieverLevel) {
-        this.stringMessages = stringMessages;
+    public SingleRetrieverLevelSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
+            ErrorReporter errorReporter, DataRetrieverChainDefinitionDTO retrieverChain,
+            LocalizedTypeDTO retrievedDataType, int retrieverLevel, Widget sizeProvider) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
@@ -56,8 +55,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
         this.retrieverLevel = retrieverLevel;
         availableDimensions = new ArrayList<>();
         
-        mainPanel = new HorizontalPanel();
-        mainPanel.setSpacing(5);
+        mainPanel = new HorizontalLayoutPanel();
         dimensionFilters = new ArrayList<>();
         selectionTablesChangedListener = new SelectionChangeEvent.Handler() {
             @Override
@@ -66,8 +64,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
             }
         };
 
-        Label label = new Label(retrievedDataType.getDisplayName() + " " + this.stringMessages.filterBy());
-        mainPanel.add(label);
+        this.sizeProvider = sizeProvider;
     }
 
     public void setAvailableDimensions(Collection<FunctionDTO> dimensions) {
@@ -81,8 +78,7 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     }
 
     private SingleDimensionFilterSelectionProvider createDimensionFilterSelectionProvider() {
-        SingleDimensionFilterSelectionProvider dimensionFilter = new SingleDimensionFilterSelectionProvider(dataMiningService, errorReporter, session,
-                                                                                                            this);
+        SingleDimensionFilterSelectionProvider dimensionFilter = new SingleDimensionFilterSelectionProvider(dataMiningService, errorReporter, session, this);
         dimensionFilter.addSelectionChangeHandler(selectionTablesChangedListener);
         return dimensionFilter;
     }
@@ -172,6 +168,18 @@ public class SingleRetrieverLevelSelectionProvider implements Component<Object> 
     @Override
     public String getDependentCssClassName() {
         return "singleRetrieverLevelSelectionPanel";
+    }
+    
+    private class HorizontalLayoutPanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
+        @Override
+        public void onResize() {
+            setSize(sizeProvider.getOffsetWidth() + "px", sizeProvider.getOffsetHeight() + "px");
+            
+            int heightInPX = sizeProvider.getOffsetHeight();
+            for (SingleDimensionFilterSelectionProvider selectionProvider : dimensionFilters) {
+                selectionProvider.resizeToHeight(heightInPX);
+            }
+        }
     }
 
 }

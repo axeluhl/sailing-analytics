@@ -16,8 +16,10 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
@@ -31,7 +33,7 @@ class SingleDimensionFilterSelectionProvider {
     private final FlowPanel mainPanel;
     private final ValueListBox<FunctionDTO> dimensionListBox;
     private final SimpleBusyIndicator busyIndicator;
-    private final SimpleSelectionTable<?> selectionTable;
+    private final FilterableSelectionTable<?> selectionTable;
     
     public SingleDimensionFilterSelectionProvider(DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
                                                   SingleRetrieverLevelSelectionProvider retrieverLevelSelectionProvider) {
@@ -55,8 +57,7 @@ class SingleDimensionFilterSelectionProvider {
         busyIndicator.setVisible(false);
         mainPanel.add(busyIndicator);
         
-        selectionTable = new SimpleSelectionTable<>();
-        selectionTable.setVisible(false);
+        selectionTable = new FilterableSelectionTable<>();
         mainPanel.add(selectionTable);
     }
     
@@ -74,7 +75,9 @@ class SingleDimensionFilterSelectionProvider {
                         LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResult<Set<Object>>>() {
                             @Override
                             public void onSuccess(QueryResult<Set<Object>> result) {
-                                //TODO Set the content of the selection table
+                                GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
+                                Collection<?> content = result.getResults().get(contentKey);
+                                selectionTable.updateContent(content == null ? new ArrayList<>() : content);
                                 
                                 busyIndicator.setVisible(false);
                                 selectionTable.setVisible(true);
@@ -119,6 +122,14 @@ class SingleDimensionFilterSelectionProvider {
     
     public Widget getEntryWidget() {
         return mainPanel;
+    }
+
+    public void resizeToHeight(int heightInPX) {
+        int widthInPX = dimensionListBox.getOffsetWidth();
+        mainPanel.setSize(widthInPX + "px", heightInPX + "px");
+        
+        int remainingHeightInPX = heightInPX - dimensionListBox.getOffsetHeight();
+        selectionTable.resizeTo(widthInPX, remainingHeightInPX);
     }
     
 }
