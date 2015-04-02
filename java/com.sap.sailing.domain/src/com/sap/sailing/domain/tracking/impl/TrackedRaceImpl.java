@@ -1249,13 +1249,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         DummyMarkPassingWithTimePointOnly markPassingTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
         TrackedLegOfCompetitor result = null;
         if (!competitorMarkPassings.isEmpty()) {
-            MarkPassing lastMarkPassingAtOfBeforeTimePoint = competitorMarkPassings.floor(markPassingTimePoint);
-            if (lastMarkPassingAtOfBeforeTimePoint != null) {
-                Waypoint waypointPassedLastAtOrBeforeTimePoint = lastMarkPassingAtOfBeforeTimePoint.getWaypoint();
-                // don't return a leg if competitor has already finished last leg and therefore the race
-                if (waypointPassedLastAtOrBeforeTimePoint != getRace().getCourse().getLastWaypoint()) {
-                    result = getTrackedLegStartingAt(waypointPassedLastAtOrBeforeTimePoint).getTrackedLeg(competitor);
+            final Course course = getRace().getCourse();
+            course.lockForRead();
+            try {
+                MarkPassing lastMarkPassingAtOfBeforeTimePoint = competitorMarkPassings.floor(markPassingTimePoint);
+                if (lastMarkPassingAtOfBeforeTimePoint != null) {
+                    Waypoint waypointPassedLastAtOrBeforeTimePoint = lastMarkPassingAtOfBeforeTimePoint.getWaypoint();
+                    // don't return a leg if competitor has already finished last leg and therefore the race
+                    if (waypointPassedLastAtOrBeforeTimePoint != course.getLastWaypoint()) {
+                        result = getTrackedLegStartingAt(waypointPassedLastAtOrBeforeTimePoint).getTrackedLeg(competitor);
+                    }
                 }
+            } finally {
+                course.unlockAfterRead();
             }
         }
         return result;

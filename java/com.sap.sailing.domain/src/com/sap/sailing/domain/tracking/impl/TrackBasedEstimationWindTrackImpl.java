@@ -617,10 +617,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         private void invalidateForNewWind(Wind wind, WindSource windSource) {
             WindTrack windTrack = getTrackedRace().getOrCreateWindTrack(windSource);
             // check what the next fixes before and after the one affected are; if they are further than the
-            // averagingInterval
-            // away, extend the invalidation interval accordingly because the entire span up to the next fix may be
-            // influenced
-            // by adding/removing a fix in a sparsely occupied track. See
+            // averagingInterval away, extend the invalidation interval accordingly because the entire span up
+            // to the next fix may be influenced by adding/removing a fix in a sparsely occupied track. See
             // WindTrackImpl.getAveragedWindUnsynchronized(Position p, TimePoint at)
             long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
             final TimePoint timePoint = wind.getTimePoint();
