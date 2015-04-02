@@ -4,6 +4,17 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
+/**
+ * Translates and rotates a coordinate space. The translation is specified by providing the position
+ * to which to map {lat: 0, lng: 0}. The rotation is defined by a new equator direction. Here, 90deg would
+ * keep the usual equator direction. The coordinate system is fixed once constructed, so its translation
+ * and rotation parameters cannot be altered. The rationale behind this is to force clients to re-do all
+ * the mappings done so far because inconsistencies would result if over time positions and bearings are
+ * mapped through different transformations, yet displayed together.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class RotateAndTranslateCoordinateSystem implements CoordinateSystem {
     private final Position zeroZero;
     private final Bearing equator;

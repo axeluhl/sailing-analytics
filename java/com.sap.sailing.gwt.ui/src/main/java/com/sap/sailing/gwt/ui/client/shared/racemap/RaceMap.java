@@ -136,6 +136,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
     private MapWidget map;
+    
+    /**
+     * Always valid, non-<code>null</code>. Must be used to map all coordinates, headings, bearings, and directions
+     * displayed on the map, including the orientations of any canvases such as boat icons, wind displays etc. that are
+     * embedded in the map. The coordinate systems facilitates the possibility of transformed displays such as
+     * rotated and translated versions of the map, implementing the "wind-up" view.
+     */
+    private CoordinateSystem coordinateSystem;
+    
     private FlowPanel headerPanel;
     private AbsolutePanel panelForLeftHeaderLabels;
     private AbsolutePanel panelForRightHeaderLabels;
