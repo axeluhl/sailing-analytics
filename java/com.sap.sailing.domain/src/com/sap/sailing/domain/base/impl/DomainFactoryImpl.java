@@ -206,7 +206,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             statisticsDTO.totalLegsCount = race.getCourse().getLegs().size();
             TrackedLeg currentLeg = trackedRace.getCurrentLeg(MillisecondsTimePoint.now());
             if(currentLeg != null) {
-                statisticsDTO.currentLegNo = race.getCourse().getIndexOfWaypoint(currentLeg.getLeg().getFrom());
+                statisticsDTO.currentLegNo = race.getCourse().getIndexOfWaypoint(currentLeg.getLeg().getFrom()) + 1;
             } else {
                 statisticsDTO.currentLegNo = 0;
             }
